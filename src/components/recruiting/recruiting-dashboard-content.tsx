@@ -18,6 +18,7 @@ import { NeedsAttentionSection } from "./needs-attention-section";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { OpenJobsTable } from "./open-jobs-table";
 import { PostAutomationQueue } from "./post-automation-queue";
+import { RecruitingIntelligenceSection } from "./recruiting-intelligence-section";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
 
@@ -72,6 +73,8 @@ export function RecruitingDashboardContent({
         {activeTab === "mel-projects" ? <MelProjectsSection /> : null}
 
         {activeTab === "data-health" ? <DataHealthSection /> : null}
+
+        {activeTab === "recruiting-intelligence" ? <RecruitingIntelligenceSection /> : null}
 
         {activeTab === "automation" ? <PostAutomationQueue /> : null}
       </main>

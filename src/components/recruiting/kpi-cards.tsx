@@ -24,11 +24,17 @@ type KpiCardsProps = {
   items: Kpi[];
   activeCardId?: string | null;
   onCardClick?: (kpi: Kpi) => void;
+  gridClassName?: string;
 };
 
-export function KpiCards({ items, activeCardId = null, onCardClick }: KpiCardsProps) {
+export function KpiCards({
+  items,
+  activeCardId = null,
+  onCardClick,
+  gridClassName = "grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
+}: KpiCardsProps) {
   return (
-    <section aria-labelledby="kpi-heading" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section aria-labelledby="kpi-heading" className={gridClassName}>
       <h2 id="kpi-heading" className="sr-only">
         Key performance indicators
       </h2>
