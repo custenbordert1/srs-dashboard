@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LiveSheetTable } from "./live-sheet-table";
 import { ManagerSummary } from "./manager-summary";
+import { ManagerKpiCards } from "./manager-kpi-cards";
 import NeedsAttentionQueue from "./needs-attention-queue";
 import { PostAutomationQueue } from "./post-automation-queue";
 
@@ -18,6 +19,8 @@ export function RecruitingLiveSheetStack() {
   return (
     <div className="space-y-6">
       <LiveSheetTable drillSeq={drillSeq} drillManager={drillManager} />
+
+      <ManagerKpiCards selectedManager={drillManager} />
 
       <NeedsAttentionQueue />
 
