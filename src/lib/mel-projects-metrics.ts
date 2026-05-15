@@ -1,55 +1,40 @@
 import type { Kpi } from "@/lib/recruiting-sample-data";
 import type { MelProjectRow, MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 
-const PROJECT_NAME_ALIASES = ["project name", "project", "name", "title"];
-const DM_ALIASES = ["dm", "district manager", "hiring manager", "manager"];
-const REP_COUNT_ALIASES = ["rep count", "reps", "# reps", "rep_count", "reps count"];
-const STATUS_ALIASES = ["status", "project status"];
-const COMPLETION_ALIASES = [
-  "completion %",
-  "completion",
-  "complete %",
-  "completion percent",
-  "% complete",
-  "percent complete",
-];
-const OPEN_CALLS_ALIASES = [
-  "open calls",
-  "open store calls",
-  "store calls",
-  "open call",
-  "# open calls",
-];
-const STATE_ALIASES = ["state", "st"];
+const STORE_CALL_ALIASES = ["store call", "storecall"];
+const PROJECT_NO_ALIASES = ["project no", "project no.", "project number", "project #"];
+const PROJECT_NAME_ALIASES = ["project name"];
+const MANAGER_ALIASES = ["manager", "dm", "district manager"];
+const STORE_NAME_ALIASES = ["location name", "store name"];
+const STATUS_ALIASES = ["status"];
+const STATE_ALIASES = ["state/province", "state", "st", "province"];
+const STAFF_NAME_ALIASES = ["staff name", "rep name", "rep"];
+const STAFF_NUMBER_ALIASES = ["staff number", "rep number", "rep #"];
 
-const INACTIVE_STATUS_VALUES = new Set([
-  "complete",
-  "completed",
-  "done",
-  "closed",
-  "cancelled",
-  "canceled",
-  "inactive",
-]);
+const COMPLETED_STATUS_VALUES = new Set(["completed", "complete", "done"]);
+
+export const MEL_TABLE_ROW_LIMIT = 25;
 
 export type MelProjectColumnKeys = {
+  storeCall?: string;
+  projectNo?: string;
   projectName?: string;
-  dm?: string;
-  repCount?: string;
+  manager?: string;
+  storeName?: string;
   status?: string;
-  completionPercent?: string;
-  openCalls?: string;
   state?: string;
+  staffName?: string;
+  staffNumber?: string;
   missingColumns: string[];
 };
 
 export type MelProjectTableRow = {
+  storeCall: string;
+  projectNo: string;
   projectName: string;
-  dm: string;
-  repCount: number;
+  manager: string;
+  storeName: string;
   status: string;
-  completionPercent: number | null;
-  openCalls: number;
   state: string;
 };
 
@@ -58,6 +43,7 @@ export type MelProjectsKpiSnapshot = {
   activeReps: number;
   completedPercent: number | null;
   openStoreCalls: number;
+  totalStoreCalls: number;
   columnHint: string;
 };
 
@@ -75,40 +61,47 @@ function pickColumn(headers: string[], aliases: string[]): string | undefined {
     if (direct) return direct;
   }
   for (const h of headers) {
+    if (aliases.some((alias) => normHeader(h) === normHeader(alias))) return h;
+  }
+  for (const h of headers) {
     const n = normHeader(h);
     for (const alias of aliases) {
       const a = normHeader(alias);
-      if (n === a || n.includes(a) || a.includes(n)) return h;
+      if (n.includes(a) || a.includes(n)) return h;
     }
   }
   return undefined;
 }
 
 export function resolveMelProjectColumnKeys(headers: string[]): MelProjectColumnKeys {
+  const storeCall = pickColumn(headers, STORE_CALL_ALIASES);
+  const projectNo = pickColumn(headers, PROJECT_NO_ALIASES);
   const projectName = pickColumn(headers, PROJECT_NAME_ALIASES);
-  const dm = pickColumn(headers, DM_ALIASES);
-  const repCount = pickColumn(headers, REP_COUNT_ALIASES);
+  const manager = pickColumn(headers, MANAGER_ALIASES);
+  const storeName = pickColumn(headers, STORE_NAME_ALIASES);
   const status = pickColumn(headers, STATUS_ALIASES);
-  const completionPercent = pickColumn(headers, COMPLETION_ALIASES);
-  const openCalls = pickColumn(headers, OPEN_CALLS_ALIASES);
   const state = pickColumn(headers, STATE_ALIASES);
+  const staffName = pickColumn(headers, STAFF_NAME_ALIASES);
+  const staffNumber = pickColumn(headers, STAFF_NUMBER_ALIASES);
 
   const missingColumns: string[] = [];
+  if (!storeCall) missingColumns.push("Store Call");
+  if (!projectNo) missingColumns.push("Project No");
   if (!projectName) missingColumns.push("Project Name");
-  if (!dm) missingColumns.push("DM");
-  if (!repCount) missingColumns.push("Rep Count");
+  if (!manager) missingColumns.push("Manager");
+  if (!storeName) missingColumns.push("Store Name");
   if (!status) missingColumns.push("Status");
-  if (!completionPercent) missingColumns.push("Completion %");
-  if (!openCalls) missingColumns.push("Open Calls");
 
   return {
+    storeCall,
+    projectNo,
     projectName,
-    dm,
-    repCount,
+    manager,
+    storeName,
     status,
-    completionPercent,
-    openCalls,
     state,
+    staffName,
+    staffNumber,
     missingColumns,
   };
 }
@@ -118,26 +111,14 @@ function cell(row: MelProjectRow, key: string | undefined): string {
   return (row[key] ?? "").trim();
 }
 
-export function parseNumericValue(raw: string): number {
-  const cleaned = String(raw).replace(/,/g, "").replace(/%/g, "").trim();
-  const n = Number.parseFloat(cleaned);
-  return Number.isFinite(n) && !Number.isNaN(n) ? n : 0;
+export function isCompletedStoreCallStatus(raw: string): boolean {
+  return COMPLETED_STATUS_VALUES.has(raw.trim().toLowerCase());
 }
 
-export function parseCompletionPercent(raw: string): number | null {
-  const s = String(raw).trim();
-  if (!s) return null;
-  const hasPercent = s.includes("%");
-  const n = parseNumericValue(s);
-  if (!Number.isFinite(n)) return null;
-  if (!hasPercent && n >= 0 && n <= 1) return Math.round(n * 1000) / 10;
-  return Math.round(n * 10) / 10;
-}
-
-export function isActiveProjectStatus(raw: string): boolean {
-  const v = raw.trim().toLowerCase();
-  if (!v) return false;
-  return !INACTIVE_STATUS_VALUES.has(v);
+function isAssignedRep(staffName: string, staffNumber: string): boolean {
+  const name = staffName.trim().toLowerCase();
+  if (!name || name === "open" || name === "—") return false;
+  return true;
 }
 
 export function buildMelProjectTableRows(
@@ -149,14 +130,12 @@ export function buildMelProjectTableRows(
 
   for (const row of rows) {
     out.push({
+      storeCall: cell(row, keys.storeCall) || "—",
+      projectNo: cell(row, keys.projectNo) || "—",
       projectName: cell(row, keys.projectName) || "—",
-      dm: cell(row, keys.dm) || "—",
-      repCount: parseNumericValue(cell(row, keys.repCount)),
+      manager: cell(row, keys.manager) || "—",
+      storeName: cell(row, keys.storeName) || "—",
       status: cell(row, keys.status) || "—",
-      completionPercent: keys.completionPercent
-        ? parseCompletionPercent(cell(row, keys.completionPercent))
-        : null,
-      openCalls: parseNumericValue(cell(row, keys.openCalls)),
       state: cell(row, keys.state) || "—",
     });
   }
@@ -165,45 +144,49 @@ export function buildMelProjectTableRows(
 }
 
 export function computeMelProjectsKpiSnapshot(
+  rawRows: MelProjectRow[],
   tableRows: MelProjectTableRow[],
   keys: MelProjectColumnKeys,
 ): MelProjectsKpiSnapshot {
-  let activeProjects = 0;
-  let activeReps = 0;
+  const totalStoreCalls = tableRows.length;
+  let completedCalls = 0;
   let openStoreCalls = 0;
-  let completionSum = 0;
-  let completionCount = 0;
+  const activeProjectNos = new Set<string>();
+  const activeRepKeys = new Set<string>();
 
-  for (const row of tableRows) {
-    const active = isActiveProjectStatus(row.status);
-    if (active) {
-      activeProjects += 1;
-      activeReps += row.repCount;
-      openStoreCalls += row.openCalls;
-    }
-    if (row.completionPercent !== null) {
-      completionSum += row.completionPercent;
-      completionCount += 1;
+  for (let i = 0; i < tableRows.length; i++) {
+    const tableRow = tableRows[i]!;
+    const raw = rawRows[i]!;
+
+    const completed = isCompletedStoreCallStatus(tableRow.status);
+    if (completed) {
+      completedCalls += 1;
+    } else {
+      openStoreCalls += 1;
+      if (tableRow.projectNo !== "—") {
+        activeProjectNos.add(tableRow.projectNo);
+      }
+
+      const staffName = cell(raw, keys.staffName);
+      const staffNumber = cell(raw, keys.staffNumber);
+      if (isAssignedRep(staffName, staffNumber)) {
+        activeRepKeys.add(staffNumber || staffName);
+      }
     }
   }
 
   const completedPercent =
-    completionCount > 0 ? Math.round((completionSum / completionCount) * 10) / 10 : null;
-
-  const optionalMissing: string[] = [];
-  if (!keys.state) optionalMissing.push("State");
-
-  const columnHint =
-    optionalMissing.length > 0
-      ? `Mapped from MEL projects sheet · optional: ${optionalMissing.join(", ")}`
-      : "Mapped from MEL projects Google Sheet";
+    totalStoreCalls > 0
+      ? Math.round((completedCalls / totalStoreCalls) * 1000) / 10
+      : null;
 
   return {
-    activeProjects,
-    activeReps,
+    activeProjects: activeProjectNos.size,
+    activeReps: activeRepKeys.size,
     completedPercent,
     openStoreCalls,
-    columnHint,
+    totalStoreCalls,
+    columnHint: "Store calls from MEL projects Google Sheet",
   };
 }
 
@@ -217,7 +200,6 @@ export function melProjectsSnapshotToKpis(
   sheetError?: string,
 ): Kpi[] {
   if (sheetError) {
-    const hint = sheetError;
     return [
       {
         id: "active-projects",
@@ -225,7 +207,7 @@ export function melProjectsSnapshotToKpis(
         value: "—",
         change: "—",
         changeDirection: "flat",
-        hint,
+        hint: sheetError,
       },
       {
         id: "active-reps",
@@ -233,7 +215,7 @@ export function melProjectsSnapshotToKpis(
         value: "—",
         change: "—",
         changeDirection: "flat",
-        hint,
+        hint: sheetError,
       },
       {
         id: "completed-pct",
@@ -241,7 +223,7 @@ export function melProjectsSnapshotToKpis(
         value: "—",
         change: "—",
         changeDirection: "flat",
-        hint,
+        hint: sheetError,
       },
       {
         id: "open-store-calls",
@@ -249,7 +231,7 @@ export function melProjectsSnapshotToKpis(
         value: "—",
         change: "—",
         changeDirection: "flat",
-        hint,
+        hint: sheetError,
       },
     ];
   }
@@ -263,7 +245,7 @@ export function melProjectsSnapshotToKpis(
       value: snapshot.activeProjects.toLocaleString(),
       change: "Live",
       changeDirection: "flat",
-      hint: `Non-completed statuses · ${hint}`,
+      hint: `Unique project numbers with open store calls · ${hint}`,
     },
     {
       id: "active-reps",
@@ -271,7 +253,7 @@ export function melProjectsSnapshotToKpis(
       value: snapshot.activeReps.toLocaleString(),
       change: "Live",
       changeDirection: "flat",
-      hint: `Sum of rep count on active projects · ${hint}`,
+      hint: `Assigned reps on open store calls · ${hint}`,
     },
     {
       id: "completed-pct",
@@ -279,7 +261,7 @@ export function melProjectsSnapshotToKpis(
       value: formatPercent(snapshot.completedPercent),
       change: "Live",
       changeDirection: "flat",
-      hint: `Average completion across all projects · ${hint}`,
+      hint: `Completed store calls ÷ ${snapshot.totalStoreCalls.toLocaleString()} total · ${hint}`,
     },
     {
       id: "open-store-calls",
@@ -287,14 +269,9 @@ export function melProjectsSnapshotToKpis(
       value: snapshot.openStoreCalls.toLocaleString(),
       change: "Live",
       changeDirection: "flat",
-      hint: `Sum of open calls on active projects · ${hint}`,
+      hint: `Non-completed store calls · ${hint}`,
     },
   ];
-}
-
-export function formatCompletionDisplay(value: number | null): string {
-  if (value === null) return "—";
-  return `${value}%`;
 }
 
 export type MelProjectsViewModel = {
@@ -303,8 +280,10 @@ export type MelProjectsViewModel = {
   snapshot: MelProjectsKpiSnapshot;
 };
 
-export function buildMelProjectsViewModel(data: Extract<MelProjectsDataResult, { ok: true }>): MelProjectsViewModel {
+export function buildMelProjectsViewModel(
+  data: Extract<MelProjectsDataResult, { ok: true }>,
+): MelProjectsViewModel {
   const { rows: tableRows, keys } = buildMelProjectTableRows(data.rows, data.headers);
-  const snapshot = computeMelProjectsKpiSnapshot(tableRows, keys);
+  const snapshot = computeMelProjectsKpiSnapshot(data.rows, tableRows, keys);
   return { tableRows, keys, snapshot };
 }
