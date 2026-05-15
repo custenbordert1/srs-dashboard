@@ -334,17 +334,13 @@ export function DataHealthSection() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
               Google Sheets
             </h2>
-            <HealthReportGrid
-              reports={reports.filter((report) => report.source === "sheet")}
-            />
+            <HealthReportGrid reports={reports.filter((report) => report.source === "sheet")} />
           </section>
           <section className="space-y-4">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
               Breezy HR (read-only)
             </h2>
-            <HealthReportGrid
-              reports={reports.filter((report) => report.source === "breezy")}
-            />
+            <HealthReportGrid reports={reports.filter((report) => report.source === "breezy")} />
           </section>
         </div>
       )}
