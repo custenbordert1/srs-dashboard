@@ -5,13 +5,7 @@ import {
   pipelineStages,
   weeklyTrends,
 } from "@/lib/recruiting-sample-data";
-import { ApplicantPipeline } from "./applicant-pipeline";
-import { DmLeaderboard } from "./dm-leaderboard";
-import { NewHireMetrics } from "./new-hire-metrics";
-import { OpenJobsTable } from "./open-jobs-table";
-import { RecruitingLiveSheetStack } from "./recruiting-live-sheet-stack";
-import { RecruitingTrendsChart } from "./recruiting-trends-chart";
-import { SheetKpiCards } from "./sheet-kpi-cards";
+import { RecruitingDashboardContent } from "./recruiting-dashboard-content";
 
 export function RecruitingDashboard() {
   return (
@@ -33,10 +27,8 @@ export function RecruitingDashboard() {
               Command center
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 sm:text-base">
-              KPIs at the top are computed from your live Google Sheet (Open + Requested rows).
-              Pipeline and charts below still use static sample data except the live sheet blocks.
-              In Needs attention, click a manager to filter the live sheet and show a per-manager
-              summary.
+              Use the tabs to switch between overview KPIs, needs attention, DM scorecards, the live
+              sheet, and automation. Live sections pull from your Google Sheet export.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -53,29 +45,17 @@ export function RecruitingDashboard() {
         </div>
       </header>
 
-      <main
-        id="dashboard-main"
-        className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8"
-      >
-        <SheetKpiCards />
-
-        <RecruitingLiveSheetStack />
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <OpenJobsTable jobs={openJobs} />
-            <RecruitingTrendsChart data={weeklyTrends} />
-          </div>
-          <div className="space-y-6">
-            <ApplicantPipeline stages={pipelineStages} />
-            <NewHireMetrics metrics={newHireMetrics} />
-          </div>
-        </div>
-
-        <DmLeaderboard rows={dmLeaderboard} />
-      </main>
+      <RecruitingDashboardContent
+        openJobs={openJobs}
+        weeklyTrends={weeklyTrends}
+        pipelineStages={pipelineStages}
+        newHireMetrics={newHireMetrics}
+        dmLeaderboard={dmLeaderboard}
+      />
 
       <footer className="border-t border-zinc-800/80 py-8 text-center text-xs text-zinc-600">
-        SRS recruiting dashboard · KPIs + live sections from Google Sheet CSV · sample charts elsewhere
+        SRS recruiting dashboard · KPIs + live sections from Google Sheet CSV · sample charts on
+        Overview
       </footer>
     </div>
   );
