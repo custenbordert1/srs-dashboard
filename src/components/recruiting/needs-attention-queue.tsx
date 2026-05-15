@@ -6,6 +6,11 @@ import {
   parseApplicantCount,
   parseCreatedDate,
 } from "@/lib/post-automation";
+import {
+  KPI_DRILL_FILTER_LABELS,
+  matchesKpiDrillFilter,
+  type KpiDrillFilterId,
+} from "@/lib/manager-kpi-filter";
 import { isOpenPostStatus, resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
 import { useEffect, useMemo, useState } from "react";
 
@@ -146,7 +151,19 @@ function QueueHeader({ subtitle }: { subtitle: string }) {
   );
 }
 
-function NeedsAttentionQueue() {
+export const NEEDS_ATTENTION_SECTION_ID = "needs-attention-queue";
+
+type NeedsAttentionQueueProps = {
+  kpiDrillFilter?: KpiDrillFilterId | null;
+  selectedManager?: string | null;
+  onClearKpiDrillFilter?: () => void;
+};
+
+function NeedsAttentionQueue({
+  kpiDrillFilter = null,
+  selectedManager = null,
+  onClearKpiDrillFilter,
+}: NeedsAttentionQueueProps) {
   const [data, setData] = useState<SheetDataResult | undefined>(undefined);
 
   useEffect(() => {
@@ -196,7 +213,11 @@ function NeedsAttentionQueue() {
 
     const out: NeedsAttentionRow[] = [];
 
+    const managerFilter = selectedManager?.trim() || null;
+    const canFilterByManager = Boolean(managerFilter && keys.manager);
+
     for (const row of data.rows) {
+      if (canFilterByManager && cell(row, keys.manager) !== managerFilter) continue;
       if (keys.status && !isOpenPostStatus(cell(row, keys.status))) continue;
 
       const applicants = parseApplicantCount(cell(row, keys.applicantCount));
@@ -228,9 +249,15 @@ function NeedsAttentionQueue() {
     });
 
     return { flaggedRows: out, missingColumns: missing };
-  }, [data]);
+  }, [data, selectedManager]);
+
+  const displayedRows = useMemo(() => {
+    return flaggedRows.filter((row) => matchesKpiDrillFilter(row, kpiDrillFilter));
+  }, [flaggedRows, kpiDrillFilter]);
 
   const totalFlagged = flaggedRows.length;
+  const totalDisplayed = displayedRows.length;
+  const hasActiveDrillFilter = Boolean(kpiDrillFilter);
   const subtitle =
     "Open posts with 0 applicants, Breezy not linked, or created more than 7 days ago.";
 
@@ -256,14 +283,37 @@ function NeedsAttentionQueue() {
 
   return (
     <section
+      id={NEEDS_ATTENTION_SECTION_ID}
       aria-labelledby="needs-attention-heading"
-      className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm"
+      className="scroll-mt-6 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm"
     >
-      <div className="flex flex-col gap-2 border-b border-zinc-800/80 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5 sm:py-5">
+      <div className="flex flex-col gap-3 border-b border-zinc-800/80 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5 sm:py-5">
         <QueueHeader subtitle={subtitle} />
-        <span className="shrink-0 rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-200">
-          {totalFlagged} flagged
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {hasActiveDrillFilter && kpiDrillFilter ? (
+            <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">
+              {KPI_DRILL_FILTER_LABELS[kpiDrillFilter]}
+            </span>
+          ) : null}
+          <span className="rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-200">
+            {hasActiveDrillFilter ? (
+              <>
+                {totalDisplayed} of {totalFlagged} shown
+              </>
+            ) : (
+              <>{totalFlagged} flagged</>
+            )}
+          </span>
+          {hasActiveDrillFilter && onClearKpiDrillFilter ? (
+            <button
+              type="button"
+              onClick={onClearKpiDrillFilter}
+              className="rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:border-zinc-600 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40"
+            >
+              Clear filter
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {missingColumns.length > 0 ? (
@@ -277,6 +327,10 @@ function NeedsAttentionQueue() {
       {totalFlagged === 0 ? (
         <p className="px-4 py-8 text-center text-sm text-zinc-500 sm:px-5">
           No rows need attention right now.
+        </p>
+      ) : totalDisplayed === 0 ? (
+        <p className="px-4 py-8 text-center text-sm text-zinc-500 sm:px-5">
+          No rows match this KPI filter.
         </p>
       ) : (
         <div className="overflow-x-auto px-4 pb-4 sm:px-5">
@@ -297,7 +351,7 @@ function NeedsAttentionQueue() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
-              {flaggedRows.map((row, i) => (
+              {displayedRows.map((row, i) => (
                 <tr key={i} className={PRIORITY_ROW_STYLES[row.priority]}>
                   <td className="whitespace-nowrap px-3 py-3 sm:px-4">
                     <span

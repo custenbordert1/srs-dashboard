@@ -6,6 +6,8 @@ import {
   computeManagerKpiSnapshot,
   managerKpiSnapshotToKpis,
 } from "@/lib/manager-sheet-stats";
+import type { KpiDrillFilterId } from "@/lib/manager-kpi-filter";
+import { isDrillableManagerKpi, kpiIdToDrillFilter } from "@/lib/manager-kpi-filter";
 import { useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
 
@@ -35,9 +37,15 @@ function ManagerKpiSkeletonGrid() {
 
 type ManagerKpiCardsProps = {
   selectedManager?: string | null;
+  activeDrillFilter?: KpiDrillFilterId | null;
+  onDrillFilterChange?: (filter: KpiDrillFilterId) => void;
 };
 
-export function ManagerKpiCards({ selectedManager = null }: ManagerKpiCardsProps) {
+export function ManagerKpiCards({
+  selectedManager = null,
+  activeDrillFilter = null,
+  onDrillFilterChange,
+}: ManagerKpiCardsProps) {
   const [data, setData] = useState<SheetDataResult | undefined>(undefined);
 
   useEffect(() => {
@@ -109,7 +117,19 @@ export function ManagerKpiCards({ selectedManager = null }: ManagerKpiCardsProps
           Scope: <span className="font-medium text-zinc-300">{scopeLabel}</span>
         </p>
       </div>
-      <KpiCards items={items} />
+      <KpiCards
+        items={items}
+        activeCardId={activeDrillFilter}
+        onCardClick={
+          onDrillFilterChange
+            ? (kpi: Kpi) => {
+                if (!isDrillableManagerKpi(kpi)) return;
+                const filter = kpiIdToDrillFilter(kpi.id);
+                if (filter) onDrillFilterChange(filter);
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }
