@@ -1,6 +1,7 @@
 "use client";
 
 import type { SheetDataResult, SheetDataSuccess, SheetRow } from "@/lib/google-sheet-csv";
+import { calculateRecruitingScore, type RecruitingPriority } from "@/lib/recruiting-score";
 import { resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
@@ -9,6 +10,13 @@ const selectClass =
 
 const inputClass =
   "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
+
+const RECRUITING_PRIORITY_STYLES: Record<RecruitingPriority["level"], string> = {
+  Critical: "bg-red-500/15 text-red-200 ring-1 ring-red-500/30",
+  High: "bg-orange-500/15 text-orange-200 ring-1 ring-orange-500/30",
+  Medium: "bg-yellow-500/15 text-yellow-200 ring-1 ring-yellow-500/30",
+  Healthy: "bg-green-500/15 text-green-200 ring-1 ring-green-500/30",
+};
 
 function formatFetchedAt(iso: string) {
   try {
@@ -252,6 +260,7 @@ function FilteredLiveSheetTable({ data, drillSeq, drillManager }: FilteredLiveSh
         <table className="min-w-[640px] w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-zinc-800/80 text-xs uppercase tracking-wide text-zinc-500">
+              <th className="whitespace-nowrap px-4 py-3 font-medium sm:px-5">Priority</th>
               {data.headers.map((h) => (
                 <th key={h} className="whitespace-nowrap px-4 py-3 font-medium sm:px-5">
                   {h}
@@ -260,18 +269,29 @@ function FilteredLiveSheetTable({ data, drillSeq, drillManager }: FilteredLiveSh
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/60">
-            {filteredRows.map((row, i) => (
-              <tr key={i} className="hover:bg-zinc-800/30">
-                {data.headers.map((h) => (
-                  <td
-                    key={`${i}-${h}`}
-                    className="max-w-[280px] whitespace-pre-wrap px-4 py-2.5 text-zinc-200 sm:px-5"
-                  >
-                    {row[h] ?? ""}
+            {filteredRows.map((row, i) => {
+              const priority = calculateRecruitingScore(row);
+
+              return (
+                <tr key={i} className="hover:bg-zinc-800/30">
+                  <td className="whitespace-nowrap px-4 py-2.5 sm:px-5">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${RECRUITING_PRIORITY_STYLES[priority.level]}`}
+                    >
+                      {priority.level}
+                    </span>
                   </td>
-                ))}
-              </tr>
-            ))}
+                  {data.headers.map((h) => (
+                    <td
+                      key={`${i}-${h}`}
+                      className="max-w-[280px] whitespace-pre-wrap px-4 py-2.5 text-zinc-200 sm:px-5"
+                    >
+                      {row[h] ?? ""}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
