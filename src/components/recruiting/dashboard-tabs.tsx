@@ -6,6 +6,7 @@ export type DashboardTabId =
   | "dm-scorecards"
   | "live-sheet"
   | "mel-projects"
+  | "data-health"
   | "automation";
 
 export type DashboardTab = {
@@ -19,6 +20,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   { id: "dm-scorecards", label: "DM Scorecards" },
   { id: "live-sheet", label: "Live Sheet" },
   { id: "mel-projects", label: "MEL Projects" },
+  { id: "data-health", label: "Data Health" },
   { id: "automation", label: "Automation" },
 ];
 
