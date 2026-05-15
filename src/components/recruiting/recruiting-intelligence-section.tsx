@@ -1,6 +1,7 @@
 "use client";
 
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
+import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 import {
   computeRecruitingIntelligence,
   intelligenceSnapshotToKpis,
@@ -8,6 +9,7 @@ import {
   type IntelligenceOpenPost,
 } from "@/lib/recruiting-intelligence";
 import { useEffect, useMemo, useState } from "react";
+import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
 
@@ -124,20 +126,35 @@ function APlusOpportunityTable({ rows }: { rows: IntelligenceOpenPost[] }) {
 
 export function RecruitingIntelligenceSection() {
   const [data, setData] = useState<SheetDataResult | undefined>(undefined);
+  const [melData, setMelData] = useState<MelProjectsDataResult | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        const res = await fetch("/api/recruiting-sheet", { cache: "no-store" });
-        const parsed = (await res.json()) as SheetDataResult;
-        if (!cancelled) setData(parsed);
+        const [recruitingRes, melRes] = await Promise.all([
+          fetch("/api/recruiting-sheet", { cache: "no-store" }),
+          fetch("/api/mel-projects", { cache: "no-store" }),
+        ]);
+        const parsed = (await recruitingRes.json()) as SheetDataResult;
+        const melParsed = (await melRes.json()) as MelProjectsDataResult;
+        if (!cancelled) {
+          setData(parsed);
+          setMelData(melParsed);
+        }
       } catch (e) {
         if (!cancelled) {
+          const message = e instanceof Error ? e.message : "Failed to load data";
           setData({
             ok: false,
-            error: e instanceof Error ? e.message : "Failed to load recruiting sheet",
+            error: message,
+            fetchedAt: new Date().toISOString(),
+            csvUrl: "",
+          });
+          setMelData({
+            ok: false,
+            error: message,
             fetchedAt: new Date().toISOString(),
             csvUrl: "",
           });
@@ -163,7 +180,7 @@ export function RecruitingIntelligenceSection() {
     return intelligenceSnapshotToKpis(snapshot);
   }, [data, snapshot]);
 
-  if (data === undefined) {
+  if (data === undefined || melData === undefined) {
     return <IntelligenceSkeleton />;
   }
 
@@ -225,6 +242,8 @@ export function RecruitingIntelligenceSection() {
       </div>
 
       <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
+
+      <DemandIntelligenceSection recruiting={data} mel={melData} />
     </div>
   );
 }
