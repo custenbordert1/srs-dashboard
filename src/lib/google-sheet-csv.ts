@@ -136,10 +136,11 @@ function rowsToObjects(matrix: string[][]): { headers: string[]; rows: SheetRow[
   return { headers, rows };
 }
 
-export async function fetchGoogleSheetAsRows(): Promise<SheetDataResult> {
+export async function fetchGoogleSheetCsvById(
+  sheetId: string,
+  gid: string = "0",
+): Promise<SheetDataResult> {
   const fetchedAt = new Date().toISOString();
-  const sheetId = getSheetId();
-  const gid = getSheetGid();
   const csvUrl = getGoogleSheetCsvUrl(sheetId, gid);
 
   try {
@@ -200,4 +201,8 @@ export async function fetchGoogleSheetAsRows(): Promise<SheetDataResult> {
       csvUrl,
     };
   }
+}
+
+export async function fetchGoogleSheetAsRows(): Promise<SheetDataResult> {
+  return fetchGoogleSheetCsvById(getSheetId(), getSheetGid());
 }

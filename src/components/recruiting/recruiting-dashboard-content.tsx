@@ -12,6 +12,7 @@ import { ApplicantPipeline } from "./applicant-pipeline";
 import { DashboardTabNav, type DashboardTabId } from "./dashboard-tabs";
 import { DmLeaderboard } from "./dm-leaderboard";
 import { LiveSheetSection } from "./live-sheet-section";
+import { MelProjectsSection } from "./mel-projects-section";
 import { NeedsAttentionSection } from "./needs-attention-section";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { OpenJobsTable } from "./open-jobs-table";
@@ -66,6 +67,8 @@ export function RecruitingDashboardContent({
         {activeTab === "dm-scorecards" ? <DmLeaderboard rows={dmLeaderboard} /> : null}
 
         {activeTab === "live-sheet" ? <LiveSheetSection /> : null}
+
+        {activeTab === "mel-projects" ? <MelProjectsSection /> : null}
 
         {activeTab === "automation" ? <PostAutomationQueue /> : null}
       </main>
