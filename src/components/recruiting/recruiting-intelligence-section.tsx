@@ -10,6 +10,7 @@ import {
 } from "@/lib/recruiting-intelligence";
 import { useEffect, useMemo, useState } from "react";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
+import { MarketIntelligenceSection } from "./market-intelligence-section";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
 
@@ -242,6 +243,8 @@ export function RecruitingIntelligenceSection() {
       </div>
 
       <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
+
+      <MarketIntelligenceSection recruiting={data} mel={melData} />
 
       <DemandIntelligenceSection recruiting={data} mel={melData} />
     </div>
