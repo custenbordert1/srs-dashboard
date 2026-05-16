@@ -145,7 +145,7 @@ export async function fetchGoogleSheetCsvById(
 
   try {
     const res = await fetch(csvUrl, {
-      next: { revalidate: 60 },
+      cache: "no-store",
       headers: {
         Accept: "text/csv,text/plain,*/*",
       },
