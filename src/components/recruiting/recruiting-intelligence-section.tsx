@@ -14,6 +14,7 @@ import {
   type IntelligenceOpenPost,
 } from "@/lib/recruiting-intelligence";
 import { useEffect, useMemo, useState } from "react";
+import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { MarketIntelligenceSection } from "./market-intelligence-section";
@@ -331,6 +332,8 @@ export function RecruitingIntelligenceSection() {
       <CriticalMarketsQueueSection recruiting={data} mel={melData} />
 
       <OpportunityAutomationSection recruiting={data} mel={melData} />
+
+      <CandidateIntelligenceSection />
 
       <MarketIntelligenceSection recruiting={data} mel={melData} />
 
