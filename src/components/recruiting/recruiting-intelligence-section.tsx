@@ -9,6 +9,7 @@ import {
   type IntelligenceOpenPost,
 } from "@/lib/recruiting-intelligence";
 import { useEffect, useMemo, useState } from "react";
+import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { MarketIntelligenceSection } from "./market-intelligence-section";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
@@ -243,6 +244,8 @@ export function RecruitingIntelligenceSection() {
       </div>
 
       <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
+
+      <CriticalMarketsQueueSection recruiting={data} mel={melData} />
 
       <MarketIntelligenceSection recruiting={data} mel={melData} />
 

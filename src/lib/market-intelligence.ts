@@ -28,6 +28,7 @@ export type CityMarketRow = {
   city: string;
   stateCode: string;
   label: string;
+  manager: string;
   marketRiskScore: number;
   urgency: MarketUrgency;
   openStoreCalls: number;
@@ -172,6 +173,27 @@ function isAssignedRep(staffName: string): boolean {
   return Boolean(name && name !== "open" && name !== "—");
 }
 
+function incrementCount(map: Map<string, number>, key: string) {
+  const normalized = key.trim() || "Unassigned";
+  map.set(normalized, (map.get(normalized) ?? 0) + 1);
+}
+
+function primaryManager(...maps: Array<Map<string, number> | undefined>): string {
+  const merged = new Map<string, number>();
+
+  for (const map of maps) {
+    if (!map) continue;
+    for (const [manager, count] of map.entries()) {
+      merged.set(manager, (merged.get(manager) ?? 0) + count);
+    }
+  }
+
+  return (
+    [...merged.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ??
+    "Unassigned"
+  );
+}
+
 export function computeMarketUrgency(score: number): MarketUrgency {
   if (score >= 75) return "Critical";
   if (score >= 55) return "High";
@@ -259,6 +281,7 @@ function buildRecommendations(input: {
 type MelCityAgg = {
   city: string;
   stateCode: string;
+  managerCounts: Map<string, number>;
   openStoreCalls: number;
   totalCalls: number;
   completedCalls: number;
@@ -268,6 +291,7 @@ type MelCityAgg = {
 type RecruitingCityAgg = {
   city: string;
   stateCode: string;
+  managerCounts: Map<string, number>;
   openRecruitingPosts: number;
   applicants: number;
 };
@@ -299,12 +323,14 @@ export function computeMarketIntelligence(
       const agg = melByCity.get(key) ?? {
         city: cityRaw,
         stateCode,
+        managerCounts: new Map<string, number>(),
         openStoreCalls: 0,
         totalCalls: 0,
         completedCalls: 0,
         activeReps: new Set<string>(),
       };
       agg.totalCalls += 1;
+      incrementCount(agg.managerCounts, cell(row, melKeys.manager));
 
       const staffName = cell(row, melKeys.staffName);
       const staffNumber = cell(row, melKeys.staffNumber);
@@ -336,10 +362,12 @@ export function computeMarketIntelligence(
       const agg = recruitingByCity.get(key) ?? {
         city: cityRaw,
         stateCode,
+        managerCounts: new Map<string, number>(),
         openRecruitingPosts: 0,
         applicants: 0,
       };
       agg.openRecruitingPosts += 1;
+      incrementCount(agg.managerCounts, cell(row, recKeys.manager));
       agg.applicants += parseApplicantCount(cell(row, recKeys.applicantCount));
       recruitingByCity.set(key, agg);
     }
@@ -407,6 +435,7 @@ export function computeMarketIntelligence(
       city,
       stateCode,
       label: formatCityLabel(city, stateCode),
+      manager: primaryManager(mel?.managerCounts, rec?.managerCounts),
       marketRiskScore,
       urgency,
       openStoreCalls,
