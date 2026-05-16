@@ -3,6 +3,11 @@
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 import {
+  analyzeMarketIdentityQuality,
+  type MarketIdentityDiagnostics,
+} from "@/lib/market-identity";
+import type { Kpi } from "@/lib/recruiting-sample-data";
+import {
   computeRecruitingIntelligence,
   intelligenceSnapshotToKpis,
   RISK_BADGE_STYLES,
@@ -14,6 +19,7 @@ import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { MarketIntelligenceSection } from "./market-intelligence-section";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
+import { OpportunityAutomationSection } from "./opportunity-automation-section";
 
 function formatDaysOpen(days: number | null): string {
   if (days === null) return "—";
@@ -182,6 +188,46 @@ export function RecruitingIntelligenceSection() {
     return intelligenceSnapshotToKpis(snapshot);
   }, [data, snapshot]);
 
+  const dataQualityDiagnostics = useMemo<MarketIdentityDiagnostics | null>(() => {
+    if (!data?.ok || !melData?.ok) return null;
+    return analyzeMarketIdentityQuality({
+      recruitingRows: data.rows,
+      recruitingHeaders: data.headers,
+      melRows: melData.rows,
+      melHeaders: melData.headers,
+    });
+  }, [data, melData]);
+
+  const dataQualityKpis = useMemo<Kpi[]>(() => {
+    if (!dataQualityDiagnostics) return [];
+    return [
+      {
+        id: "matched-market-pct",
+        label: "Matched market %",
+        value: `${dataQualityDiagnostics.matchedMarketPercent}%`,
+        change: "Identity",
+        changeDirection: "flat",
+        hint: `${dataQualityDiagnostics.matchedRows.toLocaleString()} of ${dataQualityDiagnostics.totalRows.toLocaleString()} rows have complete matched market identity`,
+      },
+      {
+        id: "unmatched-rows",
+        label: "Unmatched rows",
+        value: dataQualityDiagnostics.unmatchedRows.toLocaleString(),
+        change: "Quality",
+        changeDirection: dataQualityDiagnostics.unmatchedRows > 0 ? "down" : "flat",
+        hint: `${dataQualityDiagnostics.incompleteRows.toLocaleString()} incomplete · ${dataQualityDiagnostics.unmatchedMarkets.length.toLocaleString()} unmatched market examples`,
+      },
+      {
+        id: "duplicate-markets",
+        label: "Duplicate market count",
+        value: dataQualityDiagnostics.duplicateMarketCount.toLocaleString(),
+        change: "Normalized",
+        changeDirection: "flat",
+        hint: "City + state keys with multiple source rows after normalization",
+      },
+    ];
+  }, [dataQualityDiagnostics]);
+
   if (data === undefined || melData === undefined) {
     return <IntelligenceSkeleton />;
   }
@@ -219,6 +265,43 @@ export function RecruitingIntelligenceSection() {
         gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
       />
 
+      {dataQualityKpis.length > 0 ? (
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Data quality</h2>
+            <p className="mt-1 text-sm text-zinc-500">
+              Market identity diagnostics across recruiting and MEL sources.
+            </p>
+          </div>
+          <KpiCards
+            items={dataQualityKpis}
+            gridClassName="grid gap-3 sm:grid-cols-3"
+          />
+          {dataQualityDiagnostics ? (
+            <div className="grid gap-3 text-sm md:grid-cols-3">
+              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+                <p className="font-medium text-zinc-300">Unmatched markets</p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {dataQualityDiagnostics.unmatchedMarkets.slice(0, 5).join(", ") || "None"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+                <p className="font-medium text-zinc-300">Unmatched DMs</p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {dataQualityDiagnostics.unmatchedDms.slice(0, 5).join(", ") || "None"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+                <p className="font-medium text-zinc-300">Incomplete rows</p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {dataQualityDiagnostics.incompleteRows.toLocaleString()} rows missing city or state
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         <IntelligenceBarChart
           title="Applicants by state"
@@ -246,6 +329,8 @@ export function RecruitingIntelligenceSection() {
       <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
 
       <CriticalMarketsQueueSection recruiting={data} mel={melData} />
+
+      <OpportunityAutomationSection recruiting={data} mel={melData} />
 
       <MarketIntelligenceSection recruiting={data} mel={melData} />
 

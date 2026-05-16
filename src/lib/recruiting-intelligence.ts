@@ -1,4 +1,5 @@
 import type { Kpi } from "@/lib/recruiting-sample-data";
+import { normalizeState as normalizeIdentityState, resolveMarketIdentity } from "@/lib/market-identity";
 import type { SheetRow } from "@/lib/google-sheet-csv";
 import {
   calendarAgeDays,
@@ -99,7 +100,7 @@ function cell(row: SheetRow, key: string | undefined): string {
 }
 
 function normalizeState(raw: string): string {
-  return raw.trim().toUpperCase().slice(0, 2);
+  return normalizeIdentityState(raw);
 }
 
 export function isRuralState(stateRaw: string): boolean {
@@ -213,9 +214,15 @@ export function computeRecruitingIntelligence(
 
     openCount += 1;
     const jobTitle = cell(row, jobTitleKey) || "Untitled role";
-    const city = cell(row, keys.city) || "—";
-    const state = cell(row, keys.state) || "—";
-    const manager = cell(row, keys.manager) || "Unassigned";
+    const identity = resolveMarketIdentity({
+      city: cell(row, keys.city),
+      state: cell(row, keys.state),
+      manager: cell(row, keys.manager),
+      source: "recruiting",
+    });
+    const city = identity.city;
+    const state = identity.state || "—";
+    const manager = identity.dm;
     const applicantCount = parseApplicantCount(cell(row, keys.applicantCount));
     const openings = openingsKey ? parseOpenings(cell(row, openingsKey)) : 1;
     const storeCount = titleCounts.get(jobTitle) ?? 1;

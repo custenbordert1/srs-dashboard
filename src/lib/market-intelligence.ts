@@ -4,6 +4,12 @@ import {
   isCompletedStoreCallStatus,
   resolveMelProjectColumnKeys,
 } from "@/lib/mel-projects-metrics";
+import {
+  buildMarketKey as buildIdentityMarketKey,
+  normalizeCity as normalizeIdentityCity,
+  normalizeState as normalizeIdentityState,
+  resolveMarketIdentity,
+} from "@/lib/market-identity";
 import { parseApplicantCount } from "@/lib/post-automation";
 import { isOpenPostStatus, resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
 import { isRuralState } from "@/lib/recruiting-intelligence";
@@ -89,74 +95,15 @@ function cell(row: SheetRow, key: string | undefined): string {
 }
 
 function normalizeStateKey(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-  const upper = trimmed.toUpperCase();
-  if (upper.length === 2) return upper;
-  const stateNames: Record<string, string> = {
-    ALABAMA: "AL",
-    ALASKA: "AK",
-    ARIZONA: "AZ",
-    ARKANSAS: "AR",
-    CALIFORNIA: "CA",
-    COLORADO: "CO",
-    CONNECTICUT: "CT",
-    DELAWARE: "DE",
-    FLORIDA: "FL",
-    GEORGIA: "GA",
-    HAWAII: "HI",
-    IDAHO: "ID",
-    ILLINOIS: "IL",
-    INDIANA: "IN",
-    IOWA: "IA",
-    KANSAS: "KS",
-    KENTUCKY: "KY",
-    LOUISIANA: "LA",
-    MAINE: "ME",
-    MARYLAND: "MD",
-    MASSACHUSETTS: "MA",
-    MICHIGAN: "MI",
-    MINNESOTA: "MN",
-    MISSISSIPPI: "MS",
-    MISSOURI: "MO",
-    MONTANA: "MT",
-    NEBRASKA: "NE",
-    NEVADA: "NV",
-    "NEW HAMPSHIRE": "NH",
-    "NEW JERSEY": "NJ",
-    "NEW MEXICO": "NM",
-    "NEW YORK": "NY",
-    "NORTH CAROLINA": "NC",
-    "NORTH DAKOTA": "ND",
-    OHIO: "OH",
-    OKLAHOMA: "OK",
-    OREGON: "OR",
-    PENNSYLVANIA: "PA",
-    "RHODE ISLAND": "RI",
-    "SOUTH CAROLINA": "SC",
-    "SOUTH DAKOTA": "SD",
-    TENNESSEE: "TN",
-    TEXAS: "TX",
-    UTAH: "UT",
-    VERMONT: "VT",
-    VIRGINIA: "VA",
-    WASHINGTON: "WA",
-    "WEST VIRGINIA": "WV",
-    WISCONSIN: "WI",
-    WYOMING: "WY",
-  };
-  return stateNames[upper] ?? upper.slice(0, 2);
+  return normalizeIdentityState(raw);
 }
 
 function normalizeCity(raw: string): string {
-  return raw.trim().replace(/\s+/g, " ").toLowerCase();
+  return normalizeIdentityCity(raw);
 }
 
 function cityStateKey(city: string, stateCode: string): string {
-  const c = normalizeCity(city);
-  const s = normalizeStateKey(stateCode);
-  if (!c || !s) return "";
-  return `${c}|${s}`;
+  return buildIdentityMarketKey(city, stateCode);
 }
 
 function formatCityLabel(city: string, stateCode: string): string {
@@ -315,13 +262,19 @@ export function computeMarketIntelligence(
   if (melKeys.storeCall && melKeys.status && melKeys.state) {
     for (const row of melRows) {
       const cityRaw = melCityKey ? cell(row, melCityKey) : cell(row, melKeys.storeName);
-      const stateCode = normalizeStateKey(cell(row, melKeys.state));
-      const key = cityStateKey(cityRaw, stateCode);
+      const identity = resolveMarketIdentity({
+        city: cityRaw,
+        state: cell(row, melKeys.state),
+        manager: cell(row, melKeys.manager),
+        source: "mel",
+      });
+      const stateCode = identity.state;
+      const key = identity.key;
       if (!key) continue;
 
       const completed = isCompletedStoreCallStatus(cell(row, melKeys.status));
       const agg = melByCity.get(key) ?? {
-        city: cityRaw,
+        city: identity.city,
         stateCode,
         managerCounts: new Map<string, number>(),
         openStoreCalls: 0,
@@ -330,7 +283,7 @@ export function computeMarketIntelligence(
         activeReps: new Set<string>(),
       };
       agg.totalCalls += 1;
-      incrementCount(agg.managerCounts, cell(row, melKeys.manager));
+      incrementCount(agg.managerCounts, identity.dm);
 
       const staffName = cell(row, melKeys.staffName);
       const staffNumber = cell(row, melKeys.staffNumber);
@@ -355,19 +308,25 @@ export function computeMarketIntelligence(
     for (const row of recruitingRows) {
       if (!isOpenPostStatus(cell(row, recKeys.status))) continue;
       const cityRaw = cell(row, recKeys.city);
-      const stateCode = normalizeStateKey(cell(row, recKeys.state));
-      const key = cityStateKey(cityRaw, stateCode);
+      const identity = resolveMarketIdentity({
+        city: cityRaw,
+        state: cell(row, recKeys.state),
+        manager: cell(row, recKeys.manager),
+        source: "recruiting",
+      });
+      const stateCode = identity.state;
+      const key = identity.key;
       if (!key) continue;
 
       const agg = recruitingByCity.get(key) ?? {
-        city: cityRaw,
+        city: identity.city,
         stateCode,
         managerCounts: new Map<string, number>(),
         openRecruitingPosts: 0,
         applicants: 0,
       };
       agg.openRecruitingPosts += 1;
-      incrementCount(agg.managerCounts, cell(row, recKeys.manager));
+      incrementCount(agg.managerCounts, identity.dm);
       agg.applicants += parseApplicantCount(cell(row, recKeys.applicantCount));
       recruitingByCity.set(key, agg);
     }

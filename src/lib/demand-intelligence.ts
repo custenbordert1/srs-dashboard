@@ -7,6 +7,7 @@ import {
 import { parseApplicantCount, parseCreatedDate } from "@/lib/post-automation";
 import { isOpenPostStatus, resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
+import { normalizeState, resolveMarketIdentity } from "@/lib/market-identity";
 
 export type MarketUrgency = "Critical" | "High" | "Moderate" | "Stable";
 
@@ -105,63 +106,7 @@ function cell(row: SheetRow, key: string | undefined): string {
 }
 
 function normalizeStateKey(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-  const upper = trimmed.toUpperCase();
-  if (upper.length === 2) return upper;
-  const stateNames: Record<string, string> = {
-    ALABAMA: "AL",
-    ALASKA: "AK",
-    ARIZONA: "AZ",
-    ARKANSAS: "AR",
-    CALIFORNIA: "CA",
-    COLORADO: "CO",
-    CONNECTICUT: "CT",
-    DELAWARE: "DE",
-    FLORIDA: "FL",
-    GEORGIA: "GA",
-    HAWAII: "HI",
-    IDAHO: "ID",
-    ILLINOIS: "IL",
-    INDIANA: "IN",
-    IOWA: "IA",
-    KANSAS: "KS",
-    KENTUCKY: "KY",
-    LOUISIANA: "LA",
-    MAINE: "ME",
-    MARYLAND: "MD",
-    MASSACHUSETTS: "MA",
-    MICHIGAN: "MI",
-    MINNESOTA: "MN",
-    MISSISSIPPI: "MS",
-    MISSOURI: "MO",
-    MONTANA: "MT",
-    NEBRASKA: "NE",
-    NEVADA: "NV",
-    "NEW HAMPSHIRE": "NH",
-    "NEW JERSEY": "NJ",
-    "NEW MEXICO": "NM",
-    "NEW YORK": "NY",
-    "NORTH CAROLINA": "NC",
-    "NORTH DAKOTA": "ND",
-    OHIO: "OH",
-    OKLAHOMA: "OK",
-    OREGON: "OR",
-    PENNSYLVANIA: "PA",
-    "RHODE ISLAND": "RI",
-    "SOUTH CAROLINA": "SC",
-    "SOUTH DAKOTA": "SD",
-    TENNESSEE: "TN",
-    TEXAS: "TX",
-    UTAH: "UT",
-    VERMONT: "VT",
-    VIRGINIA: "VA",
-    WASHINGTON: "WA",
-    "WEST VIRGINIA": "WV",
-    WISCONSIN: "WI",
-    WYOMING: "WY",
-  };
-  return stateNames[upper] ?? upper.slice(0, 2);
+  return normalizeState(raw);
 }
 
 function isAssignedRep(staffName: string): boolean {
@@ -347,7 +292,12 @@ export function computeDemandIntelligence(
       const projectAgg = projects.get(projectKey) ?? {
         projectNo,
         projectName: cell(row, melKeys.projectName) || "—",
-        manager: cell(row, melKeys.manager) || "—",
+        manager: resolveMarketIdentity({
+          city: "",
+          state: stateCode,
+          manager: cell(row, melKeys.manager),
+          source: "mel",
+        }).dm,
         state: stateCode,
         openStoreCalls: 0,
         totalCalls: 0,
@@ -369,7 +319,12 @@ export function computeDemandIntelligence(
       }
       projects.set(projectKey, projectAgg);
 
-      const manager = cell(row, melKeys.manager) || "Unassigned";
+      const manager = resolveMarketIdentity({
+        city: "",
+        state: stateCode,
+        manager: cell(row, melKeys.manager),
+        source: "mel",
+      }).dm;
       const dmAgg = dms.get(manager) ?? {
         openStoreCalls: 0,
         totalCalls: 0,

@@ -6,6 +6,7 @@ import {
   parseApplicantCount,
   parseCreatedDate,
 } from "@/lib/post-automation";
+import { resolveMarketIdentity } from "@/lib/market-identity";
 import {
   KPI_DRILL_FILTER_LABELS,
   matchesKpiDrillFilter,
@@ -214,10 +215,16 @@ function NeedsAttentionQueue({
     const out: NeedsAttentionRow[] = [];
 
     const managerFilter = selectedManager?.trim() || null;
-    const canFilterByManager = Boolean(managerFilter && keys.manager);
+    const canFilterByManager = Boolean(managerFilter);
 
     for (const row of data.rows) {
-      if (canFilterByManager && cell(row, keys.manager) !== managerFilter) continue;
+      const identity = resolveMarketIdentity({
+        city: cell(row, keys.city),
+        state: cell(row, keys.state),
+        manager: cell(row, keys.manager),
+        source: "recruiting",
+      });
+      if (canFilterByManager && identity.dm !== managerFilter) continue;
       if (keys.status && !isOpenPostStatus(cell(row, keys.status))) continue;
 
       const applicants = parseApplicantCount(cell(row, keys.applicantCount));
@@ -232,8 +239,8 @@ function NeedsAttentionQueue({
       out.push({
         priority,
         jobTitle: cell(row, jobTitleKey) || "—",
-        city: cell(row, keys.city) || "—",
-        state: cell(row, keys.state) || "—",
+        city: identity.city,
+        state: identity.state || "—",
         applicantCount: applicants,
         daysOpen,
         recommendedAction: resolveRecommendedAction(applicants, breezyYes, daysOpen),

@@ -1,4 +1,13 @@
+"use client";
+
+import {
+  buildDmScorecards,
+  type DmScorecardRow,
+} from "@/lib/dm-scorecard-metrics";
+import type { SheetDataResult } from "@/lib/google-sheet-csv";
+import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 import type { DmLeaderboardRow } from "@/lib/recruiting-sample-data";
+import { useEffect, useMemo, useState } from "react";
 
 function RankBadge({ rank }: { rank: number }) {
   const tone =
@@ -18,7 +27,24 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-export function DmLeaderboard({ rows }: { rows: DmLeaderboardRow[] }) {
+function ScorecardSkeleton() {
+  return (
+    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
+      <div className="h-5 w-40 animate-pulse rounded bg-zinc-800/80" />
+      <div className="mt-4 space-y-3">
+        {Array.from({ length: 7 }, (_, i) => (
+          <div key={i} className="h-12 animate-pulse rounded-lg bg-zinc-800/50" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function statesLabel(states: string[]): string {
+  return states.length > 0 ? states.join(", ") : "—";
+}
+
+function DmScorecardTable({ rows }: { rows: DmScorecardRow[] }) {
   return (
     <section
       aria-labelledby="dm-heading"
@@ -26,47 +52,61 @@ export function DmLeaderboard({ rows }: { rows: DmLeaderboardRow[] }) {
     >
       <div className="border-b border-zinc-800/80 px-4 py-4 sm:px-5 sm:py-5">
         <h2 id="dm-heading" className="text-lg font-semibold tracking-tight text-zinc-50">
-          DM leaderboard
+          DM scorecards
         </h2>
         <p className="text-sm text-zinc-500">
-          District managers ranked by pipeline velocity and closed hires
+          Live recruiting and MEL demand metrics by mapped district manager territory
         </p>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-[640px] w-full border-collapse text-left text-sm">
+        <table className="min-w-[980px] w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-zinc-800/80 text-xs uppercase tracking-wide text-zinc-500">
               <th className="px-4 py-3 font-medium sm:px-5">Rank</th>
               <th className="px-4 py-3 font-medium sm:px-5">DM</th>
-              <th className="px-4 py-3 font-medium sm:px-5">Market</th>
-              <th className="px-4 py-3 font-medium text-right sm:px-5">Interviews</th>
-              <th className="px-4 py-3 font-medium text-right sm:px-5">Offers</th>
-              <th className="px-4 py-3 font-medium text-right sm:px-5">Hires</th>
-              <th className="px-4 py-3 font-medium text-right sm:px-5">Score</th>
+              <th className="px-4 py-3 font-medium sm:px-5">Assigned states</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">Open posts</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">Zero apps</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">Applicants</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">MEL open calls</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">Active reps</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">Demand score</th>
+              <th className="px-4 py-3 font-medium text-right sm:px-5">Critical markets</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/60">
             {rows.map((row) => (
-              <tr key={row.rank} className="hover:bg-zinc-800/30">
+              <tr key={row.manager} className="hover:bg-zinc-800/30">
                 <td className="px-4 py-3 sm:px-5">
                   <RankBadge rank={row.rank} />
                 </td>
-                <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{row.name}</td>
-                <td className="px-4 py-3 text-zinc-400 sm:px-5">{row.market}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
-                  {row.interviews}
+                <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{row.manager}</td>
+                <td className="max-w-xs px-4 py-3 text-xs text-zinc-400 sm:px-5">
+                  {statesLabel(row.assignedStates)}
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
-                  {row.offers}
+                  {row.openPosts.toLocaleString()}
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
-                  {row.hires}
+                  {row.zeroApplicantPosts.toLocaleString()}
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
+                  {row.totalApplicants.toLocaleString()}
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
+                  {row.melOpenStoreCalls.toLocaleString()}
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
+                  {row.activeReps.toLocaleString()}
                 </td>
                 <td className="px-4 py-3 text-right sm:px-5">
                   <span className="inline-flex min-w-[2.5rem] justify-end rounded-md bg-teal-500/15 px-2 py-1 text-sm font-semibold tabular-nums text-teal-200 ring-1 ring-teal-500/25">
-                    {row.score}
+                    {row.demandScore}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums text-zinc-200 sm:px-5">
+                  {row.criticalMarketsCount.toLocaleString()}
                 </td>
               </tr>
             ))}
@@ -75,4 +115,78 @@ export function DmLeaderboard({ rows }: { rows: DmLeaderboardRow[] }) {
       </div>
     </section>
   );
+}
+
+export function DmLeaderboard({ rows: _rows }: { rows?: DmLeaderboardRow[] }) {
+  const [recruiting, setRecruiting] = useState<SheetDataResult | undefined>(undefined);
+  const [mel, setMel] = useState<MelProjectsDataResult | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const [recruitingRes, melRes] = await Promise.all([
+          fetch("/api/recruiting-sheet", { cache: "no-store" }),
+          fetch("/api/mel-projects", { cache: "no-store" }),
+        ]);
+        const recruitingJson = (await recruitingRes.json()) as SheetDataResult;
+        const melJson = (await melRes.json()) as MelProjectsDataResult;
+        if (!cancelled) {
+          setRecruiting(recruitingJson);
+          setMel(melJson);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to load DM scorecards";
+        if (!cancelled) {
+          setRecruiting({
+            ok: false,
+            error: message,
+            fetchedAt: new Date().toISOString(),
+            csvUrl: "",
+          });
+          setMel({
+            ok: false,
+            error: message,
+            fetchedAt: new Date().toISOString(),
+            csvUrl: "",
+          });
+        }
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const scorecards = useMemo(() => {
+    if (!recruiting?.ok || !mel?.ok) return [];
+    return buildDmScorecards(recruiting.rows, recruiting.headers, mel.rows, mel.headers);
+  }, [mel, recruiting]);
+
+  if (recruiting === undefined || mel === undefined) return <ScorecardSkeleton />;
+
+  if (!recruiting.ok || !mel.ok) {
+    const errorMessage = !recruiting.ok
+      ? recruiting.error
+      : !mel.ok
+        ? mel.error
+        : "Failed to load DM scorecards";
+
+    return (
+      <section className="space-y-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">DM scorecards</h2>
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+        >
+          {errorMessage}
+        </div>
+      </section>
+    );
+  }
+
+  return <DmScorecardTable rows={scorecards} />;
 }

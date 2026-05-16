@@ -1,5 +1,6 @@
 import type { Kpi } from "@/lib/recruiting-sample-data";
 import type { SheetRow } from "@/lib/google-sheet-csv";
+import { resolveMarketIdentity } from "@/lib/market-identity";
 import { parseApplicantCount } from "@/lib/post-automation";
 import {
   isOpenPostStatus,
@@ -31,7 +32,7 @@ export function computeManagerSheetStats(
   if (!name) return null;
 
   const keys = resolveKpiSheetColumnKeys(headers);
-  if (!keys.manager || !keys.status || !keys.applicantCount) {
+  if (!keys.status || !keys.applicantCount) {
     return {
       managerName: name,
       totalOpenPosts: 0,
@@ -48,7 +49,13 @@ export function computeManagerSheetStats(
   let breezyLinkedCount = 0;
 
   for (const row of rows) {
-    if (cell(row, keys.manager) !== name) continue;
+    const identity = resolveMarketIdentity({
+      city: cell(row, keys.city),
+      state: cell(row, keys.state),
+      manager: cell(row, keys.manager),
+      source: "recruiting",
+    });
+    if (identity.dm !== name) continue;
     const statusRaw = cell(row, keys.status);
     if (!isOpenPostStatus(statusRaw)) continue;
 
@@ -97,7 +104,7 @@ export function computeManagerKpiSnapshot(
 ): ManagerKpiSnapshot {
   const keys = resolveKpiSheetColumnKeys(headers);
   const managerFilter = selectedManager?.trim() || null;
-  const canFilterByManager = Boolean(managerFilter && keys.manager);
+  const canFilterByManager = Boolean(managerFilter);
 
   if (!keys.status || !keys.applicantCount) {
     const missing =
@@ -120,7 +127,13 @@ export function computeManagerKpiSnapshot(
   let zeroApplicantPosts = 0;
 
   for (const row of rows) {
-    if (canFilterByManager && cell(row, keys.manager) !== managerFilter) continue;
+    const identity = resolveMarketIdentity({
+      city: cell(row, keys.city),
+      state: cell(row, keys.state),
+      manager: cell(row, keys.manager),
+      source: "recruiting",
+    });
+    if (canFilterByManager && identity.dm !== managerFilter) continue;
 
     const statusRaw = cell(row, keys.status);
     if (!isOpenPostStatus(statusRaw)) continue;
@@ -146,9 +159,7 @@ export function computeManagerKpiSnapshot(
   }
 
   let columnHint = "Open + Requested posts from live sheet";
-  if (managerFilter && !keys.manager) {
-    columnHint += " · Manager column not found; showing overall totals";
-  } else if (canFilterByManager) {
+  if (canFilterByManager) {
     columnHint += ` · ${managerFilter}`;
   }
 
