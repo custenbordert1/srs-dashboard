@@ -1,11 +1,19 @@
 "use client";
 
+import type { BreezyCandidatesResult } from "@/lib/breezy-api";
+import { buildCandidateIntelligence } from "@/lib/candidate-intelligence";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
+import {
+  normalizeMarketKey,
+  resolveMarketIdentity,
+} from "@/lib/market-identity";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
+import { resolveMelProjectColumnKeys } from "@/lib/mel-projects-metrics";
 import {
   buildOpportunityAutomationSnapshot,
   type AutomationPriorityLevel,
 } from "@/lib/opportunity-automation";
+import { parseApplicantCount } from "@/lib/post-automation";
 import {
   buildRecruiterWorkload,
   createWorkflowActivity,
@@ -19,6 +27,8 @@ import {
   type WorkflowStateById,
   type WorkflowStatus,
 } from "@/lib/recruiting-action-center";
+import { buildRecruitingForecast } from "@/lib/recruiting-forecast";
+import { isOpenPostStatus, resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
 
@@ -29,6 +39,10 @@ type RecruitingActionCenterSectionProps = {
 
 const STORAGE_KEY = "srs-dashboard:recruiting-action-center:v1";
 const ALL = "__all__";
+const MEL_CITY_ALIASES = ["city", "location city", "store city"];
+const DETAIL_TABS = ["Overview", "Recruiting", "MEL Projects", "Automation", "Forecast"] as const;
+
+type DetailTab = (typeof DETAIL_TABS)[number];
 
 const selectClass =
   "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
@@ -51,6 +65,34 @@ const URGENCY_STYLES: Record<AutomationPriorityLevel, string> = {
 
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+}
+
+function normHeader(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function pickColumn(headers: string[], aliases: string[]): string | undefined {
+  const set = new Map<string, string>();
+  for (const h of headers) {
+    set.set(normHeader(h), h);
+  }
+  for (const alias of aliases) {
+    const direct = set.get(normHeader(alias));
+    if (direct) return direct;
+  }
+  for (const h of headers) {
+    const n = normHeader(h);
+    for (const alias of aliases) {
+      const a = normHeader(alias);
+      if (n === a || n.includes(a) || a.includes(n)) return h;
+    }
+  }
+  return undefined;
+}
+
+function cell(row: Record<string, string>, key: string | undefined): string {
+  if (!key) return "";
+  return (row[key] ?? "").trim();
 }
 
 function formatDateTime(iso: string): string {
@@ -138,6 +180,8 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
   const [urgencyFilter, setUrgencyFilter] = useState(ALL);
   const [statusFilter, setStatusFilter] = useState(ALL);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [detailTabs, setDetailTabs] = useState<Record<string, DetailTab>>({});
+  const [candidateData, setCandidateData] = useState<BreezyCandidatesResult | undefined>(undefined);
 
   useEffect(() => {
     setStateById(readStoredState());
@@ -148,6 +192,31 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
     if (!hydrated || typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateById));
   }, [hydrated, stateById]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCandidates() {
+      try {
+        const res = await fetch("/api/breezy/candidates", { cache: "no-store" });
+        const parsed = (await res.json()) as BreezyCandidatesResult;
+        if (!cancelled) setCandidateData(parsed);
+      } catch (err) {
+        if (!cancelled) {
+          setCandidateData({
+            ok: false,
+            error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
+            fetchedAt: new Date().toISOString(),
+          });
+        }
+      }
+    }
+
+    void loadCandidates();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const snapshot = useMemo(() => {
     if (!recruiting.ok || !mel.ok) return null;
@@ -160,6 +229,30 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
   );
 
   const workloads = useMemo(() => buildRecruiterWorkload(workflows), [workflows]);
+
+  const melKeys = useMemo(() => (mel.ok ? resolveMelProjectColumnKeys(mel.headers) : null), [mel]);
+  const melCityKey = useMemo(
+    () => (mel.ok ? pickColumn(mel.headers, MEL_CITY_ALIASES) : undefined),
+    [mel],
+  );
+  const recruitingKeys = useMemo(
+    () => (recruiting.ok ? resolveKpiSheetColumnKeys(recruiting.headers) : null),
+    [recruiting],
+  );
+  const candidateSnapshot = useMemo(
+    () => (candidateData?.ok ? buildCandidateIntelligence(candidateData.candidates) : null),
+    [candidateData],
+  );
+  const forecastSnapshot = useMemo(() => {
+    if (!recruiting.ok || !mel.ok || !candidateData?.ok) return null;
+    return buildRecruitingForecast({
+      recruitingRows: recruiting.rows,
+      recruitingHeaders: recruiting.headers,
+      melRows: mel.rows,
+      melHeaders: mel.headers,
+      candidates: candidateData.candidates,
+    });
+  }, [candidateData, mel, recruiting]);
 
   const recruiterOptions = useMemo(
     () => sortedUnique(workflows.map((workflow) => workflow.assignedRecruiter || "Unassigned")),
@@ -198,6 +291,10 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
       else next.add(id);
       return next;
     });
+  }
+
+  function setDetailTab(id: string, tab: DetailTab) {
+    setDetailTabs((prev) => ({ ...prev, [id]: tab }));
   }
 
   function updateWorkflow(
@@ -468,12 +565,54 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
                   const escalationHistory = workflow.activity.filter(
                     (event) => event.type === "escalation" || event.message.includes("Escalated"),
                   );
+                  const normalizedMarketKey = normalizeMarketKey(workflow.city, workflow.state);
+                  const activeTab = detailTabs[workflow.id] ?? "Overview";
+                  const marketMelProjects =
+                    mel.ok && melKeys
+                      ? mel.rows
+                          .filter((row) => {
+                            const identity = resolveMarketIdentity({
+                              city: cell(row, melCityKey) || cell(row, melKeys.storeName),
+                              state: cell(row, melKeys.state),
+                              manager: cell(row, melKeys.manager),
+                              source: "mel",
+                            });
+                            return identity.key === normalizedMarketKey;
+                          })
+                          .slice(0, 12)
+                      : [];
+                  const marketRecruitingPosts =
+                    recruiting.ok && recruitingKeys
+                      ? recruiting.rows
+                          .filter((row) => {
+                            const identity = resolveMarketIdentity({
+                              city: cell(row, recruitingKeys.city),
+                              state: cell(row, recruitingKeys.state),
+                              manager: cell(row, recruitingKeys.manager),
+                              source: "recruiting",
+                            });
+                            return identity.key === normalizedMarketKey;
+                          })
+                          .slice(0, 12)
+                      : [];
+                  const marketCandidates =
+                    candidateSnapshot?.rows.filter(
+                      (candidate) => normalizeMarketKey(candidate.city, candidate.state) === normalizedMarketKey,
+                    ) ?? [];
+                  const candidateStatusCounts = [...marketCandidates.reduce((map, candidate) => {
+                    map.set(candidate.status, (map.get(candidate.status) ?? 0) + 1);
+                    return map;
+                  }, new Map<string, number>()).entries()].sort((a, b) => b[1] - a[1]);
+                  const forecast = forecastSnapshot?.forecast30Day.find(
+                    (row) => normalizeMarketKey(row.city, row.state) === normalizedMarketKey,
+                  );
 
                   return (
                     <Fragment key={workflow.id}>
                       <tr
+                        onClick={() => toggleExpanded(workflow.id)}
                         className={[
-                          "hover:bg-zinc-800/30",
+                          "cursor-pointer hover:bg-zinc-800/30",
                           isWorkflowOverdue(workflow) ? "bg-amber-500/[0.03]" : "",
                         ].join(" ")}
                       >
@@ -481,7 +620,10 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
                           <div className="flex min-w-0 items-center gap-3">
                             <button
                               type="button"
-                              onClick={() => toggleExpanded(workflow.id)}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggleExpanded(workflow.id);
+                              }}
                               aria-expanded={expanded}
                               className="shrink-0 rounded-md border border-zinc-700 bg-zinc-950/70 px-2 py-1 text-xs font-medium text-zinc-200 transition-colors hover:border-zinc-600 hover:bg-zinc-800"
                             >
@@ -527,82 +669,261 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
                       {expanded ? (
                         <tr key={`${workflow.id}-expanded`} className="bg-zinc-950/40">
                           <td colSpan={9} className="px-4 py-4 sm:px-5">
-                            <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr]">
-                              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
-                                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                                  Actions
-                                </h4>
-                                <p className="mt-2 text-xs text-zinc-500">
-                                  {formatSnooze(workflow.snoozedUntil)}
-                                </p>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  <button type="button" className={actionButtonClass()} onClick={() => assignRecruiter(workflow)}>
-                                    Assign recruiter
-                                  </button>
-                                  <button type="button" className={actionButtonClass()} onClick={() => assignDm(workflow)}>
-                                    Assign DM
-                                  </button>
-                                  <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "In Progress")}>
-                                    In progress
-                                  </button>
-                                  <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "Completed")}>
-                                    Complete
-                                  </button>
-                                  <button type="button" className={actionButtonClass("amber")} onClick={() => snoozeWorkflow(workflow)}>
-                                    Snooze
-                                  </button>
-                                  <button type="button" className={actionButtonClass("red")} onClick={() => escalateWorkflow(workflow)}>
-                                    Escalate
-                                  </button>
-                                  <button type="button" className={actionButtonClass()} onClick={() => addNote(workflow)}>
-                                    Add note
-                                  </button>
+                            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40">
+                              <div className="flex flex-col gap-3 border-b border-zinc-800 px-4 py-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div>
+                                  <h3 className="text-lg font-semibold text-zinc-50">{workflow.market}</h3>
+                                  <p className="mt-1 font-mono text-xs text-teal-300">{normalizedMarketKey}</p>
+                                  <p className="mt-2 text-sm text-zinc-500">{workflow.reason}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 lg:min-w-[32rem]">
+                                  <div>
+                                    <p className="text-xs uppercase tracking-wide text-zinc-500">Open calls</p>
+                                    <p className="mt-1 font-semibold tabular-nums text-zinc-100">{workflow.openStoreCalls}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs uppercase tracking-wide text-zinc-500">Active reps</p>
+                                    <p className="mt-1 font-semibold tabular-nums text-zinc-100">{workflow.activeReps}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs uppercase tracking-wide text-zinc-500">Open posts</p>
+                                    <p className="mt-1 font-semibold tabular-nums text-zinc-100">{workflow.openRecruitingPosts}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs uppercase tracking-wide text-zinc-500">Applicants</p>
+                                    <p className="mt-1 font-semibold tabular-nums text-zinc-100">{workflow.applicants}</p>
+                                  </div>
                                 </div>
                               </div>
 
-                              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
-                                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                                  Notes
-                                </h4>
-                                {workflow.notes.length > 0 ? (
-                                  <ul className="mt-3 space-y-2 text-sm text-zinc-300">
-                                    {workflow.notes.slice(0, 5).map((note, index) => (
-                                      <li key={`${workflow.id}-note-${index}`}>{note}</li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p className="mt-3 text-sm text-zinc-500">No notes yet.</p>
-                                )}
-
-                                <h4 className="mt-5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                                  Escalation history
-                                </h4>
-                                {escalationHistory.length > 0 ? (
-                                  <ol className="mt-3 space-y-2">
-                                    {escalationHistory.map((event) => (
-                                      <li key={event.id} className="border-l border-red-500/40 pl-3">
-                                        <p className="text-sm text-zinc-300">{event.message}</p>
-                                        <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
-                                      </li>
-                                    ))}
-                                  </ol>
-                                ) : (
-                                  <p className="mt-3 text-sm text-zinc-500">No escalations recorded.</p>
-                                )}
+                              <div className="flex gap-1 overflow-x-auto border-b border-zinc-800 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                {DETAIL_TABS.map((tab) => (
+                                  <button
+                                    key={tab}
+                                    type="button"
+                                    onClick={() => setDetailTab(workflow.id, tab)}
+                                    className={[
+                                      "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                                      activeTab === tab
+                                        ? "bg-teal-500/15 text-teal-200"
+                                        : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100",
+                                    ].join(" ")}
+                                  >
+                                    {tab}
+                                  </button>
+                                ))}
                               </div>
 
-                              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
-                                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                                  Activity timeline
-                                </h4>
-                                <ol className="mt-3 space-y-3">
-                                  {workflow.activity.slice(0, 8).map((event) => (
-                                    <li key={event.id} className="border-l border-zinc-700 pl-3">
-                                      <p className="text-sm text-zinc-300">{event.message}</p>
-                                      <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
-                                    </li>
-                                  ))}
-                                </ol>
+                              <div className="p-4">
+                                {activeTab === "Overview" ? (
+                                  <div className="grid gap-4 lg:grid-cols-3">
+                                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                      <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Assignments</h4>
+                                      <dl className="mt-3 space-y-2 text-sm">
+                                        <div className="flex justify-between gap-3">
+                                          <dt className="text-zinc-500">Recruiter</dt>
+                                          <dd className="font-medium text-zinc-200">{workflow.assignedRecruiter || "Unassigned"}</dd>
+                                        </div>
+                                        <div className="flex justify-between gap-3">
+                                          <dt className="text-zinc-500">DM</dt>
+                                          <dd className="font-medium text-zinc-200">{workflow.assignedDm}</dd>
+                                        </div>
+                                        <div className="flex justify-between gap-3">
+                                          <dt className="text-zinc-500">Workflow</dt>
+                                          <dd className="font-medium text-zinc-200">{workflow.workflowStatus}</dd>
+                                        </div>
+                                      </dl>
+                                    </div>
+                                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                      <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Forecast risk</h4>
+                                      {forecast ? (
+                                        <dl className="mt-3 space-y-2 text-sm">
+                                          <div className="flex justify-between gap-3">
+                                            <dt className="text-zinc-500">30d risk</dt>
+                                            <dd className="font-semibold tabular-nums text-teal-300">{forecast.forecastRiskScore}</dd>
+                                          </div>
+                                          <div className="flex justify-between gap-3">
+                                            <dt className="text-zinc-500">Urgency</dt>
+                                            <dd className="font-medium text-zinc-200">{forecast.urgency}</dd>
+                                          </div>
+                                          <div className="flex justify-between gap-3">
+                                            <dt className="text-zinc-500">Rep shortage</dt>
+                                            <dd className="font-medium tabular-nums text-zinc-200">{forecast.projectedRepShortage}</dd>
+                                          </div>
+                                        </dl>
+                                      ) : (
+                                        <p className="mt-3 text-sm text-zinc-500">Forecast unavailable until Breezy candidates load.</p>
+                                      )}
+                                    </div>
+                                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                      <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Candidate pipeline</h4>
+                                      {candidateStatusCounts.length > 0 ? (
+                                        <ul className="mt-3 space-y-2 text-sm">
+                                          {candidateStatusCounts.slice(0, 5).map(([status, count]) => (
+                                            <li key={status} className="flex justify-between gap-3">
+                                              <span className="text-zinc-400">{status}</span>
+                                              <span className="font-medium tabular-nums text-zinc-200">{count}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="mt-3 text-sm text-zinc-500">No mapped Breezy candidates for this market.</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : null}
+
+                                {activeTab === "Recruiting" ? (
+                                  <div className="space-y-4">
+                                    <div className="grid gap-3 sm:grid-cols-3">
+                                      <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                        <p className="text-xs uppercase tracking-wide text-zinc-500">Open recruiting posts</p>
+                                        <p className="mt-1 text-2xl font-semibold text-zinc-50">{workflow.openRecruitingPosts}</p>
+                                      </div>
+                                      <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                        <p className="text-xs uppercase tracking-wide text-zinc-500">Applicants</p>
+                                        <p className="mt-1 text-2xl font-semibold text-zinc-50">{workflow.applicants}</p>
+                                      </div>
+                                      <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                        <p className="text-xs uppercase tracking-wide text-zinc-500">Candidate records</p>
+                                        <p className="mt-1 text-2xl font-semibold text-zinc-50">{marketCandidates.length}</p>
+                                      </div>
+                                    </div>
+                                    <div className="overflow-x-auto rounded-lg border border-zinc-800">
+                                      <table className="min-w-[620px] w-full text-left text-sm">
+                                        <thead className="bg-zinc-950/60 text-xs uppercase tracking-wide text-zinc-500">
+                                          <tr>
+                                            <th className="px-3 py-2 font-medium">Status</th>
+                                            <th className="px-3 py-2 font-medium text-right">Applicants</th>
+                                            <th className="px-3 py-2 font-medium">Source row</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-zinc-800">
+                                          {marketRecruitingPosts.map((row, index) => (
+                                            <tr key={`${workflow.id}-rec-${index}`}>
+                                              <td className="px-3 py-2 text-zinc-300">{cell(row, recruitingKeys?.status) || "—"}</td>
+                                              <td className="px-3 py-2 text-right tabular-nums text-zinc-300">{parseApplicantCount(cell(row, recruitingKeys?.applicantCount))}</td>
+                                              <td className="px-3 py-2 text-zinc-500">
+                                                {isOpenPostStatus(cell(row, recruitingKeys?.status)) ? "Open/Requested" : "Other"}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                ) : null}
+
+                                {activeTab === "MEL Projects" ? (
+                                  <div className="overflow-x-auto rounded-lg border border-zinc-800">
+                                    <table className="min-w-[760px] w-full text-left text-sm">
+                                      <thead className="bg-zinc-950/60 text-xs uppercase tracking-wide text-zinc-500">
+                                        <tr>
+                                          <th className="px-3 py-2 font-medium">Project</th>
+                                          <th className="px-3 py-2 font-medium">Store call</th>
+                                          <th className="px-3 py-2 font-medium">Status</th>
+                                          <th className="px-3 py-2 font-medium">Rep</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-zinc-800">
+                                        {marketMelProjects.map((row, index) => (
+                                          <tr key={`${workflow.id}-mel-${index}`}>
+                                            <td className="px-3 py-2">
+                                              <p className="font-medium text-zinc-200">{cell(row, melKeys?.projectName) || "Untitled project"}</p>
+                                              <p className="text-xs text-zinc-500">{cell(row, melKeys?.projectNo) || "—"}</p>
+                                            </td>
+                                            <td className="px-3 py-2 text-zinc-300">{cell(row, melKeys?.storeCall) || "—"}</td>
+                                            <td className="px-3 py-2 text-zinc-300">{cell(row, melKeys?.status) || "—"}</td>
+                                            <td className="px-3 py-2 text-zinc-400">{cell(row, melKeys?.staffName) || "Open"}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : null}
+
+                                {activeTab === "Automation" ? (
+                                  <div className="grid gap-4 lg:grid-cols-3">
+                                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                      <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Recommendation</h4>
+                                      <p className="mt-3 font-medium text-zinc-100">{workflow.recommendedAction}</p>
+                                      <p className="mt-2 text-sm text-zinc-400">{workflow.reason}</p>
+                                      <p className="mt-3 text-xs text-zinc-500">{formatSnooze(workflow.snoozedUntil)}</p>
+                                      <div className="mt-3 flex flex-wrap gap-2">
+                                        <button type="button" className={actionButtonClass()} onClick={() => assignRecruiter(workflow)}>Assign recruiter</button>
+                                        <button type="button" className={actionButtonClass()} onClick={() => assignDm(workflow)}>Assign DM</button>
+                                        <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "In Progress")}>In progress</button>
+                                        <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "Completed")}>Complete</button>
+                                        <button type="button" className={actionButtonClass("amber")} onClick={() => snoozeWorkflow(workflow)}>Snooze</button>
+                                        <button type="button" className={actionButtonClass("red")} onClick={() => escalateWorkflow(workflow)}>Escalate</button>
+                                        <button type="button" className={actionButtonClass()} onClick={() => addNote(workflow)}>Add note</button>
+                                      </div>
+                                    </div>
+                                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                      <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Notes</h4>
+                                      {workflow.notes.length > 0 ? (
+                                        <ul className="mt-3 space-y-2 text-sm text-zinc-300">
+                                          {workflow.notes.slice(0, 5).map((note, index) => (
+                                            <li key={`${workflow.id}-note-${index}`}>{note}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="mt-3 text-sm text-zinc-500">No notes yet.</p>
+                                      )}
+                                      <h4 className="mt-5 text-xs font-semibold uppercase tracking-wider text-zinc-500">Escalation history</h4>
+                                      {escalationHistory.length > 0 ? (
+                                        <ol className="mt-3 space-y-2">
+                                          {escalationHistory.map((event) => (
+                                            <li key={event.id} className="border-l border-red-500/40 pl-3">
+                                              <p className="text-sm text-zinc-300">{event.message}</p>
+                                              <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
+                                            </li>
+                                          ))}
+                                        </ol>
+                                      ) : (
+                                        <p className="mt-3 text-sm text-zinc-500">No escalations recorded.</p>
+                                      )}
+                                    </div>
+                                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                      <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Workflow history</h4>
+                                      <ol className="mt-3 space-y-3">
+                                        {workflow.activity.slice(0, 8).map((event) => (
+                                          <li key={event.id} className="border-l border-zinc-700 pl-3">
+                                            <p className="text-sm text-zinc-300">{event.message}</p>
+                                            <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
+                                          </li>
+                                        ))}
+                                      </ol>
+                                    </div>
+                                  </div>
+                                ) : null}
+
+                                {activeTab === "Forecast" ? (
+                                  <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+                                    {forecast ? (
+                                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                                        <div>
+                                          <p className="text-xs uppercase tracking-wide text-zinc-500">Forecast risk</p>
+                                          <p className="mt-1 text-2xl font-semibold text-teal-300">{forecast.forecastRiskScore}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-xs uppercase tracking-wide text-zinc-500">Urgency</p>
+                                          <p className="mt-1 font-semibold text-zinc-100">{forecast.urgency}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-xs uppercase tracking-wide text-zinc-500">Projected applicant gap</p>
+                                          <p className="mt-1 font-semibold tabular-nums text-zinc-100">{forecast.projectedApplicantShortage}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-xs uppercase tracking-wide text-zinc-500">Projected rep shortage</p>
+                                          <p className="mt-1 font-semibold tabular-nums text-zinc-100">{forecast.projectedRepShortage}</p>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-zinc-500">Forecast unavailable until Breezy candidates load.</p>
+                                    )}
+                                  </div>
+                                ) : null}
                               </div>
                             </div>
                           </td>
