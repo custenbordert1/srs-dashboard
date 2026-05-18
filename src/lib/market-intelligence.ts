@@ -5,9 +5,6 @@ import {
   resolveMelProjectColumnKeys,
 } from "@/lib/mel-projects-metrics";
 import {
-  buildMarketKey as buildIdentityMarketKey,
-  normalizeCity as normalizeIdentityCity,
-  normalizeState as normalizeIdentityState,
   resolveMarketIdentity,
 } from "@/lib/market-identity";
 import { parseApplicantCount } from "@/lib/post-automation";
@@ -92,18 +89,6 @@ function pickColumn(headers: string[], aliases: string[]): string | undefined {
 function cell(row: SheetRow, key: string | undefined): string {
   if (!key) return "";
   return (row[key] ?? "").trim();
-}
-
-function normalizeStateKey(raw: string): string {
-  return normalizeIdentityState(raw);
-}
-
-function normalizeCity(raw: string): string {
-  return normalizeIdentityCity(raw);
-}
-
-function cityStateKey(city: string, stateCode: string): string {
-  return buildIdentityMarketKey(city, stateCode);
 }
 
 function formatCityLabel(city: string, stateCode: string): string {

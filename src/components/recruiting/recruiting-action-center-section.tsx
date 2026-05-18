@@ -184,8 +184,11 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
   const [candidateData, setCandidateData] = useState<BreezyCandidatesResult | undefined>(undefined);
 
   useEffect(() => {
-    setStateById(readStoredState());
-    setHydrated(true);
+    const id = window.setTimeout(() => {
+      setStateById(readStoredState());
+      setHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {

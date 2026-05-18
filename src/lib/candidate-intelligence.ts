@@ -267,7 +267,6 @@ function buildKpis(rows: CandidateIntelligenceRow[]): Kpi[] {
       : 0;
   const interviewCount = rows.filter((row) => isInterviewStage(row.status)).length;
   const offerCount = rows.filter((row) => isOfferStage(row.status)).length;
-  const hireCount = rows.filter((row) => isHireStage(row.status)).length;
   const interviewConversion = rows.length > 0 ? Math.round((interviewCount / rows.length) * 1000) / 10 : 0;
   const offerConversion = rows.length > 0 ? Math.round((offerCount / rows.length) * 1000) / 10 : 0;
   const recentHires = rows.filter((row) => isHireStage(row.status) && (row.ageDays ?? 999) <= 30).length;

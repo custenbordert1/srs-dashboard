@@ -115,7 +115,7 @@ export function isCompletedStoreCallStatus(raw: string): boolean {
   return COMPLETED_STATUS_VALUES.has(raw.trim().toLowerCase());
 }
 
-function isAssignedRep(staffName: string, staffNumber: string): boolean {
+function isAssignedRep(staffName: string): boolean {
   const name = staffName.trim().toLowerCase();
   if (!name || name === "open" || name === "—") return false;
   return true;
@@ -169,7 +169,7 @@ export function computeMelProjectsKpiSnapshot(
 
       const staffName = cell(raw, keys.staffName);
       const staffNumber = cell(raw, keys.staffNumber);
-      if (isAssignedRep(staffName, staffNumber)) {
+      if (isAssignedRep(staffName)) {
         activeRepKeys.add(staffNumber || staffName);
       }
     }

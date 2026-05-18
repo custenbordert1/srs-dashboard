@@ -117,7 +117,8 @@ function DmScorecardTable({ rows }: { rows: DmScorecardRow[] }) {
   );
 }
 
-export function DmLeaderboard({ rows: _rows }: { rows?: DmLeaderboardRow[] }) {
+export function DmLeaderboard({ rows = [] }: { rows?: DmLeaderboardRow[] }) {
+  void rows;
   const [recruiting, setRecruiting] = useState<SheetDataResult | undefined>(undefined);
   const [mel, setMel] = useState<MelProjectsDataResult | undefined>(undefined);
 
