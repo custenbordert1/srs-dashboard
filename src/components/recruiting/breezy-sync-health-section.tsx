@@ -1,0 +1,238 @@
+"use client";
+
+import type {
+  BreezySyncHealthSnapshot,
+  BreezySyncStatus,
+  BreezyTokenStatus,
+} from "@/lib/breezy-sync-status";
+import { useCallback, useEffect, useState } from "react";
+
+const STATUS_STYLES: Record<BreezySyncStatus, string> = {
+  ready: "border-teal-500/30 bg-teal-500/10 text-teal-200",
+  "safe-mode": "border-sky-500/30 bg-sky-500/10 text-sky-200",
+  queued: "border-violet-500/30 bg-violet-500/10 text-violet-200",
+  syncing: "border-cyan-500/30 bg-cyan-500/10 text-cyan-200",
+  warning: "border-amber-500/30 bg-amber-500/10 text-amber-200",
+  failed: "border-rose-500/30 bg-rose-500/10 text-rose-200",
+};
+
+const TOKEN_STYLES: Record<BreezyTokenStatus, string> = {
+  configured: "border-teal-500/30 bg-teal-500/10 text-teal-200",
+  missing: "border-amber-500/30 bg-amber-500/10 text-amber-200",
+};
+
+function formatDateTime(iso: string | null): string {
+  if (!iso) return "No live sync yet";
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}
+
+function Metric({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
+      <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50 tabular-nums">
+        {value}
+      </p>
+      {hint ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
+    </div>
+  );
+}
+
+function SyncSkeleton() {
+  return (
+    <section className="space-y-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
+      <div className="h-7 w-48 animate-pulse rounded bg-zinc-800/80" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div
+            key={index}
+            className="h-24 animate-pulse rounded-xl border border-zinc-800/80 bg-zinc-950/40"
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function BreezySyncHealthSection() {
+  const [snapshot, setSnapshot] = useState<BreezySyncHealthSnapshot | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/breezy/sync-health", { cache: "no-store" });
+      if (!res.ok) throw new Error(`Sync health HTTP ${res.status}`);
+      setSnapshot((await res.json()) as BreezySyncHealthSnapshot);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load Breezy sync health");
+      setSnapshot(undefined);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (snapshot === undefined && !error) return <SyncSkeleton />;
+
+  return (
+    <section className="space-y-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Sync Health</h2>
+          <p className="mt-1 max-w-3xl text-sm text-zinc-500">
+            Breezy-ready sync control plane with safe fallback queues, token checks, rate-limit
+            protection, and cleanup tracking.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void load()}
+          disabled={refreshing}
+          className="shrink-0 rounded-lg border border-zinc-700 bg-zinc-950/70 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-600 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {refreshing ? "Refreshing…" : "Refresh sync"}
+        </button>
+      </div>
+
+      {error ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
+        >
+          {error}
+        </div>
+      ) : null}
+
+      {snapshot ? (
+        <>
+          <div className="flex flex-wrap gap-2">
+            <span
+              className={[
+                "inline-flex rounded-full border px-3 py-1 text-xs font-medium",
+                STATUS_STYLES[snapshot.syncStatus],
+              ].join(" ")}
+            >
+              Sync status: {snapshot.statusLabel}
+            </span>
+            <span
+              className={[
+                "inline-flex rounded-full border px-3 py-1 text-xs font-medium",
+                TOKEN_STYLES[snapshot.tokenStatus],
+              ].join(" ")}
+            >
+              Token: {snapshot.tokenStatusLabel}
+            </span>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Metric label="Last sync time" value={formatDateTime(snapshot.lastSyncTime)} />
+            <Metric label="Jobs queued" value={snapshot.jobsQueued} />
+            <Metric label="Candidates queued" value={snapshot.candidatesQueued} />
+            <Metric label="Failed jobs" value={snapshot.failedJobs} />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
+              <h3 className="font-semibold text-zinc-100">Rate Limit Protection</h3>
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-zinc-500">Max / minute</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-zinc-100">
+                    {snapshot.rateLimitProtection.maxRequestsPerMinute}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-zinc-500">Remaining</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-zinc-100">
+                    {snapshot.rateLimitProtection.requestsRemainingThisMinute}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-zinc-500">Failed tracked</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-zinc-100">
+                    {snapshot.rateLimitProtection.failedRequestsTracked}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-zinc-500">Window</dt>
+                  <dd className="mt-1 font-semibold tabular-nums text-zinc-100">
+                    {snapshot.rateLimitProtection.failedRequestWindowMinutes}m
+                  </dd>
+                </div>
+              </dl>
+              <p className="mt-4 text-xs text-zinc-500">
+                {snapshot.rateLimitProtection.retryBackoffPlaceholder}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
+              <h3 className="font-semibold text-zinc-100">Warnings and Safe Mode</h3>
+              <div className="mt-3 space-y-2 text-sm text-zinc-400">
+                {[...snapshot.rateLimitWarnings, ...snapshot.notes].map((note) => (
+                  <p key={note} className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2">
+                    {note}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-950/40">
+            <div className="border-b border-zinc-800/80 px-4 py-3">
+              <h3 className="font-semibold text-zinc-100">Broken Position Cleanup Queue</h3>
+              <p className="mt-1 text-sm text-zinc-500">
+                Positions that need retry, remapping, archiving, or permission review before future
+                sync jobs run.
+              </p>
+            </div>
+            <table className="min-w-[780px] w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
+                  <th className="px-4 py-3 font-medium">Position name</th>
+                  <th className="px-4 py-3 font-medium">Position id</th>
+                  <th className="px-4 py-3 font-medium">Error type</th>
+                  <th className="px-4 py-3 font-medium text-right">Retry count</th>
+                  <th className="px-4 py-3 font-medium">Suggested action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/60">
+                {snapshot.brokenPositionCleanupQueue.map((item) => (
+                  <tr key={item.positionId} className="hover:bg-zinc-800/30">
+                    <td className="px-4 py-3 font-medium text-zinc-100">{item.positionName}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-zinc-400">{item.positionId}</td>
+                    <td className="px-4 py-3 text-zinc-300">{item.errorType}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-zinc-300">
+                      {item.retryCount}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-400">{item.suggestedAction}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : null}
+    </section>
+  );
+}

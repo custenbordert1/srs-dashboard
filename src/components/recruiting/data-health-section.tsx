@@ -10,6 +10,7 @@ import {
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { useCallback, useEffect, useState } from "react";
+import { BreezySyncHealthSection } from "./breezy-sync-health-section";
 
 function formatFetchedAt(iso: string) {
   try {
@@ -223,12 +224,15 @@ export function DataHealthSection() {
 
       breezyJobsJson = (await breezyJobsRes.json()) as BreezyJobsResult;
       if (!breezyJobsRes.ok) {
-        failures.push(`Breezy jobs HTTP ${breezyJobsRes.status}`);
+        const safeMissingToken = !breezyJobsJson.ok && breezyJobsJson.error.includes("BREEZY_API_KEY");
+        if (!safeMissingToken) failures.push(`Breezy jobs HTTP ${breezyJobsRes.status}`);
       }
 
       breezyCandidatesJson = (await breezyCandidatesRes.json()) as BreezyCandidatesResult;
       if (!breezyCandidatesRes.ok) {
-        failures.push(`Breezy candidates HTTP ${breezyCandidatesRes.status}`);
+        const safeMissingToken =
+          !breezyCandidatesJson.ok && breezyCandidatesJson.error.includes("BREEZY_API_KEY");
+        if (!safeMissingToken) failures.push(`Breezy candidates HTTP ${breezyCandidatesRes.status}`);
       }
 
       const nextReports: DataHealthReport[] = [];
@@ -330,6 +334,8 @@ export function DataHealthSection() {
         <DataHealthSkeleton />
       ) : (
         <div className="space-y-8">
+          <BreezySyncHealthSection />
+
           <section className="space-y-4">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
               Google Sheets
