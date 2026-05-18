@@ -226,7 +226,15 @@ export function RecruitingIntelligenceSection() {
         value: dataQualityDiagnostics.duplicateMarketCount.toLocaleString(),
         change: "Normalized",
         changeDirection: "flat",
-        hint: "City + state keys with multiple source rows after normalization",
+        hint: `${dataQualityDiagnostics.duplicateAliases.length.toLocaleString()} alias conflicts detected`,
+      },
+      {
+        id: "identity-confidence",
+        label: "Avg identity confidence",
+        value: `${dataQualityDiagnostics.averageConfidence}%`,
+        change: `${dataQualityDiagnostics.autoFixableRows.toLocaleString()} auto-fixable`,
+        changeDirection: "flat",
+        hint: `${dataQualityDiagnostics.confidenceBuckets.high.toLocaleString()} high · ${dataQualityDiagnostics.confidenceBuckets.medium.toLocaleString()} medium · ${dataQualityDiagnostics.confidenceBuckets.low.toLocaleString()} low confidence`,
       },
     ];
   }, [dataQualityDiagnostics]);
@@ -278,7 +286,7 @@ export function RecruitingIntelligenceSection() {
           </div>
           <KpiCards
             items={dataQualityKpis}
-            gridClassName="grid gap-3 sm:grid-cols-3"
+            gridClassName="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
           />
           {dataQualityDiagnostics ? (
             <>
@@ -300,7 +308,7 @@ export function RecruitingIntelligenceSection() {
                   <p className="mt-1 text-xs text-zinc-500">
                     {dataQualityDiagnostics.rowsMissingCityState.toLocaleString()} missing city/state ·{" "}
                     {dataQualityDiagnostics.malformedRows.toLocaleString()} malformed ·{" "}
-                    {dataQualityDiagnostics.incompleteRows.toLocaleString()} incomplete
+                    {dataQualityDiagnostics.autoFixableRows.toLocaleString()} auto-fixable
                   </p>
                 </div>
               </div>
@@ -318,6 +326,8 @@ export function RecruitingIntelligenceSection() {
                       <th className="px-4 py-3 font-medium">Market</th>
                       <th className="px-4 py-3 font-medium">Canonical key</th>
                       <th className="px-4 py-3 font-medium">Source</th>
+                      <th className="px-4 py-3 text-right font-medium">Confidence</th>
+                      <th className="px-4 py-3 font-medium">Issues</th>
                       <th className="px-4 py-3 text-right font-medium">Rows</th>
                     </tr>
                   </thead>
@@ -329,6 +339,12 @@ export function RecruitingIntelligenceSection() {
                           {market.normalizedKey}
                         </td>
                         <td className="px-4 py-3 capitalize text-zinc-400">{market.source}</td>
+                        <td className="px-4 py-3 text-right tabular-nums text-zinc-300">
+                          {market.avgConfidence}%
+                        </td>
+                        <td className="px-4 py-3 text-zinc-400">
+                          {market.issueTypes.join(", ") || "Unmatched"}
+                        </td>
                         <td className="px-4 py-3 text-right tabular-nums text-zinc-300">
                           {market.count}
                         </td>
