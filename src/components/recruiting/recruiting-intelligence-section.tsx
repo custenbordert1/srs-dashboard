@@ -18,6 +18,7 @@ import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { ForecastIntelligenceSection } from "./forecast-intelligence-section";
+import { LiveMarketIntelligenceSection } from "./live-market-intelligence-section";
 import { MarketIntelligenceSection } from "./market-intelligence-section";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
@@ -386,6 +387,8 @@ export function RecruitingIntelligenceSection() {
       <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
 
       <CriticalMarketsQueueSection recruiting={data} mel={melData} />
+
+      <LiveMarketIntelligenceSection recruiting={data} mel={melData} />
 
       <OpportunityAutomationSection recruiting={data} mel={melData} />
 
