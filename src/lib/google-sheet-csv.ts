@@ -9,6 +9,7 @@
  */
 
 const DEFAULT_SHEET_ID = "13Mdc8kWDKxrwFXeKd55-ZCqwn0Goj4hNY4wZdtLJ9zE";
+const GOOGLE_SHEET_TIMEOUT_MS = 15_000;
 
 export type SheetRow = Record<string, string>;
 
@@ -149,6 +150,7 @@ export async function fetchGoogleSheetCsvById(
       headers: {
         Accept: "text/csv,text/plain,*/*",
       },
+      signal: AbortSignal.timeout(GOOGLE_SHEET_TIMEOUT_MS),
     });
 
     if (!res.ok) {

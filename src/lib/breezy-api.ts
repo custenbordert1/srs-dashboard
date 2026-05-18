@@ -4,6 +4,10 @@
  */
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
+const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
+const BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS = 4_000;
+const BREEZY_CANDIDATE_SCAN_BUDGET_MS = 12_000;
+const BREEZY_CACHE_TTL_MS = 60_000;
 
 /** Max positions scanned when aggregating candidates without a position filter. */
 const MAX_POSITIONS_FOR_CANDIDATE_SCAN = 20;
@@ -53,6 +57,7 @@ export type BreezyCandidatesSuccess = {
   positionId?: string;
   positionsScanned?: number;
   truncated?: boolean;
+  warnings?: string[];
 };
 
 export type BreezyApiFailure = {
@@ -63,6 +68,14 @@ export type BreezyApiFailure = {
 
 export type BreezyJobsResult = BreezyJobsSuccess | BreezyApiFailure;
 export type BreezyCandidatesResult = BreezyCandidatesSuccess | BreezyApiFailure;
+
+type CacheEntry<T> = {
+  expiresAt: number;
+  promise: Promise<T>;
+};
+
+const jobsCache = new Map<string, CacheEntry<BreezyJobsResult>>();
+const candidatesCache = new Map<string, CacheEntry<BreezyCandidatesResult>>();
 
 type BreezyErrorBody = {
   error?: { message?: string; type?: string };
@@ -96,7 +109,10 @@ function parseBreezyError(body: unknown, status: number): string {
   return `Breezy API request failed (HTTP ${status})`;
 }
 
-async function breezyGet<T>(path: string): Promise<{ ok: true; data: T } | BreezyApiFailure> {
+async function breezyGet<T>(
+  path: string,
+  options?: { timeoutMs?: number },
+): Promise<{ ok: true; data: T } | BreezyApiFailure> {
   const apiKey = getBreezyApiKey();
   if (!apiKey) return missingApiKeyFailure();
 
@@ -109,6 +125,7 @@ async function breezyGet<T>(path: string): Promise<{ ok: true; data: T } | Breez
         "Content-Type": "application/json",
       },
       cache: "no-store",
+      signal: AbortSignal.timeout(options?.timeoutMs ?? BREEZY_REQUEST_TIMEOUT_MS),
     });
   } catch (err) {
     return {
@@ -139,6 +156,19 @@ async function breezyGet<T>(path: string): Promise<{ ok: true; data: T } | Breez
   }
 
   return { ok: true, data: body as T };
+}
+
+function cached<T>(cache: Map<string, CacheEntry<T>>, key: string, load: () => Promise<T>): Promise<T> {
+  const now = Date.now();
+  const existing = cache.get(key);
+  if (existing && existing.expiresAt > now) return existing.promise;
+
+  const promise = load();
+  cache.set(key, {
+    expiresAt: now + BREEZY_CACHE_TTL_MS,
+    promise,
+  });
+  return promise;
 }
 
 export async function resolveBreezyCompany(): Promise<
@@ -174,6 +204,11 @@ export async function resolveBreezyCompany(): Promise<
 }
 
 export async function fetchBreezyJobs(state = "published"): Promise<BreezyJobsResult> {
+  const cacheKey = `jobs:${state}`;
+  return cached(jobsCache, cacheKey, () => fetchBreezyJobsUncached(state));
+}
+
+async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsResult> {
   const apiKey = getBreezyApiKey();
   if (!apiKey) return missingApiKeyFailure();
 
@@ -201,6 +236,16 @@ export async function fetchBreezyJobs(state = "published"): Promise<BreezyJobsRe
 }
 
 export async function fetchBreezyCandidates(options?: {
+  positionId?: string;
+  state?: string;
+}): Promise<BreezyCandidatesResult> {
+  const positionId = options?.positionId?.trim() ?? "";
+  const state = options?.state ?? "published";
+  const cacheKey = `candidates:${positionId || "all"}:${state}`;
+  return cached(candidatesCache, cacheKey, () => fetchBreezyCandidatesUncached(options));
+}
+
+async function fetchBreezyCandidatesUncached(options?: {
   positionId?: string;
   state?: string;
 }): Promise<BreezyCandidatesResult> {
@@ -240,19 +285,36 @@ export async function fetchBreezyCandidates(options?: {
   const positions = jobsResult.jobs.filter((p) => p._id);
   const scanLimit = Math.min(positions.length, MAX_POSITIONS_FOR_CANDIDATE_SCAN);
   const candidates: BreezyCandidate[] = [];
+  const warnings: string[] = [];
+  const scanStartedAt = Date.now();
+  let positionsScanned = 0;
+  let truncated = positions.length > scanLimit;
 
   for (let i = 0; i < scanLimit; i += 1) {
+    if (Date.now() - scanStartedAt >= BREEZY_CANDIDATE_SCAN_BUDGET_MS) {
+      truncated = true;
+      warnings.push("Candidate scan stopped early to stay within the serverless runtime budget.");
+      break;
+    }
+
     const pos = positions[i];
     const posId = pos._id;
     const listResult = await breezyGet<BreezyCandidate[]>(
       `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(posId)}/candidates?page_size=${CANDIDATES_PAGE_SIZE}&page=1`,
+      { timeoutMs: BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS },
     );
-    if (!listResult.ok) return listResult;
+    if (!listResult.ok) {
+      if (candidates.length === 0) return listResult;
+      truncated = true;
+      warnings.push(`Candidate scan stopped early: ${listResult.error}`);
+      break;
+    }
 
     const batch = Array.isArray(listResult.data) ? listResult.data : [];
     for (const candidate of batch) {
       candidates.push({ ...candidate, position_id: posId });
     }
+    positionsScanned += 1;
   }
 
   return {
@@ -261,7 +323,8 @@ export async function fetchBreezyCandidates(options?: {
     fetchedAt,
     companyId,
     companyName,
-    positionsScanned: scanLimit,
-    truncated: positions.length > scanLimit,
+    positionsScanned,
+    truncated,
+    warnings: warnings.length > 0 ? warnings : undefined,
   };
 }

@@ -291,6 +291,13 @@ export function LiveMarketIntelligenceSection({ recruiting, mel }: LiveMarketInt
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="px-4 py-8 text-sm text-zinc-500 sm:px-5">
+                    No markets match the selected filters.
+                  </td>
+                </tr>
+              ) : null}
               {rows.map((row) => (
                 <tr
                   key={row.key}
