@@ -156,7 +156,10 @@ export async function fetchGoogleSheetCsvById(
     if (!res.ok) {
       return {
         ok: false,
-        error: `HTTP ${res.status} from Google while fetching CSV export.`,
+        error:
+          res.status === 404
+            ? "Google Sheet not found. Check GOOGLE_MEL_PROJECTS_SHEET_ID, GOOGLE_MEL_PROJECTS_SHEET_GID, and sharing settings."
+            : `HTTP ${res.status} from Google while fetching CSV export.`,
         fetchedAt,
         csvUrl,
       };
