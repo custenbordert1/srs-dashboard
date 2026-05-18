@@ -1,6 +1,7 @@
 "use client";
 
 import type { SheetDataResult, SheetDataSuccess, SheetRow } from "@/lib/google-sheet-csv";
+import { fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import { calculateRecruitingScore, type RecruitingPriority } from "@/lib/recruiting-score";
 import { resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
 import { startTransition, useEffect, useMemo, useState } from "react";
@@ -342,8 +343,7 @@ export function LiveSheetTable({ drillSeq = 0, drillManager = null }: LiveSheetT
 
     async function load() {
       try {
-        const res = await fetch("/api/recruiting-sheet", { cache: "no-store" });
-        const parsed = (await res.json()) as SheetDataResult;
+        const parsed = await fetchRecruitingSheetData();
         if (!cancelled) {
           setData(parsed);
         }

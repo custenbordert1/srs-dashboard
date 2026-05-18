@@ -4,6 +4,7 @@ import {
   buildDmScorecards,
   type DmScorecardRow,
 } from "@/lib/dm-scorecard-metrics";
+import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 import type { DmLeaderboardRow } from "@/lib/recruiting-sample-data";
@@ -117,22 +118,6 @@ function DmScorecardTable({ rows }: { rows: DmScorecardRow[] }) {
   );
 }
 
-async function fetchSheetResult<T>(path: string, label: string): Promise<T> {
-  const res = await fetch(path, { cache: "no-store" });
-  const contentType = res.headers.get("content-type") ?? "";
-
-  if (!contentType.includes("application/json")) {
-    throw new Error(`${label} returned HTTP ${res.status} with a non-JSON response.`);
-  }
-
-  const parsed = (await res.json()) as T;
-  if (!res.ok) {
-    throw new Error(`${label} returned HTTP ${res.status}.`);
-  }
-
-  return parsed;
-}
-
 export function DmLeaderboard({ rows = [] }: { rows?: DmLeaderboardRow[] }) {
   void rows;
   const [recruiting, setRecruiting] = useState<SheetDataResult | undefined>(undefined);
@@ -144,8 +129,8 @@ export function DmLeaderboard({ rows = [] }: { rows?: DmLeaderboardRow[] }) {
     async function load() {
       try {
         const [recruitingJson, melJson] = await Promise.all([
-          fetchSheetResult<SheetDataResult>("/api/recruiting-sheet", "Recruiting sheet"),
-          fetchSheetResult<MelProjectsDataResult>("/api/mel-projects", "MEL projects"),
+          fetchRecruitingSheetData(),
+          fetchMelProjectsData(),
         ]);
         if (!cancelled) {
           setRecruiting(recruitingJson);

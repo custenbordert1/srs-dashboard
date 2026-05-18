@@ -10,6 +10,6 @@ export async function GET(request: Request) {
   const state = searchParams.get("state")?.trim() || undefined;
 
   const result = await fetchBreezyCandidates({ positionId, state });
-  const status = result.ok ? 200 : result.error.includes("BREEZY_API_KEY") ? 503 : 502;
+  const status = result.ok ? 200 : result.error.includes("Waiting on Breezy API key") ? 503 : 502;
   return NextResponse.json(result, { status });
 }

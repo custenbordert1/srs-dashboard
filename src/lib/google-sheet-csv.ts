@@ -10,6 +10,10 @@
 
 const DEFAULT_SHEET_ID = "13Mdc8kWDKxrwFXeKd55-ZCqwn0Goj4hNY4wZdtLJ9zE";
 const GOOGLE_SHEET_TIMEOUT_MS = 15_000;
+const GOOGLE_SHEET_NOT_FOUND_MESSAGE =
+  "Google Sheet not found. Check GOOGLE_SHEET_ID, GOOGLE_SHEET_GID, GOOGLE_MEL_PROJECTS_SHEET_ID, GOOGLE_MEL_PROJECTS_SHEET_GID, and sharing settings.";
+const GOOGLE_SHEET_PRIVATE_MESSAGE =
+  "Google returned HTML instead of CSV. Check the spreadsheet sharing settings and confirm the sheet is viewable by anyone with the link.";
 
 export type SheetRow = Record<string, string>;
 
@@ -157,8 +161,8 @@ export async function fetchGoogleSheetCsvById(
       return {
         ok: false,
         error:
-          res.status === 404
-            ? "Google Sheet not found. Check GOOGLE_MEL_PROJECTS_SHEET_ID, GOOGLE_MEL_PROJECTS_SHEET_GID, and sharing settings."
+          res.status === 404 || res.status === 400
+            ? GOOGLE_SHEET_NOT_FOUND_MESSAGE
             : `HTTP ${res.status} from Google while fetching CSV export.`,
         fetchedAt,
         csvUrl,
@@ -171,8 +175,7 @@ export async function fetchGoogleSheetCsvById(
     if (trimmed.startsWith("<!") || trimmed.startsWith("<html")) {
       return {
         ok: false,
-        error:
-          "Google returned HTML instead of CSV. Share the spreadsheet with “Anyone with the link” as Viewer (or publish it), then retry.",
+        error: GOOGLE_SHEET_PRIVATE_MESSAGE,
         fetchedAt,
         csvUrl,
       };

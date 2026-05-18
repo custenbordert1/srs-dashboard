@@ -1,6 +1,7 @@
 "use client";
 
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
+import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 import {
   analyzeMarketIdentityQuality,
@@ -145,12 +146,10 @@ export function RecruitingIntelligenceSection() {
 
     async function load() {
       try {
-        const [recruitingRes, melRes] = await Promise.all([
-          fetch("/api/recruiting-sheet", { cache: "no-store" }),
-          fetch("/api/mel-projects", { cache: "no-store" }),
+        const [parsed, melParsed] = await Promise.all([
+          fetchRecruitingSheetData(),
+          fetchMelProjectsData(),
         ]);
-        const parsed = (await recruitingRes.json()) as SheetDataResult;
-        const melParsed = (await melRes.json()) as MelProjectsDataResult;
         if (!cancelled) {
           setData(parsed);
           setMelData(melParsed);

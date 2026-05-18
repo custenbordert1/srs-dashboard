@@ -83,6 +83,14 @@ type BreezyErrorBody = {
 
 export function getBreezyApiKey(): string | undefined {
   const key = process.env.BREEZY_API_KEY?.trim();
+  const normalized = key?.toLowerCase();
+  if (
+    normalized === "your-breezy-access-token" ||
+    normalized === "your-breezy-api-key" ||
+    normalized === "placeholder"
+  ) {
+    return undefined;
+  }
   return key && key.length > 0 ? key : undefined;
 }
 
@@ -94,8 +102,7 @@ export function getBreezyCompanyIdOverride(): string | undefined {
 function missingApiKeyFailure(): BreezyApiFailure {
   return {
     ok: false,
-    error:
-      "BREEZY_API_KEY is not set. Add it to your environment to enable read-only Breezy integration.",
+    error: "Waiting on Breezy API key.",
     fetchedAt: new Date().toISOString(),
   };
 }

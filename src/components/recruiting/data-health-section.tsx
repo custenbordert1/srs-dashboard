@@ -7,6 +7,7 @@ import {
   analyzeRecruitingSheetHealth,
   type DataHealthReport,
 } from "@/lib/data-health";
+import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { useCallback, useEffect, useState } from "react";
@@ -197,9 +198,9 @@ export function DataHealthSection() {
     setRefreshing(true);
     setLoadError(null);
     try {
-      const [recruitingRes, melRes, breezyJobsRes, breezyCandidatesRes] = await Promise.all([
-        fetch("/api/recruiting-sheet", { cache: "no-store" }),
-        fetch("/api/mel-projects", { cache: "no-store" }),
+      const [recruitingResult, melResult, breezyJobsRes, breezyCandidatesRes] = await Promise.allSettled([
+        fetchRecruitingSheetData(),
+        fetchMelProjectsData(),
         fetch("/api/breezy/jobs", { cache: "no-store" }),
         fetch("/api/breezy/candidates", { cache: "no-store" }),
       ]);
@@ -210,29 +211,39 @@ export function DataHealthSection() {
       let breezyJobsJson: BreezyJobsResult | null = null;
       let breezyCandidatesJson: BreezyCandidatesResult | null = null;
 
-      if (!recruitingRes.ok) {
-        failures.push(`Recruiting sheet HTTP ${recruitingRes.status}`);
+      if (recruitingResult.status === "fulfilled") {
+        recruitingJson = recruitingResult.value;
       } else {
-        recruitingJson = (await recruitingRes.json()) as SheetDataResult;
+        failures.push(recruitingResult.reason instanceof Error ? recruitingResult.reason.message : "Recruiting sheet request failed");
       }
 
-      if (!melRes.ok) {
-        failures.push(`MEL projects HTTP ${melRes.status}`);
+      if (melResult.status === "fulfilled") {
+        melJson = melResult.value;
       } else {
-        melJson = (await melRes.json()) as SheetDataResult;
+        failures.push(melResult.reason instanceof Error ? melResult.reason.message : "MEL projects request failed");
       }
 
-      breezyJobsJson = (await breezyJobsRes.json()) as BreezyJobsResult;
-      if (!breezyJobsRes.ok) {
-        const safeMissingToken = !breezyJobsJson.ok && breezyJobsJson.error.includes("BREEZY_API_KEY");
-        if (!safeMissingToken) failures.push(`Breezy jobs HTTP ${breezyJobsRes.status}`);
+      if (breezyJobsRes.status === "fulfilled") {
+        breezyJobsJson = (await breezyJobsRes.value.json()) as BreezyJobsResult;
+        if (!breezyJobsRes.value.ok) {
+          const safeMissingToken = !breezyJobsJson.ok && breezyJobsJson.error.includes("Waiting on Breezy API key");
+          if (!safeMissingToken) failures.push(`Breezy jobs HTTP ${breezyJobsRes.value.status}`);
+        }
+      } else {
+        failures.push(breezyJobsRes.reason instanceof Error ? breezyJobsRes.reason.message : "Breezy jobs request failed");
       }
 
-      breezyCandidatesJson = (await breezyCandidatesRes.json()) as BreezyCandidatesResult;
-      if (!breezyCandidatesRes.ok) {
-        const safeMissingToken =
-          !breezyCandidatesJson.ok && breezyCandidatesJson.error.includes("BREEZY_API_KEY");
-        if (!safeMissingToken) failures.push(`Breezy candidates HTTP ${breezyCandidatesRes.status}`);
+      if (breezyCandidatesRes.status === "fulfilled") {
+        breezyCandidatesJson = (await breezyCandidatesRes.value.json()) as BreezyCandidatesResult;
+        if (!breezyCandidatesRes.value.ok) {
+          const safeMissingToken =
+            !breezyCandidatesJson.ok && breezyCandidatesJson.error.includes("Waiting on Breezy API key");
+          if (!safeMissingToken) failures.push(`Breezy candidates HTTP ${breezyCandidatesRes.value.status}`);
+        }
+      } else {
+        failures.push(
+          breezyCandidatesRes.reason instanceof Error ? breezyCandidatesRes.reason.message : "Breezy candidates request failed",
+        );
       }
 
       const nextReports: DataHealthReport[] = [];
@@ -304,6 +315,14 @@ export function DataHealthSection() {
     return () => window.clearTimeout(id);
   }, [load]);
 
+  const connectedReports = reports?.filter((report) => report.status === "connected" && report.fetchedAt) ?? [];
+  const lastSuccessfulRefresh =
+    connectedReports.length > 0
+      ? connectedReports
+          .map((report) => report.fetchedAt)
+          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null
+      : null;
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -323,6 +342,12 @@ export function DataHealthSection() {
           {refreshing ? "Refreshing…" : "Refresh"}
         </button>
       </section>
+
+      {lastSuccessfulRefresh ? (
+        <section className="rounded-xl border border-teal-500/25 bg-teal-500/10 px-4 py-3 text-sm text-teal-100">
+          Last successful refresh: {formatFetchedAt(lastSuccessfulRefresh)}
+        </section>
+      ) : null}
 
       {loadError ? (
         <div

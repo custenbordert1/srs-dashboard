@@ -1,6 +1,7 @@
 "use client";
 
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
+import { fetchMelProjectsData } from "@/lib/dashboard-api-client";
 import {
   buildMelProjectsViewModel,
   MEL_TABLE_ROW_LIMIT,
@@ -102,8 +103,7 @@ export function MelProjectsSection() {
 
     async function load() {
       try {
-        const res = await fetch("/api/mel-projects", { cache: "no-store" });
-        const parsed = (await res.json()) as MelProjectsDataResult;
+        const parsed = await fetchMelProjectsData();
         if (!cancelled) setData(parsed);
       } catch (e) {
         if (!cancelled) {

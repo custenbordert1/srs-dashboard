@@ -1,6 +1,7 @@
 "use client";
 
 import type { SheetDataResult, SheetRow } from "@/lib/google-sheet-csv";
+import { fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import {
   calendarAgeDays,
   parseApplicantCount,
@@ -172,8 +173,7 @@ function NeedsAttentionQueue({
 
     async function load() {
       try {
-        const res = await fetch("/api/recruiting-sheet", { cache: "no-store" });
-        const parsed = (await res.json()) as SheetDataResult;
+        const parsed = await fetchRecruitingSheetData();
         if (!cancelled) setData(parsed);
       } catch (e) {
         if (!cancelled) {
