@@ -28,9 +28,18 @@ export type MarketIdentityDiagnostics = {
   matchedMarketPercent: number;
   unmatchedRows: number;
   duplicateMarketCount: number;
+  duplicateNormalizedKeys: string[];
   unmatchedMarkets: string[];
+  topUnmatchedMarkets: Array<{
+    market: string;
+    normalizedKey: string;
+    source: MarketSource;
+    count: number;
+  }>;
   unmatchedDms: string[];
   incompleteRows: number;
+  malformedRows: number;
+  rowsMissingCityState: number;
 };
 
 const STATE_NAMES: Record<string, string> = {
@@ -87,11 +96,22 @@ const STATE_NAMES: Record<string, string> = {
   WYOMING: "WY",
 };
 
-export function normalizeCity(raw?: string | null): string {
+function normalizeText(raw?: string | null): string {
   return String(raw ?? "")
     .trim()
+    .toUpperCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s*,\s*/g, ", ")
     .replace(/\s+/g, " ")
-    .toLowerCase();
+    .trim();
+}
+
+export function normalizeCity(raw?: string | null): string {
+  return normalizeText(raw)
+    .replace(/,/g, " ")
+    .replace(/\b[A-Z]{2}\b$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function titleCaseCity(normalized: string): string {
@@ -103,17 +123,38 @@ function titleCaseCity(normalized: string): string {
 }
 
 export function normalizeState(raw?: string | null): string {
-  const value = String(raw ?? "").trim().toUpperCase().replace(/\./g, "");
+  const value = normalizeText(raw).replace(/\./g, "");
   if (!value) return "";
-  if (value.length === 2) return value;
+  if (value.length === 2 && /^[A-Z]{2}$/.test(value)) return value;
   return STATE_NAMES[value] ?? value.slice(0, 2);
 }
 
+export function normalizeMarketKey(raw?: string | null, state?: string | null): string {
+  const explicitState = normalizeState(state);
+  if (explicitState) {
+    const city = normalizeCity(raw);
+    return city ? `${city.replace(/\s+/g, "_")}_${explicitState}` : "";
+  }
+
+  const value = normalizeText(raw);
+  if (!value) return "";
+
+  const commaParts = value.split(",").map((part) => part.trim()).filter(Boolean);
+  if (commaParts.length >= 2) {
+    const maybeState = normalizeState(commaParts.at(-1));
+    const city = normalizeCity(commaParts.slice(0, -1).join(" "));
+    return city && maybeState ? `${city.replace(/\s+/g, "_")}_${maybeState}` : "";
+  }
+
+  const tokens = value.replace(/,/g, " ").split(/\s+/).filter(Boolean);
+  if (tokens.length < 2) return "";
+  const maybeState = normalizeState(tokens.at(-1));
+  const city = normalizeCity(tokens.slice(0, -1).join(" "));
+  return city && maybeState ? `${city.replace(/\s+/g, "_")}_${maybeState}` : "";
+}
+
 export function buildMarketKey(city?: string | null, state?: string | null): string {
-  const normalizedCity = normalizeCity(city);
-  const normalizedState = normalizeState(state);
-  if (!normalizedCity || !normalizedState) return "";
-  return `${normalizedCity}|${normalizedState}`;
+  return normalizeMarketKey(city, state);
 }
 
 export function resolveDMByState(state?: string | null): DistrictManager | undefined {
@@ -129,7 +170,7 @@ export function resolveMarketIdentity(input: {
   const normalizedCity = normalizeCity(input.city);
   const state = normalizeState(input.state);
   const city = normalizedCity ? titleCaseCity(normalizedCity) : "—";
-  const key = buildMarketKey(normalizedCity, state);
+  const key = normalizeMarketKey(normalizedCity, state);
   const dm = resolveDmName(String(input.manager ?? ""), state);
 
   return {
@@ -158,6 +199,71 @@ function countDuplicates(keys: string[]): number {
   return [...counts.values()].filter((count) => count > 1).length;
 }
 
+function duplicateKeys(keys: string[]): string[] {
+  const counts = new Map<string, number>();
+  for (const key of keys) {
+    if (!key) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count > 1)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([key]) => key)
+    .slice(0, 25);
+}
+
+function normHeader(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function pickColumn(headers: string[], aliases: string[]): string | undefined {
+  const set = new Map<string, string>();
+  for (const h of headers) {
+    set.set(normHeader(h), h);
+  }
+  for (const alias of aliases) {
+    const direct = set.get(normHeader(alias));
+    if (direct) return direct;
+  }
+  for (const h of headers) {
+    const n = normHeader(h);
+    for (const alias of aliases) {
+      const a = normHeader(alias);
+      if (n === a || n.includes(a) || a.includes(n)) return h;
+    }
+  }
+  return undefined;
+}
+
+function topUnmatchedMarkets(
+  identities: MarketIdentity[],
+  recruitingKeysSet: Set<string>,
+  melKeysSet: Set<string>,
+): MarketIdentityDiagnostics["topUnmatchedMarkets"] {
+  const counts = new Map<string, { market: string; normalizedKey: string; source: MarketSource; count: number }>();
+  for (const identity of identities) {
+    if (!identity.complete) continue;
+    const unmatched =
+      identity.source === "recruiting"
+        ? !melKeysSet.has(identity.key)
+        : !recruitingKeysSet.has(identity.key);
+    if (!unmatched) continue;
+    const countKey = `${identity.source}|${identity.key}`;
+    const existing = counts.get(countKey) ?? {
+      market: identity.marketName,
+      normalizedKey: identity.key,
+      source: identity.source,
+      count: 0,
+    };
+    existing.count += 1;
+    counts.set(countKey, existing);
+  }
+
+  return [...counts.values()]
+    .sort((a, b) => b.count - a.count || a.normalizedKey.localeCompare(b.normalizedKey))
+    .slice(0, 15);
+}
+
 export function analyzeMarketIdentityQuality(input: {
   recruitingRows: SheetRow[];
   recruitingHeaders: string[];
@@ -166,6 +272,7 @@ export function analyzeMarketIdentityQuality(input: {
 }): MarketIdentityDiagnostics {
   const recruitingKeys = resolveKpiSheetColumnKeys(input.recruitingHeaders);
   const melKeys = resolveMelProjectColumnKeys(input.melHeaders);
+  const melCityKey = pickColumn(input.melHeaders, ["city", "location city", "store city"]);
   const recruitingIdentities: MarketIdentity[] = [];
   const melIdentities: MarketIdentity[] = [];
 
@@ -183,7 +290,7 @@ export function analyzeMarketIdentityQuality(input: {
   for (const row of input.melRows) {
     melIdentities.push(
       resolveMarketIdentity({
-        city: cell(row, "City"),
+        city: cell(row, melCityKey) || cell(row, melKeys.storeName),
         state: cell(row, melKeys.state),
         manager: cell(row, melKeys.manager),
         source: "mel",
@@ -195,6 +302,8 @@ export function analyzeMarketIdentityQuality(input: {
   const melKeysSet = new Set(melIdentities.filter((m) => m.complete).map((m) => m.key));
   const allIdentities = [...recruitingIdentities, ...melIdentities];
   const incompleteRows = allIdentities.filter((m) => !m.complete).length;
+  const rowsMissingCityState = allIdentities.filter((m) => !m.normalizedCity || !m.state).length;
+  const malformedRows = allIdentities.filter((m) => (m.normalizedCity || m.state) && !m.complete).length;
   const unmatchedMarkets = allIdentities
     .filter((m) => m.complete)
     .filter((m) => (m.source === "recruiting" ? !melKeysSet.has(m.key) : !recruitingKeysSet.has(m.key)))
@@ -212,8 +321,12 @@ export function analyzeMarketIdentityQuality(input: {
     matchedMarketPercent: totalRows > 0 ? Math.round((matchedRows / totalRows) * 1000) / 10 : 0,
     unmatchedRows,
     duplicateMarketCount: countDuplicates(allIdentities.map((m) => m.key)),
+    duplicateNormalizedKeys: duplicateKeys(allIdentities.map((m) => m.key)),
     unmatchedMarkets: [...new Set(unmatchedMarkets)].slice(0, 25),
+    topUnmatchedMarkets: topUnmatchedMarkets(allIdentities, recruitingKeysSet, melKeysSet),
     unmatchedDms: [...new Set(unmatchedDms)].slice(0, 25),
     incompleteRows,
+    malformedRows,
+    rowsMissingCityState,
   };
 }

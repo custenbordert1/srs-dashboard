@@ -218,7 +218,7 @@ export function RecruitingIntelligenceSection() {
         value: dataQualityDiagnostics.unmatchedRows.toLocaleString(),
         change: "Quality",
         changeDirection: dataQualityDiagnostics.unmatchedRows > 0 ? "down" : "flat",
-        hint: `${dataQualityDiagnostics.incompleteRows.toLocaleString()} incomplete · ${dataQualityDiagnostics.unmatchedMarkets.length.toLocaleString()} unmatched market examples`,
+        hint: `${dataQualityDiagnostics.rowsMissingCityState.toLocaleString()} missing city/state · ${dataQualityDiagnostics.malformedRows.toLocaleString()} malformed`,
       },
       {
         id: "duplicate-markets",
@@ -281,26 +281,64 @@ export function RecruitingIntelligenceSection() {
             gridClassName="grid gap-3 sm:grid-cols-3"
           />
           {dataQualityDiagnostics ? (
-            <div className="grid gap-3 text-sm md:grid-cols-3">
-              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
-                <p className="font-medium text-zinc-300">Unmatched markets</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {dataQualityDiagnostics.unmatchedMarkets.slice(0, 5).join(", ") || "None"}
-                </p>
+            <>
+              <div className="grid gap-3 text-sm md:grid-cols-3">
+                <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+                  <p className="font-medium text-zinc-300">Unmatched markets</p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {dataQualityDiagnostics.unmatchedMarkets.slice(0, 5).join(", ") || "None"}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+                  <p className="font-medium text-zinc-300">Unmatched DMs</p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {dataQualityDiagnostics.unmatchedDms.slice(0, 5).join(", ") || "None"}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+                  <p className="font-medium text-zinc-300">Malformed / missing rows</p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {dataQualityDiagnostics.rowsMissingCityState.toLocaleString()} missing city/state ·{" "}
+                    {dataQualityDiagnostics.malformedRows.toLocaleString()} malformed ·{" "}
+                    {dataQualityDiagnostics.incompleteRows.toLocaleString()} incomplete
+                  </p>
+                </div>
               </div>
-              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
-                <p className="font-medium text-zinc-300">Unmatched DMs</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {dataQualityDiagnostics.unmatchedDms.slice(0, 5).join(", ") || "None"}
-                </p>
+            {dataQualityDiagnostics.topUnmatchedMarkets.length > 0 ? (
+              <div className="overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-900/40">
+                <div className="border-b border-zinc-800/80 px-4 py-3">
+                  <h3 className="font-medium text-zinc-300">Top unmatched markets after normalization</h3>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Canonical keys use CITY_STATE format, for example SHREVEPORT_LA.
+                  </p>
+                </div>
+                <table className="min-w-[620px] w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
+                      <th className="px-4 py-3 font-medium">Market</th>
+                      <th className="px-4 py-3 font-medium">Canonical key</th>
+                      <th className="px-4 py-3 font-medium">Source</th>
+                      <th className="px-4 py-3 text-right font-medium">Rows</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {dataQualityDiagnostics.topUnmatchedMarkets.map((market) => (
+                      <tr key={`${market.source}-${market.normalizedKey}`} className="hover:bg-zinc-800/30">
+                        <td className="px-4 py-3 text-zinc-200">{market.market}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-zinc-400">
+                          {market.normalizedKey}
+                        </td>
+                        <td className="px-4 py-3 capitalize text-zinc-400">{market.source}</td>
+                        <td className="px-4 py-3 text-right tabular-nums text-zinc-300">
+                          {market.count}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
-                <p className="font-medium text-zinc-300">Incomplete rows</p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {dataQualityDiagnostics.incompleteRows.toLocaleString()} rows missing city or state
-                </p>
-              </div>
-            </div>
+            ) : null}
+            </>
           ) : null}
         </section>
       ) : null}
