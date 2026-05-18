@@ -19,7 +19,7 @@ import {
   type WorkflowStateById,
   type WorkflowStatus,
 } from "@/lib/recruiting-action-center";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
 
 type RecruitingActionCenterSectionProps = {
@@ -137,6 +137,7 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
   const [stateFilter, setStateFilter] = useState(ALL);
   const [urgencyFilter, setUrgencyFilter] = useState(ALL);
   const [statusFilter, setStatusFilter] = useState(ALL);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     setStateById(readStoredState());
@@ -189,6 +190,15 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
         .filter((workflow) => statusFilter === ALL || workflow.workflowStatus === statusFilter),
     [dmFilter, recruiterFilter, stateFilter, statusFilter, urgencyFilter, workflows],
   );
+
+  function toggleExpanded(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function updateWorkflow(
     workflow: RecruitingActionWorkflow,
@@ -437,117 +447,172 @@ export function RecruitingActionCenterSection({ recruiting, mel }: RecruitingAct
             No action workflows match the selected filters.
           </p>
         ) : (
-          <div className="grid gap-4 px-4 py-4 md:grid-cols-2 sm:px-5 xl:grid-cols-3">
-            {filteredWorkflows.slice(0, 60).map((workflow) => (
-              <article
-                key={workflow.id}
-                className={[
-                  "rounded-xl border bg-zinc-950/40 p-4",
-                  isWorkflowOverdue(workflow) ? "border-amber-500/35" : "border-zinc-800/80",
-                ].join(" ")}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold text-zinc-50">{workflow.market}</h3>
-                    <p className="mt-1 text-sm text-zinc-500">{workflow.recommendedAction}</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span
-                      className={[
-                        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        STATUS_STYLES[workflow.workflowStatus],
-                      ].join(" ")}
-                    >
-                      {workflow.workflowStatus}
-                    </span>
-                    <span
-                      className={[
-                        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        URGENCY_STYLES[workflow.suggestedPriorityLevel],
-                      ].join(" ")}
-                    >
-                      {workflow.suggestedPriorityLevel}
-                    </span>
-                  </div>
-                </div>
+          <div className="max-h-[42rem] overflow-auto">
+            <table className="min-w-[1120px] w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur">
+                <tr className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
+                  <th className="px-4 py-3 font-medium sm:px-5">Market</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">State</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">DM</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Recruiter</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Priority</th>
+                  <th className="px-4 py-3 font-medium text-right sm:px-5">Automation Score</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Workflow Status</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Deadline</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Recommended Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/60">
+                {filteredWorkflows.slice(0, 100).map((workflow) => {
+                  const expanded = expandedIds.has(workflow.id);
+                  const escalationHistory = workflow.activity.filter(
+                    (event) => event.type === "escalation" || event.message.includes("Escalated"),
+                  );
 
-                <p className="mt-3 text-sm text-zinc-400">{workflow.reason}</p>
+                  return (
+                    <Fragment key={workflow.id}>
+                      <tr
+                        className={[
+                          "hover:bg-zinc-800/30",
+                          isWorkflowOverdue(workflow) ? "bg-amber-500/[0.03]" : "",
+                        ].join(" ")}
+                      >
+                        <td className="px-4 py-3 sm:px-5">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(workflow.id)}
+                              aria-expanded={expanded}
+                              className="shrink-0 rounded-md border border-zinc-700 bg-zinc-950/70 px-2 py-1 text-xs font-medium text-zinc-200 transition-colors hover:border-zinc-600 hover:bg-zinc-800"
+                            >
+                              {expanded ? "Collapse" : "Expand"}
+                            </button>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium text-zinc-100">{workflow.market}</p>
+                              <p className="mt-0.5 truncate text-xs text-zinc-500">{workflow.reason}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-zinc-300 sm:px-5">{workflow.state}</td>
+                        <td className="px-4 py-3 text-zinc-400 sm:px-5">{workflow.assignedDm}</td>
+                        <td className="px-4 py-3 text-zinc-300 sm:px-5">
+                          {workflow.assignedRecruiter || "Unassigned"}
+                        </td>
+                        <td className="px-4 py-3 sm:px-5">
+                          <span
+                            className={[
+                              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+                              URGENCY_STYLES[workflow.suggestedPriorityLevel],
+                            ].join(" ")}
+                          >
+                            {workflow.suggestedPriorityLevel}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold tabular-nums text-teal-300 sm:px-5">
+                          {workflow.automationScore}
+                        </td>
+                        <td className="px-4 py-3 sm:px-5">
+                          <span
+                            className={[
+                              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+                              STATUS_STYLES[workflow.workflowStatus],
+                            ].join(" ")}
+                          >
+                            {workflow.workflowStatus}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-zinc-300 sm:px-5">{workflow.deadline}</td>
+                        <td className="px-4 py-3 text-zinc-300 sm:px-5">{workflow.recommendedAction}</td>
+                      </tr>
+                      {expanded ? (
+                        <tr key={`${workflow.id}-expanded`} className="bg-zinc-950/40">
+                          <td colSpan={9} className="px-4 py-4 sm:px-5">
+                            <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr]">
+                              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                                  Actions
+                                </h4>
+                                <p className="mt-2 text-xs text-zinc-500">
+                                  {formatSnooze(workflow.snoozedUntil)}
+                                </p>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <button type="button" className={actionButtonClass()} onClick={() => assignRecruiter(workflow)}>
+                                    Assign recruiter
+                                  </button>
+                                  <button type="button" className={actionButtonClass()} onClick={() => assignDm(workflow)}>
+                                    Assign DM
+                                  </button>
+                                  <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "In Progress")}>
+                                    In progress
+                                  </button>
+                                  <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "Completed")}>
+                                    Complete
+                                  </button>
+                                  <button type="button" className={actionButtonClass("amber")} onClick={() => snoozeWorkflow(workflow)}>
+                                    Snooze
+                                  </button>
+                                  <button type="button" className={actionButtonClass("red")} onClick={() => escalateWorkflow(workflow)}>
+                                    Escalate
+                                  </button>
+                                  <button type="button" className={actionButtonClass()} onClick={() => addNote(workflow)}>
+                                    Add note
+                                  </button>
+                                </div>
+                              </div>
 
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-zinc-500">Recruiter</dt>
-                    <dd className="mt-1 font-medium text-zinc-200">
-                      {workflow.assignedRecruiter || "Unassigned"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-zinc-500">DM</dt>
-                    <dd className="mt-1 font-medium text-zinc-200">{workflow.assignedDm}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-zinc-500">Deadline</dt>
-                    <dd className="mt-1 font-medium text-zinc-200">{workflow.deadline}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-zinc-500">Score</dt>
-                    <dd className="mt-1 font-medium tabular-nums text-teal-300">
-                      {workflow.automationScore}
-                    </dd>
-                  </div>
-                </dl>
+                              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                                  Notes
+                                </h4>
+                                {workflow.notes.length > 0 ? (
+                                  <ul className="mt-3 space-y-2 text-sm text-zinc-300">
+                                    {workflow.notes.slice(0, 5).map((note, index) => (
+                                      <li key={`${workflow.id}-note-${index}`}>{note}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="mt-3 text-sm text-zinc-500">No notes yet.</p>
+                                )}
 
-                <p className="mt-3 text-xs text-zinc-500">{formatSnooze(workflow.snoozedUntil)}</p>
+                                <h4 className="mt-5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                                  Escalation history
+                                </h4>
+                                {escalationHistory.length > 0 ? (
+                                  <ol className="mt-3 space-y-2">
+                                    {escalationHistory.map((event) => (
+                                      <li key={event.id} className="border-l border-red-500/40 pl-3">
+                                        <p className="text-sm text-zinc-300">{event.message}</p>
+                                        <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
+                                      </li>
+                                    ))}
+                                  </ol>
+                                ) : (
+                                  <p className="mt-3 text-sm text-zinc-500">No escalations recorded.</p>
+                                )}
+                              </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" className={actionButtonClass()} onClick={() => assignRecruiter(workflow)}>
-                    Assign recruiter
-                  </button>
-                  <button type="button" className={actionButtonClass()} onClick={() => assignDm(workflow)}>
-                    Assign DM
-                  </button>
-                  <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "In Progress")}>
-                    In progress
-                  </button>
-                  <button type="button" className={actionButtonClass("teal")} onClick={() => setStatus(workflow, "Completed")}>
-                    Complete
-                  </button>
-                  <button type="button" className={actionButtonClass("amber")} onClick={() => snoozeWorkflow(workflow)}>
-                    Snooze
-                  </button>
-                  <button type="button" className={actionButtonClass("red")} onClick={() => escalateWorkflow(workflow)}>
-                    Escalate
-                  </button>
-                  <button type="button" className={actionButtonClass()} onClick={() => addNote(workflow)}>
-                    Add note
-                  </button>
-                </div>
-
-                <div className="mt-5 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Activity timeline
-                  </h4>
-                  <ol className="mt-3 space-y-3">
-                    {workflow.activity.slice(0, 4).map((event) => (
-                      <li key={event.id} className="border-l border-zinc-700 pl-3">
-                        <p className="text-sm text-zinc-300">{event.message}</p>
-                        <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-
-                {workflow.notes.length > 0 ? (
-                  <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Notes</h4>
-                    <ul className="mt-2 space-y-2 text-sm text-zinc-300">
-                      {workflow.notes.slice(0, 3).map((note, index) => (
-                        <li key={`${workflow.id}-note-${index}`}>{note}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </article>
-            ))}
+                              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                                  Activity timeline
+                                </h4>
+                                <ol className="mt-3 space-y-3">
+                                  {workflow.activity.slice(0, 8).map((event) => (
+                                    <li key={event.id} className="border-l border-zinc-700 pl-3">
+                                      <p className="text-sm text-zinc-300">{event.message}</p>
+                                      <p className="mt-1 text-xs text-zinc-500">{formatDateTime(event.timestamp)}</p>
+                                    </li>
+                                  ))}
+                                </ol>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
