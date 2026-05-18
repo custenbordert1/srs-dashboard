@@ -22,6 +22,7 @@ import { MarketIntelligenceSection } from "./market-intelligence-section";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
 import { OpportunityAutomationSection } from "./opportunity-automation-section";
+import { RecruitingActionCenterSection } from "./recruiting-action-center-section";
 
 function formatDaysOpen(days: number | null): string {
   if (days === null) return "—";
@@ -333,6 +334,8 @@ export function RecruitingIntelligenceSection() {
       <CriticalMarketsQueueSection recruiting={data} mel={melData} />
 
       <OpportunityAutomationSection recruiting={data} mel={melData} />
+
+      <RecruitingActionCenterSection recruiting={data} mel={melData} />
 
       <ForecastIntelligenceSection recruiting={data} mel={melData} />
 
