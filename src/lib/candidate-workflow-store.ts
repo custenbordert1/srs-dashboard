@@ -42,6 +42,7 @@ export async function getCandidateWorkflowState(): Promise<CandidateWorkflowStat
 export async function upsertCandidateWorkflow(input: {
   candidateId: string;
   workflowStatus?: CandidateWorkflowStatus;
+  assignedRecruiter?: string;
   assignedDM?: string;
   note?: string;
 }): Promise<CandidateWorkflowRecord> {
@@ -49,6 +50,7 @@ export async function upsertCandidateWorkflow(input: {
   const state = await readStore();
   const existing = state[input.candidateId];
   const workflowStatus = input.workflowStatus ?? existing?.workflowStatus ?? "Needs Review";
+  const assignedRecruiter = input.assignedRecruiter?.trim() || existing?.assignedRecruiter || "Unassigned";
   const assignedDM = input.assignedDM?.trim() || existing?.assignedDM || "Unassigned";
   const notes = input.note?.trim()
     ? [input.note.trim(), ...(existing?.notes ?? [])].slice(0, 25)
@@ -64,11 +66,15 @@ export async function upsertCandidateWorkflow(input: {
   if (input.assignedDM?.trim() && existing?.assignedDM !== assignedDM) {
     history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
   }
+  if (input.assignedRecruiter?.trim() && existing?.assignedRecruiter !== assignedRecruiter) {
+    history.unshift(event("assignment", `Assigned recruiter changed to ${assignedRecruiter}.`, now));
+  }
 
   const record: CandidateWorkflowRecord = {
     candidateId: input.candidateId,
     workflowStatus,
     notes,
+    assignedRecruiter,
     assignedDM,
     lastActionAt: now,
     nextActionNeeded: nextActionForWorkflowStatus(workflowStatus),

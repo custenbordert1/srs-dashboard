@@ -22,6 +22,7 @@ export type CandidateWorkflowRecord = {
   candidateId: string;
   workflowStatus: CandidateWorkflowStatus;
   notes: string[];
+  assignedRecruiter: string;
   assignedDM: string;
   lastActionAt: string | null;
   nextActionNeeded: string;

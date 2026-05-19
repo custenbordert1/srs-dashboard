@@ -27,6 +27,7 @@ export async function POST(request: Request) {
   const input = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
   const candidateId = typeof input.candidateId === "string" ? input.candidateId.trim() : "";
   const workflowStatus = typeof input.workflowStatus === "string" ? input.workflowStatus : undefined;
+  const assignedRecruiter = typeof input.assignedRecruiter === "string" ? input.assignedRecruiter : undefined;
   const assignedDM = typeof input.assignedDM === "string" ? input.assignedDM : undefined;
   const note = typeof input.note === "string" ? input.note : undefined;
 
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
   const workflow = await upsertCandidateWorkflow({
     candidateId,
     workflowStatus,
+    assignedRecruiter,
     assignedDM,
     note,
   });

@@ -20,6 +20,7 @@ type CandidateWorkflowRow = BreezyCandidate & {
   workflowStatus: CandidateWorkflowStatus;
   lastActionAt: string | null;
   nextActionNeeded: string;
+  assignedRecruiter: string;
   assignedDM: string;
   notes: string[];
   history: CandidateWorkflowRecord["history"];
@@ -91,6 +92,7 @@ function workflowRow(candidate: BreezyCandidate, local?: CandidateWorkflowRecord
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
     nextActionNeeded: local?.nextActionNeeded ?? nextActionForWorkflowStatus(workflowStatus),
+    assignedRecruiter: local?.assignedRecruiter ?? "Unassigned",
     assignedDM: local?.assignedDM ?? "Unassigned",
     notes: local?.notes ?? [],
     history: local?.history ?? [],
@@ -150,6 +152,20 @@ function formatDateTime(raw: string | null): string {
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return raw;
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function daysSince(raw: string | null): number | null {
+  if (!raw) return null;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return null;
+  const start = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const now = new Date();
+  const end = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((end - start) / (24 * 60 * 60 * 1000)));
+}
+
+function formatDays(days: number | null): string {
+  return days === null ? "—" : `${days}d`;
 }
 
 function CandidatesSkeleton() {
@@ -289,15 +305,20 @@ export function CandidatesSection() {
     [filtered],
   );
 
-  function updateWorkflow(candidate: CandidateWorkflowRow, workflowStatus: CandidateWorkflowStatus, note?: string) {
+  function updateWorkflow(
+    candidate: CandidateWorkflowRow,
+    workflowStatus: CandidateWorkflowStatus,
+    options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
+  ) {
     void fetch("/api/candidates/workflows", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         candidateId: candidate.candidateId,
         workflowStatus,
-        assignedDM: candidate.assignedDM,
-        note,
+        assignedRecruiter: options.assignedRecruiter ?? candidate.assignedRecruiter,
+        assignedDM: options.assignedDM ?? candidate.assignedDM,
+        note: options.note,
       }),
     })
       .then(async (res) => {
@@ -318,7 +339,19 @@ export function CandidatesSection() {
   function addNote(candidate: CandidateWorkflowRow) {
     const note = window.prompt("Add local workflow note");
     if (!note?.trim()) return;
-    updateWorkflow(candidate, candidate.workflowStatus, note);
+    updateWorkflow(candidate, candidate.workflowStatus, { note });
+  }
+
+  function assignRecruiter(candidate: CandidateWorkflowRow) {
+    const assignedRecruiter = window.prompt("Assign recruiter", candidate.assignedRecruiter);
+    if (!assignedRecruiter?.trim()) return;
+    updateWorkflow(candidate, candidate.workflowStatus, { assignedRecruiter });
+  }
+
+  function assignDm(candidate: CandidateWorkflowRow) {
+    const assignedDM = window.prompt("Assign DM", candidate.assignedDM);
+    if (!assignedDM?.trim()) return;
+    updateWorkflow(candidate, candidate.workflowStatus, { assignedDM });
   }
 
   if (data === undefined) return <CandidatesSkeleton />;
@@ -437,7 +470,7 @@ export function CandidatesSection() {
           <p className="px-4 py-10 text-sm text-zinc-500 sm:px-5">No candidates match the selected filters.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-[1580px] w-full text-left text-sm">
+            <table className="min-w-[1780px] w-full text-left text-sm">
               <thead className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
                 <tr>
                   <th className="px-4 py-3 font-medium sm:px-5">Name</th>
@@ -450,8 +483,10 @@ export function CandidatesSection() {
                   <th className="px-4 py-3 font-medium sm:px-5">City</th>
                   <th className="px-4 py-3 font-medium sm:px-5">State</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Workflow Status</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Workflow Aging</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Next Action</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Local Actions</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Notes History</th>
                   <th className="px-4 py-3 font-medium sm:px-5">HelloSign Prep</th>
                   <th className="px-4 py-3 font-medium sm:px-5">AI Ready</th>
                 </tr>
@@ -473,16 +508,21 @@ export function CandidatesSection() {
                         {candidate.workflowStatus}
                       </span>
                     </td>
+                    <td className="px-4 py-3 text-xs text-zinc-400 sm:px-5">
+                      <p>Since applied: {formatDays(daysSince(candidate.appliedDate))}</p>
+                      <p>Status age: {formatDays(daysSince(candidate.lastActionAt ?? candidate.appliedDate))}</p>
+                    </td>
                     <td className="px-4 py-3 text-zinc-300 sm:px-5">
                       <div>{candidate.nextActionNeeded}</div>
+                      <div className="mt-1 text-xs text-zinc-500">Recruiter: {candidate.assignedRecruiter}</div>
                       <div className="mt-1 text-xs text-zinc-500">DM: {candidate.assignedDM}</div>
                       <div className="mt-1 text-xs text-zinc-600">Last action: {formatDateTime(candidate.lastActionAt)}</div>
-                      {candidate.notes.length > 0 ? (
-                        <div className="mt-1 max-w-[16rem] truncate text-xs text-zinc-500">Note: {candidate.notes[0]}</div>
-                      ) : null}
                     </td>
                     <td className="px-4 py-3 sm:px-5">
                       <div className="flex flex-wrap gap-1.5">
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Needs Review")} className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-xs font-medium text-sky-200">
+                          Mark Needs Review
+                        </button>
                         <button type="button" onClick={() => updateWorkflow(candidate, "Qualified")} className="rounded-md border border-teal-500/30 bg-teal-500/10 px-2 py-1 text-xs font-medium text-teal-200">
                           Mark Qualified
                         </button>
@@ -492,13 +532,47 @@ export function CandidatesSection() {
                         <button type="button" onClick={() => updateWorkflow(candidate, "Paperwork Needed")} className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-200">
                           Mark Paperwork Needed
                         </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Paperwork Sent")} className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-1 text-xs font-medium text-violet-200">
+                          Mark Paperwork Sent
+                        </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Signed")} className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-200">
+                          Mark Signed
+                        </button>
                         <button type="button" onClick={() => updateWorkflow(candidate, "Ready for MEL")} className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-xs font-medium text-cyan-200">
                           Mark Ready for MEL
+                        </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Training Needed")} className="rounded-md border border-orange-500/30 bg-orange-500/10 px-2 py-1 text-xs font-medium text-orange-200">
+                          Mark Training Needed
+                        </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Active Rep")} className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-200">
+                          Mark Active Rep
+                        </button>
+                        <button type="button" onClick={() => assignRecruiter(candidate)} className="rounded-md border border-zinc-600 bg-zinc-800/60 px-2 py-1 text-xs font-medium text-zinc-200">
+                          Assign Recruiter
+                        </button>
+                        <button type="button" onClick={() => assignDm(candidate)} className="rounded-md border border-zinc-600 bg-zinc-800/60 px-2 py-1 text-xs font-medium text-zinc-200">
+                          Assign DM
                         </button>
                         <button type="button" onClick={() => addNote(candidate)} className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-1 text-xs font-medium text-violet-200">
                           Add Note
                         </button>
                       </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-zinc-500 sm:px-5">
+                      {candidate.notes.length > 0 ? (
+                        <ul className="max-w-[16rem] space-y-1">
+                          {candidate.notes.slice(0, 3).map((note, index) => (
+                            <li key={`${candidate.candidateId}-note-${index}`} className="truncate">
+                              {note}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span>No notes</span>
+                      )}
+                      {candidate.history.length > 0 ? (
+                        <p className="mt-2 text-zinc-600">History events: {candidate.history.length}</p>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 sm:px-5">
                       <button
