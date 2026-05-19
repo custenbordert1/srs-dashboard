@@ -9,6 +9,7 @@ import type {
 } from "@/lib/recruiting-sample-data";
 import { useState } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
+import { BreezyDashboardSummary } from "./breezy-dashboard-summary";
 import { CandidatesSection } from "./candidates-section";
 import { DashboardTabNav, type DashboardTabId } from "./dashboard-tabs";
 import { DmLeaderboard } from "./dm-leaderboard";
@@ -51,6 +52,7 @@ export function RecruitingDashboardContent({
       >
         {activeTab === "overview" ? (
           <>
+            <BreezyDashboardSummary />
             <SheetKpiCards />
             <div className="grid gap-6 lg:grid-cols-3">
               <div className="space-y-6 lg:col-span-2">
