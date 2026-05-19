@@ -8,6 +8,7 @@ import {
   type CandidateWorkflowStatus,
   type CandidateWorkflowState,
 } from "@/lib/candidate-workflow-types";
+import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const ALL = "__all__";
@@ -164,6 +165,21 @@ function formatDays(days: number | null): string {
   return days === null ? "—" : `${days}d`;
 }
 
+function agingTextClass(days: number | null): string {
+  if (days === null) return "text-zinc-500";
+  if (days <= 3) return "font-medium text-emerald-300";
+  if (days <= 7) return "font-medium text-amber-300";
+  return "font-medium text-red-300";
+}
+
+function AgingValue({ days, label }: { days: number | null; label: string }) {
+  return (
+    <span className={`block ${agingTextClass(days)}`}>
+      {label} {formatDays(days)}
+    </span>
+  );
+}
+
 function CandidatesSkeleton() {
   return (
     <div className="space-y-6">
@@ -228,12 +244,15 @@ function CandidateActionsMenu({ onAction }: { onAction: (action: CandidateAction
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative inline-block">
+    <div ref={rootRef} className="relative inline-block" onClick={(event) => event.stopPropagation()}>
       <button
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setOpen((value) => !value)}
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen((value) => !value);
+        }}
         className="rounded-md border border-zinc-600 bg-zinc-800/80 px-2 py-0.5 text-[11px] font-medium text-zinc-200 hover:bg-zinc-700/80"
       >
         Actions
@@ -275,6 +294,7 @@ export function CandidatesSection() {
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -377,6 +397,15 @@ export function CandidatesSection() {
       })),
     [filtered],
   );
+
+  const selectedCandidate = useMemo(
+    () => (selectedCandidateId ? (candidates.find((c) => c.candidateId === selectedCandidateId) ?? null) : null),
+    [candidates, selectedCandidateId],
+  );
+
+  function toggleWorkflowStatusFilter(status: CandidateWorkflowStatus) {
+    setWorkflowFilter((current) => (current === status ? ALL : status));
+  }
 
   function updateWorkflow(
     candidate: CandidateWorkflowRow,
@@ -514,12 +543,24 @@ export function CandidatesSection() {
           Local lifecycle statuses for candidate workflow triage. These do not write back to Breezy, HelloSign, or MEL.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-          {statusCounts.map((row) => (
-            <div key={row.status} className="rounded-xl border border-zinc-800 bg-zinc-950/40 px-3 py-2">
-              <p className="text-xs text-zinc-500">{row.status}</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
-            </div>
-          ))}
+          {statusCounts.map((row) => {
+            const active = workflowFilter === row.status;
+            return (
+              <button
+                key={row.status}
+                type="button"
+                onClick={() => toggleWorkflowStatusFilter(row.status)}
+                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                  active
+                    ? "border-teal-500/50 bg-teal-500/10 ring-1 ring-teal-500/30"
+                    : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
+                }`}
+              >
+                <p className="text-xs text-zinc-500">{row.status}</p>
+                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -591,8 +632,18 @@ export function CandidatesSection() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60">
-                {filtered.map((candidate) => (
-                  <tr key={candidate.candidateId} className="hover:bg-zinc-800/30">
+                {filtered.map((candidate) => {
+                  const appliedDays = daysSince(candidate.appliedDate);
+                  const statusDays = daysSince(candidate.lastActionAt ?? candidate.appliedDate);
+                  const rowSelected = selectedCandidateId === candidate.candidateId;
+                  return (
+                  <tr
+                    key={candidate.candidateId}
+                    onClick={() => setSelectedCandidateId(candidate.candidateId)}
+                    className={`cursor-pointer transition-colors ${
+                      rowSelected ? "bg-teal-500/10 hover:bg-teal-500/15" : "hover:bg-zinc-800/40"
+                    }`}
+                  >
                     <td className={`${tdClass} max-w-[10rem] truncate font-medium text-zinc-100`}>{candidateName(candidate)}</td>
                     <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
                     <td className={tdClass}>{candidate.phone || "—"}</td>
@@ -609,9 +660,9 @@ export function CandidatesSection() {
                         {candidate.workflowStatus}
                       </span>
                     </td>
-                    <td className={`${tdClass} text-[10px] text-zinc-500`}>
-                      <span className="block">Applied {formatDays(daysSince(candidate.appliedDate))}</span>
-                      <span className="block">Status {formatDays(daysSince(candidate.lastActionAt ?? candidate.appliedDate))}</span>
+                    <td className={`${tdClass} text-[10px]`}>
+                      <AgingValue days={appliedDays} label="Applied" />
+                      <AgingValue days={statusDays} label="Status" />
                     </td>
                     <td className={`${tdClass} max-w-[12rem]`}>
                       <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
@@ -619,13 +670,16 @@ export function CandidatesSection() {
                         {candidate.assignedRecruiter} · {candidate.assignedDM}
                       </div>
                     </td>
-                    <td className={tdClass}>
+                    <td className={tdClass} onClick={(event) => event.stopPropagation()}>
                       <CandidateActionsMenu onAction={(action) => handleCandidateAction(candidate, action)} />
                     </td>
-                    <td className={`${tdClass} text-zinc-500`} title="Full notes open in candidate drawer (coming soon)">
+                    <td
+                      className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`}
+                      title="Open candidate drawer"
+                    >
                       Notes: {candidate.notes.length}
                     </td>
-                    <td className={tdClass}>
+                    <td className={tdClass} onClick={(event) => event.stopPropagation()}>
                       <button
                         type="button"
                         disabled
@@ -640,12 +694,35 @@ export function CandidatesSection() {
                       <span className="block max-w-[8rem] truncate">{candidate.aiRecommendation}</span>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
+
+      <CandidateDetailDrawer
+        candidate={selectedCandidate}
+        open={selectedCandidate !== null}
+        onClose={() => setSelectedCandidateId(null)}
+        statusAgingDays={
+          selectedCandidate ? daysSince(selectedCandidate.lastActionAt ?? selectedCandidate.appliedDate) : null
+        }
+        appliedAgingDays={selectedCandidate ? daysSince(selectedCandidate.appliedDate) : null}
+        onStatusChange={(status) => {
+          if (!selectedCandidate) return;
+          updateWorkflow(selectedCandidate, status);
+        }}
+        onSaveAssignments={(assignedRecruiter, assignedDM) => {
+          if (!selectedCandidate) return;
+          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { assignedRecruiter, assignedDM });
+        }}
+        onAddNote={(note) => {
+          if (!selectedCandidate) return;
+          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
+        }}
+      />
     </div>
   );
 }
