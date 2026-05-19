@@ -5,16 +5,14 @@ import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import {
   buildRecruitingCommandCenter,
   formatCommandCenterSyncTime,
-  type CommandCenterCandidateRow,
 } from "@/lib/recruiting-command-center";
 import { useEffect, useMemo, useState } from "react";
+import {
+  RankedCandidatesTable,
+  TopCandidatesWidget,
+} from "./command-center-candidate-ranking";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
-
-type SortKey = keyof Pick<
-  CommandCenterCandidateRow,
-  "name" | "stage" | "source" | "position" | "location" | "appliedDate" | "aiScoreLabel"
->;
 
 type CommandCenterLoadState =
   | { status: "loading" }
@@ -123,117 +121,6 @@ function FunnelVisualization({ applied, interviewing, hired }: { applied: number
   );
 }
 
-function SortableHeader({
-  label,
-  sortKey,
-  activeKey,
-  direction,
-  onSort,
-}: {
-  label: string;
-  sortKey: SortKey;
-  activeKey: SortKey;
-  direction: "asc" | "desc";
-  onSort: (key: SortKey) => void;
-}) {
-  const active = activeKey === sortKey;
-  return (
-    <th className="px-4 py-3 font-medium sm:px-5">
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        className="inline-flex items-center gap-1 text-left uppercase tracking-wider hover:text-zinc-300"
-      >
-        {label}
-        <span className="text-[10px] text-zinc-600">{active ? (direction === "asc" ? "▲" : "▼") : "↕"}</span>
-      </button>
-    </th>
-  );
-}
-
-function RecentCandidatesTable({ rows }: { rows: CommandCenterCandidateRow[] }) {
-  const [sortKey, setSortKey] = useState<SortKey>("appliedDate");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-
-  function handleSort(key: SortKey) {
-    if (sortKey === key) {
-      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
-      return;
-    }
-    setSortKey(key);
-    setSortDirection(key === "appliedDate" ? "desc" : "asc");
-  }
-
-  const sortedRows = useMemo(() => {
-    const copy = [...rows];
-    copy.sort((a, b) => {
-      let left: string | number = "";
-      let right: string | number = "";
-      if (sortKey === "appliedDate") {
-        left = new Date(a.appliedDate).getTime() || 0;
-        right = new Date(b.appliedDate).getTime() || 0;
-      } else if (sortKey === "aiScoreLabel") {
-        left = a.aiScoreLabel;
-        right = b.aiScoreLabel;
-      } else {
-        left = a[sortKey].toLowerCase();
-        right = b[sortKey].toLowerCase();
-      }
-      if (left < right) return sortDirection === "asc" ? -1 : 1;
-      if (left > right) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-    return copy;
-  }, [rows, sortDirection, sortKey]);
-
-  return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-      <div className="border-b border-zinc-800/80 px-4 py-4 sm:px-5">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Recent candidates</h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Newest applicants from Breezy. Aging: &lt;24h green · 24–72h yellow · &gt;72h red.
-        </p>
-      </div>
-      {sortedRows.length === 0 ? (
-        <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">No candidates in the current sync.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-[960px] w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-zinc-800/80 text-xs text-zinc-500">
-                <SortableHeader label="Name" sortKey="name" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="Stage" sortKey="stage" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="Source" sortKey="source" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="Position" sortKey="position" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="City/State" sortKey="location" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="Applied date" sortKey="appliedDate" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="AI score" sortKey="aiScoreLabel" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/60">
-              {sortedRows.map((row) => (
-                <tr key={row.candidateId} className="hover:bg-zinc-800/30">
-                  <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{row.name}</td>
-                  <td className="px-4 py-3 text-zinc-300 sm:px-5">{row.stage}</td>
-                  <td className="px-4 py-3 text-zinc-300 sm:px-5">{row.source}</td>
-                  <td className="px-4 py-3 text-zinc-300 sm:px-5">{row.position}</td>
-                  <td className="px-4 py-3 text-zinc-400 sm:px-5">{row.location}</td>
-                  <td className={`px-4 py-3 sm:px-5 ${row.agingClassName}`}>
-                    {row.appliedDateLabel}
-                    {row.appliedHoursAgo !== null ? (
-                      <span className="ml-1 text-[10px] text-zinc-600">({row.appliedHoursAgo}h)</span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-500 sm:px-5">{row.aiScoreLabel}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
 
 export function RecruitingCommandCenter() {
   const [loadState, setLoadState] = useState<CommandCenterLoadState>({ status: "loading" });
@@ -335,7 +222,9 @@ export function RecruitingCommandCenter() {
         />
       </div>
 
-      <RecentCandidatesTable rows={snapshot.recentCandidates} />
+      <TopCandidatesWidget rows={snapshot.topCandidates} />
+
+      <RankedCandidatesTable rows={snapshot.rankedCandidates} filterOptions={snapshot.filterOptions} />
     </div>
   );
 }

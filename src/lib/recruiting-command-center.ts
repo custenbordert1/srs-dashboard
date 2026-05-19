@@ -1,3 +1,4 @@
+import { scoreCandidate, type AiScoreTier } from "@/lib/candidate-ai-scoring";
 import {
   countCandidatesLast7Days,
   isPartialBreezyPositionSync,
@@ -36,24 +37,35 @@ export const TRACKED_SOURCE_CHANNELS = [
 
 export type CommandCenterFunnelStage = "applied" | "interviewing" | "hired";
 
-export type CommandCenterCandidateRow = {
+export type CommandCenterRankedRow = {
   candidateId: string;
   name: string;
   stage: string;
   source: string;
   position: string;
+  state: string;
   location: string;
   appliedDate: string;
   appliedDateLabel: string;
   appliedHoursAgo: number | null;
   agingClassName: string;
-  aiScoreLabel: string;
+  aiScore: number;
+  aiTier: AiScoreTier;
+  aiTierLabel: string;
+};
+
+export type CommandCenterFilterOptions = {
+  states: string[];
+  sources: string[];
+  stages: string[];
 };
 
 export type CommandCenterSnapshot = {
   kpis: Kpi[];
   funnel: ChartBar[];
-  recentCandidates: CommandCenterCandidateRow[];
+  rankedCandidates: CommandCenterRankedRow[];
+  topCandidates: CommandCenterRankedRow[];
+  filterOptions: CommandCenterFilterOptions;
   sourceBreakdown: ChartBar[];
   applicantsToday: number;
   applicantsLast7Days: number;
@@ -199,39 +211,45 @@ function topSourceLabel(candidates: BreezyCandidate[]): string {
   return `${sorted[0][0]} (${sorted[0][1].toLocaleString()})`;
 }
 
-function buildRecentCandidates(
-  candidates: BreezyCandidate[],
-  reference: Date,
-  limit = 15,
-): CommandCenterCandidateRow[] {
-  return [...candidates]
-    .sort((a, b) => {
-      const aDate = parseAppliedDate(a.appliedDate);
-      const bDate = parseAppliedDate(b.appliedDate);
-      if (!aDate && !bDate) return 0;
-      if (!aDate) return 1;
-      if (!bDate) return -1;
-      return bDate.getTime() - aDate.getTime();
-    })
-    .slice(0, limit)
+function sortedUnique(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+}
+
+function buildFilterOptions(candidates: BreezyCandidate[]): CommandCenterFilterOptions {
+  return {
+    states: sortedUnique(candidates.map((candidate) => candidate.state)),
+    sources: sortedUnique(candidates.map((candidate) => candidate.source)),
+    stages: sortedUnique(candidates.map((candidate) => candidate.stage)),
+  };
+}
+
+function buildRankedCandidates(candidates: BreezyCandidate[], reference: Date): CommandCenterRankedRow[] {
+  return candidates
     .map((candidate) => {
       const city = candidate.city.trim();
       const state = candidate.state.trim();
       const hours = appliedAgingHours(candidate.appliedDate, reference);
+      const ai = scoreCandidate(candidate);
       return {
         candidateId: candidate.candidateId,
         name: candidateName(candidate),
         stage: candidate.stage.trim() || "—",
         source: candidate.source.trim() || "—",
         position: candidate.positionName.trim() || "—",
+        state: state || "—",
         location: [city, state].filter(Boolean).join(", ") || "—",
         appliedDate: candidate.appliedDate,
         appliedDateLabel: formatAppliedDate(candidate.appliedDate),
         appliedHoursAgo: hours,
         agingClassName: appliedAgingClassName(hours),
-        aiScoreLabel: "Pending",
+        aiScore: ai.numericScore,
+        aiTier: ai.tier,
+        aiTierLabel: ai.tierLabel,
       };
-    });
+    })
+    .sort((a, b) => b.aiScore - a.aiScore || a.name.localeCompare(b.name));
 }
 
 export function buildRecruitingCommandCenter(
@@ -297,10 +315,14 @@ export function buildRecruitingCommandCenter(
     flatKpi("cc-sync", "Last Sync Time", lastSyncLabel, "Last successful Breezy candidates sync"),
   ];
 
+  const rankedCandidates = buildRankedCandidates(candidates, syncTime);
+
   return {
     kpis,
     funnel,
-    recentCandidates: buildRecentCandidates(candidates, syncTime),
+    rankedCandidates,
+    topCandidates: rankedCandidates.slice(0, 8),
+    filterOptions: buildFilterOptions(candidates),
     sourceBreakdown,
     applicantsToday,
     applicantsLast7Days,
