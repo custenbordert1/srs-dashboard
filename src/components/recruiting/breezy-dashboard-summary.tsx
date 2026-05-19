@@ -127,7 +127,7 @@ export function BreezyDashboardSummary() {
           Live candidate metrics from the Breezy API. Counts are computed directly from the synced candidate
           array ({summary.totalCandidates.toLocaleString()} records).
         </p>
-        {summary.truncated ? (
+        {summary.partialPositionSync ? (
           <p
             role="status"
             className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"

@@ -1,4 +1,9 @@
-import type { BreezyCandidate, BreezyCandidatesSuccess } from "@/lib/breezy-api";
+import {
+  countCandidatesLast7Days,
+  isPartialBreezyPositionSync,
+  type BreezyCandidate,
+  type BreezyCandidatesSuccess,
+} from "@/lib/breezy-api";
 import type { Kpi } from "@/lib/recruiting-sample-data";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -24,6 +29,8 @@ export type BreezyCandidateSummary = {
   last24Hours: number;
   last7Days: number;
   positionsScanned: number;
+  totalPositionsAvailable: number;
+  partialPositionSync: boolean;
   fetchedAt: string;
   fetchedAtLabel: string;
   bySource: BreezyCountBucket[];
@@ -131,7 +138,14 @@ function flatKpi(
 }
 
 export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): BreezyCandidateSummary {
-  const { candidates, fetchedAt, positionsScanned = 0, truncated = false } = data;
+  const {
+    candidates,
+    fetchedAt,
+    positionsScanned = 0,
+    totalPositionsAvailable = positionsScanned,
+    candidatesLast7Days,
+  } = data;
+  const partialPositionSync = isPartialBreezyPositionSync(data);
   const syncTime = new Date(fetchedAt);
   const syncMs = Number.isNaN(syncTime.getTime()) ? Date.now() : syncTime.getTime();
   const since24h = new Date(syncMs - MS_PER_DAY);
@@ -139,7 +153,7 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
 
   const totalCandidates = candidates.length;
   const last24Hours = countAppliedSince(candidates, since24h);
-  const last7Days = countAppliedSince(candidates, since7d);
+  const last7Days = candidatesLast7Days ?? countCandidatesLast7Days(candidates, fetchedAt);
   const bySource = countBuckets(candidates, "source");
   const byStage = countBuckets(candidates, "stage");
   const newestCandidates = buildNewestCandidates(candidates);
@@ -182,8 +196,10 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
     flatKpi(
       "breezy-positions",
       "Positions scanned",
-      positionsScanned.toLocaleString(),
-      truncated ? "Scan limit reached — additional positions may exist" : "Positions included in this pull",
+      `${positionsScanned.toLocaleString()} / ${totalPositionsAvailable.toLocaleString()}`,
+      partialPositionSync
+        ? "Not all published positions were scanned"
+        : "All published positions included in this pull",
     ),
     flatKpi("breezy-sync", "Last sync time", fetchedAtLabel, "Breezy candidates API fetchedAt timestamp"),
   ];
@@ -193,12 +209,14 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
     last24Hours,
     last7Days,
     positionsScanned,
+    totalPositionsAvailable,
+    partialPositionSync,
     fetchedAt,
     fetchedAtLabel,
     bySource,
     byStage,
     newestCandidates,
-    truncated,
+    truncated: partialPositionSync,
     kpis,
   };
 }

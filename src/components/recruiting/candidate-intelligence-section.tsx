@@ -172,9 +172,12 @@ export function CandidateIntelligenceSection() {
           Live Breezy candidate performance, funnel health, recruiter load, and candidate risk
           signals.
         </p>
-        {data.truncated ? (
+        {data.totalPositionsAvailable !== undefined &&
+        data.positionsScanned !== undefined &&
+        data.positionsScanned < data.totalPositionsAvailable ? (
           <p className="mt-2 text-xs text-amber-300">
-            Candidate pull scanned {data.positionsScanned?.toLocaleString()} positions and may be truncated.
+            Partial sync: scanned {data.positionsScanned.toLocaleString()} of{" "}
+            {data.totalPositionsAvailable.toLocaleString()} published positions.
           </p>
         ) : null}
       </div>

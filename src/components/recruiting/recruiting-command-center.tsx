@@ -45,12 +45,12 @@ function CommandCenterSkeleton() {
 function SyncStatusBanner({
   connected,
   lastSyncLabel,
-  truncated,
+  partialPositionSync,
   errorMessage,
 }: {
   connected: boolean;
   lastSyncLabel: string;
-  truncated: boolean;
+  partialPositionSync: boolean;
   errorMessage?: string;
 }) {
   if (!connected) {
@@ -76,7 +76,7 @@ function SyncStatusBanner({
         <p className="text-sm font-semibold text-teal-100">Breezy connected</p>
         <p className="mt-0.5 text-sm text-teal-200/80">Last successful sync: {lastSyncLabel}</p>
       </div>
-      {truncated ? (
+      {partialPositionSync ? (
         <p className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-100">
           Partial Breezy sync — more positions/candidates available.
         </p>
@@ -279,7 +279,7 @@ export function RecruitingCommandCenter() {
       <SyncStatusBanner
         connected={false}
         lastSyncLabel="—"
-        truncated={false}
+        partialPositionSync={false}
         errorMessage={loadState.message}
       />
     );
@@ -297,7 +297,7 @@ export function RecruitingCommandCenter() {
         lastSyncLabel={formatCommandCenterSyncTime(
           !loadState.candidates.ok ? loadState.candidates.fetchedAt : loadState.jobs.fetchedAt,
         )}
-        truncated={false}
+        partialPositionSync={false}
         errorMessage={errorMessage}
       />
     );
@@ -319,7 +319,7 @@ export function RecruitingCommandCenter() {
       <SyncStatusBanner
         connected={snapshot.connected}
         lastSyncLabel={snapshot.lastSyncLabel}
-        truncated={snapshot.truncated}
+        partialPositionSync={snapshot.partialPositionSync}
       />
 
       <KpiCards items={snapshot.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />

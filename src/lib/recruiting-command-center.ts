@@ -1,4 +1,10 @@
-import type { BreezyCandidate, BreezyCandidatesSuccess, BreezyJobsSuccess } from "@/lib/breezy-api";
+import {
+  countCandidatesLast7Days,
+  isPartialBreezyPositionSync,
+  type BreezyCandidate,
+  type BreezyCandidatesSuccess,
+  type BreezyJobsSuccess,
+} from "@/lib/breezy-api";
 import type { Kpi } from "@/lib/recruiting-sample-data";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
 
@@ -55,6 +61,8 @@ export type CommandCenterSnapshot = {
   interviewing: number;
   topSource: string;
   positionsScanned: number;
+  totalPositionsAvailable: number;
+  partialPositionSync: boolean;
   lastSyncLabel: string;
   fetchedAt: string;
   truncated: boolean;
@@ -230,15 +238,22 @@ export function buildRecruitingCommandCenter(
   candidatesData: BreezyCandidatesSuccess,
   jobsData: BreezyJobsSuccess,
 ): CommandCenterSnapshot {
-  const { candidates, fetchedAt, positionsScanned = 0, truncated = false } = candidatesData;
+  const {
+    candidates,
+    fetchedAt,
+    positionsScanned = 0,
+    totalPositionsAvailable = positionsScanned,
+    candidatesLast7Days,
+  } = candidatesData;
+  const partialPositionSync = isPartialBreezyPositionSync(candidatesData);
   const syncTime = new Date(fetchedAt);
   const syncMs = Number.isNaN(syncTime.getTime()) ? Date.now() : syncTime.getTime();
   const sinceToday = new Date(syncMs - MS_PER_DAY);
-  const since7d = new Date(syncMs - 7 * MS_PER_DAY);
   const lastSyncLabel = formatCommandCenterSyncTime(fetchedAt);
 
   const applicantsToday = countAppliedSince(candidates, sinceToday);
-  const applicantsLast7Days = countAppliedSince(candidates, since7d);
+  const applicantsLast7Days =
+    candidatesLast7Days ?? countCandidatesLast7Days(candidates, fetchedAt);
   const activeJobs = jobsData.jobs.length;
   const interviewing = candidates.filter((candidate) => isInterviewingStage(candidate.stage)).length;
   const topSource = topSourceLabel(candidates);
@@ -274,8 +289,10 @@ export function buildRecruitingCommandCenter(
     flatKpi(
       "cc-positions",
       "Positions Scanned",
-      positionsScanned.toLocaleString(),
-      truncated ? "Partial scan — more positions may exist" : "Positions included in candidate aggregation",
+      `${positionsScanned.toLocaleString()} / ${totalPositionsAvailable.toLocaleString()}`,
+      partialPositionSync
+        ? "Not all published positions were scanned"
+        : "All published positions included in candidate aggregation",
     ),
     flatKpi("cc-sync", "Last Sync Time", lastSyncLabel, "Last successful Breezy candidates sync"),
   ];
@@ -291,9 +308,11 @@ export function buildRecruitingCommandCenter(
     interviewing,
     topSource,
     positionsScanned,
+    totalPositionsAvailable,
+    partialPositionSync,
     lastSyncLabel,
     fetchedAt,
-    truncated,
+    truncated: partialPositionSync,
     connected: true,
   };
 }
