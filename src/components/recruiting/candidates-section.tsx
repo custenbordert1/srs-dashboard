@@ -8,8 +8,14 @@ import {
   type CandidateWorkflowStatus,
   type CandidateWorkflowState,
 } from "@/lib/candidate-workflow-types";
+import {
+  CandidateActionsMenu,
+  type CandidateRowAction,
+} from "@/components/recruiting/candidate-actions-menu";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { loadRecruiterRoster } from "@/lib/recruiter-roster";
+import { useEffect, useMemo, useState } from "react";
 
 const ALL = "__all__";
 const selectClass =
@@ -204,84 +210,6 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
   );
 }
 
-type CandidateAction =
-  | { kind: "status"; status: CandidateWorkflowStatus; label: string }
-  | { kind: "assign-recruiter" | "assign-dm" | "add-note"; label: string };
-
-const CANDIDATE_ACTIONS: CandidateAction[] = [
-  { kind: "status", status: "Needs Review", label: "Needs Review" },
-  { kind: "status", status: "Qualified", label: "Qualified" },
-  { kind: "status", status: "Not Qualified", label: "Not Qualified" },
-  { kind: "status", status: "Paperwork Needed", label: "Paperwork Needed" },
-  { kind: "status", status: "Paperwork Sent", label: "Paperwork Sent" },
-  { kind: "status", status: "Signed", label: "Signed" },
-  { kind: "status", status: "Ready for MEL", label: "Ready for MEL" },
-  { kind: "status", status: "Training Needed", label: "Training Needed" },
-  { kind: "status", status: "Active Rep", label: "Active Rep" },
-  { kind: "assign-recruiter", label: "Assign Recruiter" },
-  { kind: "assign-dm", label: "Assign DM" },
-  { kind: "add-note", label: "Add Note" },
-];
-
-function CandidateActionsMenu({ onAction }: { onAction: (action: CandidateAction) => void }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function handlePointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="relative inline-block" onClick={(event) => event.stopPropagation()}>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onClick={(event) => {
-          event.stopPropagation();
-          setOpen((value) => !value);
-        }}
-        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-2 py-0.5 text-[11px] font-medium text-zinc-200 hover:bg-zinc-700/80"
-      >
-        Actions
-      </button>
-      {open ? (
-        <div
-          role="menu"
-          className="absolute right-0 z-20 mt-1 min-w-[11rem] rounded-md border border-zinc-700 bg-zinc-950 py-1 shadow-lg shadow-black/40"
-        >
-          {CANDIDATE_ACTIONS.map((action) => (
-            <button
-              key={action.label}
-              type="button"
-              role="menuitem"
-              className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
-              onClick={() => {
-                setOpen(false);
-                onAction(action);
-              }}
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 export function CandidatesSection() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
@@ -294,7 +222,10 @@ export function CandidatesSection() {
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 200);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -345,10 +276,32 @@ export function CandidatesSection() {
   const cityOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.city)), [candidates]);
   const stateOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.state)), [candidates]);
 
+  const searchIndex = useMemo(() => {
+    const index = new Map<string, string>();
+    for (const candidate of candidates) {
+      index.set(
+        candidate.candidateId,
+        [
+          candidateName(candidate),
+          candidate.email,
+          candidate.phone,
+          candidate.positionName,
+          candidate.source,
+          candidate.stage,
+          candidate.city,
+          candidate.state,
+        ]
+          .join(" ")
+          .toLowerCase(),
+      );
+    }
+    return index;
+  }, [candidates]);
+
   const filtered = useMemo(() => {
     const fromDate = appliedFrom ? new Date(`${appliedFrom}T00:00:00`) : null;
     const toDate = appliedTo ? new Date(`${appliedTo}T23:59:59`) : null;
-    const q = search.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
 
     return candidates.filter((candidate) => {
       if (sourceFilter !== ALL && candidate.source !== sourceFilter) return false;
@@ -362,22 +315,29 @@ export function CandidatesSection() {
       if (fromDate && (!appliedDate || appliedDate < fromDate)) return false;
       if (toDate && (!appliedDate || appliedDate > toDate)) return false;
       if (q) {
-        const haystack = [
-          candidateName(candidate),
-          candidate.email,
-          candidate.phone,
-          candidate.positionName,
-          candidate.source,
-          candidate.stage,
-          candidate.city,
-          candidate.state,
-        ].join(" ").toLowerCase();
-        if (!haystack.includes(q)) return false;
+        const haystack = searchIndex.get(candidate.candidateId);
+        if (!haystack?.includes(q)) return false;
       }
 
       return true;
     });
-  }, [appliedFrom, appliedTo, candidates, cityFilter, positionFilter, search, sourceFilter, stageFilter, stateFilter, workflowFilter]);
+  }, [
+    appliedFrom,
+    appliedTo,
+    candidates,
+    cityFilter,
+    debouncedSearch,
+    positionFilter,
+    searchIndex,
+    sourceFilter,
+    stageFilter,
+    stateFilter,
+    workflowFilter,
+  ]);
+
+  const filteredIds = useMemo(() => filtered.map((candidate) => candidate.candidateId), [filtered]);
+  const allFilteredSelected =
+    filteredIds.length > 0 && filteredIds.every((candidateId) => selectedIds.has(candidateId));
 
   const newestApplicantDate = useMemo(() => {
     const newest = filtered
@@ -407,12 +367,12 @@ export function CandidatesSection() {
     setWorkflowFilter((current) => (current === status ? ALL : status));
   }
 
-  function updateWorkflow(
+  async function persistWorkflow(
     candidate: CandidateWorkflowRow,
     workflowStatus: CandidateWorkflowStatus,
     options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
-  ) {
-    void fetch("/api/candidates/workflows", {
+  ): Promise<CandidateWorkflowRecord> {
+    const res = await fetch("/api/candidates/workflows", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -422,54 +382,96 @@ export function CandidatesSection() {
         assignedDM: options.assignedDM ?? candidate.assignedDM,
         note: options.note,
       }),
-    })
-      .then(async (res) => {
-        const parsed = (await res.json()) as { ok: boolean; workflow?: CandidateWorkflowRecord; error?: string };
-        if (!res.ok || !parsed.ok || !parsed.workflow) {
-          throw new Error(parsed.error ?? `Workflow update failed with HTTP ${res.status}`);
-        }
-        setWorkflowState((prev) => ({
-          ...prev,
-          [parsed.workflow!.candidateId]: parsed.workflow!,
-        }));
-      })
+    });
+    const parsed = (await res.json()) as { ok: boolean; workflow?: CandidateWorkflowRecord; error?: string };
+    if (!res.ok || !parsed.ok || !parsed.workflow) {
+      throw new Error(parsed.error ?? `Workflow update failed with HTTP ${res.status}`);
+    }
+    return parsed.workflow;
+  }
+
+  function applyWorkflowRecord(workflow: CandidateWorkflowRecord) {
+    setWorkflowState((prev) => ({ ...prev, [workflow.candidateId]: workflow }));
+  }
+
+  function updateWorkflow(
+    candidate: CandidateWorkflowRow,
+    workflowStatus: CandidateWorkflowStatus,
+    options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
+  ) {
+    void persistWorkflow(candidate, workflowStatus, options)
+      .then(applyWorkflowRecord)
       .catch((err) => {
         window.alert(err instanceof Error ? err.message : "Workflow update failed");
       });
   }
 
-  function addNote(candidate: CandidateWorkflowRow) {
-    const note = window.prompt("Add local workflow note");
-    if (!note?.trim()) return;
-    updateWorkflow(candidate, candidate.workflowStatus, { note });
+  function toggleSelectAllFiltered() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        for (const id of filteredIds) next.delete(id);
+      } else {
+        for (const id of filteredIds) next.add(id);
+      }
+      return next;
+    });
   }
 
-  function assignRecruiter(candidate: CandidateWorkflowRow) {
-    const assignedRecruiter = window.prompt("Assign recruiter", candidate.assignedRecruiter);
-    if (!assignedRecruiter?.trim()) return;
-    updateWorkflow(candidate, candidate.workflowStatus, { assignedRecruiter });
+  function toggleSelectCandidate(candidateId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
+    });
   }
 
-  function assignDm(candidate: CandidateWorkflowRow) {
-    const assignedDM = window.prompt("Assign DM", candidate.assignedDM);
-    if (!assignedDM?.trim()) return;
-    updateWorkflow(candidate, candidate.workflowStatus, { assignedDM });
+  async function runBulkUpdate(
+    options: { workflowStatus?: CandidateWorkflowStatus; assignedRecruiter?: string; note?: string },
+  ) {
+    const rows = candidates.filter((candidate) => selectedIds.has(candidate.candidateId));
+    if (rows.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const workflows = await Promise.all(
+        rows.map((candidate) =>
+          persistWorkflow(candidate, options.workflowStatus ?? candidate.workflowStatus, {
+            assignedRecruiter: options.assignedRecruiter,
+            note: options.note,
+          }),
+        ),
+      );
+      setWorkflowState((prev) => {
+        const next = { ...prev };
+        for (const workflow of workflows) next[workflow.candidateId] = workflow;
+        return next;
+      });
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Bulk workflow update failed");
+    } finally {
+      setBulkBusy(false);
+    }
   }
 
-  function handleCandidateAction(candidate: CandidateWorkflowRow, action: CandidateAction) {
-    if (action.kind === "status") {
+  function handleCandidateAction(candidate: CandidateWorkflowRow, action: CandidateRowAction) {
+    if (action.kind === "open-drawer") {
+      setSelectedCandidateId(candidate.candidateId);
+      return;
+    }
+    if (action.kind === "change-workflow") {
       updateWorkflow(candidate, action.status);
       return;
     }
     if (action.kind === "assign-recruiter") {
-      assignRecruiter(candidate);
+      updateWorkflow(candidate, candidate.workflowStatus, { assignedRecruiter: action.recruiter });
       return;
     }
     if (action.kind === "assign-dm") {
-      assignDm(candidate);
+      updateWorkflow(candidate, candidate.workflowStatus, { assignedDM: action.dm });
       return;
     }
-    addNote(candidate);
+    updateWorkflow(candidate, candidate.workflowStatus, { note: action.note });
   }
 
   if (data === undefined) return <CandidatesSkeleton />;
@@ -572,6 +574,58 @@ export function CandidatesSection() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search name, email, phone, position, or source"
           />
+          {search.trim() !== debouncedSearch.trim() ? (
+            <p className="text-[10px] text-zinc-600">Filtering…</p>
+          ) : null}
+          {selectedIds.size > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-md border border-teal-500/30 bg-teal-500/5 px-2 py-1.5">
+              <span className="text-[11px] font-medium text-teal-200">{selectedIds.size} selected</span>
+              <select
+                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
+                defaultValue=""
+                disabled={bulkBusy}
+                onChange={(event) => {
+                  const status = event.target.value as CandidateWorkflowStatus | "";
+                  if (!status) return;
+                  void runBulkUpdate({ workflowStatus: status });
+                  event.target.value = "";
+                }}
+              >
+                <option value="">Bulk set status…</option>
+                {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
+                defaultValue=""
+                disabled={bulkBusy}
+                onChange={(event) => {
+                  const recruiter = event.target.value;
+                  if (!recruiter) return;
+                  void runBulkUpdate({ assignedRecruiter: recruiter });
+                  event.target.value = "";
+                }}
+              >
+                <option value="">Bulk assign recruiter…</option>
+                {loadRecruiterRoster().map((recruiter) => (
+                  <option key={recruiter} value={recruiter}>
+                    {recruiter}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                disabled={bulkBusy}
+                onClick={() => setSelectedIds(new Set())}
+                className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                Clear
+              </button>
+            </div>
+          ) : null}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
           <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
             <option value={ALL}>All sources</option>
@@ -613,6 +667,15 @@ export function CandidatesSection() {
             <table className="min-w-[1500px] w-full text-left">
               <thead className="border-b border-zinc-800/80">
                 <tr>
+                  <th className={thClass}>
+                    <input
+                      type="checkbox"
+                      aria-label="Select all filtered candidates"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      onClick={(event) => event.stopPropagation()}
+                    />
+                  </th>
                   <th className={thClass}>Name</th>
                   <th className={thClass}>Email</th>
                   <th className={thClass}>Phone</th>
@@ -644,6 +707,14 @@ export function CandidatesSection() {
                       rowSelected ? "bg-teal-500/10 hover:bg-teal-500/15" : "hover:bg-zinc-800/40"
                     }`}
                   >
+                    <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${candidateName(candidate)}`}
+                        checked={selectedIds.has(candidate.candidateId)}
+                        onChange={() => toggleSelectCandidate(candidate.candidateId)}
+                      />
+                    </td>
                     <td className={`${tdClass} max-w-[10rem] truncate font-medium text-zinc-100`}>{candidateName(candidate)}</td>
                     <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
                     <td className={tdClass}>{candidate.phone || "—"}</td>
@@ -703,6 +774,7 @@ export function CandidatesSection() {
       </section>
 
       <CandidateDetailDrawer
+        key={selectedCandidate?.candidateId ?? "closed"}
         candidate={selectedCandidate}
         open={selectedCandidate !== null}
         onClose={() => setSelectedCandidateId(null)}

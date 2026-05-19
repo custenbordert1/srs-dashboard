@@ -1,5 +1,6 @@
 "use client";
 
+import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
 import { useEffect, useState } from "react";
@@ -31,6 +32,8 @@ export type CandidateDrawerRow = {
   travelFitScore: number | null;
 };
 
+type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
+
 type HelloSignPrep = {
   configured: boolean;
   statusLabel: string;
@@ -47,6 +50,15 @@ type CandidateDetailDrawerProps = {
   statusAgingDays: number | null;
   appliedAgingDays: number | null;
 };
+
+const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
+  { id: "overview", label: "Overview" },
+  { id: "workflow", label: "Workflow" },
+  { id: "notes", label: "Notes" },
+  { id: "assignments", label: "Assignments" },
+  { id: "hellosign", label: "HelloSign" },
+  { id: "ai", label: "AI" },
+];
 
 function candidateDisplayName(candidate: CandidateDrawerRow): string {
   const name = `${candidate.firstName} ${candidate.lastName}`.trim();
@@ -65,7 +77,14 @@ function formatAppliedDate(raw: string): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
 }
 
-function AssignmentFields({
+function agingBadgeClass(days: number | null): string {
+  if (days === null) return "bg-zinc-800/80 text-zinc-400 ring-zinc-600/40";
+  if (days <= 3) return "bg-emerald-500/15 text-emerald-200 ring-emerald-500/35";
+  if (days <= 7) return "bg-amber-500/15 text-amber-200 ring-amber-500/35";
+  return "bg-red-500/15 text-red-200 ring-red-500/35";
+}
+
+function AssignmentPanel({
   assignedRecruiter,
   assignedDM,
   onSave,
@@ -74,34 +93,74 @@ function AssignmentFields({
   assignedDM: string;
   onSave: (recruiter: string, dm: string) => void;
 }) {
+  const [recruiters, setRecruiters] = useState(loadRecruiterRoster);
+  const [dms, setDms] = useState(loadDmRoster);
   const [recruiter, setRecruiter] = useState(assignedRecruiter);
   const [dm, setDm] = useState(assignedDM);
 
   return (
-    <div className="mt-2 space-y-2">
+    <div className="space-y-3">
       <label className="block text-[10px] text-zinc-500">
         Recruiter
-        <input
+        <select
           className="mt-0.5 w-full rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100"
           value={recruiter}
           onChange={(event) => setRecruiter(event.target.value)}
-        />
+        >
+          {recruiters.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="block text-[10px] text-zinc-500">
         DM
-        <input
+        <select
           className="mt-0.5 w-full rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100"
           value={dm}
           onChange={(event) => setDm(event.target.value)}
-        />
+        >
+          {dms.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
       </label>
-      <button
-        type="button"
-        onClick={() => onSave(recruiter.trim() || "Unassigned", dm.trim() || "Unassigned")}
-        className="rounded-md border border-teal-500/40 bg-teal-500/10 px-2 py-1 text-xs font-medium text-teal-200 hover:bg-teal-500/20"
-      >
-        Save assignments
-      </button>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            const name = window.prompt("Add recruiter to roster");
+            if (!name?.trim()) return;
+            setRecruiters(addRecruiterToRoster(name.trim()));
+            setRecruiter(name.trim());
+          }}
+          className="rounded-md border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-800"
+        >
+          + Recruiter
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const name = window.prompt("Add DM to roster");
+            if (!name?.trim()) return;
+            setDms(addDmToRoster(name.trim()));
+            setDm(name.trim());
+          }}
+          className="rounded-md border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-800"
+        >
+          + DM
+        </button>
+        <button
+          type="button"
+          onClick={() => onSave(recruiter.trim() || "Unassigned", dm.trim() || "Unassigned")}
+          className="rounded-md border border-teal-500/40 bg-teal-500/10 px-2 py-1 text-xs font-medium text-teal-200 hover:bg-teal-500/20"
+        >
+          Save assignments
+        </button>
+      </div>
     </div>
   );
 }
@@ -110,8 +169,8 @@ function NoteComposer({ onAddNote }: { onAddNote: (note: string) => void }) {
   const [noteDraft, setNoteDraft] = useState("");
 
   return (
-    <>
-      <div className="mt-2 flex gap-2">
+    <div className="space-y-2">
+      <div className="flex gap-2">
         <input
           className="min-w-0 flex-1 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600"
           placeholder="Add a local note…"
@@ -137,15 +196,8 @@ function NoteComposer({ onAddNote }: { onAddNote: (note: string) => void }) {
           Add
         </button>
       </div>
-    </>
+    </div>
   );
-}
-
-function agingBadgeClass(days: number | null): string {
-  if (days === null) return "bg-zinc-800/80 text-zinc-400 ring-zinc-600/40";
-  if (days <= 3) return "bg-emerald-500/15 text-emerald-200 ring-emerald-500/35";
-  if (days <= 7) return "bg-amber-500/15 text-amber-200 ring-amber-500/35";
-  return "bg-red-500/15 text-red-200 ring-red-500/35";
 }
 
 export function CandidateDetailDrawer({
@@ -158,6 +210,7 @@ export function CandidateDetailDrawer({
   statusAgingDays,
   appliedAgingDays,
 }: CandidateDetailDrawerProps) {
+  const [tab, setTab] = useState<DrawerTab>("overview");
   const [helloSign, setHelloSign] = useState<HelloSignPrep | null>(null);
 
   useEffect(() => {
@@ -201,6 +254,9 @@ export function CandidateDetailDrawer({
   const timeline = [...candidate.history].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
+  const workflowEvents = timeline.filter((event) => event.type === "status");
+  const assignmentEvents = timeline.filter((event) => event.type === "assignment");
+  const noteEvents = timeline.filter((event) => event.type === "note");
 
   return (
     <>
@@ -216,31 +272,82 @@ export function CandidateDetailDrawer({
         aria-labelledby="candidate-drawer-title"
         className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/50"
       >
-        <header className="flex items-start justify-between gap-3 border-b border-zinc-800 px-4 py-3">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Candidate detail</p>
-            <h2 id="candidate-drawer-title" className="mt-0.5 text-lg font-semibold text-zinc-50">
-              {candidateDisplayName(candidate)}
-            </h2>
-            <p className="mt-1 text-xs text-zinc-500">
-              {candidate.positionName || "—"} · {candidate.city || "—"}, {candidate.state || "—"}
-            </p>
+        <header className="border-b border-zinc-800 px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Candidate detail</p>
+              <h2 id="candidate-drawer-title" className="mt-0.5 text-lg font-semibold text-zinc-50">
+                {candidateDisplayName(candidate)}
+              </h2>
+              <p className="mt-1 text-xs text-zinc-500">
+                {candidate.positionName || "—"} · {candidate.city || "—"}, {candidate.state || "—"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              Close
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
-          >
-            Close
-          </button>
+          <nav className="mt-3 flex flex-wrap gap-1">
+            {DRAWER_TABS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTab(item.id)}
+                className={`rounded-md px-2 py-0.5 text-[10px] font-medium ${
+                  tab === item.id
+                    ? "bg-teal-500/15 text-teal-200 ring-1 ring-teal-500/30"
+                    : "text-zinc-500 hover:bg-zinc-800/80 hover:text-zinc-300"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </header>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">Workflow</h3>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          {tab === "overview" ? (
+            <div className="space-y-3 text-xs text-zinc-400">
+              <p>
+                <span className="text-zinc-500">Email:</span> {candidate.email || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Phone:</span> {candidate.phone || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Source / stage:</span> {candidate.source || "—"} · {candidate.stage || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Applied:</span> {formatAppliedDate(candidate.appliedDate)}
+              </p>
+              <p>
+                <span className="text-zinc-500">Workflow:</span> {candidate.workflowStatus}
+              </p>
+              <p>
+                <span className="text-zinc-500">Next action:</span> {candidate.nextActionNeeded}
+              </p>
+              <p>
+                <span className="text-zinc-500">Recruiter / DM:</span> {candidate.assignedRecruiter} · {candidate.assignedDM}
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className={`rounded-full px-2 py-0.5 text-[10px] ring-1 ${agingBadgeClass(statusAgingDays)}`}>
+                  Status {statusAgingDays === null ? "—" : `${statusAgingDays}d`}
+                </span>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] ring-1 ${agingBadgeClass(appliedAgingDays)}`}>
+                  Applied {appliedAgingDays === null ? "—" : `${appliedAgingDays}d`}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
+          {tab === "workflow" ? (
+            <div className="space-y-3">
               <select
-                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100"
+                className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100"
                 value={candidate.workflowStatus}
                 onChange={(event) => onStatusChange(event.target.value as CandidateWorkflowStatus)}
               >
@@ -250,83 +357,88 @@ export function CandidateDetailDrawer({
                   </option>
                 ))}
               </select>
-              <span
-                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${agingBadgeClass(statusAgingDays)}`}
-              >
-                Status age: {statusAgingDays === null ? "—" : `${statusAgingDays}d`}
-              </span>
-              <span
-                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${agingBadgeClass(appliedAgingDays)}`}
-              >
-                Applied: {appliedAgingDays === null ? "—" : `${appliedAgingDays}d`}
-              </span>
+              {workflowEvents.length === 0 ? (
+                <p className="text-xs text-zinc-600">No workflow status changes yet.</p>
+              ) : (
+                <ol className="space-y-2">
+                  {workflowEvents.map((event) => (
+                    <li key={event.id} className="border-l-2 border-zinc-700 pl-2">
+                      <p className="text-xs text-zinc-200">{event.message}</p>
+                      <p className="text-[10px] text-zinc-600">{formatDate(event.createdAt)}</p>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </div>
-            <p className="mt-2 text-xs text-zinc-400">Next: {candidate.nextActionNeeded}</p>
-            <p className="mt-1 text-[10px] text-zinc-600">Applied {formatAppliedDate(candidate.appliedDate)}</p>
-          </section>
+          ) : null}
 
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">Assignments</h3>
-            <AssignmentFields
-              key={`${candidate.candidateId}-${candidate.assignedRecruiter}-${candidate.assignedDM}`}
-              assignedRecruiter={candidate.assignedRecruiter}
-              assignedDM={candidate.assignedDM}
-              onSave={onSaveAssignments}
-            />
-          </section>
+          {tab === "notes" ? (
+            <div className="space-y-3">
+              <NoteComposer key={candidate.candidateId} onAddNote={onAddNote} />
+              {candidate.notes.length === 0 && noteEvents.length === 0 ? (
+                <p className="text-xs text-zinc-600">No notes yet.</p>
+              ) : (
+                <ol className="space-y-2">
+                  {noteEvents.map((event) => (
+                    <li key={event.id} className="rounded bg-zinc-900/60 px-2 py-1 text-xs text-zinc-300">
+                      {event.message}
+                      <p className="text-[10px] text-zinc-600">{formatDate(event.createdAt)}</p>
+                    </li>
+                  ))}
+                  {[...candidate.notes].reverse().map((note, index) => (
+                    <li
+                      key={`${candidate.candidateId}-stored-note-${index}`}
+                      className="rounded bg-zinc-950/60 px-2 py-1 text-xs text-zinc-300"
+                    >
+                      {note}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          ) : null}
 
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">Notes</h3>
-            <NoteComposer key={candidate.candidateId} onAddNote={onAddNote} />
-            {candidate.notes.length === 0 ? (
-              <p className="mt-2 text-xs text-zinc-600">No notes yet.</p>
-            ) : (
-              <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto text-xs text-zinc-300">
-                {[...candidate.notes].reverse().map((note, index) => (
-                  <li key={`${candidate.candidateId}-note-${index}`} className="rounded bg-zinc-950/60 px-2 py-1">
-                    {note}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          {tab === "assignments" ? (
+            <div className="space-y-4">
+              <AssignmentPanel
+                key={`${candidate.candidateId}-${candidate.assignedRecruiter}-${candidate.assignedDM}`}
+                assignedRecruiter={candidate.assignedRecruiter}
+                assignedDM={candidate.assignedDM}
+                onSave={onSaveAssignments}
+              />
+              {assignmentEvents.length === 0 ? (
+                <p className="text-xs text-zinc-600">No assignment changes yet.</p>
+              ) : (
+                <ol className="space-y-2">
+                  {assignmentEvents.map((event) => (
+                    <li key={event.id} className="border-l-2 border-zinc-700 pl-2">
+                      <p className="text-xs text-zinc-200">{event.message}</p>
+                      <p className="text-[10px] text-zinc-600">{formatDate(event.createdAt)}</p>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          ) : null}
 
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">Workflow timeline</h3>
-            {timeline.length === 0 ? (
-              <p className="mt-2 text-xs text-zinc-600">No history events yet.</p>
-            ) : (
-              <ol className="mt-2 space-y-2">
-                {timeline.map((event) => (
-                  <li key={event.id} className="border-l-2 border-zinc-700 pl-2">
-                    <p className="text-xs text-zinc-200">{event.message}</p>
-                    <p className="text-[10px] text-zinc-600">
-                      {event.type} · {formatDate(event.createdAt)}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </section>
+          {tab === "hellosign" ? (
+            <div className="space-y-2 text-xs">
+              {helloSign ? (
+                <>
+                  <p className="text-zinc-300">{helloSign.statusLabel}</p>
+                  <p className="text-zinc-500">{helloSign.message}</p>
+                  <p className="text-[10px] text-zinc-600">
+                    API key: {helloSign.configured ? "present" : "not configured"} · Send disabled (placeholder)
+                  </p>
+                </>
+              ) : (
+                <p className="text-zinc-600">Loading prep status…</p>
+              )}
+            </div>
+          ) : null}
 
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">HelloSign prep</h3>
-            {helloSign ? (
-              <div className="mt-2 space-y-1 text-xs">
-                <p className="text-zinc-300">{helloSign.statusLabel}</p>
-                <p className="text-zinc-500">{helloSign.message}</p>
-                <p className="text-[10px] text-zinc-600">
-                  API key: {helloSign.configured ? "present" : "not configured"} · Send disabled (placeholder)
-                </p>
-              </div>
-            ) : (
-              <p className="mt-2 text-xs text-zinc-600">Loading prep status…</p>
-            )}
-          </section>
-
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500">AI readiness</h3>
-            <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+          {tab === "ai" ? (
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
               <dt className="text-zinc-500">Overall</dt>
               <dd className="text-zinc-200">{candidate.overallCandidateScore ?? "Pending"}</dd>
               <dt className="text-zinc-500">Resume keywords</dt>
@@ -337,17 +449,10 @@ export function CandidateDetailDrawer({
               <dd className="text-zinc-200">{candidate.retailExperienceScore ?? "—"}</dd>
               <dt className="text-zinc-500">Travel fit</dt>
               <dd className="text-zinc-200">{candidate.travelFitScore ?? "—"}</dd>
+              <dt className="col-span-2 text-zinc-500">Recommendation</dt>
+              <dd className="col-span-2 text-zinc-400">{candidate.aiRecommendation}</dd>
             </dl>
-            <p className="mt-2 text-xs text-zinc-500">{candidate.aiRecommendation}</p>
-          </section>
-
-          <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-xs text-zinc-500">
-            <p>{candidate.email || "—"}</p>
-            <p>{candidate.phone || "—"}</p>
-            <p>
-              {candidate.source || "—"} · {candidate.stage || "—"}
-            </p>
-          </section>
+          ) : null}
         </div>
 
         <footer className="border-t border-zinc-800 px-4 py-2 text-[10px] text-zinc-600">
