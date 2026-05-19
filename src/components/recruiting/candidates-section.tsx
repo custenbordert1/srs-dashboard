@@ -3,19 +3,28 @@
 import type { BreezyCandidate, BreezyCandidatesResult } from "@/lib/breezy-api";
 import {
   CANDIDATE_WORKFLOW_STATUSES,
-  nextActionForWorkflowStatus,
   type CandidateWorkflowRecord,
   type CandidateWorkflowStatus,
   type CandidateWorkflowState,
 } from "@/lib/candidate-workflow-types";
+import { CandidateAutomationPanels } from "@/components/recruiting/candidate-automation-panels";
 import {
   CandidateActionsMenu,
   type CandidateRowAction,
 } from "@/components/recruiting/candidate-actions-menu";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { VirtualCandidateTable } from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { AI_GRADE_STYLES, type WorkflowRecommendation } from "@/lib/candidate-ai-scoring";
+import { buildPrioritizationQueues } from "@/lib/candidate-prioritization";
+import {
+  buildScoredWorkflowRow,
+  type ScoredCandidateWorkflowRow,
+} from "@/lib/build-candidate-workflow-row";
+import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
 import { loadRecruiterRoster } from "@/lib/recruiter-roster";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const ALL = "__all__";
 const selectClass =
@@ -25,22 +34,6 @@ const inputClass =
 const thClass =
   "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-sm";
 const tdClass = "whitespace-nowrap px-2 py-1 text-xs text-zinc-300";
-
-type CandidateWorkflowRow = BreezyCandidate & {
-  workflowStatus: CandidateWorkflowStatus;
-  lastActionAt: string | null;
-  nextActionNeeded: string;
-  assignedRecruiter: string;
-  assignedDM: string;
-  notes: string[];
-  history: CandidateWorkflowRecord["history"];
-  resumeKeywordScore: number | null;
-  merchandisingExperienceScore: number | null;
-  retailExperienceScore: number | null;
-  travelFitScore: number | null;
-  overallCandidateScore: number | null;
-  aiRecommendation: string;
-};
 
 const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   Applied: "bg-slate-500/15 text-slate-200 ring-1 ring-slate-500/30",
@@ -76,46 +69,7 @@ function candidateName(candidate: BreezyCandidate): string {
   return `${candidate.firstName} ${candidate.lastName}`.trim() || candidate.email || "Unknown candidate";
 }
 
-function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
-  const stage = candidate.stage.toLowerCase();
-  return words.some((word) => stage.includes(word));
-}
-
-function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStatus {
-  if (stageIncludes(candidate, ["active rep", "active"])) return "Active Rep";
-  if (stageIncludes(candidate, ["loaded in mel", "loaded"])) return "Loaded in MEL";
-  if (stageIncludes(candidate, ["training"])) return "Training Needed";
-  if (stageIncludes(candidate, ["ready for mel", "signed"])) return "Ready for MEL";
-  if (stageIncludes(candidate, ["paperwork sent", "document sent"])) return "Paperwork Sent";
-  if (stageIncludes(candidate, ["paperwork", "hellosign", "offer"])) return "Paperwork Needed";
-  if (stageIncludes(candidate, ["qualified", "interview", "screen", "assessment"])) return "Qualified";
-  if (stageIncludes(candidate, ["rejected", "disqualified", "not qualified", "archived"])) return "Not Qualified";
-  if (stageIncludes(candidate, ["applied", "new"])) return "Applied";
-  return "Needs Review";
-}
-
-function workflowRow(candidate: BreezyCandidate, local?: CandidateWorkflowRecord): CandidateWorkflowRow {
-  const workflowStatus = local?.workflowStatus ?? deriveWorkflowStatus(candidate);
-  const seededScore = candidate.score ?? null;
-  return {
-    ...candidate,
-    workflowStatus,
-    lastActionAt: local?.lastActionAt ?? null,
-    nextActionNeeded: local?.nextActionNeeded ?? nextActionForWorkflowStatus(workflowStatus),
-    assignedRecruiter: local?.assignedRecruiter ?? "Unassigned",
-    assignedDM: local?.assignedDM ?? "Unassigned",
-    notes: local?.notes ?? [],
-    history: local?.history ?? [],
-    resumeKeywordScore: null,
-    merchandisingExperienceScore: null,
-    retailExperienceScore: null,
-    travelFitScore: null,
-    overallCandidateScore: seededScore,
-    aiRecommendation: "Pending AI scoring",
-  };
-}
-
-function sourceBreakdown(candidates: CandidateWorkflowRow[]): Array<{ source: string; count: number }> {
+function sourceBreakdown(candidates: ScoredCandidateWorkflowRow[]): Array<{ source: string; count: number }> {
   const counts = new Map<string, number>();
   for (const candidate of candidates) {
     const source = candidate.source || "Unknown source";
@@ -127,7 +81,7 @@ function sourceBreakdown(candidates: CandidateWorkflowRow[]): Array<{ source: st
     .map(([source, count]) => ({ source, count }));
 }
 
-function workflowBuckets(candidates: CandidateWorkflowRow[]) {
+function workflowBuckets(candidates: ScoredCandidateWorkflowRow[]) {
   return [
     {
       id: "needs-review",
@@ -186,6 +140,25 @@ function AgingValue({ days, label }: { days: number | null; label: string }) {
   );
 }
 
+function RecommendationPills({ items }: { items: WorkflowRecommendation[] }) {
+  if (items.length === 0) {
+    return <span className="text-[10px] text-zinc-600">—</span>;
+  }
+  return (
+    <div className="flex max-w-[9rem] flex-col gap-0.5">
+      {items.slice(0, 2).map((item) => (
+        <span
+          key={item}
+          className="truncate rounded bg-zinc-800/80 px-1 py-0 text-[9px] text-zinc-300 ring-1 ring-zinc-700"
+          title={item}
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function CandidatesSkeleton() {
   return (
     <div className="space-y-6">
@@ -233,8 +206,8 @@ export function CandidatesSection() {
     async function load() {
       try {
         const [candidateRes, workflowRes] = await Promise.all([
-          fetch("/api/breezy/candidates", { cache: "no-store" }),
-          fetch("/api/candidates/workflows", { cache: "no-store" }),
+          fetchWithRetry("/api/breezy/candidates", { cache: "no-store" }),
+          fetchWithRetry("/api/candidates/workflows", { cache: "no-store" }),
         ]);
         const candidateContentType = candidateRes.headers.get("content-type") ?? "";
         if (!candidateContentType.includes("application/json")) {
@@ -267,7 +240,10 @@ export function CandidatesSection() {
   }, []);
 
   const candidates = useMemo(
-    () => (data?.ok ? data.candidates.map((candidate) => workflowRow(candidate, workflowState[candidate.candidateId])) : []),
+    () =>
+      data?.ok
+        ? data.candidates.map((candidate) => buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId]))
+        : [],
     [data, workflowState],
   );
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
@@ -363,12 +339,31 @@ export function CandidatesSection() {
     [candidates, selectedCandidateId],
   );
 
+  const prioritizationQueues = useMemo(
+    () =>
+      buildPrioritizationQueues(
+        candidates.map((candidate) => ({
+          candidateId: candidate.candidateId,
+          name: candidateName(candidate),
+          positionName: candidate.positionName,
+          workflowStatus: candidate.workflowStatus,
+          assignedRecruiter: candidate.assignedRecruiter,
+          appliedDate: candidate.appliedDate,
+          appliedDays: daysSince(candidate.appliedDate),
+          ai: candidate.ai,
+        })),
+      ),
+    [candidates],
+  );
+
+  const recruiterProductivity = useMemo(() => buildRecruiterProductivity(workflowState), [workflowState]);
+
   function toggleWorkflowStatusFilter(status: CandidateWorkflowStatus) {
     setWorkflowFilter((current) => (current === status ? ALL : status));
   }
 
   async function persistWorkflow(
-    candidate: CandidateWorkflowRow,
+    candidate: ScoredCandidateWorkflowRow,
     workflowStatus: CandidateWorkflowStatus,
     options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
   ): Promise<CandidateWorkflowRecord> {
@@ -395,7 +390,7 @@ export function CandidatesSection() {
   }
 
   function updateWorkflow(
-    candidate: CandidateWorkflowRow,
+    candidate: ScoredCandidateWorkflowRow,
     workflowStatus: CandidateWorkflowStatus,
     options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
   ) {
@@ -418,14 +413,14 @@ export function CandidatesSection() {
     });
   }
 
-  function toggleSelectCandidate(candidateId: string) {
+  const toggleSelectCandidate = useCallback((candidateId: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(candidateId)) next.delete(candidateId);
       else next.add(candidateId);
       return next;
     });
-  }
+  }, []);
 
   async function runBulkUpdate(
     options: { workflowStatus?: CandidateWorkflowStatus; assignedRecruiter?: string; note?: string },
@@ -454,25 +449,110 @@ export function CandidatesSection() {
     }
   }
 
-  function handleCandidateAction(candidate: CandidateWorkflowRow, action: CandidateRowAction) {
-    if (action.kind === "open-drawer") {
-      setSelectedCandidateId(candidate.candidateId);
-      return;
-    }
-    if (action.kind === "change-workflow") {
-      updateWorkflow(candidate, action.status);
-      return;
-    }
-    if (action.kind === "assign-recruiter") {
-      updateWorkflow(candidate, candidate.workflowStatus, { assignedRecruiter: action.recruiter });
-      return;
-    }
-    if (action.kind === "assign-dm") {
-      updateWorkflow(candidate, candidate.workflowStatus, { assignedDM: action.dm });
-      return;
-    }
-    updateWorkflow(candidate, candidate.workflowStatus, { note: action.note });
-  }
+  const handleCandidateAction = useCallback(
+    (candidate: ScoredCandidateWorkflowRow, action: CandidateRowAction) => {
+      if (action.kind === "open-drawer") {
+        setSelectedCandidateId(candidate.candidateId);
+        return;
+      }
+      if (action.kind === "change-workflow") {
+        updateWorkflow(candidate, action.status);
+        return;
+      }
+      if (action.kind === "assign-recruiter") {
+        updateWorkflow(candidate, candidate.workflowStatus, { assignedRecruiter: action.recruiter });
+        return;
+      }
+      if (action.kind === "assign-dm") {
+        updateWorkflow(candidate, candidate.workflowStatus, { assignedDM: action.dm });
+        return;
+      }
+      updateWorkflow(candidate, candidate.workflowStatus, { note: action.note });
+    },
+    // updateWorkflow is stable for this component instance (uses setState only).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+    [],
+  );
+
+  const renderCandidateRow = useCallback(
+    (candidate: ScoredCandidateWorkflowRow) => {
+      const appliedDays = daysSince(candidate.appliedDate);
+      const statusDays = daysSince(candidate.lastActionAt ?? candidate.appliedDate);
+      const rowSelected = selectedCandidateId === candidate.candidateId;
+      return (
+        <tr
+          key={candidate.candidateId}
+          onClick={() => setSelectedCandidateId(candidate.candidateId)}
+          className={`cursor-pointer transition-colors ${
+            rowSelected ? "bg-teal-500/10 hover:bg-teal-500/15" : "hover:bg-zinc-800/40"
+          }`}
+          style={{ height: 34 }}
+        >
+          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+            <input
+              type="checkbox"
+              aria-label={`Select ${candidateName(candidate)}`}
+              checked={selectedIds.has(candidate.candidateId)}
+              onChange={() => toggleSelectCandidate(candidate.candidateId)}
+            />
+          </td>
+          <td className={`${tdClass} max-w-[10rem] truncate font-medium text-zinc-100`}>{candidateName(candidate)}</td>
+          <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
+          <td className={tdClass}>{candidate.phone || "—"}</td>
+          <td className={`${tdClass} max-w-[8rem] truncate text-zinc-400`}>{candidate.source || "—"}</td>
+          <td className={`${tdClass} max-w-[8rem] truncate`}>{candidate.stage || "—"}</td>
+          <td className={`${tdClass} text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
+          <td className={`${tdClass} max-w-[10rem] truncate`}>{candidate.positionName || "—"}</td>
+          <td className={tdClass}>{candidate.city || "—"}</td>
+          <td className={tdClass}>{candidate.state || "—"}</td>
+          <td className={tdClass}>
+            <span
+              className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-tight ${WORKFLOW_STATUS_STYLES[candidate.workflowStatus]}`}
+            >
+              {candidate.workflowStatus}
+            </span>
+          </td>
+          <td className={`${tdClass} text-[10px]`}>
+            <AgingValue days={appliedDays} label="Applied" />
+            <AgingValue days={statusDays} label="Status" />
+          </td>
+          <td className={`${tdClass} max-w-[12rem]`}>
+            <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
+            <div className="mt-0.5 truncate text-[10px] text-zinc-500">
+              {candidate.assignedRecruiter} · {candidate.assignedDM}
+            </div>
+          </td>
+          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+            <CandidateActionsMenu onAction={(action) => handleCandidateAction(candidate, action)} />
+          </td>
+          <td className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`} title="Open candidate drawer">
+            Notes: {candidate.notes.length}
+          </td>
+          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              disabled
+              title="HelloSign sending is disabled until API keys and packet templates are configured."
+              className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500"
+            >
+              Send
+            </button>
+          </td>
+          <td className={tdClass}>
+            <span
+              className={`inline-flex min-w-[2rem] justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${AI_GRADE_STYLES[candidate.aiGrade]}`}
+            >
+              {candidate.aiGrade}
+            </span>
+          </td>
+          <td className={tdClass}>
+            <RecommendationPills items={candidate.aiRecommendations} />
+          </td>
+        </tr>
+      );
+    },
+    [handleCandidateAction, selectedCandidateId, selectedIds, toggleSelectCandidate],
+  );
 
   if (data === undefined) return <CandidatesSkeleton />;
 
@@ -509,6 +589,12 @@ export function CandidatesSection() {
           value={breakdown.length > 0 ? breakdown.map((row) => `${row.source}: ${row.count}`).join(" · ") : "—"}
         />
       </div>
+
+      <CandidateAutomationPanels
+        queues={prioritizationQueues}
+        productivity={recruiterProductivity}
+        onOpenCandidate={setSelectedCandidateId}
+      />
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
         <div>
@@ -619,6 +705,31 @@ export function CandidatesSection() {
               <button
                 type="button"
                 disabled={bulkBusy}
+                onClick={() =>
+                  void runBulkUpdate({
+                    workflowStatus: "Paperwork Needed",
+                    note: "Bulk paperwork prep queued",
+                  })
+                }
+                className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-100 hover:bg-amber-500/20"
+              >
+                Bulk paperwork prep
+              </button>
+              <button
+                type="button"
+                disabled={bulkBusy}
+                onClick={() => {
+                  const note = window.prompt("Note to add for all selected candidates:");
+                  if (!note?.trim()) return;
+                  void runBulkUpdate({ note: note.trim() });
+                }}
+                className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                Bulk add note
+              </button>
+              <button
+                type="button"
+                disabled={bulkBusy}
                 onClick={() => setSelectedIds(new Set())}
                 className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
               >
@@ -663,8 +774,12 @@ export function CandidatesSection() {
         {filtered.length === 0 ? (
           <p className="px-3 py-8 text-xs text-zinc-500 sm:px-4">No candidates match the selected filters.</p>
         ) : (
-          <div className="max-h-[min(70vh,960px)] overflow-auto">
-            <table className="min-w-[1500px] w-full text-left">
+          <VirtualCandidateTable
+            rows={filtered}
+            colSpan={18}
+            getRowKey={(candidate) => candidate.candidateId}
+            renderRow={(candidate) => renderCandidateRow(candidate)}
+            header={
               <thead className="border-b border-zinc-800/80">
                 <tr>
                   <th className={thClass}>
@@ -691,85 +806,12 @@ export function CandidatesSection() {
                   <th className={thClass}>Actions</th>
                   <th className={thClass}>Notes</th>
                   <th className={thClass}>HelloSign</th>
-                  <th className={thClass}>AI</th>
+                  <th className={thClass}>AI Grade</th>
+                  <th className={thClass}>Recommendations</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
-                {filtered.map((candidate) => {
-                  const appliedDays = daysSince(candidate.appliedDate);
-                  const statusDays = daysSince(candidate.lastActionAt ?? candidate.appliedDate);
-                  const rowSelected = selectedCandidateId === candidate.candidateId;
-                  return (
-                  <tr
-                    key={candidate.candidateId}
-                    onClick={() => setSelectedCandidateId(candidate.candidateId)}
-                    className={`cursor-pointer transition-colors ${
-                      rowSelected ? "bg-teal-500/10 hover:bg-teal-500/15" : "hover:bg-zinc-800/40"
-                    }`}
-                  >
-                    <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        aria-label={`Select ${candidateName(candidate)}`}
-                        checked={selectedIds.has(candidate.candidateId)}
-                        onChange={() => toggleSelectCandidate(candidate.candidateId)}
-                      />
-                    </td>
-                    <td className={`${tdClass} max-w-[10rem] truncate font-medium text-zinc-100`}>{candidateName(candidate)}</td>
-                    <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
-                    <td className={tdClass}>{candidate.phone || "—"}</td>
-                    <td className={`${tdClass} max-w-[8rem] truncate text-zinc-400`}>{candidate.source || "—"}</td>
-                    <td className={`${tdClass} max-w-[8rem] truncate`}>{candidate.stage || "—"}</td>
-                    <td className={`${tdClass} text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
-                    <td className={`${tdClass} max-w-[10rem] truncate`}>{candidate.positionName || "—"}</td>
-                    <td className={tdClass}>{candidate.city || "—"}</td>
-                    <td className={tdClass}>{candidate.state || "—"}</td>
-                    <td className={tdClass}>
-                      <span
-                        className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-tight ${WORKFLOW_STATUS_STYLES[candidate.workflowStatus]}`}
-                      >
-                        {candidate.workflowStatus}
-                      </span>
-                    </td>
-                    <td className={`${tdClass} text-[10px]`}>
-                      <AgingValue days={appliedDays} label="Applied" />
-                      <AgingValue days={statusDays} label="Status" />
-                    </td>
-                    <td className={`${tdClass} max-w-[12rem]`}>
-                      <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
-                      <div className="mt-0.5 truncate text-[10px] text-zinc-500">
-                        {candidate.assignedRecruiter} · {candidate.assignedDM}
-                      </div>
-                    </td>
-                    <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-                      <CandidateActionsMenu onAction={(action) => handleCandidateAction(candidate, action)} />
-                    </td>
-                    <td
-                      className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`}
-                      title="Open candidate drawer"
-                    >
-                      Notes: {candidate.notes.length}
-                    </td>
-                    <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-                      <button
-                        type="button"
-                        disabled
-                        title="HelloSign sending is disabled until API keys and packet templates are configured."
-                        className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500"
-                      >
-                        Send
-                      </button>
-                    </td>
-                    <td className={`${tdClass} text-[10px] text-zinc-500`}>
-                      <span className="block">{candidate.overallCandidateScore ?? "—"}</span>
-                      <span className="block max-w-[8rem] truncate">{candidate.aiRecommendation}</span>
-                    </td>
-                  </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+            }
+          />
         )}
       </section>
 

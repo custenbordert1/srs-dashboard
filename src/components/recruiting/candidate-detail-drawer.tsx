@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  AI_GRADE_STYLES,
+  type AiLetterGrade,
+  type CandidateAiScoreBreakdown,
+  type WorkflowRecommendation,
+} from "@/lib/candidate-ai-scoring";
+import { buildIntegrationPrep } from "@/lib/integration-prep";
 import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
@@ -26,6 +33,10 @@ export type CandidateDrawerRow = {
   history: Array<{ id: string; type: string; message: string; createdAt: string }>;
   overallCandidateScore: number | null;
   aiRecommendation: string;
+  aiGrade: AiLetterGrade;
+  aiNumericScore: number;
+  aiRecommendations: WorkflowRecommendation[];
+  aiBreakdown: CandidateAiScoreBreakdown;
   resumeKeywordScore: number | null;
   merchandisingExperienceScore: number | null;
   retailExperienceScore: number | null;
@@ -434,24 +445,72 @@ export function CandidateDetailDrawer({
               ) : (
                 <p className="text-zinc-600">Loading prep status…</p>
               )}
+              <div className="space-y-2 border-t border-zinc-800 pt-3">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Integration prep</p>
+                {buildIntegrationPrep(candidate, candidate.workflowStatus).map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-lg border px-2 py-1.5 ${
+                      item.ready
+                        ? "border-teal-500/30 bg-teal-500/5 text-teal-200"
+                        : "border-zinc-700 bg-zinc-950/40 text-zinc-400"
+                    }`}
+                  >
+                    <p className="font-medium text-zinc-200">{item.label}</p>
+                    <p className="mt-0.5 text-zinc-500">{item.statusLabel}</p>
+                    <p className="mt-0.5 text-[10px] text-zinc-600">{item.message}</p>
+                    {item.missingFields.length > 0 ? (
+                      <p className="mt-1 text-[10px] text-amber-300/90">Missing: {item.missingFields.join(", ")}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
 
           {tab === "ai" ? (
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-              <dt className="text-zinc-500">Overall</dt>
-              <dd className="text-zinc-200">{candidate.overallCandidateScore ?? "Pending"}</dd>
-              <dt className="text-zinc-500">Resume keywords</dt>
-              <dd className="text-zinc-200">{candidate.resumeKeywordScore ?? "—"}</dd>
-              <dt className="text-zinc-500">Merchandising</dt>
-              <dd className="text-zinc-200">{candidate.merchandisingExperienceScore ?? "—"}</dd>
-              <dt className="text-zinc-500">Retail</dt>
-              <dd className="text-zinc-200">{candidate.retailExperienceScore ?? "—"}</dd>
-              <dt className="text-zinc-500">Travel fit</dt>
-              <dd className="text-zinc-200">{candidate.travelFitScore ?? "—"}</dd>
-              <dt className="col-span-2 text-zinc-500">Recommendation</dt>
-              <dd className="col-span-2 text-zinc-400">{candidate.aiRecommendation}</dd>
-            </dl>
+            <div className="space-y-4 text-xs">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex rounded-full px-2 py-0.5 text-sm font-semibold ${AI_GRADE_STYLES[candidate.aiGrade]}`}
+                >
+                  {candidate.aiGrade}
+                </span>
+                <span className="text-zinc-400 tabular-nums">{candidate.aiNumericScore}/100</span>
+              </div>
+              {candidate.aiRecommendations.length > 0 ? (
+                <ul className="flex flex-wrap gap-1">
+                  {candidate.aiRecommendations.map((item) => (
+                    <li
+                      key={item}
+                      className="rounded-full bg-zinc-800/80 px-2 py-0.5 text-[10px] text-zinc-300 ring-1 ring-zinc-700"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-2">
+                <dt className="text-zinc-500">Merchandising keywords</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.merchandisingKeywords}</dd>
+                <dt className="text-zinc-500">Reset experience</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.resetExperience}</dd>
+                <dt className="text-zinc-500">Walmart / Target</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.walmartTargetExperience}</dd>
+                <dt className="text-zinc-500">Travel radius</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.travelRadius}</dd>
+                <dt className="text-zinc-500">Resume completeness</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.resumeCompleteness}</dd>
+                <dt className="text-zinc-500">Years of experience</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.yearsOfExperience}</dd>
+                <dt className="text-zinc-500">Retail terminology</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.retailTerminology}</dd>
+                <dt className="text-zinc-500">Breezy score boost</dt>
+                <dd className="tabular-nums text-zinc-200">{candidate.aiBreakdown.breezyScoreBoost}</dd>
+                <dt className="col-span-2 text-zinc-500">Summary</dt>
+                <dd className="col-span-2 text-zinc-400">{candidate.aiRecommendation}</dd>
+              </dl>
+            </div>
           ) : null}
         </div>
 
