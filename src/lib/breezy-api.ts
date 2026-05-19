@@ -14,6 +14,7 @@ const MAX_POSITIONS_FOR_CANDIDATE_SCAN = 20;
 
 /** Candidates fetched per position during aggregation. */
 const CANDIDATES_PAGE_SIZE = 50;
+const MAX_CANDIDATE_PAGES_PER_POSITION = 2;
 
 export type BreezyCompany = {
   _id: string;
@@ -21,27 +22,34 @@ export type BreezyCompany = {
   [key: string]: unknown;
 };
 
-export type BreezyPosition = {
-  _id: string;
-  name?: string;
-  friendly_id?: string;
-  state?: string;
-  [key: string]: unknown;
+export type BreezyJob = {
+  jobId: string;
+  name: string;
+  city: string;
+  state: string;
+  status: string;
+  createdDate: string;
+  updatedDate: string;
+  candidateCount?: number;
 };
 
 export type BreezyCandidate = {
-  _id: string;
-  name?: string;
-  email_address?: string;
-  phone_number?: string;
-  stage?: { name?: string };
-  position_id?: string;
-  [key: string]: unknown;
+  candidateId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  source: string;
+  stage: string;
+  appliedDate: string;
+  positionId: string;
+  positionName: string;
+  score?: number;
 };
 
 export type BreezyJobsSuccess = {
   ok: true;
-  jobs: BreezyPosition[];
+  jobs: BreezyJob[];
   fetchedAt: string;
   companyId: string;
   companyName?: string;
@@ -81,6 +89,21 @@ type BreezyErrorBody = {
   error?: { message?: string; type?: string };
 };
 
+type RawBreezyPosition = Record<string, unknown> & {
+  _id?: string;
+  name?: string;
+  friendly_id?: string;
+  state?: string;
+};
+
+type RawBreezyCandidate = Record<string, unknown> & {
+  _id?: string;
+  name?: string;
+  email_address?: string;
+  phone_number?: string;
+  position_id?: string;
+};
+
 export function getBreezyApiKey(): string | undefined {
   const key = process.env.BREEZY_API_KEY?.trim();
   const normalized = key?.toLowerCase();
@@ -108,12 +131,125 @@ function missingApiKeyFailure(): BreezyApiFailure {
 }
 
 function parseBreezyError(body: unknown, status: number): string {
+  if (status === 401 || status === 403) {
+    return "Breezy authentication failed. Check that BREEZY_API_KEY is active and has access to this company.";
+  }
+  if (status === 429) {
+    return "Breezy rate limit reached. Retry after Breezy allows additional requests.";
+  }
+  if (status >= 500) {
+    return `Breezy appears unavailable right now (HTTP ${status}). Retry shortly.`;
+  }
   if (body && typeof body === "object" && "error" in body) {
     const err = (body as BreezyErrorBody).error;
     if (err?.message) return err.message;
     if (err?.type) return err.type;
   }
   return `Breezy API request failed (HTTP ${status})`;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function stringField(record: Record<string, unknown> | null, keys: string[]): string {
+  if (!record) return "";
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number") return String(value);
+  }
+  return "";
+}
+
+function numberField(record: Record<string, unknown> | null, keys: string[]): number | undefined {
+  if (!record) return undefined;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number.parseFloat(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return undefined;
+}
+
+function nestedString(record: Record<string, unknown> | null, paths: string[][]): string {
+  for (const path of paths) {
+    let current: unknown = record;
+    for (const segment of path) {
+      current = asRecord(current)?.[segment];
+    }
+    if (typeof current === "string" && current.trim()) return current.trim();
+    if (typeof current === "number") return String(current);
+  }
+  return "";
+}
+
+function splitName(rawName: string): { firstName: string; lastName: string } {
+  const parts = rawName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "", lastName: "" };
+  return {
+    firstName: parts[0] ?? "",
+    lastName: parts.slice(1).join(" "),
+  };
+}
+
+function sanitizeJob(raw: RawBreezyPosition): BreezyJob | null {
+  const record = raw as Record<string, unknown>;
+  const jobId = stringField(record, ["_id", "id", "friendly_id"]);
+  if (!jobId) return null;
+
+  return {
+    jobId,
+    name: stringField(record, ["name", "title"]) || "Untitled job",
+    city: stringField(record, ["city"]) || nestedString(record, [["location", "city"], ["address", "city"]]),
+    state:
+      stringField(record, ["state", "region"]) ||
+      nestedString(record, [["location", "state"], ["address", "state"]]),
+    status: stringField(record, ["state", "status"]) || "unknown",
+    createdDate: stringField(record, ["creation_date", "created_at", "created"]) || "",
+    updatedDate: stringField(record, ["updated_date", "updated_at", "modified_at"]) || "",
+    candidateCount: numberField(record, ["candidate_count", "candidates_count", "applicants_count"]),
+  };
+}
+
+function sanitizeCandidate(
+  raw: RawBreezyCandidate,
+  position: Pick<BreezyJob, "jobId" | "name"> | undefined,
+): BreezyCandidate | null {
+  const record = raw as Record<string, unknown>;
+  const candidateId = stringField(record, ["_id", "id"]);
+  if (!candidateId) return null;
+
+  const explicitFirstName = stringField(record, ["first_name", "firstName"]);
+  const explicitLastName = stringField(record, ["last_name", "lastName"]);
+  const fallbackName = splitName(stringField(record, ["name", "full_name"]));
+
+  return {
+    candidateId,
+    firstName: explicitFirstName || fallbackName.firstName,
+    lastName: explicitLastName || fallbackName.lastName,
+    email: stringField(record, ["email_address", "email"]),
+    phone: stringField(record, ["phone_number", "phone"]),
+    source:
+      nestedString(record, [["source", "name"]]) ||
+      stringField(record, ["source", "origin", "candidate_source"]) ||
+      "Unknown source",
+    stage:
+      nestedString(record, [["stage", "name"], ["status", "name"]]) ||
+      stringField(record, ["stage_name", "status"]) ||
+      "Unknown stage",
+    appliedDate: stringField(record, ["creation_date", "created_at", "created", "applied_date"]) || "",
+    positionId: stringField(record, ["position_id"]) || position?.jobId || "",
+    positionName:
+      nestedString(record, [["position", "name"], ["position", "title"]]) ||
+      stringField(record, ["position_name", "position_title"]) ||
+      position?.name ||
+      "Unknown position",
+    score: numberField(record, ["score", "rating"]),
+  };
 }
 
 async function breezyGet<T>(
@@ -224,13 +360,15 @@ async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsR
 
   const { companyId, companyName } = companyResult;
   const params = new URLSearchParams({ state });
-  const positionsResult = await breezyGet<BreezyPosition[]>(
+  const positionsResult = await breezyGet<RawBreezyPosition[]>(
     `/company/${encodeURIComponent(companyId)}/positions?${params.toString()}`,
   );
 
   if (!positionsResult.ok) return positionsResult;
 
-  const jobs = Array.isArray(positionsResult.data) ? positionsResult.data : [];
+  const jobs = (Array.isArray(positionsResult.data) ? positionsResult.data : [])
+    .map(sanitizeJob)
+    .filter((job): job is BreezyJob => Boolean(job));
 
   return {
     ok: true,
@@ -245,16 +383,25 @@ async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsR
 export async function fetchBreezyCandidates(options?: {
   positionId?: string;
   state?: string;
+  pageSize?: number;
+  maxPages?: number;
+  maxPositions?: number;
 }): Promise<BreezyCandidatesResult> {
   const positionId = options?.positionId?.trim() ?? "";
   const state = options?.state ?? "published";
-  const cacheKey = `candidates:${positionId || "all"}:${state}`;
+  const pageSize = Math.max(1, Math.min(options?.pageSize ?? CANDIDATES_PAGE_SIZE, CANDIDATES_PAGE_SIZE));
+  const maxPages = Math.max(1, Math.min(options?.maxPages ?? MAX_CANDIDATE_PAGES_PER_POSITION, MAX_CANDIDATE_PAGES_PER_POSITION));
+  const maxPositions = Math.max(1, Math.min(options?.maxPositions ?? MAX_POSITIONS_FOR_CANDIDATE_SCAN, MAX_POSITIONS_FOR_CANDIDATE_SCAN));
+  const cacheKey = `candidates:${positionId || "all"}:${state}:${pageSize}:${maxPages}:${maxPositions}`;
   return cached(candidatesCache, cacheKey, () => fetchBreezyCandidatesUncached(options));
 }
 
 async function fetchBreezyCandidatesUncached(options?: {
   positionId?: string;
   state?: string;
+  pageSize?: number;
+  maxPages?: number;
+  maxPositions?: number;
 }): Promise<BreezyCandidatesResult> {
   const apiKey = getBreezyApiKey();
   if (!apiKey) return missingApiKeyFailure();
@@ -265,15 +412,20 @@ async function fetchBreezyCandidatesUncached(options?: {
   const { companyId, companyName } = companyResult;
   const positionId = options?.positionId?.trim();
   const fetchedAt = new Date().toISOString();
+  const pageSize = Math.max(1, Math.min(options?.pageSize ?? CANDIDATES_PAGE_SIZE, CANDIDATES_PAGE_SIZE));
+  const maxPages = Math.max(1, Math.min(options?.maxPages ?? MAX_CANDIDATE_PAGES_PER_POSITION, MAX_CANDIDATE_PAGES_PER_POSITION));
+  const maxPositions = Math.max(1, Math.min(options?.maxPositions ?? MAX_POSITIONS_FOR_CANDIDATE_SCAN, MAX_POSITIONS_FOR_CANDIDATE_SCAN));
 
   if (positionId) {
-    const candidatesResult = await breezyGet<BreezyCandidate[]>(
-      `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(positionId)}/candidates?page_size=${CANDIDATES_PAGE_SIZE}&page=1`,
+    const candidatesResult = await breezyGet<RawBreezyCandidate[]>(
+      `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(positionId)}/candidates?page_size=${pageSize}&page=1`,
     );
     if (!candidatesResult.ok) return candidatesResult;
 
     const raw = Array.isArray(candidatesResult.data) ? candidatesResult.data : [];
-    const candidates = raw.map((c) => ({ ...c, position_id: positionId }));
+    const candidates = raw
+      .map((c) => sanitizeCandidate({ ...c, position_id: positionId }, { jobId: positionId, name: "" }))
+      .filter((candidate): candidate is BreezyCandidate => Boolean(candidate));
 
     return {
       ok: true,
@@ -289,8 +441,8 @@ async function fetchBreezyCandidatesUncached(options?: {
   const jobsResult = await fetchBreezyJobs(state);
   if (!jobsResult.ok) return jobsResult;
 
-  const positions = jobsResult.jobs.filter((p) => p._id);
-  const scanLimit = Math.min(positions.length, MAX_POSITIONS_FOR_CANDIDATE_SCAN);
+  const positions = jobsResult.jobs.filter((p) => p.jobId);
+  const scanLimit = Math.min(positions.length, maxPositions);
   const candidates: BreezyCandidate[] = [];
   const warnings: string[] = [];
   const scanStartedAt = Date.now();
@@ -305,23 +457,35 @@ async function fetchBreezyCandidatesUncached(options?: {
     }
 
     const pos = positions[i];
-    const posId = pos._id;
-    const listResult = await breezyGet<BreezyCandidate[]>(
-      `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(posId)}/candidates?page_size=${CANDIDATES_PAGE_SIZE}&page=1`,
-      { timeoutMs: BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS },
-    );
-    if (!listResult.ok) {
-      if (candidates.length === 0) return listResult;
-      truncated = true;
-      warnings.push(`Candidate scan stopped early: ${listResult.error}`);
-      break;
-    }
+    const posId = pos.jobId;
+    for (let page = 1; page <= maxPages; page += 1) {
+      if (Date.now() - scanStartedAt >= BREEZY_CANDIDATE_SCAN_BUDGET_MS) {
+        truncated = true;
+        warnings.push("Candidate scan stopped early to stay within the serverless runtime budget.");
+        break;
+      }
 
-    const batch = Array.isArray(listResult.data) ? listResult.data : [];
-    for (const candidate of batch) {
-      candidates.push({ ...candidate, position_id: posId });
+      const listResult = await breezyGet<RawBreezyCandidate[]>(
+        `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(posId)}/candidates?page_size=${pageSize}&page=${page}`,
+        { timeoutMs: BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS },
+      );
+      if (!listResult.ok) {
+        if (candidates.length === 0) return listResult;
+        truncated = true;
+        warnings.push(`Candidate scan stopped early: ${listResult.error}`);
+        break;
+      }
+
+      const batch = Array.isArray(listResult.data) ? listResult.data : [];
+      for (const candidate of batch) {
+        const clean = sanitizeCandidate({ ...candidate, position_id: posId }, pos);
+        if (clean) candidates.push(clean);
+      }
+      if (batch.length < pageSize) break;
+      if (page === maxPages) truncated = true;
     }
     positionsScanned += 1;
+    if (truncated && Date.now() - scanStartedAt >= BREEZY_CANDIDATE_SCAN_BUDGET_MS) break;
   }
 
   return {
@@ -334,4 +498,28 @@ async function fetchBreezyCandidatesUncached(options?: {
     truncated,
     warnings: warnings.length > 0 ? warnings : undefined,
   };
+}
+
+export function getJobs(state = "published"): Promise<BreezyJobsResult> {
+  return fetchBreezyJobs(state);
+}
+
+export function getOpenJobs(): Promise<BreezyJobsResult> {
+  return fetchBreezyJobs("published");
+}
+
+export function getCandidates(options?: {
+  state?: string;
+  pageSize?: number;
+  maxPages?: number;
+  maxPositions?: number;
+}): Promise<BreezyCandidatesResult> {
+  return fetchBreezyCandidates(options);
+}
+
+export function getCandidatesByPosition(
+  positionId: string,
+  options?: { pageSize?: number; maxPages?: number },
+): Promise<BreezyCandidatesResult> {
+  return fetchBreezyCandidates({ positionId, ...options });
 }

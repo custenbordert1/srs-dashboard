@@ -1,4 +1,4 @@
-import { getBreezyApiKey } from "@/lib/breezy-api";
+import { fetchBreezyCandidates, fetchBreezyJobs, getBreezyApiKey } from "@/lib/breezy-api";
 
 export type BreezySyncEntity = "job" | "candidate";
 
@@ -71,83 +71,14 @@ function maxRequestsPerMinute(): number {
   return DEFAULT_MAX_REQUESTS_PER_MINUTE;
 }
 
-function minutesAgo(minutes: number): string {
-  return new Date(Date.now() - minutes * 60 * 1000).toISOString();
-}
-
-function mockQueue(now: string, tokenMissing: boolean): BreezySyncQueueItem[] {
-  return [
-    {
-      id: "mock-job-queue-1",
-      entity: "job",
-      externalId: "pos_mock_retail_rep_dallas",
-      name: "Retail Sales Representative - Dallas, TX",
-      status: tokenMissing ? "blocked" : "queued",
-      queuedAt: now,
-      retryCount: 0,
-    },
-    {
-      id: "mock-job-queue-2",
-      entity: "job",
-      externalId: "pos_mock_brand_rep_phoenix",
-      name: "Brand Representative - Phoenix, AZ",
-      status: tokenMissing ? "blocked" : "retry-ready",
-      queuedAt: minutesAgo(18),
-      retryCount: 1,
-    },
-    {
-      id: "mock-candidate-queue-1",
-      entity: "candidate",
-      externalId: "cand_mock_maria_lopez",
-      name: "Maria Lopez",
-      status: tokenMissing ? "blocked" : "queued",
-      queuedAt: minutesAgo(7),
-      retryCount: 0,
-    },
-    {
-      id: "mock-candidate-queue-2",
-      entity: "candidate",
-      externalId: "cand_mock_james_hall",
-      name: "James Hall",
-      status: tokenMissing ? "blocked" : "queued",
-      queuedAt: minutesAgo(11),
-      retryCount: 0,
-    },
-  ];
-}
-
-function mockBrokenPositionQueue(tokenMissing: boolean): BrokenPositionCleanupItem[] {
-  return [
-    {
-      positionName: "Retail Sales Representative - Dallas, TX",
-      positionId: "pos_mock_missing_dallas",
-      errorType: tokenMissing ? "Permission check" : "Missing position",
-      retryCount: tokenMissing ? 0 : 2,
-      suggestedAction: tokenMissing ? "Retry after token is configured" : "Reconnect position mapping",
-    },
-    {
-      positionName: "Brand Representative - Phoenix, AZ",
-      positionId: "pos_mock_archived_phoenix",
-      errorType: "Archived position",
-      retryCount: 1,
-      suggestedAction: "Archive local mapping",
-    },
-    {
-      positionName: "Market Specialist - Tampa, FL",
-      positionId: "pos_mock_candidate_mismatch",
-      errorType: "Candidate link mismatch",
-      retryCount: 3,
-      suggestedAction: "Review Breezy permissions",
-    },
-  ];
-}
-
 function buildRateLimitProtection(input: {
   tokenMissing: boolean;
-  failedJobs: number;
+  failedRequests: number;
+  requestsAttempted: number;
+  rateLimited: boolean;
 }): BreezyRateLimitProtection {
   const max = maxRequestsPerMinute();
-  const requestsUsed = input.tokenMissing ? 0 : Math.min(max, Math.floor(max * 0.28));
+  const requestsUsed = input.tokenMissing ? 0 : Math.min(max, input.requestsAttempted);
 
   return {
     maxRequestsPerMinute: max,
@@ -155,52 +86,113 @@ function buildRateLimitProtection(input: {
     requestsRemainingThisMinute: Math.max(0, max - requestsUsed),
     warning: input.tokenMissing
       ? "Breezy token is missing; outbound requests are disabled and no rate limit is consumed."
-      : requestsUsed > max * 0.8
-        ? "Approaching configured Breezy request budget."
+      : input.rateLimited
+        ? "Breezy reported a rate limit response during the live health check."
         : null,
     retryBackoffPlaceholder:
-      "Retry policy placeholder: exponential backoff at 30s, 2m, 5m, then cleanup queue review.",
-    failedRequestsTracked: input.failedJobs,
+      "Read-only checks use bounded requests and should be retried after Breezy recovers or rate limits reset.",
+    failedRequestsTracked: input.failedRequests,
     failedRequestWindowMinutes: 60,
   };
 }
 
-export function buildBreezySyncHealthSnapshot(): BreezySyncHealthSnapshot {
+function isRateLimitError(error: string): boolean {
+  return error.toLowerCase().includes("rate limit") || error.includes("429");
+}
+
+function isAuthError(error: string): boolean {
+  const lower = error.toLowerCase();
+  return lower.includes("authentication failed") || lower.includes("access token") || lower.includes("unauthorized");
+}
+
+export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthSnapshot> {
   const generatedAt = new Date().toISOString();
   const tokenMissing = !getBreezyApiKey();
   const tokenStatus: BreezyTokenStatus = tokenMissing ? "missing" : "configured";
-  const queue = mockQueue(generatedAt, tokenMissing);
-  const brokenPositionCleanupQueue = mockBrokenPositionQueue(tokenMissing);
-  const jobsQueued = queue.filter((item) => item.entity === "job").length;
-  const candidatesQueued = queue.filter((item) => item.entity === "candidate").length;
-  const failedJobs = brokenPositionCleanupQueue.length;
-  const rateLimitProtection = buildRateLimitProtection({ tokenMissing, failedJobs });
-  const rateLimitWarnings = [
+  const queue: BreezySyncQueueItem[] = [];
+  const brokenPositionCleanupQueue: BrokenPositionCleanupItem[] = [];
+
+  if (tokenMissing) {
+    const rateLimitProtection = buildRateLimitProtection({
+      tokenMissing,
+      failedRequests: 0,
+      requestsAttempted: 0,
+      rateLimited: false,
+    });
+    return {
+      ok: true,
+      generatedAt,
+      lastSyncTime: null,
+      syncStatus: "safe-mode",
+      statusLabel: "Waiting on Breezy API key",
+      tokenStatus,
+      tokenStatusLabel: "Missing token",
+      safeMode: true,
+      jobsQueued: 0,
+      candidatesQueued: 0,
+      failedJobs: 0,
+      rateLimitWarnings: [rateLimitProtection.warning].filter((warning): warning is string => Boolean(warning)),
+      rateLimitProtection,
+      queue,
+      brokenPositionCleanupQueue,
+      notes: ["Breezy API calls are disabled until BREEZY_API_KEY is configured."],
+    };
+  }
+
+  const [jobsResult, candidatesResult] = await Promise.all([
+    fetchBreezyJobs(),
+    fetchBreezyCandidates(),
+  ]);
+  const failures = [
+    jobsResult.ok ? null : jobsResult.error,
+    candidatesResult.ok ? null : candidatesResult.error,
+  ].filter((error): error is string => Boolean(error));
+  const rateLimited = failures.some(isRateLimitError);
+  const authFailed = failures.some(isAuthError);
+  const rateLimitProtection = buildRateLimitProtection({
+    tokenMissing,
+    failedRequests: failures.length,
+    requestsAttempted: 2 + (candidatesResult.ok ? candidatesResult.positionsScanned ?? 0 : 0),
+    rateLimited,
+  });
+  const liveWarnings = [
     rateLimitProtection.warning,
-    tokenMissing ? "Safe fallback data is active until BREEZY_API_KEY is configured." : null,
+    candidatesResult.ok ? candidatesResult.warnings?.join(" ") : null,
+    ...failures,
   ].filter((warning): warning is string => Boolean(warning));
+  const lastSyncTime = [jobsResult, candidatesResult]
+    .filter((result) => result.ok)
+    .map((result) => result.fetchedAt)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
+  const jobsCount = jobsResult.ok ? jobsResult.jobs.length : 0;
+  const candidatesCount = candidatesResult.ok ? candidatesResult.candidates.length : 0;
+  const syncStatus: BreezySyncStatus =
+    failures.length === 0 ? "ready" : authFailed ? "failed" : rateLimited || lastSyncTime ? "warning" : "failed";
 
   return {
     ok: true,
     generatedAt,
-    lastSyncTime: tokenMissing ? null : minutesAgo(22),
-    syncStatus: tokenMissing ? "safe-mode" : failedJobs > 0 ? "warning" : "ready",
-    statusLabel: tokenMissing ? "Safe mode" : failedJobs > 0 ? "Ready with cleanup warnings" : "Ready",
+    lastSyncTime,
+    syncStatus,
+    statusLabel:
+      syncStatus === "ready"
+        ? "Live Breezy reads connected"
+        : syncStatus === "warning"
+          ? "Live Breezy reads partially available"
+          : "Breezy live reads failed",
     tokenStatus,
-    tokenStatusLabel: tokenMissing ? "Missing token" : "Configured",
+    tokenStatusLabel: "Configured",
     safeMode: tokenMissing,
-    jobsQueued,
-    candidatesQueued,
-    failedJobs,
-    rateLimitWarnings,
+    jobsQueued: 0,
+    candidatesQueued: 0,
+    failedJobs: failures.length,
+    rateLimitWarnings: liveWarnings,
     rateLimitProtection,
     queue,
     brokenPositionCleanupQueue,
-    notes: tokenMissing
-      ? [
-          "Breezy API calls are disabled because BREEZY_API_KEY is not configured.",
-          "Mock queue records are safe placeholders for future job and candidate sync workflows.",
-        ]
-      : ["Sync infrastructure is ready for live Breezy reads and future write/sync jobs."],
+    notes: [
+      `Live Breezy jobs visible: ${jobsCount.toLocaleString()}.`,
+      `Live Breezy candidates visible in bounded scan: ${candidatesCount.toLocaleString()}.`,
+    ],
   };
 }

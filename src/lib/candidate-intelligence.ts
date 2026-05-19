@@ -164,28 +164,15 @@ function candidateMarket(candidate: BreezyCandidate) {
 }
 
 function candidatePosition(candidate: BreezyCandidate): string {
-  return (
-    nestedString(candidate, [["position", "name"], ["position", "title"]]) ||
-    stringField(candidate as Record<string, unknown>, ["position_name", "position_title", "position_id"]) ||
-    candidate.position_id ||
-    "Unknown position"
-  );
+  return candidate.positionName || candidate.positionId || "Unknown position";
 }
 
 function candidateSource(candidate: BreezyCandidate): string {
-  return (
-    nestedString(candidate, [["source", "name"]]) ||
-    stringField(candidate as Record<string, unknown>, ["source", "origin", "candidate_source"]) ||
-    "Unknown source"
-  );
+  return candidate.source || "Unknown source";
 }
 
 function candidateStatus(candidate: BreezyCandidate): string {
-  return (
-    nestedString(candidate, [["stage", "name"], ["status", "name"]]) ||
-    stringField(candidate as Record<string, unknown>, ["status", "stage_name"]) ||
-    "Unknown status"
-  );
+  return candidate.stage || "Unknown status";
 }
 
 function candidateRecruiter(candidate: BreezyCandidate): string {
@@ -202,9 +189,9 @@ function candidateRecruiter(candidate: BreezyCandidate): string {
 
 export function computeCandidateQualityScore(candidate: BreezyCandidate, status: string): number {
   let score = 35;
-  if (candidate.email_address) score += 15;
-  if (candidate.phone_number) score += 10;
-  if (asRecord((candidate as Record<string, unknown>).resume)) score += 15;
+  if (candidate.email) score += 15;
+  if (candidate.phone) score += 10;
+  if (candidate.score !== undefined) score += Math.min(15, Math.max(0, Math.round(candidate.score / 10)));
   if (candidateSource(candidate) !== "Unknown source") score += 10;
   if (isInterviewStage(status)) score += 10;
   if (isOfferStage(status) || isHireStage(status)) score += 15;
@@ -337,10 +324,9 @@ export function buildCandidateIntelligence(candidates: BreezyCandidate[]): Candi
   const recruiterCounts = new Map<string, number>();
 
   const rows: CandidateIntelligenceRow[] = candidates.map((candidate) => {
-    const record = candidate as Record<string, unknown>;
     const market = candidateMarket(candidate);
-    const created = parseDate(record.creation_date ?? record.created_at ?? record.created);
-    const updated = parseDate(record.updated_date ?? record.updated_at ?? record.last_activity_date);
+    const created = parseDate(candidate.appliedDate);
+    const updated = created;
     const daysOld = ageDays(created);
     const daysUpdated = ageDays(updated ?? created);
     const status = candidateStatus(candidate);
@@ -358,8 +344,11 @@ export function buildCandidateIntelligence(candidates: BreezyCandidate[]): Candi
     const source = candidateSource(candidate);
 
     const row: CandidateIntelligenceRow = {
-      id: candidate._id,
-      name: candidate.name || candidate.email_address || "Unknown candidate",
+      id: candidate.candidateId,
+      name:
+        `${candidate.firstName} ${candidate.lastName}`.trim() ||
+        candidate.email ||
+        "Unknown candidate",
       city: market.city,
       state: market.state || "—",
       dm: market.dm,

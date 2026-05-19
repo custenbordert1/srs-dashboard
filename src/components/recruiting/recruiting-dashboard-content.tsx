@@ -9,6 +9,7 @@ import type {
 } from "@/lib/recruiting-sample-data";
 import { useState } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
+import { CandidatesSection } from "./candidates-section";
 import { DashboardTabNav, type DashboardTabId } from "./dashboard-tabs";
 import { DmLeaderboard } from "./dm-leaderboard";
 import { LiveSheetSection } from "./live-sheet-section";
@@ -69,6 +70,8 @@ export function RecruitingDashboardContent({
         {activeTab === "dm-scorecards" ? <DmLeaderboard rows={dmLeaderboard} /> : null}
 
         {activeTab === "live-sheet" ? <LiveSheetSection /> : null}
+
+        {activeTab === "candidates" ? <CandidatesSection /> : null}
 
         {activeTab === "mel-projects" ? <MelProjectsSection /> : null}
 
