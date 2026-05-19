@@ -10,6 +10,7 @@ const inputClass =
   "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
 
 type CandidateWorkflowStatus =
+  | "Applied"
   | "Needs Review"
   | "Qualified"
   | "Not Qualified"
@@ -18,14 +19,22 @@ type CandidateWorkflowStatus =
   | "Signed"
   | "Ready for MEL"
   | "Loaded in MEL"
-  | "Training Needed";
+  | "Training Needed"
+  | "Active Rep";
+
+type LocalWorkflowState = {
+  workflowStatus: CandidateWorkflowStatus;
+  lastActionAt: string | null;
+  assignedDM: string;
+  notes: string[];
+};
 
 type CandidateWorkflowRow = BreezyCandidate & {
-  candidateWorkflowStatus: CandidateWorkflowStatus;
+  workflowStatus: CandidateWorkflowStatus;
   lastActionAt: string | null;
   nextActionNeeded: string;
   assignedDM: string;
-  notes: string;
+  notes: string[];
   resumeKeywordScore: number | null;
   merchandisingExperienceScore: number | null;
   retailExperienceScore: number | null;
@@ -35,6 +44,7 @@ type CandidateWorkflowRow = BreezyCandidate & {
 };
 
 const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
+  Applied: "bg-slate-500/15 text-slate-200 ring-1 ring-slate-500/30",
   "Needs Review": "bg-sky-500/15 text-sky-200 ring-1 ring-sky-500/30",
   Qualified: "bg-teal-500/15 text-teal-200 ring-1 ring-teal-500/30",
   "Not Qualified": "bg-zinc-500/15 text-zinc-300 ring-1 ring-zinc-500/30",
@@ -44,7 +54,23 @@ const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   "Ready for MEL": "bg-cyan-500/15 text-cyan-200 ring-1 ring-cyan-500/30",
   "Loaded in MEL": "bg-green-500/15 text-green-200 ring-1 ring-green-500/30",
   "Training Needed": "bg-orange-500/15 text-orange-200 ring-1 ring-orange-500/30",
+  "Active Rep": "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30",
 };
+
+const WORKFLOW_STORAGE_KEY = "srs-dashboard:candidate-workflows:v1";
+const WORKFLOW_STATUSES: CandidateWorkflowStatus[] = [
+  "Applied",
+  "Needs Review",
+  "Qualified",
+  "Not Qualified",
+  "Paperwork Needed",
+  "Paperwork Sent",
+  "Signed",
+  "Ready for MEL",
+  "Loaded in MEL",
+  "Training Needed",
+  "Active Rep",
+];
 
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -72,6 +98,7 @@ function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
 }
 
 function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStatus {
+  if (stageIncludes(candidate, ["active rep", "active"])) return "Active Rep";
   if (stageIncludes(candidate, ["loaded in mel", "loaded"])) return "Loaded in MEL";
   if (stageIncludes(candidate, ["training"])) return "Training Needed";
   if (stageIncludes(candidate, ["ready for mel", "signed"])) return "Ready for MEL";
@@ -79,11 +106,13 @@ function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStat
   if (stageIncludes(candidate, ["paperwork", "hellosign", "offer"])) return "Paperwork Needed";
   if (stageIncludes(candidate, ["qualified", "interview", "screen", "assessment"])) return "Qualified";
   if (stageIncludes(candidate, ["rejected", "disqualified", "not qualified", "archived"])) return "Not Qualified";
+  if (stageIncludes(candidate, ["applied", "new"])) return "Applied";
   return "Needs Review";
 }
 
 function nextActionForStatus(status: CandidateWorkflowStatus): string {
   const actions: Record<CandidateWorkflowStatus, string> = {
+    Applied: "Review candidate fit",
     "Needs Review": "Review candidate fit",
     Qualified: "Prepare paperwork",
     "Not Qualified": "No action",
@@ -93,20 +122,21 @@ function nextActionForStatus(status: CandidateWorkflowStatus): string {
     "Ready for MEL": "Load into MEL",
     "Loaded in MEL": "Monitor placement",
     "Training Needed": "Schedule training",
+    "Active Rep": "Monitor field activity",
   };
   return actions[status];
 }
 
-function workflowRow(candidate: BreezyCandidate): CandidateWorkflowRow {
-  const candidateWorkflowStatus = deriveWorkflowStatus(candidate);
+function workflowRow(candidate: BreezyCandidate, local?: LocalWorkflowState): CandidateWorkflowRow {
+  const workflowStatus = local?.workflowStatus ?? deriveWorkflowStatus(candidate);
   const seededScore = candidate.score ?? null;
   return {
     ...candidate,
-    candidateWorkflowStatus,
-    lastActionAt: null,
-    nextActionNeeded: nextActionForStatus(candidateWorkflowStatus),
-    assignedDM: "Unassigned",
-    notes: "Automation-ready placeholder. No external actions have been sent.",
+    workflowStatus,
+    lastActionAt: local?.lastActionAt ?? null,
+    nextActionNeeded: nextActionForStatus(workflowStatus),
+    assignedDM: local?.assignedDM ?? "Unassigned",
+    notes: local?.notes ?? [],
     resumeKeywordScore: null,
     merchandisingExperienceScore: null,
     retailExperienceScore: null,
@@ -133,29 +163,48 @@ function workflowBuckets(candidates: CandidateWorkflowRow[]) {
     {
       id: "needs-review",
       label: "Needs review",
-      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Needs Review"),
+      rows: candidates.filter((candidate) => candidate.workflowStatus === "Applied" || candidate.workflowStatus === "Needs Review"),
     },
     {
       id: "ready-paperwork",
       label: "Ready for paperwork",
-      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Qualified" || candidate.candidateWorkflowStatus === "Paperwork Needed"),
+      rows: candidates.filter((candidate) => candidate.workflowStatus === "Qualified" || candidate.workflowStatus === "Paperwork Needed"),
     },
     {
       id: "waiting-signed",
       label: "Waiting on signed paperwork",
-      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Paperwork Sent"),
+      rows: candidates.filter((candidate) => candidate.workflowStatus === "Paperwork Sent"),
     },
     {
       id: "ready-mel",
       label: "Ready to load into MEL",
-      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Signed" || candidate.candidateWorkflowStatus === "Ready for MEL"),
+      rows: candidates.filter((candidate) => candidate.workflowStatus === "Signed" || candidate.workflowStatus === "Ready for MEL"),
     },
     {
       id: "training-needed",
       label: "Needs training",
-      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Training Needed"),
+      rows: candidates.filter((candidate) => candidate.workflowStatus === "Training Needed"),
     },
   ];
+}
+
+function readLocalWorkflowState(): Record<string, LocalWorkflowState> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(WORKFLOW_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, LocalWorkflowState>;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function formatDateTime(raw: string | null): string {
+  if (!raw) return "No local action";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
 function CandidatesSkeleton() {
@@ -184,6 +233,8 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
 
 export function CandidatesSection() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
+  const [localWorkflows, setLocalWorkflows] = useState<Record<string, LocalWorkflowState>>({});
+  const [hydrated, setHydrated] = useState(false);
   const [sourceFilter, setSourceFilter] = useState(ALL);
   const [stageFilter, setStageFilter] = useState(ALL);
   const [positionFilter, setPositionFilter] = useState(ALL);
@@ -192,6 +243,19 @@ export function CandidatesSection() {
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setLocalWorkflows(readLocalWorkflowState());
+      setHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    window.localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(localWorkflows));
+  }, [hydrated, localWorkflows]);
 
   useEffect(() => {
     let cancelled = false;
@@ -222,7 +286,10 @@ export function CandidatesSection() {
     };
   }, []);
 
-  const candidates = useMemo(() => (data?.ok ? data.candidates.map(workflowRow) : []), [data]);
+  const candidates = useMemo(
+    () => (data?.ok ? data.candidates.map((candidate) => workflowRow(candidate, localWorkflows[candidate.candidateId])) : []),
+    [data, localWorkflows],
+  );
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
@@ -272,6 +339,39 @@ export function CandidatesSection() {
 
   const breakdown = useMemo(() => sourceBreakdown(filtered), [filtered]);
   const buckets = useMemo(() => workflowBuckets(filtered), [filtered]);
+  const statusCounts = useMemo(
+    () =>
+      WORKFLOW_STATUSES.map((status) => ({
+        status,
+        count: filtered.filter((candidate) => candidate.workflowStatus === status).length,
+      })),
+    [filtered],
+  );
+
+  function updateWorkflow(candidate: CandidateWorkflowRow, workflowStatus: CandidateWorkflowStatus, note?: string) {
+    const now = new Date().toISOString();
+    setLocalWorkflows((prev) => {
+      const existing = prev[candidate.candidateId];
+      const notes = note?.trim()
+        ? [note.trim(), ...(existing?.notes ?? candidate.notes)].slice(0, 5)
+        : (existing?.notes ?? candidate.notes);
+      return {
+        ...prev,
+        [candidate.candidateId]: {
+          workflowStatus,
+          lastActionAt: now,
+          assignedDM: existing?.assignedDM ?? candidate.assignedDM,
+          notes,
+        },
+      };
+    });
+  }
+
+  function addNote(candidate: CandidateWorkflowRow) {
+    const note = window.prompt("Add local workflow note");
+    if (!note?.trim()) return;
+    updateWorkflow(candidate, candidate.workflowStatus, note);
+  }
 
   if (data === undefined) return <CandidatesSkeleton />;
 
@@ -338,6 +438,21 @@ export function CandidatesSection() {
         </div>
       </section>
 
+      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Status Counts</h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          Local lifecycle statuses for candidate workflow triage. These do not write back to Breezy, HelloSign, or MEL.
+        </p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+          {statusCounts.map((row) => (
+            <div key={row.status} className="rounded-xl border border-zinc-800 bg-zinc-950/40 px-3 py-2">
+              <p className="text-xs text-zinc-500">{row.status}</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
         <div className="grid gap-3 border-b border-zinc-800/80 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-5">
           <input
@@ -374,7 +489,7 @@ export function CandidatesSection() {
           <p className="px-4 py-10 text-sm text-zinc-500 sm:px-5">No candidates match the selected filters.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-[1320px] w-full text-left text-sm">
+            <table className="min-w-[1580px] w-full text-left text-sm">
               <thead className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
                 <tr>
                   <th className="px-4 py-3 font-medium sm:px-5">Name</th>
@@ -388,6 +503,7 @@ export function CandidatesSection() {
                   <th className="px-4 py-3 font-medium sm:px-5">State</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Workflow Status</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Next Action</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Local Actions</th>
                   <th className="px-4 py-3 font-medium sm:px-5">HelloSign Prep</th>
                   <th className="px-4 py-3 font-medium sm:px-5">AI Ready</th>
                 </tr>
@@ -405,13 +521,36 @@ export function CandidatesSection() {
                     <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.city || "—"}</td>
                     <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.state || "—"}</td>
                     <td className="px-4 py-3 sm:px-5">
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${WORKFLOW_STATUS_STYLES[candidate.candidateWorkflowStatus]}`}>
-                        {candidate.candidateWorkflowStatus}
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${WORKFLOW_STATUS_STYLES[candidate.workflowStatus]}`}>
+                        {candidate.workflowStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-zinc-300 sm:px-5">
                       <div>{candidate.nextActionNeeded}</div>
                       <div className="mt-1 text-xs text-zinc-500">DM: {candidate.assignedDM}</div>
+                      <div className="mt-1 text-xs text-zinc-600">Last action: {formatDateTime(candidate.lastActionAt)}</div>
+                      {candidate.notes.length > 0 ? (
+                        <div className="mt-1 max-w-[16rem] truncate text-xs text-zinc-500">Note: {candidate.notes[0]}</div>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 sm:px-5">
+                      <div className="flex flex-wrap gap-1.5">
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Qualified")} className="rounded-md border border-teal-500/30 bg-teal-500/10 px-2 py-1 text-xs font-medium text-teal-200">
+                          Mark Qualified
+                        </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Not Qualified")} className="rounded-md border border-zinc-600 bg-zinc-800/60 px-2 py-1 text-xs font-medium text-zinc-200">
+                          Mark Not Qualified
+                        </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Paperwork Needed")} className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-200">
+                          Mark Paperwork Needed
+                        </button>
+                        <button type="button" onClick={() => updateWorkflow(candidate, "Ready for MEL")} className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-xs font-medium text-cyan-200">
+                          Mark Ready for MEL
+                        </button>
+                        <button type="button" onClick={() => addNote(candidate)} className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-1 text-xs font-medium text-violet-200">
+                          Add Note
+                        </button>
+                      </div>
                     </td>
                     <td className="px-4 py-3 sm:px-5">
                       <button
