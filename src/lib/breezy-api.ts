@@ -44,6 +44,8 @@ export type BreezyCandidate = {
   appliedDate: string;
   positionId: string;
   positionName: string;
+  city: string;
+  state: string;
   score?: number;
 };
 
@@ -217,7 +219,7 @@ function sanitizeJob(raw: RawBreezyPosition): BreezyJob | null {
 
 function sanitizeCandidate(
   raw: RawBreezyCandidate,
-  position: Pick<BreezyJob, "jobId" | "name"> | undefined,
+  position: Pick<BreezyJob, "jobId" | "name" | "city" | "state"> | undefined,
 ): BreezyCandidate | null {
   const record = raw as Record<string, unknown>;
   const candidateId = stringField(record, ["_id", "id"]);
@@ -248,6 +250,16 @@ function sanitizeCandidate(
       stringField(record, ["position_name", "position_title"]) ||
       position?.name ||
       "Unknown position",
+    city:
+      stringField(record, ["city", "location_city"]) ||
+      nestedString(record, [["address", "city"], ["location", "city"], ["position", "location", "city"]]) ||
+      position?.city ||
+      "",
+    state:
+      stringField(record, ["state", "region", "location_state"]) ||
+      nestedString(record, [["address", "state"], ["location", "state"], ["position", "location", "state"]]) ||
+      position?.state ||
+      "",
     score: numberField(record, ["score", "rating"]),
   };
 }

@@ -152,14 +152,9 @@ function weekLabel(date: Date | null): string {
 }
 
 function candidateMarket(candidate: BreezyCandidate) {
-  const record = candidate as Record<string, unknown>;
-  const city =
-    stringField(record, ["city", "location_city"]) ||
-    nestedString(candidate, [["address", "city"], ["location", "city"], ["position", "location", "city"]]);
-  const state =
-    stringField(record, ["state", "region", "location_state"]) ||
-    nestedString(candidate, [["address", "state"], ["location", "state"], ["position", "location", "state"]]);
-  const manager = nestedString(candidate, [["recruiter", "name"], ["owner", "name"], ["user", "name"]]);
+  const city = candidate.city;
+  const state = candidate.state;
+  const manager = "";
   return resolveMarketIdentity({ city, state, manager, source: "recruiting" });
 }
 

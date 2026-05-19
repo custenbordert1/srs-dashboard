@@ -9,6 +9,43 @@ const selectClass =
 const inputClass =
   "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
 
+type CandidateWorkflowStatus =
+  | "Needs Review"
+  | "Qualified"
+  | "Not Qualified"
+  | "Paperwork Needed"
+  | "Paperwork Sent"
+  | "Signed"
+  | "Ready for MEL"
+  | "Loaded in MEL"
+  | "Training Needed";
+
+type CandidateWorkflowRow = BreezyCandidate & {
+  candidateWorkflowStatus: CandidateWorkflowStatus;
+  lastActionAt: string | null;
+  nextActionNeeded: string;
+  assignedDM: string;
+  notes: string;
+  resumeKeywordScore: number | null;
+  merchandisingExperienceScore: number | null;
+  retailExperienceScore: number | null;
+  travelFitScore: number | null;
+  overallCandidateScore: number | null;
+  aiRecommendation: string;
+};
+
+const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
+  "Needs Review": "bg-sky-500/15 text-sky-200 ring-1 ring-sky-500/30",
+  Qualified: "bg-teal-500/15 text-teal-200 ring-1 ring-teal-500/30",
+  "Not Qualified": "bg-zinc-500/15 text-zinc-300 ring-1 ring-zinc-500/30",
+  "Paperwork Needed": "bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30",
+  "Paperwork Sent": "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30",
+  Signed: "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30",
+  "Ready for MEL": "bg-cyan-500/15 text-cyan-200 ring-1 ring-cyan-500/30",
+  "Loaded in MEL": "bg-green-500/15 text-green-200 ring-1 ring-green-500/30",
+  "Training Needed": "bg-orange-500/15 text-orange-200 ring-1 ring-orange-500/30",
+};
+
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }
@@ -29,7 +66,57 @@ function candidateName(candidate: BreezyCandidate): string {
   return `${candidate.firstName} ${candidate.lastName}`.trim() || candidate.email || "Unknown candidate";
 }
 
-function sourceBreakdown(candidates: BreezyCandidate[]): Array<{ source: string; count: number }> {
+function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
+  const stage = candidate.stage.toLowerCase();
+  return words.some((word) => stage.includes(word));
+}
+
+function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStatus {
+  if (stageIncludes(candidate, ["loaded in mel", "loaded"])) return "Loaded in MEL";
+  if (stageIncludes(candidate, ["training"])) return "Training Needed";
+  if (stageIncludes(candidate, ["ready for mel", "signed"])) return "Ready for MEL";
+  if (stageIncludes(candidate, ["paperwork sent", "document sent"])) return "Paperwork Sent";
+  if (stageIncludes(candidate, ["paperwork", "hellosign", "offer"])) return "Paperwork Needed";
+  if (stageIncludes(candidate, ["qualified", "interview", "screen", "assessment"])) return "Qualified";
+  if (stageIncludes(candidate, ["rejected", "disqualified", "not qualified", "archived"])) return "Not Qualified";
+  return "Needs Review";
+}
+
+function nextActionForStatus(status: CandidateWorkflowStatus): string {
+  const actions: Record<CandidateWorkflowStatus, string> = {
+    "Needs Review": "Review candidate fit",
+    Qualified: "Prepare paperwork",
+    "Not Qualified": "No action",
+    "Paperwork Needed": "Send paperwork placeholder",
+    "Paperwork Sent": "Wait for signature",
+    Signed: "Verify signed paperwork",
+    "Ready for MEL": "Load into MEL",
+    "Loaded in MEL": "Monitor placement",
+    "Training Needed": "Schedule training",
+  };
+  return actions[status];
+}
+
+function workflowRow(candidate: BreezyCandidate): CandidateWorkflowRow {
+  const candidateWorkflowStatus = deriveWorkflowStatus(candidate);
+  const seededScore = candidate.score ?? null;
+  return {
+    ...candidate,
+    candidateWorkflowStatus,
+    lastActionAt: null,
+    nextActionNeeded: nextActionForStatus(candidateWorkflowStatus),
+    assignedDM: "Unassigned",
+    notes: "Automation-ready placeholder. No external actions have been sent.",
+    resumeKeywordScore: null,
+    merchandisingExperienceScore: null,
+    retailExperienceScore: null,
+    travelFitScore: null,
+    overallCandidateScore: seededScore,
+    aiRecommendation: "Pending AI scoring",
+  };
+}
+
+function sourceBreakdown(candidates: CandidateWorkflowRow[]): Array<{ source: string; count: number }> {
   const counts = new Map<string, number>();
   for (const candidate of candidates) {
     const source = candidate.source || "Unknown source";
@@ -39,6 +126,36 @@ function sourceBreakdown(candidates: BreezyCandidate[]): Array<{ source: string;
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 5)
     .map(([source, count]) => ({ source, count }));
+}
+
+function workflowBuckets(candidates: CandidateWorkflowRow[]) {
+  return [
+    {
+      id: "needs-review",
+      label: "Needs review",
+      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Needs Review"),
+    },
+    {
+      id: "ready-paperwork",
+      label: "Ready for paperwork",
+      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Qualified" || candidate.candidateWorkflowStatus === "Paperwork Needed"),
+    },
+    {
+      id: "waiting-signed",
+      label: "Waiting on signed paperwork",
+      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Paperwork Sent"),
+    },
+    {
+      id: "ready-mel",
+      label: "Ready to load into MEL",
+      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Signed" || candidate.candidateWorkflowStatus === "Ready for MEL"),
+    },
+    {
+      id: "training-needed",
+      label: "Needs training",
+      rows: candidates.filter((candidate) => candidate.candidateWorkflowStatus === "Training Needed"),
+    },
+  ];
 }
 
 function CandidatesSkeleton() {
@@ -70,8 +187,11 @@ export function CandidatesSection() {
   const [sourceFilter, setSourceFilter] = useState(ALL);
   const [stageFilter, setStageFilter] = useState(ALL);
   const [positionFilter, setPositionFilter] = useState(ALL);
+  const [cityFilter, setCityFilter] = useState(ALL);
+  const [stateFilter, setStateFilter] = useState(ALL);
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -102,27 +222,45 @@ export function CandidatesSection() {
     };
   }, []);
 
-  const candidates = data?.ok ? data.candidates : [];
+  const candidates = useMemo(() => (data?.ok ? data.candidates.map(workflowRow) : []), [data]);
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
+  const cityOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.city)), [candidates]);
+  const stateOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.state)), [candidates]);
 
   const filtered = useMemo(() => {
     const fromDate = appliedFrom ? new Date(`${appliedFrom}T00:00:00`) : null;
     const toDate = appliedTo ? new Date(`${appliedTo}T23:59:59`) : null;
+    const q = search.trim().toLowerCase();
 
     return candidates.filter((candidate) => {
       if (sourceFilter !== ALL && candidate.source !== sourceFilter) return false;
       if (stageFilter !== ALL && candidate.stage !== stageFilter) return false;
       if (positionFilter !== ALL && candidate.positionName !== positionFilter) return false;
+      if (cityFilter !== ALL && candidate.city !== cityFilter) return false;
+      if (stateFilter !== ALL && candidate.state !== stateFilter) return false;
 
       const appliedDate = parseDate(candidate.appliedDate);
       if (fromDate && (!appliedDate || appliedDate < fromDate)) return false;
       if (toDate && (!appliedDate || appliedDate > toDate)) return false;
+      if (q) {
+        const haystack = [
+          candidateName(candidate),
+          candidate.email,
+          candidate.phone,
+          candidate.positionName,
+          candidate.source,
+          candidate.stage,
+          candidate.city,
+          candidate.state,
+        ].join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
 
       return true;
     });
-  }, [appliedFrom, appliedTo, candidates, positionFilter, sourceFilter, stageFilter]);
+  }, [appliedFrom, appliedTo, candidates, cityFilter, positionFilter, search, sourceFilter, stageFilter, stateFilter]);
 
   const newestApplicantDate = useMemo(() => {
     const newest = filtered
@@ -133,6 +271,7 @@ export function CandidatesSection() {
   }, [filtered]);
 
   const breakdown = useMemo(() => sourceBreakdown(filtered), [filtered]);
+  const buckets = useMemo(() => workflowBuckets(filtered), [filtered]);
 
   if (data === undefined) return <CandidatesSkeleton />;
 
@@ -170,8 +309,43 @@ export function CandidatesSection() {
         />
       </div>
 
+      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Buckets</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            Visibility layer for review, paperwork, MEL loading, and training readiness. Counts are derived from Breezy stage names until workflow persistence is added.
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {buckets.map((bucket) => (
+            <div key={bucket.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-zinc-200">{bucket.label}</p>
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">
+                  {bucket.rows.length}
+                </span>
+              </div>
+              <ul className="mt-3 space-y-1 text-xs text-zinc-500">
+                {bucket.rows.slice(0, 3).map((candidate) => (
+                  <li key={candidate.candidateId} className="truncate">
+                    {candidateName(candidate)} · {candidate.positionName}
+                  </li>
+                ))}
+                {bucket.rows.length === 0 ? <li>No candidates</li> : null}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-        <div className="grid gap-3 border-b border-zinc-800/80 px-4 py-4 sm:grid-cols-2 lg:grid-cols-5 sm:px-5">
+        <div className="grid gap-3 border-b border-zinc-800/80 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-5">
+          <input
+            className={`${inputClass} sm:col-span-2 lg:col-span-4`}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search name, email, phone, position, or source"
+          />
           <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
             <option value={ALL}>All sources</option>
             {sourceOptions.map((source) => <option key={source} value={source}>{source}</option>)}
@@ -184,6 +358,14 @@ export function CandidatesSection() {
             <option value={ALL}>All positions</option>
             {positionOptions.map((position) => <option key={position} value={position}>{position}</option>)}
           </select>
+          <select className={selectClass} value={cityFilter} onChange={(event) => setCityFilter(event.target.value)}>
+            <option value={ALL}>All cities</option>
+            {cityOptions.map((city) => <option key={city} value={city}>{city}</option>)}
+          </select>
+          <select className={selectClass} value={stateFilter} onChange={(event) => setStateFilter(event.target.value)}>
+            <option value={ALL}>All states</option>
+            {stateOptions.map((state) => <option key={state} value={state}>{state}</option>)}
+          </select>
           <input className={inputClass} type="date" value={appliedFrom} onChange={(event) => setAppliedFrom(event.target.value)} aria-label="Applied from date" />
           <input className={inputClass} type="date" value={appliedTo} onChange={(event) => setAppliedTo(event.target.value)} aria-label="Applied to date" />
         </div>
@@ -192,7 +374,7 @@ export function CandidatesSection() {
           <p className="px-4 py-10 text-sm text-zinc-500 sm:px-5">No candidates match the selected filters.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-[980px] w-full text-left text-sm">
+            <table className="min-w-[1320px] w-full text-left text-sm">
               <thead className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
                 <tr>
                   <th className="px-4 py-3 font-medium sm:px-5">Name</th>
@@ -202,6 +384,12 @@ export function CandidatesSection() {
                   <th className="px-4 py-3 font-medium sm:px-5">Stage</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Applied Date</th>
                   <th className="px-4 py-3 font-medium sm:px-5">Position</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">City</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">State</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Workflow Status</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">Next Action</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">HelloSign Prep</th>
+                  <th className="px-4 py-3 font-medium sm:px-5">AI Ready</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60">
@@ -214,6 +402,32 @@ export function CandidatesSection() {
                     <td className="px-4 py-3 text-zinc-300 sm:px-5">{candidate.stage || "Unknown stage"}</td>
                     <td className="px-4 py-3 text-zinc-400 sm:px-5">{formatDate(candidate.appliedDate)}</td>
                     <td className="px-4 py-3 text-zinc-300 sm:px-5">{candidate.positionName || "Unknown position"}</td>
+                    <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.city || "—"}</td>
+                    <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.state || "—"}</td>
+                    <td className="px-4 py-3 sm:px-5">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${WORKFLOW_STATUS_STYLES[candidate.candidateWorkflowStatus]}`}>
+                        {candidate.candidateWorkflowStatus}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-300 sm:px-5">
+                      <div>{candidate.nextActionNeeded}</div>
+                      <div className="mt-1 text-xs text-zinc-500">DM: {candidate.assignedDM}</div>
+                    </td>
+                    <td className="px-4 py-3 sm:px-5">
+                      <button
+                        type="button"
+                        disabled
+                        title="HelloSign sending is disabled until API keys and packet templates are configured."
+                        className="rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-1.5 text-xs font-medium text-zinc-500"
+                      >
+                        Send Paperwork
+                      </button>
+                      <p className="mt-1 text-xs text-zinc-600">Placeholder only</p>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-zinc-500 sm:px-5">
+                      <p>Overall: {candidate.overallCandidateScore ?? "Pending"}</p>
+                      <p>{candidate.aiRecommendation}</p>
+                    </td>
                   </tr>
                 ))}
               </tbody>
