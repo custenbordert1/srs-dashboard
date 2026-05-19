@@ -2,15 +2,30 @@ import { countCandidatesLast7Days } from "@/lib/breezy-api";
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import type { AuthSession } from "@/lib/auth/types";
 import {
-  buildDmNeedsAttention,
-  buildFillRiskAlerts,
-  topScoredCandidates,
-  type DmAttentionItem,
-} from "@/lib/dm-dashboard/dm-needs-attention";
+  buildCandidatePipeline,
+  recentApplicants,
+  type CandidatePipelineSnapshot,
+} from "@/lib/dm-dashboard/candidate-pipeline";
+import { buildCoverageIntelligence, type TerritoryCoverageSnapshot } from "@/lib/dm-dashboard/coverage-intelligence";
+import {
+  buildTerritoryFillRiskAlerts,
+  highestFillRiskAlerts,
+} from "@/lib/dm-dashboard/fill-risk-alerts";
+import { buildDmNeedsAttention, topScoredCandidates, type DmAttentionItem } from "@/lib/dm-dashboard/dm-needs-attention";
+import {
+  buildTerritoryHealthScore,
+  type TerritoryHealthScore,
+} from "@/lib/dm-dashboard/territory-health-score";
+import { buildTerritoryHeatmapPayload, type TerritoryHeatmapPayload } from "@/lib/dm-dashboard/territory-heatmap-prep";
+import {
+  MS_PER_DAY,
+  candidateDisplayName,
+  countBuckets,
+  isInterviewingStage,
+  parseDate,
+} from "@/lib/dm-dashboard/territory-shared";
 import { getAssignedStatesForDm } from "@/lib/dm-territory-map";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export type DmDashboardKpi = {
   id: string;
@@ -19,11 +34,26 @@ export type DmDashboardKpi = {
   hint: string;
 };
 
+export type DmCandidateSummary = {
+  candidateId: string;
+  name: string;
+  score: number;
+  tierLabel: string;
+  position: string;
+  city: string;
+  state: string;
+  stage: string;
+  source: string;
+  appliedDate?: string;
+};
+
+/** Lightweight API payload — no raw Breezy job/candidate arrays. */
 export type DmDashboardSnapshot = {
   dmName: string;
   territoryStates: string[];
   territoryLabel: string;
   fetchedAt: string;
+  health: TerritoryHealthScore;
   kpis: DmDashboardKpi[];
   activeJobs: number;
   candidatesLast7Days: number;
@@ -33,56 +63,13 @@ export type DmDashboardSnapshot = {
   candidateSources: ChartBar[];
   fillRiskAlerts: DmAttentionItem[];
   needsAttention: DmAttentionItem[];
-  topCandidates: Array<{
-    candidateId: string;
-    name: string;
-    score: number;
-    tierLabel: string;
-    position: string;
-    city: string;
-    state: string;
-    stage: string;
-    source: string;
-  }>;
-  jobs: BreezyJob[];
-  candidates: BreezyCandidate[];
+  highestFillRisk: DmAttentionItem[];
+  topCandidates: DmCandidateSummary[];
+  recentApplicants: DmCandidateSummary[];
+  coverage: TerritoryCoverageSnapshot;
+  pipeline: CandidatePipelineSnapshot;
+  heatmap: TerritoryHeatmapPayload;
 };
-
-function parseDate(raw: string): Date | null {
-  if (!raw.trim()) return null;
-  const date = new Date(raw);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function isInterviewingStage(stage: string): boolean {
-  const normalized = stage.toLowerCase();
-  return (
-    normalized.includes("interview") ||
-    normalized.includes("screen") ||
-    normalized.includes("qualified") ||
-    normalized.includes("assessment")
-  );
-}
-
-function countBuckets(
-  rows: Array<{ label: string }>,
-  labelFn: (row: { label: string }) => string,
-): ChartBar[] {
-  const counts = new Map<string, number>();
-  for (const row of rows) {
-    const label = labelFn(row) || "Unknown";
-    counts.set(label, (counts.get(label) ?? 0) + 1);
-  }
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 8)
-    .map(([label, value]) => ({ label, value }));
-}
-
-function candidateName(candidate: BreezyCandidate): string {
-  const name = `${candidate.firstName} ${candidate.lastName}`.trim();
-  return name || candidate.email || "Unknown";
-}
 
 export function buildDmDashboardSnapshot(
   session: AuthSession,
@@ -97,6 +84,14 @@ export function buildDmDashboardSnapshot(
     territoryStates.length > 0 ? territoryStates.join(", ") : "All territories";
 
   const reference = new Date(fetchedAt);
+  const health = buildTerritoryHealthScore(jobs, candidates, fetchedAt);
+  const needsAttention = buildDmNeedsAttention(jobs, candidates, fetchedAt);
+  const fillRiskAlerts = buildTerritoryFillRiskAlerts(jobs, candidates, fetchedAt);
+  const highestFillRisk = highestFillRiskAlerts(fillRiskAlerts, 12);
+  const coverage = buildCoverageIntelligence(jobs, candidates, fetchedAt);
+  const pipeline = buildCandidatePipeline(candidates, fetchedAt);
+  const heatmap = buildTerritoryHeatmapPayload(jobs, candidates, fetchedAt, territoryLabel);
+
   const agingJobs = jobs.filter((job) => {
     const created = parseDate(job.createdDate || job.updatedDate);
     if (!created) return false;
@@ -104,10 +99,8 @@ export function buildDmDashboardSnapshot(
     return days >= 21;
   }).length;
 
-  const interviewing = candidates.filter((candidate) => isInterviewingStage(candidate.stage)).length;
+  const interviewing = candidates.filter((c) => isInterviewingStage(c.stage)).length;
   const candidatesLast7Days = countCandidatesLast7Days(candidates, fetchedAt);
-  const needsAttention = buildDmNeedsAttention(jobs, candidates, fetchedAt);
-  const fillRiskAlerts = buildFillRiskAlerts(needsAttention);
 
   const topHiringCities = countBuckets(
     jobs.map((job) => ({ label: `${job.city}, ${job.state}`.trim() })),
@@ -115,11 +108,17 @@ export function buildDmDashboardSnapshot(
   );
 
   const candidateSources = countBuckets(
-    candidates.map((candidate) => ({ label: candidate.source.trim() || "Unknown" })),
-    (row) => row.label,
+    candidates.map((c) => ({ label: c.source.trim() || "Unknown" })),
+    (r) => r.label,
   );
 
   const kpis: DmDashboardKpi[] = [
+    {
+      id: "health",
+      label: "Territory health",
+      value: `${health.score}`,
+      hint: `${health.label} — composite of flow, aging, interviews, volume, velocity`,
+    },
     {
       id: "active-jobs",
       label: "Active jobs",
@@ -148,7 +147,7 @@ export function buildDmDashboardSnapshot(
       id: "fill-risk",
       label: "Fill-risk alerts",
       value: fillRiskAlerts.length.toLocaleString(),
-      hint: "Critical hiring risk signals",
+      hint: "No applicants, no interviews, aging tiers, low-flow cities",
     },
     {
       id: "attention",
@@ -156,25 +155,59 @@ export function buildDmDashboardSnapshot(
       value: needsAttention.length.toLocaleString(),
       hint: "Combined attention queue items",
     },
+    {
+      id: "stalled",
+      label: "Stalled pipeline",
+      value: pipeline.counts.stalled.toLocaleString(),
+      hint: "Candidates with 14+ days without stage progression",
+    },
   ];
 
-  const topCandidates = topScoredCandidates(candidates, 8).map(({ candidate, ai }) => ({
+  const mapCandidate = (
+    candidate: BreezyCandidate,
+    ai?: { numericScore: number; tierLabel: string },
+    appliedDate?: string,
+  ): DmCandidateSummary => ({
     candidateId: candidate.candidateId,
-    name: candidateName(candidate),
-    score: ai.numericScore,
-    tierLabel: ai.tierLabel,
+    name: candidateDisplayName(candidate),
+    score: ai?.numericScore ?? candidate.score ?? 0,
+    tierLabel: ai?.tierLabel ?? "—",
     position: candidate.positionName || "—",
     city: candidate.city || "—",
     state: candidate.state || "—",
     stage: candidate.stage || "—",
     source: candidate.source || "—",
-  }));
+    appliedDate: appliedDate ?? candidate.appliedDate,
+  });
+
+  const topCandidates = topScoredCandidates(candidates, 12).map(({ candidate, ai }) =>
+    mapCandidate(candidate, ai),
+  );
+
+  const recentApplicantRows = recentApplicants(candidates, fetchedAt, 15).map((row) => {
+    const candidate = candidates.find((c) => c.candidateId === row.candidateId);
+    return candidate
+      ? mapCandidate(candidate, undefined, row.appliedDate)
+      : {
+          candidateId: row.candidateId,
+          name: row.name,
+          score: 0,
+          tierLabel: "—",
+          position: row.position,
+          city: row.city,
+          state: row.state,
+          stage: row.stage,
+          source: row.source,
+          appliedDate: row.appliedDate,
+        };
+  });
 
   return {
     dmName,
     territoryStates,
     territoryLabel,
     fetchedAt,
+    health,
     kpis,
     activeJobs: jobs.length,
     candidatesLast7Days,
@@ -184,8 +217,11 @@ export function buildDmDashboardSnapshot(
     candidateSources,
     fillRiskAlerts,
     needsAttention,
+    highestFillRisk,
     topCandidates,
-    jobs,
-    candidates,
+    recentApplicants: recentApplicantRows,
+    coverage,
+    pipeline,
+    heatmap,
   };
 }

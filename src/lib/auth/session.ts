@@ -1,3 +1,4 @@
+import { resolveSessionSecret } from "@/lib/auth/auth-env";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { AuthSession, UserPublic } from "@/lib/auth/types";
 
@@ -5,7 +6,7 @@ const SESSION_COOKIE = "srs_session";
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
 function sessionSecret(): string {
-  const secret = process.env.SESSION_SECRET?.trim() || process.env.BREEZY_API_KEY?.trim();
+  const secret = resolveSessionSecret();
   if (!secret) {
     throw new Error("SESSION_SECRET or BREEZY_API_KEY must be configured for auth sessions.");
   }

@@ -50,6 +50,14 @@ export function AppShell({ user, children, title, subtitle }: AppShellProps) {
                 DM dashboard
               </Link>
             ) : null}
+            {user.role === "executive" ? (
+              <Link
+                href="/executive"
+                className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+              >
+                Executive rollup
+              </Link>
+            ) : null}
             <button
               type="button"
               onClick={() => void logout()}

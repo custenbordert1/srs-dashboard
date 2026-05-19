@@ -19,7 +19,7 @@ import { MelProjectsSection } from "./mel-projects-section";
 import { NeedsAttentionSection } from "./needs-attention-section";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { OpenJobsTable } from "./open-jobs-table";
-import { PostAutomationQueue } from "./post-automation-queue";
+import { RecruitingAutomationSection } from "./recruiting-automation-section";
 import { RecruitingCommandCenter } from "./recruiting-command-center";
 import { RecruitingIntelligenceSection } from "./recruiting-intelligence-section";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
@@ -84,7 +84,7 @@ export function RecruitingDashboardContent({
 
         {activeTab === "recruiting-intelligence" ? <RecruitingIntelligenceSection /> : null}
 
-        {activeTab === "automation" ? <PostAutomationQueue /> : null}
+        {activeTab === "automation" ? <RecruitingAutomationSection /> : null}
       </main>
     </>
   );

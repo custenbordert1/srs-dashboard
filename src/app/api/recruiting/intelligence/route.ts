@@ -1,6 +1,7 @@
 import { getSessionFromRequest } from "@/lib/auth/request-session";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
-import { buildDmDashboardSnapshot } from "@/lib/dm-dashboard/build-dm-dashboard";
+import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
+import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -9,7 +10,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-const ROUTE = "/api/dm/dashboard";
+const ROUTE = "/api/recruiting/intelligence";
 
 export async function GET(request: Request) {
   const session = getSessionFromRequest(request);
@@ -27,9 +28,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult] = await Promise.all([
+  const [jobsResult, candidatesResult, workflows] = await Promise.all([
     fetchBreezyJobs("published"),
     fetchBreezyCandidates(),
+    getCandidateWorkflowState(),
   ]);
 
   if (!jobsResult.ok) {
@@ -47,33 +49,31 @@ export async function GET(request: Request) {
   const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const fetchedAt = candidatesResult.fetchedAt;
 
-  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt);
+  const intelligence = buildRecruitingIntelligence(session, jobs, candidates, fetchedAt, workflows);
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
     breezyOk: true,
     filteredJobs: jobs.length,
     filteredCandidates: candidates.length,
-    territoryStates: dashboard.territoryStates,
   });
 
   return NextResponse.json(
     {
       ok: true,
-      dashboard,
+      intelligence,
       meta: {
         role: session.role,
-        territoryStates: dashboard.territoryStates,
-        totalPositionsAvailable: jobsResult.jobs.length,
         filteredJobs: jobs.length,
         filteredCandidates: candidates.length,
+        workflowCount: Object.keys(workflows).length,
         partialSync: candidatesResult.truncated ?? false,
         refreshedAt: new Date().toISOString(),
       },
     },
     {
       headers: {
-        "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+        "Cache-Control": "private, max-age=45, stale-while-revalidate=90",
       },
     },
   );

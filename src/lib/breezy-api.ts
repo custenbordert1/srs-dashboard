@@ -3,6 +3,12 @@
  * https://developer.breezy.hr/reference/overview
  */
 
+import {
+  getBreezyApiKeySync,
+  getBreezyCompanyIdSync,
+  loadConfig,
+} from "@/lib/config";
+
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
 const BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS = 10_000;
@@ -115,28 +121,20 @@ type RawBreezyCandidate = Record<string, unknown> & {
   position_id?: string;
 };
 
+/** @deprecated Prefer getBreezyApiKeySync() after loadConfig(). */
 export function getBreezyApiKey(): string | undefined {
-  const key = process.env.BREEZY_API_KEY?.trim();
-  const normalized = key?.toLowerCase();
-  if (
-    normalized === "your-breezy-access-token" ||
-    normalized === "your-breezy-api-key" ||
-    normalized === "placeholder"
-  ) {
-    return undefined;
-  }
-  return key && key.length > 0 ? key : undefined;
+  return getBreezyApiKeySync();
 }
 
 export function getBreezyCompanyIdOverride(): string | undefined {
-  const id = process.env.BREEZY_COMPANY_ID?.trim();
-  return id && id.length > 0 ? id : undefined;
+  return getBreezyCompanyIdSync();
 }
 
 function missingApiKeyFailure(): BreezyApiFailure {
   return {
     ok: false,
-    error: "Waiting on Breezy API key.",
+    error:
+      "Breezy API key is not configured. Set BREEZY_API_KEY in .env.local and restart the dev server.",
     fetchedAt: new Date().toISOString(),
   };
 }
@@ -216,9 +214,10 @@ function sanitizeJob(raw: RawBreezyPosition): BreezyJob | null {
     jobId,
     name: stringField(record, ["name", "title"]) || "Untitled job",
     city: stringField(record, ["city"]) || nestedString(record, [["location", "city"], ["address", "city"]]),
+    // Breezy uses top-level `state` for position status (published/draft), not US state.
     state:
-      stringField(record, ["state", "region"]) ||
-      nestedString(record, [["location", "state"], ["address", "state"]]),
+      nestedString(record, [["location", "state"], ["address", "state"]]) ||
+      stringField(record, ["region", "location_state"]),
     status: stringField(record, ["state", "status"]) || "unknown",
     createdDate: stringField(record, ["creation_date", "created_at", "created"]) || "",
     updatedDate: stringField(record, ["updated_date", "updated_at", "modified_at"]) || "",
@@ -277,7 +276,7 @@ async function breezyGet<T>(
   path: string,
   options?: { timeoutMs?: number },
 ): Promise<{ ok: true; data: T } | BreezyApiFailure> {
-  const apiKey = getBreezyApiKey();
+  const apiKey = getBreezyApiKeySync();
   if (!apiKey) return missingApiKeyFailure();
 
   let response: Response;
@@ -322,12 +321,29 @@ async function breezyGet<T>(
   return { ok: true, data: body as T };
 }
 
+function isMissingApiKeyResult(result: unknown): boolean {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "ok" in result &&
+    (result as { ok: boolean }).ok === false &&
+    "error" in result &&
+    typeof (result as { error: string }).error === "string" &&
+    (result as { error: string }).error.includes("Breezy API key")
+  );
+}
+
 function cached<T>(cache: Map<string, CacheEntry<T>>, key: string, load: () => Promise<T>): Promise<T> {
   const now = Date.now();
   const existing = cache.get(key);
   if (existing && existing.expiresAt > now) return existing.promise;
 
-  const promise = load();
+  const promise = load().then((result) => {
+    if (isMissingApiKeyResult(result)) {
+      cache.delete(key);
+    }
+    return result;
+  });
   cache.set(key, {
     expiresAt: now + BREEZY_CACHE_TTL_MS,
     promise,
@@ -368,12 +384,15 @@ export async function resolveBreezyCompany(): Promise<
 }
 
 export async function fetchBreezyJobs(state = "published"): Promise<BreezyJobsResult> {
+  await loadConfig();
+  if (!getBreezyApiKeySync()) return missingApiKeyFailure();
   const cacheKey = `jobs:${state}`;
   return cached(jobsCache, cacheKey, () => fetchBreezyJobsUncached(state));
 }
 
 async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsResult> {
-  const apiKey = getBreezyApiKey();
+  await loadConfig();
+  const apiKey = getBreezyApiKeySync();
   if (!apiKey) return missingApiKeyFailure();
 
   const companyResult = await resolveBreezyCompany();
@@ -432,6 +451,8 @@ export async function fetchBreezyCandidates(options?: {
   /** When omitted, all published positions are scanned. */
   maxPositions?: number;
 }): Promise<BreezyCandidatesResult> {
+  await loadConfig();
+  if (!getBreezyApiKeySync()) return missingApiKeyFailure();
   const positionId = options?.positionId?.trim() ?? "";
   const state = options?.state ?? "published";
   const pageSize = Math.max(1, Math.min(options?.pageSize ?? CANDIDATES_PAGE_SIZE, CANDIDATES_PAGE_SIZE));
@@ -502,7 +523,8 @@ async function fetchBreezyCandidatesUncached(options?: {
   maxPages?: number;
   maxPositions?: number;
 }): Promise<BreezyCandidatesResult> {
-  const apiKey = getBreezyApiKey();
+  await loadConfig();
+  const apiKey = getBreezyApiKeySync();
   if (!apiKey) return missingApiKeyFailure();
 
   const companyResult = await resolveBreezyCompany();

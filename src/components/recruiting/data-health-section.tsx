@@ -226,7 +226,8 @@ export function DataHealthSection() {
       if (breezyJobsRes.status === "fulfilled") {
         breezyJobsJson = (await breezyJobsRes.value.json()) as BreezyJobsResult;
         if (!breezyJobsRes.value.ok) {
-          const safeMissingToken = !breezyJobsJson.ok && breezyJobsJson.error.includes("Waiting on Breezy API key");
+          const safeMissingToken =
+            !breezyJobsJson.ok && breezyJobsJson.error.toLowerCase().includes("breezy api key");
           if (!safeMissingToken) failures.push(`Breezy jobs HTTP ${breezyJobsRes.value.status}`);
         }
       } else {
@@ -237,7 +238,7 @@ export function DataHealthSection() {
         breezyCandidatesJson = (await breezyCandidatesRes.value.json()) as BreezyCandidatesResult;
         if (!breezyCandidatesRes.value.ok) {
           const safeMissingToken =
-            !breezyCandidatesJson.ok && breezyCandidatesJson.error.includes("Waiting on Breezy API key");
+            !breezyCandidatesJson.ok && breezyCandidatesJson.error.toLowerCase().includes("breezy api key");
           if (!safeMissingToken) failures.push(`Breezy candidates HTTP ${breezyCandidatesRes.value.status}`);
         }
       } else {

@@ -1,5 +1,6 @@
 import { DISTRICT_MANAGERS, getAssignedStatesForDm } from "@/lib/dm-territory-map";
-import { hashPassword } from "@/lib/auth/password";
+import { getConfiguredDefaultPassword } from "@/lib/auth/auth-env";
+import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import type { DashboardUser, UserPublic, UsersFile } from "@/lib/auth/types";
 import { toPublicUser } from "@/lib/auth/session";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -32,7 +33,7 @@ async function writeUsersFile(file: UsersFile): Promise<void> {
 }
 
 function defaultPassword(): string {
-  return process.env.DM_DEFAULT_PASSWORD?.trim() || "SRS-Dashboard-2026!";
+  return getConfiguredDefaultPassword();
 }
 
 function buildSeedUsers(): DashboardUser[] {
@@ -95,6 +96,39 @@ export async function findUserByEmail(email: string): Promise<DashboardUser | nu
   const normalized = email.trim().toLowerCase();
   const file = await readUsersFile();
   return file.users.find((user) => user.email.toLowerCase() === normalized && user.active) ?? null;
+}
+
+async function updateUserPasswordHash(userId: string, passwordHash: string): Promise<void> {
+  const file = await readUsersFile();
+  const index = file.users.findIndex((user) => user.id === userId);
+  if (index < 0) return;
+  file.users[index] = {
+    ...file.users[index],
+    passwordHash,
+    updatedAt: new Date().toISOString(),
+  };
+  await writeUsersFile(file);
+}
+
+/**
+ * Verifies password against stored hash, or syncs hash when DM_DEFAULT_PASSWORD from .env.local matches.
+ */
+export async function authenticateUser(email: string, password: string): Promise<DashboardUser | null> {
+  const user = await findUserByEmail(email);
+  if (!user) return null;
+
+  if (verifyPassword(password, user.passwordHash)) {
+    return user;
+  }
+
+  const envPassword = process.env.DM_DEFAULT_PASSWORD?.trim();
+  if (envPassword && password === envPassword) {
+    const passwordHash = hashPassword(password);
+    await updateUserPasswordHash(user.id, passwordHash);
+    return { ...user, passwordHash };
+  }
+
+  return null;
 }
 
 export async function findUserById(id: string): Promise<DashboardUser | null> {

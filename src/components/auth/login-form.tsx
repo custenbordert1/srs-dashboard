@@ -1,9 +1,40 @@
 "use client";
 
 import { ROLE_LABELS } from "@/lib/auth/permissions";
-import type { UserPublic } from "@/lib/auth/types";
+import type { UserRole } from "@/lib/auth/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+
+type LoginSuccessResponse = {
+  ok: true;
+  role: UserRole;
+  redirect: string;
+};
+
+type LoginErrorResponse = {
+  ok: false;
+  error: string;
+};
+
+type LoginResponse = LoginSuccessResponse | LoginErrorResponse;
+
+async function parseLoginResponse(res: Response): Promise<LoginResponse> {
+  const text = await res.text();
+  if (!text.trim()) {
+    return {
+      ok: false,
+      error: `Empty response from server (HTTP ${res.status}). Check SESSION_SECRET in .env.local.`,
+    };
+  }
+  try {
+    return JSON.parse(text) as LoginResponse;
+  } catch {
+    return {
+      ok: false,
+      error: `Invalid server response (HTTP ${res.status}).`,
+    };
+  }
+}
 
 export function LoginForm() {
   const router = useRouter();
@@ -23,19 +54,14 @@ export function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const parsed = (await res.json()) as {
-        ok: boolean;
-        error?: string;
-        redirectTo?: string;
-        user?: UserPublic;
-      };
+      const parsed = await parseLoginResponse(res);
       if (!res.ok || !parsed.ok) {
-        setError(parsed.error ?? "Login failed");
+        setError(parsed.ok ? "Login failed" : parsed.error);
         return;
       }
       const next = searchParams.get("next");
       const destination =
-        next && next.startsWith("/") ? next : parsed.redirectTo ?? (parsed.user?.role === "dm" ? "/dm" : "/");
+        next && next.startsWith("/") ? next : parsed.redirect ?? (parsed.role === "dm" ? "/dm" : "/");
       router.replace(destination);
       router.refresh();
     } catch (err) {

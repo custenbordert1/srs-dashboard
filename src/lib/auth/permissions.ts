@@ -9,9 +9,9 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 
 /** Routes each role may access (pages and APIs). */
 const ROLE_ROUTE_PREFIXES: Record<UserRole, string[]> = {
-  executive: ["/", "/dm", "/login", "/api"],
+  executive: ["/", "/dm", "/executive", "/login", "/api"],
   recruiter: ["/", "/dm", "/login", "/api"],
-  dm: ["/dm", "/login", "/api/auth", "/api/dm", "/api/breezy"],
+  dm: ["/dm", "/login", "/api/auth", "/api/dm", "/api/breezy", "/api/recruiting"],
 };
 
 export function canAccessRoute(role: UserRole, pathname: string): boolean {

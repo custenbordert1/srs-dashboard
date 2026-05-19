@@ -1,6 +1,5 @@
 import { getSessionFromRequest } from "@/lib/auth/request-session";
-import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
-import { buildDmDashboardSnapshot } from "@/lib/dm-dashboard/build-dm-dashboard";
+import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -9,7 +8,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-const ROUTE = "/api/dm/dashboard";
+const ROUTE = "/api/executive/dashboard";
 
 export async function GET(request: Request) {
   const session = getSessionFromRequest(request);
@@ -17,8 +16,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.role === "dm" && session.territoryStates.length === 0) {
-    return NextResponse.json({ ok: false, error: "DM has no assigned territory" }, { status: 403 });
+  if (session.role !== "executive") {
+    return NextResponse.json({ ok: false, error: "Executive access required" }, { status: 403 });
   }
 
   await logBreezyRouteStart(ROUTE, session);
@@ -43,18 +42,17 @@ export async function GET(request: Request) {
     return NextResponse.json(breezyFailureBody(candidatesResult), { status });
   }
 
-  const jobs = applyTerritoryToJobs(session, jobsResult.jobs);
-  const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
-  const fetchedAt = candidatesResult.fetchedAt;
-
-  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt);
+  const dashboard = buildExecutiveDashboard(
+    jobsResult.jobs,
+    candidatesResult.candidates,
+    candidatesResult.fetchedAt,
+  );
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
     breezyOk: true,
-    filteredJobs: jobs.length,
-    filteredCandidates: candidates.length,
-    territoryStates: dashboard.territoryStates,
+    totalJobs: jobsResult.jobs.length,
+    totalCandidates: candidatesResult.candidates.length,
   });
 
   return NextResponse.json(
@@ -62,12 +60,9 @@ export async function GET(request: Request) {
       ok: true,
       dashboard,
       meta: {
-        role: session.role,
-        territoryStates: dashboard.territoryStates,
-        totalPositionsAvailable: jobsResult.jobs.length,
-        filteredJobs: jobs.length,
-        filteredCandidates: candidates.length,
         partialSync: candidatesResult.truncated ?? false,
+        totalJobs: jobsResult.jobs.length,
+        totalCandidates: candidatesResult.candidates.length,
         refreshedAt: new Date().toISOString(),
       },
     },

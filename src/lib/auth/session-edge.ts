@@ -1,7 +1,8 @@
+import { resolveSessionSecret } from "@/lib/auth/auth-env";
 import type { AuthSession } from "@/lib/auth/types";
 
 function secret(): string | null {
-  return process.env.SESSION_SECRET?.trim() || process.env.BREEZY_API_KEY?.trim() || null;
+  return resolveSessionSecret();
 }
 
 function base64UrlToBytes(value: string): Uint8Array {

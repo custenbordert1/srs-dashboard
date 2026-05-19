@@ -5,14 +5,21 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export type DmAttentionSeverity = "critical" | "warning";
 
+export type DmAttentionCategory =
+  | "no-applicants-7d"
+  | "no-interviews"
+  | "job-aging"
+  | "job-aging-14"
+  | "job-aging-21"
+  | "job-aging-30"
+  | "low-applicant-flow"
+  | "low-applicant-flow-city"
+  | "low-interview-conversion";
+
 export type DmAttentionItem = {
   id: string;
   severity: DmAttentionSeverity;
-  category:
-    | "no-applicants-7d"
-    | "job-aging"
-    | "low-applicant-flow"
-    | "low-interview-conversion";
+  category: DmAttentionCategory;
   title: string;
   detail: string;
   jobId?: string;

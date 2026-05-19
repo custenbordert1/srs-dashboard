@@ -1,4 +1,5 @@
-import { fetchBreezyCandidates, fetchBreezyJobs, getBreezyApiKey } from "@/lib/breezy-api";
+import { getBreezyApiKeySync, loadConfig } from "@/lib/config";
+import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 
 export type BreezySyncEntity = "job" | "candidate";
 
@@ -106,8 +107,9 @@ function isAuthError(error: string): boolean {
 }
 
 export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthSnapshot> {
+  await loadConfig();
   const generatedAt = new Date().toISOString();
-  const tokenMissing = !getBreezyApiKey();
+  const tokenMissing = !getBreezyApiKeySync();
   const tokenStatus: BreezyTokenStatus = tokenMissing ? "missing" : "configured";
   const queue: BreezySyncQueueItem[] = [];
   const brokenPositionCleanupQueue: BrokenPositionCleanupItem[] = [];
