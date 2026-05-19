@@ -1,3 +1,5 @@
+import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
+import { getSessionFromRequest } from "@/lib/auth/request-session";
 import { fetchBreezyCandidates } from "@/lib/breezy-api";
 import { NextResponse } from "next/server";
 
@@ -5,6 +7,11 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function GET(request: Request) {
+  const session = getSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const positionId = searchParams.get("position_id")?.trim() || undefined;
   const state = searchParams.get("state")?.trim() || undefined;
@@ -12,13 +19,16 @@ export async function GET(request: Request) {
   const maxPages = Number.parseInt(searchParams.get("max_pages") ?? "", 10);
   const maxPositions = Number.parseInt(searchParams.get("max_positions") ?? "", 10);
 
-  const result = await fetchBreezyCandidates({
-    positionId,
-    state,
-    pageSize: Number.isFinite(pageSize) ? pageSize : undefined,
-    maxPages: Number.isFinite(maxPages) ? maxPages : undefined,
-    maxPositions: Number.isFinite(maxPositions) ? maxPositions : undefined,
-  });
+  const result = guardBreezyCandidatesResult(
+    await fetchBreezyCandidates({
+      positionId,
+      state,
+      pageSize: Number.isFinite(pageSize) ? pageSize : undefined,
+      maxPages: Number.isFinite(maxPages) ? maxPages : undefined,
+      maxPositions: Number.isFinite(maxPositions) ? maxPositions : undefined,
+    }),
+    session,
+  );
   const status = result.ok ? 200 : result.error.includes("Waiting on Breezy API key") ? 503 : 502;
   return NextResponse.json(result, { status });
 }
