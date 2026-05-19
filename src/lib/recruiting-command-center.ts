@@ -1,0 +1,299 @@
+import type { BreezyCandidate, BreezyCandidatesSuccess, BreezyJobsSuccess } from "@/lib/breezy-api";
+import type { Kpi } from "@/lib/recruiting-sample-data";
+import type { ChartBar } from "@/lib/recruiting-intelligence";
+
+const MS_PER_HOUR = 60 * 60 * 1000;
+const MS_PER_DAY = 24 * MS_PER_HOUR;
+
+export const TRACKED_SOURCE_CHANNELS = [
+  {
+    id: "indeed-organic",
+    label: "Indeed Organic",
+    patterns: ["indeed organic", "organic indeed"],
+  },
+  {
+    id: "monster",
+    label: "Monster",
+    patterns: ["monster"],
+  },
+  {
+    id: "directemployers",
+    label: "DirectEmployers",
+    patterns: ["directemployers", "direct employers"],
+  },
+  {
+    id: "indeed-apply",
+    label: "Indeed Apply",
+    patterns: ["indeed apply", "indeed easy apply", "indeed sponsored"],
+  },
+] as const;
+
+export type CommandCenterFunnelStage = "applied" | "interviewing" | "hired";
+
+export type CommandCenterCandidateRow = {
+  candidateId: string;
+  name: string;
+  stage: string;
+  source: string;
+  position: string;
+  location: string;
+  appliedDate: string;
+  appliedDateLabel: string;
+  appliedHoursAgo: number | null;
+  agingClassName: string;
+  aiScoreLabel: string;
+};
+
+export type CommandCenterSnapshot = {
+  kpis: Kpi[];
+  funnel: ChartBar[];
+  recentCandidates: CommandCenterCandidateRow[];
+  sourceBreakdown: ChartBar[];
+  applicantsToday: number;
+  applicantsLast7Days: number;
+  activeJobs: number;
+  interviewing: number;
+  topSource: string;
+  positionsScanned: number;
+  lastSyncLabel: string;
+  fetchedAt: string;
+  truncated: boolean;
+  connected: boolean;
+};
+
+function parseAppliedDate(raw: string): Date | null {
+  if (!raw.trim()) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatAppliedDate(raw: string): string {
+  const date = parseAppliedDate(raw);
+  if (!date) return raw.trim() || "—";
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+}
+
+export function formatCommandCenterSyncTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function candidateName(candidate: BreezyCandidate): string {
+  const name = `${candidate.firstName} ${candidate.lastName}`.trim();
+  return name || candidate.email || "Unknown candidate";
+}
+
+function countAppliedSince(candidates: BreezyCandidate[], since: Date): number {
+  return candidates.filter((candidate) => {
+    const applied = parseAppliedDate(candidate.appliedDate);
+    return applied !== null && applied >= since;
+  }).length;
+}
+
+function normalizeText(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function classifyFunnelStage(stage: string): CommandCenterFunnelStage {
+  const normalized = normalizeText(stage);
+  if (
+    normalized.includes("hired") ||
+    normalized.includes("offer") ||
+    normalized.includes("onboard") ||
+    normalized.includes("active rep")
+  ) {
+    return "hired";
+  }
+  if (
+    normalized.includes("interview") ||
+    normalized.includes("screen") ||
+    normalized.includes("assessment") ||
+    normalized.includes("qualified") ||
+    normalized.includes("review")
+  ) {
+    return "interviewing";
+  }
+  return "applied";
+}
+
+function isInterviewingStage(stage: string): boolean {
+  return classifyFunnelStage(stage) === "interviewing";
+}
+
+function classifyTrackedSourceId(source: string): (typeof TRACKED_SOURCE_CHANNELS)[number]["id"] | null {
+  const normalized = normalizeText(source);
+  if (normalized.includes("indeed apply") || normalized.includes("indeed easy apply")) {
+    return "indeed-apply";
+  }
+  if (normalized.includes("indeed organic") || normalized.includes("organic indeed")) {
+    return "indeed-organic";
+  }
+  if (normalized.includes("monster")) return "monster";
+  if (normalized.includes("directemployers") || normalized.includes("direct employers")) {
+    return "directemployers";
+  }
+  if (normalized.includes("indeed")) return "indeed-apply";
+  return null;
+}
+
+function countTrackedSources(candidates: BreezyCandidate[]): ChartBar[] {
+  const counts = new Map<string, number>();
+  for (const channel of TRACKED_SOURCE_CHANNELS) {
+    counts.set(channel.id, 0);
+  }
+  for (const candidate of candidates) {
+    const id = classifyTrackedSourceId(candidate.source);
+    if (!id) continue;
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return TRACKED_SOURCE_CHANNELS.map((channel) => ({
+    label: channel.label,
+    value: counts.get(channel.id) ?? 0,
+  }));
+}
+
+export function appliedAgingHours(appliedDate: string, reference: Date): number | null {
+  const applied = parseAppliedDate(appliedDate);
+  if (!applied) return null;
+  return Math.max(0, Math.round((reference.getTime() - applied.getTime()) / MS_PER_HOUR));
+}
+
+export function appliedAgingClassName(hours: number | null): string {
+  if (hours === null) return "text-zinc-500";
+  if (hours < 24) return "font-medium text-emerald-300";
+  if (hours <= 72) return "font-medium text-amber-300";
+  return "font-medium text-red-300";
+}
+
+function flatKpi(id: string, label: string, value: string, hint: string): Kpi {
+  return {
+    id,
+    label,
+    value,
+    change: "—",
+    changeDirection: "flat",
+    hint,
+  };
+}
+
+function topSourceLabel(candidates: BreezyCandidate[]): string {
+  const counts = new Map<string, number>();
+  for (const candidate of candidates) {
+    const label = candidate.source.trim() || "Unknown source";
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  if (sorted.length === 0) return "—";
+  return `${sorted[0][0]} (${sorted[0][1].toLocaleString()})`;
+}
+
+function buildRecentCandidates(
+  candidates: BreezyCandidate[],
+  reference: Date,
+  limit = 15,
+): CommandCenterCandidateRow[] {
+  return [...candidates]
+    .sort((a, b) => {
+      const aDate = parseAppliedDate(a.appliedDate);
+      const bDate = parseAppliedDate(b.appliedDate);
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return bDate.getTime() - aDate.getTime();
+    })
+    .slice(0, limit)
+    .map((candidate) => {
+      const city = candidate.city.trim();
+      const state = candidate.state.trim();
+      const hours = appliedAgingHours(candidate.appliedDate, reference);
+      return {
+        candidateId: candidate.candidateId,
+        name: candidateName(candidate),
+        stage: candidate.stage.trim() || "—",
+        source: candidate.source.trim() || "—",
+        position: candidate.positionName.trim() || "—",
+        location: [city, state].filter(Boolean).join(", ") || "—",
+        appliedDate: candidate.appliedDate,
+        appliedDateLabel: formatAppliedDate(candidate.appliedDate),
+        appliedHoursAgo: hours,
+        agingClassName: appliedAgingClassName(hours),
+        aiScoreLabel: "Pending",
+      };
+    });
+}
+
+export function buildRecruitingCommandCenter(
+  candidatesData: BreezyCandidatesSuccess,
+  jobsData: BreezyJobsSuccess,
+): CommandCenterSnapshot {
+  const { candidates, fetchedAt, positionsScanned = 0, truncated = false } = candidatesData;
+  const syncTime = new Date(fetchedAt);
+  const syncMs = Number.isNaN(syncTime.getTime()) ? Date.now() : syncTime.getTime();
+  const sinceToday = new Date(syncMs - MS_PER_DAY);
+  const since7d = new Date(syncMs - 7 * MS_PER_DAY);
+  const lastSyncLabel = formatCommandCenterSyncTime(fetchedAt);
+
+  const applicantsToday = countAppliedSince(candidates, sinceToday);
+  const applicantsLast7Days = countAppliedSince(candidates, since7d);
+  const activeJobs = jobsData.jobs.length;
+  const interviewing = candidates.filter((candidate) => isInterviewingStage(candidate.stage)).length;
+  const topSource = topSourceLabel(candidates);
+
+  const funnelCounts: Record<CommandCenterFunnelStage, number> = {
+    applied: 0,
+    interviewing: 0,
+    hired: 0,
+  };
+  for (const candidate of candidates) {
+    funnelCounts[classifyFunnelStage(candidate.stage)] += 1;
+  }
+
+  const funnel: ChartBar[] = [
+    { label: "Applied", value: funnelCounts.applied },
+    { label: "Interviewing", value: funnelCounts.interviewing },
+    { label: "Hired", value: funnelCounts.hired },
+  ];
+
+  const sourceBreakdown = countTrackedSources(candidates);
+
+  const kpis: Kpi[] = [
+    flatKpi("cc-today", "Applicants Today", applicantsToday.toLocaleString(), "Applied in the last 24 hours"),
+    flatKpi(
+      "cc-7d",
+      "Applicants Last 7 Days",
+      applicantsLast7Days.toLocaleString(),
+      "Applied in the last 7 days (relative to sync)",
+    ),
+    flatKpi("cc-jobs", "Active Jobs", activeJobs.toLocaleString(), "Published positions from Breezy jobs API"),
+    flatKpi("cc-interviewing", "Interviewing", interviewing.toLocaleString(), "Candidates in interview pipeline stages"),
+    flatKpi("cc-top-source", "Top Source", topSource, "Highest-volume applicant source in current pull"),
+    flatKpi(
+      "cc-positions",
+      "Positions Scanned",
+      positionsScanned.toLocaleString(),
+      truncated ? "Partial scan — more positions may exist" : "Positions included in candidate aggregation",
+    ),
+    flatKpi("cc-sync", "Last Sync Time", lastSyncLabel, "Last successful Breezy candidates sync"),
+  ];
+
+  return {
+    kpis,
+    funnel,
+    recentCandidates: buildRecentCandidates(candidates, syncTime),
+    sourceBreakdown,
+    applicantsToday,
+    applicantsLast7Days,
+    activeJobs,
+    interviewing,
+    topSource,
+    positionsScanned,
+    lastSyncLabel,
+    fetchedAt,
+    truncated,
+    connected: true,
+  };
+}

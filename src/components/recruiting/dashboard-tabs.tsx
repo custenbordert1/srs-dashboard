@@ -1,6 +1,7 @@
 "use client";
 
 export type DashboardTabId =
+  | "command-center"
   | "overview"
   | "needs-attention"
   | "dm-scorecards"
@@ -17,6 +18,7 @@ export type DashboardTab = {
 };
 
 export const DASHBOARD_TABS: DashboardTab[] = [
+  { id: "command-center", label: "Command Center" },
   { id: "overview", label: "Overview" },
   { id: "needs-attention", label: "Needs Attention" },
   { id: "dm-scorecards", label: "DM Scorecards" },

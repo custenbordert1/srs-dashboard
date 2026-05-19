@@ -20,6 +20,7 @@ import { NeedsAttentionSection } from "./needs-attention-section";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { OpenJobsTable } from "./open-jobs-table";
 import { PostAutomationQueue } from "./post-automation-queue";
+import { RecruitingCommandCenter } from "./recruiting-command-center";
 import { RecruitingIntelligenceSection } from "./recruiting-intelligence-section";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
@@ -39,7 +40,7 @@ export function RecruitingDashboardContent({
   newHireMetrics,
   dmLeaderboard,
 }: RecruitingDashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabId>("overview");
+  const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
 
   return (
     <>
@@ -50,6 +51,8 @@ export function RecruitingDashboardContent({
         role="tabpanel"
         className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8"
       >
+        {activeTab === "command-center" ? <RecruitingCommandCenter /> : null}
+
         {activeTab === "overview" ? (
           <>
             <BreezyDashboardSummary />
