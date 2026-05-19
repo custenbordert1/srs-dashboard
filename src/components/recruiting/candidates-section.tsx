@@ -8,13 +8,16 @@ import {
   type CandidateWorkflowStatus,
   type CandidateWorkflowState,
 } from "@/lib/candidate-workflow-types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const ALL = "__all__";
 const selectClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
+  "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
+  "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
+const thClass =
+  "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-sm";
+const tdClass = "whitespace-nowrap px-2 py-1 text-xs text-zinc-300";
 
 type CandidateWorkflowRow = BreezyCandidate & {
   workflowStatus: CandidateWorkflowStatus;
@@ -147,13 +150,6 @@ function workflowBuckets(candidates: CandidateWorkflowRow[]) {
   ];
 }
 
-function formatDateTime(raw: string | null): string {
-  if (!raw) return "No local action";
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return raw;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
-}
-
 function daysSince(raw: string | null): number | null {
   if (!raw) return null;
   const date = new Date(raw);
@@ -192,6 +188,81 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
   );
 }
 
+type CandidateAction =
+  | { kind: "status"; status: CandidateWorkflowStatus; label: string }
+  | { kind: "assign-recruiter" | "assign-dm" | "add-note"; label: string };
+
+const CANDIDATE_ACTIONS: CandidateAction[] = [
+  { kind: "status", status: "Needs Review", label: "Needs Review" },
+  { kind: "status", status: "Qualified", label: "Qualified" },
+  { kind: "status", status: "Not Qualified", label: "Not Qualified" },
+  { kind: "status", status: "Paperwork Needed", label: "Paperwork Needed" },
+  { kind: "status", status: "Paperwork Sent", label: "Paperwork Sent" },
+  { kind: "status", status: "Signed", label: "Signed" },
+  { kind: "status", status: "Ready for MEL", label: "Ready for MEL" },
+  { kind: "status", status: "Training Needed", label: "Training Needed" },
+  { kind: "status", status: "Active Rep", label: "Active Rep" },
+  { kind: "assign-recruiter", label: "Assign Recruiter" },
+  { kind: "assign-dm", label: "Assign DM" },
+  { kind: "add-note", label: "Add Note" },
+];
+
+function CandidateActionsMenu({ onAction }: { onAction: (action: CandidateAction) => void }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handlePointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative inline-block">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((value) => !value)}
+        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-2 py-0.5 text-[11px] font-medium text-zinc-200 hover:bg-zinc-700/80"
+      >
+        Actions
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-1 min-w-[11rem] rounded-md border border-zinc-700 bg-zinc-950 py-1 shadow-lg shadow-black/40"
+        >
+          {CANDIDATE_ACTIONS.map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              role="menuitem"
+              className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+              onClick={() => {
+                setOpen(false);
+                onAction(action);
+              }}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function CandidatesSection() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
@@ -200,6 +271,7 @@ export function CandidatesSection() {
   const [positionFilter, setPositionFilter] = useState(ALL);
   const [cityFilter, setCityFilter] = useState(ALL);
   const [stateFilter, setStateFilter] = useState(ALL);
+  const [workflowFilter, setWorkflowFilter] = useState(ALL);
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
@@ -264,6 +336,7 @@ export function CandidatesSection() {
       if (positionFilter !== ALL && candidate.positionName !== positionFilter) return false;
       if (cityFilter !== ALL && candidate.city !== cityFilter) return false;
       if (stateFilter !== ALL && candidate.state !== stateFilter) return false;
+      if (workflowFilter !== ALL && candidate.workflowStatus !== workflowFilter) return false;
 
       const appliedDate = parseDate(candidate.appliedDate);
       if (fromDate && (!appliedDate || appliedDate < fromDate)) return false;
@@ -284,7 +357,7 @@ export function CandidatesSection() {
 
       return true;
     });
-  }, [appliedFrom, appliedTo, candidates, cityFilter, positionFilter, search, sourceFilter, stageFilter, stateFilter]);
+  }, [appliedFrom, appliedTo, candidates, cityFilter, positionFilter, search, sourceFilter, stageFilter, stateFilter, workflowFilter]);
 
   const newestApplicantDate = useMemo(() => {
     const newest = filtered
@@ -354,6 +427,22 @@ export function CandidatesSection() {
     updateWorkflow(candidate, candidate.workflowStatus, { assignedDM });
   }
 
+  function handleCandidateAction(candidate: CandidateWorkflowRow, action: CandidateAction) {
+    if (action.kind === "status") {
+      updateWorkflow(candidate, action.status);
+      return;
+    }
+    if (action.kind === "assign-recruiter") {
+      assignRecruiter(candidate);
+      return;
+    }
+    if (action.kind === "assign-dm") {
+      assignDm(candidate);
+      return;
+    }
+    addNote(candidate);
+  }
+
   if (data === undefined) return <CandidatesSkeleton />;
 
   if (!data.ok) {
@@ -394,7 +483,7 @@ export function CandidatesSection() {
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Buckets</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Visibility layer for review, paperwork, MEL loading, and training readiness. Counts are derived from Breezy stage names until workflow persistence is added.
+            Visibility layer for review, paperwork, MEL loading, and training readiness. Counts use local workflow status when set, otherwise Breezy stage names.
           </p>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
@@ -435,13 +524,14 @@ export function CandidatesSection() {
       </section>
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-        <div className="grid gap-3 border-b border-zinc-800/80 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-5">
+        <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-sm sm:px-4">
           <input
-            className={`${inputClass} sm:col-span-2 lg:col-span-4`}
+            className={inputClass}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search name, email, phone, position, or source"
           />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
           <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
             <option value={ALL}>All sources</option>
             {sourceOptions.map((source) => <option key={source} value={source}>{source}</option>)}
@@ -464,130 +554,90 @@ export function CandidatesSection() {
           </select>
           <input className={inputClass} type="date" value={appliedFrom} onChange={(event) => setAppliedFrom(event.target.value)} aria-label="Applied from date" />
           <input className={inputClass} type="date" value={appliedTo} onChange={(event) => setAppliedTo(event.target.value)} aria-label="Applied to date" />
+            <select className={selectClass} value={workflowFilter} onChange={(event) => setWorkflowFilter(event.target.value)}>
+              <option value={ALL}>All workflow statuses</option>
+              {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {filtered.length === 0 ? (
-          <p className="px-4 py-10 text-sm text-zinc-500 sm:px-5">No candidates match the selected filters.</p>
+          <p className="px-3 py-8 text-xs text-zinc-500 sm:px-4">No candidates match the selected filters.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-[1780px] w-full text-left text-sm">
-              <thead className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
+          <div className="max-h-[min(70vh,960px)] overflow-auto">
+            <table className="min-w-[1500px] w-full text-left">
+              <thead className="border-b border-zinc-800/80">
                 <tr>
-                  <th className="px-4 py-3 font-medium sm:px-5">Name</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Email</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Phone</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Source</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Stage</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Applied Date</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Position</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">City</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">State</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Workflow Status</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Workflow Aging</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Next Action</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Local Actions</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">Notes History</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">HelloSign Prep</th>
-                  <th className="px-4 py-3 font-medium sm:px-5">AI Ready</th>
+                  <th className={thClass}>Name</th>
+                  <th className={thClass}>Email</th>
+                  <th className={thClass}>Phone</th>
+                  <th className={thClass}>Source</th>
+                  <th className={thClass}>Stage</th>
+                  <th className={thClass}>Applied</th>
+                  <th className={thClass}>Position</th>
+                  <th className={thClass}>City</th>
+                  <th className={thClass}>State</th>
+                  <th className={thClass}>Workflow</th>
+                  <th className={thClass}>Aging</th>
+                  <th className={thClass}>Next Action</th>
+                  <th className={thClass}>Actions</th>
+                  <th className={thClass}>Notes</th>
+                  <th className={thClass}>HelloSign</th>
+                  <th className={thClass}>AI</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60">
                 {filtered.map((candidate) => (
                   <tr key={candidate.candidateId} className="hover:bg-zinc-800/30">
-                    <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{candidateName(candidate)}</td>
-                    <td className="px-4 py-3 text-zinc-300 sm:px-5">{candidate.email || "—"}</td>
-                    <td className="px-4 py-3 text-zinc-300 sm:px-5">{candidate.phone || "—"}</td>
-                    <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.source || "Unknown source"}</td>
-                    <td className="px-4 py-3 text-zinc-300 sm:px-5">{candidate.stage || "Unknown stage"}</td>
-                    <td className="px-4 py-3 text-zinc-400 sm:px-5">{formatDate(candidate.appliedDate)}</td>
-                    <td className="px-4 py-3 text-zinc-300 sm:px-5">{candidate.positionName || "Unknown position"}</td>
-                    <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.city || "—"}</td>
-                    <td className="px-4 py-3 text-zinc-400 sm:px-5">{candidate.state || "—"}</td>
-                    <td className="px-4 py-3 sm:px-5">
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${WORKFLOW_STATUS_STYLES[candidate.workflowStatus]}`}>
+                    <td className={`${tdClass} max-w-[10rem] truncate font-medium text-zinc-100`}>{candidateName(candidate)}</td>
+                    <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
+                    <td className={tdClass}>{candidate.phone || "—"}</td>
+                    <td className={`${tdClass} max-w-[8rem] truncate text-zinc-400`}>{candidate.source || "—"}</td>
+                    <td className={`${tdClass} max-w-[8rem] truncate`}>{candidate.stage || "—"}</td>
+                    <td className={`${tdClass} text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
+                    <td className={`${tdClass} max-w-[10rem] truncate`}>{candidate.positionName || "—"}</td>
+                    <td className={tdClass}>{candidate.city || "—"}</td>
+                    <td className={tdClass}>{candidate.state || "—"}</td>
+                    <td className={tdClass}>
+                      <span
+                        className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-tight ${WORKFLOW_STATUS_STYLES[candidate.workflowStatus]}`}
+                      >
                         {candidate.workflowStatus}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-zinc-400 sm:px-5">
-                      <p>Since applied: {formatDays(daysSince(candidate.appliedDate))}</p>
-                      <p>Status age: {formatDays(daysSince(candidate.lastActionAt ?? candidate.appliedDate))}</p>
+                    <td className={`${tdClass} text-[10px] text-zinc-500`}>
+                      <span className="block">Applied {formatDays(daysSince(candidate.appliedDate))}</span>
+                      <span className="block">Status {formatDays(daysSince(candidate.lastActionAt ?? candidate.appliedDate))}</span>
                     </td>
-                    <td className="px-4 py-3 text-zinc-300 sm:px-5">
-                      <div>{candidate.nextActionNeeded}</div>
-                      <div className="mt-1 text-xs text-zinc-500">Recruiter: {candidate.assignedRecruiter}</div>
-                      <div className="mt-1 text-xs text-zinc-500">DM: {candidate.assignedDM}</div>
-                      <div className="mt-1 text-xs text-zinc-600">Last action: {formatDateTime(candidate.lastActionAt)}</div>
-                    </td>
-                    <td className="px-4 py-3 sm:px-5">
-                      <div className="flex flex-wrap gap-1.5">
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Needs Review")} className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-xs font-medium text-sky-200">
-                          Mark Needs Review
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Qualified")} className="rounded-md border border-teal-500/30 bg-teal-500/10 px-2 py-1 text-xs font-medium text-teal-200">
-                          Mark Qualified
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Not Qualified")} className="rounded-md border border-zinc-600 bg-zinc-800/60 px-2 py-1 text-xs font-medium text-zinc-200">
-                          Mark Not Qualified
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Paperwork Needed")} className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-200">
-                          Mark Paperwork Needed
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Paperwork Sent")} className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-1 text-xs font-medium text-violet-200">
-                          Mark Paperwork Sent
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Signed")} className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-200">
-                          Mark Signed
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Ready for MEL")} className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-xs font-medium text-cyan-200">
-                          Mark Ready for MEL
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Training Needed")} className="rounded-md border border-orange-500/30 bg-orange-500/10 px-2 py-1 text-xs font-medium text-orange-200">
-                          Mark Training Needed
-                        </button>
-                        <button type="button" onClick={() => updateWorkflow(candidate, "Active Rep")} className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-200">
-                          Mark Active Rep
-                        </button>
-                        <button type="button" onClick={() => assignRecruiter(candidate)} className="rounded-md border border-zinc-600 bg-zinc-800/60 px-2 py-1 text-xs font-medium text-zinc-200">
-                          Assign Recruiter
-                        </button>
-                        <button type="button" onClick={() => assignDm(candidate)} className="rounded-md border border-zinc-600 bg-zinc-800/60 px-2 py-1 text-xs font-medium text-zinc-200">
-                          Assign DM
-                        </button>
-                        <button type="button" onClick={() => addNote(candidate)} className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-1 text-xs font-medium text-violet-200">
-                          Add Note
-                        </button>
+                    <td className={`${tdClass} max-w-[12rem]`}>
+                      <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
+                      <div className="mt-0.5 truncate text-[10px] text-zinc-500">
+                        {candidate.assignedRecruiter} · {candidate.assignedDM}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-zinc-500 sm:px-5">
-                      {candidate.notes.length > 0 ? (
-                        <ul className="max-w-[16rem] space-y-1">
-                          {candidate.notes.slice(0, 3).map((note, index) => (
-                            <li key={`${candidate.candidateId}-note-${index}`} className="truncate">
-                              {note}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <span>No notes</span>
-                      )}
-                      {candidate.history.length > 0 ? (
-                        <p className="mt-2 text-zinc-600">History events: {candidate.history.length}</p>
-                      ) : null}
+                    <td className={tdClass}>
+                      <CandidateActionsMenu onAction={(action) => handleCandidateAction(candidate, action)} />
                     </td>
-                    <td className="px-4 py-3 sm:px-5">
+                    <td className={`${tdClass} text-zinc-500`} title="Full notes open in candidate drawer (coming soon)">
+                      Notes: {candidate.notes.length}
+                    </td>
+                    <td className={tdClass}>
                       <button
                         type="button"
                         disabled
                         title="HelloSign sending is disabled until API keys and packet templates are configured."
-                        className="rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-1.5 text-xs font-medium text-zinc-500"
+                        className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500"
                       >
-                        Send Paperwork
+                        Send
                       </button>
-                      <p className="mt-1 text-xs text-zinc-600">Placeholder only</p>
                     </td>
-                    <td className="px-4 py-3 text-xs text-zinc-500 sm:px-5">
-                      <p>Overall: {candidate.overallCandidateScore ?? "Pending"}</p>
-                      <p>{candidate.aiRecommendation}</p>
+                    <td className={`${tdClass} text-[10px] text-zinc-500`}>
+                      <span className="block">{candidate.overallCandidateScore ?? "—"}</span>
+                      <span className="block max-w-[8rem] truncate">{candidate.aiRecommendation}</span>
                     </td>
                   </tr>
                 ))}
