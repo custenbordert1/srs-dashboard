@@ -436,7 +436,7 @@ async function fetchBreezyCandidatesUncached(options?: {
 
     const raw = Array.isArray(candidatesResult.data) ? candidatesResult.data : [];
     const candidates = raw
-      .map((c) => sanitizeCandidate({ ...c, position_id: positionId }, { jobId: positionId, name: "" }))
+      .map((c) => sanitizeCandidate({ ...c, position_id: positionId }, { jobId: positionId, name: "", city: "", state: "" }))
       .filter((candidate): candidate is BreezyCandidate => Boolean(candidate));
 
     return {

@@ -64,16 +64,6 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function stringField(record: Record<string, unknown> | null, keys: string[]): string {
-  if (!record) return "";
-  for (const key of keys) {
-    const value = record[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-    if (typeof value === "number") return String(value);
-  }
-  return "";
-}
-
 function nestedString(candidate: BreezyCandidate, paths: string[][]): string {
   const root = candidate as Record<string, unknown>;
   for (const path of paths) {

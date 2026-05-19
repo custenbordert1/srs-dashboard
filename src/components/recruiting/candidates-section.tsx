@@ -1,6 +1,13 @@
 "use client";
 
 import type { BreezyCandidate, BreezyCandidatesResult } from "@/lib/breezy-api";
+import {
+  CANDIDATE_WORKFLOW_STATUSES,
+  nextActionForWorkflowStatus,
+  type CandidateWorkflowRecord,
+  type CandidateWorkflowStatus,
+  type CandidateWorkflowState,
+} from "@/lib/candidate-workflow-types";
 import { useEffect, useMemo, useState } from "react";
 
 const ALL = "__all__";
@@ -9,32 +16,13 @@ const selectClass =
 const inputClass =
   "w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20";
 
-type CandidateWorkflowStatus =
-  | "Applied"
-  | "Needs Review"
-  | "Qualified"
-  | "Not Qualified"
-  | "Paperwork Needed"
-  | "Paperwork Sent"
-  | "Signed"
-  | "Ready for MEL"
-  | "Loaded in MEL"
-  | "Training Needed"
-  | "Active Rep";
-
-type LocalWorkflowState = {
-  workflowStatus: CandidateWorkflowStatus;
-  lastActionAt: string | null;
-  assignedDM: string;
-  notes: string[];
-};
-
 type CandidateWorkflowRow = BreezyCandidate & {
   workflowStatus: CandidateWorkflowStatus;
   lastActionAt: string | null;
   nextActionNeeded: string;
   assignedDM: string;
   notes: string[];
+  history: CandidateWorkflowRecord["history"];
   resumeKeywordScore: number | null;
   merchandisingExperienceScore: number | null;
   retailExperienceScore: number | null;
@@ -56,21 +44,6 @@ const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   "Training Needed": "bg-orange-500/15 text-orange-200 ring-1 ring-orange-500/30",
   "Active Rep": "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30",
 };
-
-const WORKFLOW_STORAGE_KEY = "srs-dashboard:candidate-workflows:v1";
-const WORKFLOW_STATUSES: CandidateWorkflowStatus[] = [
-  "Applied",
-  "Needs Review",
-  "Qualified",
-  "Not Qualified",
-  "Paperwork Needed",
-  "Paperwork Sent",
-  "Signed",
-  "Ready for MEL",
-  "Loaded in MEL",
-  "Training Needed",
-  "Active Rep",
-];
 
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -110,33 +83,17 @@ function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStat
   return "Needs Review";
 }
 
-function nextActionForStatus(status: CandidateWorkflowStatus): string {
-  const actions: Record<CandidateWorkflowStatus, string> = {
-    Applied: "Review candidate fit",
-    "Needs Review": "Review candidate fit",
-    Qualified: "Prepare paperwork",
-    "Not Qualified": "No action",
-    "Paperwork Needed": "Send paperwork placeholder",
-    "Paperwork Sent": "Wait for signature",
-    Signed: "Verify signed paperwork",
-    "Ready for MEL": "Load into MEL",
-    "Loaded in MEL": "Monitor placement",
-    "Training Needed": "Schedule training",
-    "Active Rep": "Monitor field activity",
-  };
-  return actions[status];
-}
-
-function workflowRow(candidate: BreezyCandidate, local?: LocalWorkflowState): CandidateWorkflowRow {
+function workflowRow(candidate: BreezyCandidate, local?: CandidateWorkflowRecord): CandidateWorkflowRow {
   const workflowStatus = local?.workflowStatus ?? deriveWorkflowStatus(candidate);
   const seededScore = candidate.score ?? null;
   return {
     ...candidate,
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
-    nextActionNeeded: nextActionForStatus(workflowStatus),
+    nextActionNeeded: local?.nextActionNeeded ?? nextActionForWorkflowStatus(workflowStatus),
     assignedDM: local?.assignedDM ?? "Unassigned",
     notes: local?.notes ?? [],
+    history: local?.history ?? [],
     resumeKeywordScore: null,
     merchandisingExperienceScore: null,
     retailExperienceScore: null,
@@ -188,18 +145,6 @@ function workflowBuckets(candidates: CandidateWorkflowRow[]) {
   ];
 }
 
-function readLocalWorkflowState(): Record<string, LocalWorkflowState> {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(WORKFLOW_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, LocalWorkflowState>;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
 function formatDateTime(raw: string | null): string {
   if (!raw) return "No local action";
   const date = new Date(raw);
@@ -233,8 +178,7 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
 
 export function CandidatesSection() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
-  const [localWorkflows, setLocalWorkflows] = useState<Record<string, LocalWorkflowState>>({});
-  const [hydrated, setHydrated] = useState(false);
+  const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
   const [sourceFilter, setSourceFilter] = useState(ALL);
   const [stageFilter, setStageFilter] = useState(ALL);
   const [positionFilter, setPositionFilter] = useState(ALL);
@@ -245,30 +189,27 @@ export function CandidatesSection() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
-      setLocalWorkflows(readLocalWorkflowState());
-      setHydrated(true);
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated || typeof window === "undefined") return;
-    window.localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(localWorkflows));
-  }, [hydrated, localWorkflows]);
-
-  useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        const res = await fetch("/api/breezy/candidates", { cache: "no-store" });
-        const contentType = res.headers.get("content-type") ?? "";
-        if (!contentType.includes("application/json")) {
-          throw new Error(`Breezy candidates returned HTTP ${res.status} instead of dashboard data.`);
+        const [candidateRes, workflowRes] = await Promise.all([
+          fetch("/api/breezy/candidates", { cache: "no-store" }),
+          fetch("/api/candidates/workflows", { cache: "no-store" }),
+        ]);
+        const candidateContentType = candidateRes.headers.get("content-type") ?? "";
+        if (!candidateContentType.includes("application/json")) {
+          throw new Error(`Breezy candidates returned HTTP ${candidateRes.status} instead of dashboard data.`);
         }
-        const parsed = (await res.json()) as BreezyCandidatesResult;
-        if (!cancelled) setData(parsed);
+        const parsed = (await candidateRes.json()) as BreezyCandidatesResult;
+        const workflowParsed = (await workflowRes.json()) as {
+          ok: boolean;
+          workflows?: CandidateWorkflowState;
+        };
+        if (!cancelled) {
+          setData(parsed);
+          setWorkflowState(workflowParsed.ok && workflowParsed.workflows ? workflowParsed.workflows : {});
+        }
       } catch (err) {
         if (!cancelled) {
           setData({
@@ -287,8 +228,8 @@ export function CandidatesSection() {
   }, []);
 
   const candidates = useMemo(
-    () => (data?.ok ? data.candidates.map((candidate) => workflowRow(candidate, localWorkflows[candidate.candidateId])) : []),
-    [data, localWorkflows],
+    () => (data?.ok ? data.candidates.map((candidate) => workflowRow(candidate, workflowState[candidate.candidateId])) : []),
+    [data, workflowState],
   );
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
@@ -341,7 +282,7 @@ export function CandidatesSection() {
   const buckets = useMemo(() => workflowBuckets(filtered), [filtered]);
   const statusCounts = useMemo(
     () =>
-      WORKFLOW_STATUSES.map((status) => ({
+      CANDIDATE_WORKFLOW_STATUSES.map((status) => ({
         status,
         count: filtered.filter((candidate) => candidate.workflowStatus === status).length,
       })),
@@ -349,22 +290,29 @@ export function CandidatesSection() {
   );
 
   function updateWorkflow(candidate: CandidateWorkflowRow, workflowStatus: CandidateWorkflowStatus, note?: string) {
-    const now = new Date().toISOString();
-    setLocalWorkflows((prev) => {
-      const existing = prev[candidate.candidateId];
-      const notes = note?.trim()
-        ? [note.trim(), ...(existing?.notes ?? candidate.notes)].slice(0, 5)
-        : (existing?.notes ?? candidate.notes);
-      return {
-        ...prev,
-        [candidate.candidateId]: {
-          workflowStatus,
-          lastActionAt: now,
-          assignedDM: existing?.assignedDM ?? candidate.assignedDM,
-          notes,
-        },
-      };
-    });
+    void fetch("/api/candidates/workflows", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        candidateId: candidate.candidateId,
+        workflowStatus,
+        assignedDM: candidate.assignedDM,
+        note,
+      }),
+    })
+      .then(async (res) => {
+        const parsed = (await res.json()) as { ok: boolean; workflow?: CandidateWorkflowRecord; error?: string };
+        if (!res.ok || !parsed.ok || !parsed.workflow) {
+          throw new Error(parsed.error ?? `Workflow update failed with HTTP ${res.status}`);
+        }
+        setWorkflowState((prev) => ({
+          ...prev,
+          [parsed.workflow!.candidateId]: parsed.workflow!,
+        }));
+      })
+      .catch((err) => {
+        window.alert(err instanceof Error ? err.message : "Workflow update failed");
+      });
   }
 
   function addNote(candidate: CandidateWorkflowRow) {
