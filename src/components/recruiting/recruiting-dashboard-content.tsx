@@ -10,7 +10,18 @@ import type {
 import { useState } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
 import { BreezyDashboardSummary } from "./breezy-dashboard-summary";
-import { CandidatesSection } from "./candidates-section";
+import {
+  DashboardTabPanel,
+  LazyCandidatesSection,
+  LazyDataHealthSection,
+  LazyLiveSheetSection,
+  LazyMelProjectsSection,
+  LazyNeedsAttentionSection,
+  LazyRecruitingAutomationSection,
+  LazyRecruitingCommandCenter,
+  LazyRecruitingIntelligenceSection,
+  LazyWorkforceOperationsSection,
+} from "./dashboard-tab-panels";
 import {
   DashboardTabNav,
   EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
@@ -18,18 +29,10 @@ import {
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
 import { DmLeaderboard } from "./dm-leaderboard";
-import { LiveSheetSection } from "./live-sheet-section";
-import { DataHealthSection } from "./data-health-section";
-import { MelProjectsSection } from "./mel-projects-section";
-import { NeedsAttentionSection } from "./needs-attention-section";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { OpenJobsTable } from "./open-jobs-table";
-import { RecruitingAutomationSection } from "./recruiting-automation-section";
-import { RecruitingCommandCenter } from "./recruiting-command-center";
-import { RecruitingIntelligenceSection } from "./recruiting-intelligence-section";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
-import { WorkforceOperationsSection } from "./workforce-operations-section";
 
 type RecruitingDashboardContentProps = {
   openJobs: OpenJob[];
@@ -64,42 +67,60 @@ export function RecruitingDashboardContent({
         role="tabpanel"
         className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8"
       >
-        {activeTab === "command-center" ? <RecruitingCommandCenter /> : null}
+        <DashboardTabPanel tabId="command-center" activeTab={activeTab}>
+          <LazyRecruitingCommandCenter />
+        </DashboardTabPanel>
 
-        {activeTab === "overview" ? (
-          <>
-            <BreezyDashboardSummary />
-            <SheetKpiCards />
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="space-y-6 lg:col-span-2">
-                <OpenJobsTable jobs={openJobs} />
-                <RecruitingTrendsChart data={weeklyTrends} />
-              </div>
-              <div className="space-y-6">
-                <ApplicantPipeline stages={pipelineStages} />
-                <NewHireMetrics metrics={newHireMetrics} />
-              </div>
+        <DashboardTabPanel tabId="overview" activeTab={activeTab}>
+          <BreezyDashboardSummary />
+          <SheetKpiCards />
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <OpenJobsTable jobs={openJobs} />
+              <RecruitingTrendsChart data={weeklyTrends} />
             </div>
-          </>
-        ) : null}
+            <div className="space-y-6">
+              <ApplicantPipeline stages={pipelineStages} />
+              <NewHireMetrics metrics={newHireMetrics} />
+            </div>
+          </div>
+        </DashboardTabPanel>
 
-        {activeTab === "needs-attention" ? <NeedsAttentionSection /> : null}
+        <DashboardTabPanel tabId="needs-attention" activeTab={activeTab}>
+          <LazyNeedsAttentionSection />
+        </DashboardTabPanel>
 
-        {activeTab === "dm-scorecards" ? <DmLeaderboard rows={dmLeaderboard} /> : null}
+        <DashboardTabPanel tabId="dm-scorecards" activeTab={activeTab}>
+          <DmLeaderboard rows={dmLeaderboard} />
+        </DashboardTabPanel>
 
-        {activeTab === "live-sheet" ? <LiveSheetSection /> : null}
+        <DashboardTabPanel tabId="live-sheet" activeTab={activeTab}>
+          <LazyLiveSheetSection />
+        </DashboardTabPanel>
 
-        {activeTab === "candidates" ? <CandidatesSection /> : null}
+        <DashboardTabPanel tabId="candidates" activeTab={activeTab}>
+          <LazyCandidatesSection />
+        </DashboardTabPanel>
 
-        {activeTab === "mel-projects" ? <MelProjectsSection /> : null}
+        <DashboardTabPanel tabId="mel-projects" activeTab={activeTab}>
+          <LazyMelProjectsSection />
+        </DashboardTabPanel>
 
-        {activeTab === "data-health" ? <DataHealthSection /> : null}
+        <DashboardTabPanel tabId="data-health" activeTab={activeTab}>
+          <LazyDataHealthSection />
+        </DashboardTabPanel>
 
-        {activeTab === "recruiting-intelligence" ? <RecruitingIntelligenceSection /> : null}
+        <DashboardTabPanel tabId="recruiting-intelligence" activeTab={activeTab}>
+          <LazyRecruitingIntelligenceSection />
+        </DashboardTabPanel>
 
-        {activeTab === "automation" ? <RecruitingAutomationSection /> : null}
+        <DashboardTabPanel tabId="automation" activeTab={activeTab}>
+          <LazyRecruitingAutomationSection />
+        </DashboardTabPanel>
 
-        {activeTab === "workforce" ? <WorkforceOperationsSection showPasswordPanel /> : null}
+        <DashboardTabPanel tabId="workforce" activeTab={activeTab}>
+          <LazyWorkforceOperationsSection showPasswordPanel />
+        </DashboardTabPanel>
       </main>
     </>
   );

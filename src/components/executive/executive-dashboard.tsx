@@ -10,6 +10,7 @@ import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-
 import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
+import { DeferredSection } from "@/components/ui/deferred-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
@@ -177,9 +178,29 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             onCandidateClick={drawer.openCandidate}
           />
 
-          <CoverageRiskSection variant="executive" />
+          <DeferredSection
+            title="Coverage risk intelligence"
+            description="Staffing risk, rep proximity, and pipeline signals for open MEL projects."
+            summary={
+              <p className="text-sm text-zinc-500">
+                Expand to load predictive coverage analysis (cached ~90s after first load).
+              </p>
+            }
+          >
+            <CoverageRiskSection variant="executive" />
+          </DeferredSection>
 
-          <WorkforceOperationsSection showPasswordPanel />
+          <DeferredSection
+            title="Workforce operations"
+            description="Rep import, geocoded matching, and staffing recommendations."
+            summary={
+              <p className="text-sm text-zinc-500">
+                Expand to load workforce intelligence and rep matching panels.
+              </p>
+            }
+          >
+            <WorkforceOperationsSection showPasswordPanel />
+          </DeferredSection>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <TerritoryTable title="Best territories" rows={data.bestTerritories} />
@@ -214,9 +235,15 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             />
           </div>
 
-          <section className="border-t border-zinc-800/80 pt-8">
-            <RecruitingAutomationSection />
-          </section>
+          <DeferredSection
+            title="Recruiting automation"
+            description="Daily executive snapshot and automation signals."
+            summary={<p className="text-sm text-zinc-500">Expand to load automation rollup.</p>}
+          >
+            <section className="border-t border-zinc-800/80 pt-4">
+              <RecruitingAutomationSection />
+            </section>
+          </DeferredSection>
 
           <p className="text-xs text-zinc-600">
             Snapshot {new Date(data.fetchedAt).toLocaleString()} · {data.territoryRollups.length} DM territories

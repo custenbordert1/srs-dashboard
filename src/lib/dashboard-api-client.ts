@@ -1,3 +1,8 @@
+import {
+  cacheKey,
+  fetchCachedJson,
+  LONG_CLIENT_CACHE_TTL_MS,
+} from "@/lib/client-api-cache";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 
@@ -17,10 +22,18 @@ async function fetchJson<T>(path: string, label: string): Promise<T> {
   return parsed;
 }
 
-export async function fetchRecruitingSheetData(): Promise<SheetDataResult> {
-  return fetchJson<SheetDataResult>("/api/recruiting-sheet", "Recruiting sheet");
+export async function fetchRecruitingSheetData(force = false): Promise<SheetDataResult> {
+  return fetchCachedJson(
+    cacheKey(["recruiting-sheet"]),
+    () => fetchJson<SheetDataResult>("/api/recruiting-sheet", "Recruiting sheet"),
+    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "recruiting-sheet" },
+  );
 }
 
-export async function fetchMelProjectsData(): Promise<MelProjectsDataResult> {
-  return fetchJson<MelProjectsDataResult>("/api/mel-projects", "MEL projects");
+export async function fetchMelProjectsData(force = false): Promise<MelProjectsDataResult> {
+  return fetchCachedJson(
+    cacheKey(["mel-projects"]),
+    () => fetchJson<MelProjectsDataResult>("/api/mel-projects", "MEL projects"),
+    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "mel-projects" },
+  );
 }

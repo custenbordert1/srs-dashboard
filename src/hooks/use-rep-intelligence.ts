@@ -1,47 +1,75 @@
 "use client";
 
+import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import type { RepIntelligenceSnapshot } from "@/lib/rep-intelligence/rep-types";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function useRepIntelligence() {
+type UseRepIntelligenceOptions = {
+  enabled?: boolean;
+};
+
+async function fetchRepIntelligence(): Promise<RepIntelligenceSnapshot> {
+  const res = await fetch("/api/rep-intelligence", { cache: "no-store" });
+  const parsed = (await res.json()) as {
+    ok?: boolean;
+    snapshot?: RepIntelligenceSnapshot;
+    error?: string;
+  };
+  if (!parsed.ok || !parsed.snapshot) {
+    throw new Error(parsed.error ?? "Unable to load rep intelligence");
+  }
+  return parsed.snapshot;
+}
+
+export function useRepIntelligence(options: UseRepIntelligenceOptions = {}) {
+  const enabled = options.enabled ?? true;
   const [snapshot, setSnapshot] = useState<RepIntelligenceSnapshot | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tick, setTick] = useState(0);
+  const mounted = useRef(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    void fetchWithRetry("/api/rep-intelligence", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((parsed: { ok?: boolean; snapshot?: RepIntelligenceSnapshot; error?: string }) => {
-        if (cancelled) return;
-        if (!parsed.ok || !parsed.snapshot) {
-          setError(parsed.error ?? "Unable to load rep intelligence");
-          return;
-        }
-        setSnapshot(parsed.snapshot);
-      })
-      .catch((err) => {
-        if (!cancelled) {
+  const load = useCallback(
+    async (force = false) => {
+      if (!enabled) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchCachedJson(
+          cacheKey(["rep-intelligence"]),
+          fetchRepIntelligence,
+          { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "rep-intelligence" },
+        );
+        if (mounted.current) setSnapshot(data);
+      } catch (err) {
+        if (mounted.current) {
           setError(err instanceof Error ? err.message : "Unable to load rep intelligence");
         }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      } finally {
+        if (mounted.current) setLoading(false);
+      }
+    },
+    [enabled],
+  );
+
+  useEffect(() => {
+    mounted.current = true;
+    if (!enabled) {
+      return () => {
+        mounted.current = false;
+      };
+    }
+    queueMicrotask(() => {
+      if (mounted.current) void load(false);
+    });
     return () => {
-      cancelled = true;
+      mounted.current = false;
     };
-  }, [tick]);
+  }, [enabled, load]);
 
   return {
     snapshot,
     loading,
     error,
-    refresh: () => {
-      setLoading(true);
-      setTick((n) => n + 1);
-    },
+    refresh: () => void load(true),
   };
 }

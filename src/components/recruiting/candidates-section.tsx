@@ -29,6 +29,8 @@ import {
   buildScoredWorkflowRow,
   type ScoredCandidateWorkflowRow,
 } from "@/lib/build-candidate-workflow-row";
+import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
+import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
 import { loadRecruiterRoster } from "@/lib/recruiter-roster";
@@ -214,19 +216,22 @@ export function CandidatesSection() {
 
     async function load() {
       try {
-        const [candidateRes, workflowRes] = await Promise.all([
-          fetchWithRetry("/api/breezy/candidates", { cache: "no-store" }),
-          fetchWithRetry("/api/candidates/workflows", { cache: "no-store" }),
+        const [parsed, workflowParsed] = await Promise.all([
+          fetchCachedBreezyCandidates(),
+          fetchCachedJson(
+            cacheKey(["candidates", "workflows"]),
+            async () => {
+              const workflowRes = await fetchWithRetry("/api/candidates/workflows", {
+                cache: "no-store",
+              });
+              return (await workflowRes.json()) as {
+                ok: boolean;
+                workflows?: CandidateWorkflowState;
+              };
+            },
+            { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
+          ),
         ]);
-        const candidateContentType = candidateRes.headers.get("content-type") ?? "";
-        if (!candidateContentType.includes("application/json")) {
-          throw new Error(`Breezy candidates returned HTTP ${candidateRes.status} instead of dashboard data.`);
-        }
-        const parsed = (await candidateRes.json()) as BreezyCandidatesResult;
-        const workflowParsed = (await workflowRes.json()) as {
-          ok: boolean;
-          workflows?: CandidateWorkflowState;
-        };
         if (!cancelled) {
           setData(parsed);
           setWorkflowState(workflowParsed.ok && workflowParsed.workflows ? workflowParsed.workflows : {});

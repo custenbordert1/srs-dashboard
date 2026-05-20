@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
+import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const DEFAULT_POLL_MS = 90_000;
@@ -40,13 +41,17 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
   const initialLoadDone = useRef(false);
 
   const fetchDashboard = useCallback(
-    async (softRefresh: boolean) => {
+    async (softRefresh: boolean, forceRefresh = false) => {
       if (!enabled) return;
       if (softRefresh) setRefreshing(true);
       else if (!initialLoadDone.current) setLoading(true);
       setError(null);
 
-      const result = await fetchJsonWithRetry<DashboardResponse<T>>(endpoint);
+      const result = await fetchJsonWithRetry<DashboardResponse<T>>(endpoint, undefined, {
+        cacheKey: cacheKey(["dashboard", endpoint]),
+        cacheTtlMs: forceRefresh ? 0 : LONG_CLIENT_CACHE_TTL_MS,
+        force: forceRefresh,
+      });
       if (!result.ok) {
         setError(result.error);
         if (!softRefresh) setData(null);
@@ -69,8 +74,9 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
   );
 
   const refresh = useCallback(() => {
-    void fetchDashboard(true);
-  }, [fetchDashboard]);
+    invalidateCached(cacheKey(["dashboard", endpoint]));
+    void fetchDashboard(true, true);
+  }, [endpoint, fetchDashboard]);
 
   useEffect(() => {
     if (!enabled) return;

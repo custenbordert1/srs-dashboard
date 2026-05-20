@@ -12,6 +12,7 @@ import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-
 import { DmMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
+import { DeferredSection } from "@/components/ui/deferred-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
@@ -90,9 +91,27 @@ export function DmDashboard({ user }: DmDashboardProps) {
 
           <DmMelMatchingPanel metrics={data.melMatching} onCandidateClick={drawer.openCandidate} />
 
-          <CoverageRiskSection variant="dm" />
+          <DeferredSection
+            title="Territory coverage alerts"
+            description="High-risk projects, recruiting urgency, and best available reps."
+            summary={
+              <p className="text-sm text-zinc-500">
+                Expand to load coverage risk for your territory.
+              </p>
+            }
+          >
+            <CoverageRiskSection variant="dm" />
+          </DeferredSection>
 
-          <WorkforceOperationsSection />
+          <DeferredSection
+            title="Workforce operations"
+            description="Rep roster import and opportunity matching."
+            summary={
+              <p className="text-sm text-zinc-500">Expand to load workforce intelligence.</p>
+            }
+          >
+            <WorkforceOperationsSection />
+          </DeferredSection>
 
           <DmAttentionPanel
             needsAttention={data.needsAttention}

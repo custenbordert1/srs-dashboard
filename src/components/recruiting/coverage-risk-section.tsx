@@ -3,6 +3,7 @@
 import { DmCoverageRiskAlerts } from "@/components/dm/dm-coverage-risk-alerts";
 import { CoverageRiskExecutivePanel } from "@/components/recruiting/coverage-risk-executive-panel";
 import { useCoverageRisk } from "@/hooks/use-coverage-risk";
+import { TabSkeleton } from "@/components/ui/tab-skeleton";
 
 type CoverageRiskSectionProps = {
   variant: "executive" | "dm";
@@ -34,9 +35,7 @@ export function CoverageRiskSection({ variant }: CoverageRiskSectionProps) {
         </p>
       ) : null}
 
-      {loading && !snapshot ? (
-        <p className="text-sm text-zinc-500">Computing coverage risk across open opportunities…</p>
-      ) : null}
+      {loading && !snapshot ? <TabSkeleton rows={3} cards={4} /> : null}
 
       {snapshot && variant === "executive" ? <CoverageRiskExecutivePanel snapshot={snapshot} /> : null}
       {snapshot && variant === "dm" ? <DmCoverageRiskAlerts snapshot={snapshot} /> : null}

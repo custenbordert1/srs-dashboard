@@ -1,7 +1,7 @@
 "use client";
 
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { fetchCachedBreezyCandidates, fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
   buildRecruitingCommandCenter,
   formatCommandCenterSyncTime,
@@ -135,12 +135,10 @@ export function RecruitingCommandCenter() {
 
     async function load() {
       try {
-        const [candidatesRes, jobsRes] = await Promise.all([
-          fetchWithRetry("/api/breezy/candidates", { cache: "no-store" }),
-          fetchWithRetry("/api/breezy/jobs", { cache: "no-store" }),
+        const [candidates, jobs] = await Promise.all([
+          fetchCachedBreezyCandidates(),
+          fetchCachedBreezyJobs(),
         ]);
-        const candidates = (await candidatesRes.json()) as BreezyCandidatesResult;
-        const jobs = (await jobsRes.json()) as BreezyJobsResult;
         if (!cancelled) setLoadState({ status: "ready", candidates, jobs });
       } catch (err) {
         if (!cancelled) {

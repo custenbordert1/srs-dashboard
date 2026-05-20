@@ -9,6 +9,7 @@ import {
   toggleRecruitingAction,
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
+import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
 import { matchCandidateToOpportunities } from "@/lib/mel-matching/matching-engine";
@@ -39,8 +40,10 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
   const [recruitingActionsMap, setRecruitingActionsMap] = useState(loadRecruitingActionsMap);
   const [fetchedCandidates, setFetchedCandidates] = useState<BreezyCandidate[]>([]);
   const [breezyLoading, setBreezyLoading] = useState(false);
+  const melEnabled = selectedCandidateId !== null;
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities(
     options.territoryStates,
+    { enabled: melEnabled },
   );
   const [repMatchCache, setRepMatchCache] = useState<Record<string, OpportunityBestRepMatches[]>>({});
   const [repMatchesLoadingKey, setRepMatchesLoadingKey] = useState<string | null>(null);
@@ -48,9 +51,15 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
 
   useEffect(() => {
     let cancelled = false;
-    void fetchWithRetry("/api/candidates/workflows", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((parsed: { ok?: boolean; workflows?: CandidateWorkflowState }) => {
+    void fetchCachedJson(
+      cacheKey(["candidates", "workflows"]),
+      async () => {
+        const res = await fetchWithRetry("/api/candidates/workflows", { cache: "no-store" });
+        return (await res.json()) as { ok?: boolean; workflows?: CandidateWorkflowState };
+      },
+      { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
+    )
+      .then((parsed) => {
         if (!cancelled && parsed.workflows) setWorkflowState(parsed.workflows);
       })
       .catch(() => {
@@ -155,14 +164,25 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
     void (async () => {
       setRepMatchesLoadingKey(requestKey);
       try {
-        const res = await fetch("/api/workforce-intelligence/opportunity-rep-matches", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ opportunityIds }),
-        });
-        const parsed = (await res.json()) as { ok?: boolean; matches?: OpportunityBestRepMatches[] };
-        if (!cancelled && parsed.ok && parsed.matches) {
-          setRepMatchCache((prev) => ({ ...prev, [requestKey]: parsed.matches! }));
+        const matches = await fetchCachedJson(
+          cacheKey(["rep-matches", requestKey]),
+          async () => {
+            const res = await fetch("/api/workforce-intelligence/opportunity-rep-matches", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ opportunityIds }),
+            });
+            const parsed = (await res.json()) as {
+              ok?: boolean;
+              matches?: OpportunityBestRepMatches[];
+            };
+            if (!parsed.ok || !parsed.matches) return [];
+            return parsed.matches;
+          },
+          { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "opportunity-rep-matches" },
+        );
+        if (!cancelled) {
+          setRepMatchCache((prev) => ({ ...prev, [requestKey]: matches }));
         }
       } catch {
         if (!cancelled) {

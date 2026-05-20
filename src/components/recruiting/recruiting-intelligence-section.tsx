@@ -14,6 +14,7 @@ import {
   RISK_BADGE_STYLES,
   type IntelligenceOpenPost,
 } from "@/lib/recruiting-intelligence";
+import { DeferredSection } from "@/components/ui/deferred-section";
 import { useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
@@ -47,7 +48,12 @@ function IntelligenceSkeleton() {
   );
 }
 
+const APLUS_TABLE_INITIAL = 25;
+
 function APlusOpportunityTable({ rows }: { rows: IntelligenceOpenPost[] }) {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? rows : rows.slice(0, APLUS_TABLE_INITIAL);
+
   return (
     <section
       aria-labelledby="aplus-heading"
@@ -88,7 +94,7 @@ function APlusOpportunityTable({ rows }: { rows: IntelligenceOpenPost[] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
-              {rows.map((row, index) => (
+              {visible.map((row, index) => (
                 <tr key={`${row.jobTitle}-${row.city}-${row.state}-${index}`} className="hover:bg-zinc-800/30">
                   <td className="px-4 py-3 font-semibold tabular-nums text-teal-300 sm:px-5">
                     {row.aPlusScore}
@@ -131,6 +137,19 @@ function APlusOpportunityTable({ rows }: { rows: IntelligenceOpenPost[] }) {
               ))}
             </tbody>
           </table>
+          {rows.length > APLUS_TABLE_INITIAL ? (
+            <div className="border-t border-zinc-800/80 px-4 py-3 sm:px-5">
+              <button
+                type="button"
+                onClick={() => setShowAll((v) => !v)}
+                className="text-xs font-medium text-teal-300 hover:text-teal-200"
+              >
+                {showAll
+                  ? "Show fewer rows"
+                  : `Show all ${rows.length} opportunities (${rows.length - APLUS_TABLE_INITIAL} more)`}
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
     </section>
@@ -383,23 +402,74 @@ export function RecruitingIntelligenceSection() {
         />
       </div>
 
-      <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
+      <DeferredSection
+        title="A+ Opportunity queue"
+        description="Prioritized open posts — expand for full table."
+        summary={
+          <p className="text-sm text-zinc-500">
+            {snapshot.aPlusOpportunities.length} prioritized opportunities ready to review.
+          </p>
+        }
+      >
+        <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
+      </DeferredSection>
 
-      <CriticalMarketsQueueSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Critical markets queue"
+        summary={<p className="text-sm text-zinc-500">Market-level recruiting priorities.</p>}
+      >
+        <CriticalMarketsQueueSection recruiting={data} mel={melData} />
+      </DeferredSection>
 
-      <LiveMarketIntelligenceSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Live market intelligence"
+        summary={<p className="text-sm text-zinc-500">Real-time market demand and coverage signals.</p>}
+      >
+        <LiveMarketIntelligenceSection recruiting={data} mel={melData} />
+      </DeferredSection>
 
-      <OpportunityAutomationSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Opportunity automation"
+        summary={<p className="text-sm text-zinc-500">Automated opportunity scoring and routing.</p>}
+      >
+        <OpportunityAutomationSection recruiting={data} mel={melData} />
+      </DeferredSection>
 
-      <RecruitingActionCenterSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Recruiting action center"
+        summary={<p className="text-sm text-zinc-500">Workflow queues and recruiter assignments.</p>}
+        skeletonRows={5}
+      >
+        <RecruitingActionCenterSection recruiting={data} mel={melData} />
+      </DeferredSection>
 
-      <ForecastIntelligenceSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Forecast intelligence"
+        summary={<p className="text-sm text-zinc-500">Staffing forecast and project risk projections.</p>}
+      >
+        <ForecastIntelligenceSection recruiting={data} mel={melData} />
+      </DeferredSection>
 
-      <CandidateIntelligenceSection />
+      <DeferredSection
+        title="Candidate intelligence"
+        summary={<p className="text-sm text-zinc-500">Candidate scoring and fit analysis.</p>}
+      >
+        <CandidateIntelligenceSection />
+      </DeferredSection>
 
-      <MarketIntelligenceSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Market intelligence"
+        summary={<p className="text-sm text-zinc-500">Territory market health and demand curves.</p>}
+      >
+        <MarketIntelligenceSection recruiting={data} mel={melData} />
+      </DeferredSection>
 
-      <DemandIntelligenceSection recruiting={data} mel={melData} />
+      <DeferredSection
+        title="Demand intelligence"
+        summary={<p className="text-sm text-zinc-500">MEL demand vs recruiting supply by state.</p>}
+      >
+        <DemandIntelligenceSection recruiting={data} mel={melData} />
+      </DeferredSection>
     </div>
   );
 }

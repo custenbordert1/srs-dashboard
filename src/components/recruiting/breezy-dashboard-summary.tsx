@@ -2,7 +2,7 @@
 
 import type { BreezyCandidatesResult } from "@/lib/breezy-api";
 import { buildBreezyCandidateSummary } from "@/lib/breezy-candidate-summary";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
 import { useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
 
@@ -76,8 +76,7 @@ export function BreezyDashboardSummary() {
 
     async function load() {
       try {
-        const res = await fetchWithRetry("/api/breezy/candidates", { cache: "no-store" });
-        const parsed = (await res.json()) as BreezyCandidatesResult;
+        const parsed = await fetchCachedBreezyCandidates();
         if (!cancelled) setData(parsed);
       } catch (err) {
         if (!cancelled) {

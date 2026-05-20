@@ -7,6 +7,7 @@ import { RepIntelligencePanel } from "@/components/recruiting/rep-intelligence-p
 import { StaffingRecommendationsPanel } from "@/components/recruiting/staffing-recommendations-panel";
 import { ChangePasswordPanel } from "@/components/auth/change-password-panel";
 import { useRepIntelligence } from "@/hooks/use-rep-intelligence";
+import { TabSkeleton } from "@/components/ui/tab-skeleton";
 
 type WorkforceOperationsSectionProps = {
   showPasswordPanel?: boolean;
@@ -45,9 +46,7 @@ export function WorkforceOperationsSection({ showPasswordPanel = false }: Workfo
         {showPasswordPanel ? <ChangePasswordPanel /> : null}
       </div>
 
-      {loading && !snapshot ? (
-        <p className="text-sm text-zinc-500">Loading workforce intelligence (geocoding may take a moment)…</p>
-      ) : null}
+      {loading && !snapshot ? <TabSkeleton rows={4} cards={2} /> : null}
 
       {snapshot ? (
         <>
