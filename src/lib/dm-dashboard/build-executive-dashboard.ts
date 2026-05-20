@@ -9,9 +9,6 @@ import {
   type ExecutiveMelMatchingMetrics,
 } from "@/lib/mel-matching/mel-matching-metrics";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
-import type { MelProjectRow } from "@/lib/mel-projects-sheet";
-import { buildRepIntelligenceSnapshot } from "@/lib/rep-intelligence/rep-engine";
-import type { RepIntelligenceSnapshot } from "@/lib/rep-intelligence/rep-types";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
 
 export type TerritoryRollupRow = {
@@ -36,7 +33,6 @@ export type ExecutiveDashboardSnapshot = {
   nationwideHealthScore: number;
   executiveInsights: ExecutiveInsightsKpis;
   melMatching: ExecutiveMelMatchingMetrics;
-  repIntelligence: RepIntelligenceSnapshot;
 };
 
 function candidatesLast7Days(candidates: BreezyCandidate[], referenceIso: string): number {
@@ -89,7 +85,6 @@ export function buildExecutiveDashboard(
   candidates: BreezyCandidate[],
   fetchedAt: string,
   melOpportunities: MelOpportunity[] = [],
-  melRows: MelProjectRow[] = [],
 ): ExecutiveDashboardSnapshot {
   const rollups: TerritoryRollupRow[] = DISTRICT_MANAGERS.map((dmName) => {
     const states = getAssignedStatesForDm(dmName);
@@ -129,6 +124,5 @@ export function buildExecutiveDashboard(
     nationwideHealthScore: nationwideHealth.score,
     executiveInsights: buildExecutiveInsightsKpis(jobs, candidates, fetchedAt),
     melMatching: buildExecutiveMelMatchingMetrics(candidates, melOpportunities),
-    repIntelligence: buildRepIntelligenceSnapshot(melRows, fetchedAt),
   };
 }

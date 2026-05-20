@@ -71,6 +71,13 @@ export function apiRoutePolicy(pathname: string): {
       requiresTerritory: true,
     };
   }
+  if (pathname.startsWith("/api/reps")) {
+    return {
+      requiresAuth: true,
+      allowedRoles: ["executive", "recruiter", "dm"],
+      requiresTerritory: true,
+    };
+  }
   if (pathname.startsWith("/api/rep-intelligence")) {
     return {
       requiresAuth: true,

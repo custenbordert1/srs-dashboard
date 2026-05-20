@@ -50,16 +50,8 @@ export async function GET(request: Request) {
   const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const fetchedAt = candidatesResult.fetchedAt;
 
-  const melRows = melResult.ok ? melResult.rows : [];
-  const melOpportunities = melResult.ok ? parseMelOpportunities(melRows) : [];
-  const dashboard = buildDmDashboardSnapshot(
-    session,
-    jobs,
-    candidates,
-    fetchedAt,
-    melOpportunities,
-    melRows,
-  );
+  const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
+  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt, melOpportunities);
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,

@@ -8,6 +8,7 @@ export function useRepIntelligence() {
   const [snapshot, setSnapshot] = useState<RepIntelligenceSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +33,15 @@ export function useRepIntelligence() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tick]);
 
-  return { snapshot, loading, error };
+  return {
+    snapshot,
+    loading,
+    error,
+    refresh: () => {
+      setLoading(true);
+      setTick((n) => n + 1);
+    },
+  };
 }

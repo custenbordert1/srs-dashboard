@@ -110,25 +110,17 @@ async function updateUserPasswordHash(userId: string, passwordHash: string): Pro
   await writeUsersFile(file);
 }
 
-/**
- * Verifies password against stored hash, or syncs hash when DM_DEFAULT_PASSWORD from .env.local matches.
- */
+/** Verifies password against stored hash only (no shared demo password). */
 export async function authenticateUser(email: string, password: string): Promise<DashboardUser | null> {
   const user = await findUserByEmail(email);
   if (!user) return null;
-
-  if (verifyPassword(password, user.passwordHash)) {
-    return user;
-  }
-
-  const envPassword = process.env.DM_DEFAULT_PASSWORD?.trim();
-  if (envPassword && password === envPassword) {
-    const passwordHash = hashPassword(password);
-    await updateUserPasswordHash(user.id, passwordHash);
-    return { ...user, passwordHash };
-  }
-
+  if (verifyPassword(password, user.passwordHash)) return user;
   return null;
+}
+
+export async function updateUserPassword(userId: string, newPassword: string): Promise<void> {
+  const passwordHash = hashPassword(newPassword);
+  await updateUserPasswordHash(userId, passwordHash);
 }
 
 export async function findUserById(id: string): Promise<DashboardUser | null> {

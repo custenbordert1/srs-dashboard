@@ -31,11 +31,18 @@ function zipToApproxPoint(zip: string, state: string): GeoPoint | null {
 
 export function milesBetweenRepAndProject(
   rep: { city: string; state: string; zip: string; lat: number | null; lng: number | null },
-  project: { city: string; state: string },
+  project: { city: string; state: string; lat?: number | null; lng?: number | null },
 ): number | null {
-  if (rep.lat !== null && rep.lng !== null) {
-    const projectPoint = estimateGeoPoint(project.city, project.state);
-    if (projectPoint) return haversineMiles({ lat: rep.lat, lng: rep.lng }, projectPoint);
+  const projectPoint =
+    project.lat !== null &&
+    project.lat !== undefined &&
+    project.lng !== null &&
+    project.lng !== undefined
+      ? { lat: project.lat, lng: project.lng }
+      : estimateGeoPoint(project.city, project.state);
+
+  if (rep.lat !== null && rep.lng !== null && projectPoint) {
+    return haversineMiles({ lat: rep.lat, lng: rep.lng }, projectPoint);
   }
   return distanceBetweenLocations(rep.city, rep.state, project.city, project.state);
 }

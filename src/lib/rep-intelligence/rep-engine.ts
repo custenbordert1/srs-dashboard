@@ -135,8 +135,9 @@ export function buildRepIntelligenceSnapshot(
   melRows: MelProjectRow[],
   fetchedAt: string,
   territoryStates?: string[],
+  repsOverride?: ActiveRep[],
 ): RepIntelligenceSnapshot {
-  const allReps = buildActiveRepsFromMelRows(melRows);
+  const allReps = repsOverride ?? buildActiveRepsFromMelRows(melRows);
   const reps =
     territoryStates && territoryStates.length > 0
       ? allReps.filter((r) => territoryStates.includes(normalizeStateCode(r.state)))
@@ -210,5 +211,10 @@ export function buildRepIntelligenceSnapshot(
       priority: o.priority,
     })),
     repUtilization: rankRepUtilization(reps).slice(0, 12),
+    repProjectMatches: [],
+    staffingRecommendations: [],
+    geocodedRepCount: 0,
+    geocodedOpportunityCount: 0,
+    importedRepCount: 0,
   };
 }

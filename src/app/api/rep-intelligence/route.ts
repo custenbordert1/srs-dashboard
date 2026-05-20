@@ -1,6 +1,6 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { filterStatesForSession } from "@/lib/auth/permissions";
-import { buildRepIntelligenceSnapshot } from "@/lib/rep-intelligence/rep-engine";
+import { buildRepIntelligenceWithGeocoding } from "@/lib/rep-intelligence/build-rep-intelligence";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { NextResponse } from "next/server";
 
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   }
 
   const territoryStates = filterStatesForSession(session) ?? undefined;
-  const snapshot = buildRepIntelligenceSnapshot(
+  const snapshot = await buildRepIntelligenceWithGeocoding(
     melResult.rows,
     melResult.fetchedAt,
     territoryStates ?? undefined,

@@ -44,14 +44,12 @@ export async function GET(request: Request) {
     return NextResponse.json(breezyFailureBody(candidatesResult), { status });
   }
 
-  const melRows = melResult.ok ? melResult.rows : [];
-  const melOpportunities = melResult.ok ? parseMelOpportunities(melRows) : [];
+  const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
   const dashboard = buildExecutiveDashboard(
     jobsResult.jobs,
     candidatesResult.candidates,
     candidatesResult.fetchedAt,
     melOpportunities,
-    melRows,
   );
 
   logBreezyRouteResult(ROUTE, 200, {

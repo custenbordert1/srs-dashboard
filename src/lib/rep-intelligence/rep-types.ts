@@ -88,4 +88,37 @@ export type RepIntelligenceSnapshot = {
     utilizationPercent: number;
     openAssignments: number;
   }>;
+  repProjectMatches: RepProjectMatchRow[];
+  staffingRecommendations: StaffingRecommendationRow[];
+  geocodedRepCount: number;
+  geocodedOpportunityCount: number;
+  importedRepCount: number;
+};
+
+export type RepProjectMatchRow = {
+  repId: string;
+  repName: string;
+  opportunityId: string;
+  projectName: string;
+  client: string;
+  storeName: string;
+  state: string;
+  matchScore: number;
+  fitLevel: string;
+  riskLevel: string;
+  distanceMiles: number | null;
+  recommendedAction: string;
+};
+
+export type StaffingRecommendationRow = {
+  id: string;
+  priority: "critical" | "high" | "medium";
+  title: string;
+  summary: string;
+  recommendedAction: string;
+  projectName?: string;
+  client?: string;
+  repName?: string;
+  distanceMiles?: number | null;
+  matchScore?: number;
 };

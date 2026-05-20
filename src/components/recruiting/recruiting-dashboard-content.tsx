@@ -24,6 +24,7 @@ import { RecruitingCommandCenter } from "./recruiting-command-center";
 import { RecruitingIntelligenceSection } from "./recruiting-intelligence-section";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
+import { WorkforceOperationsSection } from "./workforce-operations-section";
 
 type RecruitingDashboardContentProps = {
   openJobs: OpenJob[];
@@ -85,6 +86,8 @@ export function RecruitingDashboardContent({
         {activeTab === "recruiting-intelligence" ? <RecruitingIntelligenceSection /> : null}
 
         {activeTab === "automation" ? <RecruitingAutomationSection /> : null}
+
+        {activeTab === "workforce" ? <WorkforceOperationsSection showPasswordPanel /> : null}
       </main>
     </>
   );

@@ -10,7 +10,8 @@ export type DashboardTabId =
   | "mel-projects"
   | "data-health"
   | "recruiting-intelligence"
-  | "automation";
+  | "automation"
+  | "workforce";
 
 export type DashboardTab = {
   id: DashboardTabId;
@@ -28,6 +29,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   { id: "data-health", label: "Data Health" },
   { id: "recruiting-intelligence", label: "Recruiting Intelligence" },
   { id: "automation", label: "Automation" },
+  { id: "workforce", label: "Workforce" },
 ];
 
 type DashboardTabNavProps = {
