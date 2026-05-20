@@ -233,7 +233,7 @@ export function JobManagementSection() {
                   <tr key={job.breezyJobId} className="hover:bg-zinc-800/30">
                     <td className="px-4 py-3 font-medium text-zinc-100">{job.title}</td>
                     <td className="px-4 py-3 text-zinc-400">
-                      {[job.city, job.usState].filter(Boolean).join(", ") || "—"}
+                      {job.displayLocation || [job.city, job.usState].filter(Boolean).join(", ") || "—"}
                     </td>
                     <td className="px-4 py-3 text-zinc-400">{job.pipelineStatus}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-zinc-300">

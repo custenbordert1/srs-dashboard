@@ -7,6 +7,7 @@ import { ManagerKpiCards } from "./manager-kpi-cards";
 import { ManagerSummary } from "./manager-summary";
 import NeedsAttentionQueue, { NEEDS_ATTENTION_SECTION_ID } from "./needs-attention-queue";
 import { PostAutomationQueue } from "./post-automation-queue";
+import { RecruitingArchiveBanner } from "./recruiting-archive-banner";
 
 export function RecruitingLiveSheetStack() {
   const [drillSeq, setDrillSeq] = useState(0);
@@ -38,6 +39,7 @@ export function RecruitingLiveSheetStack() {
 
   return (
     <div className="space-y-6">
+      <RecruitingArchiveBanner />
       <LiveSheetTable drillSeq={drillSeq} drillManager={drillManager} />
 
       <ManagerKpiCards

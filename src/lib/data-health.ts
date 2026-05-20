@@ -1,4 +1,5 @@
 import type { BreezyCandidatesHealthProbe, BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
+import { buildBreezyJobLocationDiagnostics } from "@/lib/breezy-job-location";
 import type { SheetDataResult, SheetRow } from "@/lib/google-sheet-csv";
 import { resolveMelProjectColumnKeys } from "@/lib/mel-projects-metrics";
 import { resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
@@ -27,7 +28,14 @@ export type DataHealthReport = {
   warnings: string[];
 };
 
-const BREEZY_JOB_REQUIRED_FIELDS = ["_id", "name"] as const;
+const BREEZY_JOB_REQUIRED_FIELDS = ["jobId", "name", "city", "state"] as const;
+const BREEZY_JOB_PREVIEW_FIELDS = [
+  "name",
+  "city",
+  "state",
+  "displayLocation",
+  "locationSource",
+] as const;
 const BREEZY_CANDIDATE_REQUIRED_FIELDS = ["_id", "name"] as const;
 
 const PREVIEW_VALUE_MAX = 96;
@@ -215,7 +223,20 @@ function baseBreezyReport(
 
 export function analyzeRecruitingSheetHealth(data: SheetDataResult): DataHealthReport {
   const missingRequired = data.ok ? resolveKpiSheetColumnKeys(data.headers).missingForKpis : [];
-  return baseSheetReport("recruiting-sheet", "Recruiting sheet", "/api/recruiting-sheet", data, missingRequired);
+  const report = baseSheetReport(
+    "recruiting-sheet",
+    "Recruiting sheet (archive)",
+    "/api/recruiting-sheet",
+    data,
+    missingRequired,
+  );
+  return {
+    ...report,
+    warnings: [
+      ...report.warnings,
+      "Reference/export only — live recruiting KPIs use Breezy HR, not this sheet.",
+    ],
+  };
 }
 
 export function analyzeMelProjectsHealth(data: SheetDataResult): DataHealthReport {
@@ -239,15 +260,18 @@ export function analyzeBreezyJobsHealth(data: BreezyJobsResult): DataHealthRepor
 
   const rows = data.jobs as Record<string, unknown>[];
   const missingRequired = missingObjectFields(rows[0], BREEZY_JOB_REQUIRED_FIELDS);
+  const locationDiagnostics =
+    data.locationDiagnostics ?? buildBreezyJobLocationDiagnostics(data.jobs);
   const metaLine = [
     data.companyName ? `Company: ${data.companyName}` : null,
     `Company ID: ${data.companyId}`,
-    `State: ${data.state}`,
+    `Pipeline filter: ${data.state}`,
+    `Missing city/state: ${locationDiagnostics.missingLocationCount}/${locationDiagnostics.totalJobs}`,
   ]
     .filter(Boolean)
     .join(" · ");
 
-  return baseBreezyReport(
+  const report = baseBreezyReport(
     "breezy-jobs",
     "Breezy jobs",
     "/api/breezy/jobs",
@@ -256,6 +280,25 @@ export function analyzeBreezyJobsHealth(data: BreezyJobsResult): DataHealthRepor
     missingRequired,
     metaLine,
   );
+
+  const sampleRowPreview = buildObjectPreview(rows[0], [...BREEZY_JOB_PREVIEW_FIELDS]);
+  const warnings = [...report.warnings];
+  if (locationDiagnostics.missingLocationCount > 0) {
+    warnings.push(
+      `${locationDiagnostics.missingLocationCount} job(s) missing normalized city or state — check Breezy location fields or job title.`,
+    );
+  }
+  const topSource = Object.entries(locationDiagnostics.bySource).sort((a, b) => b[1] - a[1])[0];
+  if (topSource) {
+    warnings.push(`Primary location source: ${topSource[0]} (${topSource[1]} jobs).`);
+  }
+
+  return {
+    ...report,
+    firstFiveColumns: [...BREEZY_JOB_PREVIEW_FIELDS],
+    sampleRowPreview,
+    warnings,
+  };
 }
 
 export function analyzeBreezyCandidatesHealth(

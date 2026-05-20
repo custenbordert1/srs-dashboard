@@ -18,6 +18,7 @@ import type { BreezyCandidatesHealthProbe, BreezyJobsResult } from "@/lib/breezy
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BreezyParityDiagnostics } from "./breezy-parity-diagnostics";
 import { BreezySyncHealthSection } from "./breezy-sync-health-section";
+import { RecruitingDataSourcesPanel } from "./recruiting-data-sources-panel";
 
 function formatFetchedAt(iso: string) {
   try {
@@ -454,6 +455,8 @@ export function DataHealthSection() {
           Last successful refresh: {formatFetchedAt(lastSuccessfulRefresh)}
         </section>
       ) : null}
+
+      <RecruitingDataSourcesPanel />
 
       <BreezySyncHealthSection />
 

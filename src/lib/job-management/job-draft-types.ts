@@ -37,6 +37,7 @@ export type BreezyJobCatalogRow = {
   title: string;
   city: string;
   usState: string;
+  displayLocation: string;
   pipelineStatus: string;
   applicantCount: number | null;
   postedDate: string;

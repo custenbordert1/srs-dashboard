@@ -1,12 +1,6 @@
 import { AppShell } from "@/components/auth/app-shell";
 import type { UserPublic } from "@/lib/auth/types";
-import {
-  dmLeaderboard,
-  newHireMetrics,
-  openJobs,
-  pipelineStages,
-  weeklyTrends,
-} from "@/lib/recruiting-sample-data";
+import { dmLeaderboard, newHireMetrics, pipelineStages, weeklyTrends } from "@/lib/recruiting-sample-data";
 import { RecruitingDashboardContent } from "./recruiting-dashboard-content";
 
 type RecruitingDashboardProps = {
@@ -40,7 +34,6 @@ export function RecruitingDashboard({ user }: RecruitingDashboardProps) {
       </div>
 
       <RecruitingDashboardContent
-        openJobs={openJobs}
         weeklyTrends={weeklyTrends}
         pipelineStages={pipelineStages}
         newHireMetrics={newHireMetrics}
@@ -49,8 +42,8 @@ export function RecruitingDashboard({ user }: RecruitingDashboardProps) {
       />
 
       <footer className="border-t border-zinc-800/80 pt-8 text-center text-xs text-zinc-600">
-        SRS recruiting dashboard · KPIs + live sections from Google Sheet CSV · sample charts on
-        Overview
+        SRS recruiting dashboard · Breezy HR is the live ATS source · Google Sheet recruiting is
+        reference-only · MEL sheet for store demand
       </footer>
     </AppShell>
   );

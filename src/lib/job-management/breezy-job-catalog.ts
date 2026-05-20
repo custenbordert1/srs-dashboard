@@ -6,13 +6,12 @@ let catalogCache: { expiresAt: number; snapshot: BreezyJobCatalogSnapshot } | nu
 
 function mapJobToCatalogRow(job: BreezyJob): BreezyJobCatalogRow {
   const pipelineStatus = job.status || "unknown";
-  const usState =
-    pipelineStatus === job.state ? "" : job.state;
   return {
     breezyJobId: job.jobId,
     title: job.name,
     city: job.city,
-    usState: usState || "",
+    usState: job.state,
+    displayLocation: job.displayLocation,
     pipelineStatus,
     applicantCount: job.candidateCount ?? null,
     postedDate: job.createdDate || job.updatedDate,

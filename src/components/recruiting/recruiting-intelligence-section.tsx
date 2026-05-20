@@ -2,6 +2,9 @@
 
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
+import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
+import { isGoogleSheetRecruitingLiveEnabledClient } from "@/lib/recruiting-data-architecture";
+import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-intelligence";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 import {
   analyzeMarketIdentityQuality,
@@ -157,21 +160,41 @@ function APlusOpportunityTable({ rows }: { rows: IntelligenceOpenPost[] }) {
 }
 
 export function RecruitingIntelligenceSection() {
+  const sheetLive = isGoogleSheetRecruitingLiveEnabledClient();
   const [data, setData] = useState<SheetDataResult | undefined>(undefined);
   const [melData, setMelData] = useState<MelProjectsDataResult | undefined>(undefined);
+  const [breezyIntelligence, setBreezyIntelligence] = useState<RecruitingIntelligenceSnapshot | null>(
+    null,
+  );
+  const [liveLoadError, setLiveLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        const [parsed, melParsed] = await Promise.all([
-          fetchRecruitingSheetData(),
-          fetchMelProjectsData(),
-        ]);
+        const melParsed = await fetchMelProjectsData();
+
+        if (!sheetLive) {
+          const live = await fetchRecruitingLiveSnapshot(false);
+          if (cancelled) return;
+          setMelData(melParsed);
+          setData({ ok: true, rows: [], headers: [], fetchedAt: new Date().toISOString(), csvUrl: "" });
+          if (live.ok) {
+            setBreezyIntelligence(live.intelligence);
+            setLiveLoadError(null);
+          } else {
+            setBreezyIntelligence(null);
+            setLiveLoadError(live.error);
+          }
+          return;
+        }
+
+        const parsed = await fetchRecruitingSheetData();
         if (!cancelled) {
           setData(parsed);
           setMelData(melParsed);
+          setBreezyIntelligence(null);
         }
       } catch (e) {
         if (!cancelled) {
@@ -196,12 +219,13 @@ export function RecruitingIntelligenceSection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sheetLive]);
 
   const snapshot = useMemo(() => {
+    if (!sheetLive && breezyIntelligence) return breezyIntelligence;
     if (!data?.ok) return null;
     return computeRecruitingIntelligence(data.rows, data.headers);
-  }, [data]);
+  }, [sheetLive, breezyIntelligence, data]);
 
   const kpiItems = useMemo(() => {
     if (!data) return [];
@@ -258,11 +282,25 @@ export function RecruitingIntelligenceSection() {
     ];
   }, [dataQualityDiagnostics]);
 
-  if (data === undefined || melData === undefined) {
+  if (melData === undefined || data === undefined) {
     return <IntelligenceSkeleton />;
   }
 
-  if (!data.ok) {
+  if (!sheetLive && liveLoadError && !snapshot) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Recruiting intelligence</h1>
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+        >
+          {liveLoadError}
+        </div>
+      </div>
+    );
+  }
+
+  if (sheetLive && data && !data.ok) {
     return (
       <div className="space-y-6">
         <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Recruiting intelligence</h1>
@@ -285,8 +323,9 @@ export function RecruitingIntelligenceSection() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Recruiting intelligence</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-          Live analytics from the recruiting Google Sheet — scorecards, risk scoring, and prioritized
-          opportunities for field recruiting.
+          {sheetLive
+            ? "Legacy mode: recruiting Google Sheet drives open-post analytics."
+            : "Live analytics from Breezy HR (published jobs + candidate sync). MEL sheet still powers store-call demand."}
         </p>
       </div>
 

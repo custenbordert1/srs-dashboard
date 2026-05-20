@@ -4,6 +4,11 @@
  */
 
 import {
+  buildBreezyJobLocationDiagnostics,
+  normalizeBreezyJobLocation,
+  type BreezyJobLocationSource,
+} from "@/lib/breezy-job-location";
+import {
   getBreezyApiKeySync,
   getBreezyCompanyIdSync,
   loadConfigSync,
@@ -46,8 +51,12 @@ export type BreezyJob = {
   jobId: string;
   name: string;
   city: string;
-  /** US state/region when present on Breezy location payload. */
+  /** US state code from Breezy location — never pipeline status. */
   state: string;
+  zip: string;
+  displayLocation: string;
+  /** Which raw Breezy field(s) supplied city/state. */
+  locationSource: BreezyJobLocationSource;
   /** Breezy pipeline state (published, draft, closed, …). */
   status: string;
   createdDate: string;
@@ -93,7 +102,10 @@ export type BreezyJobsSuccess = {
   companyId: string;
   companyName?: string;
   state: string;
+  locationDiagnostics?: import("@/lib/breezy-job-location").BreezyJobLocationDiagnostics;
 };
+
+export type { BreezyJobLocationDiagnostics, BreezyJobLocationSource } from "@/lib/breezy-job-location";
 
 /** Counts explaining why fetched rows differ from Breezy UI filters. */
 export type BreezySkippedCandidatesReason = {
@@ -332,17 +344,17 @@ function sanitizeJob(raw: RawBreezyPosition): BreezyJob | null {
   const jobId = stringField(record, ["_id", "id", "friendly_id"]);
   if (!jobId) return null;
 
-  const pipelineStatus = stringField(record, ["state", "status"]) || "unknown";
-  const usState =
-    nestedString(record, [["location", "state"], ["address", "state"]]) ||
-    stringField(record, ["region", "location_state"]);
+  const location = normalizeBreezyJobLocation(record);
 
   return {
     jobId,
     name: stringField(record, ["name", "title"]) || "Untitled job",
-    city: stringField(record, ["city"]) || nestedString(record, [["location", "city"], ["address", "city"]]),
-    state: usState || pipelineStatus,
-    status: pipelineStatus,
+    city: location.city,
+    state: location.state,
+    zip: location.zip,
+    displayLocation: location.displayLocation,
+    locationSource: location.locationSource,
+    status: location.pipelineStatus,
     createdDate: stringField(record, ["creation_date", "created_at", "created"]) || "",
     updatedDate: stringField(record, ["updated_date", "updated_at", "modified_at"]) || "",
     candidateCount: numberField(record, ["candidate_count", "candidates_count", "applicants_count"]),
@@ -774,6 +786,7 @@ async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsR
     companyId,
     companyName,
     state,
+    locationDiagnostics: buildBreezyJobLocationDiagnostics(jobs),
   };
 }
 
@@ -1682,7 +1695,18 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     const rangeEnd = options.filterToDateRange ? dateRangeEnd : undefined;
     const positionResult = await fetchCandidatesForPosition(
       companyId,
-      { jobId: positionId, name: "", city: "", state: jobState, status: jobState, createdDate: "", updatedDate: "" },
+      {
+        jobId: positionId,
+        name: "",
+        city: "",
+        state: "",
+        zip: "",
+        displayLocation: "",
+        locationSource: "missing",
+        status: jobState,
+        createdDate: "",
+        updatedDate: "",
+      },
       pageSize,
       maxPages,
       deadlineMs,

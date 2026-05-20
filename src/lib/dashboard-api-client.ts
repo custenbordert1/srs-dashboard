@@ -22,6 +22,10 @@ async function fetchJson<T>(path: string, label: string): Promise<T> {
   return parsed;
 }
 
+/**
+ * Archive/reference recruiting Google Sheet — not used for live job/candidate KPIs when Breezy is primary.
+ * Prefer `fetchRecruitingLiveSnapshot` from `@/lib/cached-recruiting-live-client`.
+ */
 export async function fetchRecruitingSheetData(force = false): Promise<SheetDataResult> {
   return fetchCachedJson(
     cacheKey(["recruiting-sheet"]),

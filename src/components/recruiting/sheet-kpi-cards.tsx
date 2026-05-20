@@ -2,6 +2,9 @@
 
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
+import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
+import { breezyKpisFromSnapshot } from "@/lib/recruiting-breezy-adapters";
+import { isGoogleSheetRecruitingLiveEnabledClient } from "@/lib/recruiting-data-architecture";
 import type { Kpi } from "@/lib/recruiting-sample-data";
 import {
   computeSheetKpiSnapshot,
@@ -35,23 +38,39 @@ function KpiSkeletonGrid() {
 }
 
 export function SheetKpiCards() {
+  const sheetLive = isGoogleSheetRecruitingLiveEnabledClient();
   const [data, setData] = useState<SheetDataResult | undefined>(undefined);
+  const [breezyKpis, setBreezyKpis] = useState<Kpi[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
+        if (!sheetLive) {
+          const snap = await fetchRecruitingLiveSnapshot(false);
+          if (cancelled) return;
+          if (snap.ok && snap.jobs.ok && snap.candidates.ok) {
+            setBreezyKpis(breezyKpisFromSnapshot(snap.jobs.jobs, snap.candidates.candidates));
+            setData(undefined);
+            return;
+          }
+          setLoadError(snap.ok ? "Breezy snapshot incomplete" : snap.error);
+          setBreezyKpis(
+            sheetSnapshotToKpis(
+              { openPosts: 0, totalApplicants: 0, zeroApplicantPosts: 0, breezyLinkedPercent: null, breezyLinkedCount: 0, columnHints: "" },
+              snap.ok ? undefined : snap.error,
+            ),
+          );
+          return;
+        }
+
         const parsed = await fetchRecruitingSheetData();
         if (!cancelled) setData(parsed);
       } catch (e) {
         if (!cancelled) {
-          setData({
-            ok: false,
-            error: e instanceof Error ? e.message : "Network error while loading the sheet.",
-            fetchedAt: new Date().toISOString(),
-            csvUrl: "",
-          });
+          setLoadError(e instanceof Error ? e.message : "Failed to load KPIs");
         }
       }
     }
@@ -61,12 +80,11 @@ export function SheetKpiCards() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sheetLive]);
 
   const items: Kpi[] = useMemo(() => {
-    if (data === undefined) {
-      return [];
-    }
+    if (!sheetLive && breezyKpis) return breezyKpis;
+    if (data === undefined) return [];
     if (!data.ok) {
       return sheetSnapshotToKpis(
         {
@@ -77,14 +95,16 @@ export function SheetKpiCards() {
           breezyLinkedCount: 0,
           columnHints: "",
         },
-        data.error,
+        data.error ?? loadError ?? undefined,
       );
     }
-    const snapshot = computeSheetKpiSnapshot(data.rows, data.headers);
-    return sheetSnapshotToKpis(snapshot);
-  }, [data]);
+    return sheetSnapshotToKpis(computeSheetKpiSnapshot(data.rows, data.headers));
+  }, [sheetLive, breezyKpis, data, loadError]);
 
-  if (data === undefined) {
+  if (!sheetLive && breezyKpis === null && items.length === 0) {
+    return <KpiSkeletonGrid />;
+  }
+  if (sheetLive && data === undefined) {
     return <KpiSkeletonGrid />;
   }
 

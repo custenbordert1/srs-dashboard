@@ -10,7 +10,11 @@ function stateSet(states: string[] | null): Set<string> | null {
 
 export function filterJobsByTerritory(jobs: BreezyJob[], allowed: Set<string> | null): BreezyJob[] {
   if (!allowed) return jobs;
-  return jobs.filter((job) => allowed.has(normalizeStateCode(job.state)));
+  return jobs.filter((job) => {
+    const geo = job.state.trim();
+    if (!geo) return false;
+    return allowed.has(normalizeStateCode(geo));
+  });
 }
 
 export function filterCandidatesByTerritory(

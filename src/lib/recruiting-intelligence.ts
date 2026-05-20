@@ -140,7 +140,7 @@ export function computeRecruitingRiskLevel(input: {
   return "Low";
 }
 
-function computeAPlusScore(input: {
+export function computeAPlusScore(input: {
   applicantCount: number;
   daysOpen: number | null;
   storeCount: number;
