@@ -5,6 +5,8 @@ import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-c
 import { RecruitingAutomationSection } from "@/components/recruiting/recruiting-automation-section";
 import type { UserPublic } from "@/lib/auth/types";
 import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
+import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
 type ExecutiveDashboardProps = {
@@ -61,6 +63,7 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
     useTerritoryDashboard<ExecutiveDashboardSnapshot>({
       endpoint: "/api/executive/dashboard",
     });
+  const drawer = useCandidateDrawer();
 
   return (
     <AppShell
@@ -199,6 +202,8 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
           </p>
         </>
       ) : null}
+
+      <CandidateDetailDrawer {...drawer.drawerProps} />
     </AppShell>
   );
 }

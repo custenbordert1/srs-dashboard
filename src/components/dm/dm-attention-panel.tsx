@@ -35,7 +35,15 @@ function AttentionList({ items, emptyLabel }: { items: DmAttentionItem[]; emptyL
   );
 }
 
-function CandidateTable({ rows }: { rows: DmCandidateSummary[] }) {
+function CandidateTable({
+  rows,
+  onCandidateClick,
+  selectedCandidateId,
+}: {
+  rows: DmCandidateSummary[];
+  onCandidateClick?: (candidateId: string) => void;
+  selectedCandidateId?: string | null;
+}) {
   if (rows.length === 0) {
     return <p className="text-sm text-zinc-500">No candidates in this view.</p>;
   }
@@ -54,7 +62,25 @@ function CandidateTable({ rows }: { rows: DmCandidateSummary[] }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.candidateId} className="border-b border-zinc-800/60 last:border-0">
+            <tr
+              key={row.candidateId}
+              role={onCandidateClick ? "button" : undefined}
+              tabIndex={onCandidateClick ? 0 : undefined}
+              onClick={onCandidateClick ? () => onCandidateClick(row.candidateId) : undefined}
+              onKeyDown={
+                onCandidateClick
+                  ? (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        onCandidateClick(row.candidateId);
+                      }
+                    }
+                  : undefined
+              }
+              className={`border-b border-zinc-800/60 last:border-0 ${
+                onCandidateClick ? "cursor-pointer hover:bg-zinc-800/40" : ""
+              } ${selectedCandidateId === row.candidateId ? "bg-teal-500/10" : ""}`}
+            >
               <td className="py-2.5 pr-3 font-medium text-zinc-100">{row.name}</td>
               <td className="py-2.5 pr-3 tabular-nums text-zinc-300">
                 {row.score > 0 ? (
@@ -84,6 +110,8 @@ type DmAttentionPanelProps = {
   highestFillRisk: DmAttentionItem[];
   topCandidates: DmCandidateSummary[];
   recentApplicants: DmCandidateSummary[];
+  onCandidateClick?: (candidateId: string) => void;
+  selectedCandidateId?: string | null;
 };
 
 export function DmAttentionPanel({
@@ -91,6 +119,8 @@ export function DmAttentionPanel({
   highestFillRisk,
   topCandidates,
   recentApplicants,
+  onCandidateClick,
+  selectedCandidateId,
 }: DmAttentionPanelProps) {
   const [active, setActive] = useState<DmDashboardAction>("attention");
 
@@ -120,8 +150,20 @@ export function DmAttentionPanel({
         {active === "fill-risk" ? (
           <AttentionList items={highestFillRisk} emptyLabel="No fill-risk alerts in your territory." />
         ) : null}
-        {active === "top-candidates" ? <CandidateTable rows={topCandidates} /> : null}
-        {active === "recent" ? <CandidateTable rows={recentApplicants} /> : null}
+        {active === "top-candidates" ? (
+          <CandidateTable
+            rows={topCandidates}
+            onCandidateClick={onCandidateClick}
+            selectedCandidateId={selectedCandidateId}
+          />
+        ) : null}
+        {active === "recent" ? (
+          <CandidateTable
+            rows={recentApplicants}
+            onCandidateClick={onCandidateClick}
+            selectedCandidateId={selectedCandidateId}
+          />
+        ) : null}
       </div>
     </section>
   );

@@ -13,6 +13,12 @@ import {
   type CandidateRowAction,
 } from "@/components/recruiting/candidate-actions-menu";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
+import {
+  getRecruitingActions,
+  toggleRecruitingAction,
+  type RecruitingActionType,
+} from "@/lib/candidate-recruiting-actions";
 import { VirtualCandidateTable } from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { AI_GRADE_STYLES, type WorkflowRecommendation } from "@/lib/candidate-ai-scoring";
@@ -334,10 +340,20 @@ export function CandidatesSection() {
     [filtered],
   );
 
+  const [recruitingActionsTick, setRecruitingActionsTick] = useState(0);
+
   const selectedCandidate = useMemo(
     () => (selectedCandidateId ? (candidates.find((c) => c.candidateId === selectedCandidateId) ?? null) : null),
     [candidates, selectedCandidateId],
   );
+
+  const selectedDrawerRow = useMemo(() => {
+    if (!selectedCandidate) return null;
+    return buildCandidateDrawerRowFromScored(selectedCandidate, {
+      recruitingActions: getRecruitingActions(selectedCandidate.candidateId),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick refreshes local recruiting flags
+  }, [selectedCandidate, recruitingActionsTick]);
 
   const prioritizationQueues = useMemo(
     () =>
@@ -816,14 +832,14 @@ export function CandidatesSection() {
       </section>
 
       <CandidateDetailDrawer
-        key={selectedCandidate?.candidateId ?? "closed"}
-        candidate={selectedCandidate}
-        open={selectedCandidate !== null}
+        key={selectedDrawerRow?.candidateId ?? "closed"}
+        candidate={selectedDrawerRow}
+        open={selectedDrawerRow !== null}
         onClose={() => setSelectedCandidateId(null)}
         statusAgingDays={
-          selectedCandidate ? daysSince(selectedCandidate.lastActionAt ?? selectedCandidate.appliedDate) : null
+          selectedDrawerRow ? daysSince(selectedDrawerRow.lastActionAt ?? selectedDrawerRow.appliedDate) : null
         }
-        appliedAgingDays={selectedCandidate ? daysSince(selectedCandidate.appliedDate) : null}
+        appliedAgingDays={selectedDrawerRow ? daysSince(selectedDrawerRow.appliedDate) : null}
         onStatusChange={(status) => {
           if (!selectedCandidate) return;
           updateWorkflow(selectedCandidate, status);
@@ -835,6 +851,11 @@ export function CandidatesSection() {
         onAddNote={(note) => {
           if (!selectedCandidate) return;
           updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
+        }}
+        onRecruitingAction={(type: RecruitingActionType) => {
+          if (!selectedCandidate) return;
+          toggleRecruitingAction(selectedCandidate.candidateId, type);
+          setRecruitingActionsTick((n) => n + 1);
         }}
       />
     </div>

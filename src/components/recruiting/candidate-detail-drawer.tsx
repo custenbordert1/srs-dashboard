@@ -2,10 +2,17 @@
 
 import {
   AI_GRADE_STYLES,
+  AI_SCORE_TIER_STYLES,
   type AiLetterGrade,
+  type AiScoreTier,
   type CandidateAiScoreBreakdown,
   type WorkflowRecommendation,
 } from "@/lib/candidate-ai-scoring";
+import {
+  RECRUITING_ACTION_LABELS,
+  type CandidateRecruitingActions,
+  type RecruitingActionType,
+} from "@/lib/candidate-recruiting-actions";
 import { buildIntegrationPrep } from "@/lib/integration-prep";
 import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
@@ -41,6 +48,15 @@ export type CandidateDrawerRow = {
   merchandisingExperienceScore: number | null;
   retailExperienceScore: number | null;
   travelFitScore: number | null;
+  strengths: string[];
+  concerns: string[];
+  suggestedProjects: string[];
+  bestFit: boolean;
+  bestFitReason?: string;
+  tierLabel: string;
+  extractedKeywords: string[];
+  recommendedNextAction: string;
+  recruitingActions: CandidateRecruitingActions;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
@@ -60,6 +76,8 @@ type CandidateDetailDrawerProps = {
   onAddNote: (note: string) => void;
   statusAgingDays: number | null;
   appliedAgingDays: number | null;
+  onRecruitingAction?: (type: RecruitingActionType) => void;
+  loading?: boolean;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -176,6 +194,45 @@ function AssignmentPanel({
   );
 }
 
+function RecruitingActionsPanel({
+  actions,
+  onAction,
+}: {
+  actions: CandidateRecruitingActions;
+  onAction: (type: RecruitingActionType) => void;
+}) {
+  const entries: Array<{ type: RecruitingActionType; active: boolean }> = [
+    { type: "dm-review", active: actions.dmReview },
+    { type: "recommend-interview", active: actions.recommendInterview },
+    { type: "needs-follow-up", active: actions.needsFollowUp },
+    { type: "priority-list", active: actions.priorityList },
+    { type: "onboarding-packet", active: actions.onboardingPacketPrep },
+  ];
+
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      {entries.map(({ type, active }) => {
+        const meta = RECRUITING_ACTION_LABELS[type];
+        return (
+          <button
+            key={type}
+            type="button"
+            onClick={() => onAction(type)}
+            className={`rounded-lg border px-3 py-2 text-left text-xs transition-all duration-200 ${
+              active
+                ? "border-teal-500/40 bg-teal-500/15 text-teal-100 shadow-sm shadow-teal-950/20"
+                : "border-zinc-700 bg-zinc-950/50 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900"
+            }`}
+          >
+            <p className="font-medium">{meta.label}</p>
+            <p className="mt-0.5 text-[10px] text-zinc-500">{meta.description}</p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function NoteComposer({ onAddNote }: { onAddNote: (note: string) => void }) {
   const [noteDraft, setNoteDraft] = useState("");
 
@@ -211,6 +268,13 @@ function NoteComposer({ onAddNote }: { onAddNote: (note: string) => void }) {
   );
 }
 
+function scoreTierFromNumeric(score: number): AiScoreTier {
+  if (score >= 85) return "elite";
+  if (score >= 70) return "strong";
+  if (score >= 55) return "moderate";
+  return "weak";
+}
+
 export function CandidateDetailDrawer({
   candidate,
   open,
@@ -220,6 +284,8 @@ export function CandidateDetailDrawer({
   onAddNote,
   statusAgingDays,
   appliedAgingDays,
+  onRecruitingAction,
+  loading = false,
 }: CandidateDetailDrawerProps) {
   const [tab, setTab] = useState<DrawerTab>("overview");
   const [helloSign, setHelloSign] = useState<HelloSignPrep | null>(null);
@@ -321,6 +387,108 @@ export function CandidateDetailDrawer({
         </header>
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
+          {loading ? <p className="mb-4 text-sm text-zinc-500">Loading candidate details…</p> : null}
+
+          <section className="mb-5 space-y-4 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-3xl font-semibold tabular-nums text-teal-200">{candidate.aiNumericScore}</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${AI_SCORE_TIER_STYLES[scoreTierFromNumeric(candidate.aiNumericScore)]}`}
+              >
+                {candidate.tierLabel}
+              </span>
+              {candidate.bestFit ? (
+                <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-teal-200">
+                  Best fit
+                </span>
+              ) : null}
+            </div>
+
+            <div className="grid gap-2 text-xs text-zinc-400 sm:grid-cols-2">
+              <p>
+                <span className="text-zinc-500">Email:</span> {candidate.email || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Phone:</span> {candidate.phone || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Source:</span> {candidate.source || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Position:</span> {candidate.positionName || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Location:</span> {candidate.city || "—"}, {candidate.state || "—"}
+              </p>
+              <p>
+                <span className="text-zinc-500">Applied:</span> {formatAppliedDate(candidate.appliedDate)}
+              </p>
+              <p>
+                <span className="text-zinc-500">Stage:</span> {candidate.stage || "—"}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-teal-500/25 bg-teal-500/10 px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-teal-200/80">
+                Recommended next action
+              </p>
+              <p className="mt-1 text-sm text-teal-100">{candidate.recommendedNextAction}</p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Strengths</p>
+                <ul className="mt-1 space-y-0.5 text-xs text-zinc-300">
+                  {candidate.strengths.map((item) => (
+                    <li key={item}>+ {item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Concerns</p>
+                <ul className="mt-1 space-y-0.5 text-xs text-zinc-400">
+                  {candidate.concerns.length > 0 ? (
+                    candidate.concerns.map((item) => <li key={item}>− {item}</li>)
+                  ) : (
+                    <li className="text-zinc-600">None flagged</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+
+            {candidate.suggestedProjects.length > 0 ? (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                  Best-fit project types
+                </p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {candidate.suggestedProjects.map((project) => (
+                    <span
+                      key={project}
+                      className="rounded-md border border-zinc-700/80 bg-zinc-950 px-2 py-0.5 text-[10px] text-zinc-300"
+                    >
+                      {project}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {onRecruitingAction ? (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                  Recruiting actions
+                </p>
+                <div className="mt-2">
+                  <RecruitingActionsPanel
+                    actions={candidate.recruitingActions}
+                    onAction={onRecruitingAction}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </section>
+
           {tab === "overview" ? (
             <div className="space-y-3 text-xs text-zinc-400">
               <p>

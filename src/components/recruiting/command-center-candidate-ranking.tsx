@@ -28,7 +28,13 @@ function AiScoreBadge({ score, tier, tierLabel }: { score: number; tier: Command
   );
 }
 
-export function TopCandidatesWidget({ rows }: { rows: CommandCenterRankedRow[] }) {
+export function TopCandidatesWidget({
+  rows,
+  onCandidateClick,
+}: {
+  rows: CommandCenterRankedRow[];
+  onCandidateClick?: (candidateId: string) => void;
+}) {
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -45,7 +51,24 @@ export function TopCandidatesWidget({ rows }: { rows: CommandCenterRankedRow[] }
           {rows.map((row, index) => (
             <li
               key={row.candidateId}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2"
+              role={onCandidateClick ? "button" : undefined}
+              tabIndex={onCandidateClick ? 0 : undefined}
+              onClick={onCandidateClick ? () => onCandidateClick(row.candidateId) : undefined}
+              onKeyDown={
+                onCandidateClick
+                  ? (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        onCandidateClick(row.candidateId);
+                      }
+                    }
+                  : undefined
+              }
+              className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2 ${
+                onCandidateClick
+                  ? "cursor-pointer transition-colors hover:border-teal-500/30 hover:bg-zinc-900/80"
+                  : ""
+              }`}
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-zinc-100">
@@ -99,9 +122,13 @@ const selectClass =
 export function RankedCandidatesTable({
   rows,
   filterOptions,
+  onCandidateClick,
+  selectedCandidateId,
 }: {
   rows: CommandCenterRankedRow[];
   filterOptions: CommandCenterFilterOptions;
+  onCandidateClick?: (candidateId: string) => void;
+  selectedCandidateId?: string | null;
 }) {
   const [stateFilter, setStateFilter] = useState(ALL);
   const [sourceFilter, setSourceFilter] = useState(ALL);
@@ -204,8 +231,28 @@ export function RankedCandidatesTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
-              {sortedRows.map((row) => (
-                <tr key={row.candidateId} className="hover:bg-zinc-800/30">
+              {sortedRows.map((row) => {
+                const selected = selectedCandidateId === row.candidateId;
+                return (
+                <tr
+                  key={row.candidateId}
+                  role={onCandidateClick ? "button" : undefined}
+                  tabIndex={onCandidateClick ? 0 : undefined}
+                  onClick={onCandidateClick ? () => onCandidateClick(row.candidateId) : undefined}
+                  onKeyDown={
+                    onCandidateClick
+                      ? (event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            onCandidateClick(row.candidateId);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={`hover:bg-zinc-800/30 ${
+                    onCandidateClick ? "cursor-pointer" : ""
+                  } ${selected ? "bg-teal-500/10" : ""}`}
+                >
                   <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{row.name}</td>
                   <td className="px-4 py-3 sm:px-5">
                     <AiScoreBadge score={row.aiScore} tier={row.aiTier} tierLabel={row.aiTierLabel} />
@@ -221,7 +268,8 @@ export function RankedCandidatesTable({
                   </td>
                   <td className="px-4 py-3 text-zinc-400 sm:px-5">{row.location}</td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>

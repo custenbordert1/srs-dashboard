@@ -3,6 +3,8 @@
 import { CandidateIntelligenceSection } from "@/components/recruiting/candidate-intelligence-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
+import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import type { JobCandidateRanking, SmartTerritoryAlert } from "@/lib/recruiting-automation";
 import type { RecruitingRecommendation } from "@/lib/recruiting-recommendation-engine";
@@ -67,7 +69,15 @@ function AlertList({ alerts, empty }: { alerts: SmartTerritoryAlert[]; empty: st
   );
 }
 
-function JobRankingsTable({ rankings, maxJobs }: { rankings: JobCandidateRanking[]; maxJobs: number }) {
+function JobRankingsTable({
+  rankings,
+  maxJobs,
+  onCandidateClick,
+}: {
+  rankings: JobCandidateRanking[];
+  maxJobs: number;
+  onCandidateClick?: (candidateId: string) => void;
+}) {
   if (rankings.length === 0) {
     return <p className="text-sm text-zinc-500">No job rankings available.</p>;
   }
@@ -88,7 +98,12 @@ function JobRankingsTable({ rankings, maxJobs }: { rankings: JobCandidateRanking
               {job.topCandidates.map((row, index) => (
                 <li
                   key={row.candidateId}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-zinc-900/60 px-2 py-1.5 text-xs"
+                  role={onCandidateClick ? "button" : undefined}
+                  tabIndex={onCandidateClick ? 0 : undefined}
+                  onClick={onCandidateClick ? () => onCandidateClick(row.candidateId) : undefined}
+                  className={`flex flex-wrap items-center justify-between gap-2 rounded-lg bg-zinc-900/60 px-2 py-1.5 text-xs ${
+                    onCandidateClick ? "cursor-pointer hover:bg-zinc-800/80" : ""
+                  }`}
                 >
                   <span className="text-zinc-300">
                     #{index + 1} {row.name}
@@ -109,6 +124,9 @@ function JobRankingsTable({ rankings, maxJobs }: { rankings: JobCandidateRanking
 
 export function RecruitingAutomationSection({ compact = false }: RecruitingAutomationSectionProps) {
   const { data, meta, error, loading, refreshing, refresh } = useRecruitingIntelligence();
+  const drawer = useCandidateDrawer({
+    territoryStates: data?.territoryStates,
+  });
 
   if (loading && !data) {
     return <p className="text-sm text-zinc-500">Loading AI recommendations and automation insights…</p>;
@@ -215,7 +233,11 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           Merchandising, resume keywords, proximity, responsiveness, interview stage, retail/reset
         </p>
         <div className="mt-4">
-          <JobRankingsTable rankings={data.jobRankings} maxJobs={jobLimit} />
+          <JobRankingsTable
+            rankings={data.jobRankings}
+            maxJobs={jobLimit}
+            onCandidateClick={drawer.openCandidate}
+          />
         </div>
       </section>
 
@@ -299,6 +321,8 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           ))}
         </div>
       </section>
+
+      <CandidateDetailDrawer {...drawer.drawerProps} />
     </div>
   );
 }

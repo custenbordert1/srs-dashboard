@@ -8,6 +8,8 @@ import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import type { UserPublic } from "@/lib/auth/types";
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
+import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
 type DmDashboardProps = {
@@ -17,6 +19,9 @@ type DmDashboardProps = {
 export function DmDashboard({ user }: DmDashboardProps) {
   const { data, meta, error, loading, refreshing, refresh } = useTerritoryDashboard<DmDashboardSnapshot>({
     endpoint: "/api/dm/dashboard",
+  });
+  const drawer = useCandidateDrawer({
+    territoryStates: data?.territoryStates ?? user.territoryStates,
   });
 
   const subtitle =
@@ -85,9 +90,15 @@ export function DmDashboard({ user }: DmDashboardProps) {
             highestFillRisk={data.highestFillRisk}
             topCandidates={data.topCandidates}
             recentApplicants={data.recentApplicants}
+            onCandidateClick={drawer.openCandidate}
+            selectedCandidateId={drawer.selectedCandidateId}
           />
 
-          <CandidatePipelineWidget pipeline={data.pipeline} />
+          <CandidatePipelineWidget
+            pipeline={data.pipeline}
+            onCandidateClick={drawer.openCandidate}
+            selectedCandidateId={drawer.selectedCandidateId}
+          />
 
           <div className="grid gap-4 lg:grid-cols-2">
             <IntelligenceBarChart
@@ -148,6 +159,8 @@ export function DmDashboard({ user }: DmDashboardProps) {
           </p>
         </>
       ) : null}
+
+      <CandidateDetailDrawer {...drawer.drawerProps} />
     </AppShell>
   );
 }

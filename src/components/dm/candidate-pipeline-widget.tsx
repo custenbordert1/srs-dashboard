@@ -11,7 +11,15 @@ const BUCKET_META = [
   { key: "stalled" as const, label: "Stalled", color: "border-amber-500/30 bg-amber-500/10 text-amber-100" },
 ];
 
-export function CandidatePipelineWidget({ pipeline }: { pipeline: CandidatePipelineSnapshot }) {
+export function CandidatePipelineWidget({
+  pipeline,
+  onCandidateClick,
+  selectedCandidateId,
+}: {
+  pipeline: CandidatePipelineSnapshot;
+  onCandidateClick?: (candidateId: string) => void;
+  selectedCandidateId?: string | null;
+}) {
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
       <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Candidate pipeline</h2>
@@ -39,7 +47,24 @@ export function CandidatePipelineWidget({ pipeline }: { pipeline: CandidatePipel
                   {rows.slice(0, 5).map((row) => (
                     <li
                       key={row.candidateId}
-                      className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-2.5 py-2 text-xs"
+                      role={onCandidateClick ? "button" : undefined}
+                      tabIndex={onCandidateClick ? 0 : undefined}
+                      onClick={onCandidateClick ? () => onCandidateClick(row.candidateId) : undefined}
+                      onKeyDown={
+                        onCandidateClick
+                          ? (event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onCandidateClick(row.candidateId);
+                              }
+                            }
+                          : undefined
+                      }
+                      className={`rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-2.5 py-2 text-xs ${
+                        onCandidateClick
+                          ? "cursor-pointer transition-colors hover:border-teal-500/30 hover:bg-zinc-900/80"
+                          : ""
+                      } ${selectedCandidateId === row.candidateId ? "ring-1 ring-teal-500/40" : ""}`}
                     >
                       <p className="font-medium text-zinc-200">{row.name}</p>
                       <p className="text-zinc-500">

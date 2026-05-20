@@ -7,6 +7,8 @@ import {
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
 import { useEffect, useMemo, useState } from "react";
+import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import {
   RankedCandidatesTable,
   TopCandidatesWidget,
@@ -124,6 +126,9 @@ function FunnelVisualization({ applied, interviewing, hired }: { applied: number
 
 export function RecruitingCommandCenter() {
   const [loadState, setLoadState] = useState<CommandCenterLoadState>({ status: "loading" });
+  const breezyCandidates =
+    loadState.status === "ready" && loadState.candidates.ok ? loadState.candidates.candidates : [];
+  const drawer = useCandidateDrawer({ candidates: breezyCandidates });
 
   useEffect(() => {
     let cancelled = false;
@@ -222,9 +227,16 @@ export function RecruitingCommandCenter() {
         />
       </div>
 
-      <TopCandidatesWidget rows={snapshot.topCandidates} />
+      <TopCandidatesWidget rows={snapshot.topCandidates} onCandidateClick={drawer.openCandidate} />
 
-      <RankedCandidatesTable rows={snapshot.rankedCandidates} filterOptions={snapshot.filterOptions} />
+      <RankedCandidatesTable
+        rows={snapshot.rankedCandidates}
+        filterOptions={snapshot.filterOptions}
+        onCandidateClick={drawer.openCandidate}
+        selectedCandidateId={drawer.selectedCandidateId}
+      />
+
+      <CandidateDetailDrawer {...drawer.drawerProps} />
     </div>
   );
 }
