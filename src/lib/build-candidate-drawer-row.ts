@@ -80,5 +80,7 @@ export function buildCandidateDrawerRowFromScored(
       intelligence.bestFitReason,
     ),
     recruitingActions,
+    matchedOpportunities: [],
+    melMatchingSummary: "",
   };
 }

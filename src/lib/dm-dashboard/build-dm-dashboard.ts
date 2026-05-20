@@ -25,6 +25,11 @@ import {
   parseDate,
 } from "@/lib/dm-dashboard/territory-shared";
 import { getAssignedStatesForDm } from "@/lib/dm-territory-map";
+import {
+  buildDmMelMatchingMetrics,
+  type DmMelMatchingMetrics,
+} from "@/lib/mel-matching/mel-matching-metrics";
+import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
 
 export type DmDashboardKpi = {
@@ -69,6 +74,7 @@ export type DmDashboardSnapshot = {
   coverage: TerritoryCoverageSnapshot;
   pipeline: CandidatePipelineSnapshot;
   heatmap: TerritoryHeatmapPayload;
+  melMatching: DmMelMatchingMetrics;
 };
 
 export function buildDmDashboardSnapshot(
@@ -76,6 +82,7 @@ export function buildDmDashboardSnapshot(
   jobs: BreezyJob[],
   candidates: BreezyCandidate[],
   fetchedAt: string,
+  melOpportunities: MelOpportunity[] = [],
 ): DmDashboardSnapshot {
   const dmName = session.dmName ?? session.name;
   const territoryStates =
@@ -223,5 +230,6 @@ export function buildDmDashboardSnapshot(
     coverage,
     pipeline,
     heatmap,
+    melMatching: buildDmMelMatchingMetrics(candidates, melOpportunities, territoryStates),
   };
 }

@@ -6,6 +6,7 @@ import { RecruitingAutomationSection } from "@/components/recruiting/recruiting-
 import type { UserPublic } from "@/lib/auth/types";
 import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
@@ -159,6 +160,11 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
               </p>
             </div>
           </div>
+
+          <ExecutiveMelMatchingPanel
+            metrics={data.melMatching}
+            onCandidateClick={drawer.openCandidate}
+          />
 
           <div className="grid gap-4 lg:grid-cols-2">
             <TerritoryTable title="Best territories" rows={data.bestTerritories} />

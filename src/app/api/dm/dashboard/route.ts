@@ -2,6 +2,8 @@ import { getSessionFromRequest } from "@/lib/auth/request-session";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { buildDmDashboardSnapshot } from "@/lib/dm-dashboard/build-dm-dashboard";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
+import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { NextResponse } from "next/server";
@@ -27,9 +29,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult] = await Promise.all([
+  const [jobsResult, candidatesResult, melResult] = await Promise.all([
     fetchBreezyJobs("published"),
     fetchBreezyCandidates(),
+    fetchMelProjectsSheet(),
   ]);
 
   if (!jobsResult.ok) {
@@ -47,7 +50,8 @@ export async function GET(request: Request) {
   const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const fetchedAt = candidatesResult.fetchedAt;
 
-  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt);
+  const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
+  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt, melOpportunities);
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,

@@ -3,7 +3,15 @@
  * Composes with candidate-ai-scoring, breezy-api, and future MEL/automation hooks.
  */
 export { buildDmDashboardSnapshot, type DmDashboardSnapshot, type DmCandidateSummary } from "@/lib/dm-dashboard/build-dm-dashboard";
-export { buildExecutiveDashboard, type ExecutiveDashboardSnapshot, type TerritoryRollupRow } from "@/lib/dm-dashboard/build-executive-dashboard";
+export {
+  buildExecutiveDashboard,
+  type ExecutiveDashboardSnapshot,
+  type TerritoryRollupRow,
+} from "@/lib/dm-dashboard/build-executive-dashboard";
+export type {
+  DmMelMatchingMetrics,
+  ExecutiveMelMatchingMetrics,
+} from "@/lib/mel-matching/mel-matching-metrics";
 export {
   buildDmNeedsAttention,
   buildFillRiskAlerts,

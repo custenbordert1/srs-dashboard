@@ -21,6 +21,8 @@ import {
 } from "@/lib/candidate-recruiting-actions";
 import { VirtualCandidateTable } from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
+import { matchCandidateToOpportunities } from "@/lib/mel-matching/matching-engine";
 import { AI_GRADE_STYLES, type WorkflowRecommendation } from "@/lib/candidate-ai-scoring";
 import { buildPrioritizationQueues } from "@/lib/candidate-prioritization";
 import {
@@ -190,6 +192,7 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
 }
 
 export function CandidatesSection() {
+  const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities();
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
   const [sourceFilter, setSourceFilter] = useState(ALL);
@@ -349,11 +352,22 @@ export function CandidatesSection() {
 
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
-    return buildCandidateDrawerRowFromScored(selectedCandidate, {
+    const row = buildCandidateDrawerRowFromScored(selectedCandidate, {
       recruitingActions: getRecruitingActions(selectedCandidate.candidateId),
     });
+    const breezy =
+      data?.ok === true
+        ? data.candidates.find((c) => c.candidateId === selectedCandidate.candidateId)
+        : undefined;
+    if (!breezy || melOpportunities.length === 0) return row;
+    const melMatch = matchCandidateToOpportunities(breezy, melOpportunities);
+    return {
+      ...row,
+      matchedOpportunities: melMatch.matches,
+      melMatchingSummary: melMatch.aiSummary,
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tick refreshes local recruiting flags
-  }, [selectedCandidate, recruitingActionsTick]);
+  }, [data, melOpportunities, selectedCandidate, recruitingActionsTick]);
 
   const prioritizationQueues = useMemo(
     () =>
@@ -857,6 +871,7 @@ export function CandidatesSection() {
           toggleRecruitingAction(selectedCandidate.candidateId, type);
           setRecruitingActionsTick((n) => n + 1);
         }}
+        melMatchesLoading={melLoading}
       />
     </div>
   );

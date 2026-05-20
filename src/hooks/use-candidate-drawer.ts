@@ -10,6 +10,8 @@ import {
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
+import { matchCandidateToOpportunities } from "@/lib/mel-matching/matching-engine";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import type { CandidateWorkflowState, CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -36,6 +38,9 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
   const [recruitingActionsMap, setRecruitingActionsMap] = useState(loadRecruitingActionsMap);
   const [fetchedCandidates, setFetchedCandidates] = useState<BreezyCandidate[]>([]);
   const [breezyLoading, setBreezyLoading] = useState(false);
+  const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities(
+    options.territoryStates,
+  );
   const breezyCandidates = options.candidates ?? fetchedCandidates;
 
   useEffect(() => {
@@ -90,12 +95,28 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
     if (!selectedCandidateId) return null;
     const breezy = candidateById.get(selectedCandidateId);
     if (!breezy) return null;
-    return buildCandidateDrawerRow(breezy, {
+    const row = buildCandidateDrawerRow(breezy, {
       workflow: workflowState[selectedCandidateId],
       territoryStates: options.territoryStates,
       recruitingActions: recruitingActionsMap[selectedCandidateId] ?? getRecruitingActions(selectedCandidateId),
     });
-  }, [candidateById, options.territoryStates, recruitingActionsMap, selectedCandidateId, workflowState]);
+    if (melOpportunities.length === 0) return row;
+    const melMatch = matchCandidateToOpportunities(breezy, melOpportunities, {
+      territoryStates: options.territoryStates,
+    });
+    return {
+      ...row,
+      matchedOpportunities: melMatch.matches,
+      melMatchingSummary: melMatch.aiSummary,
+    };
+  }, [
+    candidateById,
+    melOpportunities,
+    options.territoryStates,
+    recruitingActionsMap,
+    selectedCandidateId,
+    workflowState,
+  ]);
 
   async function persistWorkflow(
     candidateId: string,
@@ -167,6 +188,7 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
       },
       onRecruitingAction: handleRecruitingAction,
       loading: breezyLoading && !selectedDrawerRow,
+      melMatchesLoading: melLoading,
     },
   };
 }

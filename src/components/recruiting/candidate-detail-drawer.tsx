@@ -17,6 +17,8 @@ import { buildIntegrationPrep } from "@/lib/integration-prep";
 import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
+import { MatchedOpportunitiesSection } from "@/components/recruiting/matched-opportunities-section";
+import type { CandidateOpportunityMatch } from "@/lib/mel-matching/matching-engine-types";
 import { useEffect, useState } from "react";
 
 export type CandidateDrawerRow = {
@@ -57,6 +59,8 @@ export type CandidateDrawerRow = {
   extractedKeywords: string[];
   recommendedNextAction: string;
   recruitingActions: CandidateRecruitingActions;
+  matchedOpportunities: CandidateOpportunityMatch[];
+  melMatchingSummary: string;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
@@ -78,6 +82,7 @@ type CandidateDetailDrawerProps = {
   appliedAgingDays: number | null;
   onRecruitingAction?: (type: RecruitingActionType) => void;
   loading?: boolean;
+  melMatchesLoading?: boolean;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -286,6 +291,7 @@ export function CandidateDetailDrawer({
   appliedAgingDays,
   onRecruitingAction,
   loading = false,
+  melMatchesLoading = false,
 }: CandidateDetailDrawerProps) {
   const [tab, setTab] = useState<DrawerTab>("overview");
   const [helloSign, setHelloSign] = useState<HelloSignPrep | null>(null);
@@ -487,6 +493,12 @@ export function CandidateDetailDrawer({
                 </div>
               </div>
             ) : null}
+
+            <MatchedOpportunitiesSection
+              matches={candidate.matchedOpportunities}
+              aiSummary={candidate.melMatchingSummary}
+              loading={melMatchesLoading}
+            />
           </section>
 
           {tab === "overview" ? (
