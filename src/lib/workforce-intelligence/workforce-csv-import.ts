@@ -1,6 +1,11 @@
 import { normalizeStateCode } from "@/lib/dm-territory-map";
 import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
 import {
+  classifyWorkforceRosterClass,
+  splitWorkforceReps,
+  type WorkforceImportSummary,
+} from "@/lib/workforce-intelligence/workforce-roster";
+import {
   WORKFORCE_CSV_HEADERS,
   WORKFORCE_CSV_HEADER_SET,
 } from "@/lib/workforce-intelligence/workforce-csv-schema";
@@ -21,11 +26,13 @@ export type WorkforceImportStats = {
   totalReps: number;
   activeCount: number;
   inactiveCount: number;
+  terminatedCount: number;
   statesCovered: number;
   uniqueSkillSets: number;
   recentLoginCount: number;
   stateBreakdown: Array<{ state: string; count: number }>;
   skillBreakdown: Array<{ skill: string; count: number }>;
+  importSummary?: WorkforceImportSummary;
 };
 
 function parseCsvLine(line: string): string[] {
@@ -84,12 +91,6 @@ function parseSkills(raw: string): string[] {
   ];
 }
 
-function isActiveStatus(status: string): boolean {
-  const v = status.trim().toLowerCase();
-  if (!v) return false;
-  return v === "active" || v === "a" || v === "yes" || v === "1";
-}
-
 function parseLoginDate(raw: string): string | null {
   const trimmed = sanitizeCell(raw);
   if (!trimmed) return null;
@@ -112,22 +113,20 @@ function repDisplayName(srsId: string, city: string): string {
 }
 
 export function buildWorkforceImportStats(reps: ActiveRep[]): WorkforceImportStats {
+  const split = splitWorkforceReps(reps);
+  const activeRoster = split.active;
   const states = new Set<string>();
   const skills = new Set<string>();
-  let activeCount = 0;
-  let inactiveCount = 0;
   let recentLoginCount = 0;
 
   const stateMap = new Map<string, number>();
   const skillMap = new Map<string, number>();
 
-  for (const rep of reps) {
+  for (const rep of activeRoster) {
     if (rep.state) {
       states.add(rep.state);
       stateMap.set(rep.state, (stateMap.get(rep.state) ?? 0) + 1);
     }
-    if (rep.active) activeCount += 1;
-    else inactiveCount += 1;
 
     const loginDays = rep.lastLoginDaysAgo;
     if (loginDays != null && loginDays <= 14) recentLoginCount += 1;
@@ -139,9 +138,10 @@ export function buildWorkforceImportStats(reps: ActiveRep[]): WorkforceImportSta
   }
 
   return {
-    totalReps: reps.length,
-    activeCount,
-    inactiveCount,
+    totalReps: activeRoster.length,
+    activeCount: split.active.length,
+    inactiveCount: split.inactive.length,
+    terminatedCount: split.terminated.length,
     statesCovered: states.size,
     uniqueSkillSets: skills.size,
     recentLoginCount,
@@ -152,6 +152,15 @@ export function buildWorkforceImportStats(reps: ActiveRep[]): WorkforceImportSta
       .map(([skill, count]) => ({ skill, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 12),
+    importSummary: {
+      totalRowsParsed: reps.length,
+      activeImported: split.active.length,
+      inactiveArchived: split.inactive.length,
+      terminatedArchived: split.terminated.length,
+      activeRosterCount: split.active.length,
+      inactiveArchiveCount: split.inactive.length,
+      terminatedArchiveCount: split.terminated.length,
+    },
   };
 }
 
@@ -222,15 +231,19 @@ export function parseWorkforceCleanCsv(csv: string): WorkforceImportPreview {
 
     const lastLoginAt = parseLoginDate(get(cells, "Last Login"));
     const lastLoginDaysAgo = daysSince(lastLoginAt);
-    const active = isActiveStatus(status);
+    const rosterClass = classifyWorkforceRosterClass(status);
+    const active = rosterClass === "active";
     const skills = parseSkills(get(cells, "Skill Set"));
     const dateOfHire = get(cells, "Date Of Hire");
+    const statusLabel =
+      sanitizeCell(status) ||
+      (rosterClass === "active" ? "Active" : rosterClass === "terminated" ? "Terminated" : "Inactive");
 
     reps.push({
       repId: srsId.toLowerCase(),
       srsId,
       name: repDisplayName(srsId, city),
-      status: sanitizeCell(status) || (active ? "Active" : "Inactive"),
+      status: statusLabel,
       city,
       state,
       zip,

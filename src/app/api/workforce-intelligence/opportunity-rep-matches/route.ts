@@ -17,9 +17,9 @@ export async function POST(request: Request) {
   });
   if (isGuardFailure(guard)) return guard;
 
-  let body: { opportunityIds?: string[] };
+  let body: { opportunityIds?: string[]; includeInactive?: boolean };
   try {
-    body = (await request.json()) as { opportunityIds?: string[] };
+    body = (await request.json()) as { opportunityIds?: string[]; includeInactive?: boolean };
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
   }
@@ -39,14 +39,18 @@ export async function POST(request: Request) {
   const idSet = new Set(ids);
   const opportunities = allOpportunities.filter((o) => idSet.has(o.opportunityId));
 
-  let reps = await listImportedReps();
+  const includeInactive = body.includeInactive === true;
+  let reps = await listImportedReps({ includeInactive });
   if (reps.length === 0) {
     const snapshot = await buildRepIntelligenceWithGeocoding(
       melResult.rows,
       melResult.fetchedAt,
       territoryStates ?? undefined,
+      { includeInactive },
     );
     reps = snapshot.activeReps;
+  } else if (!includeInactive) {
+    reps = reps.filter((r) => r.active);
   }
 
   if (territoryStates && territoryStates.length > 0) {
@@ -56,6 +60,7 @@ export async function POST(request: Request) {
   const matches = rankRepsForOpportunities(reps, opportunities, {
     territoryStates: territoryStates ?? undefined,
     limitPerOpportunity: 3,
+    includeInactive,
   });
 
   return NextResponse.json({ ok: true, matches });

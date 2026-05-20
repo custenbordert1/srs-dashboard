@@ -1,6 +1,7 @@
 import { matchRepToOpportunity } from "@/lib/rep-intelligence/opportunity-matching";
 import type { ActiveRep, BestRepMatchRow, OpportunityBestRepMatches } from "@/lib/rep-intelligence/rep-types";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
+import { filterRepsForMatching } from "@/lib/workforce-intelligence/workforce-roster";
 
 function skillOverlapList(rep: ActiveRep, opportunity: MelOpportunity): string[] {
   const type = opportunity.projectType.toLowerCase();
@@ -36,12 +37,13 @@ function buildRecommendationReason(
 export function rankRepsForOpportunity(
   reps: ActiveRep[],
   opportunity: MelOpportunity,
-  options?: { territoryStates?: string[]; limit?: number },
+  options?: { territoryStates?: string[]; limit?: number; includeInactive?: boolean },
 ): BestRepMatchRow[] {
   const limit = options?.limit ?? 3;
   const rows: BestRepMatchRow[] = [];
+  const pool = filterRepsForMatching(reps, { includeInactive: options?.includeInactive });
 
-  for (const rep of reps) {
+  for (const rep of pool) {
     const match = matchRepToOpportunity(rep, opportunity, { territoryStates: options?.territoryStates });
     const overlap = skillOverlapList(rep, opportunity);
     rows.push({
@@ -71,7 +73,7 @@ export function rankRepsForOpportunity(
 export function rankRepsForOpportunities(
   reps: ActiveRep[],
   opportunities: MelOpportunity[],
-  options?: { territoryStates?: string[]; limitPerOpportunity?: number },
+  options?: { territoryStates?: string[]; limitPerOpportunity?: number; includeInactive?: boolean },
 ): OpportunityBestRepMatches[] {
   return opportunities.map((opportunity) => ({
     opportunityId: opportunity.opportunityId,
@@ -79,6 +81,7 @@ export function rankRepsForOpportunities(
     topReps: rankRepsForOpportunity(reps, opportunity, {
       territoryStates: options?.territoryStates,
       limit: options?.limitPerOpportunity ?? 3,
+      includeInactive: options?.includeInactive,
     }),
   }));
 }

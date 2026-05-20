@@ -1,5 +1,5 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { getActiveRepStoreMeta, listImportedReps, mergeImportedReps } from "@/lib/active-rep-store";
+import { getActiveRepStoreMeta, mergeImportedReps } from "@/lib/active-rep-store";
 import { buildWorkforceImportStats, parseWorkforceCleanCsv } from "@/lib/workforce-intelligence/workforce-csv-import";
 import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
@@ -23,8 +23,11 @@ export async function GET(request: Request) {
   if (guard instanceof NextResponse) return guard;
 
   const meta = await getActiveRepStoreMeta();
-  const reps = await listImportedReps();
-  const stats = buildWorkforceImportStats(reps);
+  const stats = buildWorkforceImportStats([
+    ...meta.activeRoster,
+    ...meta.inactiveArchive,
+    ...meta.terminatedArchive,
+  ]);
 
   return NextResponse.json({
     ok: true,
@@ -32,9 +35,13 @@ export async function GET(request: Request) {
       importedAt: meta.importedAt,
       importedBy: meta.importedBy ?? null,
       source: meta.source ?? null,
-      repCount: reps.length,
+      activeRosterCount: meta.activeRoster.length,
+      inactiveArchiveCount: meta.inactiveArchive.length,
+      terminatedArchiveCount: meta.terminatedArchive.length,
+      repCount: meta.activeRoster.length,
     },
     stats,
+    lastImportSummary: meta.lastImportSummary ?? stats.importSummary,
   });
 }
 
@@ -73,13 +80,23 @@ export async function POST(request: Request) {
       metadata: { mode, count: parsed.reps.length },
     });
 
+    const allStored = [
+      ...stored.activeRoster,
+      ...stored.inactiveArchive,
+      ...stored.terminatedArchive,
+    ];
     return NextResponse.json({
       ok: true,
       importedCount: parsed.reps.length,
-      totalReps: stored.reps.length,
+      activeImported: stored.lastImportSummary?.activeImported ?? stored.activeRoster.length,
+      inactiveArchived: stored.lastImportSummary?.inactiveArchived ?? stored.inactiveArchive.length,
+      terminatedArchived: stored.lastImportSummary?.terminatedArchived ?? stored.terminatedArchive.length,
+      activeRosterCount: stored.activeRoster.length,
+      totalReps: stored.activeRoster.length,
       importedAt: stored.importedAt,
       importedBy: stored.importedBy,
-      stats: buildWorkforceImportStats(stored.reps),
+      stats: buildWorkforceImportStats(allStored),
+      lastImportSummary: stored.lastImportSummary,
       errors: parsed.errors,
     });
   }

@@ -7,10 +7,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type UseRepIntelligenceOptions = {
   enabled?: boolean;
+  includeInactive?: boolean;
 };
 
-async function fetchRepIntelligence(signal?: AbortSignal): Promise<RepIntelligenceSnapshot> {
-  const res = await fetchWithTimeout("/api/rep-intelligence", {
+async function fetchRepIntelligence(
+  signal?: AbortSignal,
+  includeInactive = false,
+): Promise<RepIntelligenceSnapshot> {
+  const query = includeInactive ? "?includeInactive=true" : "";
+  const res = await fetchWithTimeout(`/api/rep-intelligence${query}`, {
     cache: "no-store",
     timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
     signal,
@@ -28,6 +33,7 @@ async function fetchRepIntelligence(signal?: AbortSignal): Promise<RepIntelligen
 
 export function useRepIntelligence(options: UseRepIntelligenceOptions = {}) {
   const enabled = options.enabled ?? true;
+  const includeInactive = options.includeInactive ?? false;
   const [snapshot, setSnapshot] = useState<RepIntelligenceSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +60,8 @@ export function useRepIntelligence(options: UseRepIntelligenceOptions = {}) {
 
       try {
         const data = await fetchCachedJson(
-          cacheKey(["rep-intelligence"]),
-          () => fetchRepIntelligence(controller.signal),
+          cacheKey(["rep-intelligence", includeInactive ? "all" : "active"]),
+          () => fetchRepIntelligence(controller.signal, includeInactive),
           {
             ttlMs: LONG_CLIENT_CACHE_TTL_MS,
             force,
@@ -77,11 +83,11 @@ export function useRepIntelligence(options: UseRepIntelligenceOptions = {}) {
         setLoading(false);
       }
     },
-    [enabled],
+    [enabled, includeInactive],
   );
 
   const refresh = useCallback(() => {
-    invalidateCached(cacheKey(["rep-intelligence"]));
+    invalidateCached("rep-intelligence");
     void load(true);
   }, [load]);
 

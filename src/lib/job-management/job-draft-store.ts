@@ -1,0 +1,113 @@
+import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
+import type { JobDraft, JobPushAuditEntry } from "@/lib/job-management/job-draft-types";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+
+const STORE_DIR = path.join(process.cwd(), ".data");
+const DRAFTS_PATH = path.join(STORE_DIR, "job-drafts.json");
+const PUSH_AUDIT_PATH = path.join(STORE_DIR, "job-push-audit.jsonl");
+
+type JobDraftStoreFile = {
+  drafts: JobDraft[];
+  updatedAt: string;
+};
+
+async function readDrafts(): Promise<JobDraftStoreFile> {
+  try {
+    const raw = await readFile(DRAFTS_PATH, "utf8");
+    const parsed = JSON.parse(raw) as JobDraftStoreFile;
+    return {
+      drafts: Array.isArray(parsed.drafts) ? parsed.drafts : [],
+      updatedAt: parsed.updatedAt ?? new Date().toISOString(),
+    };
+  } catch {
+    return { drafts: [], updatedAt: new Date().toISOString() };
+  }
+}
+
+async function writeDrafts(file: JobDraftStoreFile): Promise<void> {
+  await mkdir(STORE_DIR, { recursive: true });
+  await writeFile(DRAFTS_PATH, JSON.stringify(file, null, 2), "utf8");
+}
+
+export async function listJobDrafts(): Promise<JobDraft[]> {
+  return (await readDrafts()).drafts.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
+}
+
+export async function getJobDraft(id: string): Promise<JobDraft | null> {
+  return (await readDrafts()).drafts.find((d) => d.id === id) ?? null;
+}
+
+export async function createJobDraft(
+  input: Omit<JobDraft, "id" | "status" | "createdAt" | "updatedAt"> & { status?: JobDraft["status"] },
+): Promise<JobDraft> {
+  const now = new Date().toISOString();
+  const draft: JobDraft = {
+    id: randomUUID(),
+    status: input.status ?? "draft",
+    clonedFromBreezyJobId: input.clonedFromBreezyJobId,
+    title: input.title,
+    description: input.description,
+    city: input.city,
+    usState: input.usState,
+    payRate: input.payRate,
+    department: input.department,
+    source: input.source,
+    metadata: input.metadata,
+    breezyJobId: input.breezyJobId,
+    pushedAt: input.pushedAt,
+    pushError: input.pushError,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const file = await readDrafts();
+  file.drafts.unshift(draft);
+  file.updatedAt = now;
+  await writeDrafts(file);
+  return draft;
+}
+
+export async function updateJobDraft(
+  id: string,
+  patch: Partial<
+    Pick<
+      JobDraft,
+      | "title"
+      | "description"
+      | "city"
+      | "usState"
+      | "payRate"
+      | "department"
+      | "source"
+      | "metadata"
+      | "status"
+      | "breezyJobId"
+      | "pushedAt"
+      | "pushError"
+    >
+  >,
+): Promise<JobDraft | null> {
+  const file = await readDrafts();
+  const index = file.drafts.findIndex((d) => d.id === id);
+  if (index < 0) return null;
+  const existing = file.drafts[index]!;
+  if (existing.status !== "draft" && patch.status === undefined) {
+    return existing;
+  }
+  const updated: JobDraft = {
+    ...existing,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+  file.drafts[index] = updated;
+  file.updatedAt = updated.updatedAt;
+  await writeDrafts(file);
+  return updated;
+}
+
+export async function appendJobPushAudit(entry: JobPushAuditEntry): Promise<void> {
+  await mkdir(STORE_DIR, { recursive: true });
+  await appendFile(PUSH_AUDIT_PATH, `${JSON.stringify(entry)}\n`, "utf8");
+}

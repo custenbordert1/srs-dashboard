@@ -46,11 +46,17 @@ export type BreezyJob = {
   jobId: string;
   name: string;
   city: string;
+  /** US state/region when present on Breezy location payload. */
   state: string;
+  /** Breezy pipeline state (published, draft, closed, …). */
   status: string;
   createdDate: string;
   updatedDate: string;
   candidateCount?: number;
+  description?: string;
+  payRate?: string;
+  department?: string;
+  source?: string;
 };
 
 export type BreezyCandidate = {
@@ -326,18 +332,27 @@ function sanitizeJob(raw: RawBreezyPosition): BreezyJob | null {
   const jobId = stringField(record, ["_id", "id", "friendly_id"]);
   if (!jobId) return null;
 
+  const pipelineStatus = stringField(record, ["state", "status"]) || "unknown";
+  const usState =
+    nestedString(record, [["location", "state"], ["address", "state"]]) ||
+    stringField(record, ["region", "location_state"]);
+
   return {
     jobId,
     name: stringField(record, ["name", "title"]) || "Untitled job",
     city: stringField(record, ["city"]) || nestedString(record, [["location", "city"], ["address", "city"]]),
-    // Breezy uses top-level `state` for position status (published/draft), not US state.
-    state:
-      nestedString(record, [["location", "state"], ["address", "state"]]) ||
-      stringField(record, ["region", "location_state"]),
-    status: stringField(record, ["state", "status"]) || "unknown",
+    state: usState || pipelineStatus,
+    status: pipelineStatus,
     createdDate: stringField(record, ["creation_date", "created_at", "created"]) || "",
     updatedDate: stringField(record, ["updated_date", "updated_at", "modified_at"]) || "",
     candidateCount: numberField(record, ["candidate_count", "candidates_count", "applicants_count"]),
+    description: stringField(record, ["description", "summary", "job_description"]),
+    payRate:
+      nestedString(record, [["compensation", "value"], ["salary", "value"]]) ||
+      stringField(record, ["pay_rate", "compensation", "salary"]),
+    department:
+      nestedString(record, [["department", "name"]]) || stringField(record, ["department", "category"]),
+    source: stringField(record, ["origin", "source"]) || "Breezy",
   };
 }
 

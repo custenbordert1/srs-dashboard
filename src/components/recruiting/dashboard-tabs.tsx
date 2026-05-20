@@ -14,6 +14,7 @@ export type DashboardTabId =
   | "recruiting-intelligence"
   | "automation"
   | "workforce"
+  | "job-management"
   | "workforce-intelligence";
 
 export type DashboardTab = {
@@ -34,6 +35,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   { id: "recruiting-intelligence", label: "Recruiting Intelligence" },
   { id: "automation", label: "Automation" },
   { id: "workforce", label: "Workforce" },
+  { id: "job-management", label: "Job Management" },
 ];
 
 export const EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB: DashboardTab = {

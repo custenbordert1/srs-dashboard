@@ -21,6 +21,7 @@ import {
   LazyRecruitingCommandCenter,
   LazyRecruitingIntelligenceSection,
   LazyWorkforceOperationsSection,
+  LazyJobManagementSection,
 } from "./dashboard-tab-panels";
 import {
   DashboardTabNav,
@@ -120,6 +121,10 @@ export function RecruitingDashboardContent({
 
         <DashboardTabPanel tabId="workforce" activeTab={activeTab}>
           <LazyWorkforceOperationsSection showPasswordPanel />
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="job-management" activeTab={activeTab}>
+          <LazyJobManagementSection />
         </DashboardTabPanel>
       </main>
     </>

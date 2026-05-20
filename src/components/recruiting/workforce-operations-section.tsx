@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ActiveRepMatchingPanel } from "@/components/recruiting/active-rep-matching-panel";
 import { CoverageRiskDashboard } from "@/components/recruiting/coverage-risk-dashboard";
 import { RepImportPanel } from "@/components/recruiting/rep-import-panel";
@@ -14,7 +15,8 @@ type WorkforceOperationsSectionProps = {
 };
 
 export function WorkforceOperationsSection({ showPasswordPanel = false }: WorkforceOperationsSectionProps) {
-  const { snapshot, loading, error, refresh } = useRepIntelligence();
+  const [includeInactive, setIncludeInactive] = useState(false);
+  const { snapshot, loading, error, refresh } = useRepIntelligence({ includeInactive });
 
   return (
     <div className="space-y-6">
@@ -25,14 +27,25 @@ export function WorkforceOperationsSection({ showPasswordPanel = false }: Workfo
             Rep import, geocoded matching, coverage risk, and AI staffing guidance
           </p>
         </div>
-        <button
-          type="button"
-          onClick={refresh}
-          disabled={loading}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
-        >
-          {loading ? "Refreshing…" : "Refresh intelligence"}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-zinc-400">
+            <input
+              type="checkbox"
+              checked={includeInactive}
+              onChange={(e) => setIncludeInactive(e.target.checked)}
+              className="rounded border-zinc-600"
+            />
+            Include inactive reps for analysis
+          </label>
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={loading}
+            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
+          >
+            {loading ? "Refreshing…" : "Refresh intelligence"}
+          </button>
+        </div>
       </div>
 
       {error ? (

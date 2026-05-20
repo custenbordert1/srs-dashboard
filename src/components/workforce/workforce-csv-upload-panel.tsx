@@ -72,9 +72,18 @@ export function WorkforceCsvUploadPanel({ onImportComplete }: WorkforceCsvUpload
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ csv: csvText, action: "import", mode }),
       });
-      const parsed = (await res.json()) as { ok?: boolean; error?: string; importedCount?: number };
+      const parsed = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        activeImported?: number;
+        inactiveArchived?: number;
+        terminatedArchived?: number;
+        activeRosterCount?: number;
+      };
       if (parsed.ok) {
-        setMessage(`Imported ${parsed.importedCount} reps successfully.`);
+        setMessage(
+          `Active roster: ${parsed.activeImported ?? 0} · Inactive archived: ${parsed.inactiveArchived ?? 0} · Terminated archived: ${parsed.terminatedArchived ?? 0} (${parsed.activeRosterCount ?? 0} used for matching).`,
+        );
         onImportComplete();
       } else {
         setMessage(parsed.error ?? "Import failed.");

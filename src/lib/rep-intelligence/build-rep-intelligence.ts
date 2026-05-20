@@ -1,4 +1,4 @@
-import { listImportedReps } from "@/lib/active-rep-store";
+import { listActiveRosterReps, listImportedReps } from "@/lib/active-rep-store";
 import { batchResolveCoordinates } from "@/lib/geocoding/geocoder";
 import type { MelProjectRow } from "@/lib/mel-projects-sheet";
 import { parseMelOpportunities, filterOpportunitiesByTerritory } from "@/lib/mel-matching/mel-opportunity-parser";
@@ -91,10 +91,13 @@ export async function buildRepIntelligenceWithGeocoding(
   melRows: MelProjectRow[],
   fetchedAt: string,
   territoryStates?: string[],
+  options?: { includeInactive?: boolean },
 ): Promise<RepIntelligenceSnapshot> {
-  const imported = await listImportedReps();
+  const imported = options?.includeInactive
+    ? await listImportedReps({ includeInactive: true })
+    : await listActiveRosterReps();
   const melReps = buildActiveRepsFromMelRows(melRows);
-  const merged = mergeReps(melReps, imported);
+  const merged = mergeReps(melReps, imported).filter((r) => options?.includeInactive || r.active);
   const scopedReps =
     territoryStates && territoryStates.length > 0
       ? merged.filter((r) => territoryStates.includes(r.state))

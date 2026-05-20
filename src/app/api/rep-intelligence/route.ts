@@ -20,11 +20,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: melResult.error }, { status: 503 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const includeInactive = searchParams.get("includeInactive") === "true";
   const territoryStates = filterStatesForSession(session) ?? undefined;
   const snapshot = await buildRepIntelligenceWithGeocoding(
     melResult.rows,
     melResult.fetchedAt,
     territoryStates ?? undefined,
+    { includeInactive },
   );
 
   return NextResponse.json(

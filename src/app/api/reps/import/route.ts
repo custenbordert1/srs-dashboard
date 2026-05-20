@@ -81,7 +81,8 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     importedCount: parsed.importedCount,
-    totalReps: stored.reps.length,
+    totalReps: stored.activeRoster.length,
+    activeRosterCount: stored.activeRoster.length,
     errors: parsed.errors,
     updatedAt: stored.updatedAt,
   });

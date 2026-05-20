@@ -11,6 +11,9 @@ type StoreMeta = {
   importedAt: string | null;
   importedBy: string | null;
   repCount: number;
+  activeRosterCount?: number;
+  inactiveArchiveCount?: number;
+  terminatedArchiveCount?: number;
 };
 
 export function WorkforceIntelligencePage({ user }: { user: UserPublic }) {
@@ -70,7 +73,11 @@ export function WorkforceIntelligencePage({ user }: { user: UserPublic }) {
         {meta?.importedAt ? (
           <p className="text-sm text-zinc-500">
             Last import: {new Date(meta.importedAt).toLocaleString()}
-            {meta.importedBy ? ` · ${meta.importedBy}` : ""} · {meta.repCount} reps in roster
+            {meta.importedBy ? ` · ${meta.importedBy}` : ""} · {meta.activeRosterCount ?? meta.repCount}{" "}
+            active in roster
+            {(meta.inactiveArchiveCount ?? 0) + (meta.terminatedArchiveCount ?? 0) > 0
+              ? ` · ${meta.inactiveArchiveCount ?? 0} inactive + ${meta.terminatedArchiveCount ?? 0} terminated archived`
+              : ""}
           </p>
         ) : (
           <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">

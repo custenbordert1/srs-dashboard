@@ -79,6 +79,14 @@ export const LazyWorkforceOperationsSection = dynamic(
   { loading, ssr: false },
 );
 
+export const LazyJobManagementSection = dynamic(
+  () =>
+    import("@/components/recruiting/job-management-section").then((m) => ({
+      default: m.JobManagementSection,
+    })),
+  { loading, ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;

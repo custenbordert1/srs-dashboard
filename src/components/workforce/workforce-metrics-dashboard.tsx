@@ -13,9 +13,10 @@ export function WorkforceMetricsDashboard({ stats }: WorkforceMetricsDashboardPr
       <h2 className="text-lg font-semibold text-zinc-50">Workforce metrics</h2>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <MetricCard label="Total active reps" value={stats.totalReps} />
-        <MetricCard label="Active" value={stats.activeCount} tone="emerald" />
-        <MetricCard label="Inactive" value={stats.inactiveCount} tone="amber" />
+        <MetricCard label="Active roster" value={stats.totalReps} />
+        <MetricCard label="Active imported" value={stats.activeCount} tone="emerald" />
+        <MetricCard label="Inactive archived" value={stats.inactiveCount} tone="amber" />
+        <MetricCard label="Terminated archived" value={stats.terminatedCount} tone="amber" />
         <MetricCard label="States covered" value={stats.statesCovered} />
         <MetricCard label="Unique skills" value={stats.uniqueSkillSets} />
         <MetricCard label="Recent logins (14d)" value={stats.recentLoginCount} tone="teal" />
