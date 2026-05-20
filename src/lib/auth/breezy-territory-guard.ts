@@ -5,6 +5,7 @@ import {
 } from "@/lib/breezy-api";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import type { AuthSession } from "@/lib/auth/types";
+import { maskCandidatePii } from "@/lib/security/mask-pii";
 
 export function guardBreezyJobsResult(result: BreezyJobsResult, session: AuthSession | null): BreezyJobsResult {
   if (!session || !result.ok) return result;
@@ -21,7 +22,9 @@ export function guardBreezyCandidatesResult(
 ): BreezyCandidatesResult {
   if (!session || !result.ok) return result;
   if (session.role === "executive" || session.role === "recruiter") return result;
-  const candidates = applyTerritoryToCandidates(session, result.candidates);
+  const candidates = applyTerritoryToCandidates(session, result.candidates).map((candidate) =>
+    maskCandidatePii(candidate, session.role),
+  );
   return {
     ...result,
     candidates,

@@ -1,4 +1,4 @@
-import { getSessionFromRequest } from "@/lib/auth/request-session";
+import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
@@ -13,14 +13,13 @@ export const maxDuration = 120;
 const ROUTE = "/api/executive/dashboard";
 
 export async function GET(request: Request) {
-  const session = getSessionFromRequest(request);
-  if (!session) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.role !== "executive") {
-    return NextResponse.json({ ok: false, error: "Executive access required" }, { status: 403 });
-  }
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive"],
+    auditAction: "executive_dashboard",
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
+  auditTerritoryAccess(session, "/api/executive/dashboard");
 
   await logBreezyRouteStart(ROUTE, session);
   const breezyCheck = await assertBreezyConfigured(ROUTE);
@@ -45,12 +44,14 @@ export async function GET(request: Request) {
     return NextResponse.json(breezyFailureBody(candidatesResult), { status });
   }
 
-  const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
+  const melRows = melResult.ok ? melResult.rows : [];
+  const melOpportunities = melResult.ok ? parseMelOpportunities(melRows) : [];
   const dashboard = buildExecutiveDashboard(
     jobsResult.jobs,
     candidatesResult.candidates,
     candidatesResult.fetchedAt,
     melOpportunities,
+    melRows,
   );
 
   logBreezyRouteResult(ROUTE, 200, {

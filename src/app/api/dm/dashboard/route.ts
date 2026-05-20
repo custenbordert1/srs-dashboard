@@ -1,4 +1,4 @@
-import { getSessionFromRequest } from "@/lib/auth/request-session";
+import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { buildDmDashboardSnapshot } from "@/lib/dm-dashboard/build-dm-dashboard";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
@@ -14,14 +14,14 @@ export const maxDuration = 120;
 const ROUTE = "/api/dm/dashboard";
 
 export async function GET(request: Request) {
-  const session = getSessionFromRequest(request);
-  if (!session) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.role === "dm" && session.territoryStates.length === 0) {
-    return NextResponse.json({ ok: false, error: "DM has no assigned territory" }, { status: 403 });
-  }
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["dm", "executive", "recruiter"],
+    requireTerritory: true,
+    auditAction: "dm_dashboard",
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
+  auditTerritoryAccess(session, "/api/dm/dashboard");
 
   await logBreezyRouteStart(ROUTE, session);
   const breezyCheck = await assertBreezyConfigured(ROUTE);
@@ -50,8 +50,16 @@ export async function GET(request: Request) {
   const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const fetchedAt = candidatesResult.fetchedAt;
 
-  const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
-  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt, melOpportunities);
+  const melRows = melResult.ok ? melResult.rows : [];
+  const melOpportunities = melResult.ok ? parseMelOpportunities(melRows) : [];
+  const dashboard = buildDmDashboardSnapshot(
+    session,
+    jobs,
+    candidates,
+    fetchedAt,
+    melOpportunities,
+    melRows,
+  );
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,

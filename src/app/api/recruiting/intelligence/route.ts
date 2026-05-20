@@ -1,4 +1,4 @@
-import { getSessionFromRequest } from "@/lib/auth/request-session";
+import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
@@ -13,14 +13,13 @@ export const maxDuration = 120;
 const ROUTE = "/api/recruiting/intelligence";
 
 export async function GET(request: Request) {
-  const session = getSessionFromRequest(request);
-  if (!session) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.role === "dm" && session.territoryStates.length === 0) {
-    return NextResponse.json({ ok: false, error: "DM has no assigned territory" }, { status: 403 });
-  }
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter", "dm"],
+    requireTerritory: true,
+    auditAction: "recruiting_intelligence",
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
 
   await logBreezyRouteStart(ROUTE, session);
   const breezyCheck = await assertBreezyConfigured(ROUTE);

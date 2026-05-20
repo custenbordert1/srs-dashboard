@@ -1,4 +1,6 @@
 import { canCreateSessions, getAuthEnvStatus } from "@/lib/auth/auth-env";
+import { writeAuditLog } from "@/lib/security/audit-log";
+import { AUTH_RATE_LIMIT, checkRateLimit, clientIpFromRequest } from "@/lib/security/rate-limit";
 import { loadConfig } from "@/lib/config";
 import type { UserRole } from "@/lib/auth/types";
 import { createSessionToken, sessionCookieName, sessionCookieOptions } from "@/lib/auth/session";
@@ -64,6 +66,21 @@ export async function GET(): Promise<NextResponse> {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
+  const ip = clientIpFromRequest(request);
+  const limited = checkRateLimit(`auth-login:${ip}`, AUTH_RATE_LIMIT);
+  if (!limited.allowed) {
+    writeAuditLog({
+      userId: "anonymous",
+      role: "anonymous",
+      action: "login_failure",
+      entityType: "user",
+      entityId: ip,
+      territory: "",
+      metadata: { reason: "rate_limited" },
+    });
+    return jsonResponse({ ok: false, error: "Too many login attempts. Try again shortly." }, 429);
+  }
+
   await loadConfig();
   const envStatus = getAuthEnvStatus();
   logAuth("request_received", {
@@ -99,6 +116,15 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const { email, password } = parsed;
     logAuth("login_attempt", { email, passwordProvided: password.length > 0 });
+    writeAuditLog({
+      userId: "anonymous",
+      role: "anonymous",
+      action: "login_attempt",
+      entityType: "user",
+      entityId: email,
+      territory: "",
+      metadata: { ip },
+    });
 
     if (!email || !password) {
       logAuth("auth_failure", { reason: "missing_credentials", email });
@@ -108,6 +134,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     const user = await authenticateUser(email, password);
     if (!user) {
       logAuth("auth_failure", { reason: "invalid_credentials", email, role: null });
+      writeAuditLog({
+        userId: "anonymous",
+        role: "anonymous",
+        action: "login_failure",
+        entityType: "user",
+        entityId: email,
+        territory: "",
+        metadata: { reason: "invalid_credentials" },
+      });
       return jsonResponse({ ok: false, error: "Invalid email or password" }, 401);
     }
 
@@ -130,6 +165,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     response.cookies.set(sessionCookieName(), token, sessionCookieOptions());
 
     logAuth("auth_success", { email, role: session.role, redirect });
+    writeAuditLog({
+      userId: session.userId,
+      role: session.role,
+      action: "login_success",
+      entityType: "user",
+      entityId: session.userId,
+      territory: session.territoryStates.join(","),
+      metadata: { email: session.email },
+    });
     return response;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Login failed";

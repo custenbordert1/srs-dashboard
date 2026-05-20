@@ -10,6 +10,7 @@ import type { UserPublic } from "@/lib/auth/types";
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { DmMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
+import { RepIntelligencePanel } from "@/components/recruiting/rep-intelligence-panel";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
@@ -87,6 +88,8 @@ export function DmDashboard({ user }: DmDashboardProps) {
           </section>
 
           <DmMelMatchingPanel metrics={data.melMatching} onCandidateClick={drawer.openCandidate} />
+
+          <RepIntelligencePanel snapshot={data.repIntelligence} />
 
           <DmAttentionPanel
             needsAttention={data.needsAttention}

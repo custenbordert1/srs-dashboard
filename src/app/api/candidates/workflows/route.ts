@@ -1,13 +1,22 @@
+import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import {
   getCandidateWorkflowState,
   upsertCandidateWorkflow,
 } from "@/lib/candidate-workflow-store";
 import { isCandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
+import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter", "dm"],
+    requireTerritory: true,
+    auditAction: "workflows_read",
+  });
+  if (isGuardFailure(guard)) return guard;
+
   const workflows = await getCandidateWorkflowState();
   return NextResponse.json({
     ok: true,
@@ -17,6 +26,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter", "dm"],
+    requireTerritory: true,
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
+
   let body: unknown;
   try {
     body = await request.json();
@@ -44,6 +60,13 @@ export async function POST(request: Request) {
     assignedRecruiter,
     assignedDM,
     note,
+  });
+
+  auditFromSession(session, {
+    action: "workflow_action",
+    entityType: "workflow",
+    entityId: candidateId,
+    metadata: { workflowStatus, hasNote: Boolean(note) },
   });
 
   return NextResponse.json({ ok: true, workflow });

@@ -30,6 +30,9 @@ import {
   type DmMelMatchingMetrics,
 } from "@/lib/mel-matching/mel-matching-metrics";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
+import { buildRepIntelligenceSnapshot } from "@/lib/rep-intelligence/rep-engine";
+import type { RepIntelligenceSnapshot } from "@/lib/rep-intelligence/rep-types";
+import type { MelProjectRow } from "@/lib/mel-projects-sheet";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
 
 export type DmDashboardKpi = {
@@ -75,6 +78,7 @@ export type DmDashboardSnapshot = {
   pipeline: CandidatePipelineSnapshot;
   heatmap: TerritoryHeatmapPayload;
   melMatching: DmMelMatchingMetrics;
+  repIntelligence: RepIntelligenceSnapshot;
 };
 
 export function buildDmDashboardSnapshot(
@@ -83,6 +87,7 @@ export function buildDmDashboardSnapshot(
   candidates: BreezyCandidate[],
   fetchedAt: string,
   melOpportunities: MelOpportunity[] = [],
+  melRows: MelProjectRow[] = [],
 ): DmDashboardSnapshot {
   const dmName = session.dmName ?? session.name;
   const territoryStates =
@@ -231,5 +236,6 @@ export function buildDmDashboardSnapshot(
     pipeline,
     heatmap,
     melMatching: buildDmMelMatchingMetrics(candidates, melOpportunities, territoryStates),
+    repIntelligence: buildRepIntelligenceSnapshot(melRows, fetchedAt, territoryStates),
   };
 }

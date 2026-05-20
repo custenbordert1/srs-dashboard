@@ -1,8 +1,10 @@
+import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
-import { getSessionFromRequest } from "@/lib/auth/request-session";
 import { fetchBreezyCandidates } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureHttpStatus } from "@/lib/breezy-http-status";
+import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
+import { blockBreezyWriteRoute } from "@/lib/security/read-only";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +13,14 @@ export const maxDuration = 120;
 const ROUTE = "/api/breezy/candidates";
 
 export async function GET(request: Request) {
-  const session = getSessionFromRequest(request);
-  if (!session) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter", "dm"],
+    requireTerritory: true,
+    rateLimit: BREEZY_RATE_LIMIT,
+    auditAction: "breezy_candidates_read",
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
 
   await logBreezyRouteStart(ROUTE, session);
   const breezyCheck = await assertBreezyConfigured(ROUTE);
@@ -45,5 +51,17 @@ export async function GET(request: Request) {
     breezyOk: result.ok,
     candidateCount: result.ok ? result.candidates.length : 0,
   });
-  return NextResponse.json(result, { status });
+  return NextResponse.json(result, {
+    status,
+    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" },
+  });
+}
+
+export async function POST(request: Request) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter", "dm"],
+    requireTerritory: true,
+  });
+  if (isGuardFailure(guard)) return guard;
+  return blockBreezyWriteRoute(request, guard.session) ?? NextResponse.json({ ok: false }, { status: 405 });
 }

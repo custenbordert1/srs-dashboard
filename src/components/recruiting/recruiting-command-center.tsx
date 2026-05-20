@@ -8,7 +8,9 @@ import {
 } from "@/lib/recruiting-command-center";
 import { useEffect, useMemo, useState } from "react";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { RepIntelligencePanel } from "@/components/recruiting/rep-intelligence-panel";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
+import { useRepIntelligence } from "@/hooks/use-rep-intelligence";
 import {
   RankedCandidatesTable,
   TopCandidatesWidget,
@@ -129,6 +131,7 @@ export function RecruitingCommandCenter() {
   const breezyCandidates =
     loadState.status === "ready" && loadState.candidates.ok ? loadState.candidates.candidates : [];
   const drawer = useCandidateDrawer({ candidates: breezyCandidates });
+  const repIntel = useRepIntelligence();
 
   useEffect(() => {
     let cancelled = false;
@@ -228,6 +231,12 @@ export function RecruitingCommandCenter() {
       </div>
 
       <TopCandidatesWidget rows={snapshot.topCandidates} onCandidateClick={drawer.openCandidate} />
+
+      {repIntel.snapshot ? (
+        <RepIntelligencePanel snapshot={repIntel.snapshot} compact />
+      ) : repIntel.loading ? (
+        <p className="text-sm text-zinc-500">Loading workforce intelligence…</p>
+      ) : null}
 
       <RankedCandidatesTable
         rows={snapshot.rankedCandidates}
