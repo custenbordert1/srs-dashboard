@@ -8,6 +8,7 @@ import type { UserPublic } from "@/lib/auth/types";
 import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
+import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
@@ -175,6 +176,8 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             metrics={data.melMatching}
             onCandidateClick={drawer.openCandidate}
           />
+
+          <CoverageRiskSection variant="executive" />
 
           <WorkforceOperationsSection showPasswordPanel />
 
