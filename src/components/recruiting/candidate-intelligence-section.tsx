@@ -1,264 +1,182 @@
 "use client";
 
-import type { BreezyCandidatesResult } from "@/lib/breezy-api";
-import {
-  buildCandidateIntelligence,
-  type CandidateDetectionRow,
-  type CandidateIntelligenceSnapshot,
-} from "@/lib/candidate-intelligence";
-import { useEffect, useMemo, useState } from "react";
-import { IntelligenceBarChart } from "./intelligence-bar-chart";
-import { KpiCards } from "./kpi-cards";
+import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
+import type { CandidateIntelligenceProfile } from "@/lib/candidate-intelligence-engine";
+import { AI_SCORE_TIER_STYLES } from "@/lib/candidate-ai-scoring";
 
-function CandidateIntelligenceSkeleton() {
+const TIER_STYLES = AI_SCORE_TIER_STYLES;
+
+function ProfileCard({ profile }: { profile: CandidateIntelligenceProfile }) {
   return (
-    <section className="space-y-6 border-t border-zinc-800/80 pt-8">
-      <div className="h-7 w-56 animate-pulse rounded bg-zinc-800/80" />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div
-            key={i}
-            className="h-28 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40"
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function formatDays(days: number | null): string {
-  if (days === null) return "—";
-  return `${days}d`;
-}
-
-function DetectionTable({
-  title,
-  description,
-  rows,
-}: {
-  title: string;
-  description: string;
-  rows: CandidateDetectionRow[];
-}) {
-  return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-      <div className="border-b border-zinc-800/80 px-4 py-4 sm:px-5">
-        <h3 className="text-lg font-semibold tracking-tight text-zinc-50">{title}</h3>
-        <p className="mt-1 text-sm text-zinc-500">{description}</p>
-      </div>
-
-      {rows.length === 0 ? (
-        <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">No candidates detected.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-[760px] w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-zinc-800/80 text-xs uppercase tracking-wider text-zinc-500">
-                <th className="px-4 py-3 font-medium sm:px-5">Candidate</th>
-                <th className="px-4 py-3 font-medium sm:px-5">Market</th>
-                <th className="px-4 py-3 font-medium sm:px-5">DM</th>
-                <th className="px-4 py-3 font-medium sm:px-5">Recruiter</th>
-                <th className="px-4 py-3 font-medium sm:px-5">Status</th>
-                <th className="px-4 py-3 font-medium text-right sm:px-5">Age</th>
-                <th className="px-4 py-3 font-medium text-right sm:px-5">Last update</th>
-                <th className="px-4 py-3 font-medium sm:px-5">Reason</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/60">
-              {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-zinc-800/30">
-                  <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{row.name}</td>
-                  <td className="px-4 py-3 text-zinc-300 sm:px-5">{row.market}</td>
-                  <td className="px-4 py-3 text-zinc-400 sm:px-5">{row.dm}</td>
-                  <td className="px-4 py-3 text-zinc-400 sm:px-5">{row.recruiter}</td>
-                  <td className="px-4 py-3 text-zinc-300 sm:px-5">{row.status}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-zinc-300 sm:px-5">
-                    {formatDays(row.ageDays)}
-                  </td>
-                  <td className="px-4 py-3 text-right tabular-nums text-zinc-300 sm:px-5">
-                    {formatDays(row.daysSinceUpdate)}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-400 sm:px-5">{row.reason}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <article className="rounded-xl border border-zinc-800/80 bg-zinc-950/50 p-4 transition-all duration-300 hover:border-zinc-700 hover:shadow-lg hover:shadow-black/20">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-medium text-zinc-100">{profile.candidateName}</p>
+          <p className="mt-0.5 text-xs text-zinc-500">
+            {profile.positionName} · {profile.city}, {profile.state}
+          </p>
         </div>
-      )}
-    </section>
-  );
-}
+        <div className="text-right">
+          <p className="text-2xl font-semibold tabular-nums text-teal-200">{profile.score}</p>
+          <span
+            className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ring-1 ${TIER_STYLES[profile.tier]}`}
+          >
+            {profile.tierLabel}
+          </span>
+        </div>
+      </div>
 
-function RecruiterLoadList({ snapshot }: { snapshot: CandidateIntelligenceSnapshot }) {
-  return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-      <h3 className="text-lg font-semibold tracking-tight text-zinc-50">Recruiter load</h3>
-      <p className="mt-1 text-sm text-zinc-500">Recruiters with 25+ active candidates are flagged.</p>
-      {snapshot.overloadedRecruiters.length === 0 ? (
-        <p className="mt-4 text-sm text-zinc-500">No overloaded recruiters detected.</p>
-      ) : (
-        <ul className="mt-4 space-y-2">
-          {snapshot.overloadedRecruiters.map((row) => (
-            <li
-              key={row.label}
-              className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/40 px-3 py-2 text-sm"
+      {profile.bestFit ? (
+        <p className="mt-3 rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-2 text-xs text-teal-100">
+          <span className="font-semibold">Best fit</span>
+          {profile.bestFitReason ? ` — ${profile.bestFitReason}` : null}
+        </p>
+      ) : null}
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Strengths</p>
+          <ul className="mt-1 space-y-0.5 text-xs text-zinc-300">
+            {profile.strengths.map((s) => (
+              <li key={s}>+ {s}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Concerns</p>
+          <ul className="mt-1 space-y-0.5 text-xs text-zinc-400">
+            {profile.concerns.length > 0 ? (
+              profile.concerns.map((c) => <li key={c}>− {c}</li>)
+            ) : (
+              <li className="text-zinc-600">None flagged</li>
+            )}
+          </ul>
+        </div>
+      </div>
+
+      {profile.extractedKeywords.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-1">
+          {profile.extractedKeywords.map((kw) => (
+            <span
+              key={kw}
+              className="rounded-md border border-zinc-700/80 bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-400"
             >
-              <span className="font-medium text-zinc-200">{row.label}</span>
-              <span className="tabular-nums text-amber-200">{row.value} candidates</span>
-            </li>
+              {kw}
+            </span>
           ))}
-        </ul>
-      )}
-    </section>
+        </div>
+      ) : null}
+
+      <div className="mt-3 border-t border-zinc-800/80 pt-3 text-xs text-zinc-500">
+        <p>
+          <span className="text-zinc-600">Territories:</span>{" "}
+          {profile.recommendedTerritories.length > 0
+            ? profile.recommendedTerritories.join(", ")
+            : "—"}
+        </p>
+        <p className="mt-1">
+          <span className="text-zinc-600">Projects:</span> {profile.suggestedProjects.join(" · ")}
+        </p>
+      </div>
+    </article>
   );
 }
 
-export function CandidateIntelligenceSection() {
-  const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
+type CandidateIntelligenceSectionProps = {
+  compact?: boolean;
+};
 
-  useEffect(() => {
-    let cancelled = false;
+export function CandidateIntelligenceSection({ compact = false }: CandidateIntelligenceSectionProps) {
+  const { data, error, loading, refreshing, refresh } = useRecruitingIntelligence();
 
-    async function load() {
-      try {
-        const res = await fetch("/api/breezy/candidates", { cache: "no-store" });
-        const parsed = (await res.json()) as BreezyCandidatesResult;
-        if (!cancelled) setData(parsed);
-      } catch (err) {
-        if (!cancelled) {
-          setData({
-            ok: false,
-            error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
-            fetchedAt: new Date().toISOString(),
-          });
-        }
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const snapshot = useMemo(() => {
-    if (!data?.ok) return null;
-    return buildCandidateIntelligence(data.candidates);
-  }, [data]);
-
-  if (data === undefined) return <CandidateIntelligenceSkeleton />;
-
-  if (!data.ok) {
+  if (loading && !data) {
     return (
       <section className="space-y-4 border-t border-zinc-800/80 pt-8">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Candidate intelligence</h2>
-        <div
-          role="alert"
-          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
-        >
-          {data.error}
+        <div className="h-7 w-64 animate-pulse rounded bg-zinc-800/80" />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: compact ? 3 : 6 }, (_, i) => (
+            <div key={i} className="h-48 animate-pulse rounded-xl border border-zinc-800/80 bg-zinc-900/40" />
+          ))}
         </div>
       </section>
     );
   }
 
-  if (!snapshot) return null;
+  if (error && !data) {
+    return (
+      <section className="border-t border-zinc-800/80 pt-8">
+        <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          {error}
+        </p>
+      </section>
+    );
+  }
+
+  if (!data) return null;
+
+  const intel = data.candidateIntelligence;
+  const displayProfiles = compact ? intel.profiles.slice(0, 6) : intel.profiles.slice(0, 12);
 
   return (
     <section className="space-y-6 border-t border-zinc-800/80 pt-8">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Candidate intelligence</h2>
-        <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-          Live Breezy candidate performance, funnel health, recruiter load, and candidate risk
-          signals.
-        </p>
-        {data.totalPositionsAvailable !== undefined &&
-        data.positionsScanned !== undefined &&
-        data.positionsScanned < data.totalPositionsAvailable ? (
-          <p className="mt-2 text-xs text-amber-300">
-            Partial sync: scanned {data.positionsScanned.toLocaleString()} of{" "}
-            {data.totalPositionsAvailable.toLocaleString()} published positions.
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Candidate intelligence</h2>
+          <p className="mt-1 max-w-3xl text-sm text-zinc-500">
+            AI scoring across merchandising fit, retail experience, travel radius, territory alignment,
+            responsiveness, and interview likelihood.
+            {refreshing ? <span className="ml-2 text-teal-400/90">Updating…</span> : null}
           </p>
-        ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={refresh}
+          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+        >
+          Refresh scores
+        </button>
       </div>
 
-      <KpiCards
-        items={snapshot.kpis}
-        gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-      />
-
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
-        <IntelligenceBarChart
-          title="Candidate pipeline funnel"
-          subtitle="Candidates by current Breezy stage"
-          data={snapshot.pipelineFunnel}
-          valueLabel="candidates"
-          barClassName="bg-teal-500/80"
-        />
-        <IntelligenceBarChart
-          title="Applicants by state"
-          subtitle="Candidate markets from Breezy profile/location data"
-          data={snapshot.applicantsByState}
-          valueLabel="candidates"
-          barClassName="bg-sky-500/80"
-        />
-        <IntelligenceBarChart
-          title="Applicants by recruiter"
-          subtitle="Candidate load by owner/recruiter"
-          data={snapshot.applicantsByRecruiter}
-          valueLabel="candidates"
-          barClassName="bg-violet-500/80"
-        />
-        <IntelligenceBarChart
-          title="Hiring velocity trend"
-          subtitle="Hired candidates by created week"
-          data={snapshot.hiringVelocityTrend}
-          valueLabel="hires"
-          barClassName="bg-emerald-500/80"
-        />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-teal-500/25 bg-teal-500/10 px-4 py-3">
+          <p className="text-[10px] uppercase tracking-wide text-teal-200/70">Avg score</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-teal-100">{intel.averageScore}</p>
+        </div>
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+          <p className="text-[10px] uppercase tracking-wide text-zinc-500">Scored</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-100">{intel.scoredCount}</p>
+        </div>
+        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
+          <p className="text-[10px] uppercase tracking-wide text-emerald-200/70">Best fit</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-100">
+            {intel.bestFitCandidates.length}
+          </p>
+        </div>
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+          <p className="text-[10px] uppercase tracking-wide text-zinc-500">Territory</p>
+          <p className="mt-1 text-sm font-medium text-zinc-200">{data.territoryLabel}</p>
+        </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <IntelligenceBarChart
-          title="Applicants by city/state"
-          data={snapshot.applicantsByMarket}
-          valueLabel="candidates"
-          barClassName="bg-amber-500/80"
-        />
-        <IntelligenceBarChart
-          title="Applicants by position"
-          data={snapshot.applicantsByPosition}
-          valueLabel="candidates"
-          barClassName="bg-cyan-500/80"
-        />
-        <IntelligenceBarChart
-          title="High-performing markets"
-          subtitle="Sum of hire probability score by market"
-          data={snapshot.highPerformingMarkets}
-          valueLabel="score"
-          barClassName="bg-emerald-500/80"
-        />
-      </div>
+      {intel.bestFitCandidates.length > 0 ? (
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-300">Best fit recommendations</h3>
+          <div className="mt-3 grid gap-4 md:grid-cols-2">
+            {intel.bestFitCandidates.slice(0, compact ? 2 : 4).map((profile) => (
+              <ProfileCard key={profile.candidateId} profile={profile} />
+            ))}
+          </div>
+        </div>
+      ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <DetectionTable
-          title="Stalled candidates"
-          description="Active candidates with no update in 14+ days"
-          rows={snapshot.stalledCandidates}
-        />
-        <DetectionTable
-          title="Aging applicants"
-          description="Candidates in pipeline for 21+ days"
-          rows={snapshot.agingApplicants}
-        />
-        <DetectionTable
-          title="Ghosted candidates"
-          description="Early-stage candidates with no update in 10+ days"
-          rows={snapshot.ghostedCandidates}
-        />
+      <div>
+        <h3 className="text-sm font-semibold text-zinc-300">Top scored candidates</h3>
+        <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {displayProfiles.map((profile) => (
+            <ProfileCard key={profile.candidateId} profile={profile} />
+          ))}
+        </div>
       </div>
-
-      <RecruiterLoadList snapshot={snapshot} />
     </section>
   );
 }

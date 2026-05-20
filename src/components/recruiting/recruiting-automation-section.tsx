@@ -1,23 +1,49 @@
 "use client";
 
+import { CandidateIntelligenceSection } from "@/components/recruiting/candidate-intelligence-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
+import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
-import type { JobCandidateRanking, SuggestedAction, SmartTerritoryAlert } from "@/lib/recruiting-automation";
+import type { JobCandidateRanking, SmartTerritoryAlert } from "@/lib/recruiting-automation";
+import type { RecruitingRecommendation } from "@/lib/recruiting-recommendation-engine";
 
 type RecruitingAutomationSectionProps = {
   compact?: boolean;
 };
 
-function actionTypeLabel(type: SuggestedAction["type"]): string {
-  const labels: Record<SuggestedAction["type"], string> = {
-    "increase-pay": "Increase pay",
-    "repost-ad": "Repost ad",
-    "expand-radius": "Expand radius",
-    "add-nearby-cities": "Add nearby cities",
-    "prioritize-follow-up": "Recruiter follow-up",
-    "alternate-candidate-pools": "Alternate pools",
-  };
-  return labels[type];
+const URGENCY_STYLES: Record<RecruitingRecommendation["urgency"], string> = {
+  critical: "border-red-500/30 bg-red-500/5",
+  high: "border-amber-500/30 bg-amber-500/5",
+  medium: "border-zinc-700 bg-zinc-950/50",
+  low: "border-zinc-800 bg-zinc-950/40",
+};
+
+function RecommendationList({
+  items,
+  limit,
+}: {
+  items: RecruitingRecommendation[];
+  limit: number;
+}) {
+  if (items.length === 0) {
+    return <p className="text-sm text-zinc-500">No recommendations right now.</p>;
+  }
+  return (
+    <ul className="space-y-2">
+      {items.slice(0, limit).map((rec) => (
+        <li
+          key={rec.id}
+          className={`rounded-lg border px-3 py-2 text-sm transition-colors ${URGENCY_STYLES[rec.urgency]}`}
+        >
+          <p className="font-medium text-zinc-200">{rec.recommendation}</p>
+          <p className="mt-0.5 text-xs text-zinc-500">{rec.reason}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-teal-400/80">
+            {rec.impactEstimate} · {rec.urgency}
+          </p>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function AlertList({ alerts, empty }: { alerts: SmartTerritoryAlert[]; empty: string }) {
@@ -128,6 +154,10 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
         </p>
       ) : null}
 
+      {!compact ? <RecruitingAlertsSection /> : null}
+
+      {!compact ? <CandidateIntelligenceSection /> : null}
+
       {!compact ? (
         <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
           <h3 className="text-base font-semibold text-zinc-50">Daily executive snapshot</h3>
@@ -169,27 +199,13 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
         </section>
 
         <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-          <h3 className="text-base font-semibold text-zinc-50">Auto suggested actions</h3>
-          <p className="mt-1 text-xs text-zinc-500">Pay, repost, radius, cities, follow-up, pools</p>
-          <ul className="mt-3 space-y-2">
-            {data.suggestedActions.slice(0, actionLimit).map((action) => (
-              <li
-                key={action.id}
-                className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-2 text-sm"
-              >
-                <p className="font-medium text-zinc-200">
-                  {action.title}{" "}
-                  <span className="text-xs font-normal text-zinc-500">
-                    · {actionTypeLabel(action.type)}
-                  </span>
-                </p>
-                <p className="mt-0.5 text-xs text-zinc-500">{action.detail}</p>
-              </li>
-            ))}
-            {data.suggestedActions.length === 0 ? (
-              <li className="text-sm text-zinc-500">No actions suggested right now.</li>
-            ) : null}
-          </ul>
+          <h3 className="text-base font-semibold text-zinc-50">AI action recommendations</h3>
+          <p className="mt-1 text-xs text-zinc-500">
+            Pay, radius, repost timing, nearby cities, recruiter & DM follow-up
+          </p>
+          <div className="mt-3">
+            <RecommendationList items={data.recommendations} limit={actionLimit} />
+          </div>
         </section>
       </div>
 

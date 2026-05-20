@@ -1,5 +1,6 @@
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import { scoreCandidate, type CandidateAiScore } from "@/lib/candidate-ai-scoring";
+import { scoreBreezyCandidate } from "@/lib/candidate-scoring-engine";
 import {
   candidateDisplayName,
   candidatesForJob,
@@ -86,6 +87,7 @@ function scoreForJob(
   referenceIso: string,
 ): { ai: CandidateAiScore; composite: number; proximity: number; responsiveness: number } {
   const reference = new Date(referenceIso);
+  const comprehensive = scoreBreezyCandidate(candidate, { referenceIso, job });
   const ai = scoreCandidate(candidate);
   const proximity = scoreLocationProximity(candidate, job);
   const responsiveness = scoreResponsiveness(candidate, reference);
@@ -95,10 +97,10 @@ function scoreForJob(
   const composite = Math.min(
     100,
     Math.round(
-      ai.numericScore * 0.55 +
-        proximity +
-        responsiveness +
-        retail * 0.5 +
+      comprehensive.score * 0.7 +
+        proximity * 0.8 +
+        responsiveness * 0.5 +
+        retail * 0.35 +
         interviewBoost,
     ),
   );

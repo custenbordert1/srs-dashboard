@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const DEFAULT_POLL_MS = 90_000;
@@ -45,23 +46,24 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
       else if (!initialLoadDone.current) setLoading(true);
       setError(null);
 
-      try {
-        const res = await fetch(endpoint, { cache: "no-store" });
-        const parsed = (await res.json()) as DashboardResponse<T>;
-        if (!res.ok || !parsed.ok || !parsed.dashboard) {
+      const result = await fetchJsonWithRetry<DashboardResponse<T>>(endpoint);
+      if (!result.ok) {
+        setError(result.error);
+        if (!softRefresh) setData(null);
+      } else {
+        const parsed = result.data;
+        if (!parsed.ok || !parsed.dashboard) {
           setError(parsed.error ?? "Failed to load dashboard");
           if (!softRefresh) setData(null);
-          return;
+        } else {
+          setData(parsed.dashboard);
+          setMeta(parsed.meta);
+          initialLoadDone.current = true;
         }
-        setData(parsed.dashboard);
-        setMeta(parsed.meta);
-        initialLoadDone.current = true;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load dashboard");
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
       }
+
+      setLoading(false);
+      setRefreshing(false);
     },
     [enabled, endpoint],
   );

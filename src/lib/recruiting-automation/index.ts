@@ -1,4 +1,20 @@
 export { buildRecruitingIntelligence, type RecruitingIntelligenceSnapshot } from "@/lib/recruiting-automation/build-recruiting-intelligence";
+export {
+  buildCandidateIntelligenceSnapshot,
+  type CandidateIntelligenceProfile,
+  type CandidateIntelligenceSnapshot,
+} from "@/lib/candidate-intelligence-engine";
+export { buildExecutiveInsightsKpis, type ExecutiveInsightsKpis } from "@/lib/executive-insights-engine";
+export {
+  buildRecruitingAlerts,
+  type RecruitingAlert,
+  type RecruitingAlertSeverity,
+} from "@/lib/recruiting-alert-engine";
+export {
+  buildRecruitingRecommendations,
+  type RecruitingRecommendation,
+} from "@/lib/recruiting-recommendation-engine";
+export { scoreBreezyCandidate, scoreCandidateComprehensive } from "@/lib/candidate-scoring-engine";
 export { AUTOMATION_HOOKS, type AutomationHook } from "@/lib/recruiting-automation/automation-hooks";
 export { buildDailyExecutiveSnapshot, type DailyExecutiveSnapshot } from "@/lib/recruiting-automation/daily-executive-snapshot";
 export {

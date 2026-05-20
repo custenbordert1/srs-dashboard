@@ -1,7 +1,17 @@
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import type { AuthSession } from "@/lib/auth/types";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
+import {
+  buildCandidateIntelligenceSnapshot,
+  type CandidateIntelligenceSnapshot,
+} from "@/lib/candidate-intelligence-engine";
+import { buildExecutiveInsightsKpis, type ExecutiveInsightsKpis } from "@/lib/executive-insights-engine";
 import { getAssignedStatesForDm } from "@/lib/dm-territory-map";
+import { buildRecruitingAlerts, type RecruitingAlert } from "@/lib/recruiting-alert-engine";
+import {
+  buildRecruitingRecommendations,
+  type RecruitingRecommendation,
+} from "@/lib/recruiting-recommendation-engine";
 import { AUTOMATION_HOOKS } from "@/lib/recruiting-automation/automation-hooks";
 import { buildDailyExecutiveSnapshot, type DailyExecutiveSnapshot } from "@/lib/recruiting-automation/daily-executive-snapshot";
 import {
@@ -32,6 +42,10 @@ export type RecruitingIntelligenceSnapshot = {
   topCandidatesTerritory: RankedCandidateRow[];
   suggestedActions: SuggestedAction[];
   smartAlerts: SmartTerritoryAlert[];
+  recruitingAlerts: RecruitingAlert[];
+  recommendations: RecruitingRecommendation[];
+  candidateIntelligence: CandidateIntelligenceSnapshot;
+  executiveInsights: ExecutiveInsightsKpis;
   productivity: RecruiterProductivityLiveRow[];
   trends: RecruitingTrendCharts;
   dailySnapshot: DailyExecutiveSnapshot;
@@ -58,6 +72,13 @@ export function buildRecruitingIntelligence(
     topCandidatesTerritory: rankTopCandidatesTerritory(candidates, 15),
     suggestedActions: buildSuggestedActions(jobs, candidates, fetchedAt),
     smartAlerts: buildSmartTerritoryAlerts(jobs, candidates, fetchedAt, workflows),
+    recruitingAlerts: buildRecruitingAlerts(jobs, candidates, fetchedAt, workflows),
+    recommendations: buildRecruitingRecommendations(jobs, candidates, fetchedAt),
+    candidateIntelligence: buildCandidateIntelligenceSnapshot(candidates, fetchedAt, {
+      territoryStates: territoryStates.length > 0 ? territoryStates : undefined,
+      workflows,
+    }),
+    executiveInsights: buildExecutiveInsightsKpis(jobs, candidates, fetchedAt, workflows),
     productivity: buildRecruiterProductivityLive(candidates, workflows, fetchedAt),
     trends: buildRecruitingTrendCharts(jobs, candidates, fetchedAt),
     dailySnapshot: buildDailyExecutiveSnapshot(jobs, candidates, fetchedAt),

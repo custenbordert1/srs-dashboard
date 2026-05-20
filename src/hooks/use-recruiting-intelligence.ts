@@ -1,9 +1,10 @@
 "use client";
 
 import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-automation";
+import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const DEFAULT_POLL_MS = 120_000;
+const DEFAULT_POLL_MS = 90_000;
 
 type IntelligenceMeta = {
   partialSync?: boolean;
@@ -32,23 +33,24 @@ export function useRecruitingIntelligence(pollIntervalMs = DEFAULT_POLL_MS) {
     else if (!initialDone.current) setLoading(true);
     setError(null);
 
-    try {
-      const res = await fetch("/api/recruiting/intelligence", { cache: "no-store" });
-      const parsed = (await res.json()) as IntelligenceResponse;
-      if (!res.ok || !parsed.ok || !parsed.intelligence) {
+    const result = await fetchJsonWithRetry<IntelligenceResponse>("/api/recruiting/intelligence");
+    if (!result.ok) {
+      setError(result.error);
+      if (!soft) setData(null);
+    } else {
+      const parsed = result.data;
+      if (!parsed.ok || !parsed.intelligence) {
         setError(parsed.error ?? "Failed to load recruiting intelligence");
         if (!soft) setData(null);
-        return;
+      } else {
+        setData(parsed.intelligence);
+        setMeta(parsed.meta);
+        initialDone.current = true;
       }
-      setData(parsed.intelligence);
-      setMeta(parsed.meta);
-      initialDone.current = true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load recruiting intelligence");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
     }
+
+    setLoading(false);
+    setRefreshing(false);
   }, []);
 
   const refresh = useCallback(() => {

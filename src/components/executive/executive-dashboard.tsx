@@ -99,13 +99,63 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
 
       {data ? (
         <>
-          <article className="rounded-2xl border border-teal-500/30 bg-teal-500/10 px-5 py-4">
-            <p className="text-xs uppercase tracking-wide text-teal-200/80">Nationwide health</p>
-            <p className="mt-1 text-4xl font-semibold tabular-nums text-teal-100">
-              {data.nationwideHealthScore}
-              <span className="text-lg text-teal-200/60">/100</span>
-            </p>
-          </article>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <article className="rounded-2xl border border-teal-500/30 bg-teal-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
+              <p className="text-xs uppercase tracking-wide text-teal-200/80">Territory health</p>
+              <p className="mt-1 text-3xl font-semibold tabular-nums text-teal-100">
+                {data.executiveInsights.territoryHealthScore}
+                <span className="text-base text-teal-200/60">/100</span>
+              </p>
+              <p className="mt-1 text-xs text-teal-200/70">{data.executiveInsights.territoryHealthLabel}</p>
+            </article>
+            <article className="rounded-2xl border border-red-500/25 bg-red-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
+              <p className="text-xs uppercase tracking-wide text-red-200/80">Fill risk</p>
+              <p className="mt-1 text-3xl font-semibold tabular-nums text-red-100">
+                {data.executiveInsights.fillRiskScore}
+              </p>
+              <p className="mt-1 text-xs text-red-200/70">{data.executiveInsights.fillRiskLabel}</p>
+            </article>
+            <article className="rounded-2xl border border-violet-500/25 bg-violet-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
+              <p className="text-xs uppercase tracking-wide text-violet-200/80">Recruiter productivity</p>
+              <p className="mt-1 text-3xl font-semibold tabular-nums text-violet-100">
+                {data.executiveInsights.recruiterProductivityScore}
+              </p>
+            </article>
+            <article className="rounded-2xl border border-sky-500/25 bg-sky-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
+              <p className="text-xs uppercase tracking-wide text-sky-200/80">Pipeline velocity</p>
+              <p className="mt-1 text-3xl font-semibold tabular-nums text-sky-100">
+                {data.executiveInsights.pipelineVelocity}%
+              </p>
+              <p className="mt-1 text-xs text-sky-200/70">14d hire rate</p>
+            </article>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+              <p className="text-[10px] uppercase tracking-wide text-zinc-500">Applicants / opening</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
+                {data.executiveInsights.applicantsPerOpening}
+              </p>
+            </div>
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+              <p className="text-[10px] uppercase tracking-wide text-zinc-500">Active jobs</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
+                {data.executiveInsights.activeJobs}
+              </p>
+            </div>
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+              <p className="text-[10px] uppercase tracking-wide text-zinc-500">7d applicants</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
+                {data.executiveInsights.candidatesLast7Days}
+              </p>
+            </div>
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
+              <p className="text-[10px] uppercase tracking-wide text-zinc-500">Interviews active</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
+                {data.executiveInsights.interviewsActive}
+              </p>
+            </div>
+          </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <TerritoryTable title="Best territories" rows={data.bestTerritories} />
@@ -120,11 +170,17 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
               barClassName="bg-violet-500/80"
             />
             <IntelligenceBarChart
-              title="Fill-rate trends"
-              subtitle="Pipeline stage distribution (%)"
-              data={data.fillRateTrends}
+              title="Conversion funnel"
+              subtitle="Stage distribution (%)"
+              data={data.executiveInsights.conversionFunnel}
               valueLabel="%"
               barClassName="bg-emerald-500/80"
+            />
+            <IntelligenceBarChart
+              title="Hiring momentum"
+              subtitle="Weekly applicant trend"
+              data={data.executiveInsights.hiringMomentumTrend}
+              barClassName="bg-teal-500/80"
             />
             <IntelligenceBarChart
               title="Total candidates by week"

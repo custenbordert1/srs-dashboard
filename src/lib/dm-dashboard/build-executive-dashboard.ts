@@ -3,6 +3,7 @@ import { DISTRICT_MANAGERS, getAssignedStatesForDm, normalizeStateCode } from "@
 import { buildCoverageIntelligence } from "@/lib/dm-dashboard/coverage-intelligence";
 import { buildTerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
 import { countBuckets, parseDate, MS_PER_DAY } from "@/lib/dm-dashboard/territory-shared";
+import { buildExecutiveInsightsKpis, type ExecutiveInsightsKpis } from "@/lib/executive-insights-engine";
 import type { ChartBar } from "@/lib/recruiting-intelligence";
 
 export type TerritoryRollupRow = {
@@ -25,6 +26,7 @@ export type ExecutiveDashboardSnapshot = {
   candidatesByWeek: ChartBar[];
   territoryRollups: TerritoryRollupRow[];
   nationwideHealthScore: number;
+  executiveInsights: ExecutiveInsightsKpis;
 };
 
 function candidatesLast7Days(candidates: BreezyCandidate[], referenceIso: string): number {
@@ -113,5 +115,6 @@ export function buildExecutiveDashboard(
     candidatesByWeek: weeklyCandidateBuckets(candidates, fetchedAt),
     territoryRollups: rollups,
     nationwideHealthScore: nationwideHealth.score,
+    executiveInsights: buildExecutiveInsightsKpis(jobs, candidates, fetchedAt),
   };
 }
