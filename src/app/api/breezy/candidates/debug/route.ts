@@ -31,18 +31,22 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const from = searchParams.get("from")?.trim() ?? "2026-05-12";
   const to = searchParams.get("to")?.trim() ?? "2026-05-20";
-  const state = searchParams.get("state")?.trim() || undefined;
+  const includeClosed = searchParams.get("includeClosed") === "true";
+  const includeArchived = searchParams.get("includeArchived") === "true";
+  const force = searchParams.get("force") === "true";
   const pageSize = Number.parseInt(searchParams.get("page_size") ?? "", 10);
   const maxPages = Number.parseInt(searchParams.get("max_pages") ?? "", 10);
-  const maxPositions = Number.parseInt(searchParams.get("max_positions") ?? "", 10);
+  const maxClosedPositions = Number.parseInt(searchParams.get("max_closed_positions") ?? "", 10);
 
   const raw = await fetchBreezyCandidatesDebug({
     dateRangeStart: from,
     dateRangeEnd: to,
-    state,
+    includeClosed,
+    includeArchived,
+    force,
     pageSize: Number.isFinite(pageSize) ? pageSize : undefined,
     maxPages: Number.isFinite(maxPages) ? maxPages : undefined,
-    maxPositions: Number.isFinite(maxPositions) ? maxPositions : undefined,
+    maxClosedPositions: Number.isFinite(maxClosedPositions) ? maxClosedPositions : undefined,
   });
 
   const result = guardBreezyCandidatesDebugResult(raw, session);
@@ -55,24 +59,36 @@ export async function GET(request: Request) {
     candidatesInDateRange: result.ok ? result.candidatesInDateRange : undefined,
   });
 
+  const parityTotal = result.ok
+    ? (result.publishedCandidatesInRange ?? 0) +
+      (result.closedCandidatesInRange ?? 0) +
+      (result.archivedCandidatesInRange ?? 0)
+    : undefined;
+
   return NextResponse.json(
     result.ok
       ? {
           ...result,
+          cached: !force,
           comparison: {
             breezyUiDateField: "Added Date (creation_date)",
             requestedRange: { from, to },
-            expectedUiCountHint:
-              "Breezy UI reported ~51 candidates for 2026-05-12–2026-05-20; compare candidatesInDateRange after territory filter.",
-            apiCandidatesInRangeBeforeTerritory: raw.ok ? raw.candidatesInDateRange : undefined,
+            includeClosed,
+            includeArchived,
+            expectedUiCount: 51,
+            apiParityTotalBeforeTerritory: parityTotal,
             apiCandidatesInRangeAfterTerritory: result.candidatesInDateRange,
+            gapVsBreezyUi:
+              parityTotal !== undefined ? 51 - parityTotal : undefined,
             territoryRole: session.role,
           },
         }
       : result,
     {
       status,
-      headers: { "Cache-Control": "no-store" },
+      headers: {
+        "Cache-Control": force ? "no-store" : "private, max-age=300, stale-while-revalidate=60",
+      },
     },
   );
 }

@@ -56,6 +56,8 @@ export async function GET(request: Request) {
     role: session.role,
     breezyOk: result.ok,
     candidateCount: result.ok ? result.candidates.length : 0,
+    candidatesInDateRange: result.ok ? result.candidatesInDateRange : undefined,
+    positionFetchFailed: result.ok ? result.skippedCandidatesReason?.positionFetchFailed : undefined,
   });
   return NextResponse.json(result, {
     status,

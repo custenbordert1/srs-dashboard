@@ -1,5 +1,6 @@
 import {
   countCandidatesInDateRange,
+  countCandidatesInRangeForPipelineStatus,
   countCandidatesLast7Days,
   type BreezyCandidatesDebugResult,
   type BreezyCandidatesResult,
@@ -69,5 +70,27 @@ export function guardBreezyCandidatesDebugResult(
 ): BreezyCandidatesDebugResult {
   if (!session || !result.ok) return result;
   if (session.role === "executive" || session.role === "recruiter") return result;
-  return guardBreezyCandidatesSuccess(result, session);
+  const guarded = guardBreezyCandidatesSuccess(result, session);
+  if (!result.dateRangeStart || !result.dateRangeEnd) return guarded;
+  return {
+    ...guarded,
+    publishedCandidatesInRange: countCandidatesInRangeForPipelineStatus(
+      guarded.candidates,
+      result.dateRangeStart,
+      result.dateRangeEnd,
+      "published",
+    ),
+    closedCandidatesInRange: countCandidatesInRangeForPipelineStatus(
+      guarded.candidates,
+      result.dateRangeStart,
+      result.dateRangeEnd,
+      "closed",
+    ),
+    archivedCandidatesInRange: countCandidatesInRangeForPipelineStatus(
+      guarded.candidates,
+      result.dateRangeStart,
+      result.dateRangeEnd,
+      "archived",
+    ),
+  };
 }

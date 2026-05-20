@@ -1,4 +1,6 @@
 import {
+  BREEZY_ADDED_DATE_TIMEZONE,
+  calendarDateKeyInTimezone,
   countCandidatesLast7Days,
   isPartialBreezyPositionSync,
   type BreezyCandidate,
@@ -149,11 +151,13 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
   const syncTime = new Date(fetchedAt);
   const syncMs = Number.isNaN(syncTime.getTime()) ? Date.now() : syncTime.getTime();
   const since24h = new Date(syncMs - MS_PER_DAY);
-  const since7d = new Date(syncMs - 7 * MS_PER_DAY);
+  const last7EndKey = calendarDateKeyInTimezone(syncTime, BREEZY_ADDED_DATE_TIMEZONE);
 
   const totalCandidates = candidates.length;
   const last24Hours = countAppliedSince(candidates, since24h);
   const last7Days = candidatesLast7Days ?? countCandidatesLast7Days(candidates, fetchedAt);
+  const customRangeCount =
+    data.dateRangeStart && data.dateRangeEnd ? (data.candidatesInDateRange ?? 0) : undefined;
   const bySource = countBuckets(candidates, "source");
   const byStage = countBuckets(candidates, "stage");
   const newestCandidates = buildNewestCandidates(candidates);
@@ -179,8 +183,18 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
       "breezy-7d",
       "Candidates last 7 days",
       last7Days.toLocaleString(),
-      `Applied on or after ${formatAppliedDate(since7d.toISOString())} (relative to last sync)`,
+      `Added Date in last 7 calendar days ending ${last7EndKey} (${BREEZY_ADDED_DATE_TIMEZONE})`,
     ),
+    ...(customRangeCount !== undefined && data.dateRangeStart && data.dateRangeEnd
+      ? [
+          flatKpi(
+            "breezy-range",
+            `Added ${data.dateRangeStart} – ${data.dateRangeEnd}`,
+            customRangeCount.toLocaleString(),
+            "Matches Breezy custom Added Date range (creation_date)",
+          ),
+        ]
+      : []),
     flatKpi(
       "breezy-source",
       "Candidates by source",

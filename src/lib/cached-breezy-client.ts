@@ -2,11 +2,18 @@ import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/clien
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
 
-export async function fetchCachedBreezyCandidates(force = false): Promise<BreezyCandidatesResult> {
+export async function fetchCachedBreezyCandidates(
+  force = false,
+  dateRange?: { from?: string; to?: string },
+): Promise<BreezyCandidatesResult> {
+  const query =
+    dateRange?.from && dateRange?.to
+      ? `?from=${encodeURIComponent(dateRange.from)}&to=${encodeURIComponent(dateRange.to)}`
+      : "";
   return fetchCachedJson(
-    cacheKey(["breezy", "candidates"]),
+    cacheKey(["breezy", "candidates", dateRange?.from ?? "", dateRange?.to ?? ""]),
     async () => {
-      const res = await fetchWithRetry("/api/breezy/candidates", { cache: "no-store" });
+      const res = await fetchWithRetry(`/api/breezy/candidates${query}`, { cache: "no-store" });
       return (await res.json()) as BreezyCandidatesResult;
     },
     { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-candidates" },

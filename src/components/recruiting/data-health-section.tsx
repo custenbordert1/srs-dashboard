@@ -11,6 +11,7 @@ import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { useCallback, useEffect, useState } from "react";
+import { BreezyParityDiagnostics } from "./breezy-parity-diagnostics";
 import { BreezySyncHealthSection } from "./breezy-sync-health-section";
 
 function formatFetchedAt(iso: string) {
@@ -364,6 +365,7 @@ export function DataHealthSection() {
       ) : (
         <div className="space-y-8">
           <BreezySyncHealthSection />
+          <BreezyParityDiagnostics />
 
           <section className="space-y-4">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
