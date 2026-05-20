@@ -5,12 +5,17 @@ import {
   analyzeBreezyJobsHealth,
   analyzeMelProjectsHealth,
   analyzeRecruitingSheetHealth,
+  type DataHealthEndpointId,
   type DataHealthReport,
 } from "@/lib/data-health";
+import {
+  DataHealthRequestTimeoutError,
+  fetchJsonWithTimeout,
+  logDataHealthTiming,
+} from "@/lib/data-health-fetch";
 import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
-import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
-import type { SheetDataResult } from "@/lib/google-sheet-csv";
-import { useCallback, useEffect, useState } from "react";
+import type { BreezyCandidatesHealthProbe, BreezyJobsResult } from "@/lib/breezy-api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BreezyParityDiagnostics } from "./breezy-parity-diagnostics";
 import { BreezySyncHealthSection } from "./breezy-sync-health-section";
 
@@ -29,11 +34,65 @@ function formatCount(n: number): string {
   return n.toLocaleString();
 }
 
-type EndpointCardProps = {
-  report: DataHealthReport;
+type CardLoadState = {
+  loading: boolean;
+  error: string | null;
+  report: DataHealthReport | null;
 };
 
-function EndpointHealthCard({ report }: EndpointCardProps) {
+const ENDPOINT_ORDER: DataHealthEndpointId[] = [
+  "recruiting-sheet",
+  "mel-projects",
+  "breezy-jobs",
+  "breezy-candidates",
+];
+
+function initialCardState(): Record<DataHealthEndpointId, CardLoadState> {
+  return {
+    "recruiting-sheet": { loading: true, error: null, report: null },
+    "mel-projects": { loading: true, error: null, report: null },
+    "breezy-jobs": { loading: true, error: null, report: null },
+    "breezy-candidates": { loading: true, error: null, report: null },
+  };
+}
+
+type EndpointCardProps = {
+  report: DataHealthReport | null;
+  loading: boolean;
+  error: string | null;
+};
+
+function EndpointHealthCard({ report, loading, error }: EndpointCardProps) {
+  if (loading && !report) {
+    return (
+      <article
+        className="flex h-64 flex-col rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm"
+        aria-busy="true"
+      >
+        <div className="animate-pulse space-y-4 px-5 py-5">
+          <div className="h-6 w-40 rounded bg-zinc-800/80" />
+          <div className="h-4 w-56 rounded bg-zinc-800/60" />
+          <div className="grid grid-cols-2 gap-3 pt-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="h-12 rounded bg-zinc-800/50" />
+            ))}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  if (!report) {
+    return (
+      <article className="flex flex-col rounded-2xl border border-rose-500/30 bg-rose-500/5 px-5 py-5">
+        <h2 className="text-lg font-semibold text-zinc-50">Endpoint unavailable</h2>
+        <p role="alert" className="mt-2 text-sm text-rose-100">
+          {error ?? "Failed to load health data."}
+        </p>
+      </article>
+    );
+  }
+
   const isConnected = report.status === "connected";
   const isBreezy = report.source === "breezy";
   const countLabel = isBreezy ? "Record count" : "Row count";
@@ -67,6 +126,15 @@ function EndpointHealthCard({ report }: EndpointCardProps) {
           Status: {isConnected ? "Connected" : "Error"}
         </span>
       </header>
+
+      {error ? (
+        <p
+          role="status"
+          className="mx-4 mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100 sm:mx-5"
+        >
+          {error}
+        </p>
+      ) : null}
 
       <div className="grid gap-4 px-4 py-4 sm:grid-cols-2 sm:px-5 sm:py-5 lg:grid-cols-4">
         <Metric label={countLabel} value={formatCount(report.rowCount)} warn={report.rowCount === 0} />
@@ -130,9 +198,7 @@ function EndpointHealthCard({ report }: EndpointCardProps) {
           )}
         </div>
 
-        {report.metaLine ? (
-          <p className="text-xs text-zinc-500">{report.metaLine}</p>
-        ) : null}
+        {report.metaLine ? <p className="text-xs text-zinc-500">{report.metaLine}</p> : null}
         {report.csvUrl ? (
           <p className="break-all font-mono text-xs text-zinc-600">{report.csvUrl}</p>
         ) : null}
@@ -167,157 +233,189 @@ function Metric({
   );
 }
 
-function DataHealthSkeleton() {
+function HealthReportGrid({
+  reports,
+  cards,
+}: {
+  reports: DataHealthEndpointId[];
+  cards: Record<DataHealthEndpointId, CardLoadState>;
+}) {
   return (
     <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
-      {Array.from({ length: 4 }, (_, i) => (
-        <div
-          key={i}
-          className="h-64 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40"
+      {reports.map((id) => (
+        <EndpointHealthCard
+          key={id}
+          report={cards[id]?.report ?? null}
+          loading={cards[id]?.loading ?? false}
+          error={cards[id]?.error ?? null}
         />
       ))}
     </div>
   );
 }
 
-function HealthReportGrid({ reports }: { reports: DataHealthReport[] }) {
-  return (
-    <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
-      {reports.map((report) => (
-        <EndpointHealthCard key={report.id} report={report} />
-      ))}
-    </div>
-  );
-}
-
 export function DataHealthSection() {
-  const [reports, setReports] = useState<DataHealthReport[] | undefined>(undefined);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const [cards, setCards] = useState(initialCardState);
+  const [manualRefreshing, setManualRefreshing] = useState(false);
+  const loadGeneration = useRef(0);
 
-  const load = useCallback(async () => {
-    setRefreshing(true);
-    setLoadError(null);
-    try {
-      const [recruitingResult, melResult, breezyJobsRes, breezyCandidatesRes] = await Promise.allSettled([
-        fetchRecruitingSheetData(),
-        fetchMelProjectsData(),
-        fetch("/api/breezy/jobs", { cache: "no-store" }),
-        fetch("/api/breezy/candidates", { cache: "no-store" }),
-      ]);
-
-      const failures: string[] = [];
-      let recruitingJson: SheetDataResult | null = null;
-      let melJson: SheetDataResult | null = null;
-      let breezyJobsJson: BreezyJobsResult | null = null;
-      let breezyCandidatesJson: BreezyCandidatesResult | null = null;
-
-      if (recruitingResult.status === "fulfilled") {
-        recruitingJson = recruitingResult.value;
-      } else {
-        failures.push(recruitingResult.reason instanceof Error ? recruitingResult.reason.message : "Recruiting sheet request failed");
-      }
-
-      if (melResult.status === "fulfilled") {
-        melJson = melResult.value;
-      } else {
-        failures.push(melResult.reason instanceof Error ? melResult.reason.message : "MEL projects request failed");
-      }
-
-      if (breezyJobsRes.status === "fulfilled") {
-        breezyJobsJson = (await breezyJobsRes.value.json()) as BreezyJobsResult;
-        if (!breezyJobsRes.value.ok) {
-          const safeMissingToken =
-            !breezyJobsJson.ok && breezyJobsJson.error.toLowerCase().includes("breezy api key");
-          if (!safeMissingToken) failures.push(`Breezy jobs HTTP ${breezyJobsRes.value.status}`);
-        }
-      } else {
-        failures.push(breezyJobsRes.reason instanceof Error ? breezyJobsRes.reason.message : "Breezy jobs request failed");
-      }
-
-      if (breezyCandidatesRes.status === "fulfilled") {
-        breezyCandidatesJson = (await breezyCandidatesRes.value.json()) as BreezyCandidatesResult;
-        if (!breezyCandidatesRes.value.ok) {
-          const safeMissingToken =
-            !breezyCandidatesJson.ok && breezyCandidatesJson.error.toLowerCase().includes("breezy api key");
-          if (!safeMissingToken) failures.push(`Breezy candidates HTTP ${breezyCandidatesRes.value.status}`);
-        }
-      } else {
-        failures.push(
-          breezyCandidatesRes.reason instanceof Error ? breezyCandidatesRes.reason.message : "Breezy candidates request failed",
-        );
-      }
-
-      const nextReports: DataHealthReport[] = [];
-
-      if (recruitingJson) {
-        nextReports.push(analyzeRecruitingSheetHealth(recruitingJson));
-      } else {
-        nextReports.push(
-          analyzeRecruitingSheetHealth({
-            ok: false,
-            error: failures.find((f) => f.startsWith("Recruiting")) ?? "Request failed",
-            fetchedAt: new Date().toISOString(),
-            csvUrl: "",
-          }),
-        );
-      }
-
-      if (melJson) {
-        nextReports.push(analyzeMelProjectsHealth(melJson));
-      } else {
-        nextReports.push(
-          analyzeMelProjectsHealth({
-            ok: false,
-            error: failures.find((f) => f.startsWith("MEL")) ?? "Request failed",
-            fetchedAt: new Date().toISOString(),
-            csvUrl: "",
-          }),
-        );
-      }
-
-      nextReports.push(
-        analyzeBreezyJobsHealth(
-          breezyJobsJson ?? {
-            ok: false,
-            error: "Request failed",
-            fetchedAt: new Date().toISOString(),
-          },
-        ),
-      );
-
-      nextReports.push(
-        analyzeBreezyCandidatesHealth(
-          breezyCandidatesJson ?? {
-            ok: false,
-            error: "Request failed",
-            fetchedAt: new Date().toISOString(),
-          },
-        ),
-      );
-
-      if (failures.length > 0) {
-        setLoadError(failures.join("; "));
-      }
-
-      setReports(nextReports);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load data health";
-      setLoadError(message);
-      setReports(undefined);
-    } finally {
-      setRefreshing(false);
-    }
+  const setCard = useCallback((id: DataHealthEndpointId, patch: Partial<CardLoadState>) => {
+    setCards((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], ...patch },
+    }));
   }, []);
 
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      void load();
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [load]);
+  const loadEndpoint = useCallback(
+    async (id: DataHealthEndpointId, generation: number): Promise<void> => {
+      setCard(id, { loading: true, error: null });
 
-  const connectedReports = reports?.filter((report) => report.status === "connected" && report.fetchedAt) ?? [];
+      try {
+        if (id === "recruiting-sheet") {
+          const data = await fetchRecruitingSheetData();
+          if (generation !== loadGeneration.current) return;
+          setCard(id, {
+            loading: false,
+            error: null,
+            report: analyzeRecruitingSheetHealth(data),
+          });
+          return;
+        }
+
+        if (id === "mel-projects") {
+          const data = await fetchMelProjectsData();
+          if (generation !== loadGeneration.current) return;
+          setCard(id, {
+            loading: false,
+            error: null,
+            report: analyzeMelProjectsHealth(data),
+          });
+          return;
+        }
+
+        if (id === "breezy-jobs") {
+          const data = await fetchJsonWithTimeout<BreezyJobsResult>("/api/breezy/jobs", {
+            label: "breezy-jobs",
+          });
+          if (generation !== loadGeneration.current) return;
+          const report = analyzeBreezyJobsHealth(data);
+          setCard(id, {
+            loading: false,
+            error: data.ok ? null : data.error,
+            report,
+          });
+          return;
+        }
+
+        const data = await fetchJsonWithTimeout<BreezyCandidatesHealthProbe>(
+          "/api/breezy/candidates/health",
+          { label: "breezy-candidates-health" },
+        );
+        if (generation !== loadGeneration.current) return;
+        const report = analyzeBreezyCandidatesHealth(data);
+        setCard(id, {
+          loading: false,
+          error: data.ok ? null : data.error,
+          report,
+        });
+      } catch (err) {
+        if (generation !== loadGeneration.current) return;
+        const message =
+          err instanceof DataHealthRequestTimeoutError
+            ? `${err.message} — showing partial card state.`
+            : err instanceof Error
+              ? err.message
+              : "Request failed";
+
+        if (id === "recruiting-sheet") {
+          setCard(id, {
+            loading: false,
+            error: message,
+            report: analyzeRecruitingSheetHealth({
+              ok: false,
+              error: message,
+              fetchedAt: new Date().toISOString(),
+              csvUrl: "",
+            }),
+          });
+          return;
+        }
+
+        if (id === "mel-projects") {
+          setCard(id, {
+            loading: false,
+            error: message,
+            report: analyzeMelProjectsHealth({
+              ok: false,
+              error: message,
+              fetchedAt: new Date().toISOString(),
+              csvUrl: "",
+            }),
+          });
+          return;
+        }
+
+        if (id === "breezy-jobs") {
+          setCard(id, {
+            loading: false,
+            error: message,
+            report: analyzeBreezyJobsHealth({
+              ok: false,
+              error: message,
+              fetchedAt: new Date().toISOString(),
+            }),
+          });
+          return;
+        }
+
+        setCard(id, {
+          loading: false,
+          error: message,
+          report: analyzeBreezyCandidatesHealth({
+            ok: false,
+            error: message,
+            fetchedAt: new Date().toISOString(),
+          }),
+        });
+      }
+    },
+    [setCard],
+  );
+
+  const runLoad = useCallback(
+    async (force = false) => {
+      const generation = loadGeneration.current + 1;
+      loadGeneration.current = generation;
+      const started = performance.now();
+
+      if (force) {
+        const { invalidateCached } = await import("@/lib/client-api-cache");
+        invalidateCached("recruiting-sheet");
+        invalidateCached("mel-projects");
+      }
+
+      const results = await Promise.allSettled(
+        ENDPOINT_ORDER.map((id) => loadEndpoint(id, generation)),
+      );
+
+      const rejected = results.filter((r) => r.status === "rejected");
+      if (rejected.length > 0) {
+        console.warn("[data-health] endpoint failures", rejected);
+      }
+
+      logDataHealthTiming("data-health-load-ms", performance.now() - started, "all-endpoints");
+    },
+    [loadEndpoint],
+  );
+
+  useEffect(() => {
+    void runLoad(false);
+  }, [runLoad]);
+
+  const connectedReports = ENDPOINT_ORDER.map((id) => cards[id]?.report).filter(
+    (report): report is DataHealthReport =>
+      Boolean(report && report.status === "connected" && report.fetchedAt),
+  );
   const lastSuccessfulRefresh =
     connectedReports.length > 0
       ? connectedReports
@@ -325,23 +423,29 @@ export function DataHealthSection() {
           .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null
       : null;
 
+  const sheetIds = ENDPOINT_ORDER.filter((id) => id === "recruiting-sheet" || id === "mel-projects");
+  const breezyIds = ENDPOINT_ORDER.filter((id) => id === "breezy-jobs" || id === "breezy-candidates");
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Data health</h1>
           <p className="mt-1 max-w-2xl text-sm text-zinc-500">
-            Live checks against Google Sheet CSV exports and read-only Breezy HR endpoints. Warnings
-            appear when APIs fail, data is empty, or required fields are missing.
+            Lightweight live checks load per endpoint (15s client limit). Full Breezy parity runs only
+            when you click Run parity check below.
           </p>
         </div>
         <button
           type="button"
-          onClick={() => void load()}
-          disabled={refreshing}
+          onClick={() => {
+            setManualRefreshing(true);
+            void runLoad(true).finally(() => setManualRefreshing(false));
+          }}
+          disabled={manualRefreshing}
           className="shrink-0 rounded-lg border border-zinc-700 bg-zinc-900/80 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-600 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {refreshing ? "Refreshing…" : "Refresh"}
+          {manualRefreshing ? "Refreshing…" : "Refresh"}
         </button>
       </section>
 
@@ -351,36 +455,19 @@ export function DataHealthSection() {
         </section>
       ) : null}
 
-      {loadError ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
-        >
-          {loadError}
-        </div>
-      ) : null}
+      <BreezySyncHealthSection />
 
-      {reports === undefined ? (
-        <DataHealthSkeleton />
-      ) : (
-        <div className="space-y-8">
-          <BreezySyncHealthSection />
-          <BreezyParityDiagnostics />
+      <BreezyParityDiagnostics />
 
-          <section className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
-              Google Sheets
-            </h2>
-            <HealthReportGrid reports={reports.filter((report) => report.source === "sheet")} />
-          </section>
-          <section className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
-              Breezy HR (read-only)
-            </h2>
-            <HealthReportGrid reports={reports.filter((report) => report.source === "breezy")} />
-          </section>
-        </div>
-      )}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">Google Sheets</h2>
+        <HealthReportGrid reports={sheetIds} cards={cards} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">Breezy HR (read-only)</h2>
+        <HealthReportGrid reports={breezyIds} cards={cards} />
+      </section>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { getBreezyApiKeySync, loadConfig } from "@/lib/config";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { fetchBreezyJobs, peekBreezyCandidatesCache } from "@/lib/breezy-api";
 
 export type BreezySyncEntity = "job" | "candidate";
 
@@ -141,33 +141,33 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     };
   }
 
-  const [jobsResult, candidatesResult] = await Promise.all([
-    fetchBreezyJobs(),
-    fetchBreezyCandidates(),
-  ]);
-  const failures = [
-    jobsResult.ok ? null : jobsResult.error,
-    candidatesResult.ok ? null : candidatesResult.error,
-  ].filter((error): error is string => Boolean(error));
+  const jobsResult = await fetchBreezyJobs();
+  const cachedCandidates = peekBreezyCandidatesCache();
+  const candidatesFromCache = Boolean(cachedCandidates?.ok);
+
+  const failures = [jobsResult.ok ? null : jobsResult.error].filter((error): error is string =>
+    Boolean(error),
+  );
   const rateLimited = failures.some(isRateLimitError);
   const authFailed = failures.some(isAuthError);
   const rateLimitProtection = buildRateLimitProtection({
     tokenMissing,
     failedRequests: failures.length,
-    requestsAttempted: 2 + (candidatesResult.ok ? candidatesResult.positionsScanned ?? 0 : 0),
+    requestsAttempted: 1 + (candidatesFromCache ? 1 : 0),
     rateLimited,
   });
   const liveWarnings = [
     rateLimitProtection.warning,
-    candidatesResult.ok ? candidatesResult.warnings?.join(" ") : null,
+    candidatesFromCache && cachedCandidates?.ok ? cachedCandidates.warnings?.join(" ") : null,
+    !candidatesFromCache ? "Candidate totals use cache peek only (no live full scan on sync-health)." : null,
     ...failures,
   ].filter((warning): warning is string => Boolean(warning));
-  const lastSyncTime = [jobsResult, candidatesResult]
-    .filter((result) => result.ok)
+  const lastSyncTime = [jobsResult, cachedCandidates]
+    .filter((result): result is NonNullable<typeof result> => Boolean(result?.ok))
     .map((result) => result.fetchedAt)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
   const jobsCount = jobsResult.ok ? jobsResult.jobs.length : 0;
-  const candidatesCount = candidatesResult.ok ? candidatesResult.candidates.length : 0;
+  const candidatesCount = cachedCandidates?.ok ? cachedCandidates.candidates.length : 0;
   const syncStatus: BreezySyncStatus =
     failures.length === 0 ? "ready" : authFailed ? "failed" : rateLimited || lastSyncTime ? "warning" : "failed";
 
@@ -194,7 +194,10 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     brokenPositionCleanupQueue,
     notes: [
       `Live Breezy jobs visible: ${jobsCount.toLocaleString()}.`,
-      `Live Breezy candidates visible in bounded scan: ${candidatesCount.toLocaleString()}.`,
+      candidatesFromCache
+        ? `Cached Breezy candidates (fast scan): ${candidatesCount.toLocaleString()}.`
+        : "Candidate cache cold — run dashboard refresh or parity check to warm.",
+      "Sync health is lightweight and does not start a full position scan.",
     ],
   };
 }

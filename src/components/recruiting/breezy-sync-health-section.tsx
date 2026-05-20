@@ -5,7 +5,12 @@ import type {
   BreezySyncStatus,
   BreezyTokenStatus,
 } from "@/lib/breezy-sync-status";
-import { useCallback, useEffect, useState } from "react";
+import {
+  DataHealthRequestTimeoutError,
+  fetchJsonWithTimeout,
+  logDataHealthTiming,
+} from "@/lib/data-health-fetch";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const STATUS_STYLES: Record<BreezySyncStatus, string> = {
   ready: "border-teal-500/30 bg-teal-500/10 text-teal-200",
@@ -53,50 +58,57 @@ function Metric({
   );
 }
 
-function SyncSkeleton() {
+function SyncCardSkeleton() {
   return (
-    <section className="space-y-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-      <div className="h-7 w-48 animate-pulse rounded bg-zinc-800/80" />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div
-            key={index}
-            className="h-24 animate-pulse rounded-xl border border-zinc-800/80 bg-zinc-950/40"
-          />
-        ))}
-      </div>
-    </section>
+    <div className="h-24 animate-pulse rounded-xl border border-zinc-800/80 bg-zinc-950/40" />
   );
 }
 
 export function BreezySyncHealthSection() {
-  const [snapshot, setSnapshot] = useState<BreezySyncHealthSnapshot | undefined>(undefined);
+  const [snapshot, setSnapshot] = useState<BreezySyncHealthSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [manualRefreshing, setManualRefreshing] = useState(false);
+  const loadGeneration = useRef(0);
 
-  const load = useCallback(async () => {
-    setRefreshing(true);
+  const load = useCallback(async (generation: number) => {
+    setLoading(true);
     setError(null);
+    const started = performance.now();
     try {
-      const res = await fetch("/api/breezy/sync-health", { cache: "no-store" });
-      if (!res.ok) throw new Error(`Sync health HTTP ${res.status}`);
-      setSnapshot((await res.json()) as BreezySyncHealthSnapshot);
+      const data = await fetchJsonWithTimeout<BreezySyncHealthSnapshot>("/api/breezy/sync-health", {
+        label: "breezy-sync-health",
+      });
+      if (generation !== loadGeneration.current) return;
+      setSnapshot(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load Breezy sync health");
-      setSnapshot(undefined);
+      if (generation !== loadGeneration.current) return;
+      const message =
+        err instanceof DataHealthRequestTimeoutError
+          ? `${err.message} — sync health uses jobs + cache peek only.`
+          : err instanceof Error
+            ? err.message
+            : "Failed to load Breezy sync health";
+      setError(message);
+      setSnapshot(null);
     } finally {
-      setRefreshing(false);
+      if (generation === loadGeneration.current) {
+        setLoading(false);
+        logDataHealthTiming("data-health-load-ms", performance.now() - started, "sync-health");
+      }
     }
   }, []);
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
-      void load();
-    }, 0);
-    return () => window.clearTimeout(id);
+    const generation = ++loadGeneration.current;
+    void load(generation);
   }, [load]);
 
-  if (snapshot === undefined && !error) return <SyncSkeleton />;
+  const refresh = () => {
+    setManualRefreshing(true);
+    const generation = ++loadGeneration.current;
+    void load(generation).finally(() => setManualRefreshing(false));
+  };
 
   return (
     <section className="space-y-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
@@ -104,17 +116,17 @@ export function BreezySyncHealthSection() {
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Sync Health</h2>
           <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-            Breezy-ready sync control plane with safe fallback queues, token checks, rate-limit
-            protection, and cleanup tracking.
+            Lightweight Breezy control-plane check (jobs list + warmed candidate cache). Does not run a
+            full position scan.
           </p>
         </div>
         <button
           type="button"
-          onClick={() => void load()}
-          disabled={refreshing}
+          onClick={refresh}
+          disabled={manualRefreshing}
           className="shrink-0 rounded-lg border border-zinc-700 bg-zinc-950/70 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-600 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {refreshing ? "Refreshing…" : "Refresh sync"}
+          {manualRefreshing ? "Refreshing…" : "Refresh sync"}
         </button>
       </div>
 
@@ -124,6 +136,14 @@ export function BreezySyncHealthSection() {
           className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
         >
           {error}
+        </div>
+      ) : null}
+
+      {loading && !snapshot ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <SyncCardSkeleton key={index} />
+          ))}
         </div>
       ) : null}
 

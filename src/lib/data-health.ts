@@ -1,4 +1,4 @@
-import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
+import type { BreezyCandidatesHealthProbe, BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import type { SheetDataResult, SheetRow } from "@/lib/google-sheet-csv";
 import { resolveMelProjectColumnKeys } from "@/lib/mel-projects-metrics";
 import { resolveKpiSheetColumnKeys } from "@/lib/sheet-kpi-metrics";
@@ -258,12 +258,14 @@ export function analyzeBreezyJobsHealth(data: BreezyJobsResult): DataHealthRepor
   );
 }
 
-export function analyzeBreezyCandidatesHealth(data: BreezyCandidatesResult): DataHealthReport {
+export function analyzeBreezyCandidatesHealth(
+  data: BreezyCandidatesResult | BreezyCandidatesHealthProbe,
+): DataHealthReport {
   if (!data.ok) {
     return baseBreezyReport(
       "breezy-candidates",
       "Breezy candidates",
-      "/api/breezy/candidates",
+      "/api/breezy/candidates/health",
       data.fetchedAt,
       [],
       [],
@@ -272,6 +274,7 @@ export function analyzeBreezyCandidatesHealth(data: BreezyCandidatesResult): Dat
     );
   }
 
+  const probe = data as BreezyCandidatesHealthProbe;
   const rows = data.candidates as Record<string, unknown>[];
   const missingRequired = missingObjectFields(rows[0], BREEZY_CANDIDATE_REQUIRED_FIELDS);
   const metaParts = [
@@ -280,15 +283,29 @@ export function analyzeBreezyCandidatesHealth(data: BreezyCandidatesResult): Dat
     data.positionId ? `Position: ${data.positionId}` : null,
     data.positionsScanned !== undefined ? `Positions scanned: ${data.positionsScanned}` : null,
     data.truncated ? "Aggregation truncated (scan limit)" : null,
+    probe.fromCache ? "Source: warmed fast-scan cache" : null,
+    probe.partial ? "Source: lightweight health probe (cache cold)" : null,
   ].filter(Boolean);
 
-  return baseBreezyReport(
+  const report = baseBreezyReport(
     "breezy-candidates",
     "Breezy candidates",
-    "/api/breezy/candidates",
+    "/api/breezy/candidates/health",
     data.fetchedAt,
     rows,
     missingRequired,
     metaParts.join(" · "),
   );
+
+  const extraWarnings = [...(data.warnings ?? [])];
+  if (probe.partial) {
+    extraWarnings.push(
+      "Lightweight probe only — record count may be 0 until dashboard warms the Breezy cache.",
+    );
+  }
+
+  return {
+    ...report,
+    warnings: [...report.warnings, ...extraWarnings],
+  };
 }
