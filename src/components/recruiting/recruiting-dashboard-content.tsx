@@ -11,7 +11,12 @@ import { useState } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
 import { BreezyDashboardSummary } from "./breezy-dashboard-summary";
 import { CandidatesSection } from "./candidates-section";
-import { DashboardTabNav, type DashboardTabId } from "./dashboard-tabs";
+import {
+  DashboardTabNav,
+  EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
+  type DashboardTabId,
+} from "./dashboard-tabs";
+import type { UserRole } from "@/lib/auth/types";
 import { DmLeaderboard } from "./dm-leaderboard";
 import { LiveSheetSection } from "./live-sheet-section";
 import { DataHealthSection } from "./data-health-section";
@@ -32,6 +37,7 @@ type RecruitingDashboardContentProps = {
   pipelineStages: PipelineStage[];
   newHireMetrics: NewHireMetric[];
   dmLeaderboard: DmLeaderboardRow[];
+  userRole?: UserRole;
 };
 
 export function RecruitingDashboardContent({
@@ -40,12 +46,18 @@ export function RecruitingDashboardContent({
   pipelineStages,
   newHireMetrics,
   dmLeaderboard,
+  userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
+  const executiveTabs = userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
 
   return (
     <>
-      <DashboardTabNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <DashboardTabNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        extraTabs={executiveTabs}
+      />
 
       <main
         id="dashboard-main"

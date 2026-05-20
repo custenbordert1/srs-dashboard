@@ -82,5 +82,6 @@ export function buildCandidateDrawerRowFromScored(
     recruitingActions,
     matchedOpportunities: [],
     melMatchingSummary: "",
+    opportunityRepMatches: [],
   };
 }

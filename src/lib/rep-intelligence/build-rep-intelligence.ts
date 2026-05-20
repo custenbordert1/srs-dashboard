@@ -11,8 +11,18 @@ import { buildStaffingRecommendations } from "@/lib/rep-intelligence/staffing-re
 import type { ActiveRep, RepIntelligenceSnapshot, RepProjectMatchRow } from "@/lib/rep-intelligence/rep-types";
 
 function mergeReps(melReps: ActiveRep[], imported: ActiveRep[]): ActiveRep[] {
+  const workforce = imported.filter((r) => r.source === "workforce_csv");
+  if (workforce.length > 0) {
+    const map = new Map<string, ActiveRep>();
+    for (const rep of workforce) map.set(rep.repId, rep);
+    for (const rep of melReps) {
+      if (!map.has(rep.repId)) map.set(rep.repId, { ...rep, source: "mel_sheet" });
+    }
+    return [...map.values()];
+  }
+
   const map = new Map<string, ActiveRep>();
-  for (const rep of melReps) map.set(rep.repId, rep);
+  for (const rep of melReps) map.set(rep.repId, { ...rep, source: "mel_sheet" });
   for (const rep of imported) {
     const existing = map.get(rep.repId);
     if (existing) {
@@ -22,7 +32,6 @@ function mergeReps(melReps: ActiveRep[], imported: ActiveRep[]): ActiveRep[] {
         openAssignments: existing.openAssignments,
         completedAssignments: existing.completedAssignments,
         skills: rep.skills.length > 0 ? rep.skills : existing.skills,
-        travelRadius: rep.travelRadius || existing.travelRadius,
       });
     } else {
       map.set(rep.repId, rep);

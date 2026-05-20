@@ -51,12 +51,20 @@ export function AppShell({ user, children, title, subtitle }: AppShellProps) {
               </Link>
             ) : null}
             {user.role === "executive" ? (
-              <Link
-                href="/executive"
-                className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
-              >
-                Executive rollup
-              </Link>
+              <>
+                <Link
+                  href="/executive"
+                  className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+                >
+                  Executive rollup
+                </Link>
+                <Link
+                  href="/executive/workforce-intelligence"
+                  className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-200 hover:bg-teal-500/20"
+                >
+                  Workforce Intelligence
+                </Link>
+              </>
             ) : null}
             <button
               type="button"

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AppShell } from "@/components/auth/app-shell";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import { RecruitingAutomationSection } from "@/components/recruiting/recruiting-automation-section";
@@ -78,14 +79,22 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
           Best/worst territories, sources, fill-rate trends, weekly candidates
           {refreshing ? <span className="ml-2 text-teal-400/90">Updating…</span> : null}
         </p>
-        <button
-          type="button"
-          onClick={refresh}
-          disabled={loading || refreshing}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-60"
-        >
-          {loading ? "Loading…" : refreshing ? "Refreshing…" : "Refresh now"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/executive/workforce-intelligence"
+            className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-200 hover:bg-teal-500/20"
+          >
+            Workforce Intelligence
+          </Link>
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={loading || refreshing}
+            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-60"
+          >
+            {loading ? "Loading…" : refreshing ? "Refreshing…" : "Refresh now"}
+          </button>
+        </div>
       </div>
 
       {error ? (

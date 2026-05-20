@@ -20,6 +20,32 @@ export type ActiveRep = {
   trainingStatus: RepTrainingStatus;
   openAssignments: number;
   completedAssignments: number;
+  /** SRS ID from workforce CSV */
+  srsId?: string;
+  status?: string;
+  dateOfHire?: string | null;
+  lastLoginAt?: string | null;
+  lastLoginDaysAgo?: number | null;
+  source?: "workforce_csv" | "mel_sheet" | "legacy_import";
+};
+
+export type BestRepMatchRow = {
+  repId: string;
+  repName: string;
+  srsId: string;
+  matchScore: number;
+  fitLevel: RepFitLevel;
+  distanceMiles: number | null;
+  skillOverlap: string[];
+  recommendationReason: string;
+  lastLoginDaysAgo: number | null;
+  active: boolean;
+};
+
+export type OpportunityBestRepMatches = {
+  opportunityId: string;
+  projectName: string;
+  topReps: BestRepMatchRow[];
 };
 
 export type RepFitLevel = "strong" | "good" | "stretch" | "poor";

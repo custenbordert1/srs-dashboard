@@ -14,6 +14,7 @@ import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
 import { matchCandidateToOpportunities } from "@/lib/mel-matching/matching-engine";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import type { CandidateWorkflowState, CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
+import type { OpportunityBestRepMatches } from "@/lib/rep-intelligence/rep-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function daysSince(raw: string | null): number | null {
@@ -41,6 +42,8 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities(
     options.territoryStates,
   );
+  const [repMatchCache, setRepMatchCache] = useState<Record<string, OpportunityBestRepMatches[]>>({});
+  const [repMatchesLoadingKey, setRepMatchesLoadingKey] = useState<string | null>(null);
   const breezyCandidates = options.candidates ?? fetchedCandidates;
 
   useEffect(() => {
@@ -91,6 +94,26 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
 
   const closeCandidate = useCallback(() => setSelectedCandidateId(null), []);
 
+  const repMatchRequestKey = useMemo(() => {
+    if (!selectedCandidateId) return "";
+    const breezy = candidateById.get(selectedCandidateId);
+    if (!breezy || melOpportunities.length === 0) return "";
+    const melMatch = matchCandidateToOpportunities(breezy, melOpportunities, {
+      territoryStates: options.territoryStates,
+    });
+    return melMatch.matches
+      .slice(0, 8)
+      .map((m) => m.opportunityId)
+      .sort()
+      .join("|");
+  }, [candidateById, melOpportunities, options.territoryStates, selectedCandidateId]);
+
+  const opportunityRepMatches = useMemo(
+    () => (repMatchRequestKey ? (repMatchCache[repMatchRequestKey] ?? []) : []),
+    [repMatchCache, repMatchRequestKey],
+  );
+  const repMatchesLoading = repMatchRequestKey !== "" && repMatchesLoadingKey === repMatchRequestKey;
+
   const selectedDrawerRow = useMemo((): CandidateDrawerRow | null => {
     if (!selectedCandidateId) return null;
     const breezy = candidateById.get(selectedCandidateId);
@@ -100,7 +123,9 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
       territoryStates: options.territoryStates,
       recruitingActions: recruitingActionsMap[selectedCandidateId] ?? getRecruitingActions(selectedCandidateId),
     });
-    if (melOpportunities.length === 0) return row;
+    if (melOpportunities.length === 0) {
+      return { ...row, opportunityRepMatches };
+    }
     const melMatch = matchCandidateToOpportunities(breezy, melOpportunities, {
       territoryStates: options.territoryStates,
     });
@@ -108,15 +133,52 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
       ...row,
       matchedOpportunities: melMatch.matches,
       melMatchingSummary: melMatch.aiSummary,
+      opportunityRepMatches,
     };
   }, [
     candidateById,
     melOpportunities,
+    opportunityRepMatches,
     options.territoryStates,
     recruitingActionsMap,
     selectedCandidateId,
     workflowState,
   ]);
+
+  useEffect(() => {
+    if (!repMatchRequestKey || repMatchCache[repMatchRequestKey]) return;
+
+    let cancelled = false;
+    const requestKey = repMatchRequestKey;
+    const opportunityIds = requestKey.split("|").filter(Boolean);
+
+    void (async () => {
+      setRepMatchesLoadingKey(requestKey);
+      try {
+        const res = await fetch("/api/workforce-intelligence/opportunity-rep-matches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ opportunityIds }),
+        });
+        const parsed = (await res.json()) as { ok?: boolean; matches?: OpportunityBestRepMatches[] };
+        if (!cancelled && parsed.ok && parsed.matches) {
+          setRepMatchCache((prev) => ({ ...prev, [requestKey]: parsed.matches! }));
+        }
+      } catch {
+        if (!cancelled) {
+          setRepMatchCache((prev) => ({ ...prev, [requestKey]: [] }));
+        }
+      } finally {
+        if (!cancelled) {
+          setRepMatchesLoadingKey((current) => (current === requestKey ? null : current));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [repMatchCache, repMatchRequestKey]);
 
   async function persistWorkflow(
     candidateId: string,
@@ -189,6 +251,7 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
       onRecruitingAction: handleRecruitingAction,
       loading: breezyLoading && !selectedDrawerRow,
       melMatchesLoading: melLoading,
+      repMatchesLoading,
     },
   };
 }

@@ -7,13 +7,27 @@ import { repReliabilityScore } from "@/lib/rep-intelligence/rep-scoring";
 import type { ActiveRep, RepFitLevel, RepOpportunityMatch, RepRiskLevel } from "@/lib/rep-intelligence/rep-types";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 
-function skillAlignment(rep: ActiveRep, projectType: string): number {
-  const type = projectType.toLowerCase();
+function skillAlignment(rep: ActiveRep, opportunity: MelOpportunity): number {
+  const type = opportunity.projectType.toLowerCase();
+  const client = opportunity.client.toLowerCase();
   let score = 0;
   for (const skill of rep.skills) {
-    if (type.includes(skill)) score += 10;
+    if (skill.length < 2) continue;
+    if (type.includes(skill) || client.includes(skill)) score += 10;
+    else if (skill.split(/\s+/).some((part) => part.length > 2 && type.includes(part))) score += 6;
   }
-  return Math.min(30, score);
+  return Math.min(35, score);
+}
+
+function activityBoost(rep: ActiveRep): number {
+  if (!rep.active) return -20;
+  const days = rep.lastLoginDaysAgo;
+  if (days === null || days === undefined) return 0;
+  if (days <= 7) return 12;
+  if (days <= 14) return 8;
+  if (days <= 30) return 4;
+  if (days > 60) return -8;
+  return 0;
 }
 
 function fitLevelForScore(score: number): RepFitLevel {
@@ -42,10 +56,13 @@ export function matchRepToOpportunity(
   const distanceScore = driveRadiusScore(distanceMiles, rep.travelRadius);
   const territoryScore = territoryProximityScore(rep.state, opportunity.state, options?.territoryStates);
   const reliability = Math.round(repReliabilityScore(rep) * 0.25);
-  const skills = skillAlignment(rep, opportunity.projectType);
+  const skills = skillAlignment(rep, opportunity);
   const utilizationPenalty = rep.openAssignments >= 6 ? 8 : rep.openAssignments >= 4 ? 4 : 0;
+  const activity = activityBoost(rep);
+  const workforceBoost = rep.source === "workforce_csv" ? 3 : 0;
 
-  const raw = distanceScore + territoryScore + reliability + skills - utilizationPenalty;
+  const raw =
+    distanceScore + territoryScore + reliability + skills + activity + workforceBoost - utilizationPenalty;
   const matchScore = Math.min(99, Math.max(5, Math.round(raw)));
   const fitLevel = fitLevelForScore(matchScore);
   const riskLevel = riskLevelForRep(rep, distanceMiles);
@@ -53,6 +70,10 @@ export function matchRepToOpportunity(
   const strengths: string[] = [];
   const concerns: string[] = [];
 
+  if (!rep.active) concerns.push("Inactive in workforce roster");
+  if (rep.lastLoginDaysAgo != null && rep.lastLoginDaysAgo <= 14) {
+    strengths.push("Recent SRS login activity");
+  }
   if (skills >= 15) strengths.push(`Skills align with ${opportunity.projectType}`);
   if (rep.completionRate >= 85) strengths.push("High completion rate on recent projects");
   if (distanceMiles !== null && distanceMiles <= rep.travelRadius) {

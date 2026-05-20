@@ -17,8 +17,10 @@ import { buildIntegrationPrep } from "@/lib/integration-prep";
 import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
+import { BestRepMatchSection } from "@/components/recruiting/best-rep-match-section";
 import { MatchedOpportunitiesSection } from "@/components/recruiting/matched-opportunities-section";
 import type { CandidateOpportunityMatch } from "@/lib/mel-matching/matching-engine-types";
+import type { OpportunityBestRepMatches } from "@/lib/rep-intelligence/rep-types";
 import { useEffect, useState } from "react";
 
 export type CandidateDrawerRow = {
@@ -61,6 +63,7 @@ export type CandidateDrawerRow = {
   recruitingActions: CandidateRecruitingActions;
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
+  opportunityRepMatches: OpportunityBestRepMatches[];
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
@@ -83,6 +86,7 @@ type CandidateDetailDrawerProps = {
   onRecruitingAction?: (type: RecruitingActionType) => void;
   loading?: boolean;
   melMatchesLoading?: boolean;
+  repMatchesLoading?: boolean;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -292,6 +296,7 @@ export function CandidateDetailDrawer({
   onRecruitingAction,
   loading = false,
   melMatchesLoading = false,
+  repMatchesLoading = false,
 }: CandidateDetailDrawerProps) {
   const [tab, setTab] = useState<DrawerTab>("overview");
   const [helloSign, setHelloSign] = useState<HelloSignPrep | null>(null);
@@ -498,6 +503,10 @@ export function CandidateDetailDrawer({
               matches={candidate.matchedOpportunities}
               aiSummary={candidate.melMatchingSummary}
               loading={melMatchesLoading}
+            />
+            <BestRepMatchSection
+              opportunityMatches={candidate.opportunityRepMatches}
+              loading={repMatchesLoading}
             />
           </section>
 
