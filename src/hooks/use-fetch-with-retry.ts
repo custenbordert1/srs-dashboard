@@ -5,15 +5,22 @@ import {
   DEFAULT_CLIENT_CACHE_TTL_MS,
   fetchCachedJson,
 } from "@/lib/client-api-cache";
+import {
+  DASHBOARD_REQUEST_TIMEOUT_MS,
+  fetchWithTimeout,
+  isAbortError,
+  isTimeoutError,
+} from "@/lib/fetch-with-timeout";
 
 export type FetchRetryOptions = {
   maxAttempts?: number;
   baseDelayMs?: number;
   isRetryable?: (status: number, body: unknown) => boolean;
-  /** Client cache TTL; set 0 to disable cache for this request */
   cacheTtlMs?: number;
   cacheKey?: string;
   force?: boolean;
+  timeoutMs?: number;
+  signal?: AbortSignal;
 };
 
 const DEFAULT_RETRYABLE = (status: number, body: unknown) => {
@@ -29,12 +36,21 @@ export async function fetchJsonWithRetry<T>(
   url: string,
   init?: RequestInit,
   options: FetchRetryOptions = {},
-): Promise<{ ok: true; data: T; status: number } | { ok: false; error: string; status: number }> {
+): Promise<
+  | { ok: true; data: T; status: number }
+  | { ok: false; error: string; status: number; timedOut?: boolean; aborted?: boolean }
+> {
   const maxAttempts = options.maxAttempts ?? 3;
   const baseDelayMs = options.baseDelayMs ?? 1200;
   const isRetryable = options.isRetryable ?? DEFAULT_RETRYABLE;
   const ttlMs = options.cacheTtlMs ?? DEFAULT_CLIENT_CACHE_TTL_MS;
   const key = options.cacheKey ?? cacheKey(["fetch", url, init?.method ?? "GET"]);
+  const timeoutMs = options.timeoutMs ?? DASHBOARD_REQUEST_TIMEOUT_MS;
+  const signal = options.signal;
+
+  if (signal?.aborted) {
+    return { ok: false, error: "Request cancelled", status: 0, aborted: true };
+  }
 
   if (ttlMs > 0 && !options.force) {
     try {
@@ -45,11 +61,13 @@ export async function fetchJsonWithRetry<T>(
             maxAttempts,
             baseDelayMs,
             isRetryable,
+            timeoutMs,
+            signal,
           });
           if (!result.ok) throw new Error(result.error);
           return result.data;
         },
-        { ttlMs, label: url },
+        { ttlMs, label: url, force: false },
       );
       return { ok: true, data: cached, status: 200 };
     } catch (err) {
@@ -57,11 +75,19 @@ export async function fetchJsonWithRetry<T>(
         ok: false,
         error: err instanceof Error ? err.message : "Request failed",
         status: 0,
+        timedOut: isTimeoutError(err),
+        aborted: isAbortError(err),
       };
     }
   }
 
-  return fetchJsonWithRetryUncached<T>(url, init, { maxAttempts, baseDelayMs, isRetryable });
+  return fetchJsonWithRetryUncached<T>(url, init, {
+    maxAttempts,
+    baseDelayMs,
+    isRetryable,
+    timeoutMs,
+    signal,
+  });
 }
 
 async function fetchJsonWithRetryUncached<T>(
@@ -71,14 +97,32 @@ async function fetchJsonWithRetryUncached<T>(
     maxAttempts: number;
     baseDelayMs: number;
     isRetryable: (status: number, body: unknown) => boolean;
-  } = { maxAttempts: 3, baseDelayMs: 1200, isRetryable: DEFAULT_RETRYABLE },
-): Promise<{ ok: true; data: T; status: number } | { ok: false; error: string; status: number }> {
+    timeoutMs: number;
+    signal?: AbortSignal;
+  } = {
+    maxAttempts: 3,
+    baseDelayMs: 1200,
+    isRetryable: DEFAULT_RETRYABLE,
+    timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+  },
+): Promise<
+  | { ok: true; data: T; status: number }
+  | { ok: false; error: string; status: number; timedOut?: boolean; aborted?: boolean }
+> {
   let lastError = "Request failed";
   let lastStatus = 0;
 
   for (let attempt = 0; attempt < options.maxAttempts; attempt += 1) {
+    if (options.signal?.aborted) {
+      return { ok: false, error: "Request cancelled", status: 0, aborted: true };
+    }
+
     try {
-      const res = await fetch(url, { cache: "no-store", ...init });
+      const res = await fetchWithTimeout(url, {
+        ...init,
+        timeoutMs: options.timeoutMs,
+        signal: options.signal,
+      });
       lastStatus = res.status;
       const parsed = (await res.json()) as T;
       if (res.ok) return { ok: true, data: parsed, status: res.status };
@@ -90,10 +134,32 @@ async function fetchJsonWithRetryUncached<T>(
         return { ok: false, error: lastError, status: res.status };
       }
     } catch (err) {
+      if (isAbortError(err)) {
+        const timedOut = isTimeoutError(err);
+        return {
+          ok: false,
+          error: timedOut ? "Request timed out after 10 seconds" : "Request cancelled",
+          status: lastStatus,
+          timedOut,
+          aborted: !timedOut,
+        };
+      }
       lastError = err instanceof Error ? err.message : "Network error";
-      if (attempt === options.maxAttempts - 1) return { ok: false, error: lastError, status: lastStatus };
+      if (attempt === options.maxAttempts - 1) {
+        return {
+          ok: false,
+          error: isTimeoutError(err) ? "Request timed out after 10 seconds" : lastError,
+          status: lastStatus,
+          timedOut: isTimeoutError(err),
+        };
+      }
     }
-    await new Promise((resolve) => setTimeout(resolve, options.baseDelayMs * (attempt + 1)));
+
+    if (options.signal?.aborted) {
+      return { ok: false, error: "Request cancelled", status: 0, aborted: true };
+    }
+
+    await new Promise((resolve) => window.setTimeout(resolve, options.baseDelayMs * (attempt + 1)));
   }
 
   return { ok: false, error: lastError, status: lastStatus };

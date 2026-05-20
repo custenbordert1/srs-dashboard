@@ -21,9 +21,10 @@ type DmDashboardProps = {
 };
 
 export function DmDashboard({ user }: DmDashboardProps) {
-  const { data, meta, error, loading, refreshing, refresh } = useTerritoryDashboard<DmDashboardSnapshot>({
-    endpoint: "/api/dm/dashboard",
-  });
+  const { data, meta, error, loading, refreshing, timedOut, refresh } =
+    useTerritoryDashboard<DmDashboardSnapshot>({
+      endpoint: "/api/dm/dashboard",
+    });
   const drawer = useCandidateDrawer({
     territoryStates: data?.territoryStates ?? user.territoryStates,
   });
@@ -57,9 +58,21 @@ export function DmDashboard({ user }: DmDashboardProps) {
       </div>
 
       {error ? (
-        <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-          {error}
-        </p>
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+        >
+          <p>{error}</p>
+          {timedOut || error ? (
+            <button
+              type="button"
+              onClick={refresh}
+              className="shrink-0 rounded-lg border border-red-400/40 px-3 py-1 text-xs font-medium text-red-100 hover:bg-red-500/20"
+            >
+              Retry
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {meta?.partialSync ? (
@@ -170,15 +183,17 @@ export function DmDashboard({ user }: DmDashboardProps) {
             />
           </div>
 
-          <section className="border-t border-zinc-800/80 pt-8">
-            <h2 className="text-lg font-semibold text-zinc-50">AI automation & recommendations</h2>
-            <p className="mt-1 text-sm text-zinc-500">
-              Rankings, suggested actions, smart alerts, productivity, and trend charts for your territory.
-            </p>
-            <div className="mt-6">
-              <RecruitingAutomationSection compact />
-            </div>
-          </section>
+          <DeferredSection
+            title="AI automation & recommendations"
+            description="Rankings, suggested actions, smart alerts, productivity, and trend charts for your territory."
+            summary={
+              <p className="text-sm text-zinc-500">
+                Expand to load AI recruiting automation for your territory.
+              </p>
+            }
+          >
+            <RecruitingAutomationSection compact />
+          </DeferredSection>
 
           <p className="text-xs text-zinc-600">
             Snapshot {new Date(data.fetchedAt).toLocaleString()} · {data.activeJobs} jobs · heatmap{" "}

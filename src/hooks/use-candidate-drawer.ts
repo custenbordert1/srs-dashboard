@@ -198,7 +198,9 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
     return () => {
       cancelled = true;
     };
-  }, [repMatchCache, repMatchRequestKey]);
+    // repMatchCache intentionally omitted — cache updates must not re-trigger fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by repMatchRequestKey only
+  }, [repMatchRequestKey]);
 
   async function persistWorkflow(
     candidateId: string,

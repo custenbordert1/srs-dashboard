@@ -36,9 +36,19 @@ export function WorkforceOperationsSection({ showPasswordPanel = false }: Workfo
       </div>
 
       {error ? (
-        <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-          {error}
-        </p>
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+        >
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={refresh}
+            className="shrink-0 rounded-lg border border-red-400/40 px-3 py-1 text-xs font-medium text-red-100 hover:bg-red-500/20"
+          >
+            Retry
+          </button>
+        </div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">

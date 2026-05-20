@@ -54,13 +54,18 @@ export async function fetchCachedJson<T>(
     if (hit !== null) return hit;
     const pending = inflight.get(key);
     if (pending) return pending as Promise<T>;
+  } else {
+    inflight.delete(key);
   }
 
   const run = async () => {
-    const data = await perfAsync(options?.label ?? key, fetcher);
-    setCached(key, data, ttlMs);
-    inflight.delete(key);
-    return data;
+    try {
+      const data = await perfAsync(options?.label ?? key, fetcher);
+      setCached(key, data, ttlMs);
+      return data;
+    } finally {
+      inflight.delete(key);
+    }
   };
 
   const promise = run().catch((err) => {

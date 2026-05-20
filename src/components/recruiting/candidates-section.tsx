@@ -29,6 +29,7 @@ import {
   buildScoredWorkflowRow,
   type ScoredCandidateWorkflowRow,
 } from "@/lib/build-candidate-workflow-row";
+import { isAppliedDateInRange } from "@/lib/breezy-api";
 import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
 import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
@@ -289,8 +290,6 @@ export function CandidatesSection() {
   }, [candidates]);
 
   const filtered = useMemo(() => {
-    const fromDate = appliedFrom ? new Date(`${appliedFrom}T00:00:00`) : null;
-    const toDate = appliedTo ? new Date(`${appliedTo}T23:59:59`) : null;
     const q = debouncedSearch.trim().toLowerCase();
 
     return candidates.filter((candidate) => {
@@ -301,9 +300,19 @@ export function CandidatesSection() {
       if (stateFilter !== ALL && candidate.state !== stateFilter) return false;
       if (workflowFilter !== ALL && candidate.workflowStatus !== workflowFilter) return false;
 
-      const appliedDate = parseDate(candidate.appliedDate);
-      if (fromDate && (!appliedDate || appliedDate < fromDate)) return false;
-      if (toDate && (!appliedDate || appliedDate > toDate)) return false;
+      if (appliedFrom && appliedTo) {
+        if (!isAppliedDateInRange(candidate.appliedDate, appliedFrom, appliedTo)) return false;
+      } else if (appliedFrom || appliedTo) {
+        const appliedDate = parseDate(candidate.appliedDate);
+        if (appliedFrom) {
+          const fromDate = new Date(`${appliedFrom}T00:00:00`);
+          if (!appliedDate || appliedDate < fromDate) return false;
+        }
+        if (appliedTo) {
+          const toDate = new Date(`${appliedTo}T23:59:59`);
+          if (!appliedDate || appliedDate > toDate) return false;
+        }
+      }
       if (q) {
         const haystack = searchIndex.get(candidate.candidateId);
         if (!haystack?.includes(q)) return false;
