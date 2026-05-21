@@ -2,7 +2,8 @@ import { fetchBreezyJobs, type BreezyJob } from "@/lib/breezy-api";
 import type { BreezyJobCatalogRow, BreezyJobCatalogSnapshot } from "@/lib/job-management/job-draft-types";
 
 const CATALOG_CACHE_TTL_MS = 120_000;
-let catalogCache: { expiresAt: number; snapshot: BreezyJobCatalogSnapshot } | null = null;
+let catalogCache: { expiresAt: number; snapshot: BreezyJobCatalogSnapshot; includeDraft: boolean } | null =
+  null;
 
 function mapJobToCatalogRow(job: BreezyJob): BreezyJobCatalogRow {
   const pipelineStatus = job.status || "unknown";
@@ -22,38 +23,89 @@ function mapJobToCatalogRow(job: BreezyJob): BreezyJobCatalogRow {
   };
 }
 
-export async function fetchPublishedBreezyJobCatalog(options?: {
+function filterCatalogJobs(jobs: BreezyJob[], pipeline: "published" | "draft" | "all"): BreezyJob[] {
+  if (pipeline === "all") {
+    return jobs.filter((job) => {
+      const status = (job.status || "").toLowerCase();
+      return status === "published" || status === "draft" || status === "unknown";
+    });
+  }
+  return jobs.filter((job) => {
+    const status = (job.status || "").toLowerCase();
+    return status === pipeline || (pipeline === "published" && status === "unknown");
+  });
+}
+
+function dedupeJobsById(jobs: BreezyJob[]): BreezyJob[] {
+  const map = new Map<string, BreezyJob>();
+  for (const job of jobs) {
+    map.set(job.jobId, job);
+  }
+  return [...map.values()];
+}
+
+export async function fetchBreezyJobCatalog(options?: {
   force?: boolean;
+  /** When true (default), merges published + draft Breezy positions for clone/post workflows. */
+  includeDraft?: boolean;
 }): Promise<BreezyJobCatalogSnapshot | { ok: false; error: string; fetchedAt: string }> {
+  const includeDraft = options?.includeDraft !== false;
   const now = Date.now();
-  if (!options?.force && catalogCache && catalogCache.expiresAt > now) {
+  if (!options?.force && catalogCache && catalogCache.expiresAt > now && catalogCache.includeDraft === includeDraft) {
     return { ...catalogCache.snapshot, fromCache: true };
   }
 
-  const result = await fetchBreezyJobs("published");
-  if (!result.ok) {
-    return { ok: false, error: result.error, fetchedAt: result.fetchedAt };
+  const publishedResult = await fetchBreezyJobs("published");
+  if (!publishedResult.ok) {
+    console.warn("[breezy-job-catalog] published fetch failed", { error: publishedResult.error });
+    return { ok: false, error: publishedResult.error, fetchedAt: publishedResult.fetchedAt };
   }
 
-  const published = result.jobs.filter(
-    (job) => (job.status || "").toLowerCase() === "published" || job.status === "unknown",
-  );
+  let merged = [...publishedResult.jobs];
+  let draftCount = 0;
+  if (includeDraft) {
+    const draftResult = await fetchBreezyJobs("draft");
+    if (draftResult.ok) {
+      merged = dedupeJobsById([...merged, ...draftResult.jobs]);
+      draftCount = draftResult.jobs.length;
+    } else {
+      console.warn("[breezy-job-catalog] draft fetch failed — published catalog still returned", {
+        error: draftResult.error,
+      });
+    }
+  }
 
+  const catalogJobs = filterCatalogJobs(merged, "all");
   const snapshot: BreezyJobCatalogSnapshot = {
     ok: true,
-    jobs: published.map(mapJobToCatalogRow),
-    fetchedAt: result.fetchedAt,
+    jobs: catalogJobs.map(mapJobToCatalogRow),
+    fetchedAt: publishedResult.fetchedAt,
     fromCache: false,
-    companyId: result.companyId,
-    companyName: result.companyName,
+    companyId: publishedResult.companyId,
+    companyName: publishedResult.companyName,
+    publishedCount: publishedResult.jobs.length,
+    draftCount,
   };
 
   catalogCache = {
     expiresAt: now + CATALOG_CACHE_TTL_MS,
     snapshot,
+    includeDraft,
   };
 
   return snapshot;
+}
+
+/** Published-only catalog (overview compatibility). */
+export async function fetchPublishedBreezyJobCatalog(options?: {
+  force?: boolean;
+}): Promise<BreezyJobCatalogSnapshot | { ok: false; error: string; fetchedAt: string }> {
+  const result = await fetchBreezyJobCatalog({ ...options, includeDraft: false });
+  if (!result.ok) return result;
+  const published = result.jobs.filter(
+    (job) => job.pipelineStatus === "published" || job.pipelineStatus === "unknown",
+  );
+  return { ...result, jobs: published };
 }
 
 export function jobCatalogRowToDraftInput(row: BreezyJobCatalogRow): {
@@ -80,6 +132,7 @@ export function jobCatalogRowToDraftInput(row: BreezyJobCatalogRow): {
       clonedFrom: row.breezyJobId,
       clonedAt: new Date().toISOString(),
       originalPostedDate: row.postedDate,
+      originalPipelineStatus: row.pipelineStatus,
     },
   };
 }

@@ -170,9 +170,49 @@ export function BreezySyncHealthSection() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Metric label="Last sync time" value={formatDateTime(snapshot.lastSyncTime)} />
-            <Metric label="Jobs queued" value={snapshot.jobsQueued} />
-            <Metric label="Candidates queued" value={snapshot.candidatesQueued} />
-            <Metric label="Failed jobs" value={snapshot.failedJobs} />
+            <Metric
+              label="Published jobs"
+              value={snapshot.jobSync.publishedCount}
+              hint={snapshot.jobSync.error ? "Published fetch had errors" : "Live Breezy published positions"}
+            />
+            <Metric
+              label="Draft jobs"
+              value={snapshot.jobSync.draftCount}
+              hint="Breezy draft pipeline positions"
+            />
+            <Metric
+              label="Cached candidates"
+              value={snapshot.candidateSync.candidateCount}
+              hint={
+                snapshot.candidateSync.fromCache
+                  ? snapshot.candidateSync.truncated
+                    ? "Truncated — warm full sync from Candidates tab"
+                    : "From warmed candidate cache"
+                  : "Cache cold"
+              }
+            />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Metric
+              label="Positions scanned"
+              value={
+                snapshot.candidateSync.positionsScanned !== null &&
+                snapshot.candidateSync.positionsAvailable !== null
+                  ? `${snapshot.candidateSync.positionsScanned} / ${snapshot.candidateSync.positionsAvailable}`
+                  : "—"
+              }
+            />
+            <Metric
+              label="Candidate sync"
+              value={snapshot.candidateSync.truncated ? "Truncated" : snapshot.candidateSync.fromCache ? "Cached" : "Cold"}
+            />
+            <Metric label="Failed job fetches" value={snapshot.failedJobs} />
+            <Metric
+              label="Skipped reason"
+              value={snapshot.candidateSync.skippedReason ?? "—"}
+              hint="When Breezy scan stops early"
+            />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">

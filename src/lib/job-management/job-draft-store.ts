@@ -40,6 +40,15 @@ export async function getJobDraft(id: string): Promise<JobDraft | null> {
   return (await readDrafts()).drafts.find((d) => d.id === id) ?? null;
 }
 
+/** Reuse an open local draft cloned from the same Breezy position (prevents duplicate drafts). */
+export async function findOpenDraftByClonedBreezyJobId(breezyJobId: string): Promise<JobDraft | null> {
+  return (
+    (await readDrafts()).drafts.find(
+      (draft) => draft.clonedFromBreezyJobId === breezyJobId && draft.status === "draft",
+    ) ?? null
+  );
+}
+
 export async function createJobDraft(
   input: Omit<JobDraft, "id" | "status" | "createdAt" | "updatedAt"> & { status?: JobDraft["status"] },
 ): Promise<JobDraft> {

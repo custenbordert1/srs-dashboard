@@ -119,6 +119,22 @@ export async function getActiveRepStoreMeta(): Promise<ActiveRepStoreFile> {
   return readStore();
 }
 
+/** Counts for sync-health and data-health panels (active roster is default for operations). */
+export async function getActiveRepStoreCounts(): Promise<{
+  active: number;
+  inactive: number;
+  terminated: number;
+  totalArchived: number;
+}> {
+  const file = await readStore();
+  return {
+    active: file.activeRoster.length,
+    inactive: file.inactiveArchive.length,
+    terminated: file.terminatedArchive.length,
+    totalArchived: file.inactiveArchive.length + file.terminatedArchive.length,
+  };
+}
+
 function persistSplitReps(reps: ActiveRep[], importedBy?: string): Promise<ActiveRepStoreFile> {
   const split = splitWorkforceReps(reps);
   const now = new Date().toISOString();

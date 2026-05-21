@@ -54,4 +54,6 @@ export type BreezyJobCatalogSnapshot = {
   fromCache: boolean;
   companyId?: string;
   companyName?: string;
+  publishedCount?: number;
+  draftCount?: number;
 };
