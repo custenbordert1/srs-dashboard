@@ -353,6 +353,20 @@ function nestedString(record: Record<string, unknown> | null, paths: string[][])
   return "";
 }
 
+function payRateFromCustomAttributes(record: Record<string, unknown>): string {
+  const attrs = record.custom_attributes;
+  if (!Array.isArray(attrs)) return "";
+  for (const item of attrs) {
+    const attr = asRecord(item);
+    if (!attr) continue;
+    const name = stringField(attr, ["name", "label", "key"]);
+    if (name.toLowerCase() !== "pay rate") continue;
+    const value = stringField(attr, ["value", "text"]);
+    if (value) return value;
+  }
+  return "";
+}
+
 function splitName(rawName: string): { firstName: string; lastName: string } {
   const parts = rawName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return { firstName: "", lastName: "" };
@@ -383,6 +397,7 @@ function sanitizeJob(raw: RawBreezyPosition): BreezyJob | null {
     candidateCount: numberField(record, ["candidate_count", "candidates_count", "applicants_count"]),
     description: stringField(record, ["description", "summary", "job_description"]),
     payRate:
+      payRateFromCustomAttributes(record) ||
       nestedString(record, [["compensation", "value"], ["salary", "value"]]) ||
       stringField(record, ["pay_rate", "compensation", "salary"]),
     department:

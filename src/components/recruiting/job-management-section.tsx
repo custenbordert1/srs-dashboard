@@ -466,7 +466,10 @@ export function JobManagementSection() {
           draft={pushDraft}
           pushing={pushing}
           onClose={() => setPushDraftId(null)}
-          onConfirm={() => void pushDraftToBreezy(pushDraft)}
+          onConfirm={() => {
+            const latest = drafts.find((d) => d.id === pushDraftId);
+            if (latest) void pushDraftToBreezy(latest);
+          }}
         />
       ) : null}
       {pushResult ? (
