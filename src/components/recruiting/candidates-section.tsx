@@ -34,7 +34,12 @@ import { fetchCachedBreezyCandidates, fetchCachedBreezyJobs } from "@/lib/cached
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
 import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
-import { fetchWithRetry } from "@/lib/fetch-with-retry";
+import {
+  DASHBOARD_REQUEST_TIMEOUT_MS,
+  fetchWithTimeout,
+  isTimeoutError,
+  timeoutErrorMessage,
+} from "@/lib/fetch-with-timeout";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
 import { loadRecruiterRoster } from "@/lib/recruiter-roster";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -174,7 +179,8 @@ function RecommendationPills({ items }: { items: WorkflowRecommendation[] }) {
 
 function CandidatesSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" aria-busy="true" aria-live="polite">
+      <p className="text-sm text-zinc-500">Loading candidates from Breezy…</p>
       <div className="h-20 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
       <div className="grid gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
@@ -227,13 +233,21 @@ export function CandidatesSection() {
           fetchCachedJson(
             cacheKey(["candidates", "workflows"]),
             async () => {
-              const workflowRes = await fetchWithRetry("/api/candidates/workflows", {
-                cache: "no-store",
-              });
-              return (await workflowRes.json()) as {
-                ok: boolean;
-                workflows?: CandidateWorkflowState;
-              };
+              try {
+                const workflowRes = await fetchWithTimeout("/api/candidates/workflows", {
+                  cache: "no-store",
+                  timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+                });
+                return (await workflowRes.json()) as {
+                  ok: boolean;
+                  workflows?: CandidateWorkflowState;
+                };
+              } catch (err) {
+                if (isTimeoutError(err)) {
+                  throw new Error(timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS));
+                }
+                throw err;
+              }
             },
             { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
           ),

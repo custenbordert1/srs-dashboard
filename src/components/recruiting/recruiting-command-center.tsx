@@ -29,7 +29,8 @@ type CommandCenterLoadState =
 
 function CommandCenterSkeleton() {
   return (
-    <div className="space-y-6" aria-busy="true">
+    <div className="space-y-6" aria-busy="true" aria-live="polite">
+      <p className="text-sm text-zinc-500">Loading Command Center from Breezy (jobs and candidates)…</p>
       <div className="h-14 animate-pulse rounded-xl border border-zinc-800/80 bg-zinc-900/40" />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 7 }, (_, index) => (
@@ -216,7 +217,17 @@ export function RecruitingCommandCenter() {
     );
   }
 
-  if (!snapshot) return null;
+  if (!snapshot) {
+    return (
+      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+        <h2 className="text-lg font-semibold text-zinc-50">Recruiting Command Center</h2>
+        <p className="mt-2 text-sm text-zinc-500">
+          Breezy connected but no KPI snapshot could be built from the latest sync. Try Refresh on Data Health or
+          switch tabs and return.
+        </p>
+      </section>
+    );
+  }
 
   const [applied, interviewing, hired] = snapshot.funnel.map((row) => row.value);
 

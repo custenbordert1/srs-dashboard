@@ -3,18 +3,19 @@
 import type { DmLeaderboardRow, NewHireMetric, PipelineStage, TrendWeek } from "@/lib/recruiting-sample-data";
 import { useState } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
-import { BreezyDashboardSummary } from "./breezy-dashboard-summary";
-import { BreezyOverviewJobsTable } from "./breezy-overview-jobs-table";
-import { RecruitingDataSourcesPanel } from "./recruiting-data-sources-panel";
 import {
   DashboardTabPanel,
+  LazyBreezyDashboardSummary,
+  LazyBreezyOverviewJobsTable,
   LazyCandidatesSection,
   LazyDataHealthSection,
+  LazyDmLeaderboard,
   LazyLiveSheetSection,
   LazyMelProjectsSection,
   LazyNeedsAttentionSection,
   LazyRecruitingAutomationSection,
   LazyRecruitingCommandCenter,
+  LazyRecruitingDataSourcesPanel,
   LazyRecruitingIntelligenceSection,
   LazyWorkforceOperationsSection,
   LazyJobManagementSection,
@@ -25,7 +26,6 @@ import {
   type DashboardTabId,
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
-import { DmLeaderboard } from "./dm-leaderboard";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
@@ -63,15 +63,18 @@ export function RecruitingDashboardContent({
       >
         <DashboardTabPanel tabId="command-center" activeTab={activeTab}>
           <LazyRecruitingCommandCenter />
-          <RecruitingDataSourcesPanel />
+          <LazyRecruitingDataSourcesPanel />
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="overview" activeTab={activeTab}>
-          <BreezyDashboardSummary />
+          <LazyBreezyDashboardSummary />
           <SheetKpiCards />
+          <p className="text-xs text-zinc-600">
+            Charts below use sample FY26 data for trends and pipeline — live KPIs are in the Breezy summary above.
+          </p>
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="space-y-6 lg:col-span-2">
-              <BreezyOverviewJobsTable />
+              <LazyBreezyOverviewJobsTable />
               <RecruitingTrendsChart data={weeklyTrends} />
             </div>
             <div className="space-y-6">
@@ -86,7 +89,7 @@ export function RecruitingDashboardContent({
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="dm-scorecards" activeTab={activeTab}>
-          <DmLeaderboard rows={dmLeaderboard} />
+          <LazyDmLeaderboard rows={dmLeaderboard} />
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="live-sheet" activeTab={activeTab}>

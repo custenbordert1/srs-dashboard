@@ -55,3 +55,10 @@ export function isTimeoutError(err: unknown): boolean {
 
 export const DASHBOARD_REQUEST_TIMEOUT_MS = 10_000;
 export const HEAVY_REQUEST_TIMEOUT_MS = 30_000;
+/** Breezy jobs/candidates/snapshot — fail fast on the client instead of blank skeletons. */
+export const BREEZY_CLIENT_REQUEST_TIMEOUT_MS = 45_000;
+
+export function timeoutErrorMessage(label: string, timeoutMs: number): string {
+  const seconds = Math.round(timeoutMs / 1000);
+  return `${label} timed out after ${seconds}s. Breezy may still be syncing — switch tabs and retry shortly.`;
+}

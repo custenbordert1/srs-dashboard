@@ -37,7 +37,8 @@ export function RecruitingDataSourcesPanel() {
   }, []);
 
   useEffect(() => {
-    const id = window.setTimeout(() => void load(false), 0);
+    // Defer so Command Center Breezy fetches are not competing on first paint.
+    const id = window.setTimeout(() => void load(false), 2_000);
     return () => window.clearTimeout(id);
   }, [load]);
 
@@ -46,6 +47,10 @@ export function RecruitingDataSourcesPanel() {
 
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+      {loading && !snapshot ? (
+        <p className="text-sm text-zinc-500">Loading source diagnostics (deferred)…</p>
+      ) : null}
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-zinc-50">Recruiting data sources</h2>

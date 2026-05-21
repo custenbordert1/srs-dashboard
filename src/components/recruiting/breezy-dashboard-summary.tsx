@@ -8,7 +8,8 @@ import { KpiCards } from "./kpi-cards";
 
 function SummarySkeleton() {
   return (
-    <section className="space-y-6" aria-busy="true">
+    <section className="space-y-6" aria-busy="true" aria-live="polite">
+      <p className="text-sm text-zinc-500">Loading Breezy candidate summary…</p>
       <div className="h-16 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 7 }, (_, index) => (
