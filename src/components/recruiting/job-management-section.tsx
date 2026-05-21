@@ -2,7 +2,8 @@
 
 import type { BreezyJobCatalogRow } from "@/lib/job-management/job-draft-types";
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
-import { useCallback, useEffect, useState } from "react";
+import { validateJobDraftForBreezyPush } from "@/lib/job-management/breezy-position-payload";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type CatalogResponse =
   | {
@@ -27,6 +28,12 @@ export function JobManagementSection() {
   const [message, setMessage] = useState<string | null>(null);
 
   const selectedDraft = drafts.find((d) => d.id === selectedDraftId) ?? null;
+
+  const pushValidation = useMemo(
+    () => (selectedDraft ? validateJobDraftForBreezyPush(selectedDraft) : null),
+    [selectedDraft],
+  );
+  const canPushToBreezy = pushValidation?.ok === true;
 
   const loadDrafts = useCallback(async () => {
     setLoadingDrafts(true);
@@ -90,32 +97,34 @@ export function JobManagementSection() {
     }
   };
 
-  const saveDraft = async () => {
-    if (!selectedDraft || selectedDraft.status !== "draft") return;
+  const saveDraft = async (draft = selectedDraft): Promise<JobDraft | null> => {
+    if (!draft || draft.status !== "draft") return null;
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/job-management/drafts/${selectedDraft.id}`, {
+      const res = await fetch(`/api/job-management/drafts/${draft.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: selectedDraft.title,
-          description: selectedDraft.description,
-          city: selectedDraft.city,
-          usState: selectedDraft.usState,
-          payRate: selectedDraft.payRate,
-          department: selectedDraft.department,
+          title: draft.title,
+          description: draft.description,
+          city: draft.city,
+          usState: draft.usState,
+          payRate: draft.payRate,
+          department: draft.department,
         }),
       });
       const parsed = (await res.json()) as { ok?: boolean; draft?: JobDraft; error?: string };
       if (!parsed.ok || !parsed.draft) {
         setError(parsed.error ?? "Save failed");
-        return;
+        return null;
       }
       setDrafts((prev) => prev.map((d) => (d.id === parsed.draft!.id ? parsed.draft! : d)));
       setMessage("Draft saved.");
+      return parsed.draft;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
+      return null;
     } finally {
       setSaving(false);
     }
@@ -123,13 +132,31 @@ export function JobManagementSection() {
 
   const pushToBreezy = async () => {
     if (!selectedDraft || selectedDraft.status !== "draft") return;
+
+    const validation = validateJobDraftForBreezyPush(selectedDraft);
+    if (!validation.ok) {
+      setError(validation.message);
+      return;
+    }
+
     setPushing(true);
     setError(null);
     try {
-      const res = await fetch(`/api/job-management/drafts/${selectedDraft.id}/push`, {
+      const saved = await saveDraft(selectedDraft);
+      const draftForPush = saved ?? selectedDraft;
+
+      const res = await fetch(`/api/job-management/drafts/${draftForPush.id}/push`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmed: true }),
+        body: JSON.stringify({
+          confirmed: true,
+          title: draftForPush.title,
+          description: draftForPush.description,
+          city: draftForPush.city,
+          usState: draftForPush.usState,
+          payRate: draftForPush.payRate,
+          department: draftForPush.department,
+        }),
       });
       const parsed = (await res.json()) as {
         ok?: boolean;
@@ -137,12 +164,17 @@ export function JobManagementSection() {
         breezyJobId?: string;
         error?: string;
         rateLimited?: boolean;
+        fieldErrors?: Record<string, string>;
       };
       if (!parsed.ok) {
+        const fieldHint =
+          parsed.fieldErrors && Object.keys(parsed.fieldErrors).length > 0
+            ? ` ${Object.values(parsed.fieldErrors).join(" ")}`
+            : "";
         setError(
           parsed.rateLimited
             ? `${parsed.error ?? "Rate limited"} — wait and retry.`
-            : (parsed.error ?? "Push failed"),
+            : `${parsed.error ?? "Push failed"}${fieldHint}`,
         );
         await loadDrafts();
         return;
@@ -357,8 +389,14 @@ export function JobManagementSection() {
                     </button>
                     <button
                       type="button"
+                      disabled={!canPushToBreezy}
+                      title={
+                        canPushToBreezy
+                          ? "Post edited draft to Breezy"
+                          : "Enter city and a valid US state before pushing"
+                      }
                       onClick={() => setPushModalOpen(true)}
-                      className="rounded-lg border border-teal-600/50 bg-teal-600/15 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/25"
+                      className="rounded-lg border border-teal-600/50 bg-teal-600/15 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/25 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Push to Breezy
                     </button>
@@ -386,6 +424,13 @@ export function JobManagementSection() {
             <p className="mt-2 text-sm text-zinc-400">
               This will create a new position in Breezy. Review details before confirming.
             </p>
+            {pushValidation && !pushValidation.ok ? (
+              <p role="alert" className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+                {pushValidation.message}
+                {pushValidation.errors.city ? ` ${pushValidation.errors.city}` : ""}
+                {pushValidation.errors.usState ? ` ${pushValidation.errors.usState}` : ""}
+              </p>
+            ) : null}
             <dl className="mt-4 space-y-2 text-sm">
               <div>
                 <dt className="text-zinc-500">Title</dt>
@@ -418,11 +463,11 @@ export function JobManagementSection() {
               </button>
               <button
                 type="button"
-                disabled={pushing}
+                disabled={pushing || !canPushToBreezy}
                 onClick={() => void pushToBreezy()}
                 className="rounded-lg bg-teal-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-50"
               >
-                {pushing ? "Posting…" : "Confirm and post"}
+                {pushing ? "Saving & posting…" : "Confirm and post"}
               </button>
             </div>
           </div>

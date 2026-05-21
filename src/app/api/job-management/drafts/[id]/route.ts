@@ -45,7 +45,17 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const updated = await updateJobDraft(id, body);
+  const patch = {
+    ...(body.title !== undefined ? { title: body.title.trim() } : {}),
+    ...(body.description !== undefined ? { description: body.description.trim() } : {}),
+    ...(body.city !== undefined ? { city: body.city.trim() } : {}),
+    ...(body.usState !== undefined ? { usState: body.usState.trim() } : {}),
+    ...(body.payRate !== undefined ? { payRate: body.payRate.trim() } : {}),
+    ...(body.department !== undefined ? { department: body.department.trim() } : {}),
+    ...(body.source !== undefined ? { source: body.source.trim() } : {}),
+  };
+
+  const updated = await updateJobDraft(id, patch);
   if (!updated) {
     return NextResponse.json({ ok: false, error: "Draft not found." }, { status: 404 });
   }
