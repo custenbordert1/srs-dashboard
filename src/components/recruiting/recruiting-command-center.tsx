@@ -3,6 +3,12 @@
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import { fetchCachedBreezyCandidates, fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
+  breezyDisconnectedDetail,
+  breezyDisconnectedTitle,
+  classifyBreezyError,
+  type BreezyFailureKind,
+} from "@/lib/breezy-error-ui";
+import {
   buildRecruitingCommandCenter,
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
@@ -47,21 +53,34 @@ function SyncStatusBanner({
   lastSyncLabel,
   partialPositionSync,
   errorMessage,
+  failureKind,
 }: {
   connected: boolean;
   lastSyncLabel: string;
   partialPositionSync: boolean;
   errorMessage?: string;
+  failureKind?: BreezyFailureKind;
 }) {
   if (!connected) {
+    const kind = failureKind ?? classifyBreezyError(errorMessage ?? "");
+    const title = breezyDisconnectedTitle(kind);
+    const detail = breezyDisconnectedDetail(errorMessage ?? "", kind);
+
     return (
       <div
         role="alert"
         className="flex flex-col gap-2 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <p className="text-sm font-semibold text-red-100">Breezy disconnected</p>
-          <p className="mt-0.5 text-sm text-red-200/80">{errorMessage ?? "Unable to load live Breezy data."}</p>
+          <p className="text-sm font-semibold text-red-100">{title}</p>
+          <p className="mt-0.5 text-sm text-red-200/80">{detail}</p>
+          {kind === "missing_config" ? (
+            <p className="mt-2 text-xs text-red-200/70">
+              Paste <code className="rounded bg-red-950/60 px-1 py-0.5">BREEZY_API_KEY</code> from your old Mac
+              into <code className="rounded bg-red-950/60 px-1 py-0.5">.env.local</code>, then restart{" "}
+              <code className="rounded bg-red-950/60 px-1 py-0.5">npm run dev</code>.
+            </p>
+          ) : null}
         </div>
       </div>
     );
@@ -165,12 +184,14 @@ export function RecruitingCommandCenter() {
   if (loadState.status === "loading") return <CommandCenterSkeleton />;
 
   if (loadState.status === "error") {
+    const failureKind = classifyBreezyError(loadState.message);
     return (
       <SyncStatusBanner
         connected={false}
         lastSyncLabel="—"
         partialPositionSync={false}
         errorMessage={loadState.message}
+        failureKind={failureKind}
       />
     );
   }
@@ -181,6 +202,7 @@ export function RecruitingCommandCenter() {
       : loadState.jobs.ok
         ? "Breezy jobs request failed"
         : loadState.jobs.error;
+    const failureKind = classifyBreezyError(errorMessage);
     return (
       <SyncStatusBanner
         connected={false}
@@ -189,6 +211,7 @@ export function RecruitingCommandCenter() {
         )}
         partialPositionSync={false}
         errorMessage={errorMessage}
+        failureKind={failureKind}
       />
     );
   }

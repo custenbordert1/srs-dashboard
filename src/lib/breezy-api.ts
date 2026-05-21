@@ -13,6 +13,7 @@ import {
   getBreezyCompanyIdSync,
   loadConfigSync,
 } from "@/lib/config";
+import { breezyConfigErrorMessage } from "@/lib/env-validation";
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
@@ -267,8 +268,7 @@ export function getBreezyCompanyIdOverride(): string | undefined {
 function missingApiKeyFailure(): BreezyApiFailure {
   return {
     ok: false,
-    error:
-      "Breezy API key is not configured. Set BREEZY_API_KEY in .env.local and restart the dev server.",
+    error: breezyConfigErrorMessage(),
     fetchedAt: new Date().toISOString(),
   };
 }

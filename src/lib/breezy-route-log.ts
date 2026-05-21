@@ -1,4 +1,5 @@
 import { hasBreezyApiKey, loadConfig } from "@/lib/config";
+import { breezyConfigErrorMessage } from "@/lib/env-validation";
 import type { AuthSession } from "@/lib/auth/types";
 
 export type BreezyRouteLogContext = {
@@ -43,8 +44,7 @@ export async function assertBreezyConfigured(route: string): Promise<
     return {
       ok: false,
       status: 503,
-      error:
-        "Breezy API key is not configured. Set BREEZY_API_KEY in .env.local and restart the dev server.",
+      error: breezyConfigErrorMessage(),
     };
   }
   return { ok: true };

@@ -6,6 +6,7 @@ import {
   type SheetDataSuccess,
   type SheetRow,
 } from "@/lib/google-sheet-csv";
+import { melConfigErrorMessage } from "@/lib/env-validation";
 
 /** One row from the MEL projects Google Sheet (header keys match CSV columns). */
 export type MelProjectRow = SheetRow;
@@ -35,8 +36,7 @@ export async function fetchMelProjectsSheet(): Promise<MelProjectsDataResult> {
   if (!sheetId) {
     return {
       ok: false,
-      error:
-        "GOOGLE_MEL_PROJECTS_SHEET_ID is not set. Add it to your environment to load the MEL projects sheet.",
+      error: melConfigErrorMessage(),
       fetchedAt,
       csvUrl: "",
     };

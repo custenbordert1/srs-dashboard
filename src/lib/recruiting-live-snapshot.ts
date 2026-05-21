@@ -1,4 +1,5 @@
 import { getBreezyApiKeySync, loadConfigSync } from "@/lib/config";
+import { breezyConfigErrorMessage } from "@/lib/env-validation";
 import {
   fetchBreezyCandidates,
   fetchBreezyJobs,
@@ -67,7 +68,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
   if (!breezyConfigured) {
     return {
       ok: false,
-      error: "Breezy API key is not configured.",
+      error: breezyConfigErrorMessage(),
       primarySource,
       sheetLiveEnabled,
       diagnostics: buildCacheDiagnostics({

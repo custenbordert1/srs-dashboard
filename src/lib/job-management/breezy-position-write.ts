@@ -1,4 +1,5 @@
 import { getBreezyApiKeySync, loadConfigSync } from "@/lib/config";
+import { breezyConfigErrorMessage } from "@/lib/env-validation";
 import { resolveBreezyCompany } from "@/lib/breezy-api";
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
 
@@ -26,7 +27,7 @@ export async function createBreezyPositionFromDraft(
   const apiKey = getBreezyApiKeySync();
   const fetchedAt = new Date().toISOString();
   if (!apiKey) {
-    return { ok: false, error: "Breezy API key is not configured.", fetchedAt };
+    return { ok: false, error: breezyConfigErrorMessage(), fetchedAt };
   }
 
   const company = await resolveBreezyCompany();

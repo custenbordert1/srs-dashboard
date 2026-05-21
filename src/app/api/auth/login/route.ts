@@ -1,4 +1,5 @@
 import { canCreateSessions, getAuthEnvStatus } from "@/lib/auth/auth-env";
+import { authConfigErrorMessage } from "@/lib/env-validation";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import { AUTH_RATE_LIMIT, checkRateLimit, clientIpFromRequest } from "@/lib/security/rate-limit";
 import { loadConfig } from "@/lib/config";
@@ -100,8 +101,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return jsonResponse(
       {
         ok: false,
-        error:
-          "Server auth is not configured. Set SESSION_SECRET or BREEZY_API_KEY in .env.local and restart the dev server.",
+        error: authConfigErrorMessage(),
       },
       503,
     );

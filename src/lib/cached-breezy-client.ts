@@ -14,7 +14,9 @@ export async function fetchCachedBreezyCandidates(
     cacheKey(["breezy", "candidates", dateRange?.from ?? "", dateRange?.to ?? ""]),
     async () => {
       const res = await fetchWithRetry(`/api/breezy/candidates${query}`, { cache: "no-store" });
-      return (await res.json()) as BreezyCandidatesResult;
+      const parsed = (await res.json()) as BreezyCandidatesResult;
+      if (!res.ok && !parsed.ok) return parsed;
+      return parsed;
     },
     { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-candidates" },
   );
@@ -25,7 +27,9 @@ export async function fetchCachedBreezyJobs(force = false): Promise<BreezyJobsRe
     cacheKey(["breezy", "jobs"]),
     async () => {
       const res = await fetchWithRetry("/api/breezy/jobs", { cache: "no-store" });
-      return (await res.json()) as BreezyJobsResult;
+      const parsed = (await res.json()) as BreezyJobsResult;
+      if (!res.ok && !parsed.ok) return parsed;
+      return parsed;
     },
     { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-jobs" },
   );

@@ -3,4 +3,5 @@
 .env.local
 .env*
 !.env.example
+!.env.local.example
 .data/

@@ -1,42 +1,45 @@
 "use client";
 
+import { DashboardFetchAlert } from "@/components/ui/dashboard-fetch-alert";
 import { breezyJobsToOverviewRows, countApplicantsByPosition } from "@/lib/recruiting-breezy-adapters";
 import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
-import { useEffect, useState } from "react";
+import { breezyDisconnectedDetail, breezyDisconnectedTitle, classifyBreezyError } from "@/lib/breezy-error-ui";
+import { useCallback, useEffect, useState } from "react";
 
 export function BreezyOverviewJobsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReturnType<typeof breezyJobsToOverviewRows>>([]);
 
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const snap = await fetchRecruitingLiveSnapshot(false);
+      if (!snap.ok || !snap.jobs?.ok || !snap.candidates?.ok) {
+        setError(snap.ok ? "Breezy snapshot incomplete" : snap.error);
+        setRows([]);
+        return;
+      }
+      const counts = countApplicantsByPosition(snap.candidates.candidates);
+      setRows(breezyJobsToOverviewRows(snap.jobs.jobs, counts));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load Breezy jobs");
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-    const id = window.setTimeout(() => {
-      void (async () => {
-        try {
-          const snap = await fetchRecruitingLiveSnapshot(false);
-          if (cancelled) return;
-          if (!snap.ok || !snap.jobs?.ok || !snap.candidates?.ok) {
-            setError(snap.ok ? "Breezy snapshot incomplete" : snap.error);
-            setRows([]);
-            return;
-          }
-          const counts = countApplicantsByPosition(snap.candidates.candidates);
-          setRows(breezyJobsToOverviewRows(snap.jobs.jobs, counts));
-        } catch (err) {
-          if (!cancelled) {
-            setError(err instanceof Error ? err.message : "Failed to load Breezy jobs");
-          }
-        } finally {
-          if (!cancelled) setLoading(false);
-        }
-      })();
-    }, 0);
+    queueMicrotask(() => {
+      if (!cancelled) void load();
+    });
     return () => {
       cancelled = true;
-      window.clearTimeout(id);
     };
-  }, []);
+  }, [load]);
 
   return (
     <section
@@ -54,14 +57,20 @@ export function BreezyOverviewJobsTable() {
       </header>
 
       {error ? (
-        <p role="alert" className="px-4 py-6 text-sm text-amber-200 sm:px-5">
-          {error}
-        </p>
+        <div className="px-4 py-6 sm:px-5">
+          <DashboardFetchAlert
+            variant={classifyBreezyError(error) === "missing_config" ? "warning" : "error"}
+            title={breezyDisconnectedTitle(classifyBreezyError(error))}
+            message={breezyDisconnectedDetail(error, classifyBreezyError(error))}
+            partial={error.includes("incomplete")}
+            onRetry={() => void load()}
+          />
+        </div>
       ) : null}
 
       {loading ? (
         <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">Loading Breezy jobs…</p>
-      ) : (
+      ) : !error ? (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
@@ -90,7 +99,9 @@ export function BreezyOverviewJobsTable() {
             </tbody>
           </table>
         </div>
-      )}
+      ) : rows.length === 0 ? (
+        <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">No published Breezy jobs in the current sync.</p>
+      ) : null}
     </section>
   );
 }

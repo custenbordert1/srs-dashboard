@@ -10,6 +10,7 @@ import {
 } from "@/lib/mel-projects-metrics";
 import type { Kpi } from "@/lib/recruiting-sample-data";
 import { useEffect, useMemo, useState } from "react";
+import { DashboardFetchAlert } from "@/components/ui/dashboard-fetch-alert";
 import { KpiCards } from "./kpi-cards";
 
 const selectClass =
@@ -228,13 +229,15 @@ export function MelProjectsSection() {
 
         {!data.ok ? (
           <div className="px-4 py-6 sm:px-5">
-            <div
-              role="alert"
-              className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
-            >
-              <p className="font-medium text-amber-50">Could not load MEL projects</p>
-              <p className="mt-2 text-amber-100/90">{data.error}</p>
-            </div>
+            <DashboardFetchAlert
+              variant="warning"
+              title="Could not load MEL projects"
+              message={data.error}
+              onRetry={() => {
+                setData(undefined);
+                void fetchMelProjectsData(true).then(setData);
+              }}
+            />
           </div>
         ) : !viewModel ? (
           <p className="px-4 py-6 text-sm text-zinc-500 sm:px-5">The sheet has no header row yet.</p>

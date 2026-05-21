@@ -1,7 +1,8 @@
 import type { BreezyApiFailure } from "@/lib/breezy-api";
+import { classifyBreezyError } from "@/lib/env-validation";
 
 export function breezyFailureHttpStatus(error: string): number {
-  if (error.includes("Breezy API key") || error.includes("Waiting on Breezy")) {
+  if (classifyBreezyError(error) === "missing_config") {
     return 503;
   }
   return 502;

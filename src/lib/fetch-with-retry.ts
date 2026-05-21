@@ -17,7 +17,8 @@ export async function fetchWithRetry(
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
       const response = await fetch(input, init);
-      if (response.ok || response.status < 500) return response;
+      // Return client/config errors immediately; retry only on transient server failures.
+      if (response.ok || response.status < 500 || response.status === 503) return response;
       lastError = new Error(`HTTP ${response.status}`);
     } catch (err) {
       lastError = err;
