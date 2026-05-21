@@ -1,4 +1,5 @@
 import { fetchBreezyJobs, type BreezyJob } from "@/lib/breezy-api";
+import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyJobCatalogRow, BreezyJobCatalogSnapshot } from "@/lib/job-management/job-draft-types";
 
 const CATALOG_CACHE_TTL_MS = 120_000;
@@ -119,12 +120,14 @@ export function jobCatalogRowToDraftInput(row: BreezyJobCatalogRow): {
   source: string;
   metadata: Record<string, string>;
 } {
+  const location = normalizeJobLocationFields(row.city, row.usState);
+
   return {
     clonedFromBreezyJobId: row.breezyJobId,
     title: `${row.title} (Draft)`.replace(/ \(Draft\) \(Draft\)/, " (Draft)"),
     description: row.description ?? "",
-    city: row.city,
-    usState: row.usState,
+    city: location.city,
+    usState: location.usState,
     payRate: row.payRate ?? "",
     department: row.department ?? "",
     source: row.source,

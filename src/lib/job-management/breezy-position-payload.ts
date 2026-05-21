@@ -1,4 +1,9 @@
 import { normalizeGeoStateCode } from "@/lib/breezy-job-location";
+import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
+import {
+  BREEZY_COUNTRY_CODE,
+  formatUsDisplayLocation,
+} from "@/lib/job-management/us-location-rules";
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
 
 export const BREEZY_POSITION_TYPES = new Set([
@@ -10,10 +15,11 @@ export const BREEZY_POSITION_TYPES = new Set([
 ]);
 export const DEFAULT_BREEZY_POSITION_TYPE = "fullTime";
 export const DEFAULT_BREEZY_DESCRIPTION = "Posted from SRS Recruiting Dashboard.";
-export const BREEZY_COUNTRY_UNITED_STATES = "United States";
+export { BREEZY_COUNTRY_CODE } from "@/lib/job-management/us-location-rules";
 
 export type DraftPushFieldErrors = {
   title?: string;
+  description?: string;
   city?: string;
   usState?: string;
 };
@@ -46,24 +52,29 @@ export function normalizeDraftTitleForBreezy(title: string): string {
 export function validateJobDraftForBreezyPush(draft: JobDraft): DraftPushValidationResult {
   const errors: DraftPushFieldErrors = {};
   const title = normalizeDraftTitleForBreezy(draft.title);
-  const city = draft.city.trim();
-  const usState = normalizeGeoStateCode(draft.usState);
+  const description = draft.description.trim();
+  const location = normalizeJobLocationFields(draft.city, draft.usState);
 
   if (!title) {
     errors.title = "Job title is required.";
   }
-  if (!city) {
-    errors.city = "City is required before posting to Breezy.";
+  if (!description) {
+    errors.description = "Job description is required before posting to Breezy.";
   }
-  if (!usState) {
-    errors.usState = "A valid US state (e.g. TX or Texas) is required before posting to Breezy.";
+  if (!location.city) {
+    errors.city = "City is required (US city only — do not include state in the city field).";
+  }
+  if (location.stateInvalid) {
+    errors.usState = "State must be a valid 2-letter US abbreviation (e.g. TX). International states are not supported.";
+  } else if (!location.usState) {
+    errors.usState = "State is required (2-letter US code, e.g. TX). Full names like Texas are accepted and normalized.";
   }
 
   if (Object.keys(errors).length > 0) {
     return {
       ok: false,
       errors,
-      message: "City and state must be filled in before pushing to Breezy.",
+      message: "Title, description, city, and state are required before pushing to Breezy.",
     };
   }
 
@@ -71,7 +82,7 @@ export function validateJobDraftForBreezyPush(draft: JobDraft): DraftPushValidat
 }
 
 export function buildDisplayLocation(city: string, state: string): string {
-  return [city.trim(), state.trim()].filter(Boolean).join(", ");
+  return formatUsDisplayLocation(city, state);
 }
 
 export function buildBreezyPositionPayload(draft: JobDraft): BreezyPositionPayloadBuildResult {
@@ -81,9 +92,10 @@ export function buildBreezyPositionPayload(draft: JobDraft): BreezyPositionPaylo
   }
 
   const breezyTitle = normalizeDraftTitleForBreezy(draft.title);
-  const city = draft.city.trim();
-  const usState = normalizeGeoStateCode(draft.usState);
-  const description = draft.description.trim() || DEFAULT_BREEZY_DESCRIPTION;
+  const location = normalizeJobLocationFields(draft.city, draft.usState);
+  const city = location.city;
+  const usState = location.usState;
+  const description = draft.description.trim();
   const displayLocation = buildDisplayLocation(city, usState);
 
   const typeCandidate = draft.metadata?.breezyPositionType?.trim();
@@ -97,7 +109,7 @@ export function buildBreezyPositionPayload(draft: JobDraft): BreezyPositionPaylo
     description,
     type,
     location: {
-      country: BREEZY_COUNTRY_UNITED_STATES,
+      country: BREEZY_COUNTRY_CODE,
       state: usState,
       city,
       is_remote: false,

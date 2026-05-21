@@ -1,5 +1,5 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { fetchPublishedBreezyJobCatalog } from "@/lib/job-management/breezy-job-catalog";
+import { fetchBreezyJobCatalog } from "@/lib/job-management/breezy-job-catalog";
 import { assertBreezyConfigured } from "@/lib/breezy-route-log";
 import { NextResponse } from "next/server";
 
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";
-  const snapshot = await fetchPublishedBreezyJobCatalog({ force });
+  const snapshot = await fetchBreezyJobCatalog({ force, includeDraft: true });
 
   if (!snapshot.ok) {
     return NextResponse.json(snapshot, { status: 503 });

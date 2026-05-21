@@ -5,6 +5,7 @@ import {
   updateJobDraft,
 } from "@/lib/job-management/job-draft-store";
 import { validateJobDraftForBreezyPush } from "@/lib/job-management/breezy-position-payload";
+import { normalizeJobDraftLocationPatch } from "@/lib/job-management/normalize-job-location-fields";
 import { createBreezyPositionFromDraft } from "@/lib/job-management/breezy-position-write";
 import { assertBreezyConfigured } from "@/lib/breezy-route-log";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -92,7 +93,7 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  const patch = trimPatch(body);
+  const patch = normalizeJobDraftLocationPatch(trimPatch(body));
   if (Object.keys(patch).length > 0) {
     await updateJobDraft(id, patch);
   }

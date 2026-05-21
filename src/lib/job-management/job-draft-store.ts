@@ -116,6 +116,18 @@ export async function updateJobDraft(
   return updated;
 }
 
+export async function deleteJobDraft(id: string): Promise<boolean> {
+  const file = await readDrafts();
+  const index = file.drafts.findIndex((d) => d.id === id);
+  if (index < 0) return false;
+  const draft = file.drafts[index]!;
+  if (draft.status !== "draft") return false;
+  file.drafts.splice(index, 1);
+  file.updatedAt = new Date().toISOString();
+  await writeDrafts(file);
+  return true;
+}
+
 export async function appendJobPushAudit(entry: JobPushAuditEntry): Promise<void> {
   await mkdir(STORE_DIR, { recursive: true });
   await appendFile(PUSH_AUDIT_PATH, `${JSON.stringify(entry)}\n`, "utf8");

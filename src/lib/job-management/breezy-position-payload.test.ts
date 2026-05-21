@@ -6,7 +6,7 @@ import {
   normalizeDraftTitleForBreezy,
   validateJobDraftForBreezyPush,
   verifyBreezyPositionResponse,
-  BREEZY_COUNTRY_UNITED_STATES,
+  BREEZY_COUNTRY_CODE,
 } from "@/lib/job-management/breezy-position-payload";
 
 function baseDraft(overrides: Partial<JobDraft> = {}): JobDraft {
@@ -27,18 +27,38 @@ function baseDraft(overrides: Partial<JobDraft> = {}): JobDraft {
 }
 
 describe("validateJobDraftForBreezyPush", () => {
-  it("blocks push when city or state is missing", () => {
-    const result = validateJobDraftForBreezyPush(baseDraft({ city: "", usState: "" }));
+  it("blocks push when city, state, or description is missing", () => {
+    const result = validateJobDraftForBreezyPush(
+      baseDraft({ city: "", usState: "", description: "" }),
+    );
     assert.equal(result.ok, false);
     if (!result.ok) {
       assert.ok(result.errors.city);
       assert.ok(result.errors.usState);
+      assert.ok(result.errors.description);
     }
+  });
+
+  it("splits combined city field before validating push", () => {
+    const result = validateJobDraftForBreezyPush(
+      baseDraft({ city: "Dallas, TX", usState: "", description: "Body" }),
+    );
+    assert.equal(result.ok, true);
   });
 
   it("accepts valid city and state", () => {
     const result = validateJobDraftForBreezyPush(baseDraft());
     assert.equal(result.ok, true);
+  });
+
+  it("rejects invalid non-US state abbreviations", () => {
+    const result = validateJobDraftForBreezyPush(
+      baseDraft({ city: "Toronto", usState: "ON", description: "Body" }),
+    );
+    assert.equal(result.ok, false);
+    if (!result.ok) {
+      assert.ok(result.errors.usState);
+    }
   });
 });
 
@@ -54,7 +74,7 @@ describe("buildBreezyPositionPayload", () => {
     assert.equal(built.payload.type, "fullTime");
 
     const location = built.payload.location as Record<string, unknown>;
-    assert.equal(location.country, BREEZY_COUNTRY_UNITED_STATES);
+    assert.equal(location.country, BREEZY_COUNTRY_CODE);
     assert.equal(location.city, "Dallas");
     assert.equal(location.state, "TX");
     assert.equal(location.is_remote, false);
@@ -84,7 +104,7 @@ describe("verifyBreezyPositionResponse", () => {
       "pos-123",
       {
         name: "Retail Merchandiser",
-        location: { country: BREEZY_COUNTRY_UNITED_STATES, city: "Houston", state: "TX" },
+        location: { country: BREEZY_COUNTRY_CODE, city: "Houston", state: "TX" },
       },
       { name: "Retail Merchandiser", city: "Dallas", state: "TX" },
     );
