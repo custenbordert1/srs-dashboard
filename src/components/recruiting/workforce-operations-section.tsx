@@ -8,6 +8,8 @@ import { RepIntelligencePanel } from "@/components/recruiting/rep-intelligence-p
 import { StaffingRecommendationsPanel } from "@/components/recruiting/staffing-recommendations-panel";
 import { ChangePasswordPanel } from "@/components/auth/change-password-panel";
 import { useRepIntelligence } from "@/hooks/use-rep-intelligence";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { TabSkeleton } from "@/components/ui/tab-skeleton";
 
 type WorkforceOperationsSectionProps = {
@@ -16,7 +18,8 @@ type WorkforceOperationsSectionProps = {
 
 export function WorkforceOperationsSection({ showPasswordPanel = false }: WorkforceOperationsSectionProps) {
   const [includeInactive, setIncludeInactive] = useState(false);
-  const { snapshot, loading, error, refresh } = useRepIntelligence({ includeInactive });
+  const { snapshot, loading, error, timedOut, refresh } = useRepIntelligence({ includeInactive });
+  const loadingCeilingHit = useLoadingCeiling(loading && !snapshot);
 
   return (
     <div className="space-y-6">
@@ -69,7 +72,29 @@ export function WorkforceOperationsSection({ showPasswordPanel = false }: Workfo
         {showPasswordPanel ? <ChangePasswordPanel /> : null}
       </div>
 
-      {loading && !snapshot ? <TabSkeleton rows={4} cards={2} /> : null}
+      {loading && !snapshot ? (
+        loadingCeilingHit ? (
+          <DashboardSectionFallback
+            title="Rep intelligence panels"
+            loadingCeilingHit
+            error="Rep intelligence is taking longer than expected."
+            timedOut={timedOut}
+            onRetry={refresh}
+            retrying={loading}
+          />
+        ) : (
+          <TabSkeleton message="Loading rep intelligence, coverage risk, and staffing panels…" rows={4} cards={2} />
+        )
+      ) : null}
+
+      {!loading && !snapshot && !error ? (
+        <DashboardSectionFallback
+          title="Rep intelligence panels"
+          isEmpty
+          emptyMessage="No rep intelligence snapshot yet. Import reps or refresh after MEL data loads."
+          onRetry={refresh}
+        />
+      ) : null}
 
       {snapshot ? (
         <>

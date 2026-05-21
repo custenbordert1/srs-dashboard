@@ -42,6 +42,8 @@ import {
 } from "@/lib/fetch-with-timeout";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
 import { loadRecruiterRoster } from "@/lib/recruiter-roster";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const ALL = "__all__";
@@ -177,21 +179,6 @@ function RecommendationPills({ items }: { items: WorkflowRecommendation[] }) {
   );
 }
 
-function CandidatesSkeleton() {
-  return (
-    <div className="space-y-6" aria-busy="true" aria-live="polite">
-      <p className="text-sm text-zinc-500">Loading candidates from Breezy…</p>
-      <div className="h-20 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
-      <div className="grid gap-3 sm:grid-cols-3">
-        {Array.from({ length: 3 }, (_, index) => (
-          <div key={index} className="h-24 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
-        ))}
-      </div>
-      <div className="h-80 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
-    </div>
-  );
-}
-
 function SummaryCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
@@ -205,6 +192,9 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
 export function CandidatesSection() {
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities();
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
+  const [loadingBundle, setLoadingBundle] = useState(true);
+  const [retrying, setRetrying] = useState(false);
+  const loadingCeilingHit = useLoadingCeiling(loadingBundle);
   const [jobsData, setJobsData] = useState<BreezyJobsResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
   const [sourceFilter, setSourceFilter] = useState(ALL);
@@ -222,57 +212,57 @@ export function CandidatesSection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const [parsed, jobsParsed, workflowParsed] = await Promise.all([
-          fetchCachedBreezyCandidates(),
-          fetchCachedBreezyJobs(),
-          fetchCachedJson(
-            cacheKey(["candidates", "workflows"]),
-            async () => {
-              try {
-                const workflowRes = await fetchWithTimeout("/api/candidates/workflows", {
-                  cache: "no-store",
-                  timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
-                });
-                return (await workflowRes.json()) as {
-                  ok: boolean;
-                  workflows?: CandidateWorkflowState;
-                };
-              } catch (err) {
-                if (isTimeoutError(err)) {
-                  throw new Error(timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS));
-                }
-                throw err;
+  const loadBundle = useCallback(async () => {
+    setLoadingBundle(true);
+    try {
+      const [parsed, jobsParsed, workflowParsed] = await Promise.all([
+        fetchCachedBreezyCandidates(),
+        fetchCachedBreezyJobs(),
+        fetchCachedJson(
+          cacheKey(["candidates", "workflows"]),
+          async () => {
+            try {
+              const workflowRes = await fetchWithTimeout("/api/candidates/workflows", {
+                cache: "no-store",
+                timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+              });
+              return (await workflowRes.json()) as {
+                ok: boolean;
+                workflows?: CandidateWorkflowState;
+              };
+            } catch (err) {
+              if (isTimeoutError(err)) {
+                throw new Error(timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS));
               }
-            },
-            { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
-          ),
-        ]);
-        if (!cancelled) {
-          setData(parsed);
-          setJobsData(jobsParsed);
-          setWorkflowState(workflowParsed.ok && workflowParsed.workflows ? workflowParsed.workflows : {});
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setData({
-            ok: false,
-            error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
-            fetchedAt: new Date().toISOString(),
-          });
-        }
-      }
+              throw err;
+            }
+          },
+          { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
+        ),
+      ]);
+      setData(parsed);
+      setJobsData(jobsParsed);
+      setWorkflowState(workflowParsed.ok && workflowParsed.workflows ? workflowParsed.workflows : {});
+    } catch (err) {
+      setData({
+        ok: false,
+        error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
+        fetchedAt: new Date().toISOString(),
+      });
+    } finally {
+      setLoadingBundle(false);
     }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => void loadBundle(), 0);
+    return () => window.clearTimeout(id);
+  }, [loadBundle]);
+
+  const retry = useCallback(() => {
+    setRetrying(true);
+    void loadBundle().finally(() => setRetrying(false));
+  }, [loadBundle]);
 
   const jobsByPositionId = useMemo(
     () => (jobsData?.ok ? buildJobsByPositionId(jobsData.jobs) : new Map()),
@@ -646,16 +636,42 @@ export function CandidatesSection() {
     [handleCandidateAction, selectedCandidateId, selectedIds, toggleSelectCandidate],
   );
 
-  if (data === undefined) return <CandidatesSkeleton />;
+  if (loadingBundle || data === undefined) {
+    return (
+      <DashboardSectionFallback
+        title="Candidates"
+        loadingMessage="Loading candidates, jobs, and workflow state from Breezy…"
+        isLoading
+        loadingCeilingHit={loadingCeilingHit}
+        onRetry={retry}
+        retrying={retrying}
+        skeletonRows={3}
+        skeletonCards={3}
+      />
+    );
+  }
 
   if (!data.ok) {
     return (
-      <section className="space-y-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Candidates</h1>
-        <div role="alert" className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          {data.error}
-        </div>
-      </section>
+      <DashboardSectionFallback
+        title="Candidates"
+        error={data.error}
+        timedOut={data.error.toLowerCase().includes("timed out")}
+        onRetry={retry}
+        retrying={retrying}
+      />
+    );
+  }
+
+  if (candidates.length === 0) {
+    return (
+      <DashboardSectionFallback
+        title="Candidates"
+        isEmpty
+        emptyMessage="No candidates in the latest Breezy sync. Try refresh after sync completes."
+        onRetry={retry}
+        retrying={retrying}
+      />
     );
   }
 

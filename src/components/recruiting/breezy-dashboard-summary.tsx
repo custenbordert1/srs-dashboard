@@ -3,26 +3,10 @@
 import type { BreezyCandidatesResult } from "@/lib/breezy-api";
 import { buildBreezyCandidateSummary } from "@/lib/breezy-candidate-summary";
 import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
-import { useEffect, useMemo, useState } from "react";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
-
-function SummarySkeleton() {
-  return (
-    <section className="space-y-6" aria-busy="true" aria-live="polite">
-      <p className="text-sm text-zinc-500">Loading Breezy candidate summary…</p>
-      <div className="h-16 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 7 }, (_, index) => (
-          <div
-            key={index}
-            className="h-28 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40"
-          />
-        ))}
-      </div>
-      <div className="h-64 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
-    </section>
-  );
-}
 
 function NewestCandidatesTable({
   rows,
@@ -71,53 +55,79 @@ function NewestCandidatesTable({
 
 export function BreezyDashboardSummary() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
+  const loadingCeilingHit = useLoadingCeiling(loading);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const parsed = await fetchCachedBreezyCandidates();
+      setData(parsed);
+    } catch (err) {
+      setData({
+        ok: false,
+        error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
+        fetchedAt: new Date().toISOString(),
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    const id = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(id);
+  }, [load]);
 
-    async function load() {
-      try {
-        const parsed = await fetchCachedBreezyCandidates();
-        if (!cancelled) setData(parsed);
-      } catch (err) {
-        if (!cancelled) {
-          setData({
-            ok: false,
-            error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
-            fetchedAt: new Date().toISOString(),
-          });
-        }
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const retry = useCallback(() => {
+    setRetrying(true);
+    void load().finally(() => setRetrying(false));
+  }, [load]);
 
   const summary = useMemo(() => {
     if (!data?.ok) return null;
     return buildBreezyCandidateSummary(data);
   }, [data]);
 
-  if (data === undefined) return <SummarySkeleton />;
-
-  if (!data.ok) {
+  if (loading || data === undefined) {
     return (
-      <section className="space-y-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Breezy recruiting summary</h2>
-        <div
-          role="alert"
-          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
-        >
-          {data.error}
-        </div>
-      </section>
+      <DashboardSectionFallback
+        title="Breezy recruiting summary"
+        loadingMessage="Loading Breezy candidate summary…"
+        isLoading
+        loadingCeilingHit={loadingCeilingHit}
+        onRetry={retry}
+        retrying={retrying}
+        skeletonRows={2}
+        skeletonCards={4}
+      />
     );
   }
 
-  if (!summary) return null;
+  if (!data.ok) {
+    return (
+      <DashboardSectionFallback
+        title="Breezy recruiting summary"
+        error={data.error}
+        timedOut={data.error.toLowerCase().includes("timed out")}
+        onRetry={retry}
+        retrying={retrying}
+      />
+    );
+  }
+
+  if (!summary) {
+    return (
+      <DashboardSectionFallback
+        title="Breezy recruiting summary"
+        isEmpty
+        emptyMessage="No candidates returned from the latest Breezy sync."
+        onRetry={retry}
+        retrying={retrying}
+      />
+    );
+  }
 
   return (
     <section className="space-y-6">

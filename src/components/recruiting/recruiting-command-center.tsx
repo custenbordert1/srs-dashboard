@@ -12,7 +12,9 @@ import {
   buildRecruitingCommandCenter,
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
-import { useEffect, useMemo, useState } from "react";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import {
@@ -146,35 +148,37 @@ function FunnelVisualization({ applied, interviewing, hired }: { applied: number
 
 export function RecruitingCommandCenter() {
   const [loadState, setLoadState] = useState<CommandCenterLoadState>({ status: "loading" });
+  const [retrying, setRetrying] = useState(false);
+  const loadingCeilingHit = useLoadingCeiling(loadState.status === "loading");
   const breezyCandidates =
     loadState.status === "ready" && loadState.candidates.ok ? loadState.candidates.candidates : [];
   const drawer = useCandidateDrawer({ candidates: breezyCandidates });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const [candidates, jobs] = await Promise.all([
-          fetchCachedBreezyCandidates(),
-          fetchCachedBreezyJobs(),
-        ]);
-        if (!cancelled) setLoadState({ status: "ready", candidates, jobs });
-      } catch (err) {
-        if (!cancelled) {
-          setLoadState({
-            status: "error",
-            message: err instanceof Error ? err.message : "Failed to load Breezy recruiting data",
-          });
-        }
-      }
+  const load = useCallback(async () => {
+    setLoadState({ status: "loading" });
+    try {
+      const [candidates, jobs] = await Promise.all([
+        fetchCachedBreezyCandidates(),
+        fetchCachedBreezyJobs(),
+      ]);
+      setLoadState({ status: "ready", candidates, jobs });
+    } catch (err) {
+      setLoadState({
+        status: "error",
+        message: err instanceof Error ? err.message : "Failed to load Breezy recruiting data",
+      });
     }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(id);
+  }, [load]);
+
+  const retry = useCallback(() => {
+    setRetrying(true);
+    void load().finally(() => setRetrying(false));
+  }, [load]);
 
   const snapshot = useMemo(() => {
     if (loadState.status !== "ready") return null;
@@ -182,7 +186,21 @@ export function RecruitingCommandCenter() {
     return buildRecruitingCommandCenter(loadState.candidates, loadState.jobs);
   }, [loadState]);
 
-  if (loadState.status === "loading") return <CommandCenterSkeleton />;
+  if (loadState.status === "loading") {
+    if (loadingCeilingHit) {
+      return (
+        <DashboardSectionFallback
+          title="Recruiting Command Center"
+          loadingCeilingHit
+          error="Breezy sync is taking longer than expected."
+          timedOut
+          onRetry={retry}
+          retrying={retrying}
+        />
+      );
+    }
+    return <CommandCenterSkeleton />;
+  }
 
   if (loadState.status === "error") {
     const failureKind = classifyBreezyError(loadState.message);

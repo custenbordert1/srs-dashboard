@@ -43,7 +43,11 @@ export function DeferredSection({
       </button>
       {open ? (
         <div className="border-t border-zinc-800/80 px-4 pb-4 pt-2 sm:px-5 sm:pb-5">
-          {loading ? <TabSkeleton rows={skeletonRows} cards={2} /> : children}
+          {loading ? (
+            <TabSkeleton message="Loading section…" rows={skeletonRows} cards={2} />
+          ) : (
+            children
+          )}
         </div>
       ) : null}
     </section>

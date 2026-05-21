@@ -1,5 +1,6 @@
 import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
+import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import {
   BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
@@ -8,16 +9,33 @@ import {
 } from "@/lib/fetch-with-timeout";
 
 async function fetchBreezyJson<T>(path: string, label: string): Promise<T> {
+  const started = performance.now();
+  logDashboardFetch("start", { route: path, label });
   try {
     const res = await fetchWithTimeout(path, {
       cache: "no-store",
       timeoutMs: BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
     });
-    return (await res.json()) as T;
+    const parsed = (await res.json()) as T;
+    logDashboardFetch(res.ok ? "success" : "error", {
+      route: path,
+      label,
+      ms: Math.round(performance.now() - started),
+      status: res.status,
+    });
+    return parsed;
   } catch (err) {
+    const ms = Math.round(performance.now() - started);
     if (isTimeoutError(err)) {
+      logDashboardFetch("timeout", { route: path, label, ms, error: "client timeout" });
       throw new Error(timeoutErrorMessage(label, BREEZY_CLIENT_REQUEST_TIMEOUT_MS));
     }
+    logDashboardFetch("error", {
+      route: path,
+      label,
+      ms,
+      error: err instanceof Error ? err.message : String(err),
+    });
     throw err;
   }
 }
