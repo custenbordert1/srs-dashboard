@@ -2,6 +2,7 @@
 
 import { AI_SCORE_TIER_STYLES } from "@/lib/candidate-ai-scoring";
 import { RESUME_PARSING_CAPABILITIES } from "@/lib/candidate-resume-prep";
+import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import type {
   CommandCenterFilterOptions,
   CommandCenterRankedRow,
@@ -12,7 +13,7 @@ const ALL = "__all__";
 
 type RankedSortKey = keyof Pick<
   CommandCenterRankedRow,
-  "name" | "aiScore" | "source" | "position" | "stage" | "appliedDate" | "location"
+  "name" | "aiScore" | "matchPercent" | "source" | "position" | "stage" | "appliedDate" | "location"
 >;
 
 function AiScoreBadge({ score, tier, tierLabel }: { score: number; tier: CommandCenterRankedRow["aiTier"]; tierLabel: string }) {
@@ -79,7 +80,15 @@ export function TopCandidatesWidget({
                   {row.position} · {row.location}
                 </p>
               </div>
-              <AiScoreBadge score={row.aiScore} tier={row.aiTier} tierLabel={row.aiTierLabel} />
+              <div className="flex flex-col items-end gap-1">
+                <CandidateMatchBadge
+                  matchPercent={row.matchPercent}
+                  matchLevel={row.matchLevel}
+                  isTopMatch={row.isTopMatch}
+                  compact
+                />
+                <AiScoreBadge score={row.aiScore} tier={row.aiTier} tierLabel={row.aiTierLabel} />
+              </div>
             </li>
           ))}
         </ul>
@@ -133,7 +142,8 @@ export function RankedCandidatesTable({
   const [stateFilter, setStateFilter] = useState(ALL);
   const [sourceFilter, setSourceFilter] = useState(ALL);
   const [stageFilter, setStageFilter] = useState(ALL);
-  const [sortKey, setSortKey] = useState<RankedSortKey>("aiScore");
+  const [matchFilter, setMatchFilter] = useState(ALL);
+  const [sortKey, setSortKey] = useState<RankedSortKey>("matchPercent");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const filteredRows = useMemo(() => {
@@ -141,9 +151,10 @@ export function RankedCandidatesTable({
       if (stateFilter !== ALL && row.state !== stateFilter) return false;
       if (sourceFilter !== ALL && row.source !== sourceFilter) return false;
       if (stageFilter !== ALL && row.stage !== stageFilter) return false;
+      if (matchFilter !== ALL && row.matchLevel !== matchFilter) return false;
       return true;
     });
-  }, [rows, sourceFilter, stageFilter, stateFilter]);
+  }, [rows, matchFilter, sourceFilter, stageFilter, stateFilter]);
 
   function handleSort(key: RankedSortKey) {
     if (sortKey === key) {
@@ -151,7 +162,7 @@ export function RankedCandidatesTable({
       return;
     }
     setSortKey(key);
-    setSortDirection(key === "aiScore" || key === "appliedDate" ? "desc" : "asc");
+    setSortDirection(key === "aiScore" || key === "matchPercent" || key === "appliedDate" ? "desc" : "asc");
   }
 
   const sortedRows = useMemo(() => {
@@ -162,6 +173,9 @@ export function RankedCandidatesTable({
       if (sortKey === "aiScore") {
         left = a.aiScore;
         right = b.aiScore;
+      } else if (sortKey === "matchPercent") {
+        left = a.matchPercent;
+        right = b.matchPercent;
       } else if (sortKey === "appliedDate") {
         left = new Date(a.appliedDate).getTime() || 0;
         right = new Date(b.appliedDate).getTime() || 0;
@@ -181,10 +195,10 @@ export function RankedCandidatesTable({
       <div className="border-b border-zinc-800/80 px-4 py-4 sm:px-5">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-50">AI-ranked candidates</h2>
         <p className="mt-1 text-sm text-zinc-500">
-          Scores 1–100 from merchandising fit, reset/Walmart-Target experience, travel, tenure, source quality, and stage.
-          Elite 90+ · Strong 75+ · Moderate 60+ · Weak below 60.
+          Match % weights merchandising resume keywords, travel radius vs job location, response speed, and resume quality.
+          High ≥75% · Medium ≥55% · Top match at ≥82% on high tier.
         </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <select className={selectClass} value={stateFilter} onChange={(event) => setStateFilter(event.target.value)} aria-label="Filter by state">
             <option value={ALL}>All states</option>
             {filterOptions.states.map((state) => (
@@ -209,6 +223,25 @@ export function RankedCandidatesTable({
               </option>
             ))}
           </select>
+          <select
+            className={selectClass}
+            value={matchFilter}
+            onChange={(event) => setMatchFilter(event.target.value)}
+            aria-label="Filter by match level"
+          >
+            <option value={ALL}>All match levels</option>
+            {filterOptions.matchLevels.map((level) => (
+              <option key={level} value={level}>
+                {level === "high"
+                  ? "High match"
+                  : level === "medium"
+                    ? "Medium match"
+                    : level === "low"
+                      ? "Low match"
+                      : "No resume"}
+              </option>
+            ))}
+          </select>
         </div>
         <p className="mt-2 text-xs text-zinc-600">
           Showing {sortedRows.length.toLocaleString()} of {rows.length.toLocaleString()} candidates
@@ -222,6 +255,7 @@ export function RankedCandidatesTable({
             <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
               <tr className="border-b border-zinc-800/80 text-xs text-zinc-500">
                 <SortableHeader label="Name" sortKey="name" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
+                <SortableHeader label="Match %" sortKey="matchPercent" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="AI score" sortKey="aiScore" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Source" sortKey="source" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Position" sortKey="position" activeKey={sortKey} direction={sortDirection} onSort={handleSort} />
@@ -253,7 +287,24 @@ export function RankedCandidatesTable({
                     onCandidateClick ? "cursor-pointer" : ""
                   } ${selected ? "bg-teal-500/10" : ""}`}
                 >
-                  <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">{row.name}</td>
+                  <td className="px-4 py-3 font-medium text-zinc-100 sm:px-5">
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                      {row.name}
+                      {row.isTopMatch ? (
+                        <span className="rounded-full bg-violet-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-200 ring-1 ring-violet-500/40">
+                          Top
+                        </span>
+                      ) : null}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 sm:px-5">
+                    <CandidateMatchBadge
+                      matchPercent={row.matchPercent}
+                      matchLevel={row.matchLevel}
+                      isTopMatch={false}
+                      compact
+                    />
+                  </td>
                   <td className="px-4 py-3 sm:px-5">
                     <AiScoreBadge score={row.aiScore} tier={row.aiTier} tierLabel={row.aiTierLabel} />
                   </td>

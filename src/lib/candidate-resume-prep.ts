@@ -17,11 +17,11 @@ export type ResumeParsingCapabilities = {
   notes: string;
 };
 
-/** Current production path: Breezy profile fields only. */
+/** Parses resume/application text from Breezy profile fields included in candidate sync (read-only). */
 export const RESUME_PARSING_CAPABILITIES: ResumeParsingCapabilities = {
-  enabled: false,
+  enabled: true,
   provider: "local-heuristic",
-  notes: "Resume body parsing is not wired yet. Scores use Breezy profile, stage, and source metadata.",
+  notes: "Scores use Breezy profile + resume/application fields from the candidate sync payload.",
 };
 
 export function buildCandidateScoringInput(

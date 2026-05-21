@@ -419,3 +419,30 @@ export const RISK_BADGE_STYLES: Record<RecruitingRiskLevel, string> = {
   Medium: "bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30",
   High: "bg-rose-500/15 text-rose-200 ring-1 ring-rose-500/30",
 };
+
+/** Candidate match scoring (Breezy resume/application parsing, travel radius, weighted match). */
+export type {
+  CandidateIntelligenceContext,
+  CandidateIntelligenceJobContext,
+  CandidateIntelligenceScore,
+  CandidateMatchFactors,
+  CandidateMatchLevel,
+  CandidateSkillTagId,
+} from "@/lib/recruiting-intelligence/types";
+
+export {
+  scoreCandidateIntelligence,
+  scoreCandidatesIntelligence,
+  buildJobsByPositionId,
+  MERCHANDISING_SKILL_TAGS,
+  extractSkillTagsFromText,
+  labelForSkillTag,
+  extractCandidateResumeText,
+  parseCandidateApplication,
+  candidateHasResume,
+  extractResumeFieldsFromRaw,
+  extractZipFromRaw,
+  normalizeZip,
+  distanceMilesForCandidateToJob,
+  scoreTravelRadiusMatch,
+} from "@/lib/recruiting-intelligence/index";

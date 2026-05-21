@@ -14,6 +14,10 @@ import {
   loadConfigSync,
 } from "@/lib/config";
 import { breezyConfigErrorMessage } from "@/lib/env-validation";
+import {
+  extractResumeFieldsFromRaw,
+  extractZipFromRaw,
+} from "@/lib/recruiting-intelligence/resume-parser";
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
@@ -69,6 +73,17 @@ export type BreezyJob = {
   source?: string;
 };
 
+export type BreezyCandidateResumeFields = {
+  headline?: string;
+  summary?: string;
+  coverLetter?: string;
+  resumeBody?: string;
+  workHistoryText?: string;
+  educationText?: string;
+  customAttributesText?: string;
+  tags?: string[];
+};
+
 export type BreezyCandidate = {
   candidateId: string;
   firstName: string;
@@ -91,6 +106,14 @@ export type BreezyCandidate = {
   positionName: string;
   city: string;
   state: string;
+  /** US postal code when present on candidate address. */
+  zipCode: string;
+  /** Combined resume/application text extracted from Breezy profile fields. */
+  resumeText: string;
+  /** True when resume or substantive application text was detected. */
+  hasResume: boolean;
+  /** Raw resume field fragments retained for scoring diagnostics. */
+  resumeFields?: BreezyCandidateResumeFields;
   score?: number;
   /** Breezy position pipeline state when fetched (published, closed, archived, …). */
   positionPipelineStatus?: string;
@@ -401,6 +424,20 @@ function sanitizeCandidate(
   const explicitLastName = stringField(record, ["last_name", "lastName"]);
   const fallbackName = splitName(stringField(record, ["name", "full_name"]));
   const dates = extractBreezyAddedDate(record);
+  const resumeFields = extractResumeFieldsFromRaw(record);
+  const zipCode = extractZipFromRaw(record);
+  const resumeParts = [
+    resumeFields?.headline,
+    resumeFields?.summary,
+    resumeFields?.coverLetter,
+    resumeFields?.resumeBody,
+    resumeFields?.workHistoryText,
+    resumeFields?.educationText,
+    resumeFields?.customAttributesText,
+    resumeFields?.tags?.join(" "),
+  ].filter(Boolean);
+  const resumeText = resumeParts.join("\n").trim();
+  const hasResume = resumeText.length >= 80 || (resumeText.length >= 40 && resumeParts.length >= 2);
 
   return {
     candidateId,
@@ -437,6 +474,10 @@ function sanitizeCandidate(
       nestedString(record, [["address", "state"], ["location", "state"], ["position", "location", "state"]]) ||
       position?.state ||
       "",
+    zipCode,
+    resumeText,
+    hasResume,
+    resumeFields,
     score: numberField(record, ["score", "rating"]),
     positionPipelineStatus: position?.status || "",
   };

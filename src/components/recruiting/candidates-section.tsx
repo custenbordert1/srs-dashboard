@@ -1,6 +1,6 @@
 "use client";
 
-import type { BreezyCandidate, BreezyCandidatesResult } from "@/lib/breezy-api";
+import type { BreezyCandidate, BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import {
   CANDIDATE_WORKFLOW_STATUSES,
   type CandidateWorkflowRecord,
@@ -30,7 +30,9 @@ import {
   type ScoredCandidateWorkflowRow,
 } from "@/lib/build-candidate-workflow-row";
 import { isAppliedDateInRange } from "@/lib/breezy-api";
-import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
+import { fetchCachedBreezyCandidates, fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
+import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
+import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
@@ -197,6 +199,7 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
 export function CandidatesSection() {
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities();
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
+  const [jobsData, setJobsData] = useState<BreezyJobsResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
   const [sourceFilter, setSourceFilter] = useState(ALL);
   const [stageFilter, setStageFilter] = useState(ALL);
@@ -204,6 +207,7 @@ export function CandidatesSection() {
   const [cityFilter, setCityFilter] = useState(ALL);
   const [stateFilter, setStateFilter] = useState(ALL);
   const [workflowFilter, setWorkflowFilter] = useState(ALL);
+  const [matchFilter, setMatchFilter] = useState(ALL);
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
@@ -217,8 +221,9 @@ export function CandidatesSection() {
 
     async function load() {
       try {
-        const [parsed, workflowParsed] = await Promise.all([
+        const [parsed, jobsParsed, workflowParsed] = await Promise.all([
           fetchCachedBreezyCandidates(),
+          fetchCachedBreezyJobs(),
           fetchCachedJson(
             cacheKey(["candidates", "workflows"]),
             async () => {
@@ -235,6 +240,7 @@ export function CandidatesSection() {
         ]);
         if (!cancelled) {
           setData(parsed);
+          setJobsData(jobsParsed);
           setWorkflowState(workflowParsed.ok && workflowParsed.workflows ? workflowParsed.workflows : {});
         }
       } catch (err) {
@@ -254,12 +260,20 @@ export function CandidatesSection() {
     };
   }, []);
 
+  const jobsByPositionId = useMemo(
+    () => (jobsData?.ok ? buildJobsByPositionId(jobsData.jobs) : new Map()),
+    [jobsData],
+  );
+
   const candidates = useMemo(
     () =>
       data?.ok
-        ? data.candidates.map((candidate) => buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId]))
+        ? data.candidates.map((candidate) => {
+            const job = jobsByPositionId.get(candidate.positionId);
+            return buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId], { job });
+          })
         : [],
-    [data, workflowState],
+    [data, jobsByPositionId, workflowState],
   );
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
@@ -292,13 +306,14 @@ export function CandidatesSection() {
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
 
-    return candidates.filter((candidate) => {
+    const rows = candidates.filter((candidate) => {
       if (sourceFilter !== ALL && candidate.source !== sourceFilter) return false;
       if (stageFilter !== ALL && candidate.stage !== stageFilter) return false;
       if (positionFilter !== ALL && candidate.positionName !== positionFilter) return false;
       if (cityFilter !== ALL && candidate.city !== cityFilter) return false;
       if (stateFilter !== ALL && candidate.state !== stateFilter) return false;
       if (workflowFilter !== ALL && candidate.workflowStatus !== workflowFilter) return false;
+      if (matchFilter !== ALL && candidate.matchLevel !== matchFilter) return false;
 
       if (appliedFrom && appliedTo) {
         if (!isAppliedDateInRange(candidate.appliedDate, appliedFrom, appliedTo)) return false;
@@ -320,12 +335,20 @@ export function CandidatesSection() {
 
       return true;
     });
+
+    return [...rows].sort(
+      (a, b) =>
+        b.matchPercent - a.matchPercent ||
+        b.ai.numericScore - a.ai.numericScore ||
+        candidateName(a).localeCompare(candidateName(b)),
+    );
   }, [
     appliedFrom,
     appliedTo,
     candidates,
     cityFilter,
     debouncedSearch,
+    matchFilter,
     positionFilter,
     searchIndex,
     sourceFilter,
@@ -582,6 +605,17 @@ export function CandidatesSection() {
               Send
             </button>
           </td>
+          <td className={tdClass} title={candidate.intelligenceSummary}>
+            <CandidateMatchBadge
+              matchPercent={candidate.matchPercent}
+              matchLevel={candidate.matchLevel}
+              isTopMatch={candidate.isTopMatch}
+              compact
+            />
+          </td>
+          <td className={`${tdClass} max-w-[8rem] truncate text-[10px] text-zinc-500`} title={candidate.skillTags.join(", ")}>
+            {candidate.skillTags.length > 0 ? candidate.skillTags.slice(0, 2).join(", ") : "—"}
+          </td>
           <td className={tdClass}>
             <span
               className={`inline-flex min-w-[2rem] justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${AI_GRADE_STYLES[candidate.aiGrade]}`}
@@ -618,7 +652,7 @@ export function CandidatesSection() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Candidates</h1>
             <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-              Clean live Breezy candidates for local dashboard review. Raw Breezy payloads, resume bodies, and HTML are not rendered.
+              Live Breezy candidates with merchandising resume intelligence, travel-radius scoring, and match filters. Breezy sync stays read-only.
             </p>
           </div>
           <p className="text-xs text-zinc-500">Fetched {formatDate(data.fetchedAt)}</p>
@@ -781,7 +815,7 @@ export function CandidatesSection() {
               </button>
             </div>
           ) : null}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
           <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
             <option value={ALL}>All sources</option>
             {sourceOptions.map((source) => <option key={source} value={source}>{source}</option>)}
@@ -812,6 +846,18 @@ export function CandidatesSection() {
                 </option>
               ))}
             </select>
+            <select
+              className={selectClass}
+              value={matchFilter}
+              onChange={(event) => setMatchFilter(event.target.value)}
+              aria-label="Filter by match level"
+            >
+              <option value={ALL}>All match levels</option>
+              <option value="high">High match</option>
+              <option value="medium">Medium match</option>
+              <option value="low">Low match</option>
+              <option value="no_resume">No resume</option>
+            </select>
           </div>
         </div>
 
@@ -820,7 +866,7 @@ export function CandidatesSection() {
         ) : (
           <VirtualCandidateTable
             rows={filtered}
-            colSpan={18}
+            colSpan={20}
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
@@ -850,6 +896,8 @@ export function CandidatesSection() {
                   <th className={thClass}>Actions</th>
                   <th className={thClass}>Notes</th>
                   <th className={thClass}>HelloSign</th>
+                  <th className={thClass}>Match</th>
+                  <th className={thClass}>Skills</th>
                   <th className={thClass}>AI Grade</th>
                   <th className={thClass}>Recommendations</th>
                 </tr>

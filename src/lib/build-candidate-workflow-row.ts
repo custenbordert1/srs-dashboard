@@ -1,4 +1,4 @@
-import type { BreezyCandidate } from "@/lib/breezy-api";
+import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import {
   scoreCandidate,
   type CandidateAiScore,
@@ -6,6 +6,11 @@ import {
   type AiLetterGrade,
   type WorkflowRecommendation,
 } from "@/lib/candidate-ai-scoring";
+import {
+  scoreCandidateIntelligence,
+  type CandidateIntelligenceScore,
+  type CandidateMatchLevel,
+} from "@/lib/recruiting-intelligence";
 import {
   nextActionForWorkflowStatus,
   type CandidateWorkflowRecord,
@@ -32,6 +37,14 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   aiSummary: string;
   aiBreakdown: CandidateAiScoreBreakdown;
   ai: CandidateAiScore;
+  matchPercent: number;
+  matchLevel: CandidateMatchLevel;
+  isTopMatch: boolean;
+  hasResume: boolean;
+  skillTags: string[];
+  distanceMiles: number | null;
+  intelligenceSummary: string;
+  intelligence: CandidateIntelligenceScore;
 };
 
 function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
@@ -55,9 +68,15 @@ function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStat
 export function buildScoredWorkflowRow(
   candidate: BreezyCandidate,
   local?: CandidateWorkflowRecord,
+  options?: { job?: Pick<BreezyJob, "city" | "state" | "zip"> },
 ): ScoredCandidateWorkflowRow {
   const workflowStatus = local?.workflowStatus ?? deriveWorkflowStatus(candidate);
-  const ai = scoreCandidate(candidate, workflowStatus);
+  const ai = scoreCandidate(candidate, workflowStatus, { resumeText: candidate.resumeText });
+  const intelligence = scoreCandidateIntelligence(candidate, {
+    job: options?.job
+      ? { city: options.job.city, state: options.job.state, zip: options.job.zip }
+      : { city: candidate.city, state: candidate.state },
+  });
 
   return {
     ...candidate,
@@ -80,5 +99,13 @@ export function buildScoredWorkflowRow(
     aiSummary: ai.summary,
     aiBreakdown: ai.breakdown,
     ai,
+    matchPercent: intelligence.matchPercent,
+    matchLevel: intelligence.matchLevel,
+    isTopMatch: intelligence.isTopMatch,
+    hasResume: intelligence.hasResume,
+    skillTags: intelligence.skillTagLabels,
+    distanceMiles: intelligence.distanceMiles,
+    intelligenceSummary: intelligence.summary,
+    intelligence,
   };
 }

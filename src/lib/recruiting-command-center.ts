@@ -7,7 +7,12 @@ import {
   type BreezyJobsSuccess,
 } from "@/lib/breezy-api";
 import type { Kpi } from "@/lib/recruiting-sample-data";
-import type { ChartBar } from "@/lib/recruiting-intelligence";
+import {
+  buildJobsByPositionId,
+  scoreCandidateIntelligence,
+  type ChartBar,
+  type CandidateMatchLevel,
+} from "@/lib/recruiting-intelligence";
 
 const MS_PER_HOUR = 60 * 60 * 1000;
 const MS_PER_DAY = 24 * MS_PER_HOUR;
@@ -52,12 +57,18 @@ export type CommandCenterRankedRow = {
   aiScore: number;
   aiTier: AiScoreTier;
   aiTierLabel: string;
+  matchPercent: number;
+  matchLevel: CandidateMatchLevel;
+  isTopMatch: boolean;
+  hasResume: boolean;
+  skillTags: string[];
 };
 
 export type CommandCenterFilterOptions = {
   states: string[];
   sources: string[];
   stages: string[];
+  matchLevels: CandidateMatchLevel[];
 };
 
 export type CommandCenterSnapshot = {
@@ -222,16 +233,26 @@ function buildFilterOptions(candidates: BreezyCandidate[]): CommandCenterFilterO
     states: sortedUnique(candidates.map((candidate) => candidate.state)),
     sources: sortedUnique(candidates.map((candidate) => candidate.source)),
     stages: sortedUnique(candidates.map((candidate) => candidate.stage)),
+    matchLevels: ["high", "medium", "low", "no_resume"],
   };
 }
 
-function buildRankedCandidates(candidates: BreezyCandidate[], reference: Date): CommandCenterRankedRow[] {
+function buildRankedCandidates(
+  candidates: BreezyCandidate[],
+  reference: Date,
+  jobsByPositionId: Map<string, { city: string; state: string; zip?: string }>,
+): CommandCenterRankedRow[] {
   return candidates
     .map((candidate) => {
       const city = candidate.city.trim();
       const state = candidate.state.trim();
       const hours = appliedAgingHours(candidate.appliedDate, reference);
-      const ai = scoreCandidate(candidate);
+      const ai = scoreCandidate(candidate, "Needs Review", { resumeText: candidate.resumeText });
+      const job = jobsByPositionId.get(candidate.positionId);
+      const intelligence = scoreCandidateIntelligence(candidate, {
+        referenceIso: reference.toISOString(),
+        job: job ?? { city: candidate.city, state: candidate.state },
+      });
       return {
         candidateId: candidate.candidateId,
         name: candidateName(candidate),
@@ -247,9 +268,19 @@ function buildRankedCandidates(candidates: BreezyCandidate[], reference: Date): 
         aiScore: ai.numericScore,
         aiTier: ai.tier,
         aiTierLabel: ai.tierLabel,
+        matchPercent: intelligence.matchPercent,
+        matchLevel: intelligence.matchLevel,
+        isTopMatch: intelligence.isTopMatch,
+        hasResume: intelligence.hasResume,
+        skillTags: intelligence.skillTagLabels,
       };
     })
-    .sort((a, b) => b.aiScore - a.aiScore || a.name.localeCompare(b.name));
+    .sort(
+      (a, b) =>
+        b.matchPercent - a.matchPercent ||
+        b.aiScore - a.aiScore ||
+        a.name.localeCompare(b.name),
+    );
 }
 
 export function buildRecruitingCommandCenter(
@@ -315,7 +346,8 @@ export function buildRecruitingCommandCenter(
     flatKpi("cc-sync", "Last Sync Time", lastSyncLabel, "Last successful Breezy candidates sync"),
   ];
 
-  const rankedCandidates = buildRankedCandidates(candidates, syncTime);
+  const jobsByPositionId = buildJobsByPositionId(jobsData.jobs);
+  const rankedCandidates = buildRankedCandidates(candidates, syncTime, jobsByPositionId);
 
   return {
     kpis,
