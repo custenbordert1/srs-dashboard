@@ -111,4 +111,18 @@ describe("verifyBreezyPositionResponse", () => {
     assert.equal(verification.ok, false);
     assert.ok(verification.mismatches.some((m) => m.includes("city")));
   });
+
+  it("flags pay rate mismatches from custom_attributes", () => {
+    const verification = verifyBreezyPositionResponse(
+      "pos-456",
+      {
+        name: "Retail Merchandiser",
+        location: { country: BREEZY_COUNTRY_CODE, city: "Dallas", state: "TX" },
+        custom_attributes: [{ name: "Pay Rate", value: "$16/hr", secure: false }],
+      },
+      { name: "Retail Merchandiser", city: "Dallas", state: "TX", payRate: "$18/hr" },
+    );
+    assert.equal(verification.ok, false);
+    assert.ok(verification.mismatches.some((m) => m.includes("pay rate")));
+  });
 });

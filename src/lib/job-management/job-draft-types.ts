@@ -47,13 +47,36 @@ export type BreezyJobCatalogRow = {
   department?: string;
 };
 
+export const JOB_MANAGEMENT_BREEZY_SOURCE = {
+  label: "Breezy HR API",
+  apiPath: "/api/job-management/breezy-jobs",
+} as const;
+
 export type BreezyJobCatalogSnapshot = {
   ok: true;
   jobs: BreezyJobCatalogRow[];
   fetchedAt: string;
   fromCache: boolean;
+  /** True when the latest refresh failed but an older server catalog is being shown. */
+  stale?: boolean;
+  /** Set when draft leg failed but published jobs were returned. */
+  partial?: boolean;
+  refreshError?: string;
+  warnings?: string[];
+  source: typeof JOB_MANAGEMENT_BREEZY_SOURCE.label;
+  sourcePath: typeof JOB_MANAGEMENT_BREEZY_SOURCE.apiPath;
   companyId?: string;
   companyName?: string;
   publishedCount?: number;
   draftCount?: number;
 };
+
+export type BreezyJobCatalogFailure = {
+  ok: false;
+  error: string;
+  fetchedAt: string;
+  source: typeof JOB_MANAGEMENT_BREEZY_SOURCE.label;
+  sourcePath: typeof JOB_MANAGEMENT_BREEZY_SOURCE.apiPath;
+};
+
+export type BreezyJobCatalogResult = BreezyJobCatalogSnapshot | BreezyJobCatalogFailure;

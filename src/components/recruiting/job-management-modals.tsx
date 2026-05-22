@@ -269,11 +269,22 @@ export function JobPushResultModal({
         <div className="mt-4 space-y-2 text-sm">
           <p className={matched ? "text-emerald-200" : "text-amber-200"}>
             {matched
-              ? "Breezy returned matching title and location."
-              : "Breezy returned mismatched location or title."}
+              ? "Breezy returned matching title, location, and pay rate."
+              : "Breezy returned data that did not fully match the draft."}
           </p>
-          <Field label="Expected location" value={verification.expected.city && verification.expected.state ? `${verification.expected.city}, ${verification.expected.state}` : "—"} />
+          <Field label="Expected title" value={verification.expected.name || "—"} />
+          <Field label="Breezy title" value={verification.actual.name || "—"} />
+          <Field
+            label="Expected location"
+            value={
+              verification.expected.city && verification.expected.state
+                ? `${verification.expected.city}, ${verification.expected.state}`
+                : "—"
+            }
+          />
           <Field label="Breezy location" value={verification.actual.displayLocation || "—"} />
+          <Field label="Expected pay rate" value={verification.expected.payRate || "—"} />
+          <Field label="Breezy pay rate" value={verification.actual.payRate || "—"} />
           {verification.mismatches.length > 0 ? (
             <ul className="list-disc pl-5 text-xs text-amber-100">
               {verification.mismatches.map((item) => (

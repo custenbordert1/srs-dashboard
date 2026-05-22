@@ -146,19 +146,34 @@ export function buildBreezyPositionPayload(draft: JobDraft): BreezyPositionPaylo
   };
 }
 
+function payRateFromBreezyRecord(record: Record<string, unknown>): string {
+  const attrs = record.custom_attributes;
+  if (!Array.isArray(attrs)) return "";
+  for (const item of attrs) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const attr = item as Record<string, unknown>;
+    const name = typeof attr.name === "string" ? attr.name.trim().toLowerCase() : "";
+    if (name !== "pay rate") continue;
+    const value = typeof attr.value === "string" ? attr.value.trim() : "";
+    if (value) return value;
+  }
+  return "";
+}
+
 export type BreezyPositionVerification = {
   ok: boolean;
   breezyJobId: string;
-  expected: { name: string; city: string; state: string };
-  actual: { name: string; city: string; state: string; displayLocation: string };
+  expected: { name: string; city: string; state: string; payRate: string };
+  actual: { name: string; city: string; state: string; displayLocation: string; payRate: string };
   mismatches: string[];
 };
 
 export function verifyBreezyPositionResponse(
   breezyJobId: string,
   raw: unknown,
-  expected: { name: string; city: string; state: string },
+  expected: { name: string; city: string; state: string; payRate?: string },
 ): BreezyPositionVerification {
+  const expectedPayRate = (expected.payRate ?? "").trim();
   const record =
     raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   const name =
@@ -187,11 +202,14 @@ export function verifyBreezyPositionResponse(
           )
         : "";
 
+  const payRate = payRateFromBreezyRecord(record);
+
   const actual = {
     name,
     city,
     state,
     displayLocation: buildDisplayLocation(city, state),
+    payRate,
   };
 
   const mismatches: string[] = [];
@@ -204,11 +222,20 @@ export function verifyBreezyPositionResponse(
   }
   if (!city) mismatches.push("city missing in Breezy response");
   if (!state) mismatches.push("state missing in Breezy response");
+  if (expectedPayRate && payRate && payRate !== expectedPayRate) {
+    mismatches.push(`pay rate (expected "${expectedPayRate}", got "${payRate}")`);
+  }
+  if (expectedPayRate && !payRate) mismatches.push("pay rate missing in Breezy response");
 
   return {
     ok: mismatches.length === 0,
     breezyJobId,
-    expected,
+    expected: {
+      name: expected.name,
+      city: expected.city,
+      state: expected.state,
+      payRate: expectedPayRate,
+    },
     actual,
     mismatches,
   };

@@ -15,13 +15,24 @@ import {
   type JobManagementRow,
   type JobManagementSortKey,
 } from "@/lib/job-management/job-management-rows";
+import { fetchJobManagementCatalog } from "@/lib/job-management/job-management-catalog-client";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type CatalogResponse =
-  | { ok: true; jobs: BreezyJobCatalogRow[]; fetchedAt: string; fromCache: boolean }
-  | { ok: false; error: string };
+type CatalogMeta = {
+  fetchedAt: string;
+  fromCache: boolean;
+  stale?: boolean;
+  partial?: boolean;
+  refreshError?: string;
+  warnings?: string[];
+  source: string;
+  sourcePath: string;
+  companyName?: string;
+  publishedCount?: number;
+  draftCount?: number;
+};
 
 type FeedbackTone = "success" | "error" | "info" | "warning";
 
@@ -36,8 +47,11 @@ const thButtonClass =
 export function JobManagementSection() {
   const [jobs, setJobs] = useState<BreezyJobCatalogRow[]>([]);
   const [drafts, setDrafts] = useState<JobDraft[]>([]);
-  const [catalogMeta, setCatalogMeta] = useState<{ fetchedAt: string; fromCache: boolean } | null>(null);
+  const [catalogMeta, setCatalogMeta] = useState<CatalogMeta | null>(null);
+  const [syncAlert, setSyncAlert] = useState<FeedbackMessage | null>(null);
   const [loadingJobs, setLoadingJobs] = useState(false);
+  const [refreshingJobs, setRefreshingJobs] = useState(false);
+  const jobsCountRef = useRef(0);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pushing, setPushing] = useState(false);
@@ -56,6 +70,10 @@ export function JobManagementSection() {
 
   const editDraft = drafts.find((d) => d.id === editDraftId) ?? null;
   const pushDraft = drafts.find((d) => d.id === pushDraftId) ?? null;
+
+  useEffect(() => {
+    jobsCountRef.current = jobs.length;
+  }, [jobs.length]);
 
   const rows = useMemo(() => {
     if (!catalogMeta) return buildJobManagementRows(jobs, drafts, new Date().toISOString());
@@ -93,38 +111,81 @@ export function JobManagementSection() {
     }
   }, []);
 
-  const loadJobs = useCallback(async (force = false) => {
-    setLoadingJobs(true);
-    setFeedback(null);
-    try {
-      const res = await fetch(`/api/job-management/breezy-jobs${force ? "?force=true" : ""}`, {
-        cache: "no-store",
-      });
-      const parsed = (await res.json()) as CatalogResponse;
-      if (!res.ok || !parsed.ok) {
-        setFeedback({
-          tone: "error",
-          text: parsed.ok ? "Failed to load Breezy jobs." : (parsed.error ?? `HTTP ${res.status}`),
-        });
-        return;
+  const applyCatalogMeta = useCallback((parsed: CatalogMeta) => {
+    setCatalogMeta(parsed);
+    if (parsed.stale || parsed.partial || parsed.refreshError) {
+      const parts: string[] = [];
+      if (parsed.stale && parsed.refreshError) {
+        parts.push(`Showing last synced Breezy jobs — refresh failed: ${parsed.refreshError}`);
+      } else if (parsed.stale) {
+        parts.push("Showing last synced Breezy jobs while refresh is unavailable.");
       }
-      setJobs(parsed.jobs);
-      setCatalogMeta({ fetchedAt: parsed.fetchedAt, fromCache: parsed.fromCache });
-      if (force) {
-        setFeedback({
-          tone: "success",
-          text: `Synced ${parsed.jobs.length.toLocaleString()} Breezy job(s).`,
-        });
+      if (parsed.partial && parsed.warnings?.length) {
+        parts.push(parsed.warnings.join(" "));
       }
-    } catch (err) {
-      setFeedback({
-        tone: "error",
-        text: err instanceof Error ? err.message : "Failed to sync Breezy jobs",
+      setSyncAlert({
+        tone: parsed.stale ? "warning" : "info",
+        text: parts.join(" "),
       });
-    } finally {
-      setLoadingJobs(false);
+    } else {
+      setSyncAlert(null);
     }
   }, []);
+
+  const loadJobs = useCallback(async (force = false) => {
+    const emptyAtStart = jobsCountRef.current === 0;
+    if (emptyAtStart) setLoadingJobs(true);
+    else setRefreshingJobs(true);
+
+    try {
+      const parsed = await fetchJobManagementCatalog({ force });
+      if (parsed.ok) {
+        setJobs(parsed.jobs);
+        applyCatalogMeta({
+          fetchedAt: parsed.fetchedAt,
+          fromCache: parsed.fromCache,
+          stale: parsed.stale,
+          partial: parsed.partial,
+          refreshError: parsed.refreshError,
+          warnings: parsed.warnings,
+          source: parsed.source,
+          sourcePath: parsed.sourcePath,
+          companyName: parsed.companyName,
+          publishedCount: parsed.publishedCount,
+          draftCount: parsed.draftCount,
+        });
+        if (force && !parsed.stale && !parsed.partial) {
+          setFeedback({
+            tone: "success",
+            text: `Synced ${parsed.jobs.length.toLocaleString()} Breezy job(s) from ${parsed.source}.`,
+          });
+        }
+        return;
+      }
+
+      const message = parsed.error ?? "Failed to load Breezy jobs.";
+      if (jobsCountRef.current > 0) {
+        setSyncAlert({
+          tone: "error",
+          text: `${message} Table kept from last successful sync.`,
+        });
+      } else {
+        setSyncAlert(null);
+        setFeedback({ tone: "error", text: message });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to sync Breezy jobs";
+      if (jobsCountRef.current > 0) {
+        setSyncAlert({ tone: "error", text: `${message} Table kept from last successful sync.` });
+      } else {
+        setSyncAlert(null);
+        setFeedback({ tone: "error", text: message });
+      }
+    } finally {
+      setLoadingJobs(false);
+      setRefreshingJobs(false);
+    }
+  }, [applyCatalogMeta]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -233,7 +294,9 @@ export function JobManagementSection() {
             : `Push successful. Breezy job ${parsed.breezyJobId ?? ""}`.trim(),
       });
       await loadDrafts();
-      void loadJobs(true);
+      // Breezy list APIs can lag briefly after publish; wait before forced catalog refresh.
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await loadJobs(true);
     } catch (err) {
       setFeedback({ tone: "error", text: err instanceof Error ? err.message : "Push failed" });
     } finally {
@@ -312,25 +375,59 @@ export function JobManagementSection() {
             Table-first workflow: sync Breezy jobs, clone to draft, edit in a modal, and push with
             confirmation. City and state stay in separate fields.
           </p>
+          <p className="mt-2 text-xs text-zinc-600">
+            Source:{" "}
+            <span className="text-zinc-500">{catalogMeta?.source ?? "Breezy HR API"}</span>
+            {catalogMeta?.sourcePath ? (
+              <span className="text-zinc-700"> · {catalogMeta.sourcePath}</span>
+            ) : null}
+          </p>
           {catalogMeta ? (
-            <p className="mt-2 text-xs text-zinc-600">
-              Last Breezy sync: {new Date(catalogMeta.fetchedAt).toLocaleString()}
-              {catalogMeta.fromCache ? " (cached)" : ""}
-              {loadingJobs || loadingDrafts ? " · Sync in progress…" : ""}
+            <p className="mt-1 text-xs text-zinc-600">
+              Last sync: {new Date(catalogMeta.fetchedAt).toLocaleString()}
+              {catalogMeta.fromCache ? " · server cache" : " · live"}
+              {catalogMeta.stale ? " · stale (refresh failed)" : ""}
+              {catalogMeta.partial ? " · partial (draft leg missing)" : ""}
+              {catalogMeta.companyName ? ` · ${catalogMeta.companyName}` : ""}
+              {catalogMeta.publishedCount != null
+                ? ` · ${catalogMeta.publishedCount} published`
+                : ""}
+              {catalogMeta.draftCount != null && catalogMeta.draftCount > 0
+                ? ` · ${catalogMeta.draftCount} draft in Breezy`
+                : ""}
+              {loadingJobs || refreshingJobs || loadingDrafts ? " · sync in progress…" : ""}
             </p>
           ) : (
-            <p className="mt-2 text-xs text-zinc-600">Candidate/job sync pending — refresh to load Breezy jobs.</p>
+            <p className="mt-1 text-xs text-zinc-600">
+              {loadingJobs ? "Loading Breezy jobs…" : "No Breezy catalog loaded yet — use Refresh / Sync."}
+            </p>
           )}
         </div>
         <button
           type="button"
-          disabled={loadingJobs}
+          disabled={loadingJobs || refreshingJobs}
           onClick={() => void loadJobs(true)}
           className="rounded-lg border border-teal-600/40 bg-teal-600/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/20 disabled:opacity-50"
         >
-          {loadingJobs ? "Syncing…" : "Refresh / Sync"}
+          {loadingJobs || refreshingJobs ? "Syncing…" : "Refresh / Sync"}
         </button>
       </header>
+
+      {syncAlert ? (
+        <p
+          role={syncAlert.tone === "error" ? "alert" : "status"}
+          className={[
+            "rounded-lg border px-3 py-2 text-sm",
+            syncAlert.tone === "error"
+              ? "border-rose-500/30 bg-rose-500/10 text-rose-100"
+              : syncAlert.tone === "warning"
+                ? "border-amber-500/30 bg-amber-500/10 text-amber-100"
+                : "border-sky-500/30 bg-sky-500/10 text-sky-100",
+          ].join(" ")}
+        >
+          {syncAlert.text}
+        </p>
+      ) : null}
 
       {feedback ? (
         <p
@@ -392,10 +489,17 @@ export function JobManagementSection() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
-              {loadingJobs && sortedRows.length === 0 ? (
+              {loadingJobs && jobs.length === 0 && sortedRows.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-10 text-center text-zinc-500">
-                    Loading jobs…
+                    Loading jobs from Breezy…
+                  </td>
+                </tr>
+              ) : null}
+              {refreshingJobs && sortedRows.length > 0 ? (
+                <tr className="bg-teal-950/20">
+                  <td colSpan={9} className="px-4 py-1.5 text-center text-[11px] text-teal-200/80">
+                    Refreshing Breezy catalog — table stays visible
                   </td>
                 </tr>
               ) : null}

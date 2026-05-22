@@ -291,6 +291,7 @@ export async function createBreezyPositionFromDraft(
     name: built.breezyTitle,
     city: built.draftSnapshot.city,
     state: built.draftSnapshot.usState,
+    payRate: built.draftSnapshot.payRate,
   });
 
   const fetchedPosition = await fetchCreatedPosition(company.companyId, breezyJobId, apiKey);
@@ -300,6 +301,7 @@ export async function createBreezyPositionFromDraft(
           name: built.breezyTitle,
           city: built.draftSnapshot.city,
           state: built.draftSnapshot.usState,
+          payRate: built.draftSnapshot.payRate,
         })
       : createVerification;
 
