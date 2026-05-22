@@ -3,6 +3,7 @@
 import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES, type CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
+import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import { useEffect, useRef, useState } from "react";
 
 export type CandidateRowAction =
@@ -10,19 +11,37 @@ export type CandidateRowAction =
   | { kind: "change-workflow"; status: CandidateWorkflowStatus }
   | { kind: "assign-recruiter"; recruiter: string }
   | { kind: "assign-dm"; dm: string }
-  | { kind: "add-note"; note: string };
+  | { kind: "add-note"; note: string }
+  | { kind: "send-paperwork"; templateKey: OnboardingTemplateKey };
+
+type OnboardingTemplateOption = {
+  key: OnboardingTemplateKey;
+  label: string;
+  configured: boolean;
+};
 
 type CandidateActionsMenuProps = {
   onAction: (action: CandidateRowAction) => void;
   rosters: RecruiterRosters;
   onRostersUpdated?: (rosters: RecruiterRosters) => void;
+  onboardingConfigured?: boolean;
+  paperworkTemplates?: OnboardingTemplateOption[];
+  sendPaperworkDisabled?: boolean;
 };
 
-export function CandidateActionsMenu({ onAction, rosters, onRostersUpdated }: CandidateActionsMenuProps) {
+export function CandidateActionsMenu({
+  onAction,
+  rosters,
+  onRostersUpdated,
+  onboardingConfigured = false,
+  paperworkTemplates = [],
+  sendPaperworkDisabled = false,
+}: CandidateActionsMenuProps) {
   const [open, setOpen] = useState(false);
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
+  const [paperworkOpen, setPaperworkOpen] = useState(false);
   const [recruiters, setRecruiters] = useState<string[]>(rosters.recruiters);
   const [dms, setDms] = useState<string[]>(rosters.dms);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -53,7 +72,10 @@ export function CandidateActionsMenu({ onAction, rosters, onRostersUpdated }: Ca
     setWorkflowOpen(false);
     setRecruiterOpen(false);
     setDmOpen(false);
+    setPaperworkOpen(false);
   }
+
+  const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
 
   function run(action: CandidateRowAction) {
     closeMenus();
@@ -206,6 +228,41 @@ export function CandidateActionsMenu({ onAction, rosters, onRostersUpdated }: Ca
                 >
                   + Add DM…
                 </button>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="relative border-t border-zinc-800/80">
+            <button
+              type="button"
+              disabled={!onboardingConfigured || configuredTemplates.length === 0 || sendPaperworkDisabled}
+              title={
+                !onboardingConfigured
+                  ? "Configure DROPBOX_SIGN_API_KEY and template IDs in .env.local"
+                  : configuredTemplates.length === 0
+                    ? "No onboarding templates configured"
+                    : sendPaperworkDisabled
+                      ? "Sending paperwork…"
+                      : "Send Dropbox Sign template"
+              }
+              className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
+              onClick={() => setPaperworkOpen((value) => !value)}
+            >
+              Send paperwork
+              <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
+            </button>
+            {paperworkOpen && configuredTemplates.length > 0 ? (
+              <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
+                {configuredTemplates.map((template) => (
+                  <button
+                    key={template.key}
+                    type="button"
+                    className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80"
+                    onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
+                  >
+                    {template.label}
+                  </button>
+                ))}
               </div>
             ) : null}
           </div>

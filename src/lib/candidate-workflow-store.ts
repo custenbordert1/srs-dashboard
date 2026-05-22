@@ -17,10 +17,13 @@ import {
   type CandidateWorkflowEvent,
   type CandidateWorkflowRecord,
   type CandidateWorkflowState,
+  normalizePaperworkStatus,
   type CandidateWorkflowStatus,
   type CandidateWorkflowStoreFile,
+  type PaperworkStatus,
   type RecruiterRosters,
 } from "@/lib/candidate-workflow-types";
+import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
@@ -182,6 +185,13 @@ export async function upsertCandidateWorkflow(input: {
   recruitingActions?: CandidateRecruitingActions;
   followUpDueAt?: string | null;
   snoozedUntil?: string | null;
+  signatureRequestId?: string | null;
+  paperworkTemplateKey?: string | null;
+  paperworkSentAt?: string | null;
+  paperworkSignedAt?: string | null;
+  paperworkStatus?: PaperworkStatus;
+  paperworkError?: string | null;
+  paperworkHistoryMessage?: string;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
@@ -199,6 +209,26 @@ export async function upsertCandidateWorkflow(input: {
     input.followUpDueAt !== undefined ? input.followUpDueAt : (existing?.followUpDueAt ?? null);
   const snoozedUntil =
     input.snoozedUntil !== undefined ? input.snoozedUntil : (existing?.snoozedUntil ?? null);
+  const signatureRequestId =
+    input.signatureRequestId !== undefined
+      ? input.signatureRequestId
+      : (existing?.signatureRequestId ?? null);
+  const paperworkTemplateKey =
+    input.paperworkTemplateKey !== undefined
+      ? input.paperworkTemplateKey
+      : (existing?.paperworkTemplateKey ?? null);
+  const paperworkSentAt =
+    input.paperworkSentAt !== undefined ? input.paperworkSentAt : (existing?.paperworkSentAt ?? null);
+  const paperworkSignedAt =
+    input.paperworkSignedAt !== undefined
+      ? input.paperworkSignedAt
+      : (existing?.paperworkSignedAt ?? null);
+  const paperworkStatus =
+    input.paperworkStatus !== undefined
+      ? input.paperworkStatus
+      : (existing?.paperworkStatus ?? "not_sent");
+  const paperworkError =
+    input.paperworkError !== undefined ? input.paperworkError : (existing?.paperworkError ?? null);
 
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
@@ -231,6 +261,9 @@ export async function upsertCandidateWorkflow(input: {
       ),
     );
   }
+  if (input.paperworkHistoryMessage?.trim()) {
+    history.unshift(event("paperwork", input.paperworkHistoryMessage.trim(), now));
+  }
 
   const record: CandidateWorkflowRecord = {
     candidateId: input.candidateId,
@@ -244,6 +277,12 @@ export async function upsertCandidateWorkflow(input: {
     recruitingActions,
     followUpDueAt,
     snoozedUntil,
+    signatureRequestId,
+    paperworkTemplateKey,
+    paperworkSentAt,
+    paperworkSignedAt,
+    paperworkStatus,
+    paperworkError,
     updatedAt: now,
   };
 
@@ -349,4 +388,107 @@ export async function snoozeCandidateWorkflow(input: {
     snoozedUntil: until,
     audit: { action: "snooze", byUserId: input.byUserId, metadata: { hours } },
   });
+}
+
+export async function recordCandidatePaperworkSent(input: {
+  candidateId: string;
+  signatureRequestId: string;
+  templateKey: OnboardingTemplateKey;
+  byUserId?: string;
+}): Promise<CandidateWorkflowRecord> {
+  const now = new Date().toISOString();
+  const file = await readStoreFile();
+  const existing = file.workflows[input.candidateId];
+
+  return upsertCandidateWorkflow({
+    candidateId: input.candidateId,
+    workflowStatus: "Paperwork Sent",
+    assignedRecruiter: existing?.assignedRecruiter,
+    assignedDM: existing?.assignedDM,
+    recruitingActions: existing?.recruitingActions,
+    signatureRequestId: input.signatureRequestId,
+    paperworkTemplateKey: input.templateKey,
+    paperworkSentAt: now,
+    paperworkSignedAt: null,
+    paperworkStatus: "sent",
+    paperworkError: null,
+    paperworkHistoryMessage: `Onboarding paperwork sent (${input.templateKey}). Request ${input.signatureRequestId}.`,
+    audit: {
+      action: "paperwork_sent",
+      byUserId: input.byUserId,
+      metadata: {
+        templateKey: input.templateKey,
+        signatureRequestId: input.signatureRequestId,
+      },
+    },
+  });
+}
+
+export async function applyCandidatePaperworkStatus(input: {
+  candidateId: string;
+  signatureRequestId: string;
+  paperworkStatus: PaperworkStatus;
+  byUserId?: string;
+}): Promise<CandidateWorkflowRecord> {
+  const now = new Date().toISOString();
+  const file = await readStoreFile();
+  const existing = file.workflows[input.candidateId];
+  const status = normalizePaperworkStatus(input.paperworkStatus);
+  const workflowStatus =
+    status === "signed"
+      ? "Signed"
+      : existing?.workflowStatus === "Paperwork Sent"
+        ? "Paperwork Sent"
+        : (existing?.workflowStatus ?? "Paperwork Sent");
+
+  return upsertCandidateWorkflow({
+    candidateId: input.candidateId,
+    workflowStatus,
+    assignedRecruiter: existing?.assignedRecruiter,
+    assignedDM: existing?.assignedDM,
+    recruitingActions: existing?.recruitingActions,
+    signatureRequestId: input.signatureRequestId,
+    paperworkTemplateKey: existing?.paperworkTemplateKey ?? null,
+    paperworkSentAt: existing?.paperworkSentAt ?? now,
+    paperworkSignedAt: status === "signed" ? now : (existing?.paperworkSignedAt ?? null),
+    paperworkStatus: status,
+    paperworkError: status === "failed" ? (existing?.paperworkError ?? "Paperwork failed") : null,
+    paperworkHistoryMessage: `Paperwork status: ${status}.`,
+    audit: {
+      action: "paperwork_status",
+      byUserId: input.byUserId,
+      metadata: { paperworkStatus: status },
+    },
+  });
+}
+
+export async function recordCandidatePaperworkFailed(input: {
+  candidateId: string;
+  error: string;
+  byUserId?: string;
+}): Promise<CandidateWorkflowRecord> {
+  const file = await readStoreFile();
+  const existing = file.workflows[input.candidateId];
+
+  return upsertCandidateWorkflow({
+    candidateId: input.candidateId,
+    workflowStatus: existing?.workflowStatus ?? "Paperwork Needed",
+    assignedRecruiter: existing?.assignedRecruiter,
+    assignedDM: existing?.assignedDM,
+    recruitingActions: existing?.recruitingActions,
+    paperworkStatus: "failed",
+    paperworkError: input.error,
+    paperworkHistoryMessage: `Paperwork send failed: ${input.error}`,
+    audit: { action: "paperwork_failed", byUserId: input.byUserId },
+  });
+}
+
+export function findCandidateIdBySignatureRequest(
+  workflows: CandidateWorkflowState,
+  signatureRequestId: string,
+): string | null {
+  for (const [candidateId, record] of Object.entries(workflows)) {
+    if (record.signatureRequestId === signatureRequestId) return candidateId;
+  }
+  return null;
 }

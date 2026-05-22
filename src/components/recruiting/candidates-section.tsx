@@ -21,12 +21,19 @@ import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-
 import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
+import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
 import {
   completeCandidateFollowUp,
   persistRecruitingActionToggle,
   persistWorkflowUpdate,
   snoozeCandidate24h,
 } from "@/lib/candidate-workflow-client";
+import {
+  checkOnboardingSignatureStatus,
+  fetchOnboardingConfig,
+  sendOnboardingPacket,
+} from "@/lib/onboarding-client";
+import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import {
   defaultRecruiterRosters,
   type RecruiterRosters,
@@ -248,6 +255,11 @@ export function CandidatesSection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
+  const [onboardingConfigured, setOnboardingConfigured] = useState(false);
+  const [paperworkTemplates, setPaperworkTemplates] = useState<
+    Array<{ key: OnboardingTemplateKey; label: string; configured: boolean }>
+  >([]);
+  const [paperworkSendingId, setPaperworkSendingId] = useState<string | null>(null);
 
   const commitCandidatesSuccess = useCallback((parsed: BreezyCandidatesSuccess) => {
     breezySnapshotRef.current = parsed;
@@ -401,6 +413,24 @@ export function CandidatesSection() {
     const id = window.setTimeout(() => void loadBundle(), 0);
     return () => window.clearTimeout(id);
   }, [loadBundle]);
+
+  useEffect(() => {
+    void fetchOnboardingConfig()
+      .then((config) => {
+        setOnboardingConfigured(config.configured);
+        setPaperworkTemplates(
+          config.templates.map((t) => ({
+            key: t.key as OnboardingTemplateKey,
+            label: t.label,
+            configured: t.configured,
+          })),
+        );
+      })
+      .catch(() => {
+        setOnboardingConfigured(false);
+        setPaperworkTemplates([]);
+      });
+  }, []);
 
   const retry = useCallback(() => {
     setRetrying(true);
@@ -626,6 +656,43 @@ export function CandidatesSection() {
       });
   }
 
+  const sendPaperwork = useCallback(
+    (candidate: ScoredCandidateWorkflowRow, templateKey: OnboardingTemplateKey) => {
+      if (!candidate.email?.trim()) {
+        window.alert("Candidate email is required to send Dropbox Sign paperwork.");
+        return;
+      }
+      setPaperworkSendingId(candidate.candidateId);
+      void sendOnboardingPacket({
+        candidateId: candidate.candidateId,
+        candidateName: candidateName(candidate),
+        candidateEmail: candidate.email.trim(),
+        templateKey,
+      })
+        .then((result) => {
+          if (result.workflow) applyWorkflowRecord(result.workflow);
+          invalidateCached(cacheKey(["candidates", "workflows"]));
+        })
+        .catch((err) => {
+          window.alert(err instanceof Error ? err.message : "Send paperwork failed");
+        })
+        .finally(() => setPaperworkSendingId(null));
+    },
+    [],
+  );
+
+  const refreshPaperworkStatus = useCallback((candidate: ScoredCandidateWorkflowRow) => {
+    if (!candidate.signatureRequestId) return;
+    void checkOnboardingSignatureStatus(candidate.signatureRequestId)
+      .then((result) => {
+        if (result.workflow) applyWorkflowRecord(result.workflow);
+        invalidateCached(cacheKey(["candidates", "workflows"]));
+      })
+      .catch((err) => {
+        window.alert(err instanceof Error ? err.message : "Paperwork status check failed");
+      });
+  }, []);
+
   const handleQueueAction = useCallback(
     (candidateId: string, payload: CandidateQueueActionPayload) => {
       const row = candidates.find((c) => c.candidateId === candidateId);
@@ -777,11 +844,13 @@ export function CandidatesSection() {
         updateWorkflow(candidate, candidate.workflowStatus, { assignedDM: action.dm });
         return;
       }
+      if (action.kind === "send-paperwork") {
+        sendPaperwork(candidate, action.templateKey);
+        return;
+      }
       updateWorkflow(candidate, candidate.workflowStatus, { note: action.note });
     },
-    // updateWorkflow is stable for this component instance (uses setState only).
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
-    [],
+    [sendPaperwork],
   );
 
   const renderCandidateRow = useCallback(
@@ -837,20 +906,49 @@ export function CandidatesSection() {
               rosters={rosters}
               onRostersUpdated={applyRosters}
               onAction={(action) => handleCandidateAction(candidate, action)}
+              onboardingConfigured={onboardingConfigured}
+              paperworkTemplates={paperworkTemplates}
+              sendPaperworkDisabled={paperworkSendingId === candidate.candidateId}
             />
           </td>
           <td className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`} title="Open candidate drawer">
             Notes: {candidate.notes.length}
           </td>
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-            <button
-              type="button"
-              disabled
-              title="HelloSign sending is disabled until API keys and packet templates are configured."
-              className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500"
-            >
-              Send
-            </button>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] text-zinc-500" title={candidate.paperworkError ?? undefined}>
+                {paperworkStatusLabel(candidate.paperworkStatus)}
+              </span>
+              <button
+                type="button"
+                disabled={
+                  !onboardingConfigured ||
+                  !candidate.email?.trim() ||
+                  paperworkSendingId === candidate.candidateId ||
+                  paperworkTemplates.every((t) => !t.configured)
+                }
+                title={
+                  !onboardingConfigured
+                    ? "Configure DROPBOX_SIGN_API_KEY in .env.local"
+                    : !candidate.email?.trim()
+                      ? "Email required"
+                      : "Send onboarding packet (Dropbox Sign)"
+                }
+                onClick={() => sendPaperwork(candidate, "onboarding_packet")}
+                className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
+              >
+                {paperworkSendingId === candidate.candidateId ? "Sending…" : "Send"}
+              </button>
+              {candidate.signatureRequestId ? (
+                <button
+                  type="button"
+                  className="text-[10px] text-teal-400/90 hover:underline"
+                  onClick={() => refreshPaperworkStatus(candidate)}
+                >
+                  Refresh
+                </button>
+              ) : null}
+            </div>
           </td>
           <td className={tdClass} title={candidate.intelligenceSummary}>
             <CandidateMatchBadge
@@ -876,7 +974,18 @@ export function CandidatesSection() {
         </tr>
       );
     },
-    [handleCandidateAction, rosters, selectedCandidateId, selectedIds, toggleSelectCandidate],
+    [
+      handleCandidateAction,
+      onboardingConfigured,
+      paperworkSendingId,
+      paperworkTemplates,
+      refreshPaperworkStatus,
+      rosters,
+      selectedCandidateId,
+      selectedIds,
+      sendPaperwork,
+      toggleSelectCandidate,
+    ],
   );
 
   if (loadingBundle && !hasCandidateSnapshot) {
@@ -1270,6 +1379,17 @@ export function CandidatesSection() {
         onRecruitingAction={(type: RecruitingActionType) => {
           if (!selectedCandidate) return;
           persistRecruitingAction(selectedCandidate.candidateId, type);
+        }}
+        onboardingConfigured={onboardingConfigured}
+        paperworkTemplates={paperworkTemplates}
+        paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
+        onSendPaperwork={(templateKey) => {
+          if (!selectedDrawerRow) return;
+          sendPaperwork(selectedDrawerRow, templateKey);
+        }}
+        onRefreshPaperworkStatus={() => {
+          if (!selectedDrawerRow) return;
+          refreshPaperworkStatus(selectedDrawerRow);
         }}
         melMatchesLoading={melLoading}
       />

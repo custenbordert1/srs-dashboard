@@ -13,7 +13,10 @@ import {
   type CandidateRecruitingActions,
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
+import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
 import { buildIntegrationPrep } from "@/lib/integration-prep";
+import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
+import type { PaperworkStatus } from "@/lib/candidate-workflow-types";
 import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
@@ -66,6 +69,12 @@ export type CandidateDrawerRow = {
   snoozedUntil: string | null;
   suggestedDM: string;
   dmNeedsAssignment: boolean;
+  signatureRequestId: string | null;
+  paperworkTemplateKey: string | null;
+  paperworkSentAt: string | null;
+  paperworkSignedAt: string | null;
+  paperworkStatus: PaperworkStatus;
+  paperworkError: string | null;
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
   opportunityRepMatches: OpportunityBestRepMatches[];
@@ -73,10 +82,10 @@ export type CandidateDrawerRow = {
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
 
-type HelloSignPrep = {
+type OnboardingTemplateOption = {
+  key: OnboardingTemplateKey;
+  label: string;
   configured: boolean;
-  statusLabel: string;
-  message: string;
 };
 
 type CandidateDetailDrawerProps = {
@@ -94,6 +103,11 @@ type CandidateDetailDrawerProps = {
   loading?: boolean;
   melMatchesLoading?: boolean;
   repMatchesLoading?: boolean;
+  onboardingConfigured?: boolean;
+  paperworkTemplates?: OnboardingTemplateOption[];
+  paperworkSending?: boolean;
+  onSendPaperwork?: (templateKey: OnboardingTemplateKey) => void;
+  onRefreshPaperworkStatus?: () => void;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -101,7 +115,7 @@ const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
   { id: "workflow", label: "Workflow" },
   { id: "notes", label: "Notes" },
   { id: "assignments", label: "Assignments" },
-  { id: "hellosign", label: "HelloSign" },
+  { id: "hellosign", label: "Paperwork" },
   { id: "ai", label: "AI" },
 ];
 
@@ -320,9 +334,13 @@ export function CandidateDetailDrawer({
   loading = false,
   melMatchesLoading = false,
   repMatchesLoading = false,
+  onboardingConfigured = false,
+  paperworkTemplates = [],
+  paperworkSending = false,
+  onSendPaperwork,
+  onRefreshPaperworkStatus,
 }: CandidateDetailDrawerProps) {
   const [tab, setTab] = useState<DrawerTab>("overview");
-  const [helloSign, setHelloSign] = useState<HelloSignPrep | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -333,34 +351,9 @@ export function CandidateDetailDrawer({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  useEffect(() => {
-    if (!open) return;
-    let cancelled = false;
-    void fetch("/api/hellosign/status", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((parsed: { configured?: boolean; statusLabel?: string; message?: string }) => {
-        if (cancelled) return;
-        setHelloSign({
-          configured: Boolean(parsed.configured),
-          statusLabel: parsed.statusLabel ?? "Unknown",
-          message: parsed.message ?? "",
-        });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setHelloSign({
-            configured: false,
-            statusLabel: "Unavailable",
-            message: "Could not load HelloSign prep status.",
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open]);
-
   if (!open || !candidate) return null;
+
+  const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
 
   const timeline = [...candidate.history].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -673,17 +666,67 @@ export function CandidateDetailDrawer({
 
           {tab === "hellosign" ? (
             <div className="space-y-2 text-xs">
-              {helloSign ? (
-                <>
-                  <p className="text-zinc-300">{helloSign.statusLabel}</p>
-                  <p className="text-zinc-500">{helloSign.message}</p>
-                  <p className="text-[10px] text-zinc-600">
-                    API key: {helloSign.configured ? "present" : "not configured"} · Send disabled (placeholder)
-                  </p>
-                </>
-              ) : (
-                <p className="text-zinc-600">Loading prep status…</p>
-              )}
+              <p className="text-zinc-300">
+                Dropbox Sign · {onboardingConfigured ? "configured" : "not configured"}
+              </p>
+              <dl className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                <dt className="text-zinc-500">Paperwork status</dt>
+                <dd className="text-zinc-200">{paperworkStatusLabel(candidate.paperworkStatus)}</dd>
+                {candidate.paperworkTemplateKey ? (
+                  <>
+                    <dt className="text-zinc-500">Template</dt>
+                    <dd className="text-zinc-200">{candidate.paperworkTemplateKey}</dd>
+                  </>
+                ) : null}
+                {candidate.signatureRequestId ? (
+                  <>
+                    <dt className="text-zinc-500">Request ID</dt>
+                    <dd className="truncate text-zinc-400" title={candidate.signatureRequestId}>
+                      {candidate.signatureRequestId}
+                    </dd>
+                  </>
+                ) : null}
+                {candidate.paperworkSentAt ? (
+                  <>
+                    <dt className="text-zinc-500">Sent</dt>
+                    <dd className="text-zinc-400">{formatDate(candidate.paperworkSentAt)}</dd>
+                  </>
+                ) : null}
+                {candidate.paperworkSignedAt ? (
+                  <>
+                    <dt className="text-zinc-500">Signed</dt>
+                    <dd className="text-zinc-400">{formatDate(candidate.paperworkSignedAt)}</dd>
+                  </>
+                ) : null}
+              </dl>
+              {candidate.paperworkError ? (
+                <p className="text-amber-300/90">{candidate.paperworkError}</p>
+              ) : null}
+              <div className="flex flex-wrap gap-1 border-t border-zinc-800 pt-2">
+                {configuredTemplates.map((template) => (
+                  <button
+                    key={template.key}
+                    type="button"
+                    disabled={!onboardingConfigured || paperworkSending || !candidate.email?.trim()}
+                    onClick={() => onSendPaperwork?.(template.key)}
+                    className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
+                  >
+                    {paperworkSending ? "Sending…" : `Send ${template.label}`}
+                  </button>
+                ))}
+                {candidate.signatureRequestId ? (
+                  <button
+                    type="button"
+                    onClick={() => onRefreshPaperworkStatus?.()}
+                    className="rounded border border-teal-500/40 px-2 py-0.5 text-[10px] text-teal-200 hover:bg-teal-500/10"
+                  >
+                    Refresh status
+                  </button>
+                ) : null}
+              </div>
+              <p className="text-[10px] text-zinc-600">
+                Template-based email signature requests only. No embedded signing. Local workflow status does not write to Breezy.
+              </p>
               <div className="space-y-2 border-t border-zinc-800 pt-3">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Integration prep</p>
                 {buildIntegrationPrep(candidate, candidate.workflowStatus).map((item) => (
@@ -754,7 +797,7 @@ export function CandidateDetailDrawer({
         </div>
 
         <footer className="border-t border-zinc-800 px-4 py-2 text-[10px] text-zinc-600">
-          Local workflow only — no writes to Breezy, HelloSign, or MEL.
+          Local workflow only — Dropbox Sign sends paperwork; no writes to Breezy or MEL.
         </footer>
       </aside>
     </>

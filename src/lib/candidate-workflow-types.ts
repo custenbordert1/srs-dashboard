@@ -14,9 +14,11 @@ export type CandidateWorkflowStatus =
   | "Training Needed"
   | "Active Rep";
 
+export type PaperworkStatus = "not_sent" | "sent" | "viewed" | "signed" | "declined" | "failed";
+
 export type CandidateWorkflowEvent = {
   id: string;
-  type: "status" | "note" | "assignment" | "snooze" | "follow_up";
+  type: "status" | "note" | "assignment" | "snooze" | "follow_up" | "paperwork";
   message: string;
   createdAt: string;
 };
@@ -35,6 +37,12 @@ export type CandidateWorkflowRecord = {
   followUpDueAt: string | null;
   /** Hide from my-open until this ISO datetime. */
   snoozedUntil: string | null;
+  signatureRequestId: string | null;
+  paperworkTemplateKey: string | null;
+  paperworkSentAt: string | null;
+  paperworkSignedAt: string | null;
+  paperworkStatus: PaperworkStatus;
+  paperworkError: string | null;
   updatedAt: string;
 };
 
@@ -94,8 +102,32 @@ export function normalizeWorkflowRecord(
     },
     followUpDueAt: typeof raw.followUpDueAt === "string" ? raw.followUpDueAt : null,
     snoozedUntil: typeof raw.snoozedUntil === "string" ? raw.snoozedUntil : null,
+    signatureRequestId:
+      typeof raw.signatureRequestId === "string" ? raw.signatureRequestId : null,
+    paperworkTemplateKey:
+      typeof raw.paperworkTemplateKey === "string" ? raw.paperworkTemplateKey : null,
+    paperworkSentAt: typeof raw.paperworkSentAt === "string" ? raw.paperworkSentAt : null,
+    paperworkSignedAt: typeof raw.paperworkSignedAt === "string" ? raw.paperworkSignedAt : null,
+    paperworkStatus: normalizePaperworkStatus(raw.paperworkStatus),
+    paperworkError: typeof raw.paperworkError === "string" ? raw.paperworkError : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };
+}
+
+const PAPERWORK_STATUSES: PaperworkStatus[] = [
+  "not_sent",
+  "sent",
+  "viewed",
+  "signed",
+  "declined",
+  "failed",
+];
+
+export function normalizePaperworkStatus(value: unknown): PaperworkStatus {
+  if (typeof value === "string" && PAPERWORK_STATUSES.includes(value as PaperworkStatus)) {
+    return value as PaperworkStatus;
+  }
+  return "not_sent";
 }
 
 export type CandidateWorkflowState = Record<string, CandidateWorkflowRecord>;
@@ -120,7 +152,7 @@ export function nextActionForWorkflowStatus(status: CandidateWorkflowStatus): st
     "Needs Review": "Review candidate fit",
     Qualified: "Prepare paperwork",
     "Not Qualified": "No action",
-    "Paperwork Needed": "Send paperwork placeholder",
+    "Paperwork Needed": "Send onboarding paperwork",
     "Paperwork Sent": "Wait for signature",
     Signed: "Verify signed paperwork",
     "Ready for MEL": "Load into MEL",

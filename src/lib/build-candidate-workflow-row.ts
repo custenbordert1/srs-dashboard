@@ -20,6 +20,7 @@ import {
   nextActionForWorkflowStatus,
   type CandidateWorkflowRecord,
   type CandidateWorkflowStatus,
+  type PaperworkStatus,
 } from "@/lib/candidate-workflow-types";
 
 export type ScoredCandidateWorkflowRow = BreezyCandidate & {
@@ -33,6 +34,12 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   recruitingActions: CandidateRecruitingActions;
   followUpDueAt: string | null;
   snoozedUntil: string | null;
+  signatureRequestId: string | null;
+  paperworkTemplateKey: string | null;
+  paperworkSentAt: string | null;
+  paperworkSignedAt: string | null;
+  paperworkStatus: PaperworkStatus;
+  paperworkError: string | null;
   suggestedDM: string;
   dmNeedsAssignment: boolean;
   resumeKeywordScore: number | null;
@@ -107,6 +114,12 @@ export function buildScoredWorkflowRow(
     recruitingActions: local?.recruitingActions ?? emptyRecruitingActions(),
     followUpDueAt: local?.followUpDueAt ?? null,
     snoozedUntil: local?.snoozedUntil ?? null,
+    signatureRequestId: local?.signatureRequestId ?? null,
+    paperworkTemplateKey: local?.paperworkTemplateKey ?? null,
+    paperworkSentAt: local?.paperworkSentAt ?? null,
+    paperworkSignedAt: local?.paperworkSignedAt ?? null,
+    paperworkStatus: local?.paperworkStatus ?? "not_sent",
+    paperworkError: local?.paperworkError ?? null,
     suggestedDM,
     dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
     resumeKeywordScore: ai.breakdown.resumeSourceQuality,
