@@ -1,6 +1,7 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
 import { fetchBreezyCandidates } from "@/lib/breezy-api";
+import { withCandidatesFailureMeta } from "@/lib/breezy-candidates-sync";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
@@ -25,10 +26,14 @@ export async function GET(request: Request) {
   await logBreezyRouteStart(ROUTE, session);
   const breezyCheck = await assertBreezyConfigured(ROUTE);
   if (!breezyCheck.ok) {
-    return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
+    return NextResponse.json(
+      withCandidatesFailureMeta(breezyCheck.error, new Date().toISOString()),
+      { status: breezyCheck.status },
+    );
   }
 
   const { searchParams } = new URL(request.url);
+  const force = searchParams.get("force") === "true";
   const positionId = searchParams.get("position_id")?.trim() || undefined;
   const state = searchParams.get("state")?.trim() || undefined;
   const pageSize = Number.parseInt(searchParams.get("page_size") ?? "", 10);
@@ -48,6 +53,7 @@ export async function GET(request: Request) {
       maxPositions: Number.isFinite(maxPositions) ? maxPositions : undefined,
       dateRangeStart,
       dateRangeEnd,
+      force,
     }),
     session,
   );

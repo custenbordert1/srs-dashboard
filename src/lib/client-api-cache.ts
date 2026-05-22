@@ -25,6 +25,13 @@ export function getCached<T>(key: string): T | null {
   return entry.data as T;
 }
 
+/** Returns last cached payload even when TTL expired (for stale UI fallback). */
+export function getCachedAllowExpired<T>(key: string): T | null {
+  const entry = store.get(key);
+  if (!entry) return null;
+  return entry.data as T;
+}
+
 export function setCached<T>(key: string, data: T, ttlMs = DEFAULT_CLIENT_CACHE_TTL_MS): void {
   store.set(key, { data, expiresAt: Date.now() + ttlMs });
 }
@@ -45,9 +52,17 @@ export function invalidateCached(keyPrefix: string): void {
 export async function fetchCachedJson<T>(
   key: string,
   fetcher: () => Promise<T>,
-  options?: { ttlMs?: number; force?: boolean; label?: string },
+  options?: {
+    ttlMs?: number;
+    force?: boolean;
+    label?: string;
+    staleOnError?: boolean;
+    /** When set, only successful payloads are written to the client cache (failures cannot evict a prior ok snapshot). */
+    shouldCache?: (data: T) => boolean;
+  },
 ): Promise<T> {
   const ttlMs = options?.ttlMs ?? DEFAULT_CLIENT_CACHE_TTL_MS;
+  const shouldCache = options?.shouldCache ?? (() => true);
 
   if (!options?.force) {
     const hit = getCached<T>(key);
@@ -61,7 +76,9 @@ export async function fetchCachedJson<T>(
   const run = async () => {
     try {
       const data = await perfAsync(options?.label ?? key, fetcher);
-      setCached(key, data, ttlMs);
+      if (shouldCache(data)) {
+        setCached(key, data, ttlMs);
+      }
       return data;
     } finally {
       inflight.delete(key);
@@ -70,6 +87,10 @@ export async function fetchCachedJson<T>(
 
   const promise = run().catch((err) => {
     inflight.delete(key);
+    if (options?.staleOnError) {
+      const stale = getCachedAllowExpired<T>(key);
+      if (stale !== null) return stale;
+    }
     throw err;
   });
 

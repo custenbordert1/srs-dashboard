@@ -1,6 +1,11 @@
 "use client";
 
-import type { BreezyCandidate, BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
+import type {
+  BreezyCandidate,
+  BreezyCandidatesResult,
+  BreezyCandidatesSuccess,
+  BreezyJobsResult,
+} from "@/lib/breezy-api";
 import {
   CANDIDATE_WORKFLOW_STATUSES,
   type CandidateWorkflowRecord,
@@ -30,7 +35,18 @@ import {
   type ScoredCandidateWorkflowRow,
 } from "@/lib/build-candidate-workflow-row";
 import { isAppliedDateInRange } from "@/lib/breezy-api";
-import { fetchCachedBreezyCandidates, fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
+import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
+import {
+  CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS,
+  fetchCandidatesForTab,
+  type CandidatesTabFetchResult,
+} from "@/lib/breezy-candidates-client";
+import {
+  BREEZY_CANDIDATES_SOURCE,
+  buildCandidatesSyncAlert,
+  CANDIDATES_WORKFLOW_SOURCE,
+  timeoutShowsCachedCandidatesMessage,
+} from "@/lib/breezy-candidates-sync";
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
 import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
@@ -44,7 +60,7 @@ import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
 import { loadRecruiterRoster } from "@/lib/recruiter-roster";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const ALL = "__all__";
 const selectClass =
@@ -191,10 +207,16 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
 
 export function CandidatesSection() {
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities();
+  /** Rows always render from this — never cleared on timeout/failed refresh. */
+  const [breezySnapshot, setBreezySnapshot] = useState<BreezyCandidatesSuccess | null>(null);
+  const breezySnapshotRef = useRef<BreezyCandidatesSuccess | null>(null);
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [loadingBundle, setLoadingBundle] = useState(true);
+  const [refreshingCandidates, setRefreshingCandidates] = useState(false);
   const [retrying, setRetrying] = useState(false);
-  const loadingCeilingHit = useLoadingCeiling(loadingBundle);
+  const loadingCeilingHit = useLoadingCeiling(loadingBundle && breezySnapshot === null);
+  const [syncAlert, setSyncAlert] = useState<string | null>(null);
+  const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
   const [jobsData, setJobsData] = useState<BreezyJobsResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
   const [sourceFilter, setSourceFilter] = useState(ALL);
@@ -212,47 +234,126 @@ export function CandidatesSection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
 
-  const loadBundle = useCallback(async () => {
-    setLoadingBundle(true);
-    try {
-      const [parsed, jobsParsed, workflowParsed] = await Promise.all([
-        fetchCachedBreezyCandidates(),
-        fetchCachedBreezyJobs(),
-        fetchCachedJson(
-          cacheKey(["candidates", "workflows"]),
-          async () => {
-            try {
-              const workflowRes = await fetchWithTimeout("/api/candidates/workflows", {
-                cache: "no-store",
-                timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
-              });
-              return (await workflowRes.json()) as {
-                ok: boolean;
-                workflows?: CandidateWorkflowState;
-              };
-            } catch (err) {
-              if (isTimeoutError(err)) {
-                throw new Error(timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS));
-              }
-              throw err;
-            }
-          },
-          { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
-        ),
-      ]);
-      setData(parsed);
-      setJobsData(jobsParsed);
-      setWorkflowState(workflowParsed.ok && workflowParsed.workflows ? workflowParsed.workflows : {});
-    } catch (err) {
+  const commitCandidatesSuccess = useCallback((parsed: BreezyCandidatesSuccess) => {
+    breezySnapshotRef.current = parsed;
+    setBreezySnapshot(parsed);
+    setData(parsed);
+    setSyncAlert(buildCandidatesSyncAlert(parsed));
+  }, []);
+
+  const commitCandidatesFailure = useCallback(
+    (parsed: CandidatesTabFetchResult | { error: string; showingCachedSnapshot?: boolean }) => {
+      if (breezySnapshotRef.current) {
+        setSyncAlert(
+          "showingCachedSnapshot" in parsed && parsed.showingCachedSnapshot
+            ? parsed.error
+            : `${parsed.error} Showing cached Breezy candidates from your last successful sync.`,
+        );
+        return;
+      }
+      setSyncAlert(null);
       setData({
         ok: false,
-        error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
+        error: parsed.error,
         fetchedAt: new Date().toISOString(),
       });
-    } finally {
-      setLoadingBundle(false);
+    },
+    [],
+  );
+
+  const loadBundle = useCallback(async (force = false) => {
+    const emptyAtStart = breezySnapshotRef.current === null;
+    if (emptyAtStart) setLoadingBundle(true);
+    else setRefreshingCandidates(true);
+
+    const enrichment: string[] = [];
+
+    const [candidatesSettled, jobsSettled, workflowsSettled] = await Promise.allSettled([
+      fetchCandidatesForTab({ force }),
+      fetchCachedBreezyJobs(),
+      fetchCachedJson(
+        cacheKey(["candidates", "workflows"]),
+        async () => {
+          const workflowRes = await fetchWithTimeout(CANDIDATES_WORKFLOW_SOURCE.apiPath, {
+            cache: "no-store",
+            timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+          });
+          return (await workflowRes.json()) as {
+            ok: boolean;
+            workflows?: CandidateWorkflowState;
+            error?: string;
+          };
+        },
+        { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows", staleOnError: true },
+      ),
+    ]);
+
+    if (candidatesSettled.status === "fulfilled") {
+      const parsed = candidatesSettled.value;
+      if (parsed.ok) {
+        commitCandidatesSuccess(parsed);
+      } else {
+        commitCandidatesFailure(parsed);
+      }
+    } else {
+      const err = candidatesSettled.reason;
+      const timedOut = isTimeoutError(err);
+      const message =
+        err instanceof Error ? err.message : "Failed to load Breezy candidates";
+      if (breezySnapshotRef.current) {
+        setSyncAlert(
+          timedOut
+            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS, true)
+            : `${message} Showing cached Breezy candidates from your last successful sync.`,
+        );
+      } else {
+        setSyncAlert(null);
+        setData({
+          ok: false,
+          error: timedOut
+            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS, false)
+            : message,
+          fetchedAt: new Date().toISOString(),
+        });
+      }
     }
-  }, []);
+
+    if (jobsSettled.status === "fulfilled" && jobsSettled.value.ok) {
+      setJobsData(jobsSettled.value);
+    } else {
+      const jobsErr =
+        jobsSettled.status === "rejected"
+          ? jobsSettled.reason instanceof Error
+            ? jobsSettled.reason.message
+            : "Breezy jobs request failed"
+          : !jobsSettled.value.ok
+            ? jobsSettled.value.error
+            : "Breezy jobs unavailable";
+      enrichment.push(`Job enrichment unavailable (${jobsErr}) — position match fields may be limited.`);
+    }
+
+    if (
+      workflowsSettled.status === "fulfilled" &&
+      workflowsSettled.value.ok &&
+      workflowsSettled.value.workflows
+    ) {
+      setWorkflowState(workflowsSettled.value.workflows);
+    } else {
+      const wfErr =
+        workflowsSettled.status === "rejected"
+          ? isTimeoutError(workflowsSettled.reason)
+            ? timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS)
+            : workflowsSettled.reason instanceof Error
+              ? workflowsSettled.reason.message
+              : "Workflow request failed"
+          : "Workflow overlay unavailable";
+      enrichment.push(`${wfErr} (${CANDIDATES_WORKFLOW_SOURCE.label}) — using Breezy stage only.`);
+    }
+
+    setEnrichmentWarnings(enrichment);
+    setLoadingBundle(false);
+    setRefreshingCandidates(false);
+  }, [commitCandidatesFailure, commitCandidatesSuccess]);
 
   useEffect(() => {
     const id = window.setTimeout(() => void loadBundle(), 0);
@@ -261,8 +362,10 @@ export function CandidatesSection() {
 
   const retry = useCallback(() => {
     setRetrying(true);
-    void loadBundle().finally(() => setRetrying(false));
+    void loadBundle(true).finally(() => setRetrying(false));
   }, [loadBundle]);
+
+  const hasCandidateSnapshot = breezySnapshot !== null;
 
   const jobsByPositionId = useMemo(
     () => (jobsData?.ok ? buildJobsByPositionId(jobsData.jobs) : new Map()),
@@ -271,13 +374,13 @@ export function CandidatesSection() {
 
   const candidates = useMemo(
     () =>
-      data?.ok
-        ? data.candidates.map((candidate) => {
+      breezySnapshot
+        ? breezySnapshot.candidates.map((candidate) => {
             const job = jobsByPositionId.get(candidate.positionId);
             return buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId], { job });
           })
         : [],
-    [data, jobsByPositionId, workflowState],
+    [breezySnapshot, jobsByPositionId, workflowState],
   );
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
@@ -396,10 +499,9 @@ export function CandidatesSection() {
     const row = buildCandidateDrawerRowFromScored(selectedCandidate, {
       recruitingActions: getRecruitingActions(selectedCandidate.candidateId),
     });
-    const breezy =
-      data?.ok === true
-        ? data.candidates.find((c) => c.candidateId === selectedCandidate.candidateId)
-        : undefined;
+    const breezy = breezySnapshot?.candidates.find(
+      (c) => c.candidateId === selectedCandidate.candidateId,
+    );
     if (!breezy || melOpportunities.length === 0) return row;
     const melMatch = matchCandidateToOpportunities(breezy, melOpportunities);
     return {
@@ -408,7 +510,7 @@ export function CandidatesSection() {
       melMatchingSummary: melMatch.aiSummary,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tick refreshes local recruiting flags
-  }, [data, melOpportunities, selectedCandidate, recruitingActionsTick]);
+  }, [breezySnapshot, melOpportunities, selectedCandidate, recruitingActionsTick]);
 
   const prioritizationQueues = useMemo(
     () =>
@@ -636,11 +738,11 @@ export function CandidatesSection() {
     [handleCandidateAction, selectedCandidateId, selectedIds, toggleSelectCandidate],
   );
 
-  if (loadingBundle || data === undefined) {
+  if (loadingBundle && !hasCandidateSnapshot) {
     return (
       <DashboardSectionFallback
         title="Candidates"
-        loadingMessage="Loading candidates, jobs, and workflow state from Breezy…"
+        loadingMessage="Loading Breezy candidates (primary), jobs, and workflow overlay…"
         isLoading
         loadingCeilingHit={loadingCeilingHit}
         onRetry={retry}
@@ -651,7 +753,7 @@ export function CandidatesSection() {
     );
   }
 
-  if (!data.ok) {
+  if (!hasCandidateSnapshot && data !== undefined && !data.ok) {
     return (
       <DashboardSectionFallback
         title="Candidates"
@@ -663,7 +765,7 @@ export function CandidatesSection() {
     );
   }
 
-  if (candidates.length === 0) {
+  if (hasCandidateSnapshot && breezySnapshot.candidates.length === 0 && !refreshingCandidates) {
     return (
       <DashboardSectionFallback
         title="Candidates"
@@ -675,8 +777,24 @@ export function CandidatesSection() {
     );
   }
 
+  const syncData = data?.ok ? data : breezySnapshot;
+
   return (
     <div className="space-y-6">
+      {syncAlert ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"
+        >
+          {syncAlert}
+        </p>
+      ) : null}
+      {enrichmentWarnings.length > 0 ? (
+        <p className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm text-sky-100">
+          {enrichmentWarnings.join(" ")}
+        </p>
+      ) : null}
+
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -684,8 +802,39 @@ export function CandidatesSection() {
             <p className="mt-1 max-w-3xl text-sm text-zinc-500">
               Live Breezy candidates with merchandising resume intelligence, travel-radius scoring, and match filters. Breezy sync stays read-only.
             </p>
+            <p className="mt-2 text-xs text-zinc-600">
+              Source: <span className="text-zinc-500">{BREEZY_CANDIDATES_SOURCE.label}</span>
+              <span className="text-zinc-700"> · {BREEZY_CANDIDATES_SOURCE.apiPath}</span>
+            </p>
+            {syncData ? (
+              <p className="mt-1 text-xs text-zinc-600">
+                Last sync: {new Date(syncData.fetchedAt).toLocaleString()}
+                {syncData.fromCache ? " · server cache" : " · live"}
+                {syncData.stale ? " · stale (refresh failed)" : ""}
+                {syncData.partial ? " · partial sync" : ""}
+                {syncData.candidates.length > 0
+                  ? ` · ${syncData.candidates.length.toLocaleString()} candidates`
+                  : ""}
+                {syncData.positionsScanned != null && syncData.totalPositionsAvailable != null
+                  ? ` · ${syncData.positionsScanned}/${syncData.totalPositionsAvailable} positions scanned`
+                  : ""}
+                {refreshingCandidates || loadingBundle ? " · sync in progress…" : ""}
+              </p>
+            ) : null}
           </div>
-          <p className="text-xs text-zinc-500">Fetched {formatDate(data.fetchedAt)}</p>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              disabled={loadingBundle || refreshingCandidates}
+              onClick={() => void loadBundle(true)}
+              className="rounded-lg border border-teal-600/40 bg-teal-600/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/20 disabled:opacity-50"
+            >
+              {loadingBundle || refreshingCandidates ? "Syncing…" : "Refresh / Sync"}
+            </button>
+            {syncData ? (
+              <p className="text-xs text-zinc-500">Fetched {formatDate(syncData.fetchedAt)}</p>
+            ) : null}
+          </div>
         </div>
       </section>
 
@@ -891,6 +1040,11 @@ export function CandidatesSection() {
           </div>
         </div>
 
+        {refreshingCandidates && hasCandidateSnapshot ? (
+          <p className="border-b border-teal-500/20 bg-teal-950/20 px-3 py-1.5 text-center text-[11px] text-teal-200/80 sm:px-4">
+            Refreshing Breezy candidates — table stays visible
+          </p>
+        ) : null}
         {filtered.length === 0 ? (
           <p className="px-3 py-8 text-xs text-zinc-500 sm:px-4">No candidates match the selected filters.</p>
         ) : (

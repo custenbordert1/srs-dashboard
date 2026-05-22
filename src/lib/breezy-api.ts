@@ -173,6 +173,13 @@ export type BreezyCandidatesSuccess = {
   syncNotes?: string[];
   truncated?: boolean;
   warnings?: string[];
+  /** Populated by Candidates sync layer (API + tab). */
+  source?: string;
+  sourcePath?: string;
+  fromCache?: boolean;
+  stale?: boolean;
+  partial?: boolean;
+  refreshError?: string;
 };
 
 export type BreezyPositionStateCounts = {
@@ -1108,9 +1115,19 @@ export async function fetchBreezyCandidates(options?: {
   /** Count only — fast published scan does not filter fetches by date. */
   dateRangeStart?: string;
   dateRangeEnd?: string;
+  /** Bypass in-memory server cache for this request. */
+  force?: boolean;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
-  if (!getBreezyApiKeySync()) return missingApiKeyFailure();
+  if (!getBreezyApiKeySync()) {
+    const {
+      withCandidatesFailureMeta,
+    } = await import("@/lib/breezy-candidates-sync");
+    return withCandidatesFailureMeta(
+      "Breezy API key is not configured.",
+      new Date().toISOString(),
+    );
+  }
   const positionId = options?.positionId?.trim() ?? "";
   const state = options?.state ?? "published";
   const pageSize = Math.max(1, Math.min(options?.pageSize ?? CANDIDATES_PAGE_SIZE, CANDIDATES_PAGE_SIZE));
@@ -1127,7 +1144,25 @@ export async function fetchBreezyCandidates(options?: {
     maxPages,
     maxPositions,
   });
-  return cached(candidatesCache, cacheKey, () =>
+
+  const {
+    getStaleOkCandidatesSnapshot,
+    isPartialCandidatesSync,
+    rememberOkCandidatesSnapshot,
+    withCandidatesFailureMeta,
+    withCandidatesSyncMeta,
+  } = await import("@/lib/breezy-candidates-sync");
+
+  if (!options?.force) {
+    const fresh = candidatesCache.get(cacheKey);
+    if (fresh && fresh.expiresAt > Date.now() && fresh.resolved?.ok) {
+      return withCandidatesSyncMeta(fresh.resolved, { fromCache: true, stale: false });
+    }
+  } else {
+    candidatesCache.delete(cacheKey);
+  }
+
+  const result = await cached(candidatesCache, cacheKey, () =>
     fetchBreezyCandidatesFastUncached({
       ...options,
       state,
@@ -1138,6 +1173,28 @@ export async function fetchBreezyCandidates(options?: {
       dateRangeEnd: rangeEnd,
     }),
   );
+
+  if (result.ok) {
+    const enriched = withCandidatesSyncMeta(result, {
+      fromCache: false,
+      stale: false,
+      partial: isPartialCandidatesSync(result),
+    });
+    rememberOkCandidatesSnapshot(cacheKey, enriched);
+    return enriched;
+  }
+
+  const stale = getStaleOkCandidatesSnapshot(cacheKey);
+  if (stale) {
+    return withCandidatesSyncMeta(stale, {
+      fromCache: true,
+      stale: true,
+      refreshError: result.error,
+      partial: stale.partial ?? isPartialCandidatesSync(stale),
+    });
+  }
+
+  return withCandidatesFailureMeta(result.error, result.fetchedAt);
 }
 
 export async function fetchBreezyCandidatesDebug(options: {
