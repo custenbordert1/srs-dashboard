@@ -46,6 +46,77 @@ describe("buildJobManagementRows", () => {
     assert.equal(rows[0]?.city, "Dallas");
     assert.equal(rows[0]?.state, "TX");
   });
+
+  it("does not show pushed local draft alongside the same Breezy job", () => {
+    const breezyJobs = [
+      {
+        breezyJobId: "breezy-new",
+        title: "Merchandiser",
+        city: "Plano",
+        usState: "TX",
+        displayLocation: "Plano, TX",
+        pipelineStatus: "published",
+        applicantCount: 0,
+        postedDate: syncedAt,
+        source: "Breezy",
+      },
+    ];
+    const drafts: JobDraft[] = [
+      {
+        id: "draft-pushed",
+        status: "pushed",
+        clonedFromBreezyJobId: "breezy-source",
+        breezyJobId: "breezy-new",
+        title: "Merchandiser (Draft)",
+        description: "Body",
+        city: "Plano",
+        usState: "TX",
+        payRate: "",
+        department: "",
+        source: "SRS Dashboard",
+        pushedAt: syncedAt,
+        createdAt: syncedAt,
+        updatedAt: syncedAt,
+      },
+    ];
+
+    const rows = buildJobManagementRows(breezyJobs, drafts, syncedAt);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?.kind, "breezy");
+    assert.equal(rows[0]?.breezyJobId, "breezy-new");
+  });
+
+  it("dedupes duplicate Breezy catalog rows by breezyJobId", () => {
+    const breezyJobs = [
+      {
+        breezyJobId: "same-id",
+        title: "Role (draft pipeline)",
+        city: "Dallas",
+        usState: "TX",
+        displayLocation: "Dallas, TX",
+        pipelineStatus: "draft",
+        applicantCount: null,
+        postedDate: syncedAt,
+        source: "Breezy",
+      },
+      {
+        breezyJobId: "same-id",
+        title: "Role",
+        city: "Dallas",
+        usState: "TX",
+        displayLocation: "Dallas, TX",
+        pipelineStatus: "published",
+        applicantCount: 4,
+        postedDate: syncedAt,
+        source: "Breezy",
+      },
+    ];
+
+    const rows = buildJobManagementRows(breezyJobs, [], syncedAt);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?.status, "published");
+    assert.equal(rows[0]?.applicants, 4);
+  });
 });
 
 describe("sortJobManagementRows", () => {

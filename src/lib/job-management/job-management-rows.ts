@@ -83,6 +83,55 @@ function rowFromBreezyJob(job: BreezyJobCatalogRow, lastSynced: string): JobMana
   };
 }
 
+/** Unpublished local drafts only — pushed drafts are represented by Breezy catalog rows. */
+function isActiveLocalDraft(draft: JobDraft): boolean {
+  return draft.status === "draft" || draft.status === "push_failed";
+}
+
+function dedupeBreezyCatalogRows(jobs: BreezyJobCatalogRow[]): BreezyJobCatalogRow[] {
+  const byId = new Map<string, BreezyJobCatalogRow>();
+  for (const job of jobs) {
+    const existing = byId.get(job.breezyJobId);
+    if (!existing) {
+      byId.set(job.breezyJobId, job);
+      continue;
+    }
+    const existingPublished =
+      breezyRowStatus(existing.pipelineStatus) === "published" ||
+      existing.pipelineStatus === "unknown";
+    const incomingPublished =
+      breezyRowStatus(job.pipelineStatus) === "published" || job.pipelineStatus === "unknown";
+    if (incomingPublished && !existingPublished) {
+      byId.set(job.breezyJobId, job);
+    }
+  }
+  return [...byId.values()];
+}
+
+function rowPriorityForDedupe(row: JobManagementRow): number {
+  if (row.kind === "local_draft" && row.draft?.status === "draft") return 3;
+  if (row.kind === "local_draft" && row.draft?.status === "push_failed") return 2;
+  return 1;
+}
+
+function dedupeRowsByBreezyJobId(rows: JobManagementRow[]): JobManagementRow[] {
+  const withoutBreezyId: JobManagementRow[] = [];
+  const byBreezyId = new Map<string, JobManagementRow>();
+
+  for (const row of rows) {
+    if (!row.breezyJobId) {
+      withoutBreezyId.push(row);
+      continue;
+    }
+    const existing = byBreezyId.get(row.breezyJobId);
+    if (!existing || rowPriorityForDedupe(row) > rowPriorityForDedupe(existing)) {
+      byBreezyId.set(row.breezyJobId, row);
+    }
+  }
+
+  return [...withoutBreezyId, ...byBreezyId.values()];
+}
+
 function rowFromLocalDraft(draft: JobDraft): JobManagementRow {
   const location = normalizeJobLocationFields(draft.city, draft.usState);
   const status = localDraftStatus(draft);
@@ -114,6 +163,8 @@ export function buildJobManagementRows(
   drafts: JobDraft[],
   catalogFetchedAt: string,
 ): JobManagementRow[] {
+  const catalogJobs = dedupeBreezyCatalogRows(breezyJobs);
+
   const openCloneSourceIds = new Set(
     drafts
       .filter((draft) => draft.status === "draft" && draft.clonedFromBreezyJobId)
@@ -122,13 +173,14 @@ export function buildJobManagementRows(
 
   const rows: JobManagementRow[] = [];
   for (const draft of drafts) {
+    if (!isActiveLocalDraft(draft)) continue;
     rows.push(rowFromLocalDraft(draft));
   }
-  for (const job of breezyJobs) {
+  for (const job of catalogJobs) {
     if (openCloneSourceIds.has(job.breezyJobId)) continue;
     rows.push(rowFromBreezyJob(job, catalogFetchedAt));
   }
-  return rows;
+  return dedupeRowsByBreezyJobId(rows);
 }
 
 function sortValue(row: JobManagementRow, key: JobManagementSortKey): string | number {
