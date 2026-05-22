@@ -5,7 +5,13 @@ import {
   recordCandidatePaperworkSent,
 } from "@/lib/candidate-workflow-store";
 import { DropboxSignError, sendTemplateSignatureRequest } from "@/lib/dropbox-sign";
-import { buildTemplateSignerPayload, maskEmailForLog } from "@/lib/onboarding-signer";
+import {
+  candidatePayloadKeys,
+  logDropboxSignDebug,
+  signerRoleMatchesEnv,
+  signersHaveBlankEmail,
+} from "@/lib/dropbox-sign-debug";
+import { buildTemplateSignerPayload, resolveSignerRoleForTemplate } from "@/lib/onboarding-signer";
 import { ONBOARDING_TEMPLATE_REGISTRY, validateSendPacketRequest } from "@/lib/onboarding-template-registry";
 import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
@@ -54,20 +60,27 @@ export async function POST(request: Request) {
 
   try {
     const templateLabel = ONBOARDING_TEMPLATE_REGISTRY[validation.templateKey].label;
-    console.info("[dropbox-sign] send_with_template signers", {
+    const finalSigners = [signerPayload.signer];
+    const registryRole = ONBOARDING_TEMPLATE_REGISTRY[validation.templateKey].signerRole;
+    const resolvedRole = resolveSignerRoleForTemplate(validation.templateKey);
+    const roleCheck = signerRoleMatchesEnv(signerPayload.signer.role);
+    logDropboxSignDebug("before_sendTemplateSignatureRequest", {
+      templateIdSelected: validation.templateId,
       templateKey: validation.templateKey,
-      templateId: validation.templateId,
-      signers: [
-        {
-          role: signerPayload.signer.role,
-          name: signerPayload.signer.name,
-          email: maskEmailForLog(signerPayload.recipientEmail),
-        },
-      ],
+      finalSignersArray: finalSigners,
+      recipientEmailChosen: signerPayload.recipientEmail,
+      signerRoleUsed: signerPayload.signer.role,
+      registrySignerRole: registryRole,
+      resolvedSignerRole: resolvedRole,
+      candidateObjectKeys: candidatePayloadKeys(input),
+      candidatePayload: input,
+      signersLengthIsZero: finalSigners.length === 0,
+      anySignerEmailBlankOrNull: signersHaveBlankEmail(finalSigners),
+      ...roleCheck,
     });
     const signature = await sendTemplateSignatureRequest({
       templateId: validation.templateId,
-      signers: [signerPayload.signer],
+      signers: finalSigners,
       title: `${templateLabel} — ${candidateName}`,
       subject: `SRS onboarding paperwork: ${templateLabel}`,
       message: "Please review and sign your onboarding documents.",

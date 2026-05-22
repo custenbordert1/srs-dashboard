@@ -1,3 +1,9 @@
+import {
+  logDropboxSignDebug,
+  signerRoleMatchesEnv,
+  signersHaveBlankEmail,
+} from "@/lib/dropbox-sign-debug";
+
 const DROPBOX_SIGN_API_BASE = "https://api.hellosign.com/v3";
 const DEFAULT_TIMEOUT_MS = 25_000;
 
@@ -250,6 +256,22 @@ export async function sendTemplateSignatureRequest(
   if (input.title?.trim()) body.title = input.title.trim();
   if (input.subject?.trim()) body.subject = input.subject.trim();
   if (input.message?.trim()) body.message = input.message.trim();
+
+  const primaryRole = signers[0]?.role ?? input.signers[0]?.role ?? "";
+  const roleCheck = signerRoleMatchesEnv(primaryRole);
+  logDropboxSignDebug("immediately_before_dropbox_sign_api", {
+    templateIdSelected: input.templateId,
+    finalSignersArray: signers,
+    inputSignersArray: input.signers,
+    recipientEmailChosen: signers[0]?.email_address ?? input.signers[0]?.emailAddress ?? null,
+    signerRoleUsed: primaryRole,
+    signersLengthIsZero: signers.length === 0,
+    inputSignersLengthIsZero: input.signers.length === 0,
+    anySignerEmailBlankOrNull:
+      signersHaveBlankEmail(input.signers) || signersHaveBlankEmail(signers),
+    ...roleCheck,
+    apiRequestBody: body,
+  });
 
   const data = await dropboxSignFetch<ApiSignatureRequestResponse>("/signature_request/send_with_template", {
     method: "POST",
