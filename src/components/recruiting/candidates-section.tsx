@@ -60,6 +60,7 @@ import {
   shouldHydrateFullCandidates,
   type CandidatesTabFetchResult,
 } from "@/lib/breezy-candidates-client";
+import { candidatePrimaryEmail, hasCandidatePrimaryEmail } from "@/lib/onboarding-signer";
 import {
   BREEZY_CANDIDATES_SOURCE,
   buildCandidatesSyncAlert,
@@ -736,7 +737,8 @@ export function CandidatesSection() {
 
   const sendPaperwork = useCallback(
     (candidate: ScoredCandidateWorkflowRow, templateKey: OnboardingTemplateKey) => {
-      if (!candidate.email?.trim()) {
+      const recipientEmail = candidatePrimaryEmail(candidate);
+      if (!recipientEmail) {
         window.alert("Candidate email is required to send Dropbox Sign paperwork.");
         return;
       }
@@ -744,7 +746,10 @@ export function CandidatesSection() {
       void sendOnboardingPacket({
         candidateId: candidate.candidateId,
         candidateName: candidateName(candidate),
-        candidateEmail: candidate.email.trim(),
+        candidateEmail: recipientEmail,
+        email: candidate.email,
+        email_address:
+          (candidate as BreezyCandidate & { email_address?: string }).email_address ?? candidate.email,
         templateKey,
       })
         .then((result) => {
@@ -987,6 +992,7 @@ export function CandidatesSection() {
               onboardingConfigured={onboardingConfigured}
               templatesAvailable={onboardingTemplatesAvailable}
               paperworkTemplates={paperworkTemplates}
+              hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
               sendPaperworkDisabled={paperworkSendingId === candidate.candidateId}
             />
           </td>
@@ -1003,7 +1009,7 @@ export function CandidatesSection() {
                 disabled={
                   !onboardingTemplatesAvailable ||
                   !onboardingConfigured ||
-                  !candidate.email?.trim() ||
+                  !hasCandidatePrimaryEmail(candidate) ||
                   paperworkSendingId === candidate.candidateId
                 }
                 title={
@@ -1011,8 +1017,8 @@ export function CandidatesSection() {
                     ? "No onboarding templates configured in .env.local"
                     : !onboardingConfigured
                       ? "Configure DROPBOX_SIGN_API_KEY in .env.local"
-                      : !candidate.email?.trim()
-                        ? "Email required"
+                      : !hasCandidatePrimaryEmail(candidate)
+                        ? "Candidate email missing"
                         : "Send onboarding packet (Dropbox Sign)"
                 }
                 onClick={() => sendPaperwork(candidate, "onboarding_packet")}

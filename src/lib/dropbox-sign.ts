@@ -213,17 +213,37 @@ export async function listTemplates(): Promise<DropboxSignTemplateSummary[]> {
     }));
 }
 
+function normalizeSignerForApi(signer: DropboxSignSignerInput): {
+  role: string;
+  name: string;
+  email_address: string;
+} | null {
+  const role = signer.role?.trim() ?? "";
+  const name = signer.name?.trim() ?? "";
+  const email = signer.emailAddress?.trim().toLowerCase() ?? "";
+  if (!role || !name || !email || !email.includes("@")) return null;
+  return { role, name, email_address: email };
+}
+
 export async function sendTemplateSignatureRequest(
   input: SendTemplateSignatureRequestInput,
 ): Promise<DropboxSignRequestSummary> {
   const config = requireDropboxSignConfig();
+  const signers = input.signers
+    .map((signer) => normalizeSignerForApi(signer))
+    .filter((signer): signer is { role: string; name: string; email_address: string } => signer !== null);
+
+  if (signers.length === 0) {
+    throw new DropboxSignError(
+      "No recipients specified. Provide a valid signer role, name, and email_address.",
+      "missing_recipients",
+      400,
+    );
+  }
+
   const body: Record<string, unknown> = {
     template_ids: [input.templateId],
-    signers: input.signers.map((s) => ({
-      role: s.role,
-      name: s.name,
-      email_address: s.emailAddress,
-    })),
+    signers,
     test_mode: config.testMode,
   };
   if (config.clientId) body.client_id = config.clientId;

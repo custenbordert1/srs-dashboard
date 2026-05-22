@@ -5,6 +5,7 @@ import {
   recordCandidatePaperworkSent,
 } from "@/lib/candidate-workflow-store";
 import { DropboxSignError, sendTemplateSignatureRequest } from "@/lib/dropbox-sign";
+import { buildTemplateSignerPayload, maskEmailForLog } from "@/lib/onboarding-signer";
 import { ONBOARDING_TEMPLATE_REGISTRY, validateSendPacketRequest } from "@/lib/onboarding-template-registry";
 import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
@@ -35,22 +36,38 @@ export async function POST(request: Request) {
     );
   }
 
-  const input = body as Record<string, string>;
-  const candidateId = input.candidateId.trim();
-  const candidateName = input.candidateName.trim();
-  const candidateEmail = input.candidateEmail.trim();
+  const input = body as Record<string, unknown>;
+  const candidateId = typeof input.candidateId === "string" ? input.candidateId.trim() : "";
+  const candidateName = typeof input.candidateName === "string" ? input.candidateName.trim() : "";
+
+  const signerPayload = buildTemplateSignerPayload({
+    templateKey: validation.templateKey,
+    candidateName,
+    emailSources: [input.candidateEmail, input.email, input.email_address, validation.recipientEmail],
+  });
+  if (!signerPayload.ok) {
+    return NextResponse.json(
+      { ok: false, error: signerPayload.error, field: signerPayload.field },
+      { status: 400 },
+    );
+  }
 
   try {
     const templateLabel = ONBOARDING_TEMPLATE_REGISTRY[validation.templateKey].label;
-    const signature = await sendTemplateSignatureRequest({
+    console.info("[dropbox-sign] send_with_template signers", {
+      templateKey: validation.templateKey,
       templateId: validation.templateId,
       signers: [
         {
-          role: validation.signerRole,
-          name: candidateName,
-          emailAddress: candidateEmail,
+          role: signerPayload.signer.role,
+          name: signerPayload.signer.name,
+          email: maskEmailForLog(signerPayload.recipientEmail),
         },
       ],
+    });
+    const signature = await sendTemplateSignatureRequest({
+      templateId: validation.templateId,
+      signers: [signerPayload.signer],
       title: `${templateLabel} — ${candidateName}`,
       subject: `SRS onboarding paperwork: ${templateLabel}`,
       message: "Please review and sign your onboarding documents.",

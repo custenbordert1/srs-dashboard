@@ -20,6 +20,24 @@ describe("onboarding-template-registry", () => {
     if (!result.ok) assert.match(result.error, /Unknown templateKey/);
   });
 
+  it("accepts Breezy email_address alias without candidateEmail", () => {
+    const prev = process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
+    process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET = "template-abc123";
+    try {
+      const result = validateSendPacketRequest({
+        candidateId: "c1",
+        candidateName: "Pat Lee",
+        email_address: "Pat@Example.com",
+        templateKey: "onboarding_packet",
+      });
+      assert.equal(result.ok, true);
+      if (result.ok) assert.equal(result.recipientEmail, "pat@example.com");
+    } finally {
+      if (prev !== undefined) process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET = prev;
+      else delete process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
+    }
+  });
+
   it("requires all send-packet fields", () => {
     const result = validateSendPacketRequest({ candidateId: "c1" });
     assert.equal(result.ok, false);
@@ -73,6 +91,7 @@ describe("onboarding-template-registry", () => {
       if (result.ok) {
         assert.equal(result.templateKey, "onboarding_packet");
         assert.equal(result.templateId, "template-abc123");
+        assert.equal(result.recipientEmail, "pat@example.com");
       }
     } finally {
       if (prev !== undefined) process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET = prev;

@@ -6,6 +6,9 @@ export type SendOnboardingPacketInput = {
   candidateId: string;
   candidateName: string;
   candidateEmail: string;
+  /** Optional Breezy alias fields for server-side normalization. */
+  email?: string;
+  email_address?: string;
   templateKey: OnboardingTemplateKey;
 };
 

@@ -1,3 +1,5 @@
+import { normalizePrimaryEmail } from "@/lib/onboarding-signer";
+
 export type OnboardingTemplateKey =
   | "independent_contractor_agreement"
   | "wage_consent"
@@ -107,7 +109,13 @@ export function listOnboardingTemplates(): ResolvedOnboardingTemplate[] {
 }
 
 export type SendPacketValidationResult =
-  | { ok: true; templateKey: OnboardingTemplateKey; templateId: string; signerRole: string }
+  | {
+      ok: true;
+      templateKey: OnboardingTemplateKey;
+      templateId: string;
+      signerRole: string;
+      recipientEmail: string;
+    }
   | { ok: false; error: string; field?: string };
 
 export function validateSendPacketRequest(body: unknown): SendPacketValidationResult {
@@ -117,18 +125,26 @@ export function validateSendPacketRequest(body: unknown): SendPacketValidationRe
   const input = body as Record<string, unknown>;
   const candidateId = typeof input.candidateId === "string" ? input.candidateId.trim() : "";
   const candidateName = typeof input.candidateName === "string" ? input.candidateName.trim() : "";
-  const candidateEmail = typeof input.candidateEmail === "string" ? input.candidateEmail.trim() : "";
   const templateKeyRaw = typeof input.templateKey === "string" ? input.templateKey.trim() : "";
 
   if (!candidateId) return { ok: false, error: "candidateId is required.", field: "candidateId" };
   if (!candidateName) return { ok: false, error: "candidateName is required.", field: "candidateName" };
-  if (!candidateEmail) return { ok: false, error: "candidateEmail is required.", field: "candidateEmail" };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidateEmail)) {
-    return { ok: false, error: "candidateEmail must be a valid email address.", field: "candidateEmail" };
-  }
   if (!templateKeyRaw) return { ok: false, error: "templateKey is required.", field: "templateKey" };
   if (!isOnboardingTemplateKey(templateKeyRaw)) {
     return { ok: false, error: `Unknown templateKey: ${templateKeyRaw}`, field: "templateKey" };
+  }
+
+  const recipientEmail = normalizePrimaryEmail(
+    input.candidateEmail,
+    input.email,
+    input.email_address,
+  );
+  if (!recipientEmail) {
+    return {
+      ok: false,
+      error: "candidateEmail must be a valid primary email address.",
+      field: "candidateEmail",
+    };
   }
 
   const templateId = resolveTemplateId(templateKeyRaw);
@@ -146,5 +162,6 @@ export function validateSendPacketRequest(body: unknown): SendPacketValidationRe
     templateKey: templateKeyRaw,
     templateId,
     signerRole: ONBOARDING_TEMPLATE_REGISTRY[templateKeyRaw].signerRole,
+    recipientEmail,
   };
 }

@@ -27,6 +27,7 @@ type CandidateActionsMenuProps = {
   onboardingConfigured?: boolean;
   templatesAvailable?: boolean;
   paperworkTemplates?: OnboardingTemplateOption[];
+  hasCandidateEmail?: boolean;
   sendPaperworkDisabled?: boolean;
 };
 
@@ -37,6 +38,7 @@ export function CandidateActionsMenu({
   onboardingConfigured = false,
   templatesAvailable = false,
   paperworkTemplates = [],
+  hasCandidateEmail = true,
   sendPaperworkDisabled = false,
 }: CandidateActionsMenuProps) {
   const [open, setOpen] = useState(false);
@@ -237,15 +239,17 @@ export function CandidateActionsMenu({
           <div className="relative border-t border-zinc-800/80">
             <button
               type="button"
-              disabled={sendPaperworkDisabled}
+              disabled={sendPaperworkDisabled || !hasCandidateEmail}
               title={
-                !templatesAvailable
-                  ? "Set DROPBOX_SIGN_TEMPLATE_* IDs in .env.local (restart dev server after changes)"
-                  : !onboardingConfigured
-                    ? "Templates loaded — add DROPBOX_SIGN_API_KEY to send"
-                    : sendPaperworkDisabled
-                      ? "Sending paperwork…"
-                      : "Send Dropbox Sign template"
+                !hasCandidateEmail
+                  ? "Candidate email missing"
+                  : !templatesAvailable
+                    ? "Set DROPBOX_SIGN_TEMPLATE_* IDs in .env.local (restart dev server after changes)"
+                    : !onboardingConfigured
+                      ? "Templates loaded — add DROPBOX_SIGN_API_KEY to send"
+                      : sendPaperworkDisabled
+                        ? "Sending paperwork…"
+                        : "Send Dropbox Sign template"
               }
               className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
               onClick={() => setPaperworkOpen((value) => !value)}
@@ -260,11 +264,13 @@ export function CandidateActionsMenu({
                     <button
                       key={template.key}
                       type="button"
-                      disabled={!onboardingConfigured}
+                      disabled={!onboardingConfigured || !hasCandidateEmail}
                       title={
-                        onboardingConfigured
-                          ? undefined
-                          : "Configure DROPBOX_SIGN_API_KEY in .env.local"
+                        !hasCandidateEmail
+                          ? "Candidate email missing"
+                          : onboardingConfigured
+                            ? undefined
+                            : "Configure DROPBOX_SIGN_API_KEY in .env.local"
                       }
                       className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
                       onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
