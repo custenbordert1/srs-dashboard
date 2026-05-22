@@ -18,14 +18,14 @@ import {
 } from "@/lib/client-api-cache";
 import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
 
-/** Preview tier — allow server aggregation to finish before client abort. */
-export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 30_000;
+/** Preview tier — aligned with server preview budget (~10s) plus network buffer. */
+export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 15_000;
 /** Fast-tier background hydration. */
 export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = 45_000;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
 export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = 120_000;
-/** Client cache TTL for preview responses. */
-export const CANDIDATES_PREVIEW_CACHE_TTL_MS = 45_000;
+/** Client cache TTL for preview responses (populated snapshots only). */
+export const CANDIDATES_PREVIEW_CACHE_TTL_MS = 300_000;
 
 const TAB_PREVIEW_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "preview", "v1"]);
 const TAB_FAST_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "fast", "v1"]);

@@ -5,6 +5,8 @@ import { extractRawBreezyCandidatesFromListResponse } from "@/lib/breezy-api";
 import {
   buildJobsLookupMap,
   describeBreezyResponseShape,
+  FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY,
+  getBreezyCandidateListStrategyForFetch,
 } from "@/lib/breezy-global-candidates";
 
 describe("extractRawBreezyCandidatesFromListResponse (global shapes)", () => {
@@ -31,6 +33,14 @@ describe("describeBreezyResponseShape", () => {
     assert.equal(shape.extractedCount, 1);
     assert.equal(shape.candidatesArrayLength, 1);
     assert.deepEqual(shape.pagination, { page: 1, page_size: 50, has_more: true });
+  });
+});
+
+describe("getBreezyCandidateListStrategyForFetch", () => {
+  it("returns frozen per-position strategy without probing", () => {
+    const strategy = getBreezyCandidateListStrategyForFetch();
+    assert.equal(strategy.kind, "per_position");
+    assert.equal(strategy.label, FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY.label);
   });
 });
 

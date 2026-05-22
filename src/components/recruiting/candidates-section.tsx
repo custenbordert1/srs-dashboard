@@ -389,8 +389,6 @@ export function CandidatesSection() {
 
     const enrichment: string[] = [];
 
-    let previewAwaitingHydration = false;
-
     try {
       const preview = await fetchCandidatesForTab({ force, scan: "preview" });
       const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
@@ -416,7 +414,6 @@ export function CandidatesSection() {
           });
           setSyncAlert(buildCandidatesSyncAlert(preview));
         } else {
-          previewAwaitingHydration = (preview.positionsScanned ?? 0) > 0;
           setSyncAlert(buildCandidatesSyncAlert(preview));
         }
       } else if (hasPopulatedSnapshot()) {
@@ -429,9 +426,7 @@ export function CandidatesSection() {
     } catch (err) {
       handlePreviewFetchError(err);
     } finally {
-      if (!previewAwaitingHydration) {
-        setLoadingBundle(false);
-      }
+      setLoadingBundle(false);
     }
 
     const [jobsSettled, workflowsSettled] = await Promise.allSettled([
@@ -529,7 +524,6 @@ export function CandidatesSection() {
         }
       } finally {
         setRefreshingCandidates(false);
-        if (previewAwaitingHydration) setLoadingBundle(false);
       }
     })();
   }, [

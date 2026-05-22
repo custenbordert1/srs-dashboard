@@ -1,10 +1,15 @@
-/** Temporary pipeline diagnostics — remove when candidate table render is stable. */
+/** Opt-in pipeline diagnostics (`BREEZY_CANDIDATES_DEBUG=true`). Hot paths stay silent by default. */
+
+function isCandidatesDebugEnabled(): boolean {
+  return process.env.BREEZY_CANDIDATES_DEBUG === "true";
+}
 
 export function logCandidatesDebug(
   stage: string,
   count: number,
   meta?: Record<string, unknown>,
 ): void {
+  if (!isCandidatesDebugEnabled()) return;
   if (meta && Object.keys(meta).length > 0) {
     console.info(`[candidates-debug] ${stage} count=${count}`, meta);
     return;
@@ -18,6 +23,7 @@ export function countRawBreezyListResponse(data: unknown): number {
   const record = data as Record<string, unknown>;
   if (Array.isArray(record.candidates)) return record.candidates.length;
   if (Array.isArray(record.data)) return record.data.length;
+  if (Array.isArray(record.results)) return record.results.length;
   if (record.data && typeof record.data === "object") {
     const nested = record.data as Record<string, unknown>;
     if (Array.isArray(nested.candidates)) return nested.candidates.length;
@@ -29,6 +35,7 @@ export function logFirstCandidateKeys(
   stage: string,
   candidate: Record<string, unknown> | null | undefined,
 ): void {
+  if (!isCandidatesDebugEnabled()) return;
   if (!candidate) {
     console.info(`[candidates-debug] ${stage}_first_candidate_keys`, { keys: [] });
     return;
@@ -46,5 +53,6 @@ export function logRecruiterTerritoryFilters(meta: {
   stageFilter?: string;
   territoryNote?: string;
 }): void {
+  if (!isCandidatesDebugEnabled()) return;
   console.info("[candidates-debug] filters_applied", meta);
 }

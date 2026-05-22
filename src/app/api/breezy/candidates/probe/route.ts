@@ -1,11 +1,13 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { getBreezyApiKeySync, getBreezyCompanyIdSync } from "@/lib/config";
+import { getBreezyApiKeySync } from "@/lib/config";
 import { breezyConfigErrorMessage } from "@/lib/env-validation";
 import {
+  FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY,
   getCachedBreezyCandidateListStrategy,
+  isBreezyCandidateEndpointProbeEnabled,
   probeBreezyCandidateEndpoints,
 } from "@/lib/breezy-global-candidates";
-import { fetchBreezyJobs } from "@/lib/breezy-api";
+import { fetchBreezyJobs, resolveBreezyCompany } from "@/lib/breezy-api";
 import { logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
 import { blockBreezyWriteRoute } from "@/lib/security/read-only";
@@ -28,13 +30,31 @@ export async function GET(request: Request) {
 
   await logBreezyRouteStart(ROUTE, session);
 
+  if (!isBreezyCandidateEndpointProbeEnabled()) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Endpoint probing is disabled. Set BREEZY_CANDIDATES_PROBE_ENDPOINTS=true to run diagnostics.",
+        frozenStrategy: FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY,
+      },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const apiKey = getBreezyApiKeySync();
-  const companyId = getBreezyCompanyIdSync();
-  if (!apiKey || !companyId) {
+  if (!apiKey) {
     const error = breezyConfigErrorMessage();
     logBreezyRouteResult(ROUTE, 503, { breezyOk: false });
     return NextResponse.json({ ok: false, error }, { status: 503 });
   }
+
+  const companyResult = await resolveBreezyCompany();
+  if (!companyResult.ok) {
+    logBreezyRouteResult(ROUTE, 503, { breezyOk: false });
+    return NextResponse.json({ ok: false, error: companyResult.error }, { status: 503 });
+  }
+  const companyId = companyResult.companyId;
 
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";

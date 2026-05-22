@@ -3,7 +3,6 @@
  * The Breezy UI Candidates tab (/app/c/{company}/candidates) uses a global list, not per-position scans.
  */
 
-import { logCandidatesDebug } from "@/lib/candidates-debug";
 import { extractRawBreezyCandidatesFromListResponse } from "@/lib/breezy-api";
 import type { BreezyApiFailure, BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 
@@ -52,14 +51,34 @@ export type BreezyCandidateEndpointProbeReport = {
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const AUTH_HEADER_FORMAT = "Authorization: <BREEZY_API_KEY>";
 
-let cachedListStrategy: BreezyCandidateListStrategy | null = null;
+/** Production fetch path — per-position list with Breezy Mongo position `_id`. */
+export const FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY: BreezyCandidateListStrategy = {
+  kind: "per_position",
+  pathTemplate: "/company/{companyId}/position/{positionId}/candidates",
+  label: "per_position_primary_id",
+};
+
+let cachedProbeWinner: BreezyCandidateListStrategy | null = null;
+
+/** Live multi-endpoint probes — dev/diagnostic only (`BREEZY_CANDIDATES_PROBE_ENDPOINTS=true`). */
+export function isBreezyCandidateEndpointProbeEnabled(): boolean {
+  return process.env.BREEZY_CANDIDATES_PROBE_ENDPOINTS === "true";
+}
 
 export function clearBreezyCandidateListStrategyCache(): void {
-  cachedListStrategy = null;
+  cachedProbeWinner = null;
 }
 
 export function getCachedBreezyCandidateListStrategy(): BreezyCandidateListStrategy | null {
-  return cachedListStrategy;
+  return cachedProbeWinner;
+}
+
+/** Strategy used by candidate sync — no network probe. */
+export function getBreezyCandidateListStrategyForFetch(): BreezyCandidateListStrategy {
+  if (isBreezyCandidateEndpointProbeEnabled() && cachedProbeWinner) {
+    return cachedProbeWinner;
+  }
+  return FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY;
 }
 
 export function describeBreezyResponseShape(body: unknown): BreezyResponseShapeSummary {
@@ -194,13 +213,15 @@ export async function probeBreezyCandidateEndpoints(input: {
   for (const def of probeDefs) {
     const url = buildProbeUrl(def.path, def.query);
 
-    console.info("[breezy-candidates-api] request", {
-      label: def.label,
-      method: "GET",
-      url,
-      queryParams: def.query,
-      authHeaderFormat: AUTH_HEADER_FORMAT,
-    });
+    if (isBreezyCandidateEndpointProbeEnabled()) {
+      console.info("[breezy-candidates-api] request", {
+        label: def.label,
+        method: "GET",
+        url,
+        queryParams: def.query,
+        authHeaderFormat: AUTH_HEADER_FORMAT,
+      });
+    }
 
     let httpStatus: number | null = null;
     let body: unknown = null;
@@ -232,14 +253,16 @@ export async function probeBreezyCandidateEndpoints(input: {
     }
 
     const shape = describeBreezyResponseShape(body);
-    console.info("[breezy-candidates-api] response", {
-      label: def.label,
-      url,
-      httpStatus,
-      responseShape: shape,
-      extractedCount: shape.extractedCount,
-      error,
-    });
+    if (isBreezyCandidateEndpointProbeEnabled()) {
+      console.info("[breezy-candidates-api] response", {
+        label: def.label,
+        url,
+        httpStatus,
+        responseShape: shape,
+        extractedCount: shape.extractedCount,
+        error,
+      });
+    }
 
     probes.push({
       label: def.label,
@@ -259,7 +282,7 @@ export async function probeBreezyCandidateEndpoints(input: {
     : null;
 
   if (winner) {
-    cachedListStrategy = winner;
+    cachedProbeWinner = winner;
   }
 
   return {
@@ -289,6 +312,7 @@ function strategyFromProbeLabel(label: string): BreezyCandidateListStrategy {
   };
 }
 
+/** Diagnostic-only — never call from production candidate loads. */
 export async function resolveBreezyCandidateListStrategy(input: {
   companyId: string;
   samplePositionId: string | null;
@@ -296,8 +320,11 @@ export async function resolveBreezyCandidateListStrategy(input: {
   apiKey: string;
   forceProbe?: boolean;
 }): Promise<BreezyCandidateListStrategy> {
-  if (!input.forceProbe && cachedListStrategy) {
-    return cachedListStrategy;
+  if (!isBreezyCandidateEndpointProbeEnabled()) {
+    return FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY;
+  }
+  if (!input.forceProbe && cachedProbeWinner) {
+    return cachedProbeWinner;
   }
   const report = await probeBreezyCandidateEndpoints({
     companyId: input.companyId,
@@ -306,22 +333,7 @@ export async function resolveBreezyCandidateListStrategy(input: {
     apiKey: input.apiKey,
     pageSize: 3,
   });
-  if (report.winner) {
-    logCandidatesDebug("candidate_list_strategy", 0, {
-      strategy: report.winner.kind,
-      label: report.winner.label,
-    });
-    return report.winner;
-  }
-  logCandidatesDebug("candidate_list_strategy_fallback", 0, {
-    strategy: "per_position",
-    reason: "no_global_endpoint_returned_rows",
-  });
-  return {
-    kind: "per_position",
-    pathTemplate: "/company/{companyId}/position/{positionId}/candidates",
-    label: "per_position_fallback",
-  };
+  return report.winner ?? FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY;
 }
 
 export type GlobalCandidatesBatchResult = {
@@ -373,14 +385,6 @@ export async function fetchCandidatesViaGlobalList(input: {
     };
     const url = buildProbeUrl(path, query);
 
-    console.info("[breezy-candidates-api] request", {
-      strategy: input.strategy.kind,
-      method: "GET",
-      url,
-      queryParams: query,
-      authHeaderFormat: AUTH_HEADER_FORMAT,
-      page,
-    });
 
     let response: Response;
     try {
@@ -427,14 +431,6 @@ export async function fetchCandidatesViaGlobalList(input: {
     rawBreezyResponseCount += batch.length;
     extractedCandidatesCount += batch.length;
 
-    console.info("[breezy-candidates-api] response", {
-      strategy: input.strategy.kind,
-      url,
-      httpStatus: response.status,
-      responseShape: shape,
-      extractedCount: batch.length,
-      pagination: shape.pagination,
-    });
 
     for (const raw of batch) {
       const record = raw as Record<string, unknown>;
@@ -460,14 +456,6 @@ export async function fetchCandidatesViaGlobalList(input: {
     if (batch.length < input.pageSize) break;
     if (shape.pagination && shape.pagination.has_more === false) break;
   }
-
-  logCandidatesDebug("global_candidates_fetch_complete", candidates.length, {
-    strategy: input.strategy.kind,
-    rawBreezyResponseCount,
-    extractedCandidatesCount,
-    pagesFetched,
-    sanitizeRejected,
-  });
 
   return {
     candidates,

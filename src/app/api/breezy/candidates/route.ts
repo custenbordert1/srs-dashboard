@@ -1,4 +1,3 @@
-import { logCandidatesDebug } from "@/lib/candidates-debug";
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
 import { fetchBreezyCandidates, type BreezyCandidatesScanMode } from "@/lib/breezy-api";
@@ -61,20 +60,7 @@ export async function GET(request: Request) {
       force,
       scanMode,
     });
-  if (breezyResult.ok) {
-    logCandidatesDebug("before_api_territory_guard", breezyResult.candidates.length, {
-      scanMode: scanMode ?? "default",
-      role: session.role,
-    });
-  }
   const result = guardBreezyCandidatesResult(breezyResult, session);
-  if (result.ok) {
-    logCandidatesDebug("after_api_territory_guard", result.candidates.length, {
-      scanMode: scanMode ?? "default",
-      role: session.role,
-      territoryFiltered: result.skippedCandidatesReason?.territoryFiltered ?? 0,
-    });
-  }
   const status = result.ok ? 200 : breezyFailureHttpStatus(result.error);
   logBreezyRouteResult(ROUTE, status, {
     role: session.role,
@@ -92,9 +78,15 @@ export async function GET(request: Request) {
     territoryFiltered: result.ok ? result.skippedCandidatesReason?.territoryFiltered : undefined,
     positionFetchFailed: result.ok ? result.skippedCandidatesReason?.positionFetchFailed : undefined,
   });
+  const cacheMaxAge =
+    result.ok && result.candidates.length > 0 && (scanMode === "preview" || scanMode === "fast")
+      ? 300
+      : 30;
   return NextResponse.json(result, {
     status,
-    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" },
+    headers: {
+      "Cache-Control": `private, max-age=${cacheMaxAge}, stale-while-revalidate=120`,
+    },
   });
 }
 
