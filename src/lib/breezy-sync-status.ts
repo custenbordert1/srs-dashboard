@@ -195,7 +195,7 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     fetchBreezyJobs("published"),
     fetchBreezyJobs("draft"),
   ]);
-  const cachedCandidates = peekBreezyCandidatesCache();
+  const cachedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
   const candidatesFromCache = Boolean(cachedCandidates?.ok);
 
   const jobFailures = [

@@ -5,13 +5,13 @@ import { BREEZY_CANDIDATES_SOURCE } from "@/lib/breezy-candidates-sync";
 let warmInflight: Promise<void> | null = null;
 
 function hasWarmCandidatesData(): boolean {
-  if (getLastOkTabCandidatesSnapshot()) return true;
+  if ((getLastOkTabCandidatesSnapshot()?.candidates.length ?? 0) > 0) return true;
   const preview = peekBreezyCandidatesCache({ scanMode: "preview" });
-  if (preview?.ok) return true;
+  if ((preview?.ok && preview.candidates.length > 0) === true) return true;
   const peeked = peekBreezyCandidatesCache({ scanMode: "fast" });
-  if (peeked?.ok) return true;
+  if ((peeked?.ok && peeked.candidates.length > 0) === true) return true;
   const merged = peekBreezyCandidatesCache({ scanMode: "all" });
-  return merged?.ok === true;
+  return (merged?.ok && merged.candidates.length > 0) === true;
 }
 
 /**

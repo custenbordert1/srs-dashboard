@@ -79,8 +79,13 @@ export async function GET(request: Request) {
   logBreezyRouteResult(ROUTE, status, {
     role: session.role,
     scanMode: scanMode ?? "default",
+    force,
     breezyOk: result.ok,
     candidateCount: result.ok ? result.candidates.length : 0,
+    normalizedCandidateCount: result.ok ? result.candidates.length : 0,
+    rawBreezyResponseCount: result.ok ? result.previewDiagnostics?.rawBreezyResponseCount : undefined,
+    extractedCandidatesCount: result.ok ? result.previewDiagnostics?.extractedCandidatesCount : undefined,
+    servedFromServerCache: result.ok ? result.previewDiagnostics?.servedFromServerCache : undefined,
     positionsScanned: result.ok ? result.positionsScanned : undefined,
     candidatesInDateRange: result.ok ? result.candidatesInDateRange : undefined,
     sanitizeRejected: result.ok ? result.skippedCandidatesReason?.sanitizeRejected : undefined,

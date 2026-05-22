@@ -11,7 +11,9 @@ import {
 import {
   cacheKey,
   fetchCachedJson,
+  getCached,
   getCachedAllowExpired,
+  invalidateCached,
   LONG_CLIENT_CACHE_TTL_MS,
 } from "@/lib/client-api-cache";
 import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
@@ -44,7 +46,16 @@ function shouldCacheCandidatesPayload(
   scan: BreezyCandidatesScanMode,
 ): boolean {
   if (!isRenderableCandidatesSnapshot(payload)) return false;
-  if (scan === "preview" && payload.candidates.length === 0) return false;
+  if ((scan === "preview" || scan === "fast") && payload.candidates.length === 0) return false;
+  return true;
+}
+
+function isUsableTabCacheHit(
+  payload: BreezyCandidatesResult,
+  scan: BreezyCandidatesScanMode,
+): boolean {
+  if (!isRenderableCandidatesSnapshot(payload)) return false;
+  if (scan === "preview" || scan === "fast") return hasPopulatedCandidatesSnapshot(payload);
   return true;
 }
 
@@ -132,11 +143,24 @@ async function fetchCandidatesFromApi(options: {
 }): Promise<CandidatesTabFetchResult> {
   const cachedOk = getCachedAllowExpired<BreezyCandidatesResult>(options.cacheKey);
   const fallbackOk =
-    cachedOk && isRenderableCandidatesSnapshot(cachedOk)
+    cachedOk && isUsableTabCacheHit(cachedOk, options.scan)
       ? cachedOk
-      : lastOkTabSnapshot;
+      : lastOkTabSnapshot && lastOkTabSnapshot.candidates.length > 0
+        ? lastOkTabSnapshot
+        : null;
 
   try {
+    logCandidatesDebug("before_client_fetch", 0, {
+      scan: options.scan,
+      forceRequested: Boolean(options.force),
+    });
+    if (!options.force && (options.scan === "preview" || options.scan === "fast")) {
+      const staleHit = getCached<BreezyCandidatesResult>(options.cacheKey);
+      if (staleHit?.ok && staleHit.candidates.length === 0) {
+        invalidateCached(options.cacheKey);
+        logCandidatesDebug("preview_skip_empty_client_cache", 0, { scan: options.scan });
+      }
+    }
     const parsed = await fetchCachedJson<BreezyCandidatesResult>(
       options.cacheKey,
       async () => {
@@ -163,12 +187,21 @@ async function fetchCandidatesFromApi(options: {
 
     if (isRenderableCandidatesSnapshot(parsed)) {
       logCandidatesDebug("before_client_api_response", 0, { scan: options.scan });
+      const diag = parsed.previewDiagnostics;
       logCandidatesDebug("after_client_api_response", parsed.candidates.length, {
         scan: options.scan,
+        forceRequested: Boolean(options.force),
         positionsScanned: parsed.positionsScanned ?? 0,
         fromCache: parsed.fromCache ?? false,
         partial: parsed.partial ?? false,
         territoryFiltered: parsed.skippedCandidatesReason?.territoryFiltered ?? 0,
+        normalizedCandidateCount: parsed.candidates.length,
+        rawBreezyResponseCount: diag?.rawBreezyResponseCount,
+        extractedCandidatesCount: diag?.extractedCandidatesCount,
+        servedFromServerCache: diag?.servedFromServerCache,
+        previewPageSize: diag?.previewPageSize,
+        previewMaxPages: diag?.previewMaxPages,
+        jobsWithApplicantCount: diag?.jobsWithApplicantCount,
       });
       logFirstCandidateKeys(
         "after_client_api_response",
