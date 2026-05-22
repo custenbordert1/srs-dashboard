@@ -40,8 +40,8 @@ export const BREEZY_CANDIDATES_CACHE_TTL_MS = 300_000;
 export const BREEZY_CANDIDATES_FAST_TIER_POSITIONS = 60;
 
 export type BreezyCandidatesScanMode = "preview" | "fast" | "full" | "all";
-/** Max published positions attempted during preview before first-populated-batch stop. */
-export const BREEZY_CANDIDATES_PREVIEW_MAX_POSITIONS = 12;
+/** Max published positions attempted during preview (within server budget). */
+export const BREEZY_CANDIDATES_PREVIEW_MAX_POSITIONS = 30;
 /** Stop preview scan once this many candidates are collected. */
 export const BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES = 50;
 /** Prefer preview to reach at least this many rows when Breezy has applicants. */
@@ -227,6 +227,17 @@ export type BreezyPreviewScanDiagnostics = {
   candidateFetchStrategy?: string;
   candidateFetchEndpoint?: string;
   globalPagesFetched?: number;
+  /** Positions in the preview scan that returned at least one Breezy row. */
+  previewCandidatePositionsFound?: number;
+  /** Positions in the preview queue with candidateCount > 0 on the job list. */
+  previewPositionsWithApplicants?: number;
+  /** Positions scanned with zero extracted Breezy rows (non-failed). */
+  previewEmptyPositions?: number;
+  previewStoppedReason?:
+    | "complete"
+    | "server_budget"
+    | "max_positions"
+    | "target_candidates";
 };
 
 /** Normalize a raw Breezy candidate record (used by global list fetch). */
@@ -857,23 +868,13 @@ export function sortPublishedJobsByRecentUpdated(jobs: BreezyJob[]): BreezyJob[]
     });
 }
 
-function previewScanPriorityTier(job: BreezyJob): number {
-  const count = job.candidateCount;
-  if (count !== undefined && count > 0) return 0;
-  if (count === undefined) return 1;
-  return 2;
-}
-
-/** Preview scan: jobs with applicants first, unknown counts next, known-empty last. */
+/** Preview scan: applicantCount DESC, then updated_at DESC (unknown counts sort last). */
 export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] {
   return [...jobs]
     .filter((job) => job.jobId)
     .sort((a, b) => {
-      const tierA = previewScanPriorityTier(a);
-      const tierB = previewScanPriorityTier(b);
-      if (tierA !== tierB) return tierA - tierB;
-      const countB = b.candidateCount ?? 0;
-      const countA = a.candidateCount ?? 0;
+      const countB = b.candidateCount ?? -1;
+      const countA = a.candidateCount ?? -1;
       if (countB !== countA) return countB - countA;
       const tb = parseJobUpdatedDate(b)?.getTime() ?? 0;
       const ta = parseJobUpdatedDate(a)?.getTime() ?? 0;
@@ -1273,6 +1274,9 @@ type ScanBatchStats = {
   truncated: boolean;
   rawBreezyResponseCount: number;
   extractedCandidatesCount: number;
+  previewCandidatePositionsFound?: number;
+  previewEmptyPositions?: number;
+  previewStoppedReason?: BreezyPreviewScanDiagnostics["previewStoppedReason"];
 };
 
 export async function fetchBreezyCandidates(options?: {
@@ -1693,8 +1697,6 @@ async function scanPositionsBatch(input: {
   filterToDateRange: boolean;
   maxCandidates?: number;
   batchDelayMs?: number;
-  /** Preview: stop after the first concurrent batch that returns extractable rows. */
-  stopAfterFirstPopulatedBatch?: boolean;
 }): Promise<ScanBatchStats> {
   const candidates: BreezyCandidate[] = [];
   const warnings: string[] = [];
@@ -1707,13 +1709,23 @@ async function scanPositionsBatch(input: {
   let truncated = false;
   let rawBreezyResponseCount = 0;
   let extractedCandidatesCount = 0;
+  let previewCandidatePositionsFound = 0;
+  let previewEmptyPositions = 0;
+  let previewStoppedReason: ScanBatchStats["previewStoppedReason"] = "complete";
   const failedPositions: BreezyJob[] = [];
 
   const rangeStart = input.filterToDateRange ? input.dateRangeStart : undefined;
   const rangeEnd = input.filterToDateRange ? input.dateRangeEnd : undefined;
 
   const mergeResult = (position: BreezyJob, result: PositionScanResult, isRetry = false) => {
-    if (!isRetry) positionsScanned += 1;
+    if (!isRetry) {
+      positionsScanned += 1;
+      if (result.extractedCandidatesCount > 0) {
+        previewCandidatePositionsFound += 1;
+      } else if (!result.failed) {
+        previewEmptyPositions += 1;
+      }
+    }
     rawBreezyResponseCount += result.rawBreezyResponseCount;
     extractedCandidatesCount += result.extractedCandidatesCount;
     candidates.push(...result.candidates);
@@ -1744,6 +1756,7 @@ async function scanPositionsBatch(input: {
   for (let offset = 0; offset < total; offset += CANDIDATE_POSITION_CONCURRENCY) {
     if (Date.now() >= input.deadlineMs) {
       truncated = true;
+      previewStoppedReason = "server_budget";
       warnings.push(`Scan stopped early (${input.pipelineState}) — server runtime budget.`);
       break;
     }
@@ -1767,19 +1780,9 @@ async function scanPositionsBatch(input: {
       mergeResult(batch[index]!, results[index]!);
     }
 
-    if (input.stopAfterFirstPopulatedBatch) {
-      const batchHadRows = results.some((result) => result.extractedCandidatesCount > 0);
-      if (batchHadRows && candidates.length > 0) {
-        truncated = true;
-        warnings.push(
-          "Preview: stopped after first position batch with applicants (background sync continues).",
-        );
-        break;
-      }
-    }
-
     if (input.maxCandidates && candidates.length >= input.maxCandidates) {
       truncated = true;
+      previewStoppedReason = "target_candidates";
       warnings.push(
         `Preview cap: loaded first ${input.maxCandidates.toLocaleString()} candidates from recent positions.`,
       );
@@ -1820,6 +1823,10 @@ async function scanPositionsBatch(input: {
     sanitizeRejected,
   });
 
+  if (truncated && previewStoppedReason === "complete") {
+    previewStoppedReason = positionsScanned < total ? "max_positions" : "complete";
+  }
+
   return {
     candidates,
     warnings,
@@ -1833,6 +1840,9 @@ async function scanPositionsBatch(input: {
     truncated,
     rawBreezyResponseCount,
     extractedCandidatesCount,
+    previewCandidatePositionsFound,
+    previewEmptyPositions,
+    previewStoppedReason,
   };
 }
 
@@ -2272,7 +2282,6 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     filterToDateRange: options.filterToDateRange,
     maxCandidates: scanMode === "preview" ? BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES : undefined,
     batchDelayMs: scanMode === "preview" ? CANDIDATE_PREVIEW_BATCH_DELAY_MS : undefined,
-    stopAfterFirstPopulatedBatch: scanMode === "preview",
   });
 
   if (batch.positionsScanned < scanPositions.length && !batch.truncated) {
@@ -2342,6 +2351,10 @@ async function fetchBreezyCandidatesUncachedCore(options: {
 
   const jobBuckets =
     scanMode === "preview" ? countPreviewJobApplicantBuckets(scanPositions) : null;
+  const previewPositionsWithApplicants =
+    scanMode === "preview"
+      ? scanPositions.filter((job) => (job.candidateCount ?? 0) > 0).length
+      : 0;
 
   return {
     ...payload,
@@ -2368,6 +2381,10 @@ async function fetchBreezyCandidatesUncachedCore(options: {
             jobsWithZeroApplicantCount: jobBuckets?.jobsWithZeroApplicantCount ?? 0,
             candidateFetchStrategy,
             candidateFetchEndpoint,
+            previewCandidatePositionsFound: batch.previewCandidatePositionsFound ?? 0,
+            previewPositionsWithApplicants,
+            previewEmptyPositions: batch.previewEmptyPositions ?? 0,
+            previewStoppedReason: batch.previewStoppedReason ?? "complete",
           }
         : undefined,
   };

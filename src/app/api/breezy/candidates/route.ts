@@ -72,6 +72,11 @@ export async function GET(request: Request) {
     rawBreezyResponseCount: result.ok ? result.previewDiagnostics?.rawBreezyResponseCount : undefined,
     extractedCandidatesCount: result.ok ? result.previewDiagnostics?.extractedCandidatesCount : undefined,
     servedFromServerCache: result.ok ? result.previewDiagnostics?.servedFromServerCache : undefined,
+    previewStoppedReason: result.ok ? result.previewDiagnostics?.previewStoppedReason : undefined,
+    previewCandidatePositionsFound: result.ok
+      ? result.previewDiagnostics?.previewCandidatePositionsFound
+      : undefined,
+    previewEmptyPositions: result.ok ? result.previewDiagnostics?.previewEmptyPositions : undefined,
     positionsScanned: result.ok ? result.positionsScanned : undefined,
     candidatesInDateRange: result.ok ? result.candidatesInDateRange : undefined,
     sanitizeRejected: result.ok ? result.skippedCandidatesReason?.sanitizeRejected : undefined,

@@ -82,6 +82,95 @@ function deriveWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStat
   return "Needs Review";
 }
 
+const BASELINE_INTELLIGENCE: CandidateIntelligenceScore = {
+  matchPercent: 0,
+  matchLevel: "no_resume",
+  isTopMatch: false,
+  hasResume: false,
+  skillTags: [],
+  skillTagLabels: [],
+  factors: { experience: 0, travelRadius: 0, responseSpeed: 0, resumeQuality: 0 },
+  distanceMiles: null,
+  resumeKeywordCount: 0,
+  summary: "Enriching match scores…",
+  scoringNotes: [],
+};
+
+const BASELINE_AI: CandidateAiScore = {
+  letterGrade: "C",
+  tier: "moderate",
+  tierLabel: "Moderate",
+  numericScore: 0,
+  breakdown: {
+    merchandisingKeywords: 0,
+    resetExperience: 0,
+    walmartTargetExperience: 0,
+    travelWillingness: 0,
+    yearsOfExperience: 0,
+    resumeSourceQuality: 0,
+    stageProgression: 0,
+    breezyScoreBoost: 0,
+  },
+  recommendations: [],
+  summary: "Enriching scores…",
+};
+
+/** Lightweight row for first paint before deferred intelligence scoring. */
+export function buildBaselineWorkflowRow(
+  candidate: BreezyCandidate,
+  local?: CandidateWorkflowRecord,
+): ScoredCandidateWorkflowRow {
+  const workflowStatus = local?.workflowStatus ?? deriveWorkflowStatus(candidate);
+  const assignedDM = local?.assignedDM ?? "Unassigned";
+  const suggestedDM = suggestDmForCandidate({
+    candidateState: candidate.state,
+    jobState: candidate.state,
+    assignedDM: local?.assignedDM,
+  });
+
+  return {
+    ...candidate,
+    workflowStatus,
+    lastActionAt: local?.lastActionAt ?? null,
+    nextActionNeeded: local?.nextActionNeeded ?? nextActionForWorkflowStatus(workflowStatus),
+    assignedRecruiter: local?.assignedRecruiter ?? "Unassigned",
+    assignedDM,
+    notes: local?.notes ?? [],
+    history: local?.history ?? [],
+    recruitingActions: local?.recruitingActions ?? emptyRecruitingActions(),
+    followUpDueAt: local?.followUpDueAt ?? null,
+    snoozedUntil: local?.snoozedUntil ?? null,
+    signatureRequestId: local?.signatureRequestId ?? null,
+    paperworkTemplateKey: local?.paperworkTemplateKey ?? null,
+    paperworkSentAt: local?.paperworkSentAt ?? null,
+    paperworkSignedAt: local?.paperworkSignedAt ?? null,
+    paperworkStatus: local?.paperworkStatus ?? "not_sent",
+    paperworkError: local?.paperworkError ?? null,
+    suggestedDM,
+    dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
+    resumeKeywordScore: null,
+    merchandisingExperienceScore: null,
+    retailExperienceScore: null,
+    travelFitScore: null,
+    overallCandidateScore: null,
+    aiRecommendation: BASELINE_AI.summary,
+    aiGrade: BASELINE_AI.letterGrade,
+    aiNumericScore: BASELINE_AI.numericScore,
+    aiRecommendations: BASELINE_AI.recommendations,
+    aiSummary: BASELINE_AI.summary,
+    aiBreakdown: BASELINE_AI.breakdown,
+    ai: BASELINE_AI,
+    matchPercent: BASELINE_INTELLIGENCE.matchPercent,
+    matchLevel: BASELINE_INTELLIGENCE.matchLevel,
+    isTopMatch: BASELINE_INTELLIGENCE.isTopMatch,
+    hasResume: candidate.hasResume ?? false,
+    skillTags: [],
+    distanceMiles: null,
+    intelligenceSummary: BASELINE_INTELLIGENCE.summary,
+    intelligence: BASELINE_INTELLIGENCE,
+  };
+}
+
 export function buildScoredWorkflowRow(
   candidate: BreezyCandidate,
   local?: CandidateWorkflowRecord,

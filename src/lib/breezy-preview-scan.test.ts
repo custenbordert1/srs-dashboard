@@ -37,14 +37,14 @@ describe("sortPublishedJobsForPreviewScan", () => {
     assert.equal(ordered[0]?.jobId, "newer");
   });
 
-  it("scans unknown applicant counts before known-empty jobs", () => {
+  it("orders by applicantCount DESC then updated_at DESC", () => {
     const ordered = sortPublishedJobsForPreviewScan([
       job("empty-recent", 0, "2026-05-22"),
       job("unknown", undefined, "2026-05-21"),
       job("has-applicants", 3, "2026-05-01"),
     ]);
     assert.equal(ordered[0]?.jobId, "has-applicants");
-    assert.equal(ordered[1]?.jobId, "unknown");
-    assert.equal(ordered[2]?.jobId, "empty-recent");
+    assert.equal(ordered[1]?.jobId, "empty-recent");
+    assert.equal(ordered[2]?.jobId, "unknown");
   });
 });

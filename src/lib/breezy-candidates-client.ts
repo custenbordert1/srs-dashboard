@@ -1,4 +1,5 @@
 import type { BreezyCandidatesResult, BreezyCandidatesScanMode, BreezyCandidatesSuccess } from "@/lib/breezy-api";
+import { logCandidatesClientTrace } from "@/lib/candidates-client-trace";
 import { logCandidatesDebug, logFirstCandidateKeys } from "@/lib/candidates-debug";
 import {
   BREEZY_CANDIDATES_SOURCE,
@@ -21,7 +22,9 @@ import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
 /** Preview tier — aligned with server preview budget (~10s) plus network buffer. */
 export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 15_000;
 /** Fast-tier background hydration. */
-export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = 45_000;
+export const CANDIDATES_FAST_CLIENT_TIMEOUT_MS = 30_000;
+/** @deprecated Use CANDIDATES_FAST_CLIENT_TIMEOUT_MS */
+export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_MS;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
 export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = 120_000;
 /** Client cache TTL for preview responses (populated snapshots only). */
@@ -39,6 +42,16 @@ function isRenderableCandidatesSnapshot(
   result: BreezyCandidatesResult,
 ): result is BreezyCandidatesSuccess {
   return result.ok === true && Array.isArray(result.candidates);
+}
+
+function describeCandidatesPayload(payload: BreezyCandidatesResult): Record<string, unknown> {
+  return {
+    ok: payload.ok,
+    candidateCount: payload.ok ? payload.candidates.length : 0,
+    hasCandidatesArray: payload.ok ? Array.isArray(payload.candidates) : false,
+    error: payload.ok ? undefined : payload.error,
+    scanMode: payload.ok ? payload.scanMode : undefined,
+  };
 }
 
 function shouldCacheCandidatesPayload(
@@ -124,13 +137,84 @@ function cacheKeyForScan(scan: BreezyCandidatesScanMode): string {
 
 function timeoutForScan(scan: BreezyCandidatesScanMode): number {
   if (scan === "full") return CANDIDATES_FULL_HYDRATION_TIMEOUT_MS;
-  if (scan === "fast") return CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS;
+  if (scan === "fast") return CANDIDATES_FAST_CLIENT_TIMEOUT_MS;
   return CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS;
 }
 
 function ttlForScan(scan: BreezyCandidatesScanMode): number {
   if (scan === "preview") return CANDIDATES_PREVIEW_CACHE_TTL_MS;
   return LONG_CLIENT_CACHE_TTL_MS;
+}
+
+async function fetchCandidatesLiveJson(input: {
+  scan: BreezyCandidatesScanMode;
+  force: boolean;
+  timeoutMs: number;
+  url: string;
+}): Promise<BreezyCandidatesResult> {
+  logCandidatesClientTrace("live_fetch_start", {
+    scan: input.scan,
+    force: input.force,
+    timeoutMs: input.timeoutMs,
+    url: input.url,
+    cacheHit: false,
+  });
+
+  let res: Response;
+  try {
+    res = await fetchWithTimeout(input.url, {
+      cache: "no-store",
+      timeoutMs: input.timeoutMs,
+    });
+  } catch (err) {
+    logCandidatesClientTrace("live_fetch_threw", {
+      scan: input.scan,
+      timeoutTriggered: isTimeoutError(err),
+      errorName: err instanceof Error ? err.name : typeof err,
+      errorMessage: err instanceof Error ? err.message : String(err),
+      introducedOkFalse: "fetch_throw_outer_catch",
+    });
+    throw err;
+  }
+
+  const bodyText = await res.text();
+  logCandidatesClientTrace("live_fetch_http", {
+    scan: input.scan,
+    httpStatus: res.status,
+    httpOk: res.ok,
+    bodyTextLength: bodyText.length,
+    timeoutTriggered: false,
+  });
+
+  let parsed: BreezyCandidatesResult;
+  try {
+    parsed = bodyText ? (JSON.parse(bodyText) as BreezyCandidatesResult) : { ok: false, error: "Empty response body", fetchedAt: new Date().toISOString() };
+    logCandidatesClientTrace("live_fetch_json_parse", {
+      scan: input.scan,
+      jsonParseSuccess: true,
+      ...describeCandidatesPayload(parsed),
+    });
+  } catch (err) {
+    logCandidatesClientTrace("live_fetch_json_parse", {
+      scan: input.scan,
+      jsonParseSuccess: false,
+      errorMessage: err instanceof Error ? err.message : String(err),
+      bodyPreview: bodyText.slice(0, 200),
+      introducedOkFalse: "json_parse_failure",
+    });
+    throw err;
+  }
+
+  if (!res.ok) {
+    logCandidatesClientTrace("live_fetch_http_error", {
+      scan: input.scan,
+      httpStatus: res.status,
+      payload: describeCandidatesPayload(parsed),
+      introducedOkFalse: parsed.ok === false ? "api_json_ok_false" : "http_status_not_ok",
+    });
+  }
+
+  return parsed;
 }
 
 async function fetchCandidatesFromApi(options: {
@@ -149,41 +233,66 @@ async function fetchCandidatesFromApi(options: {
         ? lastOkTabSnapshot
         : null;
 
+  const freshCacheHit = !options.force ? getCached<BreezyCandidatesResult>(options.cacheKey) : null;
+  if (freshCacheHit) {
+    logCandidatesClientTrace("fetch_path_cache_hit", {
+      scan: options.scan,
+      cacheKey: options.cacheKey,
+      ...describeCandidatesPayload(freshCacheHit),
+    });
+  }
+
   try {
     logCandidatesDebug("before_client_fetch", 0, {
       scan: options.scan,
       forceRequested: Boolean(options.force),
     });
-    if (!options.force && (options.scan === "preview" || options.scan === "fast")) {
+
+    let forceFetch = Boolean(options.force);
+    if (!forceFetch && (options.scan === "preview" || options.scan === "fast")) {
       const staleHit = getCached<BreezyCandidatesResult>(options.cacheKey);
       if (staleHit?.ok && staleHit.candidates.length === 0) {
         invalidateCached(options.cacheKey);
+        forceFetch = true;
         logCandidatesDebug("preview_skip_empty_client_cache", 0, { scan: options.scan });
+        logCandidatesClientTrace("skip_empty_client_cache_hit", {
+          scan: options.scan,
+          cacheKey: options.cacheKey,
+        });
       }
     }
+
+    const requestUrl = `${BREEZY_CANDIDATES_SOURCE.apiPath}${buildCandidatesQuery({
+      scan: options.scan,
+      force: forceFetch,
+    })}`;
+
     const parsed = await fetchCachedJson<BreezyCandidatesResult>(
       options.cacheKey,
-      async () => {
-        const res = await fetchWithTimeout(
-          `${BREEZY_CANDIDATES_SOURCE.apiPath}${buildCandidatesQuery({
-            scan: options.scan,
-            force: options.force,
-          })}`,
-          {
-            cache: "no-store",
-            timeoutMs: options.timeoutMs,
-          },
-        );
-        return (await res.json()) as BreezyCandidatesResult;
-      },
+      () =>
+        fetchCandidatesLiveJson({
+          scan: options.scan,
+          force: forceFetch,
+          timeoutMs: options.timeoutMs,
+          url: requestUrl,
+        }),
       {
         ttlMs: options.ttlMs,
-        force: options.force,
+        force: forceFetch,
         label: options.label,
-        staleOnError: true,
+        // Do not return stale ok:false payloads on timeout — outer catch uses populated fallbackOk.
+        staleOnError: false,
         shouldCache: (payload) => shouldCacheCandidatesPayload(payload, options.scan),
       },
     );
+
+    logCandidatesClientTrace("fetch_cached_json_resolved", {
+      scan: options.scan,
+      forceFetch,
+      cacheHit: Boolean(freshCacheHit) && !forceFetch,
+      liveFetch: forceFetch || !freshCacheHit,
+      ...describeCandidatesPayload(parsed),
+    });
 
     if (isRenderableCandidatesSnapshot(parsed)) {
       logCandidatesDebug("before_client_api_response", 0, { scan: options.scan });
@@ -207,21 +316,71 @@ async function fetchCandidatesFromApi(options: {
         "after_client_api_response",
         parsed.candidates[0] as unknown as Record<string, unknown> | undefined,
       );
+      logCandidatesClientTrace("fast_tier_response", {
+        scan: options.scan,
+        ok: true,
+        candidateCount: parsed.candidates.length,
+        normalizedCandidateCount: parsed.candidates.length,
+        fromCache: parsed.fromCache ?? false,
+        partial: parsed.partial ?? false,
+      });
       if (hasPopulatedCandidatesSnapshot(parsed)) {
         return rememberTabOkSnapshot(parsed);
       }
       if (fallbackOk && fallbackOk.candidates.length > 0) {
-        return toStaleTabCandidatesResult(fallbackOk, "Preview returned no candidates; using prior snapshot.");
+        logCandidatesClientTrace("empty_ok_payload_use_fallback", {
+          scan: options.scan,
+          fallbackCandidateCount: fallbackOk.candidates.length,
+          replacedSuccessfulApiWithFallback: true,
+        });
+        return toStaleTabCandidatesResult(
+          fallbackOk,
+          "Breezy returned no candidates for this tier; using prior snapshot.",
+        );
       }
+      logCandidatesClientTrace("empty_ok_payload_no_fallback", {
+        scan: options.scan,
+        introducedOkFalse: false,
+        ok: true,
+        candidateCount: 0,
+      });
       return parsed;
     }
+
+    logCandidatesClientTrace("non_renderable_payload", {
+      scan: options.scan,
+      ...describeCandidatesPayload(parsed),
+      introducedOkFalse: parsed.ok === false,
+      hasFallbackOk: Boolean(fallbackOk),
+    });
+
     if (fallbackOk) {
-      return toStaleTabCandidatesResult(fallbackOk, parsed.error);
+      logCandidatesClientTrace("failure_payload_use_fallback", {
+        scan: options.scan,
+        fallbackCandidateCount: fallbackOk.candidates.length,
+        apiError: parsed.ok ? undefined : parsed.error,
+        replacedFailedApiWithFallback: true,
+      });
+      return toStaleTabCandidatesResult(fallbackOk, parsed.ok ? "Invalid candidates payload" : parsed.error);
     }
+
+    logCandidatesClientTrace("failure_payload_returned", {
+      scan: options.scan,
+      ...describeCandidatesPayload(parsed),
+    });
     return parsed;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to load Breezy candidates";
     const timedOut = isTimeoutError(err);
+
+    logCandidatesClientTrace("fetch_outer_catch", {
+      scan: options.scan,
+      timeoutTriggered: timedOut,
+      errorName: err instanceof Error ? err.name : typeof err,
+      errorMessage: message,
+      hasFallbackOk: Boolean(fallbackOk),
+      introducedOkFalse: !fallbackOk,
+    });
 
     if (fallbackOk) {
       return {
@@ -280,7 +439,24 @@ export async function fetchAndMergeFastCandidates(
   base: BreezyCandidatesSuccess,
   options?: { force?: boolean },
 ): Promise<CandidatesTabFetchResult> {
+  logCandidatesClientTrace("fetchAndMergeFast_start", {
+    baseCandidateCount: base.candidates.length,
+    baseScanMode: base.scanMode,
+  });
   const fast = await fetchCandidatesForTab({ scan: "fast", force: options?.force });
-  if (!fast.ok) return fast;
-  return rememberTabOkSnapshot(mergeCandidatesSnapshots(base, fast));
+  if (!fast.ok) {
+    logCandidatesClientTrace("fetchAndMergeFast_failed", {
+      error: fast.error,
+      ok: false,
+      candidateCount: 0,
+    });
+    return fast;
+  }
+  const merged = mergeCandidatesSnapshots(base, fast);
+  logCandidatesClientTrace("fetchAndMergeFast_merged", {
+    fastCandidateCount: fast.candidates.length,
+    baseCandidateCount: base.candidates.length,
+    mergedCandidateCount: merged.candidates.length,
+  });
+  return rememberTabOkSnapshot(merged);
 }

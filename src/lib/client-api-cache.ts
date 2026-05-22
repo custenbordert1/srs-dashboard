@@ -89,7 +89,9 @@ export async function fetchCachedJson<T>(
     inflight.delete(key);
     if (options?.staleOnError) {
       const stale = getCachedAllowExpired<T>(key);
-      if (stale !== null) return stale;
+      if (stale !== null) {
+        return stale;
+      }
     }
     throw err;
   });
