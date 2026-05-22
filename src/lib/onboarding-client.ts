@@ -54,17 +54,30 @@ export async function checkOnboardingSignatureStatus(
   return data;
 }
 
-export async function fetchOnboardingConfig(): Promise<{
+export type OnboardingConfigResponse = {
   configured: boolean;
+  templatesAvailable: boolean;
   templates: Array<{ key: string; label: string; configured: boolean }>;
-}> {
+};
+
+export async function fetchOnboardingConfig(): Promise<OnboardingConfigResponse> {
   const res = await fetch("/api/onboarding/config", { cache: "no-store" });
   const data = (await res.json()) as {
+    ok?: boolean;
+    error?: string;
     configured?: boolean;
+    templatesAvailable?: boolean;
     templates?: Array<{ key: string; label: string; configured: boolean }>;
   };
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error ?? `Onboarding config failed (${res.status})`);
+  }
+  const templates = data.templates ?? [];
+  const templatesAvailable =
+    data.templatesAvailable ?? templates.some((t) => t.configured);
   return {
     configured: Boolean(data.configured),
-    templates: data.templates ?? [],
+    templatesAvailable,
+    templates,
   };
 }

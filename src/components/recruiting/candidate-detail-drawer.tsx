@@ -104,6 +104,7 @@ type CandidateDetailDrawerProps = {
   melMatchesLoading?: boolean;
   repMatchesLoading?: boolean;
   onboardingConfigured?: boolean;
+  templatesAvailable?: boolean;
   paperworkTemplates?: OnboardingTemplateOption[];
   paperworkSending?: boolean;
   onSendPaperwork?: (templateKey: OnboardingTemplateKey) => void;
@@ -335,6 +336,7 @@ export function CandidateDetailDrawer({
   melMatchesLoading = false,
   repMatchesLoading = false,
   onboardingConfigured = false,
+  templatesAvailable = false,
   paperworkTemplates = [],
   paperworkSending = false,
   onSendPaperwork,
@@ -703,17 +705,21 @@ export function CandidateDetailDrawer({
                 <p className="text-amber-300/90">{candidate.paperworkError}</p>
               ) : null}
               <div className="flex flex-wrap gap-1 border-t border-zinc-800 pt-2">
-                {configuredTemplates.map((template) => (
-                  <button
-                    key={template.key}
-                    type="button"
-                    disabled={!onboardingConfigured || paperworkSending || !candidate.email?.trim()}
-                    onClick={() => onSendPaperwork?.(template.key)}
-                    className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
-                  >
-                    {paperworkSending ? "Sending…" : `Send ${template.label}`}
-                  </button>
-                ))}
+                {configuredTemplates.length > 0 ? (
+                  configuredTemplates.map((template) => (
+                    <button
+                      key={template.key}
+                      type="button"
+                      disabled={!onboardingConfigured || paperworkSending || !candidate.email?.trim()}
+                      onClick={() => onSendPaperwork?.(template.key)}
+                      className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
+                    >
+                      {paperworkSending ? "Sending…" : `Send ${template.label}`}
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-zinc-500">No onboarding templates configured</p>
+                )}
                 {candidate.signatureRequestId ? (
                   <button
                     type="button"
@@ -725,7 +731,11 @@ export function CandidateDetailDrawer({
                 ) : null}
               </div>
               <p className="text-[10px] text-zinc-600">
-                Template-based email signature requests only. No embedded signing. Local workflow status does not write to Breezy.
+                {templatesAvailable
+                  ? onboardingConfigured
+                    ? "Template-based email signature requests only. No embedded signing. Local workflow status does not write to Breezy."
+                    : "Templates loaded from .env.local — add DROPBOX_SIGN_API_KEY to send."
+                  : "Set DROPBOX_SIGN_TEMPLATE_* variables in .env.local and restart the dev server."}
               </p>
               <div className="space-y-2 border-t border-zinc-800 pt-3">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Integration prep</p>

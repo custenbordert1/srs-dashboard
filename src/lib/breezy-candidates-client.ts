@@ -14,11 +14,16 @@ import {
 } from "@/lib/client-api-cache";
 import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
 
-/** Candidates tab — longer than the 10s dashboard default (server scan can take ~60–115s). */
-export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = 60_000;
+/** Preview tier — short timeout for first paint. */
+export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 12_000;
+/** Fast-tier background hydration. */
+export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = 45_000;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
 export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = 120_000;
+/** Client cache TTL for preview responses. */
+export const CANDIDATES_PREVIEW_CACHE_TTL_MS = 45_000;
 
+const TAB_PREVIEW_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "preview", "v1"]);
 const TAB_FAST_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "fast", "v1"]);
 const TAB_FULL_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "full", "v1"]);
 
@@ -43,6 +48,19 @@ function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidate
 
 export function getLastOkTabCandidatesSnapshot(): BreezyCandidatesSuccess | null {
   return lastOkTabSnapshot;
+}
+
+/** Instant tab paint from client cache or last in-memory ok snapshot. */
+export function peekTabCandidatesCache(): BreezyCandidatesSuccess | null {
+  const preview = getCachedAllowExpired<BreezyCandidatesResult>(TAB_PREVIEW_CACHE_KEY);
+  if (preview && isRenderableCandidatesSnapshot(preview)) {
+    return rememberTabOkSnapshot(preview);
+  }
+  const fast = getCachedAllowExpired<BreezyCandidatesResult>(TAB_FAST_CACHE_KEY);
+  if (fast && isRenderableCandidatesSnapshot(fast)) {
+    return rememberTabOkSnapshot(fast);
+  }
+  return getLastOkTabCandidatesSnapshot();
 }
 
 export function toStaleTabCandidatesResult(
@@ -75,12 +93,30 @@ function buildCandidatesQuery(options?: {
   return query ? `?${query}` : "";
 }
 
+function cacheKeyForScan(scan: BreezyCandidatesScanMode): string {
+  if (scan === "full") return TAB_FULL_CACHE_KEY;
+  if (scan === "fast") return TAB_FAST_CACHE_KEY;
+  return TAB_PREVIEW_CACHE_KEY;
+}
+
+function timeoutForScan(scan: BreezyCandidatesScanMode): number {
+  if (scan === "full") return CANDIDATES_FULL_HYDRATION_TIMEOUT_MS;
+  if (scan === "fast") return CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS;
+  return CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS;
+}
+
+function ttlForScan(scan: BreezyCandidatesScanMode): number {
+  if (scan === "preview") return CANDIDATES_PREVIEW_CACHE_TTL_MS;
+  return LONG_CLIENT_CACHE_TTL_MS;
+}
+
 async function fetchCandidatesFromApi(options: {
   scan: BreezyCandidatesScanMode;
   force?: boolean;
   timeoutMs: number;
   cacheKey: string;
   label: string;
+  ttlMs: number;
 }): Promise<CandidatesTabFetchResult> {
   const cachedOk = getCachedAllowExpired<BreezyCandidatesResult>(options.cacheKey);
   const fallbackOk =
@@ -105,7 +141,7 @@ async function fetchCandidatesFromApi(options: {
         return (await res.json()) as BreezyCandidatesResult;
       },
       {
-        ttlMs: LONG_CLIENT_CACHE_TTL_MS,
+        ttlMs: options.ttlMs,
         force: options.force,
         label: options.label,
         staleOnError: true,
@@ -152,14 +188,14 @@ export async function fetchCandidatesForTab(options?: {
   force?: boolean;
   scan?: BreezyCandidatesScanMode;
 }): Promise<CandidatesTabFetchResult> {
-  const scan = options?.scan ?? "fast";
-  const cacheKey = scan === "full" ? TAB_FULL_CACHE_KEY : TAB_FAST_CACHE_KEY;
+  const scan = options?.scan ?? "preview";
   return fetchCandidatesFromApi({
     scan,
     force: options?.force,
-    timeoutMs: scan === "full" ? CANDIDATES_FULL_HYDRATION_TIMEOUT_MS : CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS,
-    cacheKey,
+    timeoutMs: timeoutForScan(scan),
+    cacheKey: cacheKeyForScan(scan),
     label: `candidates-tab-${scan}`,
+    ttlMs: ttlForScan(scan),
   });
 }
 
@@ -175,4 +211,13 @@ export async function fetchAndMergeFullCandidates(
   const full = await fetchCandidatesForTab({ scan: "full", force: true });
   if (!full.ok) return full;
   return rememberTabOkSnapshot(mergeCandidatesSnapshots(base, full));
+}
+
+export async function fetchAndMergeFastCandidates(
+  base: BreezyCandidatesSuccess,
+  options?: { force?: boolean },
+): Promise<CandidatesTabFetchResult> {
+  const fast = await fetchCandidatesForTab({ scan: "fast", force: options?.force });
+  if (!fast.ok) return fast;
+  return rememberTabOkSnapshot(mergeCandidatesSnapshots(base, fast));
 }

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   const force = searchParams.get("force") === "true";
   const scanParam = searchParams.get("scan")?.trim().toLowerCase();
   const scanMode: BreezyCandidatesScanMode | undefined =
-    scanParam === "fast" || scanParam === "full" || scanParam === "all"
+    scanParam === "preview" || scanParam === "fast" || scanParam === "full" || scanParam === "all"
       ? scanParam
       : undefined;
   const positionId = searchParams.get("position_id")?.trim() || undefined;

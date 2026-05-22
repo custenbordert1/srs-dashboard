@@ -25,6 +25,7 @@ type CandidateActionsMenuProps = {
   rosters: RecruiterRosters;
   onRostersUpdated?: (rosters: RecruiterRosters) => void;
   onboardingConfigured?: boolean;
+  templatesAvailable?: boolean;
   paperworkTemplates?: OnboardingTemplateOption[];
   sendPaperworkDisabled?: boolean;
 };
@@ -34,6 +35,7 @@ export function CandidateActionsMenu({
   rosters,
   onRostersUpdated,
   onboardingConfigured = false,
+  templatesAvailable = false,
   paperworkTemplates = [],
   sendPaperworkDisabled = false,
 }: CandidateActionsMenuProps) {
@@ -235,12 +237,12 @@ export function CandidateActionsMenu({
           <div className="relative border-t border-zinc-800/80">
             <button
               type="button"
-              disabled={!onboardingConfigured || configuredTemplates.length === 0 || sendPaperworkDisabled}
+              disabled={sendPaperworkDisabled}
               title={
-                !onboardingConfigured
-                  ? "Configure DROPBOX_SIGN_API_KEY and template IDs in .env.local"
-                  : configuredTemplates.length === 0
-                    ? "No onboarding templates configured"
+                !templatesAvailable
+                  ? "Set DROPBOX_SIGN_TEMPLATE_* IDs in .env.local (restart dev server after changes)"
+                  : !onboardingConfigured
+                    ? "Templates loaded — add DROPBOX_SIGN_API_KEY to send"
                     : sendPaperworkDisabled
                       ? "Sending paperwork…"
                       : "Send Dropbox Sign template"
@@ -251,18 +253,28 @@ export function CandidateActionsMenu({
               Send paperwork
               <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
             </button>
-            {paperworkOpen && configuredTemplates.length > 0 ? (
+            {paperworkOpen ? (
               <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
-                {configuredTemplates.map((template) => (
-                  <button
-                    key={template.key}
-                    type="button"
-                    className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80"
-                    onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
-                  >
-                    {template.label}
-                  </button>
-                ))}
+                {configuredTemplates.length > 0 ? (
+                  configuredTemplates.map((template) => (
+                    <button
+                      key={template.key}
+                      type="button"
+                      disabled={!onboardingConfigured}
+                      title={
+                        onboardingConfigured
+                          ? undefined
+                          : "Configure DROPBOX_SIGN_API_KEY in .env.local"
+                      }
+                      className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
+                      onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
+                    >
+                      {template.label}
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-3 py-1.5 text-[10px] text-zinc-500">No onboarding templates configured</p>
+                )}
               </div>
             ) : null}
           </div>

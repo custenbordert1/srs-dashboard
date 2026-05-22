@@ -34,7 +34,13 @@ export const BREEZY_CANDIDATES_CACHE_TTL_MS = 300_000;
 /** Default published positions scanned on fast-tier pass (recent jobs first). */
 export const BREEZY_CANDIDATES_FAST_TIER_POSITIONS = 60;
 
-export type BreezyCandidatesScanMode = "fast" | "full" | "all";
+export type BreezyCandidatesScanMode = "preview" | "fast" | "full" | "all";
+/** Positions scanned on preview-tier pass (first screen paint). */
+export const BREEZY_CANDIDATES_PREVIEW_MAX_POSITIONS = 5;
+/** Stop preview scan once this many candidates are collected. */
+export const BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES = 50;
+/** Server budget for preview-tier aggregation. */
+export const BREEZY_CANDIDATES_PREVIEW_BUDGET_MS = 9_000;
 const BREEZY_PARITY_CACHE_TTL_MS = 300_000;
 /** Max closed positions scanned per parity run (recently updated first). */
 const DEFAULT_MAX_CLOSED_POSITIONS = 40;
@@ -1142,6 +1148,7 @@ export async function fetchBreezyCandidates(options?: {
   /** Bypass in-memory server cache for this request. */
   force?: boolean;
   /**
+   * preview — first ~50 candidates from ~5 recent positions (immediate UI).
    * fast — recent ~60 published positions (partial ok).
    * full — remaining positions merged with last fast-tier snapshot.
    * all — legacy full scan (other dashboard APIs).
@@ -1236,7 +1243,7 @@ export async function fetchBreezyCandidates(options?: {
       partial: isPartialCandidatesSync(payload),
     });
     rememberOkCandidatesSnapshot(cacheKey, enriched);
-    if (scanMode === "fast" || !enriched.partial) {
+    if (scanMode === "fast" || scanMode === "preview" || !enriched.partial) {
       rememberOkCandidatesSnapshot(fastTierCacheKey, enriched);
     }
     if (!enriched.partial) {
@@ -1469,6 +1476,7 @@ async function scanPositionsBatch(input: {
   dateRangeStart?: string;
   dateRangeEnd?: string;
   filterToDateRange: boolean;
+  maxCandidates?: number;
 }): Promise<ScanBatchStats> {
   const candidates: BreezyCandidate[] = [];
   const warnings: string[] = [];
@@ -1535,6 +1543,14 @@ async function scanPositionsBatch(input: {
 
     for (let index = 0; index < batch.length; index += 1) {
       mergeResult(batch[index]!, results[index]!);
+    }
+
+    if (input.maxCandidates && candidates.length >= input.maxCandidates) {
+      truncated = true;
+      warnings.push(
+        `Preview cap: loaded first ${input.maxCandidates.toLocaleString()} candidates from recent positions.`,
+      );
+      break;
     }
 
     if (offset + CANDIDATE_POSITION_CONCURRENCY < total) {
@@ -1941,7 +1957,19 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   let scanPositions: BreezyJob[] = sortedPositions;
   let fastTierSize = 0;
 
-  if (scanMode === "fast") {
+  const previewPageSize = Math.min(CANDIDATES_PAGE_SIZE, BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES);
+  const effectivePageSize = scanMode === "preview" ? previewPageSize : pageSize;
+  const effectiveMaxPages =
+    scanMode === "preview" ? 1 : maxPages;
+
+  if (scanMode === "preview") {
+    const cap = Math.min(
+      options?.maxPositions ?? BREEZY_CANDIDATES_PREVIEW_MAX_POSITIONS,
+      BREEZY_CANDIDATES_PREVIEW_MAX_POSITIONS,
+      sortedPositions.length,
+    );
+    scanPositions = sortedPositions.slice(0, cap);
+  } else if (scanMode === "fast") {
     const cap =
       options?.maxPositions !== undefined
         ? Math.min(options.maxPositions, BREEZY_CANDIDATES_FAST_TIER_POSITIONS)
@@ -1977,18 +2005,21 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     scanPositions = sortedPositions.slice(0, scanLimit);
   }
 
-  const deadlineMs = Date.now() + BREEZY_CANDIDATE_SCAN_BUDGET_MS;
+  const deadlineMs =
+    Date.now() +
+    (scanMode === "preview" ? BREEZY_CANDIDATES_PREVIEW_BUDGET_MS : BREEZY_CANDIDATE_SCAN_BUDGET_MS);
 
   const batch = await scanPositionsBatch({
     companyId,
     positions: scanPositions,
     pipelineState: jobState as BreezyPositionPipelineState,
-    pageSize,
-    maxPages,
+    pageSize: effectivePageSize,
+    maxPages: effectiveMaxPages,
     deadlineMs,
     dateRangeStart: options.filterToDateRange ? dateRangeStart : undefined,
     dateRangeEnd: options.filterToDateRange ? dateRangeEnd : undefined,
     filterToDateRange: options.filterToDateRange,
+    maxCandidates: scanMode === "preview" ? BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES : undefined,
   });
 
   if (batch.positionsScanned < scanPositions.length && !batch.truncated) {
@@ -2002,9 +2033,15 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   const hydrationComplete =
     scanMode === "all"
       ? !batch.truncated && positionsScannedTotal >= totalAvailable
-      : scanMode === "fast"
+      : scanMode === "fast" || scanMode === "preview"
         ? false
         : positionsScannedTotal >= totalAvailable && !batch.truncated;
+
+  if (scanMode === "preview") {
+    batch.warnings.push(
+      `Preview sync: ${batch.candidates.length.toLocaleString()} candidates from recent positions. Background sync continues.`,
+    );
+  }
 
   if (scanMode === "fast" && totalAvailable > fastTierSize) {
     batch.warnings.push(
@@ -2034,7 +2071,10 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     ...payload,
     scanMode,
     hydrationComplete,
-    partial: scanMode === "fast" ? true : payload.truncated || positionsScannedTotal < totalAvailable,
+    partial:
+      scanMode === "fast" || scanMode === "preview"
+        ? true
+        : payload.truncated || positionsScannedTotal < totalAvailable,
   };
 }
 

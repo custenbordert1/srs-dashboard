@@ -50,6 +50,34 @@ describe("breezy-candidates-sync", () => {
 });
 
 describe("mergeCandidatesSnapshots", () => {
+  it("combines preview and fast tiers without dropping rows", () => {
+    const preview = withCandidatesSyncMeta(
+      baseSuccess({
+        candidates: [{ candidateId: "c-1" } as BreezyCandidatesSuccess["candidates"][number]],
+        positionsScanned: 5,
+        totalPositionsAvailable: 120,
+        hydrationComplete: false,
+        partial: true,
+        scanMode: "preview",
+      }),
+      { fromCache: false, partial: true },
+    );
+    const fast = withCandidatesSyncMeta(
+      baseSuccess({
+        candidates: [{ candidateId: "c-2" } as BreezyCandidatesSuccess["candidates"][number]],
+        positionsScanned: 60,
+        totalPositionsAvailable: 120,
+        hydrationComplete: false,
+        partial: true,
+        scanMode: "fast",
+      }),
+      { fromCache: false, partial: true },
+    );
+    const merged = mergeCandidatesSnapshots(preview, fast);
+    assert.equal(merged.candidates.length, 2);
+    assert.equal(merged.hydrationComplete, false);
+  });
+
   it("combines fast and full tiers without dropping rows", () => {
     const fast = withCandidatesSyncMeta(
       baseSuccess({

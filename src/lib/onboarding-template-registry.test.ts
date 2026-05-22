@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  hasConfiguredOnboardingTemplates,
   isOnboardingTemplateKey,
+  resolveTemplateId,
   validateSendPacketRequest,
 } from "@/lib/onboarding-template-registry";
 
@@ -38,6 +40,22 @@ describe("onboarding-template-registry", () => {
       if (!result.ok) assert.match(result.error, /not configured/);
     } finally {
       if (prev !== undefined) process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET = prev;
+    }
+  });
+
+  it("reads onboarding packet from DROPOX typo alias env", () => {
+    const canonical = process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
+    const typo = process.env.DROPOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
+    delete process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
+    process.env.DROPOX_SIGN_TEMPLATE_ONBOARDING_PACKET = "template-from-typo";
+    try {
+      assert.equal(resolveTemplateId("onboarding_packet"), "template-from-typo");
+      assert.equal(hasConfiguredOnboardingTemplates(), true);
+    } finally {
+      if (canonical !== undefined) process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET = canonical;
+      else delete process.env.DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
+      if (typo !== undefined) process.env.DROPOX_SIGN_TEMPLATE_ONBOARDING_PACKET = typo;
+      else delete process.env.DROPOX_SIGN_TEMPLATE_ONBOARDING_PACKET;
     }
   });
 

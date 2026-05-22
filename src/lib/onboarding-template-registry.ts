@@ -43,9 +43,29 @@ export const ONBOARDING_TEMPLATE_KEYS = Object.keys(
   ONBOARDING_TEMPLATE_REGISTRY,
 ) as OnboardingTemplateKey[];
 
+/** Alternate env names (e.g. common typos) checked after the canonical name. */
+const TEMPLATE_ENV_ALIASES: Partial<Record<OnboardingTemplateKey, string[]>> = {
+  onboarding_packet: ["DROPOX_SIGN_TEMPLATE_ONBOARDING_PACKET"],
+};
+
 function isPlaceholder(value: string): boolean {
   const lower = value.toLowerCase();
   return !value || lower === "placeholder" || lower.startsWith("your-");
+}
+
+/** Canonical + alias env var names for a template key (server-side .env.local). */
+export function resolveTemplateEnvNames(key: OnboardingTemplateKey): string[] {
+  const def = ONBOARDING_TEMPLATE_REGISTRY[key];
+  const aliases = TEMPLATE_ENV_ALIASES[key] ?? [];
+  return [...new Set([def.envVar, ...aliases])];
+}
+
+function readFirstEnvValue(envNames: string[]): string | null {
+  for (const name of envNames) {
+    const raw = process.env[name]?.trim() ?? "";
+    if (raw && !isPlaceholder(raw)) return raw;
+  }
+  return null;
 }
 
 export function isOnboardingTemplateKey(value: string): value is OnboardingTemplateKey {
@@ -53,10 +73,15 @@ export function isOnboardingTemplateKey(value: string): value is OnboardingTempl
 }
 
 export function resolveTemplateId(key: OnboardingTemplateKey): string | null {
-  const def = ONBOARDING_TEMPLATE_REGISTRY[key];
-  const raw = process.env[def.envVar]?.trim() ?? "";
-  if (!raw || isPlaceholder(raw)) return null;
-  return raw;
+  return readFirstEnvValue(resolveTemplateEnvNames(key));
+}
+
+export function countConfiguredOnboardingTemplates(): number {
+  return ONBOARDING_TEMPLATE_KEYS.filter((key) => Boolean(resolveTemplateId(key))).length;
+}
+
+export function hasConfiguredOnboardingTemplates(): boolean {
+  return countConfiguredOnboardingTemplates() > 0;
 }
 
 export type ResolvedOnboardingTemplate = {

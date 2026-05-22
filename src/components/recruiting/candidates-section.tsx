@@ -51,9 +51,11 @@ import {
 import { isAppliedDateInRange } from "@/lib/breezy-api";
 import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
-  CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS,
+  CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
+  fetchAndMergeFastCandidates,
   fetchAndMergeFullCandidates,
   fetchCandidatesForTab,
+  peekTabCandidatesCache,
   shouldHydrateFullCandidates,
   type CandidatesTabFetchResult,
 } from "@/lib/breezy-candidates-client";
@@ -256,6 +258,7 @@ export function CandidatesSection() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
+  const [onboardingTemplatesAvailable, setOnboardingTemplatesAvailable] = useState(false);
   const [paperworkTemplates, setPaperworkTemplates] = useState<
     Array<{ key: OnboardingTemplateKey; label: string; configured: boolean }>
   >([]);
@@ -288,7 +291,7 @@ export function CandidatesSection() {
     [],
   );
 
-  const hydrateFullCandidates = useCallback(
+  const hydrateRemainingCandidates = useCallback(
     async (base: BreezyCandidatesSuccess) => {
       if (!shouldHydrateFullCandidates(base)) return;
       setRefreshingCandidates(true);
@@ -298,7 +301,7 @@ export function CandidatesSection() {
           commitCandidatesSuccess(merged);
         }
       } catch {
-        // Keep fast-tier rows visible; sync alert from fast pass remains.
+        // Keep partial rows visible while background sync continues.
       } finally {
         setRefreshingCandidates(false);
       }
@@ -310,9 +313,17 @@ export function CandidatesSection() {
     const emptyAtStart = breezySnapshotRef.current === null;
     if (emptyAtStart) setLoadingBundle(true);
 
+    if (emptyAtStart) {
+      const cached = peekTabCandidatesCache();
+      if (cached) {
+        commitCandidatesSuccess(cached);
+        setLoadingBundle(false);
+      }
+    }
+
     const enrichment: string[] = [];
 
-    const [jobsSettled, workflowsSettled] = await Promise.allSettled([
+    const [jobsSettled, workflowsSettled, previewSettled] = await Promise.allSettled([
       fetchCachedBreezyJobs(),
       fetchCachedJson(
         cacheKey(["candidates", "workflows"]),
@@ -330,33 +341,40 @@ export function CandidatesSection() {
         },
         { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows", staleOnError: true },
       ),
+      fetchCandidatesForTab({ force, scan: "preview" }),
     ]);
 
-    let fastResult: CandidatesTabFetchResult | null = null;
-    try {
-      fastResult = await fetchCandidatesForTab({ force, scan: "fast" });
-      if (fastResult.ok) {
-        commitCandidatesSuccess(fastResult);
+    if (previewSettled.status === "fulfilled") {
+      if (previewSettled.value.ok) {
+        commitCandidatesSuccess(previewSettled.value);
+      } else if (!breezySnapshotRef.current) {
+        commitCandidatesFailure(previewSettled.value);
       } else {
-        commitCandidatesFailure(fastResult);
+        setSyncAlert(
+          `${previewSettled.value.error} Showing cached Breezy candidates from your last successful sync.`,
+        );
       }
-    } catch (err) {
+    } else {
+      const err = previewSettled.reason;
       const timedOut = isTimeoutError(err);
-      const message =
-        err instanceof Error ? err.message : "Failed to load Breezy candidates";
+      const message = err instanceof Error ? err.message : "Failed to load Breezy candidates";
       if (breezySnapshotRef.current) {
         setSyncAlert(
           timedOut
-            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS, true)
+            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, true)
             : `${message} Showing cached Breezy candidates from your last successful sync.`,
         );
-      } else {
+      } else if (!timedOut) {
         setSyncAlert(null);
         setData({
           ok: false,
-          error: timedOut
-            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS, false)
-            : message,
+          error: message,
+          fetchedAt: new Date().toISOString(),
+        });
+      } else {
+        commitCandidatesFailure({
+          ok: false,
+          error: timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, false),
           fetchedAt: new Date().toISOString(),
         });
       }
@@ -404,10 +422,26 @@ export function CandidatesSection() {
 
     setEnrichmentWarnings(enrichment);
 
-    if (fastResult?.ok && shouldHydrateFullCandidates(fastResult)) {
-      void hydrateFullCandidates(fastResult);
-    }
-  }, [commitCandidatesFailure, commitCandidatesSuccess, hydrateFullCandidates]);
+    const base = breezySnapshotRef.current;
+    if (!base) return;
+
+    void (async () => {
+      setRefreshingCandidates(true);
+      try {
+        const fastMerged = await fetchAndMergeFastCandidates(base, { force });
+        if (fastMerged.ok) {
+          commitCandidatesSuccess(fastMerged);
+          if (shouldHydrateFullCandidates(fastMerged)) {
+            await hydrateRemainingCandidates(fastMerged);
+          }
+        }
+      } catch {
+        // Partial preview/fast rows remain interactive.
+      } finally {
+        setRefreshingCandidates(false);
+      }
+    })();
+  }, [commitCandidatesFailure, commitCandidatesSuccess, hydrateRemainingCandidates]);
 
   useEffect(() => {
     const id = window.setTimeout(() => void loadBundle(), 0);
@@ -418,6 +452,7 @@ export function CandidatesSection() {
     void fetchOnboardingConfig()
       .then((config) => {
         setOnboardingConfigured(config.configured);
+        setOnboardingTemplatesAvailable(config.templatesAvailable);
         setPaperworkTemplates(
           config.templates.map((t) => ({
             key: t.key as OnboardingTemplateKey,
@@ -428,6 +463,7 @@ export function CandidatesSection() {
       })
       .catch(() => {
         setOnboardingConfigured(false);
+        setOnboardingTemplatesAvailable(false);
         setPaperworkTemplates([]);
       });
   }, []);
@@ -907,6 +943,7 @@ export function CandidatesSection() {
               onRostersUpdated={applyRosters}
               onAction={(action) => handleCandidateAction(candidate, action)}
               onboardingConfigured={onboardingConfigured}
+              templatesAvailable={onboardingTemplatesAvailable}
               paperworkTemplates={paperworkTemplates}
               sendPaperworkDisabled={paperworkSendingId === candidate.candidateId}
             />
@@ -922,17 +959,19 @@ export function CandidatesSection() {
               <button
                 type="button"
                 disabled={
+                  !onboardingTemplatesAvailable ||
                   !onboardingConfigured ||
                   !candidate.email?.trim() ||
-                  paperworkSendingId === candidate.candidateId ||
-                  paperworkTemplates.every((t) => !t.configured)
+                  paperworkSendingId === candidate.candidateId
                 }
                 title={
-                  !onboardingConfigured
-                    ? "Configure DROPBOX_SIGN_API_KEY in .env.local"
-                    : !candidate.email?.trim()
-                      ? "Email required"
-                      : "Send onboarding packet (Dropbox Sign)"
+                  !onboardingTemplatesAvailable
+                    ? "No onboarding templates configured in .env.local"
+                    : !onboardingConfigured
+                      ? "Configure DROPBOX_SIGN_API_KEY in .env.local"
+                      : !candidate.email?.trim()
+                        ? "Email required"
+                        : "Send onboarding packet (Dropbox Sign)"
                 }
                 onClick={() => sendPaperwork(candidate, "onboarding_packet")}
                 className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
@@ -977,6 +1016,7 @@ export function CandidatesSection() {
     [
       handleCandidateAction,
       onboardingConfigured,
+      onboardingTemplatesAvailable,
       paperworkSendingId,
       paperworkTemplates,
       refreshPaperworkStatus,
@@ -992,7 +1032,7 @@ export function CandidatesSection() {
     return (
       <DashboardSectionFallback
         title="Candidates"
-        loadingMessage="Loading Breezy candidates (primary), jobs, and workflow overlay…"
+        loadingMessage="Loading first Breezy candidates, jobs, and workflow overlay…"
         isLoading
         loadingCeilingHit={loadingCeilingHit}
         onRetry={retry}
@@ -1381,6 +1421,7 @@ export function CandidatesSection() {
           persistRecruitingAction(selectedCandidate.candidateId, type);
         }}
         onboardingConfigured={onboardingConfigured}
+        templatesAvailable={onboardingTemplatesAvailable}
         paperworkTemplates={paperworkTemplates}
         paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
         onSendPaperwork={(templateKey) => {
