@@ -2,7 +2,7 @@
 
 import type { DmLeaderboardRow, NewHireMetric, PipelineStage, TrendWeek } from "@/lib/recruiting-sample-data";
 import { warmBreezyCandidatesCache } from "@/lib/breezy-candidates-warm";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
 import {
   DashboardTabPanel,
@@ -21,6 +21,7 @@ import {
   LazyWorkforceOperationsSection,
   LazyJobManagementSection,
 } from "./dashboard-tab-panels";
+import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
   EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
@@ -38,6 +39,21 @@ type RecruitingDashboardContentProps = {
   dmLeaderboard: DmLeaderboardRow[];
   userRole?: UserRole;
 };
+
+function TabPanelWithSourceBanner({
+  tabId,
+  children,
+}: {
+  tabId: DashboardTabId;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-6">
+      <RecruitingTabSourceBanner tabId={tabId} />
+      {children}
+    </div>
+  );
+}
 
 export function RecruitingDashboardContent({
   weeklyTrends,
@@ -68,66 +84,95 @@ export function RecruitingDashboardContent({
         className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8"
       >
         <DashboardTabPanel tabId="command-center" activeTab={activeTab}>
-          <LazyRecruitingCommandCenter />
-          <LazyRecruitingDataSourcesPanel />
+          <TabPanelWithSourceBanner tabId="command-center">
+            <LazyRecruitingCommandCenter />
+            <LazyRecruitingDataSourcesPanel />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="overview" activeTab={activeTab}>
-          <LazyBreezyDashboardSummary />
-          <SheetKpiCards />
-          <p className="text-xs text-zinc-600">
-            Charts below use sample FY26 data for trends and pipeline — live KPIs are in the Breezy summary above.
-          </p>
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2">
-              <LazyBreezyOverviewJobsTable />
-              <RecruitingTrendsChart data={weeklyTrends} />
+          <TabPanelWithSourceBanner tabId="overview">
+            <LazyBreezyDashboardSummary />
+            <SheetKpiCards />
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="space-y-6 lg:col-span-2">
+                <LazyBreezyOverviewJobsTable />
+                <div className="space-y-2">
+                  <span className="inline-flex rounded-full border border-zinc-600/60 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                    Demo · FY26 sample
+                  </span>
+                  <RecruitingTrendsChart data={weeklyTrends} />
+                </div>
+              </div>
+              <div className="space-y-6">
+                <span className="inline-flex rounded-full border border-zinc-600/60 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                  Demo · FY26 sample
+                </span>
+                <ApplicantPipeline stages={pipelineStages} />
+                <NewHireMetrics metrics={newHireMetrics} />
+              </div>
             </div>
-            <div className="space-y-6">
-              <ApplicantPipeline stages={pipelineStages} />
-              <NewHireMetrics metrics={newHireMetrics} />
-            </div>
-          </div>
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="needs-attention" activeTab={activeTab}>
-          <LazyNeedsAttentionSection />
+          <TabPanelWithSourceBanner tabId="needs-attention">
+            <LazyNeedsAttentionSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="dm-scorecards" activeTab={activeTab}>
-          <LazyDmLeaderboard rows={dmLeaderboard} />
+          <TabPanelWithSourceBanner tabId="dm-scorecards">
+            <LazyDmLeaderboard rows={dmLeaderboard} />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="live-sheet" activeTab={activeTab}>
-          <LazyLiveSheetSection />
+          <TabPanelWithSourceBanner tabId="live-sheet">
+            <LazyLiveSheetSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="candidates" activeTab={activeTab}>
-          <LazyCandidatesSection />
+          <TabPanelWithSourceBanner tabId="candidates">
+            <LazyCandidatesSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="mel-projects" activeTab={activeTab}>
-          <LazyMelProjectsSection />
+          <TabPanelWithSourceBanner tabId="mel-projects">
+            <LazyMelProjectsSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="data-health" activeTab={activeTab}>
-          <LazyDataHealthSection />
+          <TabPanelWithSourceBanner tabId="data-health">
+            <LazyDataHealthSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="recruiting-intelligence" activeTab={activeTab}>
-          <LazyRecruitingIntelligenceSection />
+          <TabPanelWithSourceBanner tabId="recruiting-intelligence">
+            <LazyRecruitingIntelligenceSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="automation" activeTab={activeTab}>
-          <LazyRecruitingAutomationSection />
+          <TabPanelWithSourceBanner tabId="automation">
+            <LazyRecruitingAutomationSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="workforce" activeTab={activeTab}>
-          <LazyWorkforceOperationsSection showPasswordPanel />
+          <TabPanelWithSourceBanner tabId="workforce">
+            <LazyWorkforceOperationsSection showPasswordPanel />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="job-management" activeTab={activeTab}>
-          <LazyJobManagementSection />
+          <TabPanelWithSourceBanner tabId="job-management">
+            <LazyJobManagementSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
       </main>
     </>

@@ -66,16 +66,16 @@ function LiveSheetTableView({ data, drillSeq = 0, drillManager = null }: LiveShe
       <div className="flex flex-col gap-2 border-b border-zinc-800/80 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5 sm:py-5">
         <div>
           <h2 id="live-sheet-heading" className="text-lg font-semibold tracking-tight text-zinc-50">
-            Live Google Sheet (CSV)
+            Recruiting Google Sheet (archive · CSV)
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Pulled from the public CSV export URL on the server; refreshes about every 60 seconds.
+            Reference-only mirror via public CSV export — not Breezy ATS. Refreshes about every 60 seconds.
           </p>
           <p className="mt-2 break-all font-mono text-xs text-zinc-600">{data.csvUrl}</p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          <span className="rounded-full border border-teal-500/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">
-            No Google API · free export
+          <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-200">
+            Archive · CSV export
           </span>
           <p className="text-xs text-zinc-500">Fetched {formatFetchedAt(data.fetchedAt)}</p>
         </div>
@@ -313,7 +313,7 @@ function LiveSheetSkeleton() {
       <div className="flex flex-col gap-2 border-b border-zinc-800/80 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5 sm:py-5">
         <div className="min-w-0 flex-1 space-y-2">
           <h2 id="live-sheet-heading" className="text-lg font-semibold tracking-tight text-zinc-50">
-            Live Google Sheet (CSV)
+            Recruiting Google Sheet (archive · CSV)
           </h2>
           <div className="h-4 w-full max-w-md animate-pulse rounded bg-zinc-800/80" />
           <div className="h-3 w-full max-w-lg animate-pulse rounded bg-zinc-800/60" />

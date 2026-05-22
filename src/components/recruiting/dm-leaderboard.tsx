@@ -31,7 +31,7 @@ function RankBadge({ rank }: { rank: number }) {
 function ScorecardSkeleton() {
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
-      <p className="text-sm text-zinc-500">Loading DM scorecards (Google Sheet recruiting archive + MEL projects)…</p>
+      <p className="text-sm text-zinc-500">Loading DM scorecards (recruiting sheet archive + MEL projects)…</p>
       <div className="mt-3 h-5 w-40 animate-pulse rounded bg-zinc-800/80" />
       <div className="mt-4 space-y-3">
         {Array.from({ length: 7 }, (_, i) => (
@@ -57,7 +57,7 @@ function DmScorecardTable({ rows }: { rows: DmScorecardRow[] }) {
           DM scorecards
         </h2>
         <p className="text-sm text-zinc-500">
-          Live recruiting and MEL demand metrics by mapped district manager territory
+          Recruiting sheet archive and MEL demand metrics by mapped district manager territory
         </p>
       </div>
 

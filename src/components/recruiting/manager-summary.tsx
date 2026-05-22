@@ -71,7 +71,7 @@ export function ManagerSummary({ managerName, onClear }: ManagerSummaryProps) {
           Manager summary
         </h2>
         <p className="mt-1 text-sm text-zinc-500">
-          Click a manager name in the Needs attention queue to filter the live sheet and see stats
+          Click a manager name in the Needs attention queue to filter the recruiting sheet (archive) and see stats
           here.
         </p>
       </section>
@@ -115,7 +115,7 @@ export function ManagerSummary({ managerName, onClear }: ManagerSummaryProps) {
           </h2>
           <p className="mt-1 text-sm font-medium text-teal-200/90">{stats.managerName}</p>
           <p className="mt-1 text-xs text-zinc-500">
-            Open posts = Status Open or Requested (same as KPIs). Live sheet filtered to this manager.
+            Open posts = Status Open or Requested (same as KPIs). Recruiting sheet (archive) filtered to this manager.
           </p>
         </div>
         <button

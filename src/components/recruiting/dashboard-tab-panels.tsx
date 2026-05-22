@@ -65,7 +65,7 @@ export const LazyLiveSheetSection = dynamic(
     import("@/components/recruiting/live-sheet-section").then((m) => ({
       default: m.LiveSheetSection,
     })),
-  { loading: tabLoading("Loading live sheet…") },
+  { loading: tabLoading("Loading recruiting sheet (archive)…") },
 );
 
 export const LazyCandidatesSection = dynamic(

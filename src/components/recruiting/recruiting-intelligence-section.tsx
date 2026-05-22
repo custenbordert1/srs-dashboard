@@ -371,7 +371,7 @@ export function RecruitingIntelligenceSection() {
         <p className="mt-1 max-w-3xl text-sm text-zinc-500">
           {sheetLive
             ? "Legacy mode: recruiting Google Sheet drives open-post analytics."
-            : "Live analytics from Breezy HR (published jobs + candidate sync). MEL sheet still powers store-call demand."}
+            : "Summary KPIs and charts use Breezy HR (published jobs + candidate sync). MEL sheet powers store-call demand. Sheet-backed sections below need archive rows or legacy mode."}
         </p>
       </div>
 
@@ -499,6 +499,21 @@ export function RecruitingIntelligenceSection() {
         <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
       </DeferredSection>
 
+      {!sheetLive && data.ok && data.rows.length === 0 ? (
+        <div
+          role="note"
+          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+        >
+          <p className="font-medium text-amber-50">Sheet-backed sections (archive)</p>
+          <p className="mt-1 text-amber-100/90">
+            Critical markets, opportunity automation, forecast, and related panels read from the
+            recruiting Google Sheet. With Breezy as the live source, those rows are not loaded here —
+            expand sections only for archive reconciliation, or enable legacy sheet-live mode for comparison.
+            Candidate intelligence below uses live Breezy data.
+          </p>
+        </div>
+      ) : null}
+
       <DeferredSection
         title="Critical markets queue"
         summary={<p className="text-sm text-zinc-500">Market-level recruiting priorities.</p>}
@@ -507,8 +522,8 @@ export function RecruitingIntelligenceSection() {
       </DeferredSection>
 
       <DeferredSection
-        title="Live market intelligence"
-        summary={<p className="text-sm text-zinc-500">Real-time market demand and coverage signals.</p>}
+        title="Market intelligence (sheet + MEL)"
+        summary={<p className="text-sm text-zinc-500">Market demand and coverage from sheet + MEL rows.</p>}
       >
         <LiveMarketIntelligenceSection recruiting={data} mel={melData} />
       </DeferredSection>

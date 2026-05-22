@@ -167,7 +167,7 @@ export function PostAutomationQueue() {
             Post Automation Queue
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Read-only queue derived from the live sheet (Open / Requested). Breezy posting is not
+            Read-only queue derived from the recruiting sheet archive (Open / Requested). Breezy posting is not
             wired yet.
           </p>
         </div>
