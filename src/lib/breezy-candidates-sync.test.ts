@@ -5,6 +5,7 @@ import {
   buildCandidatesSyncAlert,
   getStaleOkCandidatesSnapshot,
   isPartialCandidatesSync,
+  mergeCandidatesSnapshots,
   rememberOkCandidatesSnapshot,
   timeoutShowsCachedCandidatesMessage,
   withCandidatesSyncMeta,
@@ -45,6 +46,34 @@ describe("breezy-candidates-sync", () => {
     const msg = timeoutShowsCachedCandidatesMessage(60_000, true);
     assert.match(msg, /timed out after 60s/i);
     assert.match(msg, /cached candidates/i);
+  });
+});
+
+describe("mergeCandidatesSnapshots", () => {
+  it("combines fast and full tiers without dropping rows", () => {
+    const fast = withCandidatesSyncMeta(
+      baseSuccess({
+        candidates: [{ candidateId: "c-1" } as BreezyCandidatesSuccess["candidates"][number]],
+        positionsScanned: 60,
+        totalPositionsAvailable: 120,
+        hydrationComplete: false,
+        partial: true,
+      }),
+      { fromCache: false, partial: true },
+    );
+    const full = withCandidatesSyncMeta(
+      baseSuccess({
+        candidates: [{ candidateId: "c-2" } as BreezyCandidatesSuccess["candidates"][number]],
+        positionsScanned: 120,
+        totalPositionsAvailable: 120,
+        hydrationComplete: true,
+      }),
+      { fromCache: false, partial: false },
+    );
+    const merged = mergeCandidatesSnapshots(fast, full);
+    assert.equal(merged.candidates.length, 2);
+    assert.equal(merged.hydrationComplete, true);
+    assert.equal(merged.partial, false);
   });
 });
 

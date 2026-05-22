@@ -38,7 +38,9 @@ import { isAppliedDateInRange } from "@/lib/breezy-api";
 import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
   CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS,
+  fetchAndMergeFullCandidates,
   fetchCandidatesForTab,
+  shouldHydrateFullCandidates,
   type CandidatesTabFetchResult,
 } from "@/lib/breezy-candidates-client";
 import {
@@ -261,15 +263,31 @@ export function CandidatesSection() {
     [],
   );
 
+  const hydrateFullCandidates = useCallback(
+    async (base: BreezyCandidatesSuccess) => {
+      if (!shouldHydrateFullCandidates(base)) return;
+      setRefreshingCandidates(true);
+      try {
+        const merged = await fetchAndMergeFullCandidates(base);
+        if (merged.ok) {
+          commitCandidatesSuccess(merged);
+        }
+      } catch {
+        // Keep fast-tier rows visible; sync alert from fast pass remains.
+      } finally {
+        setRefreshingCandidates(false);
+      }
+    },
+    [commitCandidatesSuccess],
+  );
+
   const loadBundle = useCallback(async (force = false) => {
     const emptyAtStart = breezySnapshotRef.current === null;
     if (emptyAtStart) setLoadingBundle(true);
-    else setRefreshingCandidates(true);
 
     const enrichment: string[] = [];
 
-    const [candidatesSettled, jobsSettled, workflowsSettled] = await Promise.allSettled([
-      fetchCandidatesForTab({ force }),
+    const [jobsSettled, workflowsSettled] = await Promise.allSettled([
       fetchCachedBreezyJobs(),
       fetchCachedJson(
         cacheKey(["candidates", "workflows"]),
@@ -288,15 +306,15 @@ export function CandidatesSection() {
       ),
     ]);
 
-    if (candidatesSettled.status === "fulfilled") {
-      const parsed = candidatesSettled.value;
-      if (parsed.ok) {
-        commitCandidatesSuccess(parsed);
+    let fastResult: CandidatesTabFetchResult | null = null;
+    try {
+      fastResult = await fetchCandidatesForTab({ force, scan: "fast" });
+      if (fastResult.ok) {
+        commitCandidatesSuccess(fastResult);
       } else {
-        commitCandidatesFailure(parsed);
+        commitCandidatesFailure(fastResult);
       }
-    } else {
-      const err = candidatesSettled.reason;
+    } catch (err) {
       const timedOut = isTimeoutError(err);
       const message =
         err instanceof Error ? err.message : "Failed to load Breezy candidates";
@@ -317,6 +335,8 @@ export function CandidatesSection() {
         });
       }
     }
+
+    setLoadingBundle(false);
 
     if (jobsSettled.status === "fulfilled" && jobsSettled.value.ok) {
       setJobsData(jobsSettled.value);
@@ -351,9 +371,11 @@ export function CandidatesSection() {
     }
 
     setEnrichmentWarnings(enrichment);
-    setLoadingBundle(false);
-    setRefreshingCandidates(false);
-  }, [commitCandidatesFailure, commitCandidatesSuccess]);
+
+    if (fastResult?.ok && shouldHydrateFullCandidates(fastResult)) {
+      void hydrateFullCandidates(fastResult);
+    }
+  }, [commitCandidatesFailure, commitCandidatesSuccess, hydrateFullCandidates]);
 
   useEffect(() => {
     const id = window.setTimeout(() => void loadBundle(), 0);

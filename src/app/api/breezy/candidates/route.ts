@@ -1,6 +1,6 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
-import { fetchBreezyCandidates } from "@/lib/breezy-api";
+import { fetchBreezyCandidates, type BreezyCandidatesScanMode } from "@/lib/breezy-api";
 import { withCandidatesFailureMeta } from "@/lib/breezy-candidates-sync";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -34,6 +34,11 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";
+  const scanParam = searchParams.get("scan")?.trim().toLowerCase();
+  const scanMode: BreezyCandidatesScanMode | undefined =
+    scanParam === "fast" || scanParam === "full" || scanParam === "all"
+      ? scanParam
+      : undefined;
   const positionId = searchParams.get("position_id")?.trim() || undefined;
   const state = searchParams.get("state")?.trim() || undefined;
   const pageSize = Number.parseInt(searchParams.get("page_size") ?? "", 10);
@@ -54,6 +59,7 @@ export async function GET(request: Request) {
       dateRangeStart,
       dateRangeEnd,
       force,
+      scanMode,
     }),
     session,
   );

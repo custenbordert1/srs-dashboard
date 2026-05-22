@@ -1,4 +1,8 @@
-import type { BreezyCandidatesResult, BreezyCandidatesSuccess } from "@/lib/breezy-api";
+import type {
+  BreezyCandidate,
+  BreezyCandidatesResult,
+  BreezyCandidatesSuccess,
+} from "@/lib/breezy-api";
 import { isPartialBreezyPositionSync } from "@/lib/breezy-api";
 
 export const BREEZY_CANDIDATES_SOURCE = {
@@ -78,6 +82,47 @@ export function withCandidatesFailureMeta(
   };
 }
 
+/** Merge full-tier rows into a fast-tier snapshot without clearing existing candidates. */
+export function mergeCandidatesSnapshots(
+  base: BreezyCandidatesSuccess,
+  addition: BreezyCandidatesSuccess,
+): BreezyCandidatesSuccess {
+  const byId = new Map<string, BreezyCandidate>();
+  for (const candidate of base.candidates) {
+    byId.set(candidate.candidateId, candidate);
+  }
+  for (const candidate of addition.candidates) {
+    byId.set(candidate.candidateId, candidate);
+  }
+
+  const mergedCandidates = [...byId.values()];
+  const total = Math.max(
+    base.totalPositionsAvailable ?? 0,
+    addition.totalPositionsAvailable ?? 0,
+  );
+  const scanned = Math.max(base.positionsScanned ?? 0, addition.positionsScanned ?? 0);
+  const hydrationComplete = addition.hydrationComplete ?? scanned >= total;
+
+  return {
+    ...addition,
+    candidates: mergedCandidates,
+    totalPositionsAvailable: total,
+    totalPositions: total,
+    positionsScanned: scanned,
+    totalCandidatesPulled: mergedCandidates.length,
+    totalCandidatesFetched: mergedCandidates.length,
+    truncated: addition.truncated,
+    partial: !hydrationComplete && scanned < total,
+    hydrationComplete,
+    scanMode: addition.scanMode ?? base.scanMode,
+    warnings: [...new Set([...(base.warnings ?? []), ...(addition.warnings ?? [])])],
+    syncNotes: [...new Set([...(base.syncNotes ?? []), ...(addition.syncNotes ?? [])])],
+    fetchedAt: addition.fetchedAt,
+    source: base.source ?? addition.source,
+    sourcePath: base.sourcePath ?? addition.sourcePath,
+  };
+}
+
 export function buildCandidatesSyncAlert(
   data: BreezyCandidatesSuccess & Partial<BreezyCandidatesSyncFields>,
 ): string | null {
@@ -90,6 +135,9 @@ export function buildCandidatesSyncAlert(
     parts.push(
       `Showing cached Breezy candidates from ${formatSyncTimestamp(data.fetchedAt)} while refresh is unavailable.`,
     );
+  }
+  if (data.partial && data.hydrationComplete === false) {
+    parts.push("Loading remaining published positions in the background…");
   }
   if (data.partial) {
     const scanned = data.positionsScanned ?? 0;

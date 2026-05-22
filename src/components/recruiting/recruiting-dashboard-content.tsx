@@ -1,7 +1,8 @@
 "use client";
 
 import type { DmLeaderboardRow, NewHireMetric, PipelineStage, TrendWeek } from "@/lib/recruiting-sample-data";
-import { useState } from "react";
+import { warmBreezyCandidatesCache } from "@/lib/breezy-candidates-warm";
+import { useEffect, useState } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
 import {
   DashboardTabPanel,
@@ -47,6 +48,11 @@ export function RecruitingDashboardContent({
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
   const executiveTabs = userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
+
+  useEffect(() => {
+    const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
+    return () => window.clearTimeout(id);
+  }, []);
 
   return (
     <>
