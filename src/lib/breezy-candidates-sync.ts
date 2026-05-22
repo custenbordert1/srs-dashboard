@@ -166,6 +166,19 @@ function formatSyncTimestamp(iso: string): string {
   return date.toLocaleString();
 }
 
+export function hasPopulatedCandidatesSnapshot(
+  result: BreezyCandidatesResult,
+): result is BreezyCandidatesSuccess {
+  return result.ok === true && result.candidates.length > 0;
+}
+
+export function logCandidatesPipelineStage(
+  stage: string,
+  counts: Record<string, number | string | boolean | undefined>,
+): void {
+  console.info("[candidates-pipeline]", stage, counts);
+}
+
 export function timeoutShowsCachedCandidatesMessage(
   timeoutMs: number,
   showingCached: boolean,

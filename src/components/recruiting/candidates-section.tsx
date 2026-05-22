@@ -62,6 +62,11 @@ import {
 } from "@/lib/breezy-candidates-client";
 import { candidatePrimaryEmail, hasCandidatePrimaryEmail } from "@/lib/onboarding-signer";
 import {
+  logCandidatesDebug,
+  logFirstCandidateKeys,
+  logRecruiterTerritoryFilters,
+} from "@/lib/candidates-debug";
+import {
   BREEZY_CANDIDATES_SOURCE,
   buildCandidatesSyncAlert,
   CANDIDATES_WORKFLOW_SOURCE,
@@ -278,10 +283,24 @@ export function CandidatesSection() {
   }, []);
 
   const commitCandidatesSuccess = useCallback((parsed: BreezyCandidatesSuccess) => {
+    const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
+    logCandidatesDebug("before_commitCandidatesSuccess", parsed.candidates.length, {
+      commitCandidatesSuccessCalled: true,
+      priorSnapshotCount: priorCount,
+      willBecomeEmpty: parsed.candidates.length === 0,
+    });
+    logFirstCandidateKeys(
+      "before_commitCandidatesSuccess",
+      parsed.candidates[0] as unknown as Record<string, unknown> | undefined,
+    );
     breezySnapshotRef.current = parsed;
     setBreezySnapshot(parsed);
     setData(parsed);
     setSyncAlert(buildCandidatesSyncAlert(parsed));
+    logCandidatesDebug("after_commitCandidatesSuccess", parsed.candidates.length, {
+      commitCandidatesSuccessCalled: true,
+      candidatesStateEmpty: parsed.candidates.length === 0,
+    });
   }, []);
 
   const commitCandidatesFailure = useCallback(
@@ -362,16 +381,44 @@ export function CandidatesSection() {
 
     const cached = peekTabCandidatesCache();
     if (cached && cached.candidates.length > 0) {
+      logCandidatesDebug("before_cache_peek_commit", cached.candidates.length);
       commitCandidatesSuccess(cached);
+      logCandidatesDebug("after_cache_peek_commit", cached.candidates.length);
       setLoadingBundle(false);
     }
 
     const enrichment: string[] = [];
 
+    let previewAwaitingHydration = false;
+
     try {
       const preview = await fetchCandidatesForTab({ force, scan: "preview" });
+      const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
       if (preview.ok) {
-        commitCandidatesSuccess(preview);
+        logCandidatesDebug("before_preview_fetch_commit", preview.candidates.length, {
+          positionsScanned: preview.positionsScanned ?? 0,
+          priorSnapshotCount: priorCount,
+          willCallCommit: preview.candidates.length > 0,
+        });
+        logRecruiterTerritoryFilters({
+          actingRecruiter,
+          sourceFilter,
+          workflowFilter,
+          stageFilter,
+          territoryNote: "Territory filter runs server-side on /api/breezy/candidates (DM role).",
+        });
+        if (preview.candidates.length > 0) {
+          commitCandidatesSuccess(preview);
+        } else if (priorCount > 0) {
+          logCandidatesDebug("preview_fetch_skip_commit", 0, {
+            reason: "empty_preview_keeps_prior_snapshot",
+            priorSnapshotCount: priorCount,
+          });
+          setSyncAlert(buildCandidatesSyncAlert(preview));
+        } else {
+          previewAwaitingHydration = (preview.positionsScanned ?? 0) > 0;
+          setSyncAlert(buildCandidatesSyncAlert(preview));
+        }
       } else if (hasPopulatedSnapshot()) {
         setNonBlockingSyncAlert(
           `${preview.error} Showing loaded candidates — background sync incomplete.`,
@@ -382,7 +429,9 @@ export function CandidatesSection() {
     } catch (err) {
       handlePreviewFetchError(err);
     } finally {
-      setLoadingBundle(false);
+      if (!previewAwaitingHydration) {
+        setLoadingBundle(false);
+      }
     }
 
     const [jobsSettled, workflowsSettled] = await Promise.allSettled([
@@ -445,21 +494,27 @@ export function CandidatesSection() {
 
     setEnrichmentWarnings(enrichment);
 
-    const base = breezySnapshotRef.current;
-    if (!base) return;
-
     void (async () => {
       setRefreshingCandidates(true);
       try {
-        const fastMerged = await fetchAndMergeFastCandidates(base, { force });
-        if (fastMerged.ok) {
+        const baseNow = breezySnapshotRef.current;
+        const fastMerged = baseNow
+          ? await fetchAndMergeFastCandidates(baseNow, { force })
+          : await fetchCandidatesForTab({ force, scan: "fast" });
+        if (fastMerged.ok && fastMerged.candidates.length > 0) {
+          logCandidatesDebug("before_fast_tier_commit", fastMerged.candidates.length, {
+            mergedFromSnapshot: Boolean(baseNow),
+          });
           commitCandidatesSuccess(fastMerged);
+          logCandidatesDebug("after_fast_tier_commit", fastMerged.candidates.length, {
+            mergedFromSnapshot: Boolean(baseNow),
+          });
           if (shouldHydrateFullCandidates(fastMerged)) {
             await hydrateRemainingCandidates(fastMerged);
           }
         } else if (hasPopulatedSnapshot()) {
           setNonBlockingSyncAlert(
-            `${fastMerged.error} Showing loaded candidates — background sync incomplete.`,
+            `${fastMerged.ok ? "Fast sync returned no candidates." : fastMerged.error} Showing loaded candidates — background sync incomplete.`,
           );
         }
       } catch (err) {
@@ -474,6 +529,7 @@ export function CandidatesSection() {
         }
       } finally {
         setRefreshingCandidates(false);
+        if (previewAwaitingHydration) setLoadingBundle(false);
       }
     })();
   }, [
@@ -523,16 +579,21 @@ export function CandidatesSection() {
     [jobsData],
   );
 
-  const candidates = useMemo(
-    () =>
-      breezySnapshot
-        ? breezySnapshot.candidates.map((candidate) => {
-            const job = jobsByPositionId.get(candidate.positionId);
-            return buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId], { job });
-          })
-        : [],
-    [breezySnapshot, jobsByPositionId, workflowState],
-  );
+  const candidates = useMemo(() => {
+    logCandidatesDebug("before_workflow_enriched_candidates", breezySnapshot?.candidates.length ?? 0);
+    const rows = breezySnapshot
+      ? breezySnapshot.candidates.map((candidate) => {
+          const job = jobsByPositionId.get(candidate.positionId);
+          return buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId], { job });
+        })
+      : [];
+    logCandidatesDebug("after_workflow_enriched_candidates", rows.length);
+    logFirstCandidateKeys(
+      "after_workflow_enriched_candidates",
+      rows[0] as unknown as Record<string, unknown> | undefined,
+    );
+    return rows;
+  }, [breezySnapshot, jobsByPositionId, workflowState]);
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
@@ -562,6 +623,14 @@ export function CandidatesSection() {
   }, [candidates]);
 
   const filtered = useMemo(() => {
+    logCandidatesDebug("before_table_filter", candidates.length);
+    logRecruiterTerritoryFilters({
+      actingRecruiter,
+      sourceFilter,
+      workflowFilter,
+      stageFilter,
+      territoryNote: "Main table filters are client-side only (not recruiter assignment).",
+    });
     const q = debouncedSearch.trim().toLowerCase();
 
     const rows = candidates.filter((candidate) => {
@@ -594,15 +663,26 @@ export function CandidatesSection() {
       return true;
     });
 
-    return [...rows].sort(
+    const sorted = [...rows].sort(
       (a, b) =>
         b.matchPercent - a.matchPercent ||
         b.ai.numericScore - a.ai.numericScore ||
         candidateName(a).localeCompare(candidateName(b)),
     );
+    logCandidatesDebug("after_table_filter", sorted.length, {
+      tableRowsCommittedToState: sorted.length,
+      snapshotCandidates: breezySnapshot?.candidates.length ?? 0,
+    });
+    logFirstCandidateKeys(
+      "after_table_filter",
+      sorted[0] as unknown as Record<string, unknown> | undefined,
+    );
+    return sorted;
   }, [
+    actingRecruiter,
     appliedFrom,
     appliedTo,
+    breezySnapshot?.candidates.length,
     candidates,
     cityFilter,
     debouncedSearch,

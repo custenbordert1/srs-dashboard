@@ -1,6 +1,8 @@
 import type { BreezyCandidatesResult, BreezyCandidatesScanMode, BreezyCandidatesSuccess } from "@/lib/breezy-api";
+import { logCandidatesDebug, logFirstCandidateKeys } from "@/lib/candidates-debug";
 import {
   BREEZY_CANDIDATES_SOURCE,
+  hasPopulatedCandidatesSnapshot,
   mergeCandidatesSnapshots,
   timeoutShowsCachedCandidatesMessage,
   withCandidatesFailureMeta,
@@ -37,6 +39,15 @@ function isRenderableCandidatesSnapshot(
   return result.ok === true && Array.isArray(result.candidates);
 }
 
+function shouldCacheCandidatesPayload(
+  payload: BreezyCandidatesResult,
+  scan: BreezyCandidatesScanMode,
+): boolean {
+  if (!isRenderableCandidatesSnapshot(payload)) return false;
+  if (scan === "preview" && payload.candidates.length === 0) return false;
+  return true;
+}
+
 function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidatesSuccess {
   const enriched =
     result.source === BREEZY_CANDIDATES_SOURCE.label
@@ -53,14 +64,15 @@ export function getLastOkTabCandidatesSnapshot(): BreezyCandidatesSuccess | null
 /** Instant tab paint from client cache or last in-memory ok snapshot. */
 export function peekTabCandidatesCache(): BreezyCandidatesSuccess | null {
   const preview = getCachedAllowExpired<BreezyCandidatesResult>(TAB_PREVIEW_CACHE_KEY);
-  if (preview && isRenderableCandidatesSnapshot(preview)) {
+  if (preview && hasPopulatedCandidatesSnapshot(preview)) {
     return rememberTabOkSnapshot(preview);
   }
   const fast = getCachedAllowExpired<BreezyCandidatesResult>(TAB_FAST_CACHE_KEY);
-  if (fast && isRenderableCandidatesSnapshot(fast)) {
+  if (fast && hasPopulatedCandidatesSnapshot(fast)) {
     return rememberTabOkSnapshot(fast);
   }
-  return getLastOkTabCandidatesSnapshot();
+  const last = getLastOkTabCandidatesSnapshot();
+  return last && last.candidates.length > 0 ? last : null;
 }
 
 export function toStaleTabCandidatesResult(
@@ -145,12 +157,30 @@ async function fetchCandidatesFromApi(options: {
         force: options.force,
         label: options.label,
         staleOnError: true,
-        shouldCache: (payload) => isRenderableCandidatesSnapshot(payload),
+        shouldCache: (payload) => shouldCacheCandidatesPayload(payload, options.scan),
       },
     );
 
     if (isRenderableCandidatesSnapshot(parsed)) {
-      return rememberTabOkSnapshot(parsed);
+      logCandidatesDebug("before_client_api_response", 0, { scan: options.scan });
+      logCandidatesDebug("after_client_api_response", parsed.candidates.length, {
+        scan: options.scan,
+        positionsScanned: parsed.positionsScanned ?? 0,
+        fromCache: parsed.fromCache ?? false,
+        partial: parsed.partial ?? false,
+        territoryFiltered: parsed.skippedCandidatesReason?.territoryFiltered ?? 0,
+      });
+      logFirstCandidateKeys(
+        "after_client_api_response",
+        parsed.candidates[0] as unknown as Record<string, unknown> | undefined,
+      );
+      if (hasPopulatedCandidatesSnapshot(parsed)) {
+        return rememberTabOkSnapshot(parsed);
+      }
+      if (fallbackOk && fallbackOk.candidates.length > 0) {
+        return toStaleTabCandidatesResult(fallbackOk, "Preview returned no candidates; using prior snapshot.");
+      }
+      return parsed;
     }
     if (fallbackOk) {
       return toStaleTabCandidatesResult(fallbackOk, parsed.error);

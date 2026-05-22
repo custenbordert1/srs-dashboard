@@ -1,3 +1,4 @@
+import { logCandidatesDebug } from "@/lib/candidates-debug";
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
 import { fetchBreezyCandidates, type BreezyCandidatesScanMode } from "@/lib/breezy-api";
@@ -49,8 +50,7 @@ export async function GET(request: Request) {
   const dateRangeEnd =
     searchParams.get("to")?.trim() || searchParams.get("date_to")?.trim() || undefined;
 
-  const result = guardBreezyCandidatesResult(
-    await fetchBreezyCandidates({
+  const breezyResult = await fetchBreezyCandidates({
       positionId,
       state,
       pageSize: Number.isFinite(pageSize) ? pageSize : undefined,
@@ -60,15 +60,31 @@ export async function GET(request: Request) {
       dateRangeEnd,
       force,
       scanMode,
-    }),
-    session,
-  );
+    });
+  if (breezyResult.ok) {
+    logCandidatesDebug("before_api_territory_guard", breezyResult.candidates.length, {
+      scanMode: scanMode ?? "default",
+      role: session.role,
+    });
+  }
+  const result = guardBreezyCandidatesResult(breezyResult, session);
+  if (result.ok) {
+    logCandidatesDebug("after_api_territory_guard", result.candidates.length, {
+      scanMode: scanMode ?? "default",
+      role: session.role,
+      territoryFiltered: result.skippedCandidatesReason?.territoryFiltered ?? 0,
+    });
+  }
   const status = result.ok ? 200 : breezyFailureHttpStatus(result.error);
   logBreezyRouteResult(ROUTE, status, {
     role: session.role,
+    scanMode: scanMode ?? "default",
     breezyOk: result.ok,
     candidateCount: result.ok ? result.candidates.length : 0,
+    positionsScanned: result.ok ? result.positionsScanned : undefined,
     candidatesInDateRange: result.ok ? result.candidatesInDateRange : undefined,
+    sanitizeRejected: result.ok ? result.skippedCandidatesReason?.sanitizeRejected : undefined,
+    territoryFiltered: result.ok ? result.skippedCandidatesReason?.territoryFiltered : undefined,
     positionFetchFailed: result.ok ? result.skippedCandidatesReason?.positionFetchFailed : undefined,
   });
   return NextResponse.json(result, {

@@ -15,6 +15,11 @@ import {
 } from "@/lib/config";
 import { breezyConfigErrorMessage } from "@/lib/env-validation";
 import {
+  countRawBreezyListResponse,
+  logCandidatesDebug,
+  logFirstCandidateKeys,
+} from "@/lib/candidates-debug";
+import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
 } from "@/lib/recruiting-intelligence/resume-parser";
@@ -305,6 +310,21 @@ type RawBreezyCandidate = Record<string, unknown> & {
   phone_number?: string;
   position_id?: string;
 };
+
+/** Breezy may return a bare array or `{ candidates: [...] }` depending on endpoint/version. */
+export function extractRawBreezyCandidatesFromListResponse(data: unknown): RawBreezyCandidate[] {
+  if (Array.isArray(data)) return data as RawBreezyCandidate[];
+  if (!data || typeof data !== "object") return [];
+
+  const record = data as Record<string, unknown>;
+  if (Array.isArray(record.candidates)) return record.candidates as RawBreezyCandidate[];
+  if (Array.isArray(record.data)) return record.data as RawBreezyCandidate[];
+  if (record.data && typeof record.data === "object") {
+    const nested = record.data as Record<string, unknown>;
+    if (Array.isArray(nested.candidates)) return nested.candidates as RawBreezyCandidate[];
+  }
+  return [];
+}
 
 /** @deprecated Prefer getBreezyApiKeySync() after loadConfig(). */
 export function getBreezyApiKey(): string | undefined {
@@ -1151,6 +1171,8 @@ type ScanBatchStats = {
   positionFetchFailed: number;
   positionScanTimedOut: number;
   truncated: boolean;
+  rawBreezyResponseCount: number;
+  extractedCandidatesCount: number;
 };
 
 export async function fetchBreezyCandidates(options?: {
@@ -1349,6 +1371,8 @@ type PositionScanResult = {
   timedOut: boolean;
   failed: boolean;
   sanitizeRejected: number;
+  rawBreezyResponseCount: number;
+  extractedCandidatesCount: number;
   error?: string;
 };
 
@@ -1366,6 +1390,8 @@ async function fetchCandidatesForPosition(
   let incompletePagination = false;
   let timedOut = false;
   let sanitizeRejected = 0;
+  let rawBreezyResponseCount = 0;
+  let extractedCandidatesCount = 0;
 
   for (let page = 1; page <= maxPages; page += 1) {
     if (Date.now() >= deadlineMs) {
@@ -1384,11 +1410,20 @@ async function fetchCandidatesForPosition(
         timedOut,
         failed: true,
         sanitizeRejected,
+        rawBreezyResponseCount,
+        extractedCandidatesCount,
         error: listResult.error,
       };
     }
 
-    const batch = Array.isArray(listResult.data) ? listResult.data : [];
+    const rawPageCount = countRawBreezyListResponse(listResult.data);
+    rawBreezyResponseCount += rawPageCount;
+    logCandidatesDebug("raw_breezy_response", rawPageCount, { positionId: posId, page });
+
+    const batch = extractRawBreezyCandidatesFromListResponse(listResult.data);
+    extractedCandidatesCount += batch.length;
+    logCandidatesDebug("extracted_candidates", batch.length, { positionId: posId, page });
+
     let reachedCandidatesBeforeRange = false;
     const rangeFilterActive = Boolean(dateRangeStart && dateRangeEnd);
     for (const candidate of batch) {
@@ -1417,7 +1452,25 @@ async function fetchCandidatesForPosition(
     if (page === maxPages) incompletePagination = true;
   }
 
-  return { candidates, incompletePagination, timedOut, failed: false, sanitizeRejected };
+  logCandidatesDebug("normalized_position_candidates", candidates.length, {
+    positionId: posId,
+    rawBreezyResponseCount,
+    extractedCandidatesCount,
+    sanitizeRejected,
+  });
+  if (candidates[0]) {
+    logFirstCandidateKeys("normalized_position_candidates", candidates[0] as unknown as Record<string, unknown>);
+  }
+
+  return {
+    candidates,
+    incompletePagination,
+    timedOut,
+    failed: false,
+    sanitizeRejected,
+    rawBreezyResponseCount,
+    extractedCandidatesCount,
+  };
 }
 
 function buildCandidatesSuccessPayload(input: {
@@ -1439,6 +1492,10 @@ function buildCandidatesSuccessPayload(input: {
   positionScanTimedOut: number;
 }): BreezyCandidatesSuccess {
   const positionsNotScanned = Math.max(0, input.totalPositionsAvailable - input.positionsScanned);
+  logCandidatesDebug("before_normalized_candidates", input.rawCandidates.length, {
+    positionsScanned: input.positionsScanned,
+  });
+
   const summarized = summarizeCandidates(input.rawCandidates, {
     fetchedAt: input.fetchedAt,
     dateRangeStart: input.dateRangeStart,
@@ -1451,6 +1508,15 @@ function buildCandidatesSuccessPayload(input: {
   });
 
   const skippedCandidatesReason = summarized.skippedCandidatesReason;
+  logCandidatesDebug("after_normalized_candidates", summarized.candidates.length, {
+    sanitizeRejected: skippedCandidatesReason.sanitizeRejected,
+    duplicateCandidateId: skippedCandidatesReason.duplicateCandidateId,
+    positionsScanned: input.positionsScanned,
+  });
+  logFirstCandidateKeys(
+    "after_normalized_candidates",
+    summarized.candidates[0] as unknown as Record<string, unknown> | undefined,
+  );
   const syncNotes = buildBreezySyncNotes({
     truncated: input.truncated,
     totalPositions: input.totalPositionsAvailable,
@@ -1506,6 +1572,8 @@ async function scanPositionsBatch(input: {
   let positionFetchFailed = 0;
   let positionScanTimedOut = 0;
   let truncated = false;
+  let rawBreezyResponseCount = 0;
+  let extractedCandidatesCount = 0;
   const failedPositions: BreezyJob[] = [];
 
   const rangeStart = input.filterToDateRange ? input.dateRangeStart : undefined;
@@ -1513,6 +1581,8 @@ async function scanPositionsBatch(input: {
 
   const mergeResult = (position: BreezyJob, result: PositionScanResult, isRetry = false) => {
     if (!isRetry) positionsScanned += 1;
+    rawBreezyResponseCount += result.rawBreezyResponseCount;
+    extractedCandidatesCount += result.extractedCandidatesCount;
     candidates.push(...result.candidates);
     sanitizeRejected += result.sanitizeRejected;
     if (result.incompletePagination) {
@@ -1599,6 +1669,13 @@ async function scanPositionsBatch(input: {
     if (retry.error) warnings.push(`Retry failed ${position.name || position.jobId}: ${retry.error}`);
   }
 
+  logCandidatesDebug("after_scan_batch_sanitized", candidates.length, {
+    rawBreezyResponseCount,
+    extractedCandidatesCount,
+    positionsScanned,
+    sanitizeRejected,
+  });
+
   return {
     candidates,
     warnings,
@@ -1610,6 +1687,8 @@ async function scanPositionsBatch(input: {
     positionFetchFailed,
     positionScanTimedOut,
     truncated,
+    rawBreezyResponseCount,
+    extractedCandidatesCount,
   };
 }
 
@@ -2080,6 +2159,15 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     batch.warnings.push(
       `Fast-tier sync: ${fastTierSize.toLocaleString()} most recently updated positions loaded first. Full hydration pending.`,
     );
+  }
+
+  if (scanMode === "preview") {
+    logCandidatesDebug("preview_scan_raw_breezy_response", batch.rawBreezyResponseCount, {
+      scanMode,
+      positionsScanned: batch.positionsScanned,
+    });
+    logCandidatesDebug("preview_scan_extracted_candidates", batch.extractedCandidatesCount, { scanMode });
+    logCandidatesDebug("preview_scan_before_normalized", batch.candidates.length, { scanMode });
   }
 
   const payload = buildCandidatesSuccessPayload({

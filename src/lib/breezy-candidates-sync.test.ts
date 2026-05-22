@@ -4,6 +4,7 @@ import type { BreezyCandidatesSuccess } from "@/lib/breezy-api";
 import {
   buildCandidatesSyncAlert,
   getStaleOkCandidatesSnapshot,
+  hasPopulatedCandidatesSnapshot,
   isPartialCandidatesSync,
   mergeCandidatesSnapshots,
   rememberOkCandidatesSnapshot,
@@ -102,6 +103,13 @@ describe("mergeCandidatesSnapshots", () => {
     assert.equal(merged.candidates.length, 2);
     assert.equal(merged.hydrationComplete, true);
     assert.equal(merged.partial, false);
+  });
+});
+
+describe("hasPopulatedCandidatesSnapshot", () => {
+  it("requires at least one candidate row", () => {
+    assert.equal(hasPopulatedCandidatesSnapshot(baseSuccess()), true);
+    assert.equal(hasPopulatedCandidatesSnapshot(baseSuccess({ candidates: [] })), false);
   });
 });
 
