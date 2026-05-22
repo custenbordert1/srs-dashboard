@@ -66,7 +66,8 @@ export const RECRUITING_SOURCE_MAP: RecruitingSourceDefinition[] = [
     kind: "local_workflow",
     role: "intelligence",
     apiPath: "/api/candidates/workflows",
-    notes: "Local workflow state keyed by Breezy candidateId",
+    notes:
+      "Local workflow, recruiting action flags, and recruiter/DM rosters keyed by Breezy candidateId",
   },
   {
     id: "job_drafts",

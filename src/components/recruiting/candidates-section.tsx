@@ -19,11 +19,18 @@ import {
 } from "@/components/recruiting/candidate-actions-menu";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
+import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
+import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import {
-  getRecruitingActions,
-  toggleRecruitingAction,
-  type RecruitingActionType,
-} from "@/lib/candidate-recruiting-actions";
+  completeCandidateFollowUp,
+  persistRecruitingActionToggle,
+  persistWorkflowUpdate,
+  snoozeCandidate24h,
+} from "@/lib/candidate-workflow-client";
+import {
+  defaultRecruiterRosters,
+  type RecruiterRosters,
+} from "@/lib/candidate-workflow-types";
 import { VirtualCandidateTable } from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
@@ -51,7 +58,7 @@ import {
 } from "@/lib/breezy-candidates-sync";
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
 import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
-import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
+import { cacheKey, fetchCachedJson, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import {
   DASHBOARD_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
@@ -59,7 +66,10 @@ import {
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
-import { loadRecruiterRoster } from "@/lib/recruiter-roster";
+import { pickActingRecruiter } from "@/lib/recruiter-roster";
+import {
+  CandidateMyQueuePanel,
+} from "@/components/recruiting/candidate-my-queue-panel";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -221,6 +231,8 @@ export function CandidatesSection() {
   const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
   const [jobsData, setJobsData] = useState<BreezyJobsResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
+  const [rosters, setRosters] = useState<RecruiterRosters>(() => defaultRecruiterRosters());
+  const [actingRecruiter, setActingRecruiter] = useState(() => pickActingRecruiter(defaultRecruiterRosters()));
   const [sourceFilter, setSourceFilter] = useState(ALL);
   const [stageFilter, setStageFilter] = useState(ALL);
   const [positionFilter, setPositionFilter] = useState(ALL);
@@ -235,6 +247,7 @@ export function CandidatesSection() {
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [queueActionBusy, setQueueActionBusy] = useState(false);
 
   const commitCandidatesSuccess = useCallback((parsed: BreezyCandidatesSuccess) => {
     breezySnapshotRef.current = parsed;
@@ -299,6 +312,7 @@ export function CandidatesSection() {
           return (await workflowRes.json()) as {
             ok: boolean;
             workflows?: CandidateWorkflowState;
+            rosters?: RecruiterRosters;
             error?: string;
           };
         },
@@ -352,12 +366,18 @@ export function CandidatesSection() {
       enrichment.push(`Job enrichment unavailable (${jobsErr}) — position match fields may be limited.`);
     }
 
-    if (
-      workflowsSettled.status === "fulfilled" &&
-      workflowsSettled.value.ok &&
-      workflowsSettled.value.workflows
-    ) {
-      setWorkflowState(workflowsSettled.value.workflows);
+    if (workflowsSettled.status === "fulfilled" && workflowsSettled.value.ok) {
+      if (workflowsSettled.value.workflows) {
+        setWorkflowState(workflowsSettled.value.workflows);
+      }
+      if (workflowsSettled.value.rosters) {
+        setRosters(workflowsSettled.value.rosters);
+        setActingRecruiter((current) =>
+          workflowsSettled.value.rosters!.recruiters.includes(current)
+            ? current
+            : pickActingRecruiter(workflowsSettled.value.rosters!),
+        );
+      }
     } else {
       const wfErr =
         workflowsSettled.status === "rejected"
@@ -509,8 +529,6 @@ export function CandidatesSection() {
     [filtered],
   );
 
-  const [recruitingActionsTick, setRecruitingActionsTick] = useState(0);
-
   const selectedCandidate = useMemo(
     () => (selectedCandidateId ? (candidates.find((c) => c.candidateId === selectedCandidateId) ?? null) : null),
     [candidates, selectedCandidateId],
@@ -518,9 +536,7 @@ export function CandidatesSection() {
 
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
-    const row = buildCandidateDrawerRowFromScored(selectedCandidate, {
-      recruitingActions: getRecruitingActions(selectedCandidate.candidateId),
-    });
+    const row = buildCandidateDrawerRowFromScored(selectedCandidate);
     const breezy = breezySnapshot?.candidates.find(
       (c) => c.candidateId === selectedCandidate.candidateId,
     );
@@ -531,8 +547,7 @@ export function CandidatesSection() {
       matchedOpportunities: melMatch.matches,
       melMatchingSummary: melMatch.aiSummary,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick refreshes local recruiting flags
-  }, [breezySnapshot, melOpportunities, selectedCandidate, recruitingActionsTick]);
+  }, [breezySnapshot, melOpportunities, selectedCandidate]);
 
   const prioritizationQueues = useMemo(
     () =>
@@ -573,16 +588,116 @@ export function CandidatesSection() {
         note: options.note,
       }),
     });
-    const parsed = (await res.json()) as { ok: boolean; workflow?: CandidateWorkflowRecord; error?: string };
+    const parsed = (await res.json()) as {
+      ok: boolean;
+      workflow?: CandidateWorkflowRecord;
+      workflows?: CandidateWorkflowState;
+      rosters?: RecruiterRosters;
+      error?: string;
+    };
     if (!res.ok || !parsed.ok || !parsed.workflow) {
       throw new Error(parsed.error ?? `Workflow update failed with HTTP ${res.status}`);
     }
+    invalidateCached(cacheKey(["candidates", "workflows"]));
+    if (parsed.workflows) setWorkflowState(parsed.workflows);
+    if (parsed.rosters) setRosters(parsed.rosters);
     return parsed.workflow;
   }
 
   function applyWorkflowRecord(workflow: CandidateWorkflowRecord) {
     setWorkflowState((prev) => ({ ...prev, [workflow.candidateId]: workflow }));
   }
+
+  function applyRosters(next: RecruiterRosters) {
+    setRosters(next);
+    setActingRecruiter((current) =>
+      next.recruiters.includes(current) ? current : pickActingRecruiter(next),
+    );
+  }
+
+  function persistRecruitingAction(candidateId: string, type: RecruitingActionType) {
+    void persistRecruitingActionToggle(candidateId, type)
+      .then((workflow) => {
+        applyWorkflowRecord(workflow);
+        invalidateCached(cacheKey(["candidates", "workflows"]));
+      })
+      .catch((err) => {
+        window.alert(err instanceof Error ? err.message : "Recruiting action update failed");
+      });
+  }
+
+  const handleQueueAction = useCallback(
+    (candidateId: string, payload: CandidateQueueActionPayload) => {
+      const row = candidates.find((c) => c.candidateId === candidateId);
+      if (!row) return;
+      setQueueActionBusy(true);
+      const finish = (workflow: CandidateWorkflowRecord) => {
+        applyWorkflowRecord(workflow);
+        invalidateCached(cacheKey(["candidates", "workflows"]));
+      };
+      const run = async () => {
+        switch (payload.action) {
+          case "assign-recruiter":
+            finish(
+              await persistWorkflowUpdate({
+                candidateId,
+                assignedRecruiter: payload.recruiter,
+                workflowStatus: row.workflowStatus,
+              }),
+            );
+            break;
+          case "assign-dm":
+            finish(
+              await persistWorkflowUpdate({
+                candidateId,
+                assignedDM: payload.dm,
+                workflowStatus: row.workflowStatus,
+              }),
+            );
+            break;
+          case "apply-suggested-dm":
+            finish(
+              await persistWorkflowUpdate({
+                candidateId,
+                assignedDM: row.suggestedDM,
+                workflowStatus: row.workflowStatus,
+              }),
+            );
+            break;
+          case "complete-follow-up":
+            finish(await completeCandidateFollowUp(candidateId));
+            break;
+          case "snooze-24h":
+            finish(await snoozeCandidate24h(candidateId));
+            break;
+          case "move-paperwork":
+            finish(
+              await persistWorkflowUpdate({
+                candidateId,
+                workflowStatus: "Paperwork Needed",
+              }),
+            );
+            break;
+          case "ready-mel":
+            finish(
+              await persistWorkflowUpdate({
+                candidateId,
+                workflowStatus: "Ready for MEL",
+              }),
+            );
+            break;
+          default:
+            break;
+        }
+      };
+      void run()
+        .catch((err) => {
+          window.alert(err instanceof Error ? err.message : "Queue action failed");
+        })
+        .finally(() => setQueueActionBusy(false));
+    },
+    [candidates],
+  );
 
   function updateWorkflow(
     candidate: ScoredCandidateWorkflowRow,
@@ -718,7 +833,11 @@ export function CandidatesSection() {
             </div>
           </td>
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-            <CandidateActionsMenu onAction={(action) => handleCandidateAction(candidate, action)} />
+            <CandidateActionsMenu
+              rosters={rosters}
+              onRostersUpdated={applyRosters}
+              onAction={(action) => handleCandidateAction(candidate, action)}
+            />
           </td>
           <td className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`} title="Open candidate drawer">
             Notes: {candidate.notes.length}
@@ -757,7 +876,7 @@ export function CandidatesSection() {
         </tr>
       );
     },
-    [handleCandidateAction, selectedCandidateId, selectedIds, toggleSelectCandidate],
+    [handleCandidateAction, rosters, selectedCandidateId, selectedIds, toggleSelectCandidate],
   );
 
   if (loadingBundle && !hasCandidateSnapshot) {
@@ -869,6 +988,18 @@ export function CandidatesSection() {
         />
       </div>
 
+      <CandidateMyQueuePanel
+        candidates={candidates}
+        rosters={rosters}
+        actingRecruiter={actingRecruiter}
+        onActingRecruiterChange={setActingRecruiter}
+        onOpenCandidate={setSelectedCandidateId}
+        onQueueAction={handleQueueAction}
+        queueActionBusy={queueActionBusy}
+        syncPartial={Boolean(syncData?.partial)}
+        syncStale={Boolean(syncData?.stale)}
+      />
+
       <CandidateAutomationPanels
         queues={prioritizationQueues}
         productivity={recruiterProductivity}
@@ -975,7 +1106,7 @@ export function CandidatesSection() {
                 }}
               >
                 <option value="">Bulk assign recruiter…</option>
-                {loadRecruiterRoster().map((recruiter) => (
+                {rosters.recruiters.map((recruiter) => (
                   <option key={recruiter} value={recruiter}>
                     {recruiter}
                   </option>
@@ -1134,10 +1265,11 @@ export function CandidatesSection() {
           if (!selectedCandidate) return;
           updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
         }}
+        rosters={rosters}
+        onRostersUpdated={applyRosters}
         onRecruitingAction={(type: RecruitingActionType) => {
           if (!selectedCandidate) return;
-          toggleRecruitingAction(selectedCandidate.candidateId, type);
-          setRecruitingActionsTick((n) => n + 1);
+          persistRecruitingAction(selectedCandidate.candidateId, type);
         }}
         melMatchesLoading={melLoading}
       />

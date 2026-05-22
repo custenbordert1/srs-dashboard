@@ -14,7 +14,8 @@ import {
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
 import { buildIntegrationPrep } from "@/lib/integration-prep";
-import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
+import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
+import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
 import { BestRepMatchSection } from "@/components/recruiting/best-rep-match-section";
@@ -61,6 +62,10 @@ export type CandidateDrawerRow = {
   extractedKeywords: string[];
   recommendedNextAction: string;
   recruitingActions: CandidateRecruitingActions;
+  followUpDueAt: string | null;
+  snoozedUntil: string | null;
+  suggestedDM: string;
+  dmNeedsAssignment: boolean;
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
   opportunityRepMatches: OpportunityBestRepMatches[];
@@ -84,6 +89,8 @@ type CandidateDetailDrawerProps = {
   statusAgingDays: number | null;
   appliedAgingDays: number | null;
   onRecruitingAction?: (type: RecruitingActionType) => void;
+  rosters: RecruiterRosters;
+  onRostersUpdated?: (rosters: RecruiterRosters) => void;
   loading?: boolean;
   melMatchesLoading?: boolean;
   repMatchesLoading?: boolean;
@@ -125,14 +132,18 @@ function agingBadgeClass(days: number | null): string {
 function AssignmentPanel({
   assignedRecruiter,
   assignedDM,
+  rosters,
+  onRostersUpdated,
   onSave,
 }: {
   assignedRecruiter: string;
   assignedDM: string;
+  rosters: RecruiterRosters;
+  onRostersUpdated?: (rosters: RecruiterRosters) => void;
   onSave: (recruiter: string, dm: string) => void;
 }) {
-  const [recruiters, setRecruiters] = useState(loadRecruiterRoster);
-  const [dms, setDms] = useState(loadDmRoster);
+  const [recruiters, setRecruiters] = useState(rosters.recruiters);
+  const [dms, setDms] = useState(rosters.dms);
   const [recruiter, setRecruiter] = useState(assignedRecruiter);
   const [dm, setDm] = useState(assignedDM);
 
@@ -172,7 +183,12 @@ function AssignmentPanel({
           onClick={() => {
             const name = window.prompt("Add recruiter to roster");
             if (!name?.trim()) return;
-            setRecruiters(addRecruiterToRoster(name.trim()));
+            void addRecruiterToRoster(name.trim())
+              .then((next) => {
+                setRecruiters(next.recruiters);
+                onRostersUpdated?.(next);
+              })
+              .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save recruiter"));
             setRecruiter(name.trim());
           }}
           className="rounded-md border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-800"
@@ -184,7 +200,12 @@ function AssignmentPanel({
           onClick={() => {
             const name = window.prompt("Add DM to roster");
             if (!name?.trim()) return;
-            setDms(addDmToRoster(name.trim()));
+            void addDmToRoster(name.trim())
+              .then((next) => {
+                setDms(next.dms);
+                onRostersUpdated?.(next);
+              })
+              .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save DM"));
             setDm(name.trim());
           }}
           className="rounded-md border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-800"
@@ -294,6 +315,8 @@ export function CandidateDetailDrawer({
   statusAgingDays,
   appliedAgingDays,
   onRecruitingAction,
+  rosters,
+  onRostersUpdated,
   loading = false,
   melMatchesLoading = false,
   repMatchesLoading = false,
@@ -533,6 +556,31 @@ export function CandidateDetailDrawer({
               <p>
                 <span className="text-zinc-500">Recruiter / DM:</span> {candidate.assignedRecruiter} · {candidate.assignedDM}
               </p>
+              {candidate.suggestedDM && candidate.suggestedDM !== "Unassigned" ? (
+                <p className="flex flex-wrap items-center gap-2">
+                  <span className="text-zinc-500">Territory DM:</span>
+                  <span
+                    className={
+                      candidate.dmNeedsAssignment
+                        ? "inline-flex rounded-full border border-violet-500/40 bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-100"
+                        : "inline-flex rounded-full border border-zinc-700 bg-zinc-900/60 px-2 py-0.5 text-[10px] text-zinc-300"
+                    }
+                  >
+                    {candidate.suggestedDM}
+                    {candidate.dmNeedsAssignment ? " · assign suggested" : " · matched"}
+                  </span>
+                </p>
+              ) : null}
+              {candidate.followUpDueAt ? (
+                <p className="text-zinc-400">
+                  <span className="text-zinc-500">Follow-up due:</span> {formatAppliedDate(candidate.followUpDueAt)}
+                </p>
+              ) : null}
+              {candidate.snoozedUntil ? (
+                <p className="text-zinc-400">
+                  <span className="text-zinc-500">Snoozed until:</span> {formatAppliedDate(candidate.snoozedUntil)}
+                </p>
+              ) : null}
               <div className="flex flex-wrap gap-2 pt-1">
                 <span className={`rounded-full px-2 py-0.5 text-[10px] ring-1 ${agingBadgeClass(statusAgingDays)}`}>
                   Status {statusAgingDays === null ? "—" : `${statusAgingDays}d`}
@@ -604,6 +652,8 @@ export function CandidateDetailDrawer({
                 key={`${candidate.candidateId}-${candidate.assignedRecruiter}-${candidate.assignedDM}`}
                 assignedRecruiter={candidate.assignedRecruiter}
                 assignedDM={candidate.assignedDM}
+                rosters={rosters}
+                onRostersUpdated={onRostersUpdated}
                 onSave={onSaveAssignments}
               />
               {assignmentEvents.length === 0 ? (

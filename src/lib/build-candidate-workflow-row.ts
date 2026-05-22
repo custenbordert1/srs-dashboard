@@ -12,6 +12,11 @@ import {
   type CandidateMatchLevel,
 } from "@/lib/recruiting-intelligence";
 import {
+  dmAssignmentNeedsAttention,
+  suggestDmForCandidate,
+} from "@/lib/candidate-dm-suggest";
+import { emptyRecruitingActions, type CandidateRecruitingActions } from "@/lib/candidate-recruiting-actions";
+import {
   nextActionForWorkflowStatus,
   type CandidateWorkflowRecord,
   type CandidateWorkflowStatus,
@@ -25,6 +30,11 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   assignedDM: string;
   notes: string[];
   history: CandidateWorkflowRecord["history"];
+  recruitingActions: CandidateRecruitingActions;
+  followUpDueAt: string | null;
+  snoozedUntil: string | null;
+  suggestedDM: string;
+  dmNeedsAssignment: boolean;
   resumeKeywordScore: number | null;
   merchandisingExperienceScore: number | null;
   retailExperienceScore: number | null;
@@ -78,15 +88,27 @@ export function buildScoredWorkflowRow(
       : { city: candidate.city, state: candidate.state },
   });
 
+  const suggestedDM = suggestDmForCandidate({
+    candidateState: candidate.state,
+    jobState: options?.job?.state,
+    assignedDM: local?.assignedDM,
+  });
+  const assignedDM = local?.assignedDM ?? "Unassigned";
+
   return {
     ...candidate,
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
     nextActionNeeded: local?.nextActionNeeded ?? nextActionForWorkflowStatus(workflowStatus),
     assignedRecruiter: local?.assignedRecruiter ?? "Unassigned",
-    assignedDM: local?.assignedDM ?? "Unassigned",
+    assignedDM,
     notes: local?.notes ?? [],
     history: local?.history ?? [],
+    recruitingActions: local?.recruitingActions ?? emptyRecruitingActions(),
+    followUpDueAt: local?.followUpDueAt ?? null,
+    snoozedUntil: local?.snoozedUntil ?? null,
+    suggestedDM,
+    dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
     resumeKeywordScore: ai.breakdown.resumeSourceQuality,
     merchandisingExperienceScore: ai.breakdown.merchandisingKeywords + ai.breakdown.resetExperience,
     retailExperienceScore: ai.breakdown.walmartTargetExperience,

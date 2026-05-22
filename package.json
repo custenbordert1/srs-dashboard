@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --import tsx --test src/lib/job-management/*.test.ts src/lib/breezy-candidates-sync.test.ts"
+    "test": "node --import tsx --test src/lib/job-management/*.test.ts src/lib/breezy-candidates-sync.test.ts src/lib/candidate-action-sla.test.ts src/lib/candidate-action-queue.test.ts src/lib/candidate-dm-suggest.test.ts src/lib/candidate-follow-up.test.ts"
   },
   "dependencies": {
     "next": "16.2.6",

@@ -1,63 +1,41 @@
-const RECRUITER_STORAGE_KEY = "srs-dashboard-recruiter-roster";
-const DM_STORAGE_KEY = "srs-dashboard-dm-roster";
+import {
+  DEFAULT_DM_ROSTER,
+  DEFAULT_RECRUITER_ROSTER,
+  defaultRecruiterRosters,
+  type RecruiterRosters,
+} from "@/lib/candidate-workflow-types";
+import { addDmToServerRoster, addRecruiterToServerRoster } from "@/lib/candidate-workflow-client";
 
-const DEFAULT_RECRUITERS = ["Unassigned", "Taylor", "Recruiting Team"];
-const DEFAULT_DMS = ["Unassigned", "Field Ops"];
+export { DEFAULT_RECRUITER_ROSTER, DEFAULT_DM_ROSTER };
 
-function readRoster(storageKey: string, defaults: string[]): string[] {
-  if (typeof window === "undefined") return defaults;
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return defaults;
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return defaults;
-    const values = parsed
-      .filter((value): value is string => typeof value === "string")
-      .map((value) => value.trim())
-      .filter(Boolean);
-    return values.length > 0 ? sortedUnique(values) : defaults;
-  } catch {
-    return defaults;
-  }
+/** Fallback when workflow bundle has not loaded yet. */
+export function defaultRecruiterRosterList(): string[] {
+  return defaultRecruiterRosters().recruiters;
 }
 
-function writeRoster(storageKey: string, values: string[]): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(storageKey, JSON.stringify(sortedUnique(values)));
+export function defaultDmRosterList(): string[] {
+  return defaultRecruiterRosters().dms;
 }
 
-function sortedUnique(values: string[]): string[] {
-  return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+export function pickActingRecruiter(rosters: RecruiterRosters): string {
+  const named = rosters.recruiters.find((r) => r !== "Unassigned");
+  return named ?? "Recruiting Team";
 }
 
-export function loadRecruiterRoster(): string[] {
-  return readRoster(RECRUITER_STORAGE_KEY, DEFAULT_RECRUITERS);
+export async function addRecruiterToRoster(name: string): Promise<RecruiterRosters> {
+  return addRecruiterToServerRoster(name);
 }
 
-export function saveRecruiterRoster(values: string[]): string[] {
-  const roster = sortedUnique(["Unassigned", ...values.filter((value) => value !== "Unassigned")]);
-  writeRoster(RECRUITER_STORAGE_KEY, roster);
-  return roster;
+export async function addDmToRoster(name: string): Promise<RecruiterRosters> {
+  return addDmToServerRoster(name);
 }
 
-export function addRecruiterToRoster(name: string): string[] {
-  const trimmed = name.trim();
-  if (!trimmed) return loadRecruiterRoster();
-  return saveRecruiterRoster([...loadRecruiterRoster(), trimmed]);
+/** @deprecated Use rosters from workflow bundle; kept for typing in transitional imports. */
+export function loadRecruiterRoster(rosters?: RecruiterRosters): string[] {
+  return rosters?.recruiters ?? defaultRecruiterRosterList();
 }
 
-export function loadDmRoster(): string[] {
-  return readRoster(DM_STORAGE_KEY, DEFAULT_DMS);
-}
-
-export function saveDmRoster(values: string[]): string[] {
-  const roster = sortedUnique(["Unassigned", ...values.filter((value) => value !== "Unassigned")]);
-  writeRoster(DM_STORAGE_KEY, roster);
-  return roster;
-}
-
-export function addDmToRoster(name: string): string[] {
-  const trimmed = name.trim();
-  if (!trimmed) return loadDmRoster();
-  return saveDmRoster([...loadDmRoster(), trimmed]);
+/** @deprecated Use rosters from workflow bundle. */
+export function loadDmRoster(rosters?: RecruiterRosters): string[] {
+  return rosters?.dms ?? defaultDmRosterList();
 }

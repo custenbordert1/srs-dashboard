@@ -1,6 +1,7 @@
 "use client";
 
-import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
+import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
+import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES, type CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { useEffect, useRef, useState } from "react";
 
@@ -13,15 +14,17 @@ export type CandidateRowAction =
 
 type CandidateActionsMenuProps = {
   onAction: (action: CandidateRowAction) => void;
+  rosters: RecruiterRosters;
+  onRostersUpdated?: (rosters: RecruiterRosters) => void;
 };
 
-export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
+export function CandidateActionsMenu({ onAction, rosters, onRostersUpdated }: CandidateActionsMenuProps) {
   const [open, setOpen] = useState(false);
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
-  const [recruiters, setRecruiters] = useState<string[]>([]);
-  const [dms, setDms] = useState<string[]>([]);
+  const [recruiters, setRecruiters] = useState<string[]>(rosters.recruiters);
+  const [dms, setDms] = useState<string[]>(rosters.dms);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,7 +65,12 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
     if (custom === null) return;
     const trimmed = custom.trim();
     if (!trimmed) return;
-    setRecruiters(addRecruiterToRoster(trimmed));
+    void addRecruiterToRoster(trimmed)
+      .then((next) => {
+        setRecruiters(next.recruiters);
+        onRostersUpdated?.(next);
+      })
+      .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save recruiter"));
     run({ kind: "assign-recruiter", recruiter: trimmed });
   }
 
@@ -71,7 +79,12 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
     if (custom === null) return;
     const trimmed = custom.trim();
     if (!trimmed) return;
-    setDms(addDmToRoster(trimmed));
+    void addDmToRoster(trimmed)
+      .then((next) => {
+        setDms(next.dms);
+        onRostersUpdated?.(next);
+      })
+      .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save DM"));
     run({ kind: "assign-dm", dm: trimmed });
   }
 
@@ -92,8 +105,8 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
           setOpen((value) => {
             const next = !value;
             if (next) {
-              setRecruiters(loadRecruiterRoster());
-              setDms(loadDmRoster());
+              setRecruiters(rosters.recruiters);
+              setDms(rosters.dms);
             }
             return next;
           });

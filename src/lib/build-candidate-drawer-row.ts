@@ -2,11 +2,7 @@ import type { BreezyCandidate } from "@/lib/breezy-api";
 import { buildCandidateIntelligenceProfile } from "@/lib/candidate-intelligence-engine";
 import { buildCandidateScoringInput } from "@/lib/candidate-resume-prep";
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
-import {
-  deriveRecommendedNextAction,
-  emptyRecruitingActions,
-  type CandidateRecruitingActions,
-} from "@/lib/candidate-recruiting-actions";
+import { deriveRecommendedNextAction, type CandidateRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import { buildScoredWorkflowRow, type ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 
@@ -36,7 +32,7 @@ export function buildCandidateDrawerRowFromScored(
     referenceIso,
     territoryStates: options?.territoryStates,
   });
-  const recruitingActions = options?.recruitingActions ?? emptyRecruitingActions();
+  const recruitingActions = options?.recruitingActions ?? scored.recruitingActions;
 
   return {
     candidateId: scored.candidateId,
@@ -80,6 +76,10 @@ export function buildCandidateDrawerRowFromScored(
       intelligence.bestFitReason,
     ),
     recruitingActions,
+    followUpDueAt: scored.followUpDueAt,
+    snoozedUntil: scored.snoozedUntil,
+    suggestedDM: scored.suggestedDM,
+    dmNeedsAssignment: scored.dmNeedsAssignment,
     matchedOpportunities: [],
     melMatchingSummary: "",
     opportunityRepMatches: [],
