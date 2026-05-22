@@ -51,6 +51,7 @@ import {
 import { isAppliedDateInRange } from "@/lib/breezy-api";
 import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
+  CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS,
   CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
   fetchAndMergeFastCandidates,
   fetchAndMergeFullCandidates,
@@ -235,7 +236,9 @@ export function CandidatesSection() {
   const [loadingBundle, setLoadingBundle] = useState(true);
   const [refreshingCandidates, setRefreshingCandidates] = useState(false);
   const [retrying, setRetrying] = useState(false);
-  const loadingCeilingHit = useLoadingCeiling(loadingBundle && breezySnapshot === null);
+  const loadingCeilingHit = useLoadingCeiling(
+    loadingBundle && (breezySnapshot?.candidates.length ?? 0) === 0,
+  );
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
   const [jobsData, setJobsData] = useState<BreezyJobsResult | undefined>(undefined);
@@ -264,6 +267,15 @@ export function CandidatesSection() {
   >([]);
   const [paperworkSendingId, setPaperworkSendingId] = useState<string | null>(null);
 
+  const hasPopulatedSnapshot = useCallback(
+    () => (breezySnapshotRef.current?.candidates.length ?? 0) > 0,
+    [],
+  );
+
+  const setNonBlockingSyncAlert = useCallback((message: string) => {
+    setSyncAlert(message);
+  }, []);
+
   const commitCandidatesSuccess = useCallback((parsed: BreezyCandidatesSuccess) => {
     breezySnapshotRef.current = parsed;
     setBreezySnapshot(parsed);
@@ -273,12 +285,16 @@ export function CandidatesSection() {
 
   const commitCandidatesFailure = useCallback(
     (parsed: CandidatesTabFetchResult | { error: string; showingCachedSnapshot?: boolean }) => {
-      if (breezySnapshotRef.current) {
+      if (hasPopulatedSnapshot()) {
         setSyncAlert(
           "showingCachedSnapshot" in parsed && parsed.showingCachedSnapshot
             ? parsed.error
-            : `${parsed.error} Showing cached Breezy candidates from your last successful sync.`,
+            : `${parsed.error} Showing loaded candidates — background sync incomplete.`,
         );
+        return;
+      }
+      if (breezySnapshotRef.current) {
+        setSyncAlert(parsed.error);
         return;
       }
       setSyncAlert(null);
@@ -288,7 +304,37 @@ export function CandidatesSection() {
         fetchedAt: new Date().toISOString(),
       });
     },
-    [],
+    [hasPopulatedSnapshot],
+  );
+
+  const handlePreviewFetchError = useCallback(
+    (err: unknown) => {
+      const timedOut = isTimeoutError(err);
+      const message = err instanceof Error ? err.message : "Failed to load Breezy candidates";
+      if (hasPopulatedSnapshot()) {
+        setNonBlockingSyncAlert(
+          timedOut
+            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, true)
+            : `${message} Showing loaded candidates — background sync incomplete.`,
+        );
+        return;
+      }
+      if (!timedOut) {
+        setSyncAlert(null);
+        setData({
+          ok: false,
+          error: message,
+          fetchedAt: new Date().toISOString(),
+        });
+        return;
+      }
+      commitCandidatesFailure({
+        ok: false,
+        error: timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, false),
+        fetchedAt: new Date().toISOString(),
+      });
+    },
+    [commitCandidatesFailure, hasPopulatedSnapshot, setNonBlockingSyncAlert],
   );
 
   const hydrateRemainingCandidates = useCallback(
@@ -313,17 +359,32 @@ export function CandidatesSection() {
     const emptyAtStart = breezySnapshotRef.current === null;
     if (emptyAtStart) setLoadingBundle(true);
 
-    if (emptyAtStart) {
-      const cached = peekTabCandidatesCache();
-      if (cached) {
-        commitCandidatesSuccess(cached);
-        setLoadingBundle(false);
-      }
+    const cached = peekTabCandidatesCache();
+    if (cached && cached.candidates.length > 0) {
+      commitCandidatesSuccess(cached);
+      setLoadingBundle(false);
     }
 
     const enrichment: string[] = [];
 
-    const [jobsSettled, workflowsSettled, previewSettled] = await Promise.allSettled([
+    try {
+      const preview = await fetchCandidatesForTab({ force, scan: "preview" });
+      if (preview.ok) {
+        commitCandidatesSuccess(preview);
+      } else if (hasPopulatedSnapshot()) {
+        setNonBlockingSyncAlert(
+          `${preview.error} Showing loaded candidates — background sync incomplete.`,
+        );
+      } else {
+        commitCandidatesFailure(preview);
+      }
+    } catch (err) {
+      handlePreviewFetchError(err);
+    } finally {
+      setLoadingBundle(false);
+    }
+
+    const [jobsSettled, workflowsSettled] = await Promise.allSettled([
       fetchCachedBreezyJobs(),
       fetchCachedJson(
         cacheKey(["candidates", "workflows"]),
@@ -341,46 +402,7 @@ export function CandidatesSection() {
         },
         { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows", staleOnError: true },
       ),
-      fetchCandidatesForTab({ force, scan: "preview" }),
     ]);
-
-    if (previewSettled.status === "fulfilled") {
-      if (previewSettled.value.ok) {
-        commitCandidatesSuccess(previewSettled.value);
-      } else if (!breezySnapshotRef.current) {
-        commitCandidatesFailure(previewSettled.value);
-      } else {
-        setSyncAlert(
-          `${previewSettled.value.error} Showing cached Breezy candidates from your last successful sync.`,
-        );
-      }
-    } else {
-      const err = previewSettled.reason;
-      const timedOut = isTimeoutError(err);
-      const message = err instanceof Error ? err.message : "Failed to load Breezy candidates";
-      if (breezySnapshotRef.current) {
-        setSyncAlert(
-          timedOut
-            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, true)
-            : `${message} Showing cached Breezy candidates from your last successful sync.`,
-        );
-      } else if (!timedOut) {
-        setSyncAlert(null);
-        setData({
-          ok: false,
-          error: message,
-          fetchedAt: new Date().toISOString(),
-        });
-      } else {
-        commitCandidatesFailure({
-          ok: false,
-          error: timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, false),
-          fetchedAt: new Date().toISOString(),
-        });
-      }
-    }
-
-    setLoadingBundle(false);
 
     if (jobsSettled.status === "fulfilled" && jobsSettled.value.ok) {
       setJobsData(jobsSettled.value);
@@ -434,14 +456,33 @@ export function CandidatesSection() {
           if (shouldHydrateFullCandidates(fastMerged)) {
             await hydrateRemainingCandidates(fastMerged);
           }
+        } else if (hasPopulatedSnapshot()) {
+          setNonBlockingSyncAlert(
+            `${fastMerged.error} Showing loaded candidates — background sync incomplete.`,
+          );
         }
-      } catch {
-        // Partial preview/fast rows remain interactive.
+      } catch (err) {
+        if (hasPopulatedSnapshot()) {
+          const timedOut = isTimeoutError(err);
+          const message = err instanceof Error ? err.message : "Background candidate sync failed";
+          setNonBlockingSyncAlert(
+            timedOut
+              ? timeoutShowsCachedCandidatesMessage(CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS, true)
+              : `${message} Showing loaded candidates — background sync incomplete.`,
+          );
+        }
       } finally {
         setRefreshingCandidates(false);
       }
     })();
-  }, [commitCandidatesFailure, commitCandidatesSuccess, hydrateRemainingCandidates]);
+  }, [
+    commitCandidatesFailure,
+    commitCandidatesSuccess,
+    handlePreviewFetchError,
+    hasPopulatedSnapshot,
+    hydrateRemainingCandidates,
+    setNonBlockingSyncAlert,
+  ]);
 
   useEffect(() => {
     const id = window.setTimeout(() => void loadBundle(), 0);
@@ -474,6 +515,7 @@ export function CandidatesSection() {
   }, [loadBundle]);
 
   const hasCandidateSnapshot = breezySnapshot !== null;
+  const hasRenderableCandidateRows = (breezySnapshot?.candidates.length ?? 0) > 0;
 
   const jobsByPositionId = useMemo(
     () => (jobsData?.ok ? buildJobsByPositionId(jobsData.jobs) : new Map()),
@@ -1028,7 +1070,7 @@ export function CandidatesSection() {
     ],
   );
 
-  if (loadingBundle && !hasCandidateSnapshot) {
+  if (loadingBundle && !hasRenderableCandidateRows) {
     return (
       <DashboardSectionFallback
         title="Candidates"
@@ -1043,7 +1085,7 @@ export function CandidatesSection() {
     );
   }
 
-  if (!hasCandidateSnapshot && data !== undefined && !data.ok) {
+  if (!hasRenderableCandidateRows && data !== undefined && !data.ok) {
     return (
       <DashboardSectionFallback
         title="Candidates"
@@ -1055,7 +1097,7 @@ export function CandidatesSection() {
     );
   }
 
-  if (hasCandidateSnapshot && breezySnapshot.candidates.length === 0 && !refreshingCandidates) {
+  if (hasCandidateSnapshot && !hasRenderableCandidateRows && !refreshingCandidates && !loadingBundle) {
     return (
       <DashboardSectionFallback
         title="Candidates"
@@ -1108,18 +1150,18 @@ export function CandidatesSection() {
                 {syncData.positionsScanned != null && syncData.totalPositionsAvailable != null
                   ? ` · ${syncData.positionsScanned}/${syncData.totalPositionsAvailable} positions scanned`
                   : ""}
-                {refreshingCandidates || loadingBundle ? " · sync in progress…" : ""}
+                {refreshingCandidates ? " · sync in progress…" : ""}
               </p>
             ) : null}
           </div>
           <div className="flex flex-col items-end gap-2">
             <button
               type="button"
-              disabled={loadingBundle || refreshingCandidates}
+              disabled={refreshingCandidates}
               onClick={() => void loadBundle(true)}
               className="rounded-lg border border-teal-600/40 bg-teal-600/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/20 disabled:opacity-50"
             >
-              {loadingBundle || refreshingCandidates ? "Syncing…" : "Refresh / Sync"}
+              {refreshingCandidates ? "Syncing…" : "Refresh / Sync"}
             </button>
             {syncData ? (
               <p className="text-xs text-zinc-500">Fetched {formatDate(syncData.fetchedAt)}</p>

@@ -14,8 +14,8 @@ import {
 } from "@/lib/client-api-cache";
 import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
 
-/** Preview tier — short timeout for first paint. */
-export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 12_000;
+/** Preview tier — allow server aggregation to finish before client abort. */
+export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 30_000;
 /** Fast-tier background hydration. */
 export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = 45_000;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
