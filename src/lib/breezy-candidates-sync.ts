@@ -123,9 +123,7 @@ export function mergeCandidatesSnapshots(
   };
 }
 
-export function buildCandidatesSyncAlert(
-  data: BreezyCandidatesSuccess & Partial<BreezyCandidatesSyncFields>,
-): string | null {
+export function buildCandidatesSyncAlert(data: BreezyCandidatesSuccess): string | null {
   const parts: string[] = [];
   if (data.stale && data.refreshError) {
     parts.push(

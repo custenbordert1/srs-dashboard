@@ -47,7 +47,7 @@ export const BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES = 50;
 /** Prefer preview to reach at least this many rows when Breezy has applicants. */
 export const BREEZY_CANDIDATES_PREVIEW_MIN_CANDIDATES = 25;
 /** Server budget for preview-tier aggregation (hard ceiling for tab first paint). */
-export const BREEZY_CANDIDATES_PREVIEW_BUDGET_MS = 10_000;
+export const BREEZY_CANDIDATES_PREVIEW_BUDGET_MS = 18_000;
 /** Shorter delay between preview position batches to fit more jobs in budget. */
 const CANDIDATE_PREVIEW_BATCH_DELAY_MS = 120;
 const BREEZY_PARITY_CACHE_TTL_MS = 300_000;
@@ -1439,6 +1439,13 @@ export async function fetchBreezyCandidates(options?: {
 
   const stale = getStaleOkCandidatesSnapshot(cacheKey);
   if (stale && ((scanMode !== "preview" && scanMode !== "fast") || stale.candidates.length > 0)) {
+    const { logBreezyCandidatesOps } = await import("@/lib/breezy-candidates-ops-log");
+    logBreezyCandidatesOps("server", "fallback", {
+      scanMode,
+      fallbackSource: "server_memory_stale_snapshot",
+      candidateCount: stale.candidates.length,
+      refreshError: result.error,
+    });
     return withCandidatesSyncMeta(stale, {
       fromCache: true,
       stale: true,

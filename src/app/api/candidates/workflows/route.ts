@@ -172,7 +172,7 @@ export async function POST(request: Request) {
     audit: {
       action: "upsert_workflow",
       byUserId: session.userId,
-      metadata: { workflowStatus, hasNote: Boolean(note) },
+      metadata: { workflowStatus: workflowStatus ?? "", hasNote: Boolean(note) },
     },
   });
 
@@ -180,7 +180,7 @@ export async function POST(request: Request) {
     action: "workflow_action",
     entityType: "workflow",
     entityId: candidateId,
-    metadata: { workflowStatus, hasNote: Boolean(note) },
+    metadata: { workflowStatus: workflowStatus ?? "", hasNote: Boolean(note) },
   });
 
   const bundle = await getCandidateWorkflowBundle();

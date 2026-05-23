@@ -346,6 +346,23 @@ export function RecruitingIntelligenceSection() {
     ];
   }, [dataQualityDiagnostics]);
 
+  const archiveSheetData: SheetDataResult =
+    data ??
+    ({
+      ok: false,
+      error: "Recruiting sheet not loaded",
+      fetchedAt: new Date().toISOString(),
+      csvUrl: "",
+    } as SheetDataResult);
+  const archiveMelData: MelProjectsDataResult =
+    melData ??
+    ({
+      ok: false,
+      error: "MEL sheet not loaded",
+      fetchedAt: new Date().toISOString(),
+      csvUrl: "",
+    } as MelProjectsDataResult);
+
   if (phase === "loading" || phase === "error" || !snapshot) {
     const timedOut = loadingCeilingHit || Boolean(loadError?.toLowerCase().includes("timed out"));
     return (
@@ -499,7 +516,7 @@ export function RecruitingIntelligenceSection() {
         <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
       </DeferredSection>
 
-      {!sheetLive && data.ok && data.rows.length === 0 ? (
+      {!sheetLive && archiveSheetData.ok && archiveSheetData.rows.length === 0 ? (
         <div
           role="note"
           className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
@@ -518,21 +535,21 @@ export function RecruitingIntelligenceSection() {
         title="Critical markets queue"
         summary={<p className="text-sm text-zinc-500">Market-level recruiting priorities.</p>}
       >
-        <CriticalMarketsQueueSection recruiting={data} mel={melData} />
+        <CriticalMarketsQueueSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Market intelligence (sheet + MEL)"
         summary={<p className="text-sm text-zinc-500">Market demand and coverage from sheet + MEL rows.</p>}
       >
-        <LiveMarketIntelligenceSection recruiting={data} mel={melData} />
+        <LiveMarketIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Opportunity automation"
         summary={<p className="text-sm text-zinc-500">Automated opportunity scoring and routing.</p>}
       >
-        <OpportunityAutomationSection recruiting={data} mel={melData} />
+        <OpportunityAutomationSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
@@ -540,14 +557,14 @@ export function RecruitingIntelligenceSection() {
         summary={<p className="text-sm text-zinc-500">Workflow queues and recruiter assignments.</p>}
         skeletonRows={5}
       >
-        <RecruitingActionCenterSection recruiting={data} mel={melData} />
+        <RecruitingActionCenterSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Forecast intelligence"
         summary={<p className="text-sm text-zinc-500">Staffing forecast and project risk projections.</p>}
       >
-        <ForecastIntelligenceSection recruiting={data} mel={melData} />
+        <ForecastIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
@@ -561,14 +578,14 @@ export function RecruitingIntelligenceSection() {
         title="Market intelligence"
         summary={<p className="text-sm text-zinc-500">Territory market health and demand curves.</p>}
       >
-        <MarketIntelligenceSection recruiting={data} mel={melData} />
+        <MarketIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Demand intelligence"
         summary={<p className="text-sm text-zinc-500">MEL demand vs recruiting supply by state.</p>}
       >
-        <DemandIntelligenceSection recruiting={data} mel={melData} />
+        <DemandIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
     </div>
   );

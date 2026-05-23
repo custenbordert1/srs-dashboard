@@ -1,4 +1,8 @@
 import type { BreezyCandidatesResult, BreezyCandidatesScanMode, BreezyCandidatesSuccess } from "@/lib/breezy-api";
+import {
+  isBreezyCandidatesTimeoutMessage,
+  logBreezyCandidatesOps,
+} from "@/lib/breezy-candidates-ops-log";
 import { logCandidatesClientTrace } from "@/lib/candidates-client-trace";
 import { logCandidatesDebug, logFirstCandidateKeys } from "@/lib/candidates-debug";
 import {
@@ -19,10 +23,12 @@ import {
 } from "@/lib/client-api-cache";
 import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
 
-/** Preview tier — aligned with server preview budget (~10s) plus network buffer. */
-export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 15_000;
-/** Fast-tier background hydration. */
-export const CANDIDATES_FAST_CLIENT_TIMEOUT_MS = 30_000;
+/** Preview tier — must cover server preview budget (~10s) + jobs list fetch + Breezy latency. */
+export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 30_000;
+/** Fast-tier scan (60 positions) — must not abort before server can return populated rows. */
+export const CANDIDATES_FAST_CLIENT_TIMEOUT_MS = 75_000;
+/** Candidates tab loading ceiling — wait through preview + fast before timeout messaging. */
+export const CANDIDATES_TAB_LOADING_CEILING_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_MS + 5_000;
 /** @deprecated Use CANDIDATES_FAST_CLIENT_TIMEOUT_MS */
 export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_MS;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
@@ -33,10 +39,11 @@ export const CANDIDATES_PREVIEW_CACHE_TTL_MS = 300_000;
 const TAB_PREVIEW_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "preview", "v1"]);
 const TAB_FAST_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "fast", "v1"]);
 const TAB_FULL_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "full", "v1"]);
+const TAB_SNAPSHOT_SESSION_KEY = "breezy:candidates:tab:lastOk:v1";
+const TAB_SNAPSHOT_SESSION_MAX_AGE_MS = 30 * 60 * 1000;
 
 /** In-memory last ok tab snapshot (survives ok:false writes to client cache). */
-let lastOkTabSnapshot: (BreezyCandidatesSuccess & { source: string; sourcePath: string }) | null =
-  null;
+let lastOkTabSnapshot: BreezyCandidatesSuccess | null = null;
 
 function isRenderableCandidatesSnapshot(
   result: BreezyCandidatesResult,
@@ -66,10 +73,42 @@ function shouldCacheCandidatesPayload(
 function isUsableTabCacheHit(
   payload: BreezyCandidatesResult,
   scan: BreezyCandidatesScanMode,
-): boolean {
+): payload is BreezyCandidatesSuccess {
   if (!isRenderableCandidatesSnapshot(payload)) return false;
   if (scan === "preview" || scan === "fast") return hasPopulatedCandidatesSnapshot(payload);
   return true;
+}
+
+function readPersistedTabSnapshot(): BreezyCandidatesSuccess | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(TAB_SNAPSHOT_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { savedAt?: number; snapshot?: BreezyCandidatesSuccess };
+    if (!parsed.snapshot?.ok || !Array.isArray(parsed.snapshot.candidates)) return null;
+    if (parsed.snapshot.candidates.length === 0) return null;
+    if (
+      typeof parsed.savedAt === "number" &&
+      Date.now() - parsed.savedAt > TAB_SNAPSHOT_SESSION_MAX_AGE_MS
+    ) {
+      return null;
+    }
+    return parsed.snapshot;
+  } catch {
+    return null;
+  }
+}
+
+function persistTabSnapshotToSession(snapshot: BreezyCandidatesSuccess): void {
+  if (typeof window === "undefined" || snapshot.candidates.length === 0) return;
+  try {
+    sessionStorage.setItem(
+      TAB_SNAPSHOT_SESSION_KEY,
+      JSON.stringify({ savedAt: Date.now(), snapshot }),
+    );
+  } catch {
+    // Quota or private mode — in-memory fallback still applies.
+  }
 }
 
 function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidatesSuccess {
@@ -78,6 +117,9 @@ function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidate
       ? result
       : withCandidatesSyncMeta(result, { fromCache: result.fromCache ?? false, stale: result.stale });
   lastOkTabSnapshot = enriched;
+  if (hasPopulatedCandidatesSnapshot(enriched)) {
+    persistTabSnapshotToSession(enriched);
+  }
   return enriched;
 }
 
@@ -96,7 +138,19 @@ export function peekTabCandidatesCache(): BreezyCandidatesSuccess | null {
     return rememberTabOkSnapshot(fast);
   }
   const last = getLastOkTabCandidatesSnapshot();
-  return last && last.candidates.length > 0 ? last : null;
+  if (last && last.candidates.length > 0) {
+    return last;
+  }
+  const persisted = readPersistedTabSnapshot();
+  if (persisted) {
+    logBreezyCandidatesOps("client", "fallback", {
+      fallbackSource: "session_storage",
+      candidateCount: persisted.candidates.length,
+      reason: "peek_tab_cache",
+    });
+    return rememberTabOkSnapshot(persisted);
+  }
+  return null;
 }
 
 export function toStaleTabCandidatesResult(
@@ -152,6 +206,13 @@ async function fetchCandidatesLiveJson(input: {
   timeoutMs: number;
   url: string;
 }): Promise<BreezyCandidatesResult> {
+  logBreezyCandidatesOps("client", "request_start", {
+    scan: input.scan,
+    force: input.force,
+    timeoutMs: input.timeoutMs,
+    url: input.url,
+    liveFetch: true,
+  });
   logCandidatesClientTrace("live_fetch_start", {
     scan: input.scan,
     force: input.force,
@@ -167,11 +228,18 @@ async function fetchCandidatesLiveJson(input: {
       timeoutMs: input.timeoutMs,
     });
   } catch (err) {
+    const timedOut = isTimeoutError(err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logBreezyCandidatesOps("client", timedOut ? "timeout" : "error", {
+      scan: input.scan,
+      error: errorMessage,
+      phase: "live_fetch_throw",
+    });
     logCandidatesClientTrace("live_fetch_threw", {
       scan: input.scan,
-      timeoutTriggered: isTimeoutError(err),
+      timeoutTriggered: timedOut,
       errorName: err instanceof Error ? err.name : typeof err,
-      errorMessage: err instanceof Error ? err.message : String(err),
+      errorMessage,
       introducedOkFalse: "fetch_throw_outer_catch",
     });
     throw err;
@@ -212,6 +280,26 @@ async function fetchCandidatesLiveJson(input: {
       payload: describeCandidatesPayload(parsed),
       introducedOkFalse: parsed.ok === false ? "api_json_ok_false" : "http_status_not_ok",
     });
+    const apiError = parsed.ok ? `HTTP ${res.status}` : parsed.error;
+    logBreezyCandidatesOps("client", isBreezyCandidatesTimeoutMessage(apiError) ? "timeout" : "error", {
+      scan: input.scan,
+      httpStatus: res.status,
+      error: apiError,
+      phase: "live_fetch_http",
+    });
+  } else if (parsed.ok && parsed.candidates.length > 0) {
+    logBreezyCandidatesOps("client", "success", {
+      scan: input.scan,
+      candidateCount: parsed.candidates.length,
+      httpStatus: res.status,
+      phase: "live_fetch_http",
+    });
+  } else if (parsed.ok) {
+    logBreezyCandidatesOps("client", "empty", {
+      scan: input.scan,
+      httpStatus: res.status,
+      phase: "live_fetch_http",
+    });
   }
 
   return parsed;
@@ -226,12 +314,18 @@ async function fetchCandidatesFromApi(options: {
   ttlMs: number;
 }): Promise<CandidatesTabFetchResult> {
   const cachedOk = getCachedAllowExpired<BreezyCandidatesResult>(options.cacheKey);
-  const fallbackOk =
-    cachedOk && isUsableTabCacheHit(cachedOk, options.scan)
-      ? cachedOk
-      : lastOkTabSnapshot && lastOkTabSnapshot.candidates.length > 0
-        ? lastOkTabSnapshot
-        : null;
+  const fallbackFromCache: BreezyCandidatesSuccess | null =
+    cachedOk && isUsableTabCacheHit(cachedOk, options.scan) ? cachedOk : null;
+  const fallbackFromMemory: BreezyCandidatesSuccess | null =
+    !fallbackFromCache && lastOkTabSnapshot && lastOkTabSnapshot.candidates.length > 0
+      ? lastOkTabSnapshot
+      : null;
+  const fallbackOk: BreezyCandidatesSuccess | null = fallbackFromCache ?? fallbackFromMemory;
+  const fallbackSource = fallbackFromCache
+    ? "client_cache"
+    : fallbackFromMemory
+      ? "last_ok_tab_snapshot"
+      : null;
 
   const freshCacheHit = !options.force ? getCached<BreezyCandidatesResult>(options.cacheKey) : null;
   if (freshCacheHit) {
@@ -243,6 +337,13 @@ async function fetchCandidatesFromApi(options: {
   }
 
   try {
+    logBreezyCandidatesOps("client", "request_start", {
+      scan: options.scan,
+      force: Boolean(options.force),
+      cacheKey: options.cacheKey,
+      hasFallback: Boolean(fallbackOk),
+      fallbackSource,
+    });
     logCandidatesDebug("before_client_fetch", 0, {
       scan: options.scan,
       forceRequested: Boolean(options.force),
@@ -325,9 +426,21 @@ async function fetchCandidatesFromApi(options: {
         partial: parsed.partial ?? false,
       });
       if (hasPopulatedCandidatesSnapshot(parsed)) {
+        logBreezyCandidatesOps("client", "success", {
+          scan: options.scan,
+          candidateCount: parsed.candidates.length,
+          fromCache: parsed.fromCache ?? false,
+          partial: parsed.partial ?? false,
+        });
         return rememberTabOkSnapshot(parsed);
       }
       if (fallbackOk && fallbackOk.candidates.length > 0) {
+        logBreezyCandidatesOps("client", "fallback", {
+          scan: options.scan,
+          fallbackSource,
+          candidateCount: fallbackOk.candidates.length,
+          reason: "empty_ok_payload",
+        });
         logCandidatesClientTrace("empty_ok_payload_use_fallback", {
           scan: options.scan,
           fallbackCandidateCount: fallbackOk.candidates.length,
@@ -338,6 +451,10 @@ async function fetchCandidatesFromApi(options: {
           "Breezy returned no candidates for this tier; using prior snapshot.",
         );
       }
+      logBreezyCandidatesOps("client", "empty", {
+        scan: options.scan,
+        candidateCount: 0,
+      });
       logCandidatesClientTrace("empty_ok_payload_no_fallback", {
         scan: options.scan,
         introducedOkFalse: false,
@@ -355,6 +472,13 @@ async function fetchCandidatesFromApi(options: {
     });
 
     if (fallbackOk) {
+      logBreezyCandidatesOps("client", "fallback", {
+        scan: options.scan,
+        fallbackSource,
+        candidateCount: fallbackOk.candidates.length,
+        reason: "non_renderable_payload",
+        apiError: parsed.ok ? undefined : parsed.error,
+      });
       logCandidatesClientTrace("failure_payload_use_fallback", {
         scan: options.scan,
         fallbackCandidateCount: fallbackOk.candidates.length,
@@ -362,6 +486,17 @@ async function fetchCandidatesFromApi(options: {
         replacedFailedApiWithFallback: true,
       });
       return toStaleTabCandidatesResult(fallbackOk, parsed.ok ? "Invalid candidates payload" : parsed.error);
+    }
+
+    const apiError = parsed.ok ? "Invalid candidates payload" : parsed.error;
+    if (isBreezyCandidatesTimeoutMessage(apiError)) {
+      logBreezyCandidatesOps("client", "timeout", { scan: options.scan, error: apiError });
+    } else {
+      logBreezyCandidatesOps("client", "error", {
+        scan: options.scan,
+        error: apiError,
+        introducedOkFalse: true,
+      });
     }
 
     logCandidatesClientTrace("failure_payload_returned", {
@@ -383,6 +518,13 @@ async function fetchCandidatesFromApi(options: {
     });
 
     if (fallbackOk) {
+      logBreezyCandidatesOps("client", "fallback", {
+        scan: options.scan,
+        fallbackSource,
+        candidateCount: fallbackOk.candidates.length,
+        reason: timedOut ? "fetch_timeout" : "fetch_error",
+        error: message,
+      });
       return {
         ...toStaleTabCandidatesResult(
           fallbackOk,
@@ -392,6 +534,12 @@ async function fetchCandidatesFromApi(options: {
         ),
         clientTimedOut: timedOut,
       };
+    }
+
+    if (timedOut) {
+      logBreezyCandidatesOps("client", "timeout", { scan: options.scan, error: message });
+    } else {
+      logBreezyCandidatesOps("client", "error", { scan: options.scan, error: message });
     }
 
     return {
@@ -411,6 +559,19 @@ export async function fetchCandidatesForTab(options?: {
   scan?: BreezyCandidatesScanMode;
 }): Promise<CandidatesTabFetchResult> {
   const scan = options?.scan ?? "preview";
+  if (!options?.force) {
+    const warmKey = cacheKeyForScan(scan);
+    const warmHit = getCached<BreezyCandidatesResult>(warmKey);
+    if (warmHit && isUsableTabCacheHit(warmHit, scan)) {
+      logBreezyCandidatesOps("client", "success", {
+        scan,
+        candidateCount: warmHit.candidates.length,
+        fromCache: true,
+        phase: "warm_client_cache",
+      });
+      return rememberTabOkSnapshot(warmHit);
+    }
+  }
   return fetchCandidatesFromApi({
     scan,
     force: options?.force,

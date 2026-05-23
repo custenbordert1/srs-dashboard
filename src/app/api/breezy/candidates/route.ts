@@ -2,6 +2,10 @@ import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
 import { fetchBreezyCandidates, type BreezyCandidatesScanMode } from "@/lib/breezy-api";
 import { withCandidatesFailureMeta } from "@/lib/breezy-candidates-sync";
+import {
+  isBreezyCandidatesTimeoutMessage,
+  logBreezyCandidatesOps,
+} from "@/lib/breezy-candidates-ops-log";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
@@ -49,6 +53,15 @@ export async function GET(request: Request) {
   const dateRangeEnd =
     searchParams.get("to")?.trim() || searchParams.get("date_to")?.trim() || undefined;
 
+  logBreezyCandidatesOps("server", "request_start", {
+    route: ROUTE,
+    role: session.role,
+    scanMode: scanMode ?? "default",
+    force,
+    positionId: positionId ?? null,
+    state: state ?? null,
+  });
+
   const breezyResult = await fetchBreezyCandidates({
       positionId,
       state,
@@ -62,6 +75,44 @@ export async function GET(request: Request) {
     });
   const result = guardBreezyCandidatesResult(breezyResult, session);
   const status = result.ok ? 200 : breezyFailureHttpStatus(result.error);
+
+  if (result.ok && result.stale && result.fromCache) {
+    logBreezyCandidatesOps("server", "fallback", {
+      route: ROUTE,
+      scanMode: scanMode ?? result.scanMode ?? "default",
+      fallbackSource: "server_stale_snapshot",
+      candidateCount: result.candidates.length,
+      refreshError: result.refreshError ?? null,
+    });
+  } else if (result.ok && result.candidates.length > 0) {
+    logBreezyCandidatesOps("server", "success", {
+      route: ROUTE,
+      scanMode: scanMode ?? result.scanMode ?? "default",
+      candidateCount: result.candidates.length,
+      fromCache: result.fromCache ?? false,
+      partial: result.partial ?? false,
+    });
+  } else if (result.ok) {
+    logBreezyCandidatesOps("server", "empty", {
+      route: ROUTE,
+      scanMode: scanMode ?? result.scanMode ?? "default",
+      positionsScanned: result.positionsScanned ?? 0,
+    });
+  } else if (isBreezyCandidatesTimeoutMessage(result.error)) {
+    logBreezyCandidatesOps("server", "timeout", {
+      route: ROUTE,
+      scanMode: scanMode ?? "default",
+      error: result.error,
+    });
+  } else {
+    logBreezyCandidatesOps("server", "error", {
+      route: ROUTE,
+      scanMode: scanMode ?? "default",
+      httpStatus: status,
+      error: result.error,
+    });
+  }
+
   logBreezyRouteResult(ROUTE, status, {
     role: session.role,
     scanMode: scanMode ?? "default",
