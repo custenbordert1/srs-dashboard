@@ -22,6 +22,7 @@ export function countRawBreezyListResponse(data: unknown): number {
   if (!data || typeof data !== "object") return 0;
   const record = data as Record<string, unknown>;
   if (Array.isArray(record.candidates)) return record.candidates.length;
+  if (Array.isArray(record.applicants)) return record.applicants.length;
   if (Array.isArray(record.data)) return record.data.length;
   if (Array.isArray(record.results)) return record.results.length;
   if (record.data && typeof record.data === "object") {

@@ -1,6 +1,7 @@
 /**
- * Breezy company-wide candidate list discovery and fetch.
- * The Breezy UI Candidates tab (/app/c/{company}/candidates) uses a global list, not per-position scans.
+ * Breezy candidate list discovery and fetch helpers.
+ * Breezy Hire UI shows a company-wide Candidates tab, but v3 REST lists candidates only per position
+ * (`GET /company/{companyId}/position/{positionId}/candidates` with Mongo `_id`, not friendly_id).
  */
 
 import { extractRawBreezyCandidatesFromListResponse } from "@/lib/breezy-api";
@@ -51,7 +52,11 @@ export type BreezyCandidateEndpointProbeReport = {
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const AUTH_HEADER_FORMAT = "Authorization: <BREEZY_API_KEY>";
 
-/** Production fetch path — per-position list with Breezy Mongo position `_id`. */
+/**
+ * Production fetch path — Breezy v3 REST only exposes candidates per position.
+ * `/company/{companyId}/candidates` and `/candidates` return HTTP 404 for this tenant.
+ * Breezy Hire UI aggregates per-position lists client-side (no public company-wide list API).
+ */
 export const FROZEN_BREEZY_CANDIDATE_LIST_STRATEGY: BreezyCandidateListStrategy = {
   kind: "per_position",
   pathTemplate: "/company/{companyId}/position/{positionId}/candidates",
@@ -177,19 +182,14 @@ export async function probeBreezyCandidateEndpoints(input: {
       query: { ...baseQuery },
     },
     {
-      label: "company_global_candidates_updated_sort",
-      path: `/company/${companyEncoded}/candidates`,
-      query: { ...baseQuery, sort: "updated" },
-    },
-    {
       label: "user_global_candidates",
       path: "/candidates",
       query: { ...baseQuery },
     },
     {
-      label: "company_candidates_search",
+      label: "company_candidates_search_requires_email",
       path: `/company/${companyEncoded}/candidates/search`,
-      query: { ...baseQuery },
+      query: { ...baseQuery, email_address: "@" },
     },
   ];
 
@@ -438,10 +438,6 @@ export async function fetchCandidatesViaGlobalList(input: {
       const job = positionId ? input.jobsById.get(positionId) : undefined;
       const clean = input.normalize(record, job);
       if (!clean) {
-        sanitizeRejected += 1;
-        continue;
-      }
-      if (!job) {
         sanitizeRejected += 1;
         continue;
       }

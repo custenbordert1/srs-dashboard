@@ -24,3 +24,11 @@ export function logBreezyCandidatesOps(
   }
   console.info(`[breezy-candidates-ops] ${side}:${outcome}`);
 }
+
+/** Server-side Breezy per-position extraction diagnostics (always on in dev). */
+export function logBreezyCandidatesExtract(
+  stage: string,
+  meta: Record<string, unknown>,
+): void {
+  console.info(`[breezy-candidates-extract] ${stage}`, meta);
+}

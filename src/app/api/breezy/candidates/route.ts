@@ -4,6 +4,7 @@ import { fetchBreezyCandidates, type BreezyCandidatesScanMode } from "@/lib/bree
 import { withCandidatesFailureMeta } from "@/lib/breezy-candidates-sync";
 import {
   isBreezyCandidatesTimeoutMessage,
+  logBreezyCandidatesExtract,
   logBreezyCandidatesOps,
 } from "@/lib/breezy-candidates-ops-log";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
@@ -138,6 +139,24 @@ export async function GET(request: Request) {
     result.ok && result.candidates.length > 0 && (scanMode === "preview" || scanMode === "fast")
       ? 300
       : 30;
+
+  logBreezyCandidatesExtract("final_json_to_browser", {
+    route: ROUTE,
+    httpStatus: status,
+    scanMode: scanMode ?? (result.ok ? (result.scanMode ?? "default") : "default"),
+    ok: result.ok,
+    candidateCount: result.ok ? result.candidates.length : 0,
+    rawBreezyResponseCount: result.ok ? result.previewDiagnostics?.rawBreezyResponseCount ?? null : null,
+    extractedCandidatesCount: result.ok ? result.previewDiagnostics?.extractedCandidatesCount ?? null : null,
+    positionsScanned: result.ok ? result.positionsScanned ?? null : null,
+    totalPositionsAvailable: result.ok ? result.totalPositionsAvailable ?? null : null,
+    previewStoppedReason: result.ok ? result.previewDiagnostics?.previewStoppedReason ?? null : null,
+    previewEmptyPositions: result.ok ? result.previewDiagnostics?.previewEmptyPositions ?? null : null,
+    candidateFetchEndpoint: result.ok ? result.candidateFetchEndpoint ?? null : null,
+    fromCache: result.ok ? result.fromCache ?? false : null,
+    error: result.ok ? null : result.error,
+  });
+
   return NextResponse.json(result, {
     status,
     headers: {

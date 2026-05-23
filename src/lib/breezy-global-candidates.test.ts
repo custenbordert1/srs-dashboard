@@ -44,6 +44,15 @@ describe("getBreezyCandidateListStrategyForFetch", () => {
   });
 });
 
+describe("breezyAddedDateRangeLastNDays", () => {
+  it("returns a 7-day inclusive window ending on reference day", async () => {
+    const { breezyAddedDateRangeLastNDays } = await import("@/lib/breezy-api");
+    const range = breezyAddedDateRangeLastNDays("2026-05-21T18:00:00.000Z");
+    assert.equal(range.end, "2026-05-21");
+    assert.equal(range.start, "2026-05-15");
+  });
+});
+
 describe("buildJobsLookupMap", () => {
   it("indexes jobId and friendlyId", () => {
     const jobs: BreezyJob[] = [

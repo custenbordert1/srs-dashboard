@@ -19,6 +19,14 @@ describe("extractRawBreezyCandidatesFromListResponse", () => {
     assert.equal(rows[0]?._id, "c-2");
   });
 
+  it("reads applicants array responses", () => {
+    const rows = extractRawBreezyCandidatesFromListResponse({
+      applicants: [{ _id: "c-3", name: "Sam" }],
+    });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?._id, "c-3");
+  });
+
   it("returns empty for unknown shapes", () => {
     assert.deepEqual(extractRawBreezyCandidatesFromListResponse({ meta: {} }), []);
   });
