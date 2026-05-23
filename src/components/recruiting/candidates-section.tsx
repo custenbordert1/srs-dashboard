@@ -245,6 +245,8 @@ export function CandidatesSection() {
   const [committedCandidates, setCommittedCandidates] = useState<BreezyCandidate[]>([]);
   const [enrichedCandidates, setEnrichedCandidates] = useState<ScoredCandidateWorkflowRow[]>([]);
   const [workflowEnrichmentPending, setWorkflowEnrichmentPending] = useState(false);
+  const hasRenderableCandidateRows = committedCandidates.length > 0;
+  const hasCandidateSnapshot = breezySnapshot !== null || committedCandidates.length > 0;
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [loadingBundle, setLoadingBundle] = useState(true);
   const [refreshingCandidates, setRefreshingCandidates] = useState(false);
@@ -711,9 +713,6 @@ export function CandidatesSection() {
     void loadBundle(true).finally(() => setRetrying(false));
   }, [loadBundle]);
 
-  const hasCandidateSnapshot = breezySnapshot !== null || committedCandidates.length > 0;
-  const hasRenderableCandidateRows = committedCandidates.length > 0;
-
   const jobsByPositionId = useMemo(
     () => (jobsData?.ok ? buildJobsByPositionId(jobsData.jobs) : new Map()),
     [jobsData],
@@ -840,7 +839,7 @@ export function CandidatesSection() {
     );
     logCandidatesClientTrace("table_render_state", {
       tableRowsCommittedToState: sorted.length,
-      hasRenderableCandidateRows: (breezySnapshot?.candidates.length ?? 0) > 0,
+      hasRenderableCandidateRows,
       snapshotCandidateCount: breezySnapshot?.candidates.length ?? 0,
       workflowEnrichedRowCount: candidates.length,
       activeFilters: {
