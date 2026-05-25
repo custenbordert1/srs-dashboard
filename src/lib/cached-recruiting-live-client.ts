@@ -5,7 +5,7 @@ import type {
 } from "@/lib/recruiting-live-snapshot";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import {
-  BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
+  BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
   fetchWithTimeout,
   isTimeoutError,
   timeoutErrorMessage,
@@ -26,7 +26,7 @@ export async function fetchRecruitingLiveSnapshot(force = false): Promise<Recrui
       try {
         const res = await fetchWithTimeout(route, {
           cache: "no-store",
-          timeoutMs: BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
+          timeoutMs: BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
         });
         const parsed = (await res.json()) as RecruitingLiveSnapshotResponse;
         logDashboardFetch(parsed.ok || parsed.partial ? "success" : "error", {
@@ -45,7 +45,9 @@ export async function fetchRecruitingLiveSnapshot(force = false): Promise<Recrui
         const ms = Math.round(performance.now() - started);
         if (isTimeoutError(err)) {
           logDashboardFetch("timeout", { route, label: "live-snapshot", ms });
-          throw new Error(timeoutErrorMessage("Recruiting live snapshot", BREEZY_CLIENT_REQUEST_TIMEOUT_MS));
+          throw new Error(
+            timeoutErrorMessage("Recruiting live snapshot", BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS),
+          );
         }
         logDashboardFetch("error", {
           route,

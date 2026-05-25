@@ -803,7 +803,7 @@ export function breezyFastCandidatesCacheKey(options?: {
 }): string {
   const positionId = options?.positionId?.trim() ?? "";
   const state = options?.state ?? "published";
-  const scanMode = options?.scanMode ?? "all";
+  const scanMode = options?.scanMode ?? "preview";
   const pageSize = Math.max(1, Math.min(options?.pageSize ?? CANDIDATES_PAGE_SIZE, CANDIDATES_PAGE_SIZE));
   const maxPages = options?.maxPages
     ? Math.max(1, Math.min(options.maxPages, MAX_CANDIDATE_PAGES_PER_POSITION))
@@ -1360,7 +1360,7 @@ export async function fetchBreezyCandidates(options?: {
   const maxPositions = options?.maxPositions;
   const rangeStart = parseDateRangeParam(options?.dateRangeStart);
   const rangeEnd = parseDateRangeParam(options?.dateRangeEnd);
-  const scanMode = options?.scanMode ?? "all";
+  const scanMode = options?.scanMode ?? "preview";
   const cacheKey = breezyFastCandidatesCacheKey({
     positionId,
     state,
@@ -2120,7 +2120,7 @@ async function fetchBreezyCandidatesFastUncached(options?: {
     ...options,
     filterToDateRange: false,
     jobState: options?.state ?? "published",
-    scanMode: options?.scanMode ?? "all",
+    scanMode: options?.scanMode ?? "preview",
   });
 }
 

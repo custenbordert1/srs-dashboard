@@ -55,8 +55,10 @@ export function isTimeoutError(err: unknown): boolean {
 
 export const DASHBOARD_REQUEST_TIMEOUT_MS = 10_000;
 export const HEAVY_REQUEST_TIMEOUT_MS = 30_000;
-/** Breezy jobs/candidates/snapshot — match dashboard loading ceiling (10s). */
+/** Breezy jobs list — single GET, fits 10s budget. */
 export const BREEZY_CLIENT_REQUEST_TIMEOUT_MS = DASHBOARD_REQUEST_TIMEOUT_MS;
+/** Breezy preview-tier candidate sync — server budget ~18s + jobs list. */
+export const BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = HEAVY_REQUEST_TIMEOUT_MS;
 
 export function timeoutErrorMessage(label: string, timeoutMs: number): string {
   const seconds = Math.round(timeoutMs / 1000);
