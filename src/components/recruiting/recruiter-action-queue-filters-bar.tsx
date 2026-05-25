@@ -2,6 +2,7 @@
 
 import {
   RECRUITER_QUICK_FILTERS,
+  toggleRecruiterQuickFilter,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
 
@@ -27,12 +28,12 @@ export function RecruiterActionQueueFiltersBar({
           <button
             key={id}
             type="button"
-            onClick={() => onFilterChange(id)}
+            onClick={() => onFilterChange(toggleRecruiterQuickFilter(activeFilter, id))}
             className={[
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              "rounded-full border px-3 py-1 text-xs font-medium",
               active
                 ? "border-teal-500/40 bg-teal-500/15 text-teal-100"
-                : "border-zinc-700 bg-zinc-950/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200",
+                : "border-zinc-700 bg-zinc-950/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-500/40",
             ].join(" ")}
           >
             {label}

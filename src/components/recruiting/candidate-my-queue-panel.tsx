@@ -83,7 +83,7 @@ export function CandidateMyQueuePanel({
   return (
     <section
       aria-labelledby="my-queue-heading"
-      className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5"
+      className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -96,12 +96,14 @@ export function CandidateMyQueuePanel({
             sync stays read-only. Notes and due dates persist in{" "}
             <span className="text-zinc-400">/api/candidates/workflows</span>.
           </p>
-          {syncPartial ? (
-            <p className="mt-2 text-xs text-amber-200/90">Partial Breezy hydration — queue counts may grow after full sync.</p>
-          ) : null}
-          {syncStale ? (
-            <p className="mt-2 text-xs text-amber-200/90">Showing last successful Breezy snapshot.</p>
-          ) : null}
+          <div className="mt-2 min-h-[1.125rem] text-xs leading-snug text-amber-200/90">
+            {syncPartial ? (
+              <p className="line-clamp-2">Partial Breezy hydration — queue counts may grow after full sync.</p>
+            ) : null}
+            {syncStale ? (
+              <p className="line-clamp-2">Showing last successful Breezy snapshot.</p>
+            ) : null}
+          </div>
         </div>
         <label className="flex min-w-[12rem] flex-col gap-1 text-xs text-zinc-400">
           Acting recruiter
@@ -126,14 +128,14 @@ export function CandidateMyQueuePanel({
         counts={filterCounts}
       />
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid auto-rows-fr items-stretch gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Overdue follow-ups" value={metrics.overdueFollowUps} tone="warn" />
         <MetricCard label="Paperwork pending" value={metrics.paperworkPending} />
         <MetricCard label="Ready for MEL" value={metrics.readyForMel} tone="ok" />
         <MetricCard label="Unassigned" value={metrics.unassigned} />
       </div>
 
-      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+      <div className="mt-2 grid auto-rows-fr items-stretch gap-2 sm:grid-cols-3">
         <MetricCard label="Aging 24h+" value={actionCounts.aging24h} tone="warn" />
         <MetricCard label="Aging 3d+" value={actionCounts.aging3d} tone="warn" />
         <MetricCard label="Aging 7d+" value={actionCounts.aging7dPlus} tone="warn" />
@@ -149,10 +151,10 @@ export function CandidateMyQueuePanel({
               type="button"
               onClick={() => setActiveLane(lane)}
               className={[
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                "rounded-full border px-3 py-1 text-xs font-medium",
                 active
                   ? "border-teal-500/40 bg-teal-500/15 text-teal-100"
-                  : "border-zinc-700 bg-zinc-950/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200",
+                  : "border-zinc-700 bg-zinc-950/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-500/40",
               ].join(" ")}
             >
               {CANDIDATE_QUEUE_LANE_LABELS[lane]} ({count})
@@ -161,8 +163,8 @@ export function CandidateMyQueuePanel({
         })}
       </div>
 
-      <div className="mt-4 rounded-xl border border-zinc-800/80 bg-zinc-950/40">
-        <div className="border-b border-zinc-800/80 px-3 py-2 sm:px-4">
+      <div className="mt-4 rounded-xl border border-zinc-800/60 bg-zinc-950/40">
+        <div className="border-b border-zinc-800/60 px-3 py-2 sm:px-4">
           <p className="text-sm font-medium text-zinc-200">
             {CANDIDATE_QUEUE_LANE_LABELS[activeLane]}
             <span className="ml-2 text-zinc-500">
@@ -178,11 +180,24 @@ export function CandidateMyQueuePanel({
         {activeQueue.rows.length === 0 ? (
           <p className="px-4 py-6 text-sm text-zinc-500">No candidates in this lane.</p>
         ) : (
-          <ul className="divide-y divide-zinc-800/60">
-            {activeQueue.rows.map((row) => (
+          <ul
+            className="max-h-[min(60vh,560px)] divide-y divide-zinc-800/35 overflow-y-auto overscroll-contain"
+            aria-label={`${CANDIDATE_QUEUE_LANE_LABELS[activeLane]} queue`}
+          >
+            <li
+              className="sticky top-0 z-10 hidden border-b border-zinc-800/50 bg-zinc-950/95 px-4 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-600 backdrop-blur-sm sm:grid sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)_4.75rem_minmax(0,auto)] sm:gap-x-3"
+              aria-hidden
+            >
+              <span>Candidate</span>
+              <span>Next action</span>
+              <span className="text-right">Urgency</span>
+              <span className="text-right">Actions</span>
+            </li>
+            {activeQueue.rows.map((row, rowIndex) => (
               <CandidateQueueRow
                 key={row.candidateId}
                 row={row}
+                rowIndex={rowIndex}
                 rosters={rosters}
                 actingRecruiter={actingRecruiter}
                 busy={queueActionBusy}
@@ -213,9 +228,11 @@ function MetricCard({
         ? "border-teal-500/30 bg-teal-500/5"
         : "border-zinc-800/80 bg-zinc-950/40";
   return (
-    <div className={`rounded-lg border px-3 py-2 ${toneClass}`}>
+    <div className={`flex min-h-[4.25rem] flex-col justify-center rounded-lg border px-3 py-2 ${toneClass}`}>
       <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
-      <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-50">{value.toLocaleString()}</p>
+      <p className="mt-1 text-xl font-semibold leading-none tabular-nums text-zinc-50">
+        {value.toLocaleString()}
+      </p>
     </div>
   );
 }
