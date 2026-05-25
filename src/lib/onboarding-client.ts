@@ -29,6 +29,20 @@ export type OnboardingStatusResponse = {
   workflow?: CandidateWorkflowRecord;
 };
 
+export class OnboardingRequestError extends Error {
+  readonly workflow?: CandidateWorkflowRecord;
+
+  constructor(message: string, workflow?: CandidateWorkflowRecord) {
+    super(message);
+    this.name = "OnboardingRequestError";
+    this.workflow = workflow;
+  }
+}
+
+export function isOnboardingRequestError(error: unknown): error is OnboardingRequestError {
+  return error instanceof OnboardingRequestError;
+}
+
 export async function sendOnboardingPacket(
   input: SendOnboardingPacketInput,
 ): Promise<SendOnboardingPacketResponse> {
@@ -39,7 +53,10 @@ export async function sendOnboardingPacket(
   });
   const data = (await res.json()) as SendOnboardingPacketResponse;
   if (!res.ok || !data.ok) {
-    throw new Error(data.error ?? `Send paperwork failed (${res.status})`);
+    throw new OnboardingRequestError(
+      data.error ?? `Send paperwork failed (${res.status})`,
+      data.workflow,
+    );
   }
   return data;
 }

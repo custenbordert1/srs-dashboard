@@ -28,8 +28,16 @@ import {
 import {
   checkOnboardingSignatureStatus,
   fetchOnboardingConfig,
+  isOnboardingRequestError,
   sendOnboardingPacket,
 } from "@/lib/onboarding-client";
+import { patchEnrichedRowsFromWorkflow } from "@/lib/patch-enriched-workflow-row";
+import {
+  workflowNoticeAssigned,
+  workflowNoticePacketSent,
+  workflowNoticePaperworkSigned,
+  workflowNoticeStatus,
+} from "@/lib/workflow-action-notices";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import {
   defaultRecruiterRosters,
@@ -419,6 +427,8 @@ export function CandidatesSection() {
   );
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
+  const [workflowNotice, setWorkflowNotice] = useState<string | null>(null);
+  const workflowNoticeTimerRef = useRef<number | null>(null);
   const [jobsData, setJobsData] = useState<BreezyJobsResult | undefined>(undefined);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
   const [rosters, setRosters] = useState<RecruiterRosters>(() => defaultRecruiterRosters());
@@ -981,6 +991,42 @@ export function CandidatesSection() {
     return () => window.clearTimeout(timerId);
   }, [committedCandidates, jobsByPositionId, workflowState]);
 
+  useEffect(() => {
+    return () => {
+      if (workflowNoticeTimerRef.current !== null) {
+        window.clearTimeout(workflowNoticeTimerRef.current);
+      }
+    };
+  }, []);
+
+  const commitWorkflowToView = useCallback(
+    (
+      workflow: CandidateWorkflowRecord,
+      options?: { notice?: string; workflows?: CandidateWorkflowState },
+    ) => {
+      if (options?.workflows) {
+        setWorkflowState(options.workflows);
+      } else {
+        setWorkflowState((prev) => ({ ...prev, [workflow.candidateId]: workflow }));
+      }
+      const breezy = committedCandidates.find((c) => c.candidateId === workflow.candidateId);
+      const job = breezy ? jobsByPositionId.get(breezy.positionId) : undefined;
+      setEnrichedCandidates((prev) => patchEnrichedRowsFromWorkflow(prev, breezy, workflow, job));
+      if (options?.notice) {
+        setWorkflowNotice(options.notice);
+        if (workflowNoticeTimerRef.current !== null) {
+          window.clearTimeout(workflowNoticeTimerRef.current);
+        }
+        workflowNoticeTimerRef.current = window.setTimeout(() => {
+          setWorkflowNotice(null);
+          workflowNoticeTimerRef.current = null;
+        }, 3500);
+      }
+      invalidateCached(cacheKey(["candidates", "workflows"]));
+    },
+    [committedCandidates, jobsByPositionId],
+  );
+
   const candidates = useMemo(() => {
     if (enrichedCandidates.length > 0) {
       return enrichedCandidates;
@@ -1188,7 +1234,11 @@ export function CandidatesSection() {
     candidate: ScoredCandidateWorkflowRow,
     workflowStatus: CandidateWorkflowStatus,
     options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
-  ): Promise<CandidateWorkflowRecord> {
+  ): Promise<{
+    workflow: CandidateWorkflowRecord;
+    workflows?: CandidateWorkflowState;
+    rosters?: RecruiterRosters;
+  }> {
     const res = await fetch("/api/candidates/workflows", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1210,14 +1260,11 @@ export function CandidatesSection() {
     if (!res.ok || !parsed.ok || !parsed.workflow) {
       throw new Error(parsed.error ?? `Workflow update failed with HTTP ${res.status}`);
     }
-    invalidateCached(cacheKey(["candidates", "workflows"]));
-    if (parsed.workflows) setWorkflowState(parsed.workflows);
-    if (parsed.rosters) setRosters(parsed.rosters);
-    return parsed.workflow;
-  }
-
-  function applyWorkflowRecord(workflow: CandidateWorkflowRecord) {
-    setWorkflowState((prev) => ({ ...prev, [workflow.candidateId]: workflow }));
+    return {
+      workflow: parsed.workflow,
+      workflows: parsed.workflows,
+      rosters: parsed.rosters,
+    };
   }
 
   function applyRosters(next: RecruiterRosters) {
@@ -1230,8 +1277,7 @@ export function CandidatesSection() {
   function persistRecruitingAction(candidateId: string, type: RecruitingActionType) {
     void persistRecruitingActionToggle(candidateId, type)
       .then((workflow) => {
-        applyWorkflowRecord(workflow);
-        invalidateCached(cacheKey(["candidates", "workflows"]));
+        commitWorkflowToView(workflow);
       })
       .catch((err) => {
         window.alert(err instanceof Error ? err.message : "Recruiting action update failed");
@@ -1290,50 +1336,44 @@ export function CandidatesSection() {
       })
         .then((result) => {
           if (result.workflow) {
-            applyWorkflowRecord(result.workflow);
-            const breezy = committedCandidates.find((c) => c.candidateId === candidate.candidateId);
-            if (breezy) {
-              const job = jobsByPositionId.get(breezy.positionId);
-              const updatedRow = buildScoredWorkflowRow(breezy, result.workflow, { job });
-              setEnrichedCandidates((prev) =>
-                prev.length > 0
-                  ? prev.map((row) =>
-                      row.candidateId === updatedRow.candidateId ? updatedRow : row,
-                    )
-                  : prev,
-              );
-            }
+            commitWorkflowToView(result.workflow, { notice: workflowNoticePacketSent() });
           }
-          invalidateCached(cacheKey(["candidates", "workflows"]));
         })
         .catch((err) => {
+          if (isOnboardingRequestError(err) && err.workflow) {
+            commitWorkflowToView(err.workflow);
+          }
           window.alert(err instanceof Error ? err.message : "Send paperwork failed");
         })
         .finally(() => setPaperworkSendingId(null));
     },
-    [buildSendEligibility, committedCandidates, jobsByPositionId, paperworkSendingId],
+    [buildSendEligibility, commitWorkflowToView, paperworkSendingId],
   );
 
   const refreshPaperworkStatus = useCallback((candidate: ScoredCandidateWorkflowRow) => {
     if (!candidate.signatureRequestId) return;
     void checkOnboardingSignatureStatus(candidate.signatureRequestId)
       .then((result) => {
-        if (result.workflow) applyWorkflowRecord(result.workflow);
-        invalidateCached(cacheKey(["candidates", "workflows"]));
+        if (!result.workflow) return;
+        const signed =
+          result.workflow.paperworkStatus === "signed" ||
+          result.workflow.workflowStatus === "Signed";
+        commitWorkflowToView(result.workflow, {
+          notice: signed ? workflowNoticePaperworkSigned() : undefined,
+        });
       })
       .catch((err) => {
         window.alert(err instanceof Error ? err.message : "Paperwork status check failed");
       });
-  }, []);
+  }, [commitWorkflowToView]);
 
   const handleQueueAction = useCallback(
     (candidateId: string, payload: CandidateQueueActionPayload) => {
       const row = candidates.find((c) => c.candidateId === candidateId);
       if (!row) return;
       setQueueActionBusy(true);
-      const finish = (workflow: CandidateWorkflowRecord) => {
-        applyWorkflowRecord(workflow);
-        invalidateCached(cacheKey(["candidates", "workflows"]));
+      const finish = (workflow: CandidateWorkflowRecord, notice?: string) => {
+        commitWorkflowToView(workflow, { notice });
       };
       const run = async () => {
         switch (payload.action) {
@@ -1344,6 +1384,7 @@ export function CandidatesSection() {
                 assignedRecruiter: payload.recruiter,
                 workflowStatus: row.workflowStatus,
               }),
+              workflowNoticeAssigned(payload.recruiter),
             );
             break;
           case "assign-dm":
@@ -1379,6 +1420,7 @@ export function CandidatesSection() {
                 candidateId,
                 workflowStatus: "Paperwork Needed",
               }),
+              workflowNoticeStatus("Paperwork Needed"),
             );
             break;
           case "ready-mel":
@@ -1387,6 +1429,7 @@ export function CandidatesSection() {
                 candidateId,
                 workflowStatus: "Ready for MEL",
               }),
+              workflowNoticeStatus("Ready for MEL"),
             );
             break;
           default:
@@ -1399,7 +1442,7 @@ export function CandidatesSection() {
         })
         .finally(() => setQueueActionBusy(false));
     },
-    [candidates],
+    [candidates, commitWorkflowToView],
   );
 
   function updateWorkflow(
@@ -1407,8 +1450,22 @@ export function CandidatesSection() {
     workflowStatus: CandidateWorkflowStatus,
     options: { note?: string; assignedRecruiter?: string; assignedDM?: string } = {},
   ) {
+    const prevStatus = candidate.workflowStatus;
+    const assignNotice =
+      options.assignedRecruiter &&
+      options.assignedRecruiter !== candidate.assignedRecruiter
+        ? workflowNoticeAssigned(options.assignedRecruiter)
+        : undefined;
     void persistWorkflow(candidate, workflowStatus, options)
-      .then(applyWorkflowRecord)
+      .then((result) => {
+        if (result.rosters) setRosters(result.rosters);
+        const statusNotice =
+          workflowStatus !== prevStatus ? workflowNoticeStatus(workflowStatus) : undefined;
+        commitWorkflowToView(result.workflow, {
+          notice: statusNotice ?? assignNotice,
+          workflows: result.workflows,
+        });
+      })
       .catch((err) => {
         window.alert(err instanceof Error ? err.message : "Workflow update failed");
       });
@@ -1442,7 +1499,7 @@ export function CandidatesSection() {
     if (rows.length === 0) return;
     setBulkBusy(true);
     try {
-      const workflows = await Promise.all(
+      const results = await Promise.all(
         rows.map((candidate) =>
           persistWorkflow(candidate, options.workflowStatus ?? candidate.workflowStatus, {
             assignedRecruiter: options.assignedRecruiter,
@@ -1450,11 +1507,29 @@ export function CandidatesSection() {
           }),
         ),
       );
-      setWorkflowState((prev) => {
-        const next = { ...prev };
-        for (const workflow of workflows) next[workflow.candidateId] = workflow;
-        return next;
-      });
+      const statusNotice =
+        options.workflowStatus != null
+          ? workflowNoticeStatus(options.workflowStatus)
+          : options.assignedRecruiter
+            ? workflowNoticeAssigned(options.assignedRecruiter)
+            : undefined;
+      for (const result of results) {
+        if (result.rosters) setRosters(result.rosters);
+        commitWorkflowToView(result.workflow, {
+          notice: results.length === 1 ? statusNotice : undefined,
+          workflows: result.workflows,
+        });
+      }
+      if (results.length > 1 && statusNotice) {
+        setWorkflowNotice(statusNotice);
+        if (workflowNoticeTimerRef.current !== null) {
+          window.clearTimeout(workflowNoticeTimerRef.current);
+        }
+        workflowNoticeTimerRef.current = window.setTimeout(() => {
+          setWorkflowNotice(null);
+          workflowNoticeTimerRef.current = null;
+        }, 3500);
+      }
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Bulk workflow update failed");
     } finally {
@@ -1492,24 +1567,22 @@ export function CandidatesSection() {
   const flagCandidateFollowUp = useCallback((candidateId: string) => {
     void persistRecruitingActionToggle(candidateId, "needs-follow-up", true)
       .then((workflow) => {
-        applyWorkflowRecord(workflow);
-        invalidateCached(cacheKey(["candidates", "workflows"]));
+        commitWorkflowToView(workflow);
       })
       .catch((err) => {
         window.alert(err instanceof Error ? err.message : "Follow-up flag failed");
       });
-  }, []);
+  }, [commitWorkflowToView]);
 
   const completeCandidateFollowUpRow = useCallback((candidateId: string) => {
     void completeCandidateFollowUp(candidateId)
       .then((workflow) => {
-        applyWorkflowRecord(workflow);
-        invalidateCached(cacheKey(["candidates", "workflows"]));
+        commitWorkflowToView(workflow);
       })
       .catch((err) => {
         window.alert(err instanceof Error ? err.message : "Follow-up complete failed");
       });
-  }, []);
+  }, [commitWorkflowToView]);
 
   const assignActingRecruiterToRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
@@ -1519,14 +1592,13 @@ export function CandidatesSection() {
         workflowStatus: candidate.workflowStatus,
       })
         .then((workflow) => {
-          applyWorkflowRecord(workflow);
-          invalidateCached(cacheKey(["candidates", "workflows"]));
+          commitWorkflowToView(workflow, { notice: workflowNoticeAssigned(actingRecruiter) });
         })
         .catch((err) => {
           window.alert(err instanceof Error ? err.message : "Assign recruiter failed");
         });
     },
-    [actingRecruiter],
+    [actingRecruiter, commitWorkflowToView],
   );
 
   const addQuickNoteToRow = useCallback(
@@ -1810,6 +1882,16 @@ export function CandidatesSection() {
               className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-sky-500/30 bg-sky-500/10 py-2 text-sky-100`}
             >
               <span className="line-clamp-2">{enrichmentWarnings.join(" ")}</span>
+            </p>
+          ) : null}
+        </div>
+        <div className={syncBannerSlotClass}>
+          {workflowNotice ? (
+            <p
+              role="status"
+              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-teal-500/30 bg-teal-500/10 py-2 text-teal-100`}
+            >
+              <span className="line-clamp-2">{workflowNotice}</span>
             </p>
           ) : null}
         </div>
