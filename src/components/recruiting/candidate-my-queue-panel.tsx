@@ -11,6 +11,12 @@ import {
 import { buildQueueCompactMetrics } from "@/lib/candidate-queue-metrics";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
+import {
+  buildRecruiterActionQueueCounts,
+  matchesRecruiterQuickFilter,
+  type RecruiterQuickFilterId,
+} from "@/lib/recruiter-action-queue-filters";
+import { RecruiterActionQueueFiltersBar } from "@/components/recruiting/recruiter-action-queue-filters-bar";
 import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import { useMemo, useState } from "react";
 
@@ -24,6 +30,8 @@ type CandidateMyQueuePanelProps = {
   queueActionBusy?: boolean;
   syncPartial?: boolean;
   syncStale?: boolean;
+  quickFilter: RecruiterQuickFilterId;
+  onQuickFilterChange: (filter: RecruiterQuickFilterId) => void;
 };
 
 export function CandidateMyQueuePanel({
@@ -36,15 +44,38 @@ export function CandidateMyQueuePanel({
   queueActionBusy = false,
   syncPartial,
   syncStale,
+  quickFilter,
+  onQuickFilterChange,
 }: CandidateMyQueuePanelProps) {
   const [activeLane, setActiveLane] = useState<CandidateQueueLaneId>("my-open");
 
+  const queueCandidates = useMemo(() => {
+    if (quickFilter === "all") return candidates;
+    return candidates.filter((row) => matchesRecruiterQuickFilter(row, quickFilter, actingRecruiter));
+  }, [actingRecruiter, candidates, quickFilter]);
+
   const board = useMemo(
-    () => buildCandidateQueueBoard(candidates, actingRecruiter, { limitPerLane: 40 }),
-    [actingRecruiter, candidates],
+    () => buildCandidateQueueBoard(queueCandidates, actingRecruiter, { limitPerLane: 40 }),
+    [actingRecruiter, queueCandidates],
   );
 
   const metrics = useMemo(() => buildQueueCompactMetrics(candidates), [candidates]);
+  const actionCounts = useMemo(() => buildRecruiterActionQueueCounts(candidates), [candidates]);
+
+  const filterCounts = useMemo(
+    () => ({
+      "my-owned": candidates.filter((r) =>
+        matchesRecruiterQuickFilter(r, "my-owned", actingRecruiter),
+      ).length,
+      "needs-follow-up": actionCounts.needsFollowUp,
+      "no-response": actionCounts.noResponse,
+      "paperwork-pending": actionCounts.paperworkPending,
+      "interview-needed": actionCounts.interviewNeeded,
+      "ready-mel": actionCounts.readyForMel,
+      priority: actionCounts.priority,
+    }),
+    [actingRecruiter, actionCounts, candidates],
+  );
 
   const activeQueue = board.lanes[activeLane];
   const myOpenCount = board.lanes["my-open"].totalInLane;
@@ -57,11 +88,13 @@ export function CandidateMyQueuePanel({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 id="my-queue-heading" className="text-lg font-semibold tracking-tight text-zinc-50">
-            My queue
+            Recruiter action queue
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-zinc-500">
-            Operational tasks for <span className="text-zinc-300">{actingRecruiter}</span>. My open shows
-            only candidates assigned to the acting recruiter (snoozed hidden). Unassigned stays separate.
+            Follow-ups, aging, and ownership for{" "}
+            <span className="text-zinc-300">{actingRecruiter}</span>. Uses local workflow overlay only — Breezy
+            sync stays read-only. Notes and due dates persist in{" "}
+            <span className="text-zinc-400">/api/candidates/workflows</span>.
           </p>
           {syncPartial ? (
             <p className="mt-2 text-xs text-amber-200/90">Partial Breezy hydration — queue counts may grow after full sync.</p>
@@ -86,11 +119,24 @@ export function CandidateMyQueuePanel({
         </label>
       </div>
 
+      <RecruiterActionQueueFiltersBar
+        className="mt-4"
+        activeFilter={quickFilter}
+        onFilterChange={onQuickFilterChange}
+        counts={filterCounts}
+      />
+
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Overdue follow-ups" value={metrics.overdueFollowUps} tone="warn" />
         <MetricCard label="Paperwork pending" value={metrics.paperworkPending} />
         <MetricCard label="Ready for MEL" value={metrics.readyForMel} tone="ok" />
         <MetricCard label="Unassigned" value={metrics.unassigned} />
+      </div>
+
+      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        <MetricCard label="Aging 24h+" value={actionCounts.aging24h} tone="warn" />
+        <MetricCard label="Aging 3d+" value={actionCounts.aging3d} tone="warn" />
+        <MetricCard label="Aging 7d+" value={actionCounts.aging7dPlus} tone="warn" />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

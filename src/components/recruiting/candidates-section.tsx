@@ -89,6 +89,12 @@ import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
+import { RecruiterActionQueueFiltersBar } from "@/components/recruiting/recruiter-action-queue-filters-bar";
+import {
+  buildRecruiterActionQueueCounts,
+  matchesRecruiterQuickFilter,
+  type RecruiterQuickFilterId,
+} from "@/lib/recruiter-action-queue-filters";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
@@ -277,6 +283,7 @@ export function CandidatesSection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
+  const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingTemplatesAvailable, setOnboardingTemplatesAvailable] = useState(false);
   const [paperworkTemplates, setPaperworkTemplates] = useState<
@@ -874,6 +881,13 @@ export function CandidatesSection() {
         if (!haystack?.includes(q)) return false;
       }
 
+      if (
+        recruiterQuickFilter !== "all" &&
+        !matchesRecruiterQuickFilter(candidate, recruiterQuickFilter, actingRecruiter)
+      ) {
+        return false;
+      }
+
       return true;
     });
 
@@ -899,6 +913,7 @@ export function CandidatesSection() {
         appliedFrom: appliedFrom || null,
         appliedTo: appliedTo || null,
         debouncedSearch: debouncedSearch || null,
+        recruiterQuickFilter,
       },
     });
     logCandidatesDebug("after_table_filter", sorted.length, {
@@ -920,12 +935,34 @@ export function CandidatesSection() {
     debouncedSearch,
     matchFilter,
     positionFilter,
+    actingRecruiter,
+    recruiterQuickFilter,
     searchIndex,
     sourceFilter,
     stageFilter,
     stateFilter,
     workflowFilter,
   ]);
+
+  const recruiterActionCounts = useMemo(
+    () => buildRecruiterActionQueueCounts(candidates),
+    [candidates],
+  );
+
+  const recruiterQuickFilterCounts = useMemo(
+    () => ({
+      "my-owned": candidates.filter((r) =>
+        matchesRecruiterQuickFilter(r, "my-owned", actingRecruiter),
+      ).length,
+      "needs-follow-up": recruiterActionCounts.needsFollowUp,
+      "no-response": recruiterActionCounts.noResponse,
+      "paperwork-pending": recruiterActionCounts.paperworkPending,
+      "interview-needed": recruiterActionCounts.interviewNeeded,
+      "ready-mel": recruiterActionCounts.readyForMel,
+      priority: recruiterActionCounts.priority,
+    }),
+    [actingRecruiter, candidates, recruiterActionCounts],
+  );
 
   const filteredIds = useMemo(() => filtered.map((candidate) => candidate.candidateId), [filtered]);
   const allFilteredSelected =
@@ -1125,6 +1162,9 @@ export function CandidatesSection() {
                 workflowStatus: row.workflowStatus,
               }),
             );
+            break;
+          case "mark-follow-up":
+            finish(await persistRecruitingActionToggle(candidateId, "needs-follow-up", true));
             break;
           case "complete-follow-up":
             finish(await completeCandidateFollowUp(candidateId));
@@ -1512,6 +1552,8 @@ export function CandidatesSection() {
         queueActionBusy={queueActionBusy}
         syncPartial={Boolean(syncData?.partial)}
         syncStale={Boolean(syncData?.stale)}
+        quickFilter={recruiterQuickFilter}
+        onQuickFilterChange={setRecruiterQuickFilter}
       />
 
       <CandidateAutomationPanels
@@ -1578,6 +1620,17 @@ export function CandidatesSection() {
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
         <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-sm sm:px-4">
+          <RecruiterActionQueueFiltersBar
+            activeFilter={recruiterQuickFilter}
+            onFilterChange={setRecruiterQuickFilter}
+            counts={recruiterQuickFilterCounts}
+          />
+          {recruiterQuickFilter !== "all" ? (
+            <p className="text-[11px] text-zinc-500">
+              Action queue filter active — table shows {filtered.length.toLocaleString()} matching candidate
+              {filtered.length === 1 ? "" : "s"}.
+            </p>
+          ) : null}
           <input
             className={inputClass}
             value={search}

@@ -3,6 +3,10 @@
 import type { QueueCandidateRow } from "@/lib/candidate-action-queue";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { slaToneClass } from "@/lib/candidate-action-sla";
+import {
+  computeRecruiterAgingBucket,
+  RECRUITER_AGING_BUCKET_LABELS,
+} from "@/lib/recruiter-action-queue-filters";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 
 type CandidateQueueRowProps = {
@@ -39,6 +43,8 @@ export function CandidateQueueRow({
   busy = false,
 }: CandidateQueueRowProps) {
   const overdue = row.sla.followUpOverdue || row.sla.followUpDueSeverity === "critical";
+  const agingBucket = computeRecruiterAgingBucket(row);
+  const agingLabel = RECRUITER_AGING_BUCKET_LABELS[agingBucket];
 
   return (
     <li className={overdue ? "border-l-2 border-l-red-500/50" : "border-l-2 border-l-transparent"}>
@@ -67,6 +73,21 @@ export function CandidateQueueRow({
           <span className="flex shrink-0 flex-wrap items-center gap-2 text-xs">
             <span className="rounded-full bg-zinc-800 px-2 py-0.5 font-semibold text-teal-200">{row.aiGrade}</span>
             <span className="text-zinc-500">P{row.priorityScore}</span>
+            {agingBucket !== "fresh" ? (
+              <span className="rounded-full border border-zinc-700 bg-zinc-900/60 px-2 py-0.5 text-zinc-400">
+                {agingLabel}
+              </span>
+            ) : null}
+            {row.recruitingActions.needsFollowUp ? (
+              <span className="rounded-full border border-amber-500/35 bg-amber-500/10 px-2 py-0.5 text-amber-100">
+                Follow-up
+              </span>
+            ) : null}
+            {row.recruitingActions.priorityList ? (
+              <span className="rounded-full border border-teal-500/35 bg-teal-500/10 px-2 py-0.5 text-teal-100">
+                Priority
+              </span>
+            ) : null}
             {row.followUpDueAt ? (
               <span
                 className={[
@@ -122,6 +143,14 @@ export function CandidateQueueRow({
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            disabled={busy || row.recruitingActions.needsFollowUp}
+            className="rounded border border-amber-600/40 bg-amber-600/10 px-2 py-0.5 text-[10px] text-amber-100 hover:bg-amber-600/20 disabled:opacity-50"
+            onClick={() => onAction({ action: "mark-follow-up" })}
+          >
+            Needs follow-up
+          </button>
           <button
             type="button"
             disabled={busy}

@@ -4,6 +4,7 @@ export type CandidateQueueActionId =
   | "assign-recruiter"
   | "assign-dm"
   | "apply-suggested-dm"
+  | "mark-follow-up"
   | "complete-follow-up"
   | "snooze-24h"
   | "move-paperwork"
@@ -13,6 +14,7 @@ export type CandidateQueueActionPayload =
   | { action: "assign-recruiter"; recruiter: string }
   | { action: "assign-dm"; dm: string }
   | { action: "apply-suggested-dm" }
+  | { action: "mark-follow-up" }
   | { action: "complete-follow-up" }
   | { action: "snooze-24h" }
   | { action: "move-paperwork"; status?: "Paperwork Needed" }
