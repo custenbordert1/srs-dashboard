@@ -18,6 +18,34 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+function buildOnboardingEmailCopy(input: {
+  candidateName: string;
+  templateLabel: string;
+}): { title: string; subject: string; message: string } {
+  const trimmedName = input.candidateName.trim();
+  const displayName = trimmedName.length > 0 ? trimmedName : "Candidate";
+  const firstToken = trimmedName.split(/\s+/)[0]?.replace(/[.,]+$/, "") ?? "";
+  const firstName =
+    firstToken.length > 0 && !/^unknown$/i.test(firstToken) ? firstToken : "there";
+
+  const subject = `${firstName}, your SRS merchandising paperwork is ready`;
+  const message = [
+    `Hi ${firstName},`,
+    "",
+    "Congratulations on moving forward with SRS Merchandising.",
+    "",
+    `Please review and sign the attached ${input.templateLabel}.`,
+    "",
+    "If you have questions, reply to your recruiter or contact our recruiting team.",
+    "",
+    "Thank you,",
+    "SRS Merchandising Recruiting",
+  ].join("\n");
+  const title = `SRS Merchandising — ${input.templateLabel} — ${displayName}`;
+
+  return { title, subject, message };
+}
+
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
     allowedRoles: ["executive", "recruiter", "dm"],
@@ -78,12 +106,13 @@ export async function POST(request: Request) {
       anySignerEmailBlankOrNull: signersHaveBlankEmail(finalSigners),
       ...roleCheck,
     });
+    const emailCopy = buildOnboardingEmailCopy({ candidateName, templateLabel });
     const signature = await sendTemplateSignatureRequest({
       templateId: validation.templateId,
       signers: finalSigners,
-      title: `${templateLabel} — ${candidateName}`,
-      subject: `SRS onboarding paperwork: ${templateLabel}`,
-      message: "Please review and sign your onboarding documents.",
+      title: emailCopy.title,
+      subject: emailCopy.subject,
+      message: emailCopy.message,
     });
 
     const paperworkStatus = mapSignatureRequestToPaperworkStatus(signature);
