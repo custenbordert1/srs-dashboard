@@ -29,6 +29,10 @@ type CandidateActionsMenuProps = {
   paperworkTemplates?: OnboardingTemplateOption[];
   hasCandidateEmail?: boolean;
   sendPaperworkDisabled?: boolean;
+  /** Overflow-only: workflow, DM, alternate templates, drawer. */
+  variant?: "default" | "overflow";
+  /** Hidden from overflow paperwork list (primary Send chip uses this template). */
+  excludePaperworkTemplateKey?: OnboardingTemplateKey;
 };
 
 export function CandidateActionsMenu({
@@ -40,7 +44,10 @@ export function CandidateActionsMenu({
   paperworkTemplates = [],
   hasCandidateEmail = true,
   sendPaperworkDisabled = false,
+  variant = "default",
+  excludePaperworkTemplateKey = "onboarding_packet",
 }: CandidateActionsMenuProps) {
+  const overflow = variant === "overflow";
   const [open, setOpen] = useState(false);
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
@@ -80,6 +87,7 @@ export function CandidateActionsMenu({
   }
 
   const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
+  const overflowTemplates = configuredTemplates.filter((t) => t.key !== excludePaperworkTemplateKey);
 
   function run(action: CandidateRowAction) {
     closeMenus();
@@ -137,9 +145,9 @@ export function CandidateActionsMenu({
             return next;
           });
         }}
-        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-2 py-0.5 text-[11px] font-medium text-zinc-200 hover:bg-zinc-700/80"
+        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-700/80"
       >
-        Actions
+        {overflow ? "More ▾" : "Actions"}
       </button>
       {open ? (
         <div
@@ -172,37 +180,39 @@ export function CandidateActionsMenu({
             ) : null}
           </div>
 
-          <div className="relative border-t border-zinc-800/80">
-            <button
-              type="button"
-              className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
-              onClick={() => setRecruiterOpen((value) => !value)}
-            >
-              Assign recruiter
-              <span className="text-zinc-500">{recruiterOpen ? "▴" : "▾"}</span>
-            </button>
-            {recruiterOpen ? (
-              <div className="max-h-32 overflow-y-auto border-t border-zinc-800/80 py-1">
-                {recruiters.map((recruiter) => (
+          {!overflow ? (
+            <div className="relative border-t border-zinc-800/80">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => setRecruiterOpen((value) => !value)}
+              >
+                Assign recruiter
+                <span className="text-zinc-500">{recruiterOpen ? "▴" : "▾"}</span>
+              </button>
+              {recruiterOpen ? (
+                <div className="max-h-32 overflow-y-auto border-t border-zinc-800/80 py-1">
+                  {recruiters.map((recruiter) => (
+                    <button
+                      key={recruiter}
+                      type="button"
+                      className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80"
+                      onClick={() => run({ kind: "assign-recruiter", recruiter })}
+                    >
+                      {recruiter}
+                    </button>
+                  ))}
                   <button
-                    key={recruiter}
                     type="button"
-                    className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80"
-                    onClick={() => run({ kind: "assign-recruiter", recruiter })}
+                    className="block w-full px-3 py-1 text-left text-[11px] text-teal-300 hover:bg-zinc-800/80"
+                    onClick={pickRecruiter}
                   >
-                    {recruiter}
+                    + Add recruiter…
                   </button>
-                ))}
-                <button
-                  type="button"
-                  className="block w-full px-3 py-1 text-left text-[11px] text-teal-300 hover:bg-zinc-800/80"
-                  onClick={pickRecruiter}
-                >
-                  + Add recruiter…
-                </button>
-              </div>
-            ) : null}
-          </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="relative border-t border-zinc-800/80">
             <button
@@ -236,63 +246,94 @@ export function CandidateActionsMenu({
             ) : null}
           </div>
 
-          <div className="relative border-t border-zinc-800/80">
-            <button
-              type="button"
-              disabled={sendPaperworkDisabled || !hasCandidateEmail}
-              title={
-                !hasCandidateEmail
-                  ? "Candidate email missing"
-                  : !templatesAvailable
-                    ? "Set DROPBOX_SIGN_TEMPLATE_* IDs in .env.local (restart dev server after changes)"
-                    : !onboardingConfigured
-                      ? "Templates loaded — add DROPBOX_SIGN_API_KEY to send"
-                      : sendPaperworkDisabled
-                        ? "Sending paperwork…"
-                        : "Send Dropbox Sign template"
-              }
-              className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
-              onClick={() => setPaperworkOpen((value) => !value)}
-            >
-              Send paperwork
-              <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
-            </button>
-            {paperworkOpen ? (
-              <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
-                {configuredTemplates.length > 0 ? (
-                  configuredTemplates.map((template) => (
+          {!overflow ? (
+            <div className="relative border-t border-zinc-800/80">
+              <button
+                type="button"
+                disabled={sendPaperworkDisabled || !hasCandidateEmail}
+                title={
+                  !hasCandidateEmail
+                    ? "Candidate email missing"
+                    : !templatesAvailable
+                      ? "Set DROPBOX_SIGN_TEMPLATE_* IDs in .env.local (restart dev server after changes)"
+                      : !onboardingConfigured
+                        ? "Templates loaded — add DROPBOX_SIGN_API_KEY to send"
+                        : sendPaperworkDisabled
+                          ? "Sending paperwork…"
+                          : "Send Dropbox Sign template"
+                }
+                className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
+                onClick={() => setPaperworkOpen((value) => !value)}
+              >
+                Send paperwork
+                <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
+              </button>
+              {paperworkOpen ? (
+                <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
+                  {configuredTemplates.length > 0 ? (
+                    configuredTemplates.map((template) => (
+                      <button
+                        key={template.key}
+                        type="button"
+                        disabled={!onboardingConfigured || !hasCandidateEmail}
+                        title={
+                          !hasCandidateEmail
+                            ? "Candidate email missing"
+                            : onboardingConfigured
+                              ? undefined
+                              : "Configure DROPBOX_SIGN_API_KEY in .env.local"
+                        }
+                        className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
+                        onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
+                      >
+                        {template.label}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-3 py-1.5 text-[10px] text-zinc-500">No onboarding templates configured</p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          ) : overflowTemplates.length > 0 ? (
+            <div className="relative border-t border-zinc-800/80">
+              <button
+                type="button"
+                disabled={sendPaperworkDisabled || !hasCandidateEmail}
+                className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
+                onClick={() => setPaperworkOpen((value) => !value)}
+              >
+                Other paperwork
+                <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
+              </button>
+              {paperworkOpen ? (
+                <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
+                  {overflowTemplates.map((template) => (
                     <button
                       key={template.key}
                       type="button"
                       disabled={!onboardingConfigured || !hasCandidateEmail}
-                      title={
-                        !hasCandidateEmail
-                          ? "Candidate email missing"
-                          : onboardingConfigured
-                            ? undefined
-                            : "Configure DROPBOX_SIGN_API_KEY in .env.local"
-                      }
                       className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
                       onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
                     >
                       {template.label}
                     </button>
-                  ))
-                ) : (
-                  <p className="px-3 py-1.5 text-[10px] text-zinc-500">No onboarding templates configured</p>
-                )}
-              </div>
-            ) : null}
-          </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
-          <button
-            type="button"
-            role="menuitem"
-            className="block w-full border-t border-zinc-800/80 px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
-            onClick={addNote}
-          >
-            Add note
-          </button>
+          {!overflow ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="block w-full border-t border-zinc-800/80 px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+              onClick={addNote}
+            >
+              Add note
+            </button>
+          ) : null}
 
           <button
             type="button"

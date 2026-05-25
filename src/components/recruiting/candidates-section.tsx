@@ -13,10 +13,7 @@ import {
   type CandidateWorkflowState,
 } from "@/lib/candidate-workflow-types";
 import { CandidateAutomationPanels } from "@/components/recruiting/candidate-automation-panels";
-import {
-  CandidateActionsMenu,
-  type CandidateRowAction,
-} from "@/components/recruiting/candidate-actions-menu";
+import type { CandidateRowAction } from "@/components/recruiting/candidate-actions-menu";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
@@ -89,15 +86,39 @@ import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
-import { RecruiterActionQueueFiltersBar } from "@/components/recruiting/recruiter-action-queue-filters-bar";
 import {
-  buildRecruiterActionQueueCounts,
+  computeRecruiterAgingBucket,
   matchesRecruiterQuickFilter,
+  RECRUITER_AGING_BUCKET_LABELS,
+  type RecruiterAgingBucket,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
+import {
+  buildCandidateSlaSnapshot,
+  isFollowUpOverdue,
+  isPaperworkPendingStatus,
+} from "@/lib/candidate-action-sla";
+import {
+  ATTENTION_CUE_STYLES,
+  buildRowAttentionCues,
+} from "@/lib/candidate-row-attention-cues";
+import {
+  formatRecruiterBackgroundSyncLine,
+  formatRecruiterSyncAlert,
+  formatRecruiterCandidatesSyncHeader,
+} from "@/lib/recruiter-sync-status-copy";
+import { CandidateRowTriageActions } from "@/components/recruiting/candidate-row-triage-actions";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
-import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  startTransition,
+  type ReactNode,
+} from "react";
 import { flushSync } from "react-dom";
 
 const ALL = "__all__";
@@ -107,7 +128,7 @@ const inputClass =
   "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const thClass =
   "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-sm";
-const tdClass = "whitespace-nowrap px-2 py-1 text-xs text-zinc-300";
+const tdClass = "whitespace-nowrap px-1.5 py-0.5 text-xs text-zinc-300";
 
 const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   Applied: "bg-slate-500/15 text-slate-200 ring-1 ring-slate-500/30",
@@ -206,11 +227,107 @@ function agingTextClass(days: number | null): string {
   return "font-medium text-red-300";
 }
 
-function AgingValue({ days, label }: { days: number | null; label: string }) {
+function agingBucketTextClass(bucket: RecruiterAgingBucket): string {
+  if (bucket === "fresh") return "font-medium text-emerald-300";
+  if (bucket === "24h") return "font-medium text-amber-300";
+  return "font-medium text-red-300";
+}
+
+function StatusTouchAging({ candidate }: { candidate: ScoredCandidateWorkflowRow }) {
+  const bucket = computeRecruiterAgingBucket(candidate);
   return (
-    <span className={`block ${agingTextClass(days)}`}>
-      {label} {formatDays(days)}
+    <span className={agingBucketTextClass(bucket)}>
+      Touch {RECRUITER_AGING_BUCKET_LABELS[bucket]}
     </span>
+  );
+}
+
+function CandidateRowAttentionBadges({ candidate }: { candidate: ScoredCandidateWorkflowRow }) {
+  const cues = buildRowAttentionCues(candidate);
+  if (cues.length === 0) return null;
+  return (
+    <div className="mt-0.5 flex max-w-[10rem] flex-wrap gap-0.5">
+      {cues.map((cue) => (
+        <span
+          key={cue.id}
+          className={`inline-flex rounded-full border px-1 py-px text-[9px] font-medium leading-tight ${ATTENTION_CUE_STYLES[cue.id]}`}
+        >
+          {cue.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function tableRowUrgencyClass(candidate: ScoredCandidateWorkflowRow): string {
+  const sla = buildCandidateSlaSnapshot({
+    appliedDate: candidate.appliedDate,
+    workflowStatus: candidate.workflowStatus,
+    lastActionAt: candidate.lastActionAt,
+    recruitingActions: candidate.recruitingActions,
+    followUpDueAt: candidate.followUpDueAt,
+    snoozedUntil: candidate.snoozedUntil,
+  });
+  if (sla.followUpOverdue || candidate.recruitingActions.needsFollowUp) {
+    return "border-l-2 border-l-red-500/70";
+  }
+  if (
+    isPaperworkPendingStatus(candidate.workflowStatus) &&
+    candidate.paperworkStatus !== "signed"
+  ) {
+    return "border-l-2 border-l-amber-500/60";
+  }
+  const bucket = computeRecruiterAgingBucket(candidate);
+  if (bucket === "3d" || bucket === "7d+") {
+    return "border-l-2 border-l-amber-500/40";
+  }
+  return "border-l-2 border-l-transparent";
+}
+
+function workflowStatusPillClass(
+  status: CandidateWorkflowStatus,
+  candidate: ScoredCandidateWorkflowRow,
+): string {
+  const overdue = isFollowUpOverdue({
+    recruitingActions: candidate.recruitingActions,
+    followUpDueAt: candidate.followUpDueAt,
+  });
+  const base = WORKFLOW_STATUS_STYLES[status];
+  if (overdue) return `${base} ring-1 ring-red-500/50`;
+  if (candidate.recruitingActions.needsFollowUp) return `${base} ring-1 ring-amber-500/40`;
+  return base;
+}
+
+function RecruiterCollapsibleSection({
+  title,
+  description,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  description?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-start justify-between gap-3 p-4 text-left sm:p-5"
+        aria-expanded={open}
+      >
+        <span>
+          <span className="text-lg font-semibold tracking-tight text-zinc-50">{title}</span>
+          {description ? (
+            <span className="mt-1 block text-sm font-normal text-zinc-500">{description}</span>
+          ) : null}
+        </span>
+        <span className="shrink-0 text-xs text-zinc-500">{open ? "Hide" : "Show"}</span>
+      </button>
+      {open ? <div className="border-t border-zinc-800/80 px-4 pb-4 pt-0 sm:px-5 sm:pb-5">{children}</div> : null}
+    </section>
   );
 }
 
@@ -944,26 +1061,6 @@ export function CandidatesSection() {
     workflowFilter,
   ]);
 
-  const recruiterActionCounts = useMemo(
-    () => buildRecruiterActionQueueCounts(candidates),
-    [candidates],
-  );
-
-  const recruiterQuickFilterCounts = useMemo(
-    () => ({
-      "my-owned": candidates.filter((r) =>
-        matchesRecruiterQuickFilter(r, "my-owned", actingRecruiter),
-      ).length,
-      "needs-follow-up": recruiterActionCounts.needsFollowUp,
-      "no-response": recruiterActionCounts.noResponse,
-      "paperwork-pending": recruiterActionCounts.paperworkPending,
-      "interview-needed": recruiterActionCounts.interviewNeeded,
-      "ready-mel": recruiterActionCounts.readyForMel,
-      priority: recruiterActionCounts.priority,
-    }),
-    [actingRecruiter, candidates, recruiterActionCounts],
-  );
-
   const filteredIds = useMemo(() => filtered.map((candidate) => candidate.candidateId), [filtered]);
   const allFilteredSelected =
     filteredIds.length > 0 && filteredIds.every((candidateId) => selectedIds.has(candidateId));
@@ -1288,19 +1385,70 @@ export function CandidatesSection() {
     [sendPaperwork],
   );
 
+  const flagCandidateFollowUp = useCallback((candidateId: string) => {
+    void persistRecruitingActionToggle(candidateId, "needs-follow-up", true)
+      .then((workflow) => {
+        applyWorkflowRecord(workflow);
+        invalidateCached(cacheKey(["candidates", "workflows"]));
+      })
+      .catch((err) => {
+        window.alert(err instanceof Error ? err.message : "Follow-up flag failed");
+      });
+  }, []);
+
+  const completeCandidateFollowUpRow = useCallback((candidateId: string) => {
+    void completeCandidateFollowUp(candidateId)
+      .then((workflow) => {
+        applyWorkflowRecord(workflow);
+        invalidateCached(cacheKey(["candidates", "workflows"]));
+      })
+      .catch((err) => {
+        window.alert(err instanceof Error ? err.message : "Follow-up complete failed");
+      });
+  }, []);
+
+  const assignActingRecruiterToRow = useCallback(
+    (candidate: ScoredCandidateWorkflowRow) => {
+      void persistWorkflowUpdate({
+        candidateId: candidate.candidateId,
+        assignedRecruiter: actingRecruiter,
+        workflowStatus: candidate.workflowStatus,
+      })
+        .then((workflow) => {
+          applyWorkflowRecord(workflow);
+          invalidateCached(cacheKey(["candidates", "workflows"]));
+        })
+        .catch((err) => {
+          window.alert(err instanceof Error ? err.message : "Assign recruiter failed");
+        });
+    },
+    [actingRecruiter],
+  );
+
+  const addQuickNoteToRow = useCallback(
+    (candidate: ScoredCandidateWorkflowRow) => {
+      const note = window.prompt("Add local workflow note");
+      if (!note?.trim()) return;
+      updateWorkflow(candidate, candidate.workflowStatus, { note: note.trim() });
+    },
+    [updateWorkflow],
+  );
+
   const renderCandidateRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
       const appliedDays = daysSince(candidate.appliedDate);
-      const statusDays = daysSince(candidate.lastActionAt ?? candidate.appliedDate);
       const rowSelected = selectedCandidateId === candidate.candidateId;
+      const paperworkUrgent =
+        isPaperworkPendingStatus(candidate.workflowStatus) &&
+        candidate.paperworkStatus !== "signed";
       return (
         <tr
           key={candidate.candidateId}
           onClick={() => setSelectedCandidateId(candidate.candidateId)}
-          className={`cursor-pointer transition-colors ${
+          className={`cursor-pointer transition-colors ${tableRowUrgencyClass(candidate)} ${
             rowSelected ? "bg-teal-500/10 hover:bg-teal-500/15" : "hover:bg-zinc-800/40"
           }`}
-          style={{ height: 34 }}
+          style={{ height: 36 }}
         >
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
             <input
@@ -1310,7 +1458,10 @@ export function CandidatesSection() {
               onChange={() => toggleSelectCandidate(candidate.candidateId)}
             />
           </td>
-          <td className={`${tdClass} max-w-[10rem] truncate font-medium text-zinc-100`}>{candidateName(candidate)}</td>
+          <td className={`${tdClass} max-w-[11rem]`}>
+            <div className="truncate font-medium text-zinc-100">{candidateName(candidate)}</div>
+            <CandidateRowAttentionBadges candidate={candidate} />
+          </td>
           <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
           <td className={tdClass}>{candidate.phone || "—"}</td>
           <td className={`${tdClass} max-w-[8rem] truncate text-zinc-400`}>{candidate.source || "—"}</td>
@@ -1321,14 +1472,17 @@ export function CandidatesSection() {
           <td className={tdClass}>{candidate.state || "—"}</td>
           <td className={tdClass}>
             <span
-              className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-tight ${WORKFLOW_STATUS_STYLES[candidate.workflowStatus]}`}
+              className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-tight ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
             >
               {candidate.workflowStatus}
             </span>
           </td>
-          <td className={`${tdClass} text-[10px]`}>
-            <AgingValue days={appliedDays} label="Applied" />
-            <AgingValue days={statusDays} label="Status" />
+          <td className={`${tdClass} text-[10px] leading-tight`}>
+            <span className="text-zinc-500">
+              Applied {formatDays(appliedDays)}
+              <span className="text-zinc-600"> · </span>
+              <StatusTouchAging candidate={candidate} />
+            </span>
           </td>
           <td className={`${tdClass} max-w-[12rem]`}>
             <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
@@ -1337,47 +1491,49 @@ export function CandidatesSection() {
             </div>
           </td>
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-            <CandidateActionsMenu
+            <CandidateRowTriageActions
+              followUpDisabled={candidate.recruitingActions.needsFollowUp}
+              onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
+              onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
+              onSend={() => sendPaperwork(candidate, "onboarding_packet")}
+              onNote={() => addQuickNoteToRow(candidate)}
+              onAssignMe={() => assignActingRecruiterToRow(candidate)}
+              sendBusy={paperworkSendingId === candidate.candidateId}
+              sendDisabled={
+                !onboardingTemplatesAvailable ||
+                !onboardingConfigured ||
+                !hasCandidatePrimaryEmail(candidate)
+              }
+              sendTitle={
+                !hasCandidatePrimaryEmail(candidate)
+                  ? "Candidate email missing"
+                  : !onboardingConfigured
+                    ? "Configure DROPBOX_SIGN_API_KEY"
+                    : "Send onboarding packet"
+              }
+              onOverflowAction={(action) => handleCandidateAction(candidate, action)}
               rosters={rosters}
               onRostersUpdated={applyRosters}
-              onAction={(action) => handleCandidateAction(candidate, action)}
               onboardingConfigured={onboardingConfigured}
               templatesAvailable={onboardingTemplatesAvailable}
               paperworkTemplates={paperworkTemplates}
               hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
-              sendPaperworkDisabled={paperworkSendingId === candidate.candidateId}
             />
           </td>
           <td className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`} title="Open candidate drawer">
             Notes: {candidate.notes.length}
           </td>
-          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+          <td
+            className={`${tdClass}${paperworkUrgent ? " bg-amber-500/5" : ""}`}
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] text-zinc-500" title={candidate.paperworkError ?? undefined}>
+              <span
+                className={`text-[10px] ${paperworkUrgent ? "font-medium text-amber-200" : "text-zinc-500"}`}
+                title={candidate.paperworkError ?? undefined}
+              >
                 {paperworkStatusLabel(candidate.paperworkStatus)}
               </span>
-              <button
-                type="button"
-                disabled={
-                  !onboardingTemplatesAvailable ||
-                  !onboardingConfigured ||
-                  !hasCandidatePrimaryEmail(candidate) ||
-                  paperworkSendingId === candidate.candidateId
-                }
-                title={
-                  !onboardingTemplatesAvailable
-                    ? "No onboarding templates configured in .env.local"
-                    : !onboardingConfigured
-                      ? "Configure DROPBOX_SIGN_API_KEY in .env.local"
-                      : !hasCandidatePrimaryEmail(candidate)
-                        ? "Candidate email missing"
-                        : "Send onboarding packet (Dropbox Sign)"
-                }
-                onClick={() => sendPaperwork(candidate, "onboarding_packet")}
-                className="rounded border border-zinc-700 bg-zinc-950/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
-              >
-                {paperworkSendingId === candidate.candidateId ? "Sending…" : "Send"}
-              </button>
               {candidate.signatureRequestId ? (
                 <button
                   type="button"
@@ -1423,6 +1579,10 @@ export function CandidatesSection() {
       rosters,
       selectedCandidateId,
       selectedIds,
+      addQuickNoteToRow,
+      assignActingRecruiterToRow,
+      completeCandidateFollowUpRow,
+      flagCandidateFollowUp,
       sendPaperwork,
       toggleSelectCandidate,
     ],
@@ -1476,12 +1636,12 @@ export function CandidatesSection() {
           role="alert"
           className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"
         >
-          {syncAlert}
+          {formatRecruiterSyncAlert(syncAlert)}
         </p>
       ) : null}
       {hasRenderableCandidateRows && (refreshingCandidates || syncAlert) ? (
         <p className="rounded-lg border border-teal-500/25 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-100">
-          Background sync in progress — {committedCandidates.length.toLocaleString()} candidates loaded
+          {formatRecruiterBackgroundSyncLine(committedCandidates.length)}
         </p>
       ) : null}
       {enrichmentWarnings.length > 0 ? (
@@ -1502,18 +1662,17 @@ export function CandidatesSection() {
               <span className="text-zinc-700"> · {BREEZY_CANDIDATES_SOURCE.apiPath}</span>
             </p>
             {syncData ? (
-              <p className="mt-1 text-xs text-zinc-600">
-                Last sync: {new Date(syncData.fetchedAt).toLocaleString()}
-                {syncData.fromCache ? " · server cache" : " · live"}
-                {syncData.stale ? " · stale (refresh failed)" : ""}
-                {syncData.partial ? " · partial sync" : ""}
-                {syncData.candidates.length > 0
-                  ? ` · ${syncData.candidates.length.toLocaleString()} candidates`
-                  : ""}
-                {syncData.positionsScanned != null && syncData.totalPositionsAvailable != null
-                  ? ` · ${syncData.positionsScanned}/${syncData.totalPositionsAvailable} positions scanned`
-                  : ""}
-                {refreshingCandidates ? " · sync in progress…" : ""}
+              <p className="mt-1 text-xs text-zinc-500">
+                {formatRecruiterCandidatesSyncHeader({
+                  candidateCount: syncData.candidates.length,
+                  fetchedAt: syncData.fetchedAt,
+                  fromCache: syncData.fromCache,
+                  stale: syncData.stale,
+                  partial: syncData.partial,
+                  positionsScanned: syncData.positionsScanned,
+                  totalPositionsAvailable: syncData.totalPositionsAvailable,
+                  refreshing: refreshingCandidates,
+                })}
               </p>
             ) : null}
           </div>
@@ -1534,7 +1693,11 @@ export function CandidatesSection() {
       </section>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <SummaryCard label="Candidates shown" value={filtered.length.toLocaleString()} hint={`${candidates.length.toLocaleString()} loaded`} />
+        <SummaryCard
+          label="Candidates shown"
+          value={filtered.length.toLocaleString()}
+          hint={`${candidates.length.toLocaleString()} currently available`}
+        />
         <SummaryCard label="Newest applicant" value={newestApplicantDate} />
         <SummaryCard
           label="Top sources"
@@ -1556,20 +1719,24 @@ export function CandidatesSection() {
         onQuickFilterChange={setRecruiterQuickFilter}
       />
 
-      <CandidateAutomationPanels
-        queues={prioritizationQueues}
-        productivity={recruiterProductivity}
-        onOpenCandidate={setSelectedCandidateId}
-      />
+      <RecruiterCollapsibleSection
+        title="Analytics & productivity"
+        description="AI prioritization and recruiter productivity — optional detail below the action queue."
+        defaultOpen={false}
+      >
+        <CandidateAutomationPanels
+          queues={prioritizationQueues}
+          productivity={recruiterProductivity}
+          onOpenCandidate={setSelectedCandidateId}
+        />
+      </RecruiterCollapsibleSection>
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Buckets</h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            Visibility layer for review, paperwork, MEL loading, and training readiness. Counts use local workflow status when set, otherwise Breezy stage names.
-          </p>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      <RecruiterCollapsibleSection
+        title="Workflow buckets"
+        description="Grouped counts by lifecycle stage — expand when you need a secondary view."
+        defaultOpen={false}
+      >
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           {buckets.map((bucket) => (
             <div key={bucket.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
               <div className="flex items-center justify-between gap-3">
@@ -1589,7 +1756,7 @@ export function CandidatesSection() {
             </div>
           ))}
         </div>
-      </section>
+      </RecruiterCollapsibleSection>
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Status Counts</h2>
@@ -1620,15 +1787,10 @@ export function CandidatesSection() {
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
         <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-sm sm:px-4">
-          <RecruiterActionQueueFiltersBar
-            activeFilter={recruiterQuickFilter}
-            onFilterChange={setRecruiterQuickFilter}
-            counts={recruiterQuickFilterCounts}
-          />
           {recruiterQuickFilter !== "all" ? (
-            <p className="text-[11px] text-zinc-500">
-              Action queue filter active — table shows {filtered.length.toLocaleString()} matching candidate
-              {filtered.length === 1 ? "" : "s"}.
+            <p className="text-[11px] text-teal-200/90">
+              Table filtered by action queue — {filtered.length.toLocaleString()} candidate
+              {filtered.length === 1 ? "" : "s"}. Use chips above the queue to change or clear.
             </p>
           ) : null}
           <input
