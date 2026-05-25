@@ -56,6 +56,10 @@ export type CandidateWorkflowRecord = {
   directDepositRequestedAt: string | null;
   directDepositLastReminderAt: string | null;
   directDepositNotes: string | null;
+  /** User id who last triggered DD email (null = automated webhook). */
+  directDepositTriggeredByUserId: string | null;
+  /** Last send transport: log outbox vs Resend API. */
+  directDepositLastDeliveryMode: "log" | "resend" | null;
   updatedAt: string;
 };
 
@@ -138,6 +142,14 @@ export function normalizeWorkflowRecord(
     directDepositLastReminderAt:
       typeof raw.directDepositLastReminderAt === "string" ? raw.directDepositLastReminderAt : null,
     directDepositNotes: typeof raw.directDepositNotes === "string" ? raw.directDepositNotes : null,
+    directDepositTriggeredByUserId:
+      typeof raw.directDepositTriggeredByUserId === "string"
+        ? raw.directDepositTriggeredByUserId
+        : null,
+    directDepositLastDeliveryMode:
+      raw.directDepositLastDeliveryMode === "log" || raw.directDepositLastDeliveryMode === "resend"
+        ? raw.directDepositLastDeliveryMode
+        : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };
 }

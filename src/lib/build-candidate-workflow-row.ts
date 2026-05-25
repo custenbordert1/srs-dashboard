@@ -49,6 +49,8 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   directDepositRequestedAt: string | null;
   directDepositLastReminderAt: string | null;
   directDepositNotes: string | null;
+  directDepositTriggeredByUserId: string | null;
+  directDepositLastDeliveryMode: "log" | "resend" | null;
   suggestedDM: string;
   dmNeedsAssignment: boolean;
   resumeKeywordScore: number | null;
@@ -162,6 +164,8 @@ export function buildBaselineWorkflowRow(
     directDepositRequestedAt: local?.directDepositRequestedAt ?? null,
     directDepositLastReminderAt: local?.directDepositLastReminderAt ?? null,
     directDepositNotes: local?.directDepositNotes ?? null,
+    directDepositTriggeredByUserId: local?.directDepositTriggeredByUserId ?? null,
+    directDepositLastDeliveryMode: local?.directDepositLastDeliveryMode ?? null,
     suggestedDM,
     dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
     resumeKeywordScore: null,
@@ -236,6 +240,8 @@ export function buildScoredWorkflowRow(
     directDepositRequestedAt: local?.directDepositRequestedAt ?? null,
     directDepositLastReminderAt: local?.directDepositLastReminderAt ?? null,
     directDepositNotes: local?.directDepositNotes ?? null,
+    directDepositTriggeredByUserId: local?.directDepositTriggeredByUserId ?? null,
+    directDepositLastDeliveryMode: local?.directDepositLastDeliveryMode ?? null,
     suggestedDM,
     dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
     resumeKeywordScore: ai.breakdown.resumeSourceQuality,

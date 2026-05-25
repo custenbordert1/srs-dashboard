@@ -6,8 +6,11 @@ import {
 import {
   DIRECT_DEPOSIT_EMAIL_SUBJECT,
   DIRECT_DEPOSIT_HR_EMAIL,
-  type DirectDepositStatus,
 } from "@/lib/direct-deposit-types";
+import {
+  isEligibleDirectDepositBackfillWorkflow,
+} from "@/lib/direct-deposit-backfill";
+import { hasDirectDepositEmailInOutbox, readTransactionalEmailOutbox } from "@/lib/transactional-email-outbox";
 import { sendTransactionalEmail } from "@/lib/transactional-email";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
@@ -43,8 +46,10 @@ export async function resolveOnboardingContactEmail(input: {
 async function sendDirectDepositVerificationEmail(input: {
   to: string;
   candidateId: string;
+  signatureRequestId?: string | null;
   resend: boolean;
-}): Promise<{ ok: boolean; error?: string }> {
+  source: "webhook" | "manual" | "backfill" | "resend";
+}): Promise<{ ok: boolean; error?: string; deliveryMode: "log" | "resend" }> {
   const text = buildDirectDepositVerificationEmailBody();
   const result = await sendTransactionalEmail(
     {
@@ -56,9 +61,54 @@ async function sendDirectDepositVerificationEmail(input: {
       html: buildDirectDepositVerificationEmailHtml(),
       tags: ["direct-deposit", input.resend ? "resend" : "initial"],
     },
-    { candidateId: input.candidateId, kind: "direct_deposit_verification" },
+    {
+      candidateId: input.candidateId,
+      signatureRequestId: input.signatureRequestId ?? null,
+      kind: "direct_deposit_verification",
+      source: input.source,
+    },
   );
-  return { ok: result.ok, error: result.error };
+  return {
+    ok: result.ok,
+    error: result.error,
+    deliveryMode: result.mode === "resend" ? "resend" : "log",
+  };
+}
+
+async function applyDirectDepositEmailSent(input: {
+  candidateId: string;
+  email: string;
+  signatureRequestId?: string | null;
+  existing: CandidateWorkflowRecord | undefined;
+  byUserId?: string;
+  historyMessage: string;
+  auditAction: string;
+  resend: boolean;
+  deliveryMode: "log" | "resend";
+}): Promise<CandidateWorkflowRecord> {
+  const now = new Date().toISOString();
+  const existing = input.existing;
+  return upsertCandidateWorkflow({
+    candidateId: input.candidateId,
+    workflowStatus:
+      existing?.workflowStatus === "Signed" ? "Awaiting DD Verification" : existing?.workflowStatus ?? "Awaiting DD Verification",
+    onboardingContactEmail: input.email,
+    directDepositStatus: "requested",
+    directDepositRequestedAt: existing?.directDepositRequestedAt ?? now,
+    directDepositLastReminderAt: now,
+    directDepositTriggeredByUserId: input.byUserId ?? null,
+    directDepositLastDeliveryMode: input.deliveryMode,
+    paperworkHistoryMessage: input.historyMessage,
+    audit: {
+      action: input.auditAction,
+      byUserId: input.byUserId,
+      metadata: {
+        recipientEmail: input.email,
+        deliveryMode: input.deliveryMode,
+        resend: input.resend,
+      },
+    },
+  });
 }
 
 export type DirectDepositWorkflowResult = {
@@ -108,7 +158,9 @@ export async function requestDirectDepositAfterPaperworkSigned(input: {
   const send = await sendDirectDepositVerificationEmail({
     to: email,
     candidateId: input.workflow.candidateId,
+    signatureRequestId: input.signatureRequestId ?? input.workflow.signatureRequestId,
     resend: false,
+    source: "webhook",
   });
 
   if (!send.ok) {
@@ -127,23 +179,83 @@ export async function requestDirectDepositAfterPaperworkSigned(input: {
     return { workflow, emailSent: false, skipped: "send_failed" };
   }
 
-  const now = new Date().toISOString();
-  const workflow = await upsertCandidateWorkflow({
+  const { getCandidateWorkflowState } = await import("@/lib/candidate-workflow-store");
+  const workflows = await getCandidateWorkflowState();
+  const workflow = await applyDirectDepositEmailSent({
     candidateId: input.workflow.candidateId,
-    workflowStatus: "Awaiting DD Verification",
-    onboardingContactEmail: email,
-    directDepositStatus: "requested",
-    directDepositRequestedAt: now,
-    directDepositLastReminderAt: now,
-    paperworkHistoryMessage: "Direct deposit verification email sent to candidate.",
-    audit: {
-      action: "direct_deposit_requested",
-      byUserId: input.byUserId,
-      metadata: { recipientEmail: email },
-    },
+    email,
+    signatureRequestId: input.signatureRequestId ?? input.workflow.signatureRequestId,
+    existing: workflows[input.workflow.candidateId],
+    byUserId: input.byUserId,
+    historyMessage: "Direct deposit verification email sent to candidate (automated after signature).",
+    auditAction: "direct_deposit_requested",
+    resend: false,
+    deliveryMode: send.deliveryMode,
   });
 
   return { workflow, emailSent: true };
+}
+
+/** Manual backfill send — only recent signed candidates; never auto-bulk. */
+export async function requestDirectDepositManualBackfill(input: {
+  candidateId: string;
+  recipientEmail?: string | null;
+  byUserId: string;
+}): Promise<DirectDepositWorkflowResult> {
+  const { getCandidateWorkflowState } = await import("@/lib/candidate-workflow-store");
+  const workflows = await getCandidateWorkflowState();
+  const workflow = workflows[input.candidateId];
+  if (!workflow) {
+    throw new Error("Candidate workflow not found.");
+  }
+  if (!isEligibleDirectDepositBackfillWorkflow(workflow)) {
+    throw new Error(
+      "Candidate is outside the 72-hour backfill window or direct deposit was already requested.",
+    );
+  }
+
+  const outboxRows = await readTransactionalEmailOutbox();
+  const outbox = hasDirectDepositEmailInOutbox({
+    candidateId: input.candidateId,
+    signatureRequestId: workflow.signatureRequestId,
+    rows: outboxRows,
+  });
+  if (outbox.sent) {
+    throw new Error("Direct deposit email already logged in outbox for this candidate.");
+  }
+
+  const email = await resolveOnboardingContactEmail({
+    workflow,
+    overrideEmail: input.recipientEmail,
+  });
+  if (!email) {
+    throw new Error("No candidate email available for direct deposit follow-up.");
+  }
+
+  const send = await sendDirectDepositVerificationEmail({
+    to: email,
+    candidateId: input.candidateId,
+    signatureRequestId: workflow.signatureRequestId,
+    resend: false,
+    source: "backfill",
+  });
+  if (!send.ok) {
+    throw new Error(send.error ?? "Failed to send direct deposit email.");
+  }
+
+  const updated = await applyDirectDepositEmailSent({
+    candidateId: input.candidateId,
+    email,
+    signatureRequestId: workflow.signatureRequestId,
+    existing: workflow,
+    byUserId: input.byUserId,
+    historyMessage: "Direct deposit verification email sent (manual backfill).",
+    auditAction: "direct_deposit_backfill",
+    resend: false,
+    deliveryMode: send.deliveryMode,
+  });
+
+  return { workflow: updated, emailSent: true };
 }
 
 export async function resendDirectDepositVerificationEmail(input: {
@@ -175,27 +287,24 @@ export async function resendDirectDepositVerificationEmail(input: {
   const send = await sendDirectDepositVerificationEmail({
     to: email,
     candidateId: input.candidateId,
+    signatureRequestId: existing.signatureRequestId,
     resend: true,
+    source: "resend",
   });
   if (!send.ok) {
     throw new Error(send.error ?? "Failed to send direct deposit email.");
   }
 
-  const now = new Date().toISOString();
-  const workflow = await upsertCandidateWorkflow({
+  const workflow = await applyDirectDepositEmailSent({
     candidateId: input.candidateId,
-    workflowStatus:
-      existing.workflowStatus === "Signed" ? "Awaiting DD Verification" : existing.workflowStatus,
-    onboardingContactEmail: email,
-    directDepositStatus: existing.directDepositStatus === "not_requested" ? "requested" : existing.directDepositStatus,
-    directDepositRequestedAt: existing.directDepositRequestedAt ?? now,
-    directDepositLastReminderAt: now,
-    paperworkHistoryMessage: "Direct deposit verification email resent to candidate.",
-    audit: {
-      action: "direct_deposit_resent",
-      byUserId: input.byUserId,
-      metadata: { recipientEmail: email },
-    },
+    email,
+    signatureRequestId: existing.signatureRequestId,
+    existing,
+    byUserId: input.byUserId,
+    historyMessage: "Direct deposit verification email resent to candidate.",
+    auditAction: "direct_deposit_resent",
+    resend: true,
+    deliveryMode: send.deliveryMode,
   });
 
   return { workflow, emailSent: true };

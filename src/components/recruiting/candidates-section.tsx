@@ -119,6 +119,7 @@ import {
   formatRecruiterSyncAlert,
   formatRecruiterCandidatesSyncHeader,
 } from "@/lib/recruiter-sync-status-copy";
+import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
 import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
 import {
@@ -1228,6 +1229,33 @@ export function CandidatesSection() {
     [candidates, selectedCandidateId],
   );
 
+  const backfillCandidateNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const candidate of enrichedCandidates) {
+      map[candidate.candidateId] = candidateName(candidate);
+    }
+    return map;
+  }, [enrichedCandidates]);
+
+  const applyWorkflowsBundle = useCallback(
+    (workflows: CandidateWorkflowState) => {
+      setWorkflowState(workflows);
+      setEnrichedCandidates((prev) =>
+        prev.map((row) => {
+          const wf = workflows[row.candidateId];
+          if (!wf) return row;
+          const breezy = committedCandidates.find((c) => c.candidateId === row.candidateId);
+          if (!breezy) return row;
+          return buildScoredWorkflowRow(breezy, wf, {
+            job: jobsByPositionId.get(breezy.positionId),
+          });
+        }),
+      );
+      invalidateCached(cacheKey(["candidates", "workflows"]));
+    },
+    [committedCandidates, jobsByPositionId],
+  );
+
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
     const row = buildCandidateDrawerRowFromScored(selectedCandidate);
@@ -2120,6 +2148,20 @@ export function CandidatesSection() {
             </div>
           ))}
         </div>
+      </RecruiterCollapsibleSection>
+
+      <RecruiterCollapsibleSection
+        title="Recent DD backfill queue"
+        description="Signed in the last 72 hours without DD requested — manual send only."
+        defaultOpen
+      >
+        <RecentDdBackfillQueue
+          candidateNames={backfillCandidateNames}
+          onWorkflowUpdated={(workflows) =>
+            applyWorkflowsBundle(workflows as CandidateWorkflowState)
+          }
+          onOpenCandidate={(candidateId) => setSelectedCandidateId(candidateId)}
+        />
       </RecruiterCollapsibleSection>
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">

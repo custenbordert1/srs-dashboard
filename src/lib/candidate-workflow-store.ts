@@ -212,6 +212,8 @@ export async function upsertCandidateWorkflow(input: {
   directDepositRequestedAt?: string | null;
   directDepositLastReminderAt?: string | null;
   directDepositNotes?: string | null;
+  directDepositTriggeredByUserId?: string | null;
+  directDepositLastDeliveryMode?: "log" | "resend" | null;
   paperworkHistoryMessage?: string;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
@@ -278,6 +280,14 @@ export async function upsertCandidateWorkflow(input: {
     input.directDepositNotes !== undefined
       ? input.directDepositNotes
       : (existing?.directDepositNotes ?? null);
+  const directDepositTriggeredByUserId =
+    input.directDepositTriggeredByUserId !== undefined
+      ? input.directDepositTriggeredByUserId
+      : (existing?.directDepositTriggeredByUserId ?? null);
+  const directDepositLastDeliveryMode =
+    input.directDepositLastDeliveryMode !== undefined
+      ? input.directDepositLastDeliveryMode
+      : (existing?.directDepositLastDeliveryMode ?? null);
 
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
@@ -339,6 +349,8 @@ export async function upsertCandidateWorkflow(input: {
     directDepositRequestedAt,
     directDepositLastReminderAt,
     directDepositNotes,
+    directDepositTriggeredByUserId,
+    directDepositLastDeliveryMode,
     updatedAt: now,
   };
 

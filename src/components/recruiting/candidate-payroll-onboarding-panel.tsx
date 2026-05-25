@@ -14,6 +14,8 @@ type CandidatePayrollOnboardingPanelProps = {
   directDepositRequestedAt: string | null;
   directDepositLastReminderAt: string | null;
   directDepositNotes: string | null;
+  directDepositTriggeredByUserId?: string | null;
+  directDepositLastDeliveryMode?: "log" | "resend" | null;
   hasCandidateEmail: boolean;
   busy?: boolean;
   onAction: (
@@ -61,6 +63,8 @@ export function CandidatePayrollOnboardingPanel({
   directDepositRequestedAt,
   directDepositLastReminderAt,
   directDepositNotes,
+  directDepositTriggeredByUserId = null,
+  directDepositLastDeliveryMode = null,
   hasCandidateEmail,
   busy = false,
   onAction,
@@ -138,6 +142,23 @@ export function CandidatePayrollOnboardingPanel({
         >
           Save payroll notes
         </button>
+      </div>
+      <div className="rounded-md border border-zinc-800/80 bg-zinc-950/60 px-2 py-1.5 text-[10px] text-zinc-500">
+        <p className="font-medium text-zinc-400">DD email audit</p>
+        <p className="mt-0.5">
+          Requested: {formatWhen(directDepositRequestedAt)}
+          {directDepositLastReminderAt && directDepositLastReminderAt !== directDepositRequestedAt
+            ? ` · Last resend: ${formatWhen(directDepositLastReminderAt)}`
+            : ""}
+        </p>
+        <p className="mt-0.5">
+          Delivery: {directDepositLastDeliveryMode ?? "—"}
+          {directDepositTriggeredByUserId
+            ? ` · Triggered by ${directDepositTriggeredByUserId}`
+            : directDepositRequestedAt
+              ? " · Triggered by automation (webhook)"
+              : ""}
+        </p>
       </div>
       <p className="text-[10px] text-zinc-600">
         Direct deposit is never auto-approved. HR/recruiter must mark received, then approved.

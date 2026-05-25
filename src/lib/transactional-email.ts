@@ -40,7 +40,7 @@ export async function appendTransactionalEmailOutbox(
   await appendFile(outboxPath, `${JSON.stringify(row)}\n`, "utf8");
 }
 
-function readEmailMode(): "log" | "resend" {
+export function getTransactionalEmailMode(): "log" | "resend" {
   const raw = process.env.DIRECT_DEPOSIT_EMAIL_MODE?.trim().toLowerCase() ?? "log";
   return raw === "resend" ? "resend" : "log";
 }
@@ -84,9 +84,12 @@ export async function sendTransactionalEmail(
   payload: TransactionalEmailPayload,
   meta: Record<string, unknown> = {},
 ): Promise<TransactionalEmailResult> {
-  await appendTransactionalEmailOutbox(payload, meta);
+  const mode = getTransactionalEmailMode();
+  await appendTransactionalEmailOutbox(payload, {
+    ...meta,
+    deliveryMode: mode,
+  });
 
-  const mode = readEmailMode();
   if (mode === "log") {
     console.info("[transactional-email] logged", {
       to: payload.to,
