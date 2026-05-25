@@ -105,6 +105,7 @@ import {
   ATTENTION_CUE_STYLES,
   buildRowAttentionCues,
 } from "@/lib/candidate-row-attention-cues";
+import { buildRecruiterFitSignals } from "@/lib/recruiter-candidate-intelligence";
 import {
   formatRecruiterBackgroundSyncLine,
   formatRecruiterSyncAlert,
@@ -266,6 +267,22 @@ const CandidateRowAttentionBadges = memo(function CandidateRowAttentionBadges({
         ))}
       </div>
     </div>
+  );
+});
+
+const CandidateRowFitSignals = memo(function CandidateRowFitSignals({
+  candidate,
+}: {
+  candidate: ScoredCandidateWorkflowRow;
+}) {
+  const signals = buildRecruiterFitSignals(candidate, 2);
+  if (signals.length === 0) return null;
+  return (
+    <p className="mt-0.5 h-3 overflow-hidden text-[9px] leading-none text-zinc-500">
+      <span className="truncate" title={signals.map((s) => s.label).join(" · ")}>
+        {signals.map((s) => s.label).join(" · ")}
+      </span>
+    </p>
   );
 });
 
@@ -1476,6 +1493,7 @@ export function CandidatesSection() {
             <div className="flex min-w-0 flex-col justify-center">
               <div className="truncate font-medium leading-tight text-zinc-100">{candidateName(candidate)}</div>
               <CandidateRowAttentionBadges candidate={candidate} />
+              <CandidateRowFitSignals candidate={candidate} />
             </div>
           </td>
           <td className={`${tdClass} truncate`}>{candidate.email || "—"}</td>
@@ -1503,8 +1521,13 @@ export function CandidatesSection() {
           </td>
           <td className={tdClass}>
             <div className="flex min-w-0 flex-col justify-center overflow-hidden leading-tight">
-              <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
-              <div className="truncate text-[10px] text-zinc-500">
+              <div
+                className="truncate text-sm font-semibold text-teal-50/95"
+                title={candidate.nextActionNeeded}
+              >
+                {candidate.nextActionNeeded}
+              </div>
+              <div className="truncate text-[10px] text-zinc-600">
                 {candidate.assignedRecruiter} · {candidate.assignedDM}
               </div>
             </div>
@@ -1576,8 +1599,13 @@ export function CandidatesSection() {
               compact
             />
           </td>
-          <td className={`${tdClass} truncate text-[10px] text-zinc-500`} title={candidate.skillTags.join(", ")}>
-            {candidate.skillTags.length > 0 ? candidate.skillTags.slice(0, 2).join(", ") : "—"}
+          <td
+            className={`${tdClass} truncate text-[10px] text-zinc-500`}
+            title={candidate.intelligenceSummary || candidate.skillTags.join(", ")}
+          >
+            {buildRecruiterFitSignals(candidate, 2)
+              .map((s) => s.label)
+              .join(" · ") || (candidate.skillTags[0] ?? "—")}
           </td>
           <td className={tdClass}>
             <span

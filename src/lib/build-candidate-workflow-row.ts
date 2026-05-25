@@ -16,6 +16,7 @@ import {
   suggestDmForCandidate,
 } from "@/lib/candidate-dm-suggest";
 import { emptyRecruitingActions, type CandidateRecruitingActions } from "@/lib/candidate-recruiting-actions";
+import { resolveRecruiterNextAction } from "@/lib/recruiter-candidate-intelligence";
 import {
   nextActionForWorkflowStatus,
   type CandidateWorkflowRecord,
@@ -128,7 +129,7 @@ export function buildBaselineWorkflowRow(
     assignedDM: local?.assignedDM,
   });
 
-  return {
+  const baseline: ScoredCandidateWorkflowRow = {
     ...candidate,
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
@@ -169,6 +170,10 @@ export function buildBaselineWorkflowRow(
     intelligenceSummary: BASELINE_INTELLIGENCE.summary,
     intelligence: BASELINE_INTELLIGENCE,
   };
+  return {
+    ...baseline,
+    nextActionNeeded: resolveRecruiterNextAction(baseline, workflowStatus, local?.nextActionNeeded),
+  };
 }
 
 export function buildScoredWorkflowRow(
@@ -191,7 +196,7 @@ export function buildScoredWorkflowRow(
   });
   const assignedDM = local?.assignedDM ?? "Unassigned";
 
-  return {
+  const scored: ScoredCandidateWorkflowRow = {
     ...candidate,
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
@@ -231,5 +236,9 @@ export function buildScoredWorkflowRow(
     distanceMiles: intelligence.distanceMiles,
     intelligenceSummary: intelligence.summary,
     intelligence,
+  };
+  return {
+    ...scored,
+    nextActionNeeded: resolveRecruiterNextAction(scored, workflowStatus, local?.nextActionNeeded),
   };
 }

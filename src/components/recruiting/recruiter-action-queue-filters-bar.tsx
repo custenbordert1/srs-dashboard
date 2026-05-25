@@ -2,7 +2,6 @@
 
 import {
   RECRUITER_QUICK_FILTERS,
-  toggleRecruiterQuickFilter,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
 
@@ -28,7 +27,7 @@ export function RecruiterActionQueueFiltersBar({
           <button
             key={id}
             type="button"
-            onClick={() => onFilterChange(toggleRecruiterQuickFilter(activeFilter, id))}
+            onClick={() => onFilterChange(activeFilter === id ? "all" : id)}
             className={[
               "rounded-full border px-3 py-1 text-xs font-medium",
               active

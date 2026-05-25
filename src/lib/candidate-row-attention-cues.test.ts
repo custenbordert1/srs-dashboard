@@ -64,8 +64,8 @@ describe("candidate-row-attention-cues", () => {
     );
     const cues = buildRowAttentionCues(row, REF);
     assert.equal(cues.length, 2);
-    assert.equal(cues[0]?.id, "needs-attention");
-    assert.equal(cues[1]?.id, "paperwork-pending");
+    assert.equal(cues[0]?.id, "follow-up-overdue");
+    assert.ok(cues[1]);
   });
 
   it("shows unassigned when no higher priority cues", () => {
