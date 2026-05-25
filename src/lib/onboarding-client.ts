@@ -73,7 +73,17 @@ export async function fetchOnboardingConfig(): Promise<OnboardingConfigResponse>
     templates?: Array<{ key: string; label: string; configured: boolean }>;
   };
   if (!res.ok || data.ok === false) {
-    throw new Error(data.error ?? `Onboarding config failed (${res.status})`);
+    const messageField =
+      typeof data === "object" && data !== null && "message" in data
+        ? (data as { message?: unknown }).message
+        : undefined;
+    const detail =
+      typeof data.error === "string"
+        ? data.error
+        : typeof messageField === "string"
+          ? messageField
+          : `Onboarding config failed (${res.status})`;
+    throw new Error(detail);
   }
   const templates = data.templates ?? [];
   const templatesAvailable =

@@ -4,6 +4,11 @@ import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES, type CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
+import {
+  getSendPaperworkBlockReason,
+  sendPaperworkBlockMessage,
+  type OnboardingTemplateOption,
+} from "@/lib/onboarding-send-eligibility";
 import { useEffect, useRef, useState } from "react";
 
 export type CandidateRowAction =
@@ -14,12 +19,6 @@ export type CandidateRowAction =
   | { kind: "add-note"; note: string }
   | { kind: "send-paperwork"; templateKey: OnboardingTemplateKey };
 
-type OnboardingTemplateOption = {
-  key: OnboardingTemplateKey;
-  label: string;
-  configured: boolean;
-};
-
 type CandidateActionsMenuProps = {
   onAction: (action: CandidateRowAction) => void;
   rosters: RecruiterRosters;
@@ -29,6 +28,8 @@ type CandidateActionsMenuProps = {
   paperworkTemplates?: OnboardingTemplateOption[];
   hasCandidateEmail?: boolean;
   sendPaperworkDisabled?: boolean;
+  onboardingConfigLoaded?: boolean;
+  onboardingConfigError?: string | null;
   /** Overflow-only: workflow, DM, alternate templates, drawer. */
   variant?: "default" | "overflow";
   /** Hidden from overflow paperwork list (primary Send chip uses this template). */
@@ -40,10 +41,12 @@ export function CandidateActionsMenu({
   rosters,
   onRostersUpdated,
   onboardingConfigured = false,
-  templatesAvailable = false,
+  templatesAvailable: _templatesAvailable = false,
   paperworkTemplates = [],
   hasCandidateEmail = true,
   sendPaperworkDisabled = false,
+  onboardingConfigLoaded = true,
+  onboardingConfigError = null,
   variant = "default",
   excludePaperworkTemplateKey = "onboarding_packet",
 }: CandidateActionsMenuProps) {
@@ -88,6 +91,35 @@ export function CandidateActionsMenu({
 
   const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
   const overflowTemplates = configuredTemplates.filter((t) => t.key !== excludePaperworkTemplateKey);
+
+  function templateEligibility(templateKey: OnboardingTemplateKey) {
+    return {
+      candidate: {
+        candidateId: "",
+        email: "",
+        paperworkStatus: "not_sent" as const,
+        signatureRequestId: null,
+      },
+      templateKey,
+      onboardingConfigured,
+      onboardingConfigLoaded,
+      onboardingConfigError,
+      paperworkTemplates,
+      sendBusy: sendPaperworkDisabled,
+      hasCandidateEmail,
+    };
+  }
+
+  function templateSendTitle(templateKey: OnboardingTemplateKey): string {
+    const eligibility = templateEligibility(templateKey);
+    const reason = getSendPaperworkBlockReason(eligibility);
+    if (reason) return sendPaperworkBlockMessage(reason, eligibility);
+    return `Send ${paperworkTemplates.find((t) => t.key === templateKey)?.label ?? "template"}`;
+  }
+
+  function templateSendDisabled(templateKey: OnboardingTemplateKey): boolean {
+    return getSendPaperworkBlockReason(templateEligibility(templateKey)) !== null;
+  }
 
   function run(action: CandidateRowAction) {
     closeMenus();
@@ -250,17 +282,19 @@ export function CandidateActionsMenu({
             <div className="relative border-t border-zinc-800/80">
               <button
                 type="button"
-                disabled={sendPaperworkDisabled || !hasCandidateEmail}
+                disabled={
+                  sendPaperworkDisabled ||
+                  !hasCandidateEmail ||
+                  configuredTemplates.length === 0
+                }
                 title={
-                  !hasCandidateEmail
-                    ? "Candidate email missing"
-                    : !templatesAvailable
-                      ? "Set DROPBOX_SIGN_TEMPLATE_* IDs in .env.local (restart dev server after changes)"
-                      : !onboardingConfigured
-                        ? "Templates loaded — add DROPBOX_SIGN_API_KEY to send"
-                        : sendPaperworkDisabled
-                          ? "Sending paperwork…"
-                          : "Send Dropbox Sign template"
+                  configuredTemplates.length === 0
+                    ? "No Dropbox Sign templates configured"
+                    : !hasCandidateEmail
+                      ? sendPaperworkBlockMessage("missing_email")
+                      : sendPaperworkDisabled
+                        ? sendPaperworkBlockMessage("sending")
+                        : "Choose a Dropbox Sign template"
                 }
                 className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
                 onClick={() => setPaperworkOpen((value) => !value)}
@@ -275,14 +309,8 @@ export function CandidateActionsMenu({
                       <button
                         key={template.key}
                         type="button"
-                        disabled={!onboardingConfigured || !hasCandidateEmail}
-                        title={
-                          !hasCandidateEmail
-                            ? "Candidate email missing"
-                            : onboardingConfigured
-                              ? undefined
-                              : "Configure DROPBOX_SIGN_API_KEY in .env.local"
-                        }
+                        disabled={templateSendDisabled(template.key)}
+                        title={templateSendTitle(template.key)}
                         className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
                         onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
                       >
@@ -299,7 +327,7 @@ export function CandidateActionsMenu({
             <div className="relative border-t border-zinc-800/80">
               <button
                 type="button"
-                disabled={sendPaperworkDisabled || !hasCandidateEmail}
+                disabled={sendPaperworkDisabled || !hasCandidateEmail || overflowTemplates.length === 0}
                 className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
                 onClick={() => setPaperworkOpen((value) => !value)}
               >
@@ -312,7 +340,8 @@ export function CandidateActionsMenu({
                     <button
                       key={template.key}
                       type="button"
-                      disabled={!onboardingConfigured || !hasCandidateEmail}
+                      disabled={templateSendDisabled(template.key)}
+                      title={templateSendTitle(template.key)}
                       className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
                       onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
                     >

@@ -27,6 +27,8 @@ type CandidateRowTriageActionsProps = {
   rosters: RecruiterRosters;
   onRostersUpdated?: (rosters: RecruiterRosters) => void;
   onboardingConfigured?: boolean;
+  onboardingConfigLoaded?: boolean;
+  onboardingConfigError?: string | null;
   templatesAvailable?: boolean;
   paperworkTemplates?: PaperworkTemplateOption[];
   hasCandidateEmail?: boolean;
@@ -78,6 +80,8 @@ export function CandidateRowTriageActions({
   rosters,
   onRostersUpdated,
   onboardingConfigured = false,
+  onboardingConfigLoaded = true,
+  onboardingConfigError = null,
   templatesAvailable = false,
   paperworkTemplates = [],
   hasCandidateEmail = true,
@@ -110,6 +114,8 @@ export function CandidateRowTriageActions({
         onRostersUpdated={onRostersUpdated}
         onAction={onOverflowAction}
         onboardingConfigured={onboardingConfigured}
+        onboardingConfigLoaded={onboardingConfigLoaded}
+        onboardingConfigError={onboardingConfigError}
         templatesAvailable={templatesAvailable}
         paperworkTemplates={paperworkTemplates}
         hasCandidateEmail={hasCandidateEmail}

@@ -112,6 +112,13 @@ import {
   formatRecruiterCandidatesSyncHeader,
 } from "@/lib/recruiter-sync-status-copy";
 import { CandidateRowTriageActions } from "@/components/recruiting/candidate-row-triage-actions";
+import {
+  getSendPaperworkBlockReason,
+  logSendPaperworkEligibility,
+  sendPaperworkBlockMessage,
+  sendPaperworkTooltip,
+  type SendPaperworkEligibilityInput,
+} from "@/lib/onboarding-send-eligibility";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import {
@@ -433,6 +440,8 @@ export function CandidatesSection() {
   const [queueActionBusy, setQueueActionBusy] = useState(false);
   const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
+  const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
+  const [onboardingConfigError, setOnboardingConfigError] = useState<string | null>(null);
   const [onboardingTemplatesAvailable, setOnboardingTemplatesAvailable] = useState(false);
   const [paperworkTemplates, setPaperworkTemplates] = useState<
     Array<{ key: OnboardingTemplateKey; label: string; configured: boolean }>
@@ -894,6 +903,7 @@ export function CandidatesSection() {
   useEffect(() => {
     void fetchOnboardingConfig()
       .then((config) => {
+        setOnboardingConfigError(null);
         setOnboardingConfigured(config.configured);
         setOnboardingTemplatesAvailable(config.templatesAvailable);
         setPaperworkTemplates(
@@ -903,12 +913,28 @@ export function CandidatesSection() {
             configured: t.configured,
           })),
         );
+        if (process.env.NODE_ENV !== "production") {
+          console.debug("[onboarding-send] config_loaded", {
+            configured: config.configured,
+            templatesAvailable: config.templatesAvailable,
+            templates: config.templates.map((t) => ({
+              key: t.key,
+              configured: t.configured,
+            })),
+          });
+        }
       })
-      .catch(() => {
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Onboarding config failed";
+        setOnboardingConfigError(message);
         setOnboardingConfigured(false);
         setOnboardingTemplatesAvailable(false);
         setPaperworkTemplates([]);
-      });
+        if (process.env.NODE_ENV !== "production") {
+          console.debug("[onboarding-send] config_failed", { message });
+        }
+      })
+      .finally(() => setOnboardingConfigLoaded(true));
   }, []);
 
   const retry = useCallback(() => {
@@ -1212,11 +1238,44 @@ export function CandidatesSection() {
       });
   }
 
+  const buildSendEligibility = useCallback(
+    (
+      candidate: ScoredCandidateWorkflowRow,
+      templateKey: OnboardingTemplateKey,
+      sendBusy: boolean,
+    ): SendPaperworkEligibilityInput => ({
+      candidate,
+      templateKey,
+      onboardingConfigured,
+      onboardingConfigLoaded,
+      onboardingConfigError,
+      paperworkTemplates,
+      sendBusy,
+    }),
+    [
+      onboardingConfigured,
+      onboardingConfigLoaded,
+      onboardingConfigError,
+      paperworkTemplates,
+    ],
+  );
+
   const sendPaperwork = useCallback(
     (candidate: ScoredCandidateWorkflowRow, templateKey: OnboardingTemplateKey) => {
+      const eligibility = buildSendEligibility(
+        candidate,
+        templateKey,
+        paperworkSendingId === candidate.candidateId,
+      );
+      const blockReason = getSendPaperworkBlockReason(eligibility);
+      if (blockReason) {
+        logSendPaperworkEligibility("send_blocked_click", eligibility);
+        window.alert(sendPaperworkBlockMessage(blockReason, eligibility));
+        return;
+      }
       const recipientEmail = candidatePrimaryEmail(candidate);
       if (!recipientEmail) {
-        window.alert("Candidate email is required to send Dropbox Sign paperwork.");
+        window.alert(sendPaperworkBlockMessage("missing_email", eligibility));
         return;
       }
       setPaperworkSendingId(candidate.candidateId);
@@ -1230,7 +1289,21 @@ export function CandidatesSection() {
         templateKey,
       })
         .then((result) => {
-          if (result.workflow) applyWorkflowRecord(result.workflow);
+          if (result.workflow) {
+            applyWorkflowRecord(result.workflow);
+            const breezy = committedCandidates.find((c) => c.candidateId === candidate.candidateId);
+            if (breezy) {
+              const job = jobsByPositionId.get(breezy.positionId);
+              const updatedRow = buildScoredWorkflowRow(breezy, result.workflow, { job });
+              setEnrichedCandidates((prev) =>
+                prev.length > 0
+                  ? prev.map((row) =>
+                      row.candidateId === updatedRow.candidateId ? updatedRow : row,
+                    )
+                  : prev,
+              );
+            }
+          }
           invalidateCached(cacheKey(["candidates", "workflows"]));
         })
         .catch((err) => {
@@ -1238,7 +1311,7 @@ export function CandidatesSection() {
         })
         .finally(() => setPaperworkSendingId(null));
     },
-    [],
+    [buildSendEligibility, committedCandidates, jobsByPositionId, paperworkSendingId],
   );
 
   const refreshPaperworkStatus = useCallback((candidate: ScoredCandidateWorkflowRow) => {
@@ -1542,21 +1615,27 @@ export function CandidatesSection() {
               onAssignMe={() => assignActingRecruiterToRow(candidate)}
               sendBusy={paperworkSendingId === candidate.candidateId}
               sendDisabled={
-                !onboardingTemplatesAvailable ||
-                !onboardingConfigured ||
-                !hasCandidatePrimaryEmail(candidate)
+                getSendPaperworkBlockReason(
+                  buildSendEligibility(
+                    candidate,
+                    "onboarding_packet",
+                    paperworkSendingId === candidate.candidateId,
+                  ),
+                ) !== null
               }
-              sendTitle={
-                !hasCandidatePrimaryEmail(candidate)
-                  ? "Candidate email missing"
-                  : !onboardingConfigured
-                    ? "Configure DROPBOX_SIGN_API_KEY"
-                    : "Send onboarding packet"
-              }
+              sendTitle={sendPaperworkTooltip(
+                buildSendEligibility(
+                  candidate,
+                  "onboarding_packet",
+                  paperworkSendingId === candidate.candidateId,
+                ),
+              )}
               onOverflowAction={(action) => handleCandidateAction(candidate, action)}
               rosters={rosters}
               onRostersUpdated={applyRosters}
               onboardingConfigured={onboardingConfigured}
+              onboardingConfigLoaded={onboardingConfigLoaded}
+              onboardingConfigError={onboardingConfigError}
               templatesAvailable={onboardingTemplatesAvailable}
               paperworkTemplates={paperworkTemplates}
               hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
@@ -1623,6 +1702,8 @@ export function CandidatesSection() {
     [
       handleCandidateAction,
       onboardingConfigured,
+      onboardingConfigLoaded,
+      onboardingConfigError,
       onboardingTemplatesAvailable,
       paperworkSendingId,
       paperworkTemplates,
@@ -1632,6 +1713,7 @@ export function CandidatesSection() {
       selectedIds,
       addQuickNoteToRow,
       assignActingRecruiterToRow,
+      buildSendEligibility,
       completeCandidateFollowUpRow,
       flagCandidateFollowUp,
       sendPaperwork,
@@ -1756,6 +1838,23 @@ export function CandidatesSection() {
                 </span>
               )}
             </p>
+            {onboardingConfigLoaded && onboardingConfigError ? (
+              <p className="mt-1 text-xs text-amber-200/90" role="status">
+                Dropbox Sign unavailable: {onboardingConfigError}
+              </p>
+            ) : onboardingConfigLoaded &&
+              !onboardingConfigured &&
+              !onboardingConfigError ? (
+              <p className="mt-1 text-xs text-amber-200/90" role="status">
+                Send disabled: set DROPBOX_SIGN_API_KEY in .env.local and restart the dev server.
+              </p>
+            ) : onboardingConfigLoaded &&
+              onboardingConfigured &&
+              !paperworkTemplates.some((t) => t.key === "onboarding_packet" && t.configured) ? (
+              <p className="mt-1 text-xs text-amber-200/90" role="status">
+                Send disabled: set DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET in .env.local.
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col items-end gap-2">
             <button
