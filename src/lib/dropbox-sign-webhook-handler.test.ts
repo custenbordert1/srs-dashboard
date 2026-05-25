@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { describe, it } from "node:test";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import {
@@ -28,18 +28,50 @@ describe("dropbox-sign-webhook-handler", () => {
     const prevDataDir = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
     process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = dir;
     try {
+      process.env.DIRECT_DEPOSIT_EMAIL_MODE = "log";
       await recordCandidatePaperworkSent({
         candidateId: "c-webhook-1",
         signatureRequestId: "sig-webhook-99",
         templateKey: "onboarding_packet",
+        onboardingContactEmail: "signed-candidate@example.com",
       });
 
       const result = await handleDropboxSignWebhookEvent(signedPayload("sig-webhook-99"));
       assert.equal(result.handled, true);
       assert.equal(result.candidateId, "c-webhook-1");
-      assert.equal(result.workflow?.workflowStatus, "Signed");
+      assert.equal(result.workflow?.workflowStatus, "Awaiting DD Verification");
       assert.equal(result.workflow?.paperworkStatus, "signed");
       assert.ok(result.workflow?.paperworkSignedAt);
+      assert.equal(result.workflow?.directDepositStatus, "requested");
+      assert.ok(result.workflow?.directDepositRequestedAt);
+    } finally {
+      if (prevDataDir === undefined) delete process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
+      else process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = prevDataDir;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not resend DD email on duplicate signed webhook", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "srs-webhook-dd-dup-"));
+    const prevDataDir = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
+    process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = dir;
+    process.env.DIRECT_DEPOSIT_EMAIL_MODE = "log";
+    try {
+      await recordCandidatePaperworkSent({
+        candidateId: "c-webhook-dup",
+        signatureRequestId: "sig-webhook-dup",
+        templateKey: "onboarding_packet",
+        onboardingContactEmail: "dup@example.com",
+      });
+      const first = await handleDropboxSignWebhookEvent(signedPayload("sig-webhook-dup"));
+      const second = await handleDropboxSignWebhookEvent(signedPayload("sig-webhook-dup"));
+      assert.equal(first.workflow?.directDepositStatus, "requested");
+      assert.equal(second.workflow?.directDepositStatus, "requested");
+      assert.equal(second.workflow?.workflowStatus, "Awaiting DD Verification");
+      assert.equal(first.workflow?.directDepositRequestedAt, second.workflow?.directDepositRequestedAt);
+      const outbox = await readFile(path.join(dir, "transactional-email-outbox.jsonl"), "utf8");
+      const lines = outbox.trim().split("\n").filter(Boolean);
+      assert.equal(lines.length, 1);
     } finally {
       if (prevDataDir === undefined) delete process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
       else process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = prevDataDir;

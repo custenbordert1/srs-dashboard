@@ -171,6 +171,7 @@ const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   "Paperwork Needed": "bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30",
   "Paperwork Sent": "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30",
   Signed: "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30",
+  "Awaiting DD Verification": "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30",
   "Ready for MEL": "bg-cyan-500/15 text-cyan-200 ring-1 ring-cyan-500/30",
   "Loaded in MEL": "bg-green-500/15 text-green-200 ring-1 ring-green-500/30",
   "Training Needed": "bg-orange-500/15 text-orange-200 ring-1 ring-orange-500/30",
@@ -463,6 +464,7 @@ export function CandidatesSection() {
     Array<{ key: OnboardingTemplateKey; label: string; configured: boolean }>
   >([]);
   const [paperworkSendingId, setPaperworkSendingId] = useState<string | null>(null);
+  const [directDepositBusyId, setDirectDepositBusyId] = useState<string | null>(null);
 
   const hasPopulatedSnapshot = useCallback(
     () =>
@@ -1299,6 +1301,45 @@ export function CandidatesSection() {
       workflows: parsed.workflows,
       rosters: parsed.rosters,
     };
+  }
+
+  async function runDirectDepositAction(
+    candidate: ScoredCandidateWorkflowRow,
+    action: "resend" | "mark-received" | "mark-approved" | "set-notes",
+    payload?: { notes?: string },
+  ) {
+    setDirectDepositBusyId(candidate.candidateId);
+    try {
+      const res = await fetch("/api/onboarding/direct-deposit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          candidateId: candidate.candidateId,
+          action,
+          notes: payload?.notes,
+          candidateEmail: candidatePrimaryEmail(candidate),
+        }),
+      });
+      const parsed = (await res.json()) as {
+        ok: boolean;
+        workflow?: CandidateWorkflowRecord;
+        error?: string;
+      };
+      if (!res.ok || !parsed.ok || !parsed.workflow) {
+        throw new Error(parsed.error ?? `Direct deposit action failed (${res.status})`);
+      }
+      const notice =
+        action === "resend"
+          ? "Direct deposit verification email sent."
+          : action === "mark-received"
+            ? "Marked direct deposit received."
+            : action === "mark-approved"
+              ? "Direct deposit approved (manual)."
+              : "Payroll notes saved.";
+      commitWorkflowToView(parsed.workflow, { notice });
+    } finally {
+      setDirectDepositBusyId(null);
+    }
   }
 
   function applyRosters(next: RecruiterRosters) {
@@ -2391,6 +2432,13 @@ export function CandidatesSection() {
         onAssignActingRecruiter={() => {
           if (!selectedCandidate) return;
           assignActingRecruiterToRow(selectedCandidate);
+        }}
+        directDepositBusy={directDepositBusyId === selectedCandidate?.candidateId}
+        onDirectDepositAction={(action, payload) => {
+          if (!selectedCandidate) return;
+          void runDirectDepositAction(selectedCandidate, action, payload).catch((err) => {
+            window.alert(err instanceof Error ? err.message : "Direct deposit action failed");
+          });
         }}
         melMatchesLoading={melLoading}
       />

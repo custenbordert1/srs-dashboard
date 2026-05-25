@@ -21,6 +21,7 @@ import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
+import { CandidatePayrollOnboardingPanel } from "@/components/recruiting/candidate-payroll-onboarding-panel";
 import { BestRepMatchSection } from "@/components/recruiting/best-rep-match-section";
 import { MatchedOpportunitiesSection } from "@/components/recruiting/matched-opportunities-section";
 import type { CandidateOpportunityMatch } from "@/lib/mel-matching/matching-engine-types";
@@ -80,6 +81,10 @@ export type CandidateDrawerRow = {
   paperworkSignedAt: string | null;
   paperworkStatus: PaperworkStatus;
   paperworkError: string | null;
+  directDepositStatus: import("@/lib/direct-deposit-types").DirectDepositStatus;
+  directDepositRequestedAt: string | null;
+  directDepositLastReminderAt: string | null;
+  directDepositNotes: string | null;
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
   opportunityRepMatches: OpportunityBestRepMatches[];
@@ -119,6 +124,11 @@ type CandidateDetailDrawerProps = {
   onFlagFollowUp?: () => void;
   onCompleteFollowUp?: () => void;
   onAssignActingRecruiter?: () => void;
+  onDirectDepositAction?: (
+    action: "resend" | "mark-received" | "mark-approved" | "set-notes",
+    payload?: { notes?: string },
+  ) => void | Promise<void>;
+  directDepositBusy?: boolean;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -371,6 +381,8 @@ export function CandidateDetailDrawer({
   onFlagFollowUp,
   onCompleteFollowUp,
   onAssignActingRecruiter,
+  onDirectDepositAction,
+  directDepositBusy = false,
 }: CandidateDetailDrawerProps) {
   const [tab, setTab] = useState<DrawerTab>("workflow");
 
@@ -853,6 +865,19 @@ export function CandidateDetailDrawer({
                     : "Templates loaded from .env.local — add DROPBOX_SIGN_API_KEY to send."
                   : "Set DROPBOX_SIGN_TEMPLATE_* variables in .env.local and restart the dev server."}
               </p>
+              {onDirectDepositAction ? (
+                <CandidatePayrollOnboardingPanel
+                  key={`${candidate.candidateId}-${candidate.directDepositStatus}`}
+                  paperworkStatus={candidate.paperworkStatus}
+                  directDepositStatus={candidate.directDepositStatus}
+                  directDepositRequestedAt={candidate.directDepositRequestedAt}
+                  directDepositLastReminderAt={candidate.directDepositLastReminderAt}
+                  directDepositNotes={candidate.directDepositNotes}
+                  hasCandidateEmail={Boolean(candidate.email?.trim())}
+                  busy={directDepositBusy}
+                  onAction={onDirectDepositAction}
+                />
+              ) : null}
               <div className="space-y-2 border-t border-zinc-800 pt-3">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Integration prep</p>
                 {buildIntegrationPrep(candidate, candidate.workflowStatus).map((item) => (

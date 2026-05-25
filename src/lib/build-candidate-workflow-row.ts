@@ -17,6 +17,7 @@ import {
 } from "@/lib/candidate-dm-suggest";
 import { emptyRecruitingActions, type CandidateRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import { resolveRecruiterNextAction } from "@/lib/recruiter-candidate-intelligence";
+import type { DirectDepositStatus } from "@/lib/direct-deposit-types";
 import {
   nextActionForWorkflowStatus,
   type CandidateWorkflowRecord,
@@ -43,6 +44,11 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   paperworkSignedAt: string | null;
   paperworkStatus: PaperworkStatus;
   paperworkError: string | null;
+  onboardingContactEmail: string | null;
+  directDepositStatus: DirectDepositStatus;
+  directDepositRequestedAt: string | null;
+  directDepositLastReminderAt: string | null;
+  directDepositNotes: string | null;
   suggestedDM: string;
   dmNeedsAssignment: boolean;
   resumeKeywordScore: number | null;
@@ -151,6 +157,11 @@ export function buildBaselineWorkflowRow(
     paperworkSignedAt: local?.paperworkSignedAt ?? null,
     paperworkStatus: local?.paperworkStatus ?? "not_sent",
     paperworkError: local?.paperworkError ?? null,
+    onboardingContactEmail: local?.onboardingContactEmail ?? null,
+    directDepositStatus: local?.directDepositStatus ?? "not_requested",
+    directDepositRequestedAt: local?.directDepositRequestedAt ?? null,
+    directDepositLastReminderAt: local?.directDepositLastReminderAt ?? null,
+    directDepositNotes: local?.directDepositNotes ?? null,
     suggestedDM,
     dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
     resumeKeywordScore: null,
@@ -220,6 +231,11 @@ export function buildScoredWorkflowRow(
     paperworkSignedAt: local?.paperworkSignedAt ?? null,
     paperworkStatus: local?.paperworkStatus ?? "not_sent",
     paperworkError: local?.paperworkError ?? null,
+    onboardingContactEmail: local?.onboardingContactEmail ?? null,
+    directDepositStatus: local?.directDepositStatus ?? "not_requested",
+    directDepositRequestedAt: local?.directDepositRequestedAt ?? null,
+    directDepositLastReminderAt: local?.directDepositLastReminderAt ?? null,
+    directDepositNotes: local?.directDepositNotes ?? null,
     suggestedDM,
     dmNeedsAssignment: dmAssignmentNeedsAttention(assignedDM, suggestedDM),
     resumeKeywordScore: ai.breakdown.resumeSourceQuality,

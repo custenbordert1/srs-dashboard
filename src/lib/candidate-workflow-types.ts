@@ -1,5 +1,9 @@
 import type { CandidateRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import { emptyRecruitingActions } from "@/lib/candidate-recruiting-actions";
+import {
+  normalizeDirectDepositStatus,
+  type DirectDepositStatus,
+} from "@/lib/direct-deposit-types";
 
 export type CandidateWorkflowStatus =
   | "Applied"
@@ -9,6 +13,7 @@ export type CandidateWorkflowStatus =
   | "Paperwork Needed"
   | "Paperwork Sent"
   | "Signed"
+  | "Awaiting DD Verification"
   | "Ready for MEL"
   | "Loaded in MEL"
   | "Training Needed"
@@ -45,8 +50,16 @@ export type CandidateWorkflowRecord = {
   paperworkSignedAt: string | null;
   paperworkStatus: PaperworkStatus;
   paperworkError: string | null;
+  /** Candidate email captured at paperwork send (used for payroll follow-up). */
+  onboardingContactEmail: string | null;
+  directDepositStatus: DirectDepositStatus;
+  directDepositRequestedAt: string | null;
+  directDepositLastReminderAt: string | null;
+  directDepositNotes: string | null;
   updatedAt: string;
 };
+
+export type { DirectDepositStatus };
 
 export type RecruiterRosters = {
   recruiters: string[];
@@ -117,6 +130,14 @@ export function normalizeWorkflowRecord(
     paperworkSignedAt: typeof raw.paperworkSignedAt === "string" ? raw.paperworkSignedAt : null,
     paperworkStatus: normalizePaperworkStatus(raw.paperworkStatus),
     paperworkError: typeof raw.paperworkError === "string" ? raw.paperworkError : null,
+    onboardingContactEmail:
+      typeof raw.onboardingContactEmail === "string" ? raw.onboardingContactEmail : null,
+    directDepositStatus: normalizeDirectDepositStatus(raw.directDepositStatus),
+    directDepositRequestedAt:
+      typeof raw.directDepositRequestedAt === "string" ? raw.directDepositRequestedAt : null,
+    directDepositLastReminderAt:
+      typeof raw.directDepositLastReminderAt === "string" ? raw.directDepositLastReminderAt : null,
+    directDepositNotes: typeof raw.directDepositNotes === "string" ? raw.directDepositNotes : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };
 }
@@ -147,6 +168,7 @@ export const CANDIDATE_WORKFLOW_STATUSES: CandidateWorkflowStatus[] = [
   "Paperwork Needed",
   "Paperwork Sent",
   "Signed",
+  "Awaiting DD Verification",
   "Ready for MEL",
   "Loaded in MEL",
   "Training Needed",
@@ -162,6 +184,7 @@ export function nextActionForWorkflowStatus(status: CandidateWorkflowStatus): st
     "Paperwork Needed": "Send onboarding paperwork",
     "Paperwork Sent": "Wait for signature",
     Signed: "Verify signed paperwork",
+    "Awaiting DD Verification": "Await direct deposit verification from candidate",
     "Ready for MEL": "Load into MEL",
     "Loaded in MEL": "Monitor placement",
     "Training Needed": "Schedule training",

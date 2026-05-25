@@ -6,6 +6,7 @@ import {
 } from "@/lib/candidate-workflow-store";
 import type { DropboxSignWebhookPayload } from "@/lib/dropbox-sign-webhook";
 import { isHandledDropboxSignEventType } from "@/lib/dropbox-sign-webhook";
+import { requestDirectDepositAfterPaperworkSigned } from "@/lib/direct-deposit-workflow";
 import {
   appendHrPaperworkNotice,
   notifyDmPaperworkSignedHook,
@@ -83,10 +84,15 @@ export async function handleDropboxSignWebhookEvent(
     eventType === "signature_request_signed" ||
     eventType === "signature_request_all_signed"
   ) {
-    const workflow = await applyCandidatePaperworkSigned({
+    const signedWorkflow = await applyCandidatePaperworkSigned({
       candidateId,
       signatureRequestId,
     });
+    const ddResult = await requestDirectDepositAfterPaperworkSigned({
+      workflow: signedWorkflow,
+      signatureRequestId,
+    });
+    const workflow = ddResult.workflow;
     await appendHrPaperworkNotice({
       type: "paperwork_signed",
       workflow,
@@ -97,7 +103,7 @@ export async function handleDropboxSignWebhookEvent(
       candidateId,
       workflow,
       source: "dropbox_sign_webhook",
-      eventType,
+      eventType: ddResult.emailSent ? `${eventType}:dd_sent` : eventType,
     });
     return { handled: true, eventType, signatureRequestId, candidateId, workflow };
   }

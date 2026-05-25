@@ -3,7 +3,7 @@ import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 export type WorkflowRealtimePayload = {
   candidateId: string;
   workflow: CandidateWorkflowRecord;
-  source: "dropbox_sign_webhook" | "workflow_api";
+  source: "dropbox_sign_webhook" | "workflow_api" | "direct_deposit_api";
   eventType?: string;
 };
 

@@ -9,6 +9,7 @@ import {
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
 import { SLA_SNOOZE_HOURS } from "@/lib/candidate-action-sla";
+import type { DirectDepositStatus } from "@/lib/direct-deposit-types";
 import {
   defaultRecruiterRosters,
   normalizeWorkflowRecord,
@@ -206,6 +207,11 @@ export async function upsertCandidateWorkflow(input: {
   paperworkSignedAt?: string | null;
   paperworkStatus?: PaperworkStatus;
   paperworkError?: string | null;
+  onboardingContactEmail?: string | null;
+  directDepositStatus?: DirectDepositStatus;
+  directDepositRequestedAt?: string | null;
+  directDepositLastReminderAt?: string | null;
+  directDepositNotes?: string | null;
   paperworkHistoryMessage?: string;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
@@ -252,6 +258,26 @@ export async function upsertCandidateWorkflow(input: {
       : (existing?.paperworkStatus ?? "not_sent");
   const paperworkError =
     input.paperworkError !== undefined ? input.paperworkError : (existing?.paperworkError ?? null);
+  const onboardingContactEmail =
+    input.onboardingContactEmail !== undefined
+      ? input.onboardingContactEmail
+      : (existing?.onboardingContactEmail ?? null);
+  const directDepositStatus =
+    input.directDepositStatus !== undefined
+      ? input.directDepositStatus
+      : (existing?.directDepositStatus ?? "not_requested");
+  const directDepositRequestedAt =
+    input.directDepositRequestedAt !== undefined
+      ? input.directDepositRequestedAt
+      : (existing?.directDepositRequestedAt ?? null);
+  const directDepositLastReminderAt =
+    input.directDepositLastReminderAt !== undefined
+      ? input.directDepositLastReminderAt
+      : (existing?.directDepositLastReminderAt ?? null);
+  const directDepositNotes =
+    input.directDepositNotes !== undefined
+      ? input.directDepositNotes
+      : (existing?.directDepositNotes ?? null);
 
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
@@ -308,6 +334,11 @@ export async function upsertCandidateWorkflow(input: {
     paperworkSignedAt,
     paperworkStatus,
     paperworkError,
+    onboardingContactEmail,
+    directDepositStatus,
+    directDepositRequestedAt,
+    directDepositLastReminderAt,
+    directDepositNotes,
     updatedAt: now,
   };
 
@@ -419,6 +450,7 @@ export async function recordCandidatePaperworkSent(input: {
   candidateId: string;
   signatureRequestId: string;
   templateKey: OnboardingTemplateKey;
+  onboardingContactEmail?: string | null;
   byUserId?: string;
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
@@ -439,6 +471,7 @@ export async function recordCandidatePaperworkSent(input: {
     paperworkSignedAt: null,
     paperworkStatus: "sent",
     paperworkError: null,
+    onboardingContactEmail: input.onboardingContactEmail?.trim() || null,
     paperworkHistoryMessage: `Onboarding paperwork sent (${input.templateKey}). Request ${input.signatureRequestId}.`,
     audit: {
       action: "paperwork_sent",
@@ -446,6 +479,7 @@ export async function recordCandidatePaperworkSent(input: {
       metadata: {
         templateKey: input.templateKey,
         signatureRequestId: input.signatureRequestId,
+        onboardingContactEmail: input.onboardingContactEmail?.trim() || "",
       },
     },
   });
@@ -546,7 +580,7 @@ export async function applyCandidatePaperworkSigned(input: {
   const now = new Date().toISOString();
   const file = await readStoreFile();
   const existing = file.workflows[input.candidateId];
-  if (existing?.paperworkStatus === "signed" && existing.workflowStatus === "Signed") {
+  if (existing?.paperworkStatus === "signed" && existing.paperworkSignedAt) {
     return existing;
   }
 

@@ -120,6 +120,7 @@ export async function POST(request: Request) {
       candidateId,
       signatureRequestId: signature.signatureRequestId,
       templateKey: validation.templateKey,
+      onboardingContactEmail: signerPayload.recipientEmail,
       byUserId: session.userId,
     });
 
