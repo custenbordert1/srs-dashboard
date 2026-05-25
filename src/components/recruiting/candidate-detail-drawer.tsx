@@ -25,6 +25,11 @@ import { BestRepMatchSection } from "@/components/recruiting/best-rep-match-sect
 import { MatchedOpportunitiesSection } from "@/components/recruiting/matched-opportunities-section";
 import type { CandidateOpportunityMatch } from "@/lib/mel-matching/matching-engine-types";
 import type { OpportunityBestRepMatches } from "@/lib/rep-intelligence/rep-types";
+import {
+  resolveCandidateRowPrimaryAction,
+  type CandidateRowPrimaryAction,
+} from "@/lib/candidate-row-primary-action";
+import type { SendPaperworkBlockReason } from "@/lib/onboarding-send-eligibility";
 import { useEffect, useState } from "react";
 
 export type CandidateDrawerRow = {
@@ -109,6 +114,11 @@ type CandidateDetailDrawerProps = {
   paperworkSending?: boolean;
   onSendPaperwork?: (templateKey: OnboardingTemplateKey) => void;
   onRefreshPaperworkStatus?: () => void;
+  actingRecruiter?: string;
+  sendBlockReason?: SendPaperworkBlockReason | null;
+  onFlagFollowUp?: () => void;
+  onCompleteFollowUp?: () => void;
+  onAssignActingRecruiter?: () => void;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -313,6 +323,21 @@ function NoteComposer({ onAddNote }: { onAddNote: (note: string) => void }) {
   );
 }
 
+function drawerPrimaryToneClass(tone: CandidateRowPrimaryAction["tone"]): string {
+  switch (tone) {
+    case "teal":
+      return "border-teal-600/50 bg-teal-600/15 text-teal-100 hover:bg-teal-600/25";
+    case "amber":
+      return "border-amber-600/45 bg-amber-600/12 text-amber-100 hover:bg-amber-600/22";
+    case "sky":
+      return "border-sky-600/45 bg-sky-600/12 text-sky-100 hover:bg-sky-600/22";
+    case "cyan":
+      return "border-cyan-600/45 bg-cyan-600/12 text-cyan-100 hover:bg-cyan-600/22";
+    default:
+      return "border-zinc-600 bg-zinc-900/80 text-zinc-100 hover:bg-zinc-800";
+  }
+}
+
 function scoreTierFromNumeric(score: number): AiScoreTier {
   if (score >= 85) return "elite";
   if (score >= 70) return "strong";
@@ -341,8 +366,13 @@ export function CandidateDetailDrawer({
   paperworkSending = false,
   onSendPaperwork,
   onRefreshPaperworkStatus,
+  actingRecruiter = "Unassigned",
+  sendBlockReason = null,
+  onFlagFollowUp,
+  onCompleteFollowUp,
+  onAssignActingRecruiter,
 }: CandidateDetailDrawerProps) {
-  const [tab, setTab] = useState<DrawerTab>("overview");
+  const [tab, setTab] = useState<DrawerTab>("workflow");
 
   useEffect(() => {
     if (!open) return;
@@ -354,6 +384,42 @@ export function CandidateDetailDrawer({
   }, [open, onClose]);
 
   if (!open || !candidate) return null;
+
+  const drawerPrimary = resolveCandidateRowPrimaryAction({
+    candidate,
+    actingRecruiter,
+    sendBlockReason,
+    sendBusy: paperworkSending,
+  });
+
+  function runDrawerPrimary() {
+    if (drawerPrimary.disabled) return;
+    switch (drawerPrimary.kind) {
+      case "send-packet":
+        onSendPaperwork?.("onboarding_packet");
+        setTab("hellosign");
+        break;
+      case "follow-up":
+        onFlagFollowUp?.();
+        break;
+      case "follow-up-done":
+        onCompleteFollowUp?.();
+        break;
+      case "assign-me":
+        onAssignActingRecruiter?.();
+        setTab("assignments");
+        break;
+      case "ready-for-mel":
+        onStatusChange("Ready for MEL");
+        setTab("workflow");
+        break;
+      case "review":
+        setTab("overview");
+        break;
+      default:
+        setTab("workflow");
+    }
+  }
 
   const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
 
@@ -418,6 +484,69 @@ export function CandidateDetailDrawer({
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {loading ? <p className="mb-4 text-sm text-zinc-500">Loading candidate details…</p> : null}
 
+          <section className="mb-4 rounded-xl border border-teal-500/20 bg-zinc-900/60 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-teal-200/80">
+              Operational workspace
+            </p>
+            <p className="mt-0.5 truncate text-xs text-zinc-400" title={candidate.nextActionNeeded}>
+              {candidate.nextActionNeeded}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={drawerPrimary.disabled}
+                title={drawerPrimary.title ?? drawerPrimary.label}
+                onClick={runDrawerPrimary}
+                className={`rounded-md border px-3 py-1.5 text-xs font-semibold disabled:opacity-40 ${drawerPrimaryToneClass(drawerPrimary.tone)}`}
+              >
+                {paperworkSending && drawerPrimary.kind === "send-packet" ? "Sending…" : drawerPrimary.label}
+              </button>
+              {onSendPaperwork && drawerPrimary.kind !== "send-packet" ? (
+                <button
+                  type="button"
+                  disabled={paperworkSending || sendBlockReason !== null || !candidate.email?.trim()}
+                  onClick={() => {
+                    onSendPaperwork("onboarding_packet");
+                    setTab("hellosign");
+                  }}
+                  className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
+                >
+                  Send packet
+                </button>
+              ) : null}
+              {onFlagFollowUp ? (
+                <button
+                  type="button"
+                  disabled={candidate.recruitingActions.needsFollowUp}
+                  onClick={onFlagFollowUp}
+                  className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
+                >
+                  Follow-up
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setTab("notes")}
+                className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                Notes
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("hellosign")}
+                className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                Paperwork
+              </button>
+            </div>
+            {onRecruitingAction ? (
+              <div className="mt-3 border-t border-zinc-800/80 pt-3">
+                <RecruitingActionsPanel actions={candidate.recruitingActions} onAction={onRecruitingAction} />
+              </div>
+            ) : null}
+          </section>
+
+          {tab === "overview" || tab === "ai" ? (
           <section className="mb-5 space-y-4 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-3xl font-semibold tabular-nums text-teal-200">{candidate.aiNumericScore}</span>
@@ -503,20 +632,6 @@ export function CandidateDetailDrawer({
               </div>
             ) : null}
 
-            {onRecruitingAction ? (
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                  Recruiting actions
-                </p>
-                <div className="mt-2">
-                  <RecruitingActionsPanel
-                    actions={candidate.recruitingActions}
-                    onAction={onRecruitingAction}
-                  />
-                </div>
-              </div>
-            ) : null}
-
             <MatchedOpportunitiesSection
               matches={candidate.matchedOpportunities}
               aiSummary={candidate.melMatchingSummary}
@@ -527,6 +642,7 @@ export function CandidateDetailDrawer({
               loading={repMatchesLoading}
             />
           </section>
+          ) : null}
 
           {tab === "overview" ? (
             <div className="space-y-3 text-xs text-zinc-400">

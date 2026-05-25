@@ -34,6 +34,15 @@ type CandidateActionsMenuProps = {
   variant?: "default" | "overflow";
   /** Hidden from overflow paperwork list (primary Send chip uses this template). */
   excludePaperworkTemplateKey?: OnboardingTemplateKey;
+  /** Row overflow: triage shortcuts moved out of the table toolbar. */
+  overflowTriage?: {
+    onFollowUp: () => void;
+    onFollowUpDone: () => void;
+    onNote: () => void;
+    onAssignMe: () => void;
+    followUpDisabled?: boolean;
+    hideSendInOverflow?: boolean;
+  };
 };
 
 export function CandidateActionsMenu({
@@ -49,6 +58,7 @@ export function CandidateActionsMenu({
   onboardingConfigError = null,
   variant = "default",
   excludePaperworkTemplateKey = "onboarding_packet",
+  overflowTriage,
 }: CandidateActionsMenuProps) {
   const overflow = variant === "overflow";
   const [open, setOpen] = useState(false);
@@ -186,6 +196,56 @@ export function CandidateActionsMenu({
           role="menu"
           className="absolute right-0 z-30 mt-1 min-w-[12rem] rounded-md border border-zinc-700 bg-zinc-950 py-1 shadow-lg shadow-black/40"
         >
+          {overflow && overflowTriage ? (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                disabled={overflowTriage.followUpDisabled}
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:text-zinc-600"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onFollowUp();
+                }}
+              >
+                Flag follow-up
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onFollowUpDone();
+                }}
+              >
+                Follow-up done
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onNote();
+                }}
+              >
+                Add note
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onAssignMe();
+                }}
+              >
+                Assign me
+              </button>
+              <div className="my-1 border-t border-zinc-800/80" />
+            </>
+          ) : null}
           <div className="relative">
             <button
               type="button"
@@ -323,7 +383,7 @@ export function CandidateActionsMenu({
                 </div>
               ) : null}
             </div>
-          ) : overflowTemplates.length > 0 ? (
+          ) : overflow && !overflowTriage?.hideSendInOverflow && overflowTemplates.length > 0 ? (
             <div className="relative border-t border-zinc-800/80">
               <button
                 type="button"

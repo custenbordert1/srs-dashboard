@@ -119,12 +119,18 @@ import {
   formatRecruiterSyncAlert,
   formatRecruiterCandidatesSyncHeader,
 } from "@/lib/recruiter-sync-status-copy";
-import { CandidateRowTriageActions } from "@/components/recruiting/candidate-row-triage-actions";
+import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
+import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
+import {
+  stickyCheckboxCellClass,
+  stickyCheckboxHeaderClass,
+  stickyIdentityCellClass,
+  stickyIdentityHeaderClass,
+} from "@/lib/candidate-table-sticky";
 import {
   getSendPaperworkBlockReason,
   logSendPaperworkEligibility,
   sendPaperworkBlockMessage,
-  sendPaperworkTooltip,
   type SendPaperworkEligibilityInput,
 } from "@/lib/onboarding-send-eligibility";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
@@ -1649,12 +1655,21 @@ export function CandidatesSection() {
         <tr
           key={candidate.candidateId}
           onClick={() => setSelectedCandidateId(candidate.candidateId)}
-          className={`cursor-pointer ${tableRowUrgencyClass(candidate)} ${
-            rowSelected ? "bg-teal-500/8 hover:bg-teal-500/12" : "hover:bg-zinc-800/30"
+          className={`group cursor-pointer ${tableRowUrgencyClass(candidate)} ${
+            rowSelected
+              ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
+              : "hover:bg-zinc-800/30"
           }`}
           style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
+          aria-selected={rowSelected}
         >
-          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+          <td
+            className={stickyCheckboxCellClass(tdClass, {
+              selected: rowSelected,
+              rowBg: "bg-zinc-950",
+            })}
+            onClick={(event) => event.stopPropagation()}
+          >
             <input
               type="checkbox"
               aria-label={`Select ${candidateName(candidate)}`}
@@ -1662,9 +1677,28 @@ export function CandidatesSection() {
               onChange={() => toggleSelectCandidate(candidate.candidateId)}
             />
           </td>
-          <td className={tdClass}>
-            <div className="flex min-w-0 flex-col justify-center">
+          <td
+            className={`${stickyIdentityCellClass(tdClass, {
+              selected: rowSelected,
+              rowBg: "bg-zinc-950",
+            })} !whitespace-normal`}
+          >
+            <div className="flex min-w-0 flex-col justify-center gap-0.5 py-0.5">
               <div className="truncate font-medium leading-tight text-zinc-100">{candidateName(candidate)}</div>
+              <div className="flex min-w-0 flex-wrap items-center gap-1">
+                <span
+                  className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
+                  title={candidate.workflowStatus}
+                >
+                  {candidate.workflowStatus}
+                </span>
+                <span
+                  className="inline-flex max-w-[7rem] truncate rounded border border-zinc-700/80 bg-zinc-900/70 px-1 text-[9px] text-zinc-400"
+                  title={`${candidate.assignedRecruiter} · ${candidate.assignedDM}`}
+                >
+                  {candidate.assignedRecruiter}
+                </span>
+              </div>
               <CandidateRowAttentionBadges candidate={candidate} />
               <CandidateRowFitSignals candidate={candidate} />
             </div>
@@ -1677,14 +1711,6 @@ export function CandidatesSection() {
           <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
           <td className={tdClass}>{candidate.city || "—"}</td>
           <td className={tdClass}>{candidate.state || "—"}</td>
-          <td className={tdClass}>
-            <span
-              className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
-              title={candidate.workflowStatus}
-            >
-              {candidate.workflowStatus}
-            </span>
-          </td>
           <td className={`${tdClass} truncate text-[10px] leading-tight`}>
             <span className="text-zinc-500">
               Applied {formatDays(appliedDays)}
@@ -1706,7 +1732,20 @@ export function CandidatesSection() {
             </div>
           </td>
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-            <CandidateRowTriageActions
+            <CandidateRowPrimaryActionBar
+              primary={resolveCandidateRowPrimaryAction({
+                candidate,
+                actingRecruiter,
+                sendBlockReason: getSendPaperworkBlockReason(
+                  buildSendEligibility(
+                    candidate,
+                    "onboarding_packet",
+                    paperworkSendingId === candidate.candidateId,
+                  ),
+                ),
+                sendBusy: paperworkSendingId === candidate.candidateId,
+              })}
+              onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
               followUpDisabled={candidate.recruitingActions.needsFollowUp}
               onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
               onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
@@ -1723,13 +1762,6 @@ export function CandidatesSection() {
                   ),
                 ) !== null
               }
-              sendTitle={sendPaperworkTooltip(
-                buildSendEligibility(
-                  candidate,
-                  "onboarding_packet",
-                  paperworkSendingId === candidate.candidateId,
-                ),
-              )}
               onOverflowAction={(action) => handleCandidateAction(candidate, action)}
               rosters={rosters}
               onRostersUpdated={applyRosters}
@@ -1809,6 +1841,7 @@ export function CandidatesSection() {
       paperworkTemplates,
       refreshPaperworkStatus,
       rosters,
+      actingRecruiter,
       selectedCandidateId,
       selectedIds,
       addQuickNoteToRow,
@@ -2233,14 +2266,14 @@ export function CandidatesSection() {
         ) : (
           <VirtualCandidateTable
             rows={filtered}
-            colSpan={20}
+            colSpan={19}
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
               <>
                 <colgroup>
-                  <col className="w-[2%]" />
-                  <col className="w-[9%]" />
+                  <col className="w-[40px]" />
+                  <col className="w-[272px]" />
                   <col className="w-[9%]" />
                   <col className="w-[6%]" />
                   <col className="w-[5%]" />
@@ -2249,10 +2282,9 @@ export function CandidatesSection() {
                   <col className="w-[7%]" />
                   <col className="w-[4%]" />
                   <col className="w-[3%]" />
-                  <col className="w-[7%]" />
                   <col className="w-[6%]" />
                   <col className="w-[8%]" />
-                  <col className="w-[10%]" />
+                  <col className="w-[7%]" />
                   <col className="w-[4%]" />
                   <col className="w-[5%]" />
                   <col className="w-[4%]" />
@@ -2262,7 +2294,7 @@ export function CandidatesSection() {
                 </colgroup>
                 <thead className="border-b border-zinc-800/60">
                 <tr>
-                  <th className={thClass}>
+                  <th className={stickyCheckboxHeaderClass(thClass)}>
                     <input
                       type="checkbox"
                       aria-label="Select all filtered candidates"
@@ -2271,7 +2303,7 @@ export function CandidatesSection() {
                       onClick={(event) => event.stopPropagation()}
                     />
                   </th>
-                  <th className={thClass}>Name</th>
+                  <th className={stickyIdentityHeaderClass(thClass)}>Candidate</th>
                   <th className={thClass}>Email</th>
                   <th className={thClass}>Phone</th>
                   <th className={thClass}>Source</th>
@@ -2280,10 +2312,9 @@ export function CandidatesSection() {
                   <th className={thClass}>Position</th>
                   <th className={thClass}>City</th>
                   <th className={thClass}>State</th>
-                  <th className={thClass}>Workflow</th>
                   <th className={thClass}>Aging</th>
                   <th className={thClass}>Next Action</th>
-                  <th className={thClass}>Actions</th>
+                  <th className={thClass}>Action</th>
                   <th className={thClass}>Notes</th>
                   <th className={thClass}>HelloSign</th>
                   <th className={thClass}>Match</th>
@@ -2336,6 +2367,30 @@ export function CandidatesSection() {
         onRefreshPaperworkStatus={() => {
           if (!selectedCandidate) return;
           refreshPaperworkStatus(selectedCandidate);
+        }}
+        actingRecruiter={actingRecruiter}
+        sendBlockReason={
+          selectedCandidate
+            ? getSendPaperworkBlockReason(
+                buildSendEligibility(
+                  selectedCandidate,
+                  "onboarding_packet",
+                  paperworkSendingId === selectedCandidate.candidateId,
+                ),
+              )
+            : null
+        }
+        onFlagFollowUp={() => {
+          if (!selectedCandidate) return;
+          flagCandidateFollowUp(selectedCandidate.candidateId);
+        }}
+        onCompleteFollowUp={() => {
+          if (!selectedCandidate) return;
+          completeCandidateFollowUpRow(selectedCandidate.candidateId);
+        }}
+        onAssignActingRecruiter={() => {
+          if (!selectedCandidate) return;
+          assignActingRecruiterToRow(selectedCandidate);
         }}
         melMatchesLoading={melLoading}
       />
