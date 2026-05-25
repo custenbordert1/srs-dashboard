@@ -19,6 +19,7 @@ import {
 export type RecruiterScanCueId =
   | "follow-up-overdue"
   | "interview"
+  | "paperwork-viewed"
   | "paperwork-stalled"
   | "ready-mel"
   | "unassigned"
@@ -39,6 +40,7 @@ export type RecruiterFitSignal = {
 const SCAN_PRIORITY: RecruiterScanCueId[] = [
   "follow-up-overdue",
   "interview",
+  "paperwork-viewed",
   "paperwork-stalled",
   "ready-mel",
   "unassigned",
@@ -50,6 +52,7 @@ const SCAN_PRIORITY: RecruiterScanCueId[] = [
 const SCAN_LABELS: Record<RecruiterScanCueId, string> = {
   "follow-up-overdue": "Follow-up overdue",
   interview: "Interview ready",
+  "paperwork-viewed": "Viewed",
   "paperwork-stalled": "Paperwork stalled",
   "ready-mel": "Ready for MEL",
   unassigned: "No owner",
@@ -61,6 +64,7 @@ const SCAN_LABELS: Record<RecruiterScanCueId, string> = {
 export const RECRUITER_SCAN_CUE_STYLES: Record<RecruiterScanCueId, string> = {
   "follow-up-overdue": "border-red-500/40 bg-red-500/10 text-red-100",
   interview: "border-sky-500/40 bg-sky-500/10 text-sky-100",
+  "paperwork-viewed": "border-sky-500/35 bg-sky-500/10 text-sky-100",
   "paperwork-stalled": "border-amber-500/40 bg-amber-500/10 text-amber-100",
   "ready-mel": "border-teal-500/40 bg-teal-500/10 text-teal-100",
   unassigned: "border-violet-500/35 bg-violet-500/10 text-violet-100",
@@ -120,6 +124,8 @@ function matchesScanCue(
       );
     case "interview":
       return row.recruitingActions.recommendInterview;
+    case "paperwork-viewed":
+      return row.paperworkStatus === "viewed" && row.workflowStatus === "Paperwork Sent";
     case "paperwork-stalled":
       return isPaperworkStalled(row, referenceMs);
     case "ready-mel":
@@ -226,14 +232,27 @@ export function deriveRecruiterNextAction(
   if (row.recruitingActions.recommendInterview) {
     return "Schedule interview — flagged as interview-ready";
   }
-  if (row.workflowStatus === "Paperwork Sent" && row.paperworkStatus !== "signed") {
+  if (row.workflowStatus === "Signed" || row.paperworkStatus === "signed") {
+    return "Signed — Ready for MEL";
+  }
+  if (row.workflowStatus === "Paperwork Sent" && row.paperworkStatus === "viewed") {
+    const viewedHours = hoursSince(row.paperworkViewedAt, referenceMs);
+    if ((row.paperworkViewCount ?? 0) >= 2) {
+      return "Viewed twice, not signed — call candidate";
+    }
+    if (viewedHours != null && viewedHours >= 3) {
+      return `Viewed ${viewedHours}h ago — follow up`;
+    }
+    return "Viewed — awaiting signature";
+  }
+  if (row.workflowStatus === "Paperwork Sent" && row.paperworkStatus === "sent") {
     if (sla.paperworkAgingSeverity === "critical") {
       return "Escalate signature — paperwork stalled 8+ days";
     }
     if (sla.paperworkAgingSeverity === "warn") {
       return "Nudge Dropbox Sign — paperwork aging 5+ days";
     }
-    return "Check HelloSign status and resend packet if needed";
+    return "Awaiting signature — Dropbox Sign will update automatically";
   }
   if (isMelReadyStatus(row.workflowStatus)) {
     return "Load into MEL — candidate is paperwork-ready";
@@ -264,9 +283,6 @@ export function deriveRecruiterNextAction(
   }
   if (row.workflowStatus === "Paperwork Needed") {
     return "Send onboarding packet via HelloSign";
-  }
-  if (row.workflowStatus === "Signed") {
-    return "Verify signed docs and mark Ready for MEL";
   }
   if (row.workflowStatus === "Applied" || row.workflowStatus === "Needs Review") {
     if (row.isTopMatch) {

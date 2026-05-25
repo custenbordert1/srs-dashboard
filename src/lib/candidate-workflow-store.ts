@@ -27,9 +27,19 @@ import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const STORE_PATH = path.join(STORE_DIR, "candidate-workflows.json");
-const WORKFLOW_AUDIT_PATH = path.join(STORE_DIR, "candidate-workflow-audit.jsonl");
+function workflowDataDir(): string {
+  const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
+  return override ? path.resolve(override) : path.join(process.cwd(), ".data");
+}
+
+function storePaths() {
+  const dir = workflowDataDir();
+  return {
+    storeDir: dir,
+    storePath: path.join(dir, "candidate-workflows.json"),
+    auditPath: path.join(dir, "candidate-workflow-audit.jsonl"),
+  };
+}
 
 export type CandidateWorkflowAuditEntry = {
   id: string;
@@ -104,8 +114,9 @@ function normalizeStoreFile(parsed: unknown): CandidateWorkflowStoreFile {
 }
 
 async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
+  const { storePath } = storePaths();
   try {
-    const raw = await readFile(STORE_PATH, "utf8");
+    const raw = await readFile(storePath, "utf8");
     return normalizeStoreFile(JSON.parse(raw) as unknown);
   } catch {
     return {
@@ -118,13 +129,15 @@ async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
 }
 
 async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(STORE_PATH, JSON.stringify(file, null, 2), "utf8");
+  const { storeDir, storePath } = storePaths();
+  await mkdir(storeDir, { recursive: true });
+  await writeFile(storePath, JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function appendCandidateWorkflowAudit(entry: CandidateWorkflowAuditEntry): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await appendFile(WORKFLOW_AUDIT_PATH, `${JSON.stringify(entry)}\n`, "utf8");
+  const { storeDir, auditPath } = storePaths();
+  await mkdir(storeDir, { recursive: true });
+  await appendFile(auditPath, `${JSON.stringify(entry)}\n`, "utf8");
 }
 
 export async function getCandidateWorkflowBundle(): Promise<CandidateWorkflowBundle> {
@@ -188,6 +201,8 @@ export async function upsertCandidateWorkflow(input: {
   signatureRequestId?: string | null;
   paperworkTemplateKey?: string | null;
   paperworkSentAt?: string | null;
+  paperworkViewedAt?: string | null;
+  paperworkViewCount?: number;
   paperworkSignedAt?: string | null;
   paperworkStatus?: PaperworkStatus;
   paperworkError?: string | null;
@@ -219,6 +234,14 @@ export async function upsertCandidateWorkflow(input: {
       : (existing?.paperworkTemplateKey ?? null);
   const paperworkSentAt =
     input.paperworkSentAt !== undefined ? input.paperworkSentAt : (existing?.paperworkSentAt ?? null);
+  const paperworkViewedAt =
+    input.paperworkViewedAt !== undefined
+      ? input.paperworkViewedAt
+      : (existing?.paperworkViewedAt ?? null);
+  const paperworkViewCount =
+    input.paperworkViewCount !== undefined
+      ? input.paperworkViewCount
+      : (existing?.paperworkViewCount ?? 0);
   const paperworkSignedAt =
     input.paperworkSignedAt !== undefined
       ? input.paperworkSignedAt
@@ -280,6 +303,8 @@ export async function upsertCandidateWorkflow(input: {
     signatureRequestId,
     paperworkTemplateKey,
     paperworkSentAt,
+    paperworkViewedAt,
+    paperworkViewCount,
     paperworkSignedAt,
     paperworkStatus,
     paperworkError,
@@ -409,6 +434,8 @@ export async function recordCandidatePaperworkSent(input: {
     signatureRequestId: input.signatureRequestId,
     paperworkTemplateKey: input.templateKey,
     paperworkSentAt: now,
+    paperworkViewedAt: null,
+    paperworkViewCount: 0,
     paperworkSignedAt: null,
     paperworkStatus: "sent",
     paperworkError: null,
@@ -450,6 +477,8 @@ export async function applyCandidatePaperworkStatus(input: {
     signatureRequestId: input.signatureRequestId,
     paperworkTemplateKey: existing?.paperworkTemplateKey ?? null,
     paperworkSentAt: existing?.paperworkSentAt ?? now,
+    paperworkViewedAt: existing?.paperworkViewedAt ?? null,
+    paperworkViewCount: existing?.paperworkViewCount ?? 0,
     paperworkSignedAt: status === "signed" ? now : (existing?.paperworkSignedAt ?? null),
     paperworkStatus: status,
     paperworkError: status === "failed" ? (existing?.paperworkError ?? "Paperwork failed") : null,
@@ -458,6 +487,92 @@ export async function applyCandidatePaperworkStatus(input: {
       action: "paperwork_status",
       byUserId: input.byUserId,
       metadata: { paperworkStatus: status },
+    },
+  });
+}
+
+export async function applyCandidatePaperworkViewed(input: {
+  candidateId: string;
+  signatureRequestId: string;
+  byUserId?: string;
+}): Promise<CandidateWorkflowRecord> {
+  const now = new Date().toISOString();
+  const file = await readStoreFile();
+  const existing = file.workflows[input.candidateId];
+  if (existing?.paperworkStatus === "signed") {
+    return existing;
+  }
+
+  const viewCount = (existing?.paperworkViewCount ?? 0) + 1;
+
+  return upsertCandidateWorkflow({
+    candidateId: input.candidateId,
+    workflowStatus: "Paperwork Sent",
+    assignedRecruiter: existing?.assignedRecruiter,
+    assignedDM: existing?.assignedDM,
+    recruitingActions: existing?.recruitingActions,
+    signatureRequestId: input.signatureRequestId,
+    paperworkTemplateKey: existing?.paperworkTemplateKey ?? null,
+    paperworkSentAt: existing?.paperworkSentAt ?? now,
+    paperworkViewedAt: existing?.paperworkViewedAt ?? now,
+    paperworkViewCount: viewCount,
+    paperworkSignedAt: null,
+    paperworkStatus: "viewed",
+    paperworkError: null,
+    paperworkHistoryMessage: `Candidate viewed onboarding paperwork (view #${viewCount}).`,
+    audit: {
+      action: "paperwork_viewed",
+      byUserId: input.byUserId,
+      metadata: { viewCount },
+    },
+  });
+}
+
+function clearPaperworkPendingActions(
+  actions: CandidateRecruitingActions,
+): CandidateRecruitingActions {
+  return {
+    ...actions,
+    onboardingPacketPrep: false,
+    needsFollowUp: actions.needsFollowUp,
+  };
+}
+
+export async function applyCandidatePaperworkSigned(input: {
+  candidateId: string;
+  signatureRequestId: string;
+  byUserId?: string;
+}): Promise<CandidateWorkflowRecord> {
+  const now = new Date().toISOString();
+  const file = await readStoreFile();
+  const existing = file.workflows[input.candidateId];
+  if (existing?.paperworkStatus === "signed" && existing.workflowStatus === "Signed") {
+    return existing;
+  }
+
+  const recruitingActions = clearPaperworkPendingActions(
+    existing?.recruitingActions ?? emptyRecruitingActions(),
+  );
+
+  return upsertCandidateWorkflow({
+    candidateId: input.candidateId,
+    workflowStatus: "Signed",
+    assignedRecruiter: existing?.assignedRecruiter,
+    assignedDM: existing?.assignedDM,
+    recruitingActions,
+    signatureRequestId: input.signatureRequestId,
+    paperworkTemplateKey: existing?.paperworkTemplateKey ?? null,
+    paperworkSentAt: existing?.paperworkSentAt ?? now,
+    paperworkViewedAt: existing?.paperworkViewedAt ?? null,
+    paperworkViewCount: existing?.paperworkViewCount ?? 0,
+    paperworkSignedAt: now,
+    paperworkStatus: "signed",
+    paperworkError: null,
+    paperworkHistoryMessage: "Dropbox Sign webhook: paperwork signed.",
+    audit: {
+      action: "paperwork_signed",
+      byUserId: input.byUserId,
+      metadata: { signatureRequestId: input.signatureRequestId },
     },
   });
 }

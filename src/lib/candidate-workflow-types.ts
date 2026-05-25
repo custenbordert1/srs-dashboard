@@ -40,6 +40,8 @@ export type CandidateWorkflowRecord = {
   signatureRequestId: string | null;
   paperworkTemplateKey: string | null;
   paperworkSentAt: string | null;
+  paperworkViewedAt: string | null;
+  paperworkViewCount: number;
   paperworkSignedAt: string | null;
   paperworkStatus: PaperworkStatus;
   paperworkError: string | null;
@@ -107,6 +109,11 @@ export function normalizeWorkflowRecord(
     paperworkTemplateKey:
       typeof raw.paperworkTemplateKey === "string" ? raw.paperworkTemplateKey : null,
     paperworkSentAt: typeof raw.paperworkSentAt === "string" ? raw.paperworkSentAt : null,
+    paperworkViewedAt: typeof raw.paperworkViewedAt === "string" ? raw.paperworkViewedAt : null,
+    paperworkViewCount:
+      typeof raw.paperworkViewCount === "number" && raw.paperworkViewCount >= 0
+        ? Math.floor(raw.paperworkViewCount)
+        : 0,
     paperworkSignedAt: typeof raw.paperworkSignedAt === "string" ? raw.paperworkSignedAt : null,
     paperworkStatus: normalizePaperworkStatus(raw.paperworkStatus),
     paperworkError: typeof raw.paperworkError === "string" ? raw.paperworkError : null,

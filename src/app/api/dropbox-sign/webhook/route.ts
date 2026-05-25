@@ -1,45 +1,81 @@
+import {
+  DROPBOX_SIGN_WEBHOOK_ACK,
+  isHandledDropboxSignEventType,
+  parseDropboxSignWebhookBody,
+  readDropboxSignWebhookPayload,
+  verifyDropboxSignEventHash,
+  verifyDropboxSignWebhookSecret,
+} from "@/lib/dropbox-sign-webhook";
+import { handleDropboxSignWebhookEvent } from "@/lib/dropbox-sign-webhook-handler";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-/** Phase 1 placeholder — logs events only; status polling drives workflow updates. */
+/** No guardApiRoute — Dropbox Sign servers call this without a recruiter session. */
+
+function webhookSkipVerify(): boolean {
+  return process.env.DROPBOX_SIGN_WEBHOOK_SKIP_VERIFY?.trim().toLowerCase() === "true";
+}
+
 export async function POST(request: Request) {
-  let eventType = "unknown";
-  let signatureRequestId: string | null = null;
+  if (!verifyDropboxSignWebhookSecret(request)) {
+    console.warn("[dropbox-sign-webhook] invalid_webhook_secret");
+    return new NextResponse("Invalid webhook secret", { status: 401 });
+  }
 
-  try {
-    const contentType = request.headers.get("content-type") ?? "";
-    if (contentType.includes("multipart/form-data")) {
-      const form = await request.formData();
-      const jsonField = form.get("json");
-      if (typeof jsonField === "string") {
-        const parsed = JSON.parse(jsonField) as {
-          event?: { event_type?: string; event_metadata?: { related_signature_id?: string } };
-          signature_request?: { signature_request_id?: string };
-        };
-        eventType = parsed.event?.event_type ?? eventType;
-        signatureRequestId =
-          parsed.signature_request?.signature_request_id ??
-          parsed.event?.event_metadata?.related_signature_id ??
-          null;
-      }
-    } else {
-      const body = (await request.json()) as {
-        event?: { event_type?: string };
-        signature_request?: { signature_request_id?: string };
-      };
-      eventType = body.event?.event_type ?? eventType;
-      signatureRequestId = body.signature_request?.signature_request_id ?? null;
+  const raw = await readDropboxSignWebhookPayload(request);
+  const payload = parseDropboxSignWebhookBody(raw);
+
+  if (!payload) {
+    console.warn("[dropbox-sign-webhook] invalid_payload");
+    return new NextResponse("Invalid payload", { status: 400 });
+  }
+
+  const eventType = payload.event.event_type;
+  const signatureRequestId = payload.signature_request?.signature_request_id ?? null;
+
+  const apiKey = process.env.DROPBOX_SIGN_API_KEY?.trim() ?? "";
+  if (!webhookSkipVerify()) {
+    if (!apiKey) {
+      console.error("[dropbox-sign-webhook] missing_api_key_for_verification");
+      return new NextResponse("Webhook verification unavailable", { status: 503 });
     }
-  } catch {
-    // Accept webhook without failing Dropbox Sign retries.
+    if (!verifyDropboxSignEventHash(apiKey, payload.event)) {
+      console.warn("[dropbox-sign-webhook] invalid_event_hash", {
+        eventType,
+        signatureRequestId: signatureRequestId ? "[redacted]" : null,
+      });
+      return new NextResponse("Invalid event hash", { status: 401 });
+    }
   }
 
   console.info("[dropbox-sign-webhook]", {
     eventType,
+    handledType: isHandledDropboxSignEventType(eventType),
     signatureRequestId: signatureRequestId ? "[redacted]" : null,
     receivedAt: new Date().toISOString(),
   });
 
-  return NextResponse.json({ ok: true, received: true, eventType });
+  if (isHandledDropboxSignEventType(eventType)) {
+    try {
+      const result = await handleDropboxSignWebhookEvent(payload);
+      if (result.skipped) {
+        console.warn("[dropbox-sign-webhook] skipped", {
+          eventType,
+          reason: result.skipped,
+          candidateId: result.candidateId,
+        });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Webhook handler failed";
+      console.error("[dropbox-sign-webhook] handler_error", { eventType, message });
+      return new NextResponse("Handler error", { status: 500 });
+    }
+  }
+
+  return new NextResponse(DROPBOX_SIGN_WEBHOOK_ACK, {
+    status: 200,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
 }

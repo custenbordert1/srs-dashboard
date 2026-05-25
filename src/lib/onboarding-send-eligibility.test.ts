@@ -90,6 +90,62 @@ describe("onboarding-send-eligibility", () => {
     );
   });
 
+  it("blocks resend when signature is still pending", () => {
+    const row = buildBaselineWorkflowRow(sample(), {
+      candidateId: "c1",
+      workflowStatus: "Paperwork Sent",
+      paperworkStatus: "sent",
+      signatureRequestId: "sig-abc",
+      paperworkSentAt: "2026-05-20T12:00:00.000Z",
+      paperworkViewedAt: null,
+      paperworkViewCount: 0,
+      paperworkSignedAt: null,
+      paperworkTemplateKey: "onboarding_packet",
+      paperworkError: null,
+      updatedAt: "2026-05-20T12:00:00.000Z",
+    } as never);
+    assert.equal(
+      getSendPaperworkBlockReason({
+        candidate: row,
+        templateKey: "onboarding_packet",
+        onboardingConfigured: true,
+        onboardingConfigLoaded: true,
+        onboardingConfigError: null,
+        paperworkTemplates: [{ key: "onboarding_packet", label: "Packet", configured: true }],
+        sendBusy: false,
+      }),
+      "pending_signature",
+    );
+  });
+
+  it("blocks send when paperwork already signed", () => {
+    const row = buildBaselineWorkflowRow(sample(), {
+      candidateId: "c1",
+      workflowStatus: "Signed",
+      paperworkStatus: "signed",
+      signatureRequestId: "sig-abc",
+      paperworkSignedAt: "2026-05-21T12:00:00.000Z",
+      paperworkViewedAt: null,
+      paperworkViewCount: 0,
+      paperworkSentAt: "2026-05-20T12:00:00.000Z",
+      paperworkTemplateKey: "onboarding_packet",
+      paperworkError: null,
+      updatedAt: "2026-05-21T12:00:00.000Z",
+    } as never);
+    assert.equal(
+      getSendPaperworkBlockReason({
+        candidate: row,
+        templateKey: "onboarding_packet",
+        onboardingConfigured: true,
+        onboardingConfigLoaded: true,
+        onboardingConfigError: null,
+        paperworkTemplates: [{ key: "onboarding_packet", label: "Packet", configured: true }],
+        sendBusy: false,
+      }),
+      "already_signed",
+    );
+  });
+
   it("includes config error detail in message", () => {
     assert.match(
       sendPaperworkBlockMessage("config_error", {

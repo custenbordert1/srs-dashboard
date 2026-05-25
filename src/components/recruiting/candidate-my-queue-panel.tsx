@@ -9,6 +9,7 @@ import {
   type CandidateQueueLaneId,
 } from "@/lib/candidate-action-queue";
 import { buildQueueCompactMetrics } from "@/lib/candidate-queue-metrics";
+import { buildPaperworkOperationsMetrics } from "@/lib/paperwork-operations-metrics";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import {
@@ -60,6 +61,7 @@ export function CandidateMyQueuePanel({
   );
 
   const metrics = useMemo(() => buildQueueCompactMetrics(candidates), [candidates]);
+  const paperworkOps = useMemo(() => buildPaperworkOperationsMetrics(candidates), [candidates]);
   const actionCounts = useMemo(() => buildRecruiterActionQueueCounts(candidates), [candidates]);
 
   const filterCounts = useMemo(
@@ -141,6 +143,17 @@ export function CandidateMyQueuePanel({
         <MetricCard label="Aging 7d+" value={actionCounts.aging7dPlus} tone="warn" />
       </div>
 
+      <div className="mt-2 grid auto-rows-fr items-stretch gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <MetricCard label="Viewed, not signed" value={paperworkOps.viewedNotSigned} />
+        <MetricCard
+          label="Avg time to sign (h)"
+          value={paperworkOps.avgTimeToSignHours != null ? String(paperworkOps.avgTimeToSignHours) : "—"}
+        />
+        <MetricCard label="Signed today" value={paperworkOps.signedToday} tone="ok" />
+        <MetricCard label="Pending 24h+" value={paperworkOps.pendingOver24h} tone="warn" />
+        <MetricCard label="Resend watchlist" value={paperworkOps.resendCandidates} tone="warn" />
+      </div>
+
       <div className="mt-4 flex flex-wrap gap-2">
         {CANDIDATE_QUEUE_LANE_ORDER.map((lane) => {
           const count = board.lanes[lane].totalInLane;
@@ -218,7 +231,7 @@ function MetricCard({
   tone = "neutral",
 }: {
   label: string;
-  value: number;
+  value: number | string;
   tone?: "neutral" | "warn" | "ok";
 }) {
   const toneClass =

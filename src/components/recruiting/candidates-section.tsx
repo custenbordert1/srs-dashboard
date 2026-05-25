@@ -1027,6 +1027,34 @@ export function CandidatesSection() {
     [committedCandidates, jobsByPositionId],
   );
 
+  useEffect(() => {
+    if (typeof EventSource === "undefined") return;
+    const source = new EventSource("/api/candidates/workflows/events");
+    source.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as {
+          candidateId?: string;
+          workflow?: CandidateWorkflowRecord;
+          eventType?: string;
+        };
+        const workflow = payload.workflow;
+        if (!workflow?.candidateId) return;
+        const notice =
+          workflow.paperworkStatus === "signed"
+            ? workflowNoticePaperworkSigned()
+            : workflow.paperworkStatus === "viewed"
+              ? "Paperwork viewed"
+              : payload.eventType === "signature_request_all_signed"
+                ? workflowNoticePaperworkSigned()
+                : undefined;
+        commitWorkflowToView(workflow, { notice });
+      } catch {
+        // Ignore malformed SSE payloads.
+      }
+    };
+    return () => source.close();
+  }, [commitWorkflowToView]);
+
   const candidates = useMemo(() => {
     if (enrichedCandidates.length > 0) {
       return enrichedCandidates;

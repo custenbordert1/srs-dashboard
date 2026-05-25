@@ -38,6 +38,8 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   signatureRequestId: string | null;
   paperworkTemplateKey: string | null;
   paperworkSentAt: string | null;
+  paperworkViewedAt: string | null;
+  paperworkViewCount: number;
   paperworkSignedAt: string | null;
   paperworkStatus: PaperworkStatus;
   paperworkError: string | null;
@@ -144,6 +146,8 @@ export function buildBaselineWorkflowRow(
     signatureRequestId: local?.signatureRequestId ?? null,
     paperworkTemplateKey: local?.paperworkTemplateKey ?? null,
     paperworkSentAt: local?.paperworkSentAt ?? null,
+    paperworkViewedAt: local?.paperworkViewedAt ?? null,
+    paperworkViewCount: local?.paperworkViewCount ?? 0,
     paperworkSignedAt: local?.paperworkSignedAt ?? null,
     paperworkStatus: local?.paperworkStatus ?? "not_sent",
     paperworkError: local?.paperworkError ?? null,
@@ -211,6 +215,8 @@ export function buildScoredWorkflowRow(
     signatureRequestId: local?.signatureRequestId ?? null,
     paperworkTemplateKey: local?.paperworkTemplateKey ?? null,
     paperworkSentAt: local?.paperworkSentAt ?? null,
+    paperworkViewedAt: local?.paperworkViewedAt ?? null,
+    paperworkViewCount: local?.paperworkViewCount ?? 0,
     paperworkSignedAt: local?.paperworkSignedAt ?? null,
     paperworkStatus: local?.paperworkStatus ?? "not_sent",
     paperworkError: local?.paperworkError ?? null,

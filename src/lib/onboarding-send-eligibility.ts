@@ -29,7 +29,9 @@ export type SendPaperworkBlockReason =
   | "config_error"
   | "missing_api_key"
   | "missing_template"
-  | "missing_email";
+  | "missing_email"
+  | "already_signed"
+  | "pending_signature";
 
 const BLOCK_MESSAGES: Record<SendPaperworkBlockReason, string> = {
   sending: "Sending packet…",
@@ -38,6 +40,8 @@ const BLOCK_MESSAGES: Record<SendPaperworkBlockReason, string> = {
   missing_api_key: "DROPBOX_SIGN_API_KEY not configured",
   missing_template: "Onboarding packet template not configured",
   missing_email: "Missing candidate email",
+  already_signed: "Paperwork already signed",
+  pending_signature: "Packet already sent — awaiting signature",
 };
 
 export function isOnboardingTemplateConfigured(
@@ -61,6 +65,13 @@ export function getSendPaperworkBlockReason(
   const hasEmail =
     input.hasCandidateEmail ?? hasCandidatePrimaryEmail(input.candidate);
   if (!hasEmail) return "missing_email";
+  if (input.candidate.paperworkStatus === "signed") return "already_signed";
+  if (
+    input.candidate.signatureRequestId &&
+    (input.candidate.paperworkStatus === "sent" || input.candidate.paperworkStatus === "viewed")
+  ) {
+    return "pending_signature";
+  }
   return null;
 }
 
@@ -83,8 +94,11 @@ export function sendPaperworkBlockMessage(
 export function sendPaperworkTooltip(input: SendPaperworkEligibilityInput): string {
   const reason = getSendPaperworkBlockReason(input);
   if (reason) return sendPaperworkBlockMessage(reason, input);
-  if (input.candidate.signatureRequestId && input.candidate.paperworkStatus === "sent") {
-    return "Resend onboarding packet via Dropbox Sign";
+  if (reason === "pending_signature") {
+    return "Packet pending in Dropbox Sign — use Refresh only if webhook is delayed";
+  }
+  if (reason === "already_signed") {
+    return BLOCK_MESSAGES.already_signed;
   }
   return "Send onboarding packet via Dropbox Sign";
 }

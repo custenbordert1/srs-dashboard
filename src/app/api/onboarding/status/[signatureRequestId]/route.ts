@@ -1,10 +1,13 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { mapSignatureRequestToPaperworkStatus } from "@/lib/candidate-paperwork";
 import {
+  applyCandidatePaperworkSigned,
   applyCandidatePaperworkStatus,
+  applyCandidatePaperworkViewed,
   findCandidateIdBySignatureRequest,
   getCandidateWorkflowState,
 } from "@/lib/candidate-workflow-store";
+import { publishWorkflowRealtime } from "@/lib/workflow-realtime-push";
 import { DropboxSignError, getSignatureRequest } from "@/lib/dropbox-sign";
 import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
@@ -39,12 +42,33 @@ export async function GET(request: Request, context: RouteContext) {
       : undefined;
 
     if (candidateId) {
-      workflow = await applyCandidatePaperworkStatus({
-        candidateId,
-        signatureRequestId: id,
-        paperworkStatus,
-        byUserId: session.userId,
-      });
+      if (paperworkStatus === "signed") {
+        workflow = await applyCandidatePaperworkSigned({
+          candidateId,
+          signatureRequestId: id,
+          byUserId: session.userId,
+        });
+      } else if (paperworkStatus === "viewed") {
+        workflow = await applyCandidatePaperworkViewed({
+          candidateId,
+          signatureRequestId: id,
+          byUserId: session.userId,
+        });
+      } else {
+        workflow = await applyCandidatePaperworkStatus({
+          candidateId,
+          signatureRequestId: id,
+          paperworkStatus,
+          byUserId: session.userId,
+        });
+      }
+      if (workflow) {
+        publishWorkflowRealtime({
+          candidateId,
+          workflow,
+          source: "workflow_api",
+        });
+      }
       auditFromSession(session, {
         action: "onboarding_status_check",
         entityType: "candidate_workflow",
