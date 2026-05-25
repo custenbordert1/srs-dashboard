@@ -35,7 +35,10 @@ import {
   defaultRecruiterRosters,
   type RecruiterRosters,
 } from "@/lib/candidate-workflow-types";
-import { VirtualCandidateTable } from "@/components/recruiting/virtual-candidate-table";
+import {
+  CANDIDATE_TABLE_ROW_HEIGHT_PX,
+  VirtualCandidateTable,
+} from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
 import { matchCandidateToOpportunities } from "@/lib/mel-matching/matching-engine";
@@ -111,6 +114,7 @@ import { CandidateRowTriageActions } from "@/components/recruiting/candidate-row
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -128,7 +132,14 @@ const inputClass =
   "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const thClass =
   "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-sm";
-const tdClass = "whitespace-nowrap px-1.5 py-0.5 text-xs text-zinc-300";
+/** Keep in sync with `CANDIDATE_TABLE_ROW_HEIGHT_PX` (54). */
+const tdClass =
+  "max-h-[54px] align-middle overflow-hidden whitespace-nowrap px-1.5 py-0 text-xs text-zinc-300";
+const workflowPillClass =
+  "inline-flex h-5 max-w-full items-center truncate rounded-full px-1.5 text-[10px] font-medium leading-none";
+const syncBannerClass =
+  "rounded-lg border px-3 text-sm leading-snug";
+const syncBannerSlotClass = "min-h-[2.75rem]";
 
 const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   Applied: "bg-slate-500/15 text-slate-200 ring-1 ring-slate-500/30",
@@ -220,13 +231,6 @@ function formatDays(days: number | null): string {
   return days === null ? "—" : `${days}d`;
 }
 
-function agingTextClass(days: number | null): string {
-  if (days === null) return "text-zinc-500";
-  if (days <= 3) return "font-medium text-emerald-300";
-  if (days <= 7) return "font-medium text-amber-300";
-  return "font-medium text-red-300";
-}
-
 function agingBucketTextClass(bucket: RecruiterAgingBucket): string {
   if (bucket === "fresh") return "font-medium text-emerald-300";
   if (bucket === "24h") return "font-medium text-amber-300";
@@ -242,22 +246,28 @@ function StatusTouchAging({ candidate }: { candidate: ScoredCandidateWorkflowRow
   );
 }
 
-function CandidateRowAttentionBadges({ candidate }: { candidate: ScoredCandidateWorkflowRow }) {
+const CandidateRowAttentionBadges = memo(function CandidateRowAttentionBadges({
+  candidate,
+}: {
+  candidate: ScoredCandidateWorkflowRow;
+}) {
   const cues = buildRowAttentionCues(candidate);
-  if (cues.length === 0) return null;
   return (
-    <div className="mt-0.5 flex max-w-[10rem] flex-wrap gap-0.5">
-      {cues.map((cue) => (
-        <span
-          key={cue.id}
-          className={`inline-flex rounded-full border px-1 py-px text-[9px] font-medium leading-tight ${ATTENTION_CUE_STYLES[cue.id]}`}
-        >
-          {cue.label}
-        </span>
-      ))}
+    <div className="mt-0.5 h-3.5 overflow-hidden" aria-hidden={cues.length === 0}>
+      <div className="flex h-3.5 items-center gap-0.5 overflow-hidden">
+        {cues.map((cue) => (
+          <span
+            key={cue.id}
+            className={`inline-flex h-3.5 shrink-0 items-center truncate rounded-full border px-1 text-[9px] font-medium leading-none ${ATTENTION_CUE_STYLES[cue.id]}`}
+            title={cue.label}
+          >
+            {cue.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
-}
+});
 
 function tableRowUrgencyClass(candidate: ScoredCandidateWorkflowRow): string {
   const sla = buildCandidateSlaSnapshot({
@@ -311,7 +321,7 @@ function RecruiterCollapsibleSection({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
+    <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -331,16 +341,20 @@ function RecruiterCollapsibleSection({
   );
 }
 
-function RecommendationPills({ items }: { items: WorkflowRecommendation[] }) {
+const RecommendationPills = memo(function RecommendationPills({
+  items,
+}: {
+  items: WorkflowRecommendation[];
+}) {
   if (items.length === 0) {
-    return <span className="text-[10px] text-zinc-600">—</span>;
+    return <span className="inline-flex h-7 items-center text-[10px] text-zinc-600">—</span>;
   }
   return (
-    <div className="flex max-w-[9rem] flex-col gap-0.5">
+    <div className="flex h-7 max-w-[9rem] flex-col justify-center gap-0.5 overflow-hidden">
       {items.slice(0, 2).map((item) => (
         <span
           key={item}
-          className="truncate rounded bg-zinc-800/80 px-1 py-0 text-[9px] text-zinc-300 ring-1 ring-zinc-700"
+          className="truncate rounded bg-zinc-800/80 px-1 py-0 text-[9px] leading-none text-zinc-300 ring-1 ring-zinc-700/80"
           title={item}
         >
           {item}
@@ -348,14 +362,14 @@ function RecommendationPills({ items }: { items: WorkflowRecommendation[] }) {
       ))}
     </div>
   );
-}
+});
 
 function SummaryCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
+    <div className="flex min-h-[7.5rem] flex-col justify-center rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
       <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50">{value}</p>
-      {hint ? <p className="mt-1 text-sm text-zinc-500">{hint}</p> : null}
+      <p className="mt-2 line-clamp-2 text-2xl font-semibold tracking-tight text-zinc-50">{value}</p>
+      {hint ? <p className="mt-1 line-clamp-2 text-sm text-zinc-500">{hint}</p> : null}
     </div>
   );
 }
@@ -1445,10 +1459,10 @@ export function CandidatesSection() {
         <tr
           key={candidate.candidateId}
           onClick={() => setSelectedCandidateId(candidate.candidateId)}
-          className={`cursor-pointer transition-colors ${tableRowUrgencyClass(candidate)} ${
-            rowSelected ? "bg-teal-500/10 hover:bg-teal-500/15" : "hover:bg-zinc-800/40"
+          className={`cursor-pointer ${tableRowUrgencyClass(candidate)} ${
+            rowSelected ? "bg-teal-500/8 hover:bg-teal-500/12" : "hover:bg-zinc-800/30"
           }`}
-          style={{ height: 36 }}
+          style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
         >
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
             <input
@@ -1458,36 +1472,41 @@ export function CandidatesSection() {
               onChange={() => toggleSelectCandidate(candidate.candidateId)}
             />
           </td>
-          <td className={`${tdClass} max-w-[11rem]`}>
-            <div className="truncate font-medium text-zinc-100">{candidateName(candidate)}</div>
-            <CandidateRowAttentionBadges candidate={candidate} />
+          <td className={tdClass}>
+            <div className="flex min-w-0 flex-col justify-center">
+              <div className="truncate font-medium leading-tight text-zinc-100">{candidateName(candidate)}</div>
+              <CandidateRowAttentionBadges candidate={candidate} />
+            </div>
           </td>
-          <td className={`${tdClass} max-w-[12rem] truncate`}>{candidate.email || "—"}</td>
-          <td className={tdClass}>{candidate.phone || "—"}</td>
-          <td className={`${tdClass} max-w-[8rem] truncate text-zinc-400`}>{candidate.source || "—"}</td>
-          <td className={`${tdClass} max-w-[8rem] truncate`}>{candidate.stage || "—"}</td>
-          <td className={`${tdClass} text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
-          <td className={`${tdClass} max-w-[10rem] truncate`}>{candidate.positionName || "—"}</td>
+          <td className={`${tdClass} truncate`}>{candidate.email || "—"}</td>
+          <td className={`${tdClass} truncate`}>{candidate.phone || "—"}</td>
+          <td className={`${tdClass} truncate text-zinc-400`}>{candidate.source || "—"}</td>
+          <td className={`${tdClass} truncate`}>{candidate.stage || "—"}</td>
+          <td className={`${tdClass} truncate text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
+          <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
           <td className={tdClass}>{candidate.city || "—"}</td>
           <td className={tdClass}>{candidate.state || "—"}</td>
           <td className={tdClass}>
             <span
-              className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-tight ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
+              className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
+              title={candidate.workflowStatus}
             >
               {candidate.workflowStatus}
             </span>
           </td>
-          <td className={`${tdClass} text-[10px] leading-tight`}>
+          <td className={`${tdClass} truncate text-[10px] leading-tight`}>
             <span className="text-zinc-500">
               Applied {formatDays(appliedDays)}
               <span className="text-zinc-600"> · </span>
               <StatusTouchAging candidate={candidate} />
             </span>
           </td>
-          <td className={`${tdClass} max-w-[12rem]`}>
-            <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
-            <div className="mt-0.5 truncate text-[10px] text-zinc-500">
-              {candidate.assignedRecruiter} · {candidate.assignedDM}
+          <td className={tdClass}>
+            <div className="flex min-w-0 flex-col justify-center overflow-hidden leading-tight">
+              <div className="truncate text-zinc-300">{candidate.nextActionNeeded}</div>
+              <div className="truncate text-[10px] text-zinc-500">
+                {candidate.assignedRecruiter} · {candidate.assignedDM}
+              </div>
             </div>
           </td>
           <td className={tdClass} onClick={(event) => event.stopPropagation()}>
@@ -1527,9 +1546,9 @@ export function CandidatesSection() {
             className={`${tdClass}${paperworkUrgent ? " bg-amber-500/5" : ""}`}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex flex-col gap-0.5">
+            <div className="flex h-7 flex-col justify-center overflow-hidden leading-tight">
               <span
-                className={`text-[10px] ${paperworkUrgent ? "font-medium text-amber-200" : "text-zinc-500"}`}
+                className={`truncate text-[10px] ${paperworkUrgent ? "font-medium text-amber-200" : "text-zinc-500"}`}
                 title={candidate.paperworkError ?? undefined}
               >
                 {paperworkStatusLabel(candidate.paperworkStatus)}
@@ -1537,12 +1556,16 @@ export function CandidatesSection() {
               {candidate.signatureRequestId ? (
                 <button
                   type="button"
-                  className="text-[10px] text-teal-400/90 hover:underline"
+                  className="truncate text-left text-[10px] text-teal-400/90 hover:underline"
                   onClick={() => refreshPaperworkStatus(candidate)}
                 >
                   Refresh
                 </button>
-              ) : null}
+              ) : (
+                <span className="invisible text-[10px]" aria-hidden>
+                  —
+                </span>
+              )}
             </div>
           </td>
           <td className={tdClass} title={candidate.intelligenceSummary}>
@@ -1553,12 +1576,12 @@ export function CandidatesSection() {
               compact
             />
           </td>
-          <td className={`${tdClass} max-w-[8rem] truncate text-[10px] text-zinc-500`} title={candidate.skillTags.join(", ")}>
+          <td className={`${tdClass} truncate text-[10px] text-zinc-500`} title={candidate.skillTags.join(", ")}>
             {candidate.skillTags.length > 0 ? candidate.skillTags.slice(0, 2).join(", ") : "—"}
           </td>
           <td className={tdClass}>
             <span
-              className={`inline-flex min-w-[2rem] justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${AI_GRADE_STYLES[candidate.aiGrade]}`}
+              className={`inline-flex h-5 min-w-[2rem] items-center justify-center rounded-full px-1.5 text-[10px] font-semibold leading-none ${AI_GRADE_STYLES[candidate.aiGrade]}`}
             >
               {candidate.aiGrade}
             </span>
@@ -1629,28 +1652,60 @@ export function CandidatesSection() {
 
   const syncData = data?.ok ? data : breezySnapshot;
 
-  return (
-    <div className="space-y-6">
-      {syncAlert && !(hasRenderableCandidateRows && syncAlert.toLowerCase().includes("timed out")) ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"
-        >
-          {formatRecruiterSyncAlert(syncAlert)}
-        </p>
-      ) : null}
-      {hasRenderableCandidateRows && (refreshingCandidates || syncAlert) ? (
-        <p className="rounded-lg border border-teal-500/25 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-100">
-          {formatRecruiterBackgroundSyncLine(committedCandidates.length)}
-        </p>
-      ) : null}
-      {enrichmentWarnings.length > 0 ? (
-        <p className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm text-sky-100">
-          {enrichmentWarnings.join(" ")}
-        </p>
-      ) : null}
+  const showSyncAlert =
+    Boolean(syncAlert) &&
+    !(hasRenderableCandidateRows && syncAlert?.toLowerCase().includes("timed out"));
+  const showBackgroundSyncLine =
+    hasRenderableCandidateRows && (refreshingCandidates || syncAlert);
+  const syncHeaderLine = syncData
+    ? formatRecruiterCandidatesSyncHeader({
+        candidateCount: syncData.candidates.length,
+        fetchedAt: syncData.fetchedAt,
+        fromCache: syncData.fromCache,
+        stale: syncData.stale,
+        partial: syncData.partial,
+        positionsScanned: syncData.positionsScanned,
+        totalPositionsAvailable: syncData.totalPositionsAvailable,
+        refreshing: refreshingCandidates,
+      })
+    : null;
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
+  return (
+    <div className="space-y-5">
+      <div className="space-y-2" aria-live="polite">
+        <div className={syncBannerSlotClass}>
+          {showSyncAlert ? (
+            <p
+              role="alert"
+              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-amber-500/30 bg-amber-500/10 py-2 text-amber-100`}
+            >
+              <span className="line-clamp-2">{formatRecruiterSyncAlert(syncAlert!)}</span>
+            </p>
+          ) : null}
+        </div>
+        <div className="min-h-[2.25rem]">
+          {showBackgroundSyncLine ? (
+            <p
+              className={`${syncBannerClass} flex min-h-[2.25rem] items-center border-teal-500/25 bg-teal-500/10 py-1.5 text-xs text-teal-100`}
+            >
+              <span className="line-clamp-1 tabular-nums">
+                {formatRecruiterBackgroundSyncLine(committedCandidates.length)}
+              </span>
+            </p>
+          ) : null}
+        </div>
+        <div className={syncBannerSlotClass}>
+          {enrichmentWarnings.length > 0 ? (
+            <p
+              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-sky-500/30 bg-sky-500/10 py-2 text-sky-100`}
+            >
+              <span className="line-clamp-2">{enrichmentWarnings.join(" ")}</span>
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Candidates</h1>
@@ -1661,20 +1716,18 @@ export function CandidatesSection() {
               Source: <span className="text-zinc-500">{BREEZY_CANDIDATES_SOURCE.label}</span>
               <span className="text-zinc-700"> · {BREEZY_CANDIDATES_SOURCE.apiPath}</span>
             </p>
-            {syncData ? (
-              <p className="mt-1 text-xs text-zinc-500">
-                {formatRecruiterCandidatesSyncHeader({
-                  candidateCount: syncData.candidates.length,
-                  fetchedAt: syncData.fetchedAt,
-                  fromCache: syncData.fromCache,
-                  stale: syncData.stale,
-                  partial: syncData.partial,
-                  positionsScanned: syncData.positionsScanned,
-                  totalPositionsAvailable: syncData.totalPositionsAvailable,
-                  refreshing: refreshingCandidates,
-                })}
-              </p>
-            ) : null}
+            <p
+              className="mt-1 min-h-[2.5rem] text-xs leading-snug text-zinc-500"
+              title={syncHeaderLine ?? undefined}
+            >
+              {syncHeaderLine ? (
+                <span className="line-clamp-2 tabular-nums">{syncHeaderLine}</span>
+              ) : (
+                <span className="invisible" aria-hidden>
+                  Candidate list not loaded yet
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <button
@@ -1692,7 +1745,7 @@ export function CandidatesSection() {
         </div>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid auto-rows-fr items-stretch gap-3 sm:grid-cols-3">
         <SummaryCard
           label="Candidates shown"
           value={filtered.length.toLocaleString()}
@@ -1785,7 +1838,7 @@ export function CandidatesSection() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
+      <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
         <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-sm sm:px-4">
           {recruiterQuickFilter !== "all" ? (
             <p className="text-[11px] text-teal-200/90">
@@ -1922,13 +1975,22 @@ export function CandidatesSection() {
           </div>
         </div>
 
-        {refreshingCandidates || workflowEnrichmentPending ? (
-          <p className="border-b border-teal-500/20 bg-teal-950/20 px-3 py-1.5 text-center text-[11px] text-teal-200/80 sm:px-4">
+        <div
+          className={`flex min-h-[1.75rem] items-center justify-center border-b border-teal-500/15 bg-teal-950/15 px-3 sm:px-4 ${
+            refreshingCandidates || workflowEnrichmentPending ? "" : "border-b-transparent bg-transparent"
+          }`}
+          aria-live="polite"
+        >
+          <p
+            className={`text-center text-[11px] leading-tight text-teal-200/80 ${
+              refreshingCandidates || workflowEnrichmentPending ? "" : "invisible"
+            }`}
+          >
             {workflowEnrichmentPending && !refreshingCandidates
               ? "Enriching candidate scores — table shows loaded rows"
               : "Refreshing Breezy candidates — table stays visible"}
           </p>
-        ) : null}
+        </div>
         {filtered.length === 0 ? (
           <p className="px-3 py-8 text-xs text-zinc-500 sm:px-4">No candidates match the selected filters.</p>
         ) : (
@@ -1938,7 +2000,30 @@ export function CandidatesSection() {
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
-              <thead className="border-b border-zinc-800/80">
+              <>
+                <colgroup>
+                  <col className="w-[2%]" />
+                  <col className="w-[9%]" />
+                  <col className="w-[9%]" />
+                  <col className="w-[6%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[7%]" />
+                  <col className="w-[4%]" />
+                  <col className="w-[3%]" />
+                  <col className="w-[7%]" />
+                  <col className="w-[6%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[4%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[4%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[4%]" />
+                  <col className="w-[6%]" />
+                </colgroup>
+                <thead className="border-b border-zinc-800/60">
                 <tr>
                   <th className={thClass}>
                     <input
@@ -1970,6 +2055,7 @@ export function CandidatesSection() {
                   <th className={thClass}>Recommendations</th>
                 </tr>
               </thead>
+              </>
             }
           />
         )}

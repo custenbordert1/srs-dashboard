@@ -57,7 +57,7 @@ function TriageChip({
       disabled={disabled}
       title={title}
       onClick={onClick}
-      className={`rounded border px-1.5 py-0.5 text-[10px] font-medium disabled:cursor-not-allowed disabled:opacity-40 ${toneClass}`}
+      className={`inline-flex h-5 shrink-0 items-center justify-center rounded border px-1.5 text-[10px] font-medium leading-none disabled:cursor-not-allowed disabled:opacity-40 ${toneClass}`}
     >
       {label}
     </button>
@@ -84,7 +84,7 @@ export function CandidateRowTriageActions({
 }: CandidateRowTriageActionsProps) {
   return (
     <div
-      className="flex max-w-[14rem] flex-wrap items-center gap-0.5"
+      className="flex h-7 max-w-full items-center gap-0.5 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       onClick={(event) => event.stopPropagation()}
     >
       <TriageChip
@@ -96,7 +96,7 @@ export function CandidateRowTriageActions({
       />
       <TriageChip label="Done" title="Mark follow-up complete" onClick={onFollowUpDone} />
       <TriageChip
-        label={sendBusy ? "Sending…" : "Send"}
+        label={sendBusy ? "…" : "Send"}
         tone="teal"
         disabled={sendDisabled || sendBusy}
         title={sendTitle ?? "Send onboarding packet"}
