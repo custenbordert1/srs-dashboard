@@ -24,7 +24,7 @@ const ALLOWED_SECTIONS = new Set<DmRecruitingFoundationSection>([
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["dm", "executive", "recruiter"],
+    allowedRoles: ["dm", "admin", "executive"],
     requireTerritory: true,
     auditAction: "dm_recruiting_foundation",
   });

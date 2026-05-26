@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter", "dm"],
   });
   if (isGuardFailure(guard)) return guard;
   const { session } = guard;

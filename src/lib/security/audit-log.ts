@@ -94,6 +94,8 @@ export function auditFromSession(
 
 export function territoryLabel(session: AuthSession | null): string {
   if (!session) return "";
-  if (session.role === "executive" || session.role === "recruiter") return "nationwide";
+  if (session.role === "admin" || session.role === "executive" || session.role === "recruiter") {
+    return "nationwide";
+  }
   return session.territoryStates.join(",");
 }

@@ -41,6 +41,17 @@ function buildSeedUsers(): DashboardUser[] {
   const passwordHash = hashPassword(defaultPassword());
   const users: DashboardUser[] = [
     {
+      id: "user-admin",
+      email: "admin@srsmerchandising.com",
+      name: "Admin",
+      role: "admin",
+      passwordHash,
+      territoryStates: [],
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
       id: "user-executive",
       email: "executive@srsmerchandising.com",
       name: "Executive Admin",

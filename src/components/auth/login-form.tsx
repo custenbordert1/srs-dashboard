@@ -1,5 +1,6 @@
 "use client";
 
+import { MOCK_DM_LOGINS, isMockDmLoginEnabled } from "@/lib/auth/mock-dm-logins";
 import { ROLE_LABELS } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -116,11 +117,42 @@ export function LoginForm() {
         </button>
       </form>
 
+      {isMockDmLoginEnabled() ? (
+        <div className="mt-6 rounded-lg border border-violet-500/25 bg-violet-500/5 px-3 py-3">
+          <p className="text-[11px] font-medium text-violet-200/90">Dev: quick DM login</p>
+          <p className="mt-1 text-[10px] text-zinc-500">
+            Uses seeded DM accounts and default password from <code className="text-zinc-400">.env.local</code>.
+          </p>
+          <div className="mt-2 flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
+            {MOCK_DM_LOGINS.map((mock) => (
+              <button
+                key={mock.email}
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setEmail(mock.email);
+                  setPassword("");
+                  setError(null);
+                }}
+                className="rounded border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] text-zinc-300 hover:border-violet-500/40 hover:bg-violet-500/10 disabled:opacity-50"
+                title={`${mock.territoryStates.join(", ")} (${mock.stateCount} states)`}
+              >
+                {mock.dmName}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] text-zinc-600">
+            Click a DM, enter password, then Sign in. Recruiter: recruiter@srsmerchandising.com · Admin:
+            admin@srsmerchandising.com
+          </p>
+        </div>
+      ) : null}
+
       <div className="mt-6 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-[11px] text-zinc-500">
         <p className="font-medium text-zinc-400">Roles</p>
         <ul className="mt-1 space-y-0.5">
-          <li>{ROLE_LABELS.executive} — full dashboard</li>
-          <li>{ROLE_LABELS.recruiter} — full dashboard</li>
+          <li>{ROLE_LABELS.admin} — full command center + executive tools</li>
+          <li>{ROLE_LABELS.recruiter} — full recruiting command center</li>
           <li>{ROLE_LABELS.dm} — territory-scoped DM dashboard only</li>
         </ul>
       </div>

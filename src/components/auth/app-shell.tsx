@@ -1,6 +1,7 @@
 "use client";
 
 import { ROLE_LABELS } from "@/lib/auth/permissions";
+import { isAdminRole, isDmRole } from "@/lib/auth/roles";
 import type { UserPublic } from "@/lib/auth/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -34,7 +35,7 @@ export function AppShell({ user, children, title, subtitle }: AppShellProps) {
             <span className="rounded-full border border-zinc-700 bg-zinc-900/60 px-3 py-1 text-xs text-zinc-300">
               {user.name} · {ROLE_LABELS[user.role]}
             </span>
-            {user.role !== "dm" ? (
+            {!isDmRole(user.role) ? (
               <Link
                 href="/"
                 className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
@@ -42,7 +43,7 @@ export function AppShell({ user, children, title, subtitle }: AppShellProps) {
                 Command center
               </Link>
             ) : null}
-            {user.role === "dm" || user.role === "executive" ? (
+            {isDmRole(user.role) || isAdminRole(user.role) ? (
               <Link
                 href="/dm"
                 className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
@@ -50,7 +51,7 @@ export function AppShell({ user, children, title, subtitle }: AppShellProps) {
                 DM dashboard
               </Link>
             ) : null}
-            {user.role === "executive" ? (
+            {isAdminRole(user.role) ? (
               <>
                 <Link
                   href="/executive"

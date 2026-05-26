@@ -1,6 +1,8 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { buildDmDashboardSnapshot } from "@/lib/dm-dashboard/build-dm-dashboard";
+import { buildDmOnboardingSnapshot } from "@/lib/dm-dashboard/dm-onboarding-snapshot";
+import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
@@ -15,7 +17,7 @@ const ROUTE = "/api/dm/dashboard";
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["dm", "executive", "recruiter"],
+    allowedRoles: ["dm", "admin", "executive"],
     requireTerritory: true,
     auditAction: "dm_dashboard",
   });
@@ -51,7 +53,16 @@ export async function GET(request: Request) {
   const fetchedAt = candidatesResult.fetchedAt;
 
   const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
-  const dashboard = buildDmDashboardSnapshot(session, jobs, candidates, fetchedAt, melOpportunities);
+  const workflowBundle = await getCandidateWorkflowBundle();
+  const onboarding = buildDmOnboardingSnapshot(session, workflowBundle.workflows, candidates);
+  const dashboard = buildDmDashboardSnapshot(
+    session,
+    jobs,
+    candidates,
+    fetchedAt,
+    melOpportunities,
+    onboarding,
+  );
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,

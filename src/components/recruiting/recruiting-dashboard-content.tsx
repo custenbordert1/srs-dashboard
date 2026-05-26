@@ -63,7 +63,8 @@ export function RecruitingDashboardContent({
   userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
-  const executiveTabs = userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
+  const executiveTabs =
+    userRole === "admin" || userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
 
   useEffect(() => {
     const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);

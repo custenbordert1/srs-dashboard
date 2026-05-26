@@ -19,7 +19,7 @@ const ROUTE = "/api/breezy/candidates/health";
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
     rateLimit: BREEZY_RATE_LIMIT,
     auditAction: "breezy_candidates_health_read",
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
   });
   if (isGuardFailure(guard)) return guard;

@@ -1,22 +1,37 @@
-import { canAccessRoute, canAccessTerritory, filterStatesForSession } from "@/lib/auth/permissions";
+import {
+  canAccessRoute,
+  canAccessTerritory,
+  filterStatesForSession,
+} from "@/lib/auth/permissions";
+import { isAdminRole, isRecruiterRole } from "@/lib/auth/roles";
 import type { AuthSession, UserRole } from "@/lib/auth/types";
 
 export { canAccessRoute, canAccessTerritory, filterStatesForSession };
 
+const RECRUITER_OPS_ROLES: UserRole[] = ["admin", "executive", "recruiter"];
+
+function isBreezyDiagnosticsPath(pathname: string): boolean {
+  return (
+    pathname.includes("/debug") ||
+    pathname.includes("/probe") ||
+    pathname.includes("/health")
+  );
+}
+
 export function canAccessExecutiveApi(session: AuthSession): boolean {
-  return session.role === "executive";
+  return isAdminRole(session.role);
 }
 
 export function canAccessDmApi(session: AuthSession): boolean {
-  return session.role === "dm" || session.role === "executive" || session.role === "recruiter";
+  return session.role === "dm" || isAdminRole(session.role);
 }
 
 export function canAccessRecruitingApi(session: AuthSession): boolean {
-  return session.role === "executive" || session.role === "recruiter" || session.role === "dm";
+  return isAdminRole(session.role) || isRecruiterRole(session.role);
 }
 
 export function canAccessCandidatesApi(session: AuthSession): boolean {
-  return canAccessRecruitingApi(session);
+  return canAccessRecruitingApi(session) || session.role === "dm";
 }
 
 export function hasTerritoryAssignment(session: AuthSession): boolean {
@@ -25,11 +40,11 @@ export function hasTerritoryAssignment(session: AuthSession): boolean {
 }
 
 export function canAccessExecutivePage(role: UserRole): boolean {
-  return role === "executive";
+  return isAdminRole(role);
 }
 
 export function canAccessDmPage(role: UserRole): boolean {
-  return role === "dm" || role === "executive" || role === "recruiter";
+  return role === "dm" || isAdminRole(role);
 }
 
 export function apiRoutePolicy(pathname: string): {
@@ -37,51 +52,66 @@ export function apiRoutePolicy(pathname: string): {
   allowedRoles?: UserRole[];
   requiresTerritory?: boolean;
 } {
-  if (pathname.startsWith("/api/executive")) {
-    return { requiresAuth: true, allowedRoles: ["executive"], requiresTerritory: false };
+  if (pathname.startsWith("/api/executive") || pathname.startsWith("/api/health")) {
+    return { requiresAuth: true, allowedRoles: ["admin", "executive"], requiresTerritory: false };
   }
   if (pathname.startsWith("/api/dm")) {
-    return { requiresAuth: true, allowedRoles: ["dm", "executive", "recruiter"], requiresTerritory: true };
+    return { requiresAuth: true, allowedRoles: ["dm", "admin", "executive"], requiresTerritory: true };
+  }
+  if (pathname.startsWith("/api/job-management")) {
+    return { requiresAuth: true, allowedRoles: RECRUITER_OPS_ROLES, requiresTerritory: false };
+  }
+  if (
+    pathname.startsWith("/api/onboarding/send-packet") ||
+    pathname.startsWith("/api/onboarding/direct-deposit") ||
+    pathname.startsWith("/api/onboarding/config")
+  ) {
+    return { requiresAuth: true, allowedRoles: RECRUITER_OPS_ROLES, requiresTerritory: false };
+  }
+  if (pathname.startsWith("/api/onboarding/status")) {
+    return {
+      requiresAuth: true,
+      allowedRoles: [...RECRUITER_OPS_ROLES, "dm"],
+      requiresTerritory: true,
+    };
+  }
+  if (pathname.startsWith("/api/workforce-intelligence") || pathname.startsWith("/api/reps")) {
+    return { requiresAuth: true, allowedRoles: RECRUITER_OPS_ROLES, requiresTerritory: false };
+  }
+  if (pathname.startsWith("/api/rep-intelligence")) {
+    return { requiresAuth: true, allowedRoles: RECRUITER_OPS_ROLES, requiresTerritory: false };
+  }
+  if (isBreezyDiagnosticsPath(pathname)) {
+    return { requiresAuth: true, allowedRoles: RECRUITER_OPS_ROLES, requiresTerritory: false };
   }
   if (pathname.startsWith("/api/recruiting")) {
     return {
       requiresAuth: true,
-      allowedRoles: ["executive", "recruiter", "dm"],
-      requiresTerritory: true,
+      allowedRoles: RECRUITER_OPS_ROLES,
+      requiresTerritory: false,
     };
   }
   if (pathname.startsWith("/api/candidates")) {
     return {
       requiresAuth: true,
-      allowedRoles: ["executive", "recruiter", "dm"],
+      allowedRoles: [...RECRUITER_OPS_ROLES, "dm"],
       requiresTerritory: true,
     };
+  }
+  if (pathname.startsWith("/api/breezy/jobs")) {
+    return { requiresAuth: true, allowedRoles: RECRUITER_OPS_ROLES, requiresTerritory: false };
   }
   if (pathname.startsWith("/api/breezy")) {
     return {
       requiresAuth: true,
-      allowedRoles: ["executive", "recruiter", "dm"],
+      allowedRoles: [...RECRUITER_OPS_ROLES, "dm"],
       requiresTerritory: true,
     };
   }
-  if (pathname.startsWith("/api/mel-projects")) {
+  if (pathname.startsWith("/api/mel-projects") || pathname.startsWith("/api/coverage-risk")) {
     return {
       requiresAuth: true,
-      allowedRoles: ["executive", "recruiter", "dm"],
-      requiresTerritory: true,
-    };
-  }
-  if (pathname.startsWith("/api/reps")) {
-    return {
-      requiresAuth: true,
-      allowedRoles: ["executive", "recruiter", "dm"],
-      requiresTerritory: true,
-    };
-  }
-  if (pathname.startsWith("/api/rep-intelligence")) {
-    return {
-      requiresAuth: true,
-      allowedRoles: ["executive", "recruiter", "dm"],
+      allowedRoles: [...RECRUITER_OPS_ROLES, "dm"],
       requiresTerritory: true,
     };
   }

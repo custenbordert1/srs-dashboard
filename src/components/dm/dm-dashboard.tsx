@@ -3,7 +3,9 @@
 import { AppShell } from "@/components/auth/app-shell";
 import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widget";
 import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
+import { DmOperationalDashboard } from "@/components/dm/dm-operational-dashboard";
 import { RecruitingAutomationSection } from "@/components/recruiting/recruiting-automation-section";
+import { isDmRole } from "@/lib/auth/roles";
 import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import type { UserPublic } from "@/lib/auth/types";
@@ -29,15 +31,14 @@ export function DmDashboard({ user }: DmDashboardProps) {
     territoryStates: data?.territoryStates ?? user.territoryStates,
   });
 
-  const subtitle =
-    user.role === "dm"
-      ? `Territory: ${user.territoryStates.join(", ") || "—"}`
-      : "Executive view — all territories";
+  const subtitle = isDmRole(user.role)
+    ? `Territory: ${user.territoryStates.join(", ") || "—"}`
+    : "Admin view — all territories";
 
   return (
     <AppShell
       user={user}
-      title={user.role === "dm" ? `${user.name} · Territory intelligence` : "DM territory intelligence"}
+      title={isDmRole(user.role) ? `${user.name} · Territory operations` : "DM territory intelligence"}
       subtitle={subtitle}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -86,6 +87,14 @@ export function DmDashboard({ user }: DmDashboardProps) {
       ) : null}
 
       {data ? (
+        isDmRole(user.role) ? (
+          <DmOperationalDashboard
+            data={data}
+            meta={meta}
+            onCandidateClick={drawer.openCandidate}
+            selectedCandidateId={drawer.selectedCandidateId}
+          />
+        ) : (
         <>
           <TerritoryHealthCard health={data.health} />
 
@@ -201,6 +210,7 @@ export function DmDashboard({ user }: DmDashboardProps) {
             {meta?.refreshedAt ? ` · refreshed ${new Date(meta.refreshedAt).toLocaleTimeString()}` : ""}
           </p>
         </>
+        )
       ) : null}
 
       <CandidateDetailDrawer {...drawer.drawerProps} />

@@ -1,4 +1,10 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { isDmRole } from "@/lib/auth/roles";
+import {
+  filterRostersForSession,
+  filterWorkflowsForSession,
+} from "@/lib/auth/workflow-territory-filter";
+import { peekBreezyCandidatesCache } from "@/lib/breezy-api";
 import { isCandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import {
   addDmToServerRoster,
@@ -17,25 +23,39 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter", "dm"],
     requireTerritory: true,
     auditAction: "workflows_read",
   });
   if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
 
   const bundle = await getCandidateWorkflowBundle();
+  const previewCache = peekBreezyCandidatesCache({ scanMode: "preview" });
+  const fastCache = peekBreezyCandidatesCache({ scanMode: "fast" });
+  const candidates =
+    previewCache?.ok === true
+      ? previewCache.candidates
+      : fastCache?.ok === true
+        ? fastCache.candidates
+        : [];
+
+  const workflows = filterWorkflowsForSession(session, bundle.workflows, candidates);
+  const rosters = filterRostersForSession(session, bundle.rosters);
+
   return NextResponse.json({
     ok: true,
-    workflows: bundle.workflows,
-    rosters: bundle.rosters,
-    count: Object.keys(bundle.workflows).length,
+    workflows,
+    rosters,
+    count: Object.keys(workflows).length,
     updatedAt: bundle.updatedAt,
+    ...(isDmRole(session.role) ? { dmScoped: true } : {}),
   });
 }
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
   });
   if (isGuardFailure(guard)) return guard;

@@ -14,7 +14,7 @@ const ROUTE = "/api/recruiting/intelligence";
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
     auditAction: "recruiting_intelligence",
   });

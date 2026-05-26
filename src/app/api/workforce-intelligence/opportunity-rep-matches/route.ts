@@ -12,7 +12,7 @@ export const maxDuration = 120;
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
   });
   if (isGuardFailure(guard)) return guard;

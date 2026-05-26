@@ -14,7 +14,7 @@ function encodeSse(data: WorkflowRealtimePayload): string {
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter", "dm"],
     requireTerritory: true,
     auditAction: "workflows_events_stream",
   });

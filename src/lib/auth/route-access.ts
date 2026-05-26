@@ -7,8 +7,8 @@ export type PageRoutePolicy = {
 };
 
 export const PROTECTED_PAGE_ROUTES: PageRoutePolicy[] = [
-  { prefix: "/executive", roles: ["executive"] },
-  { prefix: "/dm", roles: ["dm", "executive", "recruiter"], requireDmTerritory: true },
+  { prefix: "/executive", roles: ["admin", "executive"] },
+  { prefix: "/dm", roles: ["dm", "admin", "executive"], requireDmTerritory: true },
 ];
 
 export const PROTECTED_API_PREFIXES = [

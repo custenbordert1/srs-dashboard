@@ -12,7 +12,7 @@ export const maxDuration = 120;
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter", "dm"],
     requireTerritory: true,
     auditAction: "coverage_risk_read",
   });

@@ -24,6 +24,8 @@ import {
   isInterviewingStage,
   parseDate,
 } from "@/lib/dm-dashboard/territory-shared";
+import { isDmRole } from "@/lib/auth/roles";
+import type { DmOnboardingSnapshot } from "@/lib/dm-dashboard/dm-onboarding-snapshot";
 import { getAssignedStatesForDm } from "@/lib/dm-territory-map";
 import {
   buildDmMelMatchingMetrics,
@@ -75,6 +77,7 @@ export type DmDashboardSnapshot = {
   pipeline: CandidatePipelineSnapshot;
   heatmap: TerritoryHeatmapPayload;
   melMatching: DmMelMatchingMetrics;
+  onboarding: DmOnboardingSnapshot;
 };
 
 export function buildDmDashboardSnapshot(
@@ -83,10 +86,20 @@ export function buildDmDashboardSnapshot(
   candidates: BreezyCandidate[],
   fetchedAt: string,
   melOpportunities: MelOpportunity[] = [],
+  onboarding: DmOnboardingSnapshot = {
+    paperworkSent: 0,
+    paperworkSigned: 0,
+    ddNotRequested: 0,
+    ddRequested: 0,
+    ddReceived: 0,
+    ddApproved: 0,
+    awaitingDdVerification: 0,
+  },
 ): DmDashboardSnapshot {
   const dmName = session.dmName ?? session.name;
-  const territoryStates =
-    session.role === "dm" ? session.territoryStates : getAssignedStatesForDm(dmName);
+  const territoryStates = isDmRole(session.role)
+    ? session.territoryStates
+    : getAssignedStatesForDm(dmName);
   const territoryLabel =
     territoryStates.length > 0 ? territoryStates.join(", ") : "All territories";
 
@@ -168,6 +181,18 @@ export function buildDmDashboardSnapshot(
       value: pipeline.counts.stalled.toLocaleString(),
       hint: "Candidates with 14+ days without stage progression",
     },
+    {
+      id: "paperwork-signed",
+      label: "Paperwork signed",
+      value: onboarding.paperworkSigned.toLocaleString(),
+      hint: "Onboarding packets completed in territory",
+    },
+    {
+      id: "dd-pending",
+      label: "DD verification pending",
+      value: onboarding.awaitingDdVerification.toLocaleString(),
+      hint: "Awaiting direct deposit verification from candidate",
+    },
   ];
 
   const mapCandidate = (
@@ -231,5 +256,6 @@ export function buildDmDashboardSnapshot(
     pipeline,
     heatmap,
     melMatching: buildDmMelMatchingMetrics(candidates, melOpportunities, territoryStates),
+    onboarding,
   };
 }

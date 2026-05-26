@@ -13,7 +13,7 @@ import { maskCandidatePii } from "@/lib/security/mask-pii";
 
 export function guardBreezyJobsResult(result: BreezyJobsResult, session: AuthSession | null): BreezyJobsResult {
   if (!session || !result.ok) return result;
-  if (session.role === "executive" || session.role === "recruiter") return result;
+  if (session.role === "admin" || session.role === "executive" || session.role === "recruiter") return result;
   return {
     ...result,
     jobs: applyTerritoryToJobs(session, result.jobs),
@@ -79,7 +79,7 @@ export function guardBreezyCandidatesResult(
   session: AuthSession | null,
 ): BreezyCandidatesResult {
   if (!session || !result.ok) return result;
-  if (session.role === "executive" || session.role === "recruiter") return result;
+  if (session.role === "admin" || session.role === "executive" || session.role === "recruiter") return result;
   return guardBreezyCandidatesSuccess(result, session);
 }
 
@@ -88,7 +88,7 @@ export function guardBreezyCandidatesDebugResult(
   session: AuthSession | null,
 ): BreezyCandidatesDebugResult {
   if (!session || !result.ok) return result;
-  if (session.role === "executive" || session.role === "recruiter") return result;
+  if (session.role === "admin" || session.role === "executive" || session.role === "recruiter") return result;
   const guarded = guardBreezyCandidatesSuccess(result, session);
   if (!result.dateRangeStart || !result.dateRangeEnd) return guarded;
   return {

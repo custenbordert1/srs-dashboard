@@ -29,7 +29,8 @@ function jsonResponse(body: LoginSuccessBody | LoginErrorBody, status: number): 
 }
 
 function redirectForRole(role: UserRole): string {
-  return role === "dm" ? "/dm" : "/";
+  if (role === "dm") return "/dm";
+  return "/";
 }
 
 function logAuth(event: string, details: Record<string, unknown>): void {

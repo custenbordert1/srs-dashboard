@@ -67,10 +67,20 @@ Health signals on `/api/breezy/sync-health`:
 
 | Endpoint | Purpose |
 |----------|---------|
-| `GET /api/dm/dashboard` | Full DM snapshot (Breezy + MEL, territory-filtered) |
+| `GET /api/dm/dashboard` | Territory snapshot: jobs, applicants, onboarding/DD counts, coverage (DM + admin) |
 | `GET /api/dm/recruiting` | Modular recruiting payload: `?section=jobs,candidates,stores,coverage` |
 
-Territory filtering uses session DM assignment (`applyTerritoryToJobs` / `applyTerritoryToCandidates`).
+Territory map is centralized in `src/lib/dm-territory-map.ts` (config-driven per state → DM).
+
+| Role | Access |
+|------|--------|
+| `admin` / `executive` | Full command center + `/dm` admin view |
+| `recruiter` | Full command center (unchanged) |
+| `dm` | `/dm` only — territory-filtered Breezy, workflows (read), MEL; no job management or DD send |
+
+DM workflow reads are scoped by candidate state (`filterWorkflowsForSession`). DM roster API responses hide the full recruiter directory.
+
+Dev login: `/login` shows quick DM buttons when `NODE_ENV=development` or `ENABLE_MOCK_DM_LOGIN=true`. Seeded accounts: `{slug}@srsmerchandising.com` with `DM_DEFAULT_PASSWORD`.
 
 ## Performance notes
 

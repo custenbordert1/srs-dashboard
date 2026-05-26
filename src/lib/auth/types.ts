@@ -1,4 +1,4 @@
-export type UserRole = "executive" | "recruiter" | "dm";
+export type UserRole = "admin" | "executive" | "recruiter" | "dm";
 
 export type DashboardUser = {
   id: string;

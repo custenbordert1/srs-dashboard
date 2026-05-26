@@ -18,7 +18,7 @@ type RouteContext = { params: Promise<{ signatureRequestId: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter", "dm"],
     requireTerritory: true,
     auditAction: "onboarding_status_check",
   });

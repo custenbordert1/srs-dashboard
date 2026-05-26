@@ -9,7 +9,7 @@ export const maxDuration = 120;
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
     rateLimit: BREEZY_RATE_LIMIT,
     auditAction: "recruiting_live_snapshot_read",

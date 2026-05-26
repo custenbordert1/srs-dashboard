@@ -16,7 +16,7 @@ const ACTIONS = new Set(["resend", "mark-received", "mark-approved", "set-notes"
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter", "dm"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     requireTerritory: true,
     auditAction: "workflow_action",
   });

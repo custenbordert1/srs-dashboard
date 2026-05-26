@@ -1,5 +1,6 @@
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import type { AuthSession } from "@/lib/auth/types";
+import { isDmRole } from "@/lib/auth/roles";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { getAssignedStatesForDm } from "@/lib/dm-territory-map";
 import { candidateDisplayName, candidatesForJob } from "@/lib/dm-dashboard/territory-shared";
@@ -113,7 +114,9 @@ export function buildDmRecruitingFoundation(
     sections?: DmRecruitingFoundationSection[];
   } = {},
 ): DmRecruitingFoundationPayload {
-  const territoryStates = getAssignedStatesForDm(session.dmName ?? session.email);
+  const territoryStates = isDmRole(session.role)
+    ? session.territoryStates
+    : getAssignedStatesForDm(session.dmName ?? session.name);
   const scopedJobs = applyTerritoryToJobs(session, jobs);
   const scopedCandidates = applyTerritoryToCandidates(session, candidates);
   const melOpportunities = options.melOpportunities ?? [];
