@@ -1,22 +1,35 @@
-import type { DmAttentionItem, DmCandidateSummary } from "@/lib/dm-dashboard";
+import type { DmCandidateSummary } from "@/lib/dm-dashboard";
+import type { DmPrioritizedAlert } from "@/lib/dm-dashboard/dm-alert-priority";
 import { useState } from "react";
 
 export type DmDashboardAction = "attention" | "fill-risk" | "top-candidates" | "recent";
 
-const TABS: Array<{ id: DmDashboardAction; label: string }> = [
+const FULL_TABS: Array<{ id: DmDashboardAction; label: string }> = [
   { id: "attention", label: "Needs attention" },
   { id: "fill-risk", label: "Highest fill risk" },
   { id: "top-candidates", label: "Top candidates" },
   { id: "recent", label: "Recent applicants" },
 ];
 
-function severityStyles(severity: DmAttentionItem["severity"]): string {
-  return severity === "critical"
-    ? "border-red-500/30 bg-red-500/10 text-red-100"
-    : "border-amber-500/30 bg-amber-500/10 text-amber-100";
+const CANDIDATE_TABS: Array<{ id: DmDashboardAction; label: string }> = [
+  { id: "top-candidates", label: "Top candidates" },
+  { id: "recent", label: "Recent applicants" },
+];
+
+function priorityStyles(item: DmPrioritizedAlert): string {
+  switch (item.priority) {
+    case "critical":
+      return "border-red-500 bg-red-500/20 text-red-50";
+    case "high":
+      return "border-orange-500/70 bg-orange-500/15 text-orange-50";
+    case "medium":
+      return "border-amber-500/50 bg-amber-500/10 text-amber-50";
+    default:
+      return "border-zinc-700/80 bg-zinc-900/40 text-zinc-300";
+  }
 }
 
-function AttentionList({ items, emptyLabel }: { items: DmAttentionItem[]; emptyLabel: string }) {
+function AttentionList({ items, emptyLabel }: { items: DmPrioritizedAlert[]; emptyLabel: string }) {
   if (items.length === 0) {
     return <p className="text-sm text-zinc-500">{emptyLabel}</p>;
   }
@@ -25,10 +38,15 @@ function AttentionList({ items, emptyLabel }: { items: DmAttentionItem[]; emptyL
       {items.map((item) => (
         <li
           key={item.id}
-          className={`rounded-lg border px-3 py-2.5 text-sm ${severityStyles(item.severity)}`}
+          className={`rounded-lg border px-3 py-2.5 text-sm ${priorityStyles(item)}`}
         >
           <p className="font-medium">{item.title}</p>
           <p className="mt-0.5 text-xs opacity-90">{item.detail}</p>
+          {"recommendedAction" in item ? (
+            <p className="mt-1.5 text-xs font-medium text-teal-200/90">
+              Recommended: {item.recommendedAction}
+            </p>
+          ) : null}
         </li>
       ))}
     </ul>
@@ -106,12 +124,14 @@ function CandidateTable({
 }
 
 type DmAttentionPanelProps = {
-  needsAttention: DmAttentionItem[];
-  highestFillRisk: DmAttentionItem[];
+  needsAttention: DmPrioritizedAlert[];
+  highestFillRisk: DmPrioritizedAlert[];
   topCandidates: DmCandidateSummary[];
   recentApplicants: DmCandidateSummary[];
   onCandidateClick?: (candidateId: string) => void;
   selectedCandidateId?: string | null;
+  /** DM operational view — hide duplicate alert tabs (shown in priority panel). */
+  candidatesOnly?: boolean;
 };
 
 export function DmAttentionPanel({
@@ -121,13 +141,17 @@ export function DmAttentionPanel({
   recentApplicants,
   onCandidateClick,
   selectedCandidateId,
+  candidatesOnly = false,
 }: DmAttentionPanelProps) {
-  const [active, setActive] = useState<DmDashboardAction>("attention");
+  const tabs = candidatesOnly ? CANDIDATE_TABS : FULL_TABS;
+  const [active, setActive] = useState<DmDashboardAction>(
+    candidatesOnly ? "top-candidates" : "attention",
+  );
 
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
       <div className="flex flex-wrap gap-2 border-b border-zinc-800/80 pb-3">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"

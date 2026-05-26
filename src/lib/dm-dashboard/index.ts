@@ -24,6 +24,14 @@ export {
   highestFillRiskAlerts,
   type FillRiskCategory,
 } from "@/lib/dm-dashboard/fill-risk-alerts";
+export {
+  buildPrioritizedTerritoryAlerts,
+  filterPrioritizedAlerts,
+  sortPrioritizedAlerts,
+  type DmAlertOperationsSummary,
+  type DmAlertPriority,
+  type DmPrioritizedAlert,
+} from "@/lib/dm-dashboard/dm-alert-priority";
 export { buildTerritoryHealthScore, type TerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
 export { buildCoverageIntelligence, type TerritoryCoverageSnapshot } from "@/lib/dm-dashboard/coverage-intelligence";
 export { buildCandidatePipeline, recentApplicants, type CandidatePipelineSnapshot } from "@/lib/dm-dashboard/candidate-pipeline";

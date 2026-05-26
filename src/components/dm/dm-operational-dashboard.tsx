@@ -1,8 +1,10 @@
 "use client";
 
+import { DmAlertOperationsKpis } from "@/components/dm/dm-alert-operations-kpis";
 import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widget";
 import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
 import { DmOnboardingStatusCard } from "@/components/dm/dm-onboarding-status-card";
+import { DmPriorityAlertsPanel } from "@/components/dm/dm-priority-alerts-panel";
 import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
@@ -30,6 +32,8 @@ export function DmOperationalDashboard({
     <>
       <TerritoryHealthCard health={data.health} />
 
+      <DmAlertOperationsKpis summary={data.alertSummary} />
+
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {data.kpis
           .filter((kpi) =>
@@ -38,8 +42,6 @@ export function DmOperationalDashboard({
               "candidates-7d",
               "paperwork-signed",
               "dd-pending",
-              "fill-risk",
-              "attention",
             ].includes(kpi.id),
           )
           .map((kpi) => (
@@ -56,6 +58,8 @@ export function DmOperationalDashboard({
 
       <DmOnboardingStatusCard onboarding={data.onboarding} />
 
+      <DmPriorityAlertsPanel alerts={data.prioritizedAlerts} />
+
       <DmAttentionPanel
         needsAttention={data.needsAttention}
         highestFillRisk={data.highestFillRisk}
@@ -63,6 +67,7 @@ export function DmOperationalDashboard({
         recentApplicants={data.recentApplicants}
         onCandidateClick={onCandidateClick}
         selectedCandidateId={selectedCandidateId}
+        candidatesOnly
       />
 
       <CandidatePipelineWidget

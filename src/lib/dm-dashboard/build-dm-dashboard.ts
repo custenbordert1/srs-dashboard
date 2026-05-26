@@ -8,9 +8,12 @@ import {
 } from "@/lib/dm-dashboard/candidate-pipeline";
 import { buildCoverageIntelligence, type TerritoryCoverageSnapshot } from "@/lib/dm-dashboard/coverage-intelligence";
 import {
-  buildTerritoryFillRiskAlerts,
-  highestFillRiskAlerts,
-} from "@/lib/dm-dashboard/fill-risk-alerts";
+  buildPrioritizedTerritoryAlerts,
+  mergeTerritoryAlertSources,
+  type DmAlertOperationsSummary,
+  type DmPrioritizedAlert,
+} from "@/lib/dm-dashboard/dm-alert-priority";
+import { buildTerritoryFillRiskAlerts } from "@/lib/dm-dashboard/fill-risk-alerts";
 import { buildDmNeedsAttention, topScoredCandidates, type DmAttentionItem } from "@/lib/dm-dashboard/dm-needs-attention";
 import {
   buildTerritoryHealthScore,
@@ -69,8 +72,10 @@ export type DmDashboardSnapshot = {
   topHiringCities: ChartBar[];
   candidateSources: ChartBar[];
   fillRiskAlerts: DmAttentionItem[];
-  needsAttention: DmAttentionItem[];
-  highestFillRisk: DmAttentionItem[];
+  needsAttention: DmPrioritizedAlert[];
+  highestFillRisk: DmPrioritizedAlert[];
+  prioritizedAlerts: DmPrioritizedAlert[];
+  alertSummary: DmAlertOperationsSummary;
   topCandidates: DmCandidateSummary[];
   recentApplicants: DmCandidateSummary[];
   coverage: TerritoryCoverageSnapshot;
@@ -105,9 +110,18 @@ export function buildDmDashboardSnapshot(
 
   const reference = new Date(fetchedAt);
   const health = buildTerritoryHealthScore(jobs, candidates, fetchedAt);
-  const needsAttention = buildDmNeedsAttention(jobs, candidates, fetchedAt);
+  const needsAttentionRaw = buildDmNeedsAttention(jobs, candidates, fetchedAt);
   const fillRiskAlerts = buildTerritoryFillRiskAlerts(jobs, candidates, fetchedAt);
-  const highestFillRisk = highestFillRiskAlerts(fillRiskAlerts, 12);
+  const mergedAlerts = mergeTerritoryAlertSources(fillRiskAlerts, needsAttentionRaw);
+  const { alerts: prioritizedAlerts, summary: alertSummary } = buildPrioritizedTerritoryAlerts(
+    mergedAlerts,
+    jobs,
+    candidates,
+    fetchedAt,
+    { healthScore: health.score },
+  );
+  const needsAttention = prioritizedAlerts;
+  const highestFillRisk = prioritizedAlerts.slice(0, 12);
   const coverage = buildCoverageIntelligence(jobs, candidates, fetchedAt);
   const pipeline = buildCandidatePipeline(candidates, fetchedAt);
   const heatmap = buildTerritoryHeatmapPayload(jobs, candidates, fetchedAt, territoryLabel);
@@ -250,6 +264,8 @@ export function buildDmDashboardSnapshot(
     fillRiskAlerts,
     needsAttention,
     highestFillRisk,
+    prioritizedAlerts,
+    alertSummary,
     topCandidates,
     recentApplicants: recentApplicantRows,
     coverage,
