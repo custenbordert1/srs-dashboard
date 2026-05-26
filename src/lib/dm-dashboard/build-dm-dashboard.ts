@@ -13,6 +13,9 @@ import {
   type DmAlertOperationsSummary,
   type DmPrioritizedAlert,
 } from "@/lib/dm-dashboard/dm-alert-priority";
+import { buildDmOperationalIndex } from "@/lib/dm-dashboard/build-dm-operational-index";
+import type { DmOperationalIndex } from "@/lib/dm-dashboard/dm-operational-types";
+import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import { buildTerritoryFillRiskAlerts } from "@/lib/dm-dashboard/fill-risk-alerts";
 import { buildDmNeedsAttention, topScoredCandidates, type DmAttentionItem } from "@/lib/dm-dashboard/dm-needs-attention";
 import {
@@ -76,6 +79,7 @@ export type DmDashboardSnapshot = {
   highestFillRisk: DmPrioritizedAlert[];
   prioritizedAlerts: DmPrioritizedAlert[];
   alertSummary: DmAlertOperationsSummary;
+  operationalIndex: DmOperationalIndex;
   topCandidates: DmCandidateSummary[];
   recentApplicants: DmCandidateSummary[];
   coverage: TerritoryCoverageSnapshot;
@@ -100,6 +104,7 @@ export function buildDmDashboardSnapshot(
     ddApproved: 0,
     awaitingDdVerification: 0,
   },
+  workflows: CandidateWorkflowState = {},
 ): DmDashboardSnapshot {
   const dmName = session.dmName ?? session.name;
   const territoryStates = isDmRole(session.role)
@@ -122,6 +127,13 @@ export function buildDmDashboardSnapshot(
   );
   const needsAttention = prioritizedAlerts;
   const highestFillRisk = prioritizedAlerts.slice(0, 12);
+  const operationalIndex = buildDmOperationalIndex(
+    jobs,
+    candidates,
+    prioritizedAlerts,
+    fetchedAt,
+    workflows,
+  );
   const coverage = buildCoverageIntelligence(jobs, candidates, fetchedAt);
   const pipeline = buildCandidatePipeline(candidates, fetchedAt);
   const heatmap = buildTerritoryHeatmapPayload(jobs, candidates, fetchedAt, territoryLabel);
@@ -266,6 +278,7 @@ export function buildDmDashboardSnapshot(
     highestFillRisk,
     prioritizedAlerts,
     alertSummary,
+    operationalIndex,
     topCandidates,
     recentApplicants: recentApplicantRows,
     coverage,

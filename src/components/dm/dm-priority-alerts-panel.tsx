@@ -66,10 +66,16 @@ function priorityBadge(priority: DmAlertPriority): string {
 
 type DmPriorityAlertsPanelProps = {
   alerts: DmPrioritizedAlert[];
+  onAlertClick?: (alert: DmPrioritizedAlert) => void;
+  initialPriorityFilter?: DmAlertPriorityFilter;
 };
 
-export function DmPriorityAlertsPanel({ alerts }: DmPriorityAlertsPanelProps) {
-  const [priorityFilter, setPriorityFilter] = useState<DmAlertPriorityFilter>("all");
+export function DmPriorityAlertsPanel({
+  alerts,
+  onAlertClick,
+  initialPriorityFilter = "all",
+}: DmPriorityAlertsPanelProps) {
+  const [priorityFilter, setPriorityFilter] = useState<DmAlertPriorityFilter>(initialPriorityFilter);
   const [categoryFilter, setCategoryFilter] = useState<DmAttentionCategory | "all">("all");
   const [sortMode, setSortMode] = useState<DmAlertSortMode>("highest-risk");
 
@@ -141,10 +147,12 @@ export function DmPriorityAlertsPanel({ alerts }: DmPriorityAlertsPanelProps) {
       ) : (
         <ul className="mt-4 space-y-2.5">
           {visible.map((alert) => (
-            <li
-              key={alert.id}
-              className={`rounded-lg border px-3 py-3 text-sm ${priorityStyles(alert.priority)}`}
-            >
+            <li key={alert.id}>
+              <button
+                type="button"
+                onClick={() => onAlertClick?.(alert)}
+                className={`w-full rounded-lg border px-3 py-3 text-left text-sm transition-colors hover:brightness-110 ${priorityStyles(alert.priority)}`}
+              >
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${priorityBadge(alert.priority)}`}
@@ -163,6 +171,12 @@ export function DmPriorityAlertsPanel({ alerts }: DmPriorityAlertsPanelProps) {
               <p className="mt-2 text-xs font-medium text-teal-200/95">
                 Recommended: {alert.recommendedAction}
               </p>
+              {onAlertClick ? (
+                <p className="mt-2 text-[10px] uppercase tracking-wide text-zinc-400">
+                  Click for operational drilldown →
+                </p>
+              ) : null}
+              </button>
             </li>
           ))}
         </ul>

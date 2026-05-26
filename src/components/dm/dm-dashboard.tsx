@@ -91,6 +91,7 @@ export function DmDashboard({ user }: DmDashboardProps) {
         isDmRole(user.role) ? (
           <DmOperationalDashboard
             data={data}
+            user={user}
             meta={meta}
             onCandidateClick={drawer.openCandidate}
             selectedCandidateId={drawer.selectedCandidateId}

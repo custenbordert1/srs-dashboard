@@ -32,6 +32,14 @@ export {
   type DmAlertPriority,
   type DmPrioritizedAlert,
 } from "@/lib/dm-dashboard/dm-alert-priority";
+export { buildDmOperationalIndex, parseCityLabelToKey } from "@/lib/dm-dashboard/build-dm-operational-index";
+export type {
+  DmEscalationActionType,
+  DmEscalationLogEntry,
+  DmJobOperationalDetail,
+  DmOperationalDrawerTarget,
+  DmOperationalIndex,
+} from "@/lib/dm-dashboard/dm-operational-types";
 export { buildTerritoryHealthScore, type TerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
 export { buildCoverageIntelligence, type TerritoryCoverageSnapshot } from "@/lib/dm-dashboard/coverage-intelligence";
 export { buildCandidatePipeline, recentApplicants, type CandidatePipelineSnapshot } from "@/lib/dm-dashboard/candidate-pipeline";

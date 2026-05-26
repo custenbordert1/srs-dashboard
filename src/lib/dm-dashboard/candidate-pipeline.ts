@@ -1,12 +1,6 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
-import {
-  MS_PER_DAY,
-  candidateDisplayName,
-  isAppliedStage,
-  isHiredStage,
-  isInterviewingStage,
-  parseDate,
-} from "@/lib/dm-dashboard/territory-shared";
+import { classifyBucketForCandidate } from "@/lib/dm-dashboard/candidate-pipeline-buckets";
+import { MS_PER_DAY, candidateDisplayName, parseDate } from "@/lib/dm-dashboard/territory-shared";
 
 export type PipelineStageBucket = "applied" | "interviewing" | "hired" | "stalled";
 
@@ -30,28 +24,6 @@ export type CandidatePipelineSnapshot = {
   hired: PipelineCandidateRow[];
   stalled: PipelineCandidateRow[];
 };
-
-const STALLED_DAYS = 14;
-
-function classifyBucket(candidate: BreezyCandidate, reference: Date): PipelineStageBucket {
-  const applied = parseDate(candidate.appliedDate);
-  const daysInPipeline =
-    applied !== null
-      ? Math.max(0, Math.round((reference.getTime() - applied.getTime()) / MS_PER_DAY))
-      : null;
-
-  if (isHiredStage(candidate.stage)) return "hired";
-  if (isInterviewingStage(candidate.stage)) {
-    if (daysInPipeline !== null && daysInPipeline >= STALLED_DAYS) return "stalled";
-    return "interviewing";
-  }
-  if (isAppliedStage(candidate.stage)) {
-    if (daysInPipeline !== null && daysInPipeline >= STALLED_DAYS) return "stalled";
-    return "applied";
-  }
-  if (daysInPipeline !== null && daysInPipeline >= STALLED_DAYS) return "stalled";
-  return "applied";
-}
 
 function toRow(candidate: BreezyCandidate, bucket: PipelineStageBucket, reference: Date): PipelineCandidateRow {
   const applied = parseDate(candidate.appliedDate);
@@ -88,7 +60,7 @@ export function buildCandidatePipeline(
   };
 
   for (const candidate of candidates) {
-    const bucket = classifyBucket(candidate, reference);
+    const bucket = classifyBucketForCandidate(candidate, reference);
     buckets[bucket].push(toRow(candidate, bucket, reference));
   }
 
@@ -117,7 +89,7 @@ export function recentApplicants(
 ): PipelineCandidateRow[] {
   const reference = new Date(referenceIso);
   return [...candidates]
-    .map((candidate) => toRow(candidate, classifyBucket(candidate, reference), reference))
+    .map((candidate) => toRow(candidate, classifyBucketForCandidate(candidate, reference), reference))
     .sort((a, b) => {
       const da = parseDate(a.appliedDate)?.getTime() ?? 0;
       const db = parseDate(b.appliedDate)?.getTime() ?? 0;

@@ -62,6 +62,7 @@ export async function GET(request: Request) {
     fetchedAt,
     melOpportunities,
     onboarding,
+    workflowBundle.workflows,
   );
 
   logBreezyRouteResult(ROUTE, 200, {
