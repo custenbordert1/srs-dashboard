@@ -11,7 +11,11 @@ import {
   parseMelOpportunities,
 } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
-import { buildRoutingIntelligence, emptyRoutingIntelligence } from "@/lib/routing-intelligence";
+import {
+  attachRoutingPlanning,
+  buildRoutingIntelligence,
+  emptyRoutingIntelligence,
+} from "@/lib/routing-intelligence";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -102,7 +106,7 @@ export async function GET(request: Request) {
       parseMelOpportunities(melResult.rows),
       session.territoryStates.length > 0 ? session.territoryStates : undefined,
     );
-    intelligence.routingIntelligence = buildRoutingIntelligence({
+    const routingBase = buildRoutingIntelligence({
       fetchedAt: melResult.fetchedAt,
       opportunities,
       reps: territoryReps,
@@ -110,9 +114,18 @@ export async function GET(request: Request) {
       coverageRecommendations: intelligence.decisionIntelligence.coverageRecommendations,
       escalations,
     });
+    intelligence.routingIntelligence = attachRoutingPlanning(routingBase, {
+      opportunities,
+      reps: territoryReps,
+      jobs,
+    });
   } else {
     partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
-    intelligence.routingIntelligence = emptyRoutingIntelligence(fetchedAt);
+    intelligence.routingIntelligence = attachRoutingPlanning(emptyRoutingIntelligence(fetchedAt), {
+      opportunities: [],
+      reps: territoryReps,
+      jobs,
+    });
   }
 
   logBreezyRouteResult(ROUTE, 200, {

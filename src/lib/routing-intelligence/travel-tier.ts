@@ -4,7 +4,7 @@ export const TRAVEL_TIER_LABELS: Record<TravelTier, string> = {
   1: "Tier 1 · <20 mi",
   2: "Tier 2 · 20–40 mi",
   3: "Tier 3 · 40–60 mi",
-  4: "Tier 4 · no coverage",
+  4: "Tier 4 · 60+ mi / overnight",
 };
 
 export function travelTierFromNearestRepMiles(miles: number | null): TravelTier {

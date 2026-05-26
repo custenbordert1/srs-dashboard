@@ -108,6 +108,14 @@ export const LazyRecruitingAutomationSection = dynamic(
   { loading: tabLoading("Loading automation…") },
 );
 
+export const LazyRoutingIntelligenceSection = dynamic(
+  () =>
+    import("@/components/recruiting/routing-intelligence/routing-intelligence-section").then((m) => ({
+      default: m.RoutingIntelligenceSection,
+    })),
+  { loading: tabLoading("Loading routing intelligence…"), ssr: false },
+);
+
 export const LazyWorkforceOperationsSection = dynamic(
   () =>
     import("@/components/recruiting/workforce-operations-section").then((m) => ({

@@ -15,6 +15,7 @@ import {
   LazyMelProjectsSection,
   LazyNeedsAttentionSection,
   LazyRecruitingAutomationSection,
+  LazyRoutingIntelligenceSection,
   LazyRecruitingCommandCenter,
   LazyRecruitingDataSourcesPanel,
   LazyRecruitingIntelligenceSection,
@@ -28,6 +29,10 @@ import {
   type DashboardTabId,
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
+import {
+  RECRUITING_NAVIGATE_EVENT,
+  type RecruitingNavigateDetail,
+} from "@/lib/recruiting-tab-navigation";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
@@ -69,6 +74,21 @@ export function RecruitingDashboardContent({
   useEffect(() => {
     const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
     return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<RecruitingNavigateDetail>).detail;
+      if (!detail?.tab) return;
+      setActiveTab(detail.tab);
+      if (detail.elementId) {
+        window.setTimeout(() => {
+          document.getElementById(detail.elementId!)?.scrollIntoView({ behavior: "smooth" });
+        }, 120);
+      }
+    };
+    window.addEventListener(RECRUITING_NAVIGATE_EVENT, handler);
+    return () => window.removeEventListener(RECRUITING_NAVIGATE_EVENT, handler);
   }, []);
 
   return (
@@ -161,6 +181,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="automation" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="automation">
             <LazyRecruitingAutomationSection />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="routing-intelligence" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="routing-intelligence">
+            <LazyRoutingIntelligenceSection />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

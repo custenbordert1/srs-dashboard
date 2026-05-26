@@ -9,6 +9,7 @@ export type DashboardTabId =
   | "data-health"
   | "recruiting-intelligence"
   | "automation"
+  | "routing-intelligence"
   | "workforce"
   | "job-management"
   | "workforce-intelligence";
@@ -115,6 +116,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "live-breezy",
     bannerMessage:
       "Recommendations and alerts are computed from Breezy jobs and candidates plus local workflow state.",
+  },
+  "routing-intelligence": {
+    navLabel: "Routing Intelligence",
+    sourceTag: "MEL + reps",
+    badgeLabel: "Territory routing (MEL)",
+    kind: "live-mel",
+    bannerMessage:
+      "Route packs, travel burden, and store clusters use the MEL projects sheet and active rep roster — no live map APIs. All staffing actions are manual-only.",
   },
   workforce: {
     navLabel: "Workforce",

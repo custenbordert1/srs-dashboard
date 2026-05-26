@@ -85,6 +85,20 @@ export type RouteIntelligenceCardRow = {
   manualOnly: true;
 };
 
+export type RouteBurdenMetrics = {
+  estimatedDriveBurden: number;
+  estimatedOvernightLikelihood: number;
+  multiDayRouteProbability: number;
+  coverageSaturation: number;
+  routeEfficiencyScore: number;
+};
+
+export type EnrichedRoutePack = RoutePack & {
+  geoClusterId: string;
+  routePackScore: number;
+  burden: RouteBurdenMetrics;
+};
+
 export type RoutingIntelligenceSnapshot = {
   fetchedAt: string;
   manualOnly: true;
@@ -97,4 +111,8 @@ export type RoutingIntelligenceSnapshot = {
   multiStoreRoutePacks: RouteIntelligenceCardRow[];
   nearbyRepCoverage: RouteIntelligenceCardRow[];
   highTravelBurdenJobs: RouteIntelligenceCardRow[];
+  territoryOverview?: import("@/lib/routing-intelligence/territory-overview").TerritoryOverviewCard[];
+  routeQueues?: import("@/lib/routing-intelligence/route-queue").RouteQueueRow[];
+  enrichedRoutePacks?: EnrichedRoutePack[];
+  geoVisualization?: import("@/lib/routing-intelligence/geo-visualization").GeoVisualizationSnapshot;
 };
