@@ -1,16 +1,23 @@
 "use client";
 
+import { AutomationSyncStatusBanner } from "@/components/recruiting/automation-sync-status-banner";
 import { CandidateIntelligenceSection } from "@/components/recruiting/candidate-intelligence-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { RecruiterDecisionIntelligencePanel } from "@/components/recruiting/recruiter-decision-intelligence-panel";
+import { RecruiterOperationalKpiStrip } from "@/components/recruiting/recruiter-operational-kpi-strip";
+import { RecruiterTopActionsPanel } from "@/components/recruiting/recruiter-top-actions-panel";
+import { StaffingRiskHeatPanel } from "@/components/recruiting/staffing-risk-heat-panel";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { buildRecruiterOperationalKpis } from "@/lib/recruiting-dashboard-ux/recruiter-operational-kpis";
+import { buildTopRecommendedActions } from "@/lib/recruiting-dashboard-ux/top-recommended-actions";
 import type { JobCandidateRanking, SmartTerritoryAlert } from "@/lib/recruiting-automation";
 import type { RecruitingRecommendation } from "@/lib/recruiting-recommendation-engine";
+import { useMemo } from "react";
 
 type RecruitingAutomationSectionProps = {
   compact?: boolean;
@@ -22,34 +29,6 @@ const URGENCY_STYLES: Record<RecruitingRecommendation["urgency"], string> = {
   medium: "border-zinc-700 bg-zinc-950/50",
   low: "border-zinc-800 bg-zinc-950/40",
 };
-
-function RecommendationList({
-  items,
-  limit,
-}: {
-  items: RecruitingRecommendation[];
-  limit: number;
-}) {
-  if (items.length === 0) {
-    return <p className="text-sm text-zinc-500">No recommendations right now.</p>;
-  }
-  return (
-    <ul className="space-y-2">
-      {items.slice(0, limit).map((rec) => (
-        <li
-          key={rec.id}
-          className={`rounded-lg border px-3 py-2 text-sm transition-colors ${URGENCY_STYLES[rec.urgency]}`}
-        >
-          <p className="font-medium text-zinc-200">{rec.recommendation}</p>
-          <p className="mt-0.5 text-xs text-zinc-500">{rec.reason}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-wide text-teal-400/80">
-            {rec.impactEstimate} · {rec.urgency}
-          </p>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 function AlertList({ alerts, empty }: { alerts: SmartTerritoryAlert[]; empty: string }) {
   if (alerts.length === 0) return <p className="text-sm text-zinc-500">{empty}</p>;
@@ -126,7 +105,18 @@ function JobRankingsTable({
 }
 
 export function RecruitingAutomationSection({ compact = false }: RecruitingAutomationSectionProps) {
-  const { data, meta, error, loading, refreshing, timedOut, refresh } = useRecruitingIntelligence({
+  const {
+    data,
+    meta,
+    error,
+    fatalError,
+    loading,
+    refreshing,
+    timedOut,
+    stale,
+    lastSyncedAt,
+    refresh,
+  } = useRecruitingIntelligence({
     pollIntervalMs: compact ? 0 : undefined,
   });
   const loadingCeilingHit = useLoadingCeiling(loading && !data);
@@ -134,15 +124,27 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     territoryStates: data?.territoryStates,
   });
 
-  if ((loading && !data) || (error && !data) || !data) {
+  const topActions = useMemo(() => (data ? buildTopRecommendedActions(data, compact ? 6 : 10) : []), [data, compact]);
+  const kpis = useMemo(
+    () =>
+      data
+        ? buildRecruiterOperationalKpis(data, [], [], meta?.escalations ?? [])
+        : [],
+    [data, meta?.escalations],
+  );
+  const activeRepsByState = useMemo(
+    () => new Map(Object.entries(meta?.activeRepsByState ?? {})),
+    [meta?.activeRepsByState],
+  );
+
+  if (loading && !data) {
     return (
       <DashboardSectionFallback
-        title="AI recruiting automation"
-        loadingMessage="Loading AI recommendations and automation insights…"
-        isLoading={loading && !data}
+        title="Recruiting automation"
+        loadingMessage="Loading operational recommendations and intelligence…"
+        isLoading
         loadingCeilingHit={loadingCeilingHit}
-        error={error && !data ? error : !data ? "Automation insights unavailable." : null}
-        timedOut={timedOut || Boolean(error?.toLowerCase().includes("timed out"))}
+        timedOut={timedOut}
         onRetry={refresh}
         retrying={refreshing}
         skeletonRows={compact ? 2 : 4}
@@ -151,15 +153,30 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     );
   }
 
-  const alertLimit = compact ? 8 : 15;
-  const actionLimit = compact ? 8 : 15;
-  const jobLimit = compact ? 6 : 12;
+  if (!data && fatalError) {
+    return (
+      <DashboardSectionFallback
+        title="Recruiting automation"
+        error={fatalError}
+        timedOut={timedOut}
+        onRetry={refresh}
+        retrying={refreshing}
+        skeletonRows={compact ? 2 : 4}
+        skeletonCards={2}
+      />
+    );
+  }
+
+  if (!data) return null;
+
+  const alertLimit = compact ? 6 : 12;
+  const jobLimit = compact ? 4 : 8;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">AI recruiting automation</h2>
+          <h2 className="text-lg font-semibold text-zinc-50">Recruiting automation & intelligence</h2>
           <p className="text-sm text-zinc-500">
             Territory: {data.territoryLabel}
             {refreshing ? <span className="ml-2 text-teal-400/90">Updating…</span> : null}
@@ -175,167 +192,148 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
         </button>
       </div>
 
-      {meta?.partialSync ? (
-        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-          Partial Breezy sync — rankings may update as more positions load.
-        </p>
-      ) : null}
-
-      {!compact ? <RecruitingAlertsSection /> : null}
-
-      <RecruiterDecisionIntelligencePanel
-        data={data.decisionIntelligence}
-        loading={loading}
-        compact={compact}
+      <AutomationSyncStatusBanner
+        lastSyncedAt={lastSyncedAt}
+        stale={stale}
+        partialSync={meta?.partialSync}
+        partialErrors={meta?.partialErrors}
+        error={error}
+        timedOut={timedOut}
+        onRetry={refresh}
+        retrying={refreshing}
       />
 
-      {!compact ? <CandidateIntelligenceSection /> : null}
+      <RecruiterTopActionsPanel actions={topActions} />
+      <RecruiterOperationalKpiStrip kpis={kpis} />
+      <StaffingRiskHeatPanel
+        snapshot={data}
+        escalations={meta?.escalations ?? []}
+        activeRepsByState={activeRepsByState}
+      />
+
+      <RecruiterDecisionIntelligencePanel data={data.decisionIntelligence} compact={compact} />
 
       {!compact ? (
-        <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-          <h3 className="text-base font-semibold text-zinc-50">Daily executive snapshot</h3>
-          <ul className="mt-3 space-y-1.5 text-sm text-zinc-400">
-            {data.dailySnapshot.summaryBullets.map((bullet) => (
-              <li key={bullet}>• {bullet}</li>
-            ))}
-          </ul>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <IntelligenceBarChart
-              title="Hottest territories"
-              data={data.dailySnapshot.hottestTerritories}
-              barClassName="bg-teal-500/80"
-            />
-            <IntelligenceBarChart
-              title="Highest risk territories"
-              data={data.dailySnapshot.highestRiskTerritories}
-              barClassName="bg-red-500/70"
-            />
-            <IntelligenceBarChart
-              title="Best recruiting sources"
-              data={data.dailySnapshot.bestRecruitingSources}
-              barClassName="bg-violet-500/80"
-            />
+        <details className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+          <summary className="cursor-pointer text-base font-semibold text-zinc-50">
+            Analytics & alerts
+          </summary>
+          <div className="mt-4 space-y-6">
+            <RecruitingAlertsSection />
+            <CandidateIntelligenceSection />
+            <section>
+              <h3 className="text-sm font-semibold text-zinc-100">Smart territory alerts</h3>
+              <div className="mt-3">
+                <AlertList
+                  alerts={data.smartAlerts.slice(0, alertLimit)}
+                  empty="No smart alerts for this territory."
+                />
+              </div>
+            </section>
+            <section>
+              <h3 className="text-sm font-semibold text-zinc-100">Legacy AI recommendations</h3>
+              <ul className="mt-3 space-y-2">
+                {data.recommendations.slice(0, alertLimit).map((rec) => (
+                  <li
+                    key={rec.id}
+                    className={`rounded-lg border px-3 py-2 text-sm ${URGENCY_STYLES[rec.urgency]}`}
+                  >
+                    <p className="font-medium text-zinc-200">{rec.recommendation}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">{rec.reason}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
-        </section>
+        </details>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-          <h3 className="text-base font-semibold text-zinc-50">Smart territory alerts</h3>
-          <p className="mt-1 text-xs text-zinc-500">48h gaps, conversion, aging, dropoff, response time</p>
-          <div className="mt-3">
-            <AlertList
-              alerts={data.smartAlerts.slice(0, alertLimit)}
-              empty="No smart alerts for this territory."
-            />
+      {!compact ? (
+        <details className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+          <summary className="cursor-pointer text-base font-semibold text-zinc-50">
+            Executive snapshot & trends
+          </summary>
+          <div className="mt-4 space-y-4">
+            <ul className="space-y-1.5 text-sm text-zinc-400">
+              {data.dailySnapshot.summaryBullets.map((bullet) => (
+                <li key={bullet}>• {bullet}</li>
+              ))}
+            </ul>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <IntelligenceBarChart
+                title="Hottest territories"
+                data={data.dailySnapshot.hottestTerritories}
+                barClassName="bg-teal-500/80"
+              />
+              <IntelligenceBarChart
+                title="Highest risk territories"
+                data={data.dailySnapshot.highestRiskTerritories}
+                barClassName="bg-red-500/70"
+              />
+              <IntelligenceBarChart
+                title="Best recruiting sources"
+                data={data.dailySnapshot.bestRecruitingSources}
+                barClassName="bg-violet-500/80"
+              />
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <IntelligenceBarChart
+                title="Applicants per day"
+                subtitle="Last 14 days"
+                data={data.trends.applicantsPerDay}
+                barClassName="bg-sky-500/80"
+              />
+              <IntelligenceBarChart
+                title="Hires per week"
+                subtitle="Rolling 8 weeks"
+                data={data.trends.hiresPerWeek}
+                barClassName="bg-emerald-500/80"
+              />
+            </div>
           </div>
-        </section>
+        </details>
+      ) : null}
 
-        <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-          <h3 className="text-base font-semibold text-zinc-50">AI action recommendations</h3>
-          <p className="mt-1 text-xs text-zinc-500">
-            Pay, radius, repost timing, nearby cities, recruiter & DM follow-up
-          </p>
-          <div className="mt-3">
-            <RecommendationList items={data.recommendations} limit={actionLimit} />
-          </div>
-        </section>
-      </div>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h3 className="text-base font-semibold text-zinc-50">AI candidate ranking by job</h3>
-        <p className="mt-1 text-xs text-zinc-500">
-          Merchandising, resume keywords, proximity, responsiveness, interview stage, retail/reset
-        </p>
-        <div className="mt-4">
+      <details className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+        <summary className="cursor-pointer text-base font-semibold text-zinc-50">
+          Candidate ranking & productivity
+        </summary>
+        <div className="mt-4 space-y-4">
           <JobRankingsTable
             rankings={data.jobRankings}
             maxJobs={jobLimit}
             onCandidateClick={drawer.openCandidate}
           />
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h3 className="text-base font-semibold text-zinc-50">Recruiter productivity</h3>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
-                <th className="pb-2 pr-3">Recruiter</th>
-                <th className="pb-2 pr-3">Reviewed</th>
-                <th className="pb-2 pr-3">Interviews</th>
-                <th className="pb-2 pr-3">Hires</th>
-                <th className="pb-2 pr-3">Response</th>
-                <th className="pb-2">Conversion</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.productivity.slice(0, compact ? 6 : 12).map((row) => (
-                <tr key={row.recruiter} className="border-b border-zinc-800/60">
-                  <td className="py-2 pr-3 font-medium text-zinc-200">{row.recruiter}</td>
-                  <td className="py-2 pr-3 text-zinc-400">{row.candidatesReviewed}</td>
-                  <td className="py-2 pr-3 text-zinc-400">{row.interviewsScheduled}</td>
-                  <td className="py-2 pr-3 text-zinc-400">{row.hires}</td>
-                  <td className="py-2 pr-3 text-zinc-400">{row.responseSpeedLabel}</td>
-                  <td className="py-2 text-zinc-400">
-                    {row.conversionPercent != null ? `${row.conversionPercent}%` : "—"}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
+                  <th className="pb-2 pr-3">Recruiter</th>
+                  <th className="pb-2 pr-3">Reviewed</th>
+                  <th className="pb-2 pr-3">Interviews</th>
+                  <th className="pb-2 pr-3">Hires</th>
+                  <th className="pb-2 pr-3">Response</th>
+                  <th className="pb-2">Conversion</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.productivity.slice(0, compact ? 6 : 12).map((row) => (
+                  <tr key={row.recruiter} className="border-b border-zinc-800/60">
+                    <td className="py-2 pr-3 font-medium text-zinc-200">{row.recruiter}</td>
+                    <td className="py-2 pr-3 text-zinc-400">{row.candidatesReviewed}</td>
+                    <td className="py-2 pr-3 text-zinc-400">{row.interviewsScheduled}</td>
+                    <td className="py-2 pr-3 text-zinc-400">{row.hires}</td>
+                    <td className="py-2 pr-3 text-zinc-400">{row.responseSpeedLabel}</td>
+                    <td className="py-2 text-zinc-400">
+                      {row.conversionPercent != null ? `${row.conversionPercent}%` : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <IntelligenceBarChart
-          title="Applicants per day"
-          subtitle="Last 14 days"
-          data={data.trends.applicantsPerDay}
-          barClassName="bg-sky-500/80"
-        />
-        <IntelligenceBarChart
-          title="Hires per week"
-          subtitle="Rolling 8 weeks"
-          data={data.trends.hiresPerWeek}
-          barClassName="bg-emerald-500/80"
-        />
-        <IntelligenceBarChart
-          title="Source conversion"
-          subtitle="Hire rate % by source"
-          data={data.trends.sourceConversion}
-          valueLabel="%"
-          barClassName="bg-violet-500/80"
-        />
-        <IntelligenceBarChart
-          title="Territory fill velocity"
-          subtitle="Hires per open job % by DM"
-          data={data.trends.territoryFillVelocity}
-          valueLabel="%"
-          barClassName="bg-teal-500/80"
-        />
-      </div>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h3 className="text-base font-semibold text-zinc-50">Automation hooks (integration prep)</h3>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {data.automationHooks.map((hook) => (
-            <div
-              key={hook.id}
-              className={`rounded-lg border px-3 py-2 text-xs ${
-                hook.status === "ready"
-                  ? "border-teal-500/30 bg-teal-500/5 text-teal-200"
-                  : "border-zinc-700 bg-zinc-950/40 text-zinc-400"
-              }`}
-            >
-              <p className="font-medium">{hook.label}</p>
-              <p className="mt-0.5 text-zinc-500">{hook.description}</p>
-              <p className="mt-1 uppercase tracking-wide text-[10px] text-zinc-600">{hook.status}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      </details>
 
       <CandidateDetailDrawer {...drawer.drawerProps} />
     </div>

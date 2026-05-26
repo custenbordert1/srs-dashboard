@@ -41,20 +41,34 @@ export async function GET(request: Request) {
       listActiveRosterReps(),
     ]);
 
-  if (!jobsResult.ok) {
-    const status = breezyFailureHttpStatus(jobsResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "jobs" });
-    return NextResponse.json(breezyFailureBody(jobsResult), { status });
+  const partialErrors: string[] = [];
+  const breezyJobsOk = jobsResult.ok;
+  const breezyCandidatesOk = candidatesResult.ok;
+
+  if (!breezyJobsOk) {
+    partialErrors.push(`Published jobs unavailable: ${jobsResult.error}`);
   }
-  if (!candidatesResult.ok) {
-    const status = breezyFailureHttpStatus(candidatesResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "candidates" });
-    return NextResponse.json(breezyFailureBody(candidatesResult), { status });
+  if (!breezyCandidatesOk) {
+    partialErrors.push(`Candidate sync unavailable: ${candidatesResult.error}`);
   }
 
-  const jobs = applyTerritoryToJobs(session, jobsResult.jobs);
-  const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
-  const fetchedAt = candidatesResult.fetchedAt;
+  if (!breezyJobsOk && !breezyCandidatesOk && drafts.length === 0 && escalations.length === 0) {
+    const status = breezyFailureHttpStatus(jobsResult.error ?? candidatesResult.error);
+    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "all" });
+    return NextResponse.json(
+      breezyFailureBody(breezyJobsOk ? candidatesResult : jobsResult),
+      { status },
+    );
+  }
+
+  const jobs = breezyJobsOk ? applyTerritoryToJobs(session, jobsResult.jobs) : [];
+  const candidates = breezyCandidatesOk
+    ? applyTerritoryToCandidates(session, candidatesResult.candidates)
+    : [];
+  const fetchedAt =
+    (breezyCandidatesOk ? candidatesResult.fetchedAt : null) ??
+    (breezyJobsOk ? jobsResult.fetchedAt : null) ??
+    new Date().toISOString();
 
   const territoryReps =
     session.territoryStates.length > 0
@@ -62,6 +76,13 @@ export async function GET(request: Request) {
           session.territoryStates.includes(normalizeStateCode(rep.state)),
         )
       : activeReps;
+
+  const activeRepsByState: Record<string, number> = {};
+  for (const rep of territoryReps) {
+    if (!rep.active) continue;
+    const state = normalizeStateCode(rep.state);
+    activeRepsByState[state] = (activeRepsByState[state] ?? 0) + 1;
+  }
 
   const intelligence = buildRecruitingIntelligence(session, jobs, candidates, fetchedAt, workflows, {
     drafts,
@@ -71,9 +92,10 @@ export async function GET(request: Request) {
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
-    breezyOk: true,
+    breezyOk: breezyJobsOk && breezyCandidatesOk,
     filteredJobs: jobs.length,
     filteredCandidates: candidates.length,
+    partial: partialErrors.length > 0,
   });
 
   return NextResponse.json(
@@ -85,7 +107,12 @@ export async function GET(request: Request) {
         filteredJobs: jobs.length,
         filteredCandidates: candidates.length,
         workflowCount: Object.keys(workflows).length,
-        partialSync: candidatesResult.truncated ?? false,
+        partialSync: candidatesResult.ok ? candidatesResult.truncated ?? false : true,
+        partialErrors,
+        breezyJobsOk,
+        breezyCandidatesOk,
+        escalations,
+        activeRepsByState,
         refreshedAt: new Date().toISOString(),
       },
     },
