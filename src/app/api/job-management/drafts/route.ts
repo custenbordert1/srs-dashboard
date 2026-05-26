@@ -1,7 +1,11 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { createJobDraft, listJobDrafts } from "@/lib/job-management/job-draft-store";
 import {
-  fetchPublishedBreezyJobCatalog,
+  createJobDraft,
+  findOpenDraftByClonedBreezyJobId,
+  listJobDrafts,
+} from "@/lib/job-management/job-draft-store";
+import {
+  fetchBreezyJobCatalog,
   jobCatalogRowToDraftInput,
 } from "@/lib/job-management/breezy-job-catalog";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -46,22 +50,35 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "clone" && body.breezyJobId) {
-    const catalog = await fetchPublishedBreezyJobCatalog();
+    const existing = await findOpenDraftByClonedBreezyJobId(body.breezyJobId);
+    if (existing) {
+      console.info("[job-drafts] reusing open clone draft", {
+        breezyJobId: body.breezyJobId,
+        draftId: existing.id,
+      });
+      return NextResponse.json({ ok: true, draft: existing, reused: true });
+    }
+
+    const catalog = await fetchBreezyJobCatalog({ includeDraft: true });
     if (!catalog.ok) {
+      console.warn("[job-drafts] breezy catalog fetch failed", { error: catalog.error });
       return NextResponse.json({ ok: false, error: catalog.error }, { status: 503 });
     }
     const row = catalog.jobs.find((j) => j.breezyJobId === body.breezyJobId);
     if (!row) {
-      return NextResponse.json({ ok: false, error: "Breezy job not found in published catalog." }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: "Breezy job not found in published or draft catalog." },
+        { status: 404 },
+      );
     }
     const draft = await createJobDraft(jobCatalogRowToDraftInput(row));
     auditFromSession(guard.session, {
       action: "api_access",
       entityType: "system",
       entityId: draft.id,
-      metadata: { action: "clone", breezyJobId: body.breezyJobId },
+      metadata: { action: "clone", breezyJobId: body.breezyJobId, pipelineStatus: row.pipelineStatus },
     });
-    return NextResponse.json({ ok: true, draft });
+    return NextResponse.json({ ok: true, draft, reused: false });
   }
 
   const title = body.title?.trim();

@@ -3,6 +3,7 @@
 import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-automation";
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
+import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import { DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -64,12 +65,17 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
       if (mode === "manual") setTimedOut(false);
       if (mode !== "background") setError(null);
 
+      const route = "/api/recruiting/intelligence";
+      const started = performance.now();
+      logDashboardFetch("start", { route, label: "recruiting-intelligence-api" });
+
       try {
-        const result = await fetchJsonWithRetry<IntelligenceResponse>("/api/recruiting/intelligence", undefined, {
+        const result = await fetchJsonWithRetry<IntelligenceResponse>(route, undefined, {
           cacheKey: cacheKey(["recruiting", "intelligence"]),
           cacheTtlMs: forceRefresh ? 0 : LONG_CLIENT_CACHE_TTL_MS,
           force: forceRefresh,
           timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+          maxAttempts: 1,
           signal: controller.signal,
         });
 
@@ -78,6 +84,12 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
         if (!result.ok) {
           if (result.aborted) return;
           if (mode === "background" && initialDone.current) return;
+          logDashboardFetch(result.timedOut ? "timeout" : "error", {
+            route,
+            label: "recruiting-intelligence-api",
+            ms: Math.round(performance.now() - started),
+            error: result.error,
+          });
           if (result.timedOut) {
             setTimedOut(true);
             setError(result.error);
@@ -90,11 +102,24 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
 
         const parsed = result.data;
         if (!parsed.ok || !parsed.intelligence) {
-          setError(parsed.error ?? "Failed to load recruiting intelligence");
+          const message = parsed.error ?? "Failed to load recruiting intelligence";
+          logDashboardFetch("error", {
+            route,
+            label: "recruiting-intelligence-api",
+            ms: Math.round(performance.now() - started),
+            error: message,
+          });
+          setError(message);
           if (mode === "initial") setData(null);
           return;
         }
 
+        logDashboardFetch(parsed.meta?.partialSync ? "partial" : "success", {
+          route,
+          label: "recruiting-intelligence-api",
+          ms: Math.round(performance.now() - started),
+          partial: Boolean(parsed.meta?.partialSync),
+        });
         setData(parsed.intelligence);
         setMeta(parsed.meta);
         setTimedOut(false);

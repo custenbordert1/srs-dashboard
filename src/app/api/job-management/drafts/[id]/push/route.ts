@@ -4,6 +4,8 @@ import {
   getJobDraft,
   updateJobDraft,
 } from "@/lib/job-management/job-draft-store";
+import { validateJobDraftForBreezyPush } from "@/lib/job-management/breezy-position-payload";
+import { normalizeJobDraftLocationPatch } from "@/lib/job-management/normalize-job-location-fields";
 import { createBreezyPositionFromDraft } from "@/lib/job-management/breezy-position-write";
 import { assertBreezyConfigured } from "@/lib/breezy-route-log";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -14,6 +16,41 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+type PushBody = {
+  confirmed?: boolean;
+  title?: string;
+  description?: string;
+  city?: string;
+  usState?: string;
+  payRate?: string;
+  department?: string;
+};
+
+function trimPatch(body: PushBody): Partial<{
+  title: string;
+  description: string;
+  city: string;
+  usState: string;
+  payRate: string;
+  department: string;
+}> {
+  const patch: Partial<{
+    title: string;
+    description: string;
+    city: string;
+    usState: string;
+    payRate: string;
+    department: string;
+  }> = {};
+  if (body.title !== undefined) patch.title = body.title.trim();
+  if (body.description !== undefined) patch.description = body.description.trim();
+  if (body.city !== undefined) patch.city = body.city.trim();
+  if (body.usState !== undefined) patch.usState = body.usState.trim();
+  if (body.payRate !== undefined) patch.payRate = body.payRate.trim();
+  if (body.department !== undefined) patch.department = body.department.trim();
+  return patch;
+}
 
 export async function POST(request: Request, context: RouteContext) {
   const guard = guardApiRoute(request, {
@@ -27,9 +64,9 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  let body: { confirmed?: boolean };
+  let body: PushBody;
   try {
-    body = (await request.json()) as { confirmed?: boolean };
+    body = (await request.json()) as PushBody;
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
   }
@@ -45,14 +82,46 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const draft = await getJobDraft(id);
-  if (!draft) {
+  const existing = await getJobDraft(id);
+  if (!existing) {
     return NextResponse.json({ ok: false, error: "Draft not found." }, { status: 404 });
   }
-  if (draft.status !== "draft") {
+  if (existing.status !== "draft") {
     return NextResponse.json(
       { ok: false, error: "Only draft-status jobs can be pushed to Breezy." },
       { status: 409 },
+    );
+  }
+
+  const patch = normalizeJobDraftLocationPatch(trimPatch(body));
+  if (Object.keys(patch).length > 0) {
+    await updateJobDraft(id, patch);
+  }
+
+  const draft = await getJobDraft(id);
+  if (!draft) {
+    return NextResponse.json({ ok: false, error: "Draft not found after save." }, { status: 404 });
+  }
+
+  console.info("[job-draft-push] using latest draft", {
+    draftId: draft.id,
+    title: draft.title,
+    city: draft.city,
+    usState: draft.usState,
+    descriptionLength: draft.description.length,
+    updatedAt: draft.updatedAt,
+    savedFieldsFromRequest: Object.keys(patch),
+  });
+
+  const validation = validateJobDraftForBreezyPush(draft);
+  if (!validation.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: validation.message,
+        fieldErrors: validation.errors,
+      },
+      { status: 400 },
     );
   }
 
@@ -80,8 +149,13 @@ export async function POST(request: Request, context: RouteContext) {
       metadata: { push: "failed", error: result.error, rateLimited: result.rateLimited ?? false },
     });
     return NextResponse.json(
-      { ok: false, error: result.error, rateLimited: result.rateLimited ?? false },
-      { status: result.rateLimited ? 429 : 502 },
+      {
+        ok: false,
+        error: result.error,
+        rateLimited: result.rateLimited ?? false,
+        fieldErrors: result.fieldErrors,
+      },
+      { status: result.rateLimited ? 429 : result.fieldErrors ? 400 : 502 },
     );
   }
 
@@ -116,5 +190,6 @@ export async function POST(request: Request, context: RouteContext) {
     draft: updated,
     breezyJobId: result.breezyJobId,
     postedAt: result.fetchedAt,
+    verification: result.verification,
   });
 }

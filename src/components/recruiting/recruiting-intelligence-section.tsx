@@ -17,8 +17,11 @@ import {
   RISK_BADGE_STYLES,
   type IntelligenceOpenPost,
 } from "@/lib/recruiting-intelligence";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { DeferredSection } from "@/components/ui/deferred-section";
-import { useEffect, useMemo, useState } from "react";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
@@ -35,21 +38,7 @@ function formatDaysOpen(days: number | null): string {
   return `${days}d`;
 }
 
-function IntelligenceSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div
-            key={i}
-            className="h-28 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40"
-          />
-        ))}
-      </div>
-      <div className="h-72 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40" />
-    </div>
-  );
-}
+type IntelligenceLoadPhase = "loading" | "ready" | "error";
 
 const APLUS_TABLE_INITIAL = 25;
 
@@ -161,65 +150,140 @@ function APlusOpportunityTable({ rows }: { rows: IntelligenceOpenPost[] }) {
 
 export function RecruitingIntelligenceSection() {
   const sheetLive = isGoogleSheetRecruitingLiveEnabledClient();
-  const [data, setData] = useState<SheetDataResult | undefined>(undefined);
-  const [melData, setMelData] = useState<MelProjectsDataResult | undefined>(undefined);
+  const [data, setData] = useState<SheetDataResult | null>(null);
+  const [melData, setMelData] = useState<MelProjectsDataResult | null>(null);
   const [breezyIntelligence, setBreezyIntelligence] = useState<RecruitingIntelligenceSnapshot | null>(
     null,
   );
-  const [liveLoadError, setLiveLoadError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<IntelligenceLoadPhase>("loading");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const loadingCeilingHit = useLoadingCeiling(phase === "loading");
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadBundle = useCallback(async () => {
+    const route = "/recruiting-intelligence";
+    const started = performance.now();
+    logDashboardFetch("start", { route, label: "intelligence-bundle" });
+    setPhase("loading");
+    setLoadError(null);
 
-    async function load() {
-      try {
-        const melParsed = await fetchMelProjectsData();
+    try {
+      if (!sheetLive) {
+        const [melResult, liveResult] = await Promise.allSettled([
+          fetchMelProjectsData(),
+          fetchRecruitingLiveSnapshot(false),
+        ]);
 
-        if (!sheetLive) {
-          const live = await fetchRecruitingLiveSnapshot(false);
-          if (cancelled) return;
-          setMelData(melParsed);
-          setData({ ok: true, rows: [], headers: [], fetchedAt: new Date().toISOString(), csvUrl: "" });
-          if (live.ok) {
+        const melParsed =
+          melResult.status === "fulfilled"
+            ? melResult.value
+            : {
+                ok: false as const,
+                error:
+                  melResult.reason instanceof Error
+                    ? melResult.reason.message
+                    : "MEL projects unavailable",
+                fetchedAt: new Date().toISOString(),
+                csvUrl: "",
+              };
+
+        setMelData(melParsed);
+        setData({ ok: true, rows: [], headers: [], fetchedAt: new Date().toISOString(), csvUrl: "" });
+
+        if (liveResult.status === "fulfilled") {
+          const live = liveResult.value;
+          if (live.ok && live.intelligence) {
             setBreezyIntelligence(live.intelligence);
-            setLiveLoadError(null);
-          } else {
-            setBreezyIntelligence(null);
-            setLiveLoadError(live.error);
+            setPhase("ready");
+            logDashboardFetch(live.partial ? "partial" : "success", {
+              route,
+              label: "intelligence-bundle",
+              ms: Math.round(performance.now() - started),
+              partial: Boolean(live.partial),
+            });
+            return;
           }
+          const message = live.ok
+            ? "Breezy live snapshot returned no intelligence payload."
+            : live.error;
+          setBreezyIntelligence(null);
+          setLoadError(message);
+          setPhase("error");
+          logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: message });
           return;
         }
 
-        const parsed = await fetchRecruitingSheetData();
-        if (!cancelled) {
-          setData(parsed);
-          setMelData(melParsed);
-          setBreezyIntelligence(null);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          const message = e instanceof Error ? e.message : "Failed to load data";
-          setData({
-            ok: false,
-            error: message,
-            fetchedAt: new Date().toISOString(),
-            csvUrl: "",
-          });
-          setMelData({
-            ok: false,
-            error: message,
-            fetchedAt: new Date().toISOString(),
-            csvUrl: "",
-          });
-        }
+        const message =
+          liveResult.reason instanceof Error
+            ? liveResult.reason.message
+            : "Failed to load Breezy live snapshot";
+        setBreezyIntelligence(null);
+        setLoadError(message);
+        setPhase("error");
+        logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: message });
+        return;
       }
-    }
 
-    void load();
-    return () => {
-      cancelled = true;
-    };
+      const [sheetResult, melResult] = await Promise.allSettled([
+        fetchRecruitingSheetData(),
+        fetchMelProjectsData(),
+      ]);
+
+      const parsed =
+        sheetResult.status === "fulfilled"
+          ? sheetResult.value
+          : {
+              ok: false as const,
+              error:
+                sheetResult.reason instanceof Error
+                  ? sheetResult.reason.message
+                  : "Recruiting sheet unavailable",
+              fetchedAt: new Date().toISOString(),
+              csvUrl: "",
+            };
+      const melParsed =
+        melResult.status === "fulfilled"
+          ? melResult.value
+          : {
+              ok: false as const,
+              error:
+                melResult.reason instanceof Error
+                  ? melResult.reason.message
+                  : "MEL projects unavailable",
+              fetchedAt: new Date().toISOString(),
+              csvUrl: "",
+            };
+
+      setData(parsed);
+      setMelData(melParsed);
+      setBreezyIntelligence(null);
+
+      if (!parsed.ok) {
+        setLoadError(parsed.error);
+        setPhase("error");
+        logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: parsed.error });
+        return;
+      }
+
+      setPhase("ready");
+      logDashboardFetch("success", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started) });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to load recruiting intelligence";
+      setLoadError(message);
+      setPhase("error");
+      logDashboardFetch("error", { route, label: "intelligence-bundle", error: message });
+    }
   }, [sheetLive]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => void loadBundle(), 0);
+    return () => window.clearTimeout(id);
+  }, [loadBundle]);
+
+  const retry = useCallback(() => {
+    setRetrying(true);
+    void loadBundle().finally(() => setRetrying(false));
+  }, [loadBundle]);
 
   const snapshot = useMemo(() => {
     if (!sheetLive && breezyIntelligence) return breezyIntelligence;
@@ -282,40 +346,39 @@ export function RecruitingIntelligenceSection() {
     ];
   }, [dataQualityDiagnostics]);
 
-  if (melData === undefined || data === undefined) {
-    return <IntelligenceSkeleton />;
-  }
+  const archiveSheetData: SheetDataResult =
+    data ??
+    ({
+      ok: false,
+      error: "Recruiting sheet not loaded",
+      fetchedAt: new Date().toISOString(),
+      csvUrl: "",
+    } as SheetDataResult);
+  const archiveMelData: MelProjectsDataResult =
+    melData ??
+    ({
+      ok: false,
+      error: "MEL sheet not loaded",
+      fetchedAt: new Date().toISOString(),
+      csvUrl: "",
+    } as MelProjectsDataResult);
 
-  if (!sheetLive && liveLoadError && !snapshot) {
+  if (phase === "loading" || phase === "error" || !snapshot) {
+    const timedOut = loadingCeilingHit || Boolean(loadError?.toLowerCase().includes("timed out"));
     return (
-      <div className="space-y-6">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Recruiting intelligence</h1>
-        <div
-          role="alert"
-          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
-        >
-          {liveLoadError}
-        </div>
-      </div>
+      <DashboardSectionFallback
+        title="Recruiting intelligence"
+        loadingMessage="Loading recruiting intelligence (Breezy + MEL)…"
+        isLoading={phase === "loading"}
+        loadingCeilingHit={loadingCeilingHit}
+        error={phase === "error" || !snapshot ? loadError ?? "No intelligence data available." : null}
+        timedOut={timedOut}
+        onRetry={retry}
+        retrying={retrying}
+        skeletonRows={4}
+        skeletonCards={6}
+      />
     );
-  }
-
-  if (sheetLive && data && !data.ok) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Recruiting intelligence</h1>
-        <div
-          role="alert"
-          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
-        >
-          {data.error}
-        </div>
-      </div>
-    );
-  }
-
-  if (!snapshot) {
-    return <IntelligenceSkeleton />;
   }
 
   return (
@@ -325,7 +388,7 @@ export function RecruitingIntelligenceSection() {
         <p className="mt-1 max-w-3xl text-sm text-zinc-500">
           {sheetLive
             ? "Legacy mode: recruiting Google Sheet drives open-post analytics."
-            : "Live analytics from Breezy HR (published jobs + candidate sync). MEL sheet still powers store-call demand."}
+            : "Summary KPIs and charts use Breezy HR (published jobs + candidate sync). MEL sheet powers store-call demand. Sheet-backed sections below need archive rows or legacy mode."}
         </p>
       </div>
 
@@ -453,25 +516,40 @@ export function RecruitingIntelligenceSection() {
         <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
       </DeferredSection>
 
+      {!sheetLive && archiveSheetData.ok && archiveSheetData.rows.length === 0 ? (
+        <div
+          role="note"
+          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+        >
+          <p className="font-medium text-amber-50">Sheet-backed sections (archive)</p>
+          <p className="mt-1 text-amber-100/90">
+            Critical markets, opportunity automation, forecast, and related panels read from the
+            recruiting Google Sheet. With Breezy as the live source, those rows are not loaded here —
+            expand sections only for archive reconciliation, or enable legacy sheet-live mode for comparison.
+            Candidate intelligence below uses live Breezy data.
+          </p>
+        </div>
+      ) : null}
+
       <DeferredSection
         title="Critical markets queue"
         summary={<p className="text-sm text-zinc-500">Market-level recruiting priorities.</p>}
       >
-        <CriticalMarketsQueueSection recruiting={data} mel={melData} />
+        <CriticalMarketsQueueSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
-        title="Live market intelligence"
-        summary={<p className="text-sm text-zinc-500">Real-time market demand and coverage signals.</p>}
+        title="Market intelligence (sheet + MEL)"
+        summary={<p className="text-sm text-zinc-500">Market demand and coverage from sheet + MEL rows.</p>}
       >
-        <LiveMarketIntelligenceSection recruiting={data} mel={melData} />
+        <LiveMarketIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Opportunity automation"
         summary={<p className="text-sm text-zinc-500">Automated opportunity scoring and routing.</p>}
       >
-        <OpportunityAutomationSection recruiting={data} mel={melData} />
+        <OpportunityAutomationSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
@@ -479,14 +557,14 @@ export function RecruitingIntelligenceSection() {
         summary={<p className="text-sm text-zinc-500">Workflow queues and recruiter assignments.</p>}
         skeletonRows={5}
       >
-        <RecruitingActionCenterSection recruiting={data} mel={melData} />
+        <RecruitingActionCenterSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Forecast intelligence"
         summary={<p className="text-sm text-zinc-500">Staffing forecast and project risk projections.</p>}
       >
-        <ForecastIntelligenceSection recruiting={data} mel={melData} />
+        <ForecastIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
@@ -500,14 +578,14 @@ export function RecruitingIntelligenceSection() {
         title="Market intelligence"
         summary={<p className="text-sm text-zinc-500">Territory market health and demand curves.</p>}
       >
-        <MarketIntelligenceSection recruiting={data} mel={melData} />
+        <MarketIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
 
       <DeferredSection
         title="Demand intelligence"
         summary={<p className="text-sm text-zinc-500">MEL demand vs recruiting supply by state.</p>}
       >
-        <DemandIntelligenceSection recruiting={data} mel={melData} />
+        <DemandIntelligenceSection recruiting={archiveSheetData} mel={archiveMelData} />
       </DeferredSection>
     </div>
   );

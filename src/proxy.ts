@@ -8,16 +8,33 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/login"];
 const PUBLIC_API_PREFIXES = ["/api/auth/login", "/api/auth/session"];
 
+/** Dropbox Sign callbacks — no session; secured in route via event_hash (+ optional webhook secret). */
+export const DROPBOX_SIGN_WEBHOOK_PATH = "/api/dropbox-sign/webhook";
+
+function normalizePathname(pathname: string): string {
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
+export function isDropboxSignWebhookPath(pathname: string): boolean {
+  const path = normalizePathname(pathname);
+  return path === DROPBOX_SIGN_WEBHOOK_PATH;
+}
+
 function isPublicPath(pathname: string): boolean {
-  if (PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) return true;
-  if (PUBLIC_API_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+  const path = normalizePathname(pathname);
+  if (isDropboxSignWebhookPath(path)) return true;
+  if (PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`))) return true;
+  if (PUBLIC_API_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
     return true;
   }
   return false;
 }
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const pathname = normalizePathname(request.nextUrl.pathname);
 
   if (
     pathname.startsWith("/_next") ||

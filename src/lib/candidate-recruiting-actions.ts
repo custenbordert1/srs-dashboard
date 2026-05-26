@@ -1,5 +1,5 @@
 /**
- * Local recruiting action flags — structured for future workflow API sync.
+ * Recruiting action flags — persisted on server workflow overlay (see candidate-workflow-store).
  */
 
 export type RecruitingActionType =
@@ -22,8 +22,6 @@ export type CandidateRecruitingActionRecord = {
   candidateId: string;
   actions: CandidateRecruitingActions;
 };
-
-const STORAGE_KEY = "srs-candidate-recruiting-actions-v1";
 
 export const RECRUITING_ACTION_LABELS: Record<
   RecruitingActionType,
@@ -62,38 +60,11 @@ export function emptyRecruitingActions(): CandidateRecruitingActions {
   };
 }
 
-function readStore(): Record<string, CandidateRecruitingActions> {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, CandidateRecruitingActions>;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeStore(store: Record<string, CandidateRecruitingActions>): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-}
-
-export function loadRecruitingActionsMap(): Record<string, CandidateRecruitingActions> {
-  return readStore();
-}
-
-export function getRecruitingActions(candidateId: string): CandidateRecruitingActions {
-  return readStore()[candidateId] ?? emptyRecruitingActions();
-}
-
-export function toggleRecruitingAction(
-  candidateId: string,
+export function applyRecruitingActionToggle(
+  current: CandidateRecruitingActions,
   type: RecruitingActionType,
   enabled?: boolean,
 ): CandidateRecruitingActions {
-  const store = readStore();
-  const current = store[candidateId] ?? emptyRecruitingActions();
   const nextEnabled =
     enabled ??
     !(type === "dm-review"
@@ -106,7 +77,7 @@ export function toggleRecruitingAction(
             ? current.priorityList
             : current.onboardingPacketPrep);
 
-  const updated: CandidateRecruitingActions = {
+  return {
     ...current,
     dmReview: type === "dm-review" ? nextEnabled : current.dmReview,
     recommendInterview: type === "recommend-interview" ? nextEnabled : current.recommendInterview,
@@ -115,18 +86,43 @@ export function toggleRecruitingAction(
     onboardingPacketPrep: type === "onboarding-packet" ? nextEnabled : current.onboardingPacketPrep,
     updatedAt: new Date().toISOString(),
   };
-
-  store[candidateId] = updated;
-  writeStore(store);
-  return updated;
 }
 
-/** Payload shape for a future POST /api/candidates/recruiting-actions */
 export function toRecruitingActionPayload(
   candidateId: string,
   actions: CandidateRecruitingActions,
 ): CandidateRecruitingActionRecord {
   return { candidateId, actions };
+}
+
+const MS_PER_HOUR = 60 * 60 * 1000;
+
+export function scheduleFollowUpDue(referenceMs = Date.now(), hours = 48): string {
+  return new Date(referenceMs + hours * MS_PER_HOUR).toISOString();
+}
+
+/** Clears follow-up flag and due date after recruiter completes outreach. */
+export function completeFollowUpActions(
+  current: CandidateRecruitingActions,
+  referenceMs = Date.now(),
+): CandidateRecruitingActions {
+  return {
+    ...current,
+    needsFollowUp: false,
+    updatedAt: new Date(referenceMs).toISOString(),
+  };
+}
+
+/** Enables follow-up with a fresh 48h due window. */
+export function markNeedsFollowUp(
+  current: CandidateRecruitingActions,
+  referenceMs = Date.now(),
+): CandidateRecruitingActions {
+  return {
+    ...current,
+    needsFollowUp: true,
+    updatedAt: new Date(referenceMs).toISOString(),
+  };
 }
 
 export function deriveRecommendedNextAction(

@@ -3,12 +3,12 @@
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import { buildCandidateDrawerRow } from "@/lib/build-candidate-drawer-row";
+import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
+import { persistRecruitingActionToggle } from "@/lib/candidate-workflow-client";
 import {
-  getRecruitingActions,
-  loadRecruitingActionsMap,
-  toggleRecruitingAction,
-  type RecruitingActionType,
-} from "@/lib/candidate-recruiting-actions";
+  defaultRecruiterRosters,
+  type RecruiterRosters,
+} from "@/lib/candidate-workflow-types";
 import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { fetchWithRetry } from "@/lib/fetch-with-retry";
 import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
@@ -37,7 +37,7 @@ type UseCandidateDrawerOptions = {
 export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [workflowState, setWorkflowState] = useState<CandidateWorkflowState>({});
-  const [recruitingActionsMap, setRecruitingActionsMap] = useState(loadRecruitingActionsMap);
+  const [rosters, setRosters] = useState<RecruiterRosters>(() => defaultRecruiterRosters());
   const [fetchedCandidates, setFetchedCandidates] = useState<BreezyCandidate[]>([]);
   const [breezyLoading, setBreezyLoading] = useState(false);
   const melEnabled = selectedCandidateId !== null;
@@ -55,12 +55,17 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
       cacheKey(["candidates", "workflows"]),
       async () => {
         const res = await fetchWithRetry("/api/candidates/workflows", { cache: "no-store" });
-        return (await res.json()) as { ok?: boolean; workflows?: CandidateWorkflowState };
+        return (await res.json()) as {
+          ok?: boolean;
+          workflows?: CandidateWorkflowState;
+          rosters?: RecruiterRosters;
+        };
       },
       { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows" },
     )
       .then((parsed) => {
         if (!cancelled && parsed.workflows) setWorkflowState(parsed.workflows);
+        if (!cancelled && parsed.rosters) setRosters(parsed.rosters);
       })
       .catch(() => {
         /* local-only fallback */
@@ -130,7 +135,6 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
     const row = buildCandidateDrawerRow(breezy, {
       workflow: workflowState[selectedCandidateId],
       territoryStates: options.territoryStates,
-      recruitingActions: recruitingActionsMap[selectedCandidateId] ?? getRecruitingActions(selectedCandidateId),
     });
     if (melOpportunities.length === 0) {
       return { ...row, opportunityRepMatches };
@@ -149,7 +153,6 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
     melOpportunities,
     opportunityRepMatches,
     options.territoryStates,
-    recruitingActionsMap,
     selectedCandidateId,
     workflowState,
   ]);
@@ -230,8 +233,13 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
 
   const handleRecruitingAction = useCallback((type: RecruitingActionType) => {
     if (!selectedCandidateId) return;
-    const updated = toggleRecruitingAction(selectedCandidateId, type);
-    setRecruitingActionsMap((prev) => ({ ...prev, [selectedCandidateId]: updated }));
+    void persistRecruitingActionToggle(selectedCandidateId, type)
+      .then((workflow) => {
+        setWorkflowState((prev) => ({ ...prev, [selectedCandidateId]: workflow }));
+      })
+      .catch((err) => {
+        window.alert(err instanceof Error ? err.message : "Recruiting action update failed");
+      });
   }, [selectedCandidateId]);
 
   return {
@@ -271,6 +279,8 @@ export function useCandidateDrawer(options: UseCandidateDrawerOptions = {}) {
         });
       },
       onRecruitingAction: handleRecruitingAction,
+      rosters,
+      onRostersUpdated: setRosters,
       loading: breezyLoading && !selectedDrawerRow,
       melMatchesLoading: melLoading,
       repMatchesLoading,

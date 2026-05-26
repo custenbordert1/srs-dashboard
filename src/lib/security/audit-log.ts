@@ -15,12 +15,17 @@ export type AuditAction =
   | "territory_access"
   | "export_download"
   | "api_access"
-  | "read_only_blocked";
+  | "read_only_blocked"
+  | "workflow_roster"
+  | "onboarding_send_packet"
+  | "onboarding_status_check";
 
 export type AuditEntityType =
   | "user"
   | "candidate"
   | "workflow"
+  | "workflow_roster"
+  | "candidate_workflow"
   | "recommendation"
   | "territory"
   | "export"

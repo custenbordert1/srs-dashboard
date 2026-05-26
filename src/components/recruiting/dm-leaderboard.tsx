@@ -31,7 +31,8 @@ function RankBadge({ rank }: { rank: number }) {
 function ScorecardSkeleton() {
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
-      <div className="h-5 w-40 animate-pulse rounded bg-zinc-800/80" />
+      <p className="text-sm text-zinc-500">Loading DM scorecards (recruiting sheet archive + MEL projects)…</p>
+      <div className="mt-3 h-5 w-40 animate-pulse rounded bg-zinc-800/80" />
       <div className="mt-4 space-y-3">
         {Array.from({ length: 7 }, (_, i) => (
           <div key={i} className="h-12 animate-pulse rounded-lg bg-zinc-800/50" />
@@ -56,7 +57,7 @@ function DmScorecardTable({ rows }: { rows: DmScorecardRow[] }) {
           DM scorecards
         </h2>
         <p className="text-sm text-zinc-500">
-          Live recruiting and MEL demand metrics by mapped district manager territory
+          Recruiting sheet archive and MEL demand metrics by mapped district manager territory
         </p>
       </div>
 
@@ -178,12 +179,27 @@ export function DmLeaderboard({ rows = [] }: { rows?: DmLeaderboardRow[] }) {
     return (
       <section className="space-y-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-50">DM scorecards</h2>
+        <p className="text-sm text-zinc-500">
+          Combines archive recruiting Google Sheet rows with MEL project demand — not live Breezy KPIs.
+        </p>
         <div
           role="alert"
           className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
         >
           {errorMessage}
         </div>
+      </section>
+    );
+  }
+
+  if (scorecards.length === 0) {
+    return (
+      <section className="space-y-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 sm:p-5">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">DM scorecards</h2>
+        <p className="text-sm text-zinc-500">
+          Sheet and MEL data loaded but no district manager rows matched. Check Google Sheet column headers and MEL
+          project mapping.
+        </p>
       </section>
     );
   }

@@ -1,31 +1,33 @@
 "use client";
 
 import type { DmLeaderboardRow, NewHireMetric, PipelineStage, TrendWeek } from "@/lib/recruiting-sample-data";
-import { useState } from "react";
+import { warmBreezyCandidatesCache } from "@/lib/breezy-candidates-warm";
+import { useEffect, useState, type ReactNode } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
-import { BreezyDashboardSummary } from "./breezy-dashboard-summary";
-import { BreezyOverviewJobsTable } from "./breezy-overview-jobs-table";
-import { RecruitingDataSourcesPanel } from "./recruiting-data-sources-panel";
 import {
   DashboardTabPanel,
+  LazyBreezyDashboardSummary,
+  LazyBreezyOverviewJobsTable,
   LazyCandidatesSection,
   LazyDataHealthSection,
+  LazyDmLeaderboard,
   LazyLiveSheetSection,
   LazyMelProjectsSection,
   LazyNeedsAttentionSection,
   LazyRecruitingAutomationSection,
   LazyRecruitingCommandCenter,
+  LazyRecruitingDataSourcesPanel,
   LazyRecruitingIntelligenceSection,
   LazyWorkforceOperationsSection,
   LazyJobManagementSection,
 } from "./dashboard-tab-panels";
+import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
   EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
   type DashboardTabId,
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
-import { DmLeaderboard } from "./dm-leaderboard";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
 import { SheetKpiCards } from "./sheet-kpi-cards";
@@ -38,6 +40,21 @@ type RecruitingDashboardContentProps = {
   userRole?: UserRole;
 };
 
+function TabPanelWithSourceBanner({
+  tabId,
+  children,
+}: {
+  tabId: DashboardTabId;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-6">
+      <RecruitingTabSourceBanner tabId={tabId} />
+      {children}
+    </div>
+  );
+}
+
 export function RecruitingDashboardContent({
   weeklyTrends,
   pipelineStages,
@@ -47,6 +64,11 @@ export function RecruitingDashboardContent({
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
   const executiveTabs = userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
+
+  useEffect(() => {
+    const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
+    return () => window.clearTimeout(id);
+  }, []);
 
   return (
     <>
@@ -62,63 +84,95 @@ export function RecruitingDashboardContent({
         className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8"
       >
         <DashboardTabPanel tabId="command-center" activeTab={activeTab}>
-          <LazyRecruitingCommandCenter />
-          <RecruitingDataSourcesPanel />
+          <TabPanelWithSourceBanner tabId="command-center">
+            <LazyRecruitingCommandCenter />
+            <LazyRecruitingDataSourcesPanel />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="overview" activeTab={activeTab}>
-          <BreezyDashboardSummary />
-          <SheetKpiCards />
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2">
-              <BreezyOverviewJobsTable />
-              <RecruitingTrendsChart data={weeklyTrends} />
+          <TabPanelWithSourceBanner tabId="overview">
+            <LazyBreezyDashboardSummary />
+            <SheetKpiCards />
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="space-y-6 lg:col-span-2">
+                <LazyBreezyOverviewJobsTable />
+                <div className="space-y-2">
+                  <span className="inline-flex rounded-full border border-zinc-600/60 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                    Demo · FY26 sample
+                  </span>
+                  <RecruitingTrendsChart data={weeklyTrends} />
+                </div>
+              </div>
+              <div className="space-y-6">
+                <span className="inline-flex rounded-full border border-zinc-600/60 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                  Demo · FY26 sample
+                </span>
+                <ApplicantPipeline stages={pipelineStages} />
+                <NewHireMetrics metrics={newHireMetrics} />
+              </div>
             </div>
-            <div className="space-y-6">
-              <ApplicantPipeline stages={pipelineStages} />
-              <NewHireMetrics metrics={newHireMetrics} />
-            </div>
-          </div>
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="needs-attention" activeTab={activeTab}>
-          <LazyNeedsAttentionSection />
+          <TabPanelWithSourceBanner tabId="needs-attention">
+            <LazyNeedsAttentionSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="dm-scorecards" activeTab={activeTab}>
-          <DmLeaderboard rows={dmLeaderboard} />
+          <TabPanelWithSourceBanner tabId="dm-scorecards">
+            <LazyDmLeaderboard rows={dmLeaderboard} />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="live-sheet" activeTab={activeTab}>
-          <LazyLiveSheetSection />
+          <TabPanelWithSourceBanner tabId="live-sheet">
+            <LazyLiveSheetSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="candidates" activeTab={activeTab}>
-          <LazyCandidatesSection />
+          <TabPanelWithSourceBanner tabId="candidates">
+            <LazyCandidatesSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="mel-projects" activeTab={activeTab}>
-          <LazyMelProjectsSection />
+          <TabPanelWithSourceBanner tabId="mel-projects">
+            <LazyMelProjectsSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="data-health" activeTab={activeTab}>
-          <LazyDataHealthSection />
+          <TabPanelWithSourceBanner tabId="data-health">
+            <LazyDataHealthSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="recruiting-intelligence" activeTab={activeTab}>
-          <LazyRecruitingIntelligenceSection />
+          <TabPanelWithSourceBanner tabId="recruiting-intelligence">
+            <LazyRecruitingIntelligenceSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="automation" activeTab={activeTab}>
-          <LazyRecruitingAutomationSection />
+          <TabPanelWithSourceBanner tabId="automation">
+            <LazyRecruitingAutomationSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="workforce" activeTab={activeTab}>
-          <LazyWorkforceOperationsSection showPasswordPanel />
+          <TabPanelWithSourceBanner tabId="workforce">
+            <LazyWorkforceOperationsSection showPasswordPanel />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="job-management" activeTab={activeTab}>
-          <LazyJobManagementSection />
+          <TabPanelWithSourceBanner tabId="job-management">
+            <LazyJobManagementSection />
+          </TabPanelWithSourceBanner>
         </DashboardTabPanel>
       </main>
     </>

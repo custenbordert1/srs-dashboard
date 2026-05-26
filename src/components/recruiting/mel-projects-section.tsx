@@ -220,8 +220,8 @@ export function MelProjectsSection() {
             ) : null}
           </div>
           <div className="flex flex-col items-start gap-2 sm:items-end">
-            <span className="rounded-full border border-teal-500/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">
-              Live sheet
+            <span className="rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-200">
+              Live · MEL sheet
             </span>
             <p className="text-xs text-zinc-500">Fetched {formatFetchedAt(data.fetchedAt)}</p>
           </div>

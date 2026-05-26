@@ -4,12 +4,14 @@ import { DashboardFetchAlert } from "@/components/ui/dashboard-fetch-alert";
 import { breezyJobsToOverviewRows, countApplicantsByPosition } from "@/lib/recruiting-breezy-adapters";
 import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
 import { breezyDisconnectedDetail, breezyDisconnectedTitle, classifyBreezyError } from "@/lib/breezy-error-ui";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useState } from "react";
 
 export function BreezyOverviewJobsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReturnType<typeof breezyJobsToOverviewRows>>([]);
+  const loadingCeilingHit = useLoadingCeiling(loading);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,7 +71,13 @@ export function BreezyOverviewJobsTable() {
       ) : null}
 
       {loading ? (
-        <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">Loading Breezy jobs…</p>
+        <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">
+          {loadingCeilingHit
+            ? "Sync in progress — Breezy jobs are taking longer than expected. Use Retry below."
+            : "Loading Breezy jobs…"}
+        </p>
+      ) : !error && rows.length === 0 ? (
+        <p className="px-4 py-8 text-sm text-zinc-500 sm:px-5">No published Breezy jobs in the latest sync.</p>
       ) : !error ? (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">

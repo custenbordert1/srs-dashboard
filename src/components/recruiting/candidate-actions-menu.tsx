@@ -1,7 +1,14 @@
 "use client";
 
-import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
+import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
+import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES, type CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
+import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
+import {
+  getSendPaperworkBlockReason,
+  sendPaperworkBlockMessage,
+  type OnboardingTemplateOption,
+} from "@/lib/onboarding-send-eligibility";
 import { useEffect, useRef, useState } from "react";
 
 export type CandidateRowAction =
@@ -9,19 +16,58 @@ export type CandidateRowAction =
   | { kind: "change-workflow"; status: CandidateWorkflowStatus }
   | { kind: "assign-recruiter"; recruiter: string }
   | { kind: "assign-dm"; dm: string }
-  | { kind: "add-note"; note: string };
+  | { kind: "add-note"; note: string }
+  | { kind: "send-paperwork"; templateKey: OnboardingTemplateKey };
 
 type CandidateActionsMenuProps = {
   onAction: (action: CandidateRowAction) => void;
+  rosters: RecruiterRosters;
+  onRostersUpdated?: (rosters: RecruiterRosters) => void;
+  onboardingConfigured?: boolean;
+  templatesAvailable?: boolean;
+  paperworkTemplates?: OnboardingTemplateOption[];
+  hasCandidateEmail?: boolean;
+  sendPaperworkDisabled?: boolean;
+  onboardingConfigLoaded?: boolean;
+  onboardingConfigError?: string | null;
+  /** Overflow-only: workflow, DM, alternate templates, drawer. */
+  variant?: "default" | "overflow";
+  /** Hidden from overflow paperwork list (primary Send chip uses this template). */
+  excludePaperworkTemplateKey?: OnboardingTemplateKey;
+  /** Row overflow: triage shortcuts moved out of the table toolbar. */
+  overflowTriage?: {
+    onFollowUp: () => void;
+    onFollowUpDone: () => void;
+    onNote: () => void;
+    onAssignMe: () => void;
+    followUpDisabled?: boolean;
+    hideSendInOverflow?: boolean;
+  };
 };
 
-export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
+export function CandidateActionsMenu({
+  onAction,
+  rosters,
+  onRostersUpdated,
+  onboardingConfigured = false,
+  templatesAvailable: _templatesAvailable = false,
+  paperworkTemplates = [],
+  hasCandidateEmail = true,
+  sendPaperworkDisabled = false,
+  onboardingConfigLoaded = true,
+  onboardingConfigError = null,
+  variant = "default",
+  excludePaperworkTemplateKey = "onboarding_packet",
+  overflowTriage,
+}: CandidateActionsMenuProps) {
+  const overflow = variant === "overflow";
   const [open, setOpen] = useState(false);
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
-  const [recruiters, setRecruiters] = useState<string[]>([]);
-  const [dms, setDms] = useState<string[]>([]);
+  const [paperworkOpen, setPaperworkOpen] = useState(false);
+  const [recruiters, setRecruiters] = useState<string[]>(rosters.recruiters);
+  const [dms, setDms] = useState<string[]>(rosters.dms);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +96,39 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
     setWorkflowOpen(false);
     setRecruiterOpen(false);
     setDmOpen(false);
+    setPaperworkOpen(false);
+  }
+
+  const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
+  const overflowTemplates = configuredTemplates.filter((t) => t.key !== excludePaperworkTemplateKey);
+
+  function templateEligibility(templateKey: OnboardingTemplateKey) {
+    return {
+      candidate: {
+        candidateId: "",
+        email: "",
+        paperworkStatus: "not_sent" as const,
+        signatureRequestId: null,
+      },
+      templateKey,
+      onboardingConfigured,
+      onboardingConfigLoaded,
+      onboardingConfigError,
+      paperworkTemplates,
+      sendBusy: sendPaperworkDisabled,
+      hasCandidateEmail,
+    };
+  }
+
+  function templateSendTitle(templateKey: OnboardingTemplateKey): string {
+    const eligibility = templateEligibility(templateKey);
+    const reason = getSendPaperworkBlockReason(eligibility);
+    if (reason) return sendPaperworkBlockMessage(reason, eligibility);
+    return `Send ${paperworkTemplates.find((t) => t.key === templateKey)?.label ?? "template"}`;
+  }
+
+  function templateSendDisabled(templateKey: OnboardingTemplateKey): boolean {
+    return getSendPaperworkBlockReason(templateEligibility(templateKey)) !== null;
   }
 
   function run(action: CandidateRowAction) {
@@ -62,7 +141,12 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
     if (custom === null) return;
     const trimmed = custom.trim();
     if (!trimmed) return;
-    setRecruiters(addRecruiterToRoster(trimmed));
+    void addRecruiterToRoster(trimmed)
+      .then((next) => {
+        setRecruiters(next.recruiters);
+        onRostersUpdated?.(next);
+      })
+      .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save recruiter"));
     run({ kind: "assign-recruiter", recruiter: trimmed });
   }
 
@@ -71,7 +155,12 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
     if (custom === null) return;
     const trimmed = custom.trim();
     if (!trimmed) return;
-    setDms(addDmToRoster(trimmed));
+    void addDmToRoster(trimmed)
+      .then((next) => {
+        setDms(next.dms);
+        onRostersUpdated?.(next);
+      })
+      .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save DM"));
     run({ kind: "assign-dm", dm: trimmed });
   }
 
@@ -92,21 +181,71 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
           setOpen((value) => {
             const next = !value;
             if (next) {
-              setRecruiters(loadRecruiterRoster());
-              setDms(loadDmRoster());
+              setRecruiters(rosters.recruiters);
+              setDms(rosters.dms);
             }
             return next;
           });
         }}
-        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-2 py-0.5 text-[11px] font-medium text-zinc-200 hover:bg-zinc-700/80"
+        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-700/80"
       >
-        Actions
+        {overflow ? "More ▾" : "Actions"}
       </button>
       {open ? (
         <div
           role="menu"
           className="absolute right-0 z-30 mt-1 min-w-[12rem] rounded-md border border-zinc-700 bg-zinc-950 py-1 shadow-lg shadow-black/40"
         >
+          {overflow && overflowTriage ? (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                disabled={overflowTriage.followUpDisabled}
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:text-zinc-600"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onFollowUp();
+                }}
+              >
+                Flag follow-up
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onFollowUpDone();
+                }}
+              >
+                Follow-up done
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onNote();
+                }}
+              >
+                Add note
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => {
+                  closeMenus();
+                  overflowTriage.onAssignMe();
+                }}
+              >
+                Assign me
+              </button>
+              <div className="my-1 border-t border-zinc-800/80" />
+            </>
+          ) : null}
           <div className="relative">
             <button
               type="button"
@@ -133,37 +272,39 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
             ) : null}
           </div>
 
-          <div className="relative border-t border-zinc-800/80">
-            <button
-              type="button"
-              className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
-              onClick={() => setRecruiterOpen((value) => !value)}
-            >
-              Assign recruiter
-              <span className="text-zinc-500">{recruiterOpen ? "▴" : "▾"}</span>
-            </button>
-            {recruiterOpen ? (
-              <div className="max-h-32 overflow-y-auto border-t border-zinc-800/80 py-1">
-                {recruiters.map((recruiter) => (
+          {!overflow ? (
+            <div className="relative border-t border-zinc-800/80">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+                onClick={() => setRecruiterOpen((value) => !value)}
+              >
+                Assign recruiter
+                <span className="text-zinc-500">{recruiterOpen ? "▴" : "▾"}</span>
+              </button>
+              {recruiterOpen ? (
+                <div className="max-h-32 overflow-y-auto border-t border-zinc-800/80 py-1">
+                  {recruiters.map((recruiter) => (
+                    <button
+                      key={recruiter}
+                      type="button"
+                      className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80"
+                      onClick={() => run({ kind: "assign-recruiter", recruiter })}
+                    >
+                      {recruiter}
+                    </button>
+                  ))}
                   <button
-                    key={recruiter}
                     type="button"
-                    className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80"
-                    onClick={() => run({ kind: "assign-recruiter", recruiter })}
+                    className="block w-full px-3 py-1 text-left text-[11px] text-teal-300 hover:bg-zinc-800/80"
+                    onClick={pickRecruiter}
                   >
-                    {recruiter}
+                    + Add recruiter…
                   </button>
-                ))}
-                <button
-                  type="button"
-                  className="block w-full px-3 py-1 text-left text-[11px] text-teal-300 hover:bg-zinc-800/80"
-                  onClick={pickRecruiter}
-                >
-                  + Add recruiter…
-                </button>
-              </div>
-            ) : null}
-          </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="relative border-t border-zinc-800/80">
             <button
@@ -197,14 +338,91 @@ export function CandidateActionsMenu({ onAction }: CandidateActionsMenuProps) {
             ) : null}
           </div>
 
-          <button
-            type="button"
-            role="menuitem"
-            className="block w-full border-t border-zinc-800/80 px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
-            onClick={addNote}
-          >
-            Add note
-          </button>
+          {!overflow ? (
+            <div className="relative border-t border-zinc-800/80">
+              <button
+                type="button"
+                disabled={
+                  sendPaperworkDisabled ||
+                  !hasCandidateEmail ||
+                  configuredTemplates.length === 0
+                }
+                title={
+                  configuredTemplates.length === 0
+                    ? "No Dropbox Sign templates configured"
+                    : !hasCandidateEmail
+                      ? sendPaperworkBlockMessage("missing_email")
+                      : sendPaperworkDisabled
+                        ? sendPaperworkBlockMessage("sending")
+                        : "Choose a Dropbox Sign template"
+                }
+                className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
+                onClick={() => setPaperworkOpen((value) => !value)}
+              >
+                Send paperwork
+                <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
+              </button>
+              {paperworkOpen ? (
+                <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
+                  {configuredTemplates.length > 0 ? (
+                    configuredTemplates.map((template) => (
+                      <button
+                        key={template.key}
+                        type="button"
+                        disabled={templateSendDisabled(template.key)}
+                        title={templateSendTitle(template.key)}
+                        className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
+                        onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
+                      >
+                        {template.label}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-3 py-1.5 text-[10px] text-zinc-500">No onboarding templates configured</p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          ) : overflow && !overflowTriage?.hideSendInOverflow && overflowTemplates.length > 0 ? (
+            <div className="relative border-t border-zinc-800/80">
+              <button
+                type="button"
+                disabled={sendPaperworkDisabled || !hasCandidateEmail || overflowTemplates.length === 0}
+                className="flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600"
+                onClick={() => setPaperworkOpen((value) => !value)}
+              >
+                Other paperwork
+                <span className="text-zinc-500">{paperworkOpen ? "▴" : "▾"}</span>
+              </button>
+              {paperworkOpen ? (
+                <div className="max-h-36 overflow-y-auto border-t border-zinc-800/80 py-1">
+                  {overflowTemplates.map((template) => (
+                    <button
+                      key={template.key}
+                      type="button"
+                      disabled={templateSendDisabled(template.key)}
+                      title={templateSendTitle(template.key)}
+                      className="block w-full px-3 py-1 text-left text-[11px] text-zinc-300 hover:bg-zinc-800/80 disabled:text-zinc-600"
+                      onClick={() => run({ kind: "send-paperwork", templateKey: template.key })}
+                    >
+                      {template.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {!overflow ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="block w-full border-t border-zinc-800/80 px-2.5 py-1 text-left text-[11px] text-zinc-200 hover:bg-zinc-800/80"
+              onClick={addNote}
+            >
+              Add note
+            </button>
+          ) : null}
 
           <button
             type="button"

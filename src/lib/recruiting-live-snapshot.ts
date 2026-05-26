@@ -63,7 +63,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
   const sheetLiveEnabled = isGoogleSheetRecruitingLiveEnabled();
   const primarySource = getPrimaryRecruitingSourceLabel();
 
-  const peekedCandidates = peekBreezyCandidatesCache();
+  const peekedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
 
   if (!breezyConfigured) {
     return {
@@ -92,7 +92,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
   if (options?.force) {
     const [jobsResult, candidatesResult] = await Promise.all([
       fetchBreezyJobs("published"),
-      fetchBreezyCandidates(),
+      fetchBreezyCandidates({ scanMode: "preview", force: true }),
     ]);
 
     if (!jobsResult.ok && !candidatesResult.ok && !peekedCandidates) {
@@ -168,7 +168,9 @@ export async function buildRecruitingLiveSnapshot(options?: {
 
   const [jobsResult, candidatesResult] = await Promise.all([
     fetchBreezyJobs("published"),
-    peekedCandidates ? Promise.resolve(peekedCandidates) : fetchBreezyCandidates(),
+    peekedCandidates
+      ? Promise.resolve(peekedCandidates)
+      : fetchBreezyCandidates({ scanMode: "preview" }),
   ]);
 
   const jobsOk = jobsResult.ok;

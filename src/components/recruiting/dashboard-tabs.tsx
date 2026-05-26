@@ -1,21 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { RecruitingSourceNavBadge } from "@/components/recruiting/recruiting-source-nav-badge";
+import {
+  getRecruitingTabSource,
+  RECRUITING_TAB_SOURCE_BY_ID,
+  type DashboardTabId,
+} from "@/lib/recruiting-tab-source-labels";
 
-export type DashboardTabId =
-  | "command-center"
-  | "overview"
-  | "needs-attention"
-  | "dm-scorecards"
-  | "live-sheet"
-  | "candidates"
-  | "mel-projects"
-  | "data-health"
-  | "recruiting-intelligence"
-  | "automation"
-  | "workforce"
-  | "job-management"
-  | "workforce-intelligence";
+export type { DashboardTabId };
 
 export type DashboardTab = {
   id: DashboardTabId;
@@ -23,24 +16,30 @@ export type DashboardTab = {
   href?: string;
 };
 
-export const DASHBOARD_TABS: DashboardTab[] = [
-  { id: "command-center", label: "Command Center" },
-  { id: "overview", label: "Overview" },
-  { id: "needs-attention", label: "Needs Attention" },
-  { id: "dm-scorecards", label: "DM Scorecards" },
-  { id: "live-sheet", label: "Live Sheet" },
-  { id: "candidates", label: "Candidates" },
-  { id: "mel-projects", label: "MEL Projects" },
-  { id: "data-health", label: "Data Health" },
-  { id: "recruiting-intelligence", label: "Recruiting Intelligence" },
-  { id: "automation", label: "Automation" },
-  { id: "workforce", label: "Workforce" },
-  { id: "job-management", label: "Job Management" },
-];
+/** Nav labels synced with `RECRUITING_TAB_SOURCE_BY_ID` — do not drift from source metadata. */
+export const DASHBOARD_TABS: DashboardTab[] = (
+  [
+    "command-center",
+    "overview",
+    "needs-attention",
+    "dm-scorecards",
+    "live-sheet",
+    "candidates",
+    "mel-projects",
+    "data-health",
+    "recruiting-intelligence",
+    "automation",
+    "workforce",
+    "job-management",
+  ] as const
+).map((id) => {
+  const meta = getRecruitingTabSource(id);
+  return { id, label: meta.navLabel };
+});
 
 export const EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB: DashboardTab = {
   id: "workforce-intelligence",
-  label: "Workforce Intelligence",
+  label: getRecruitingTabSource("workforce-intelligence").navLabel,
   href: "/executive/workforce-intelligence",
 };
 
@@ -69,10 +68,21 @@ export function DashboardTabNav({ activeTab, onTabChange, extraTabs = [] }: Dash
         <div className="-mb-px flex gap-1 overflow-x-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
+            const source = RECRUITING_TAB_SOURCE_BY_ID[tab.id];
+            const tabLabel = (
+              <span className="flex flex-col items-start gap-0.5 text-left">
+                <span>{tab.label}</span>
+                <RecruitingSourceNavBadge
+                  sourceTag={source.sourceTag}
+                  kind={source.kind}
+                  active={isActive}
+                />
+              </span>
+            );
             if (tab.href) {
               return (
                 <Link key={tab.id} href={tab.href} className={tabButtonClass(false)}>
-                  {tab.label}
+                  {tabLabel}
                 </Link>
               );
             }
@@ -85,7 +95,7 @@ export function DashboardTabNav({ activeTab, onTabChange, extraTabs = [] }: Dash
                 onClick={() => onTabChange(tab.id)}
                 className={tabButtonClass(isActive)}
               >
-                {tab.label}
+                {tabLabel}
               </button>
             );
           })}

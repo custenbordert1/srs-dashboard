@@ -12,7 +12,7 @@ export function RecruitingDashboard({ user }: RecruitingDashboardProps) {
     <AppShell
       user={user}
       title="Command center"
-      subtitle="Overview KPIs, needs attention, DM scorecards, live sheet, and automation."
+      subtitle="Breezy HR for live recruiting · recruiting sheet and FY26 charts for reference · MEL for store demand."
     >
       <a
         href="#dashboard-main"
@@ -22,14 +22,14 @@ export function RecruitingDashboard({ user }: RecruitingDashboardProps) {
       </a>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-zinc-700/80 bg-zinc-900/60 px-3 py-1 text-xs font-medium text-zinc-300">
-          FY26 Q1
+        <span className="rounded-full border border-teal-500/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">
+          Live · Breezy HR
         </span>
-        <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-200">
-          Live sheet (client)
+        <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-200">
+          Archive · Recruiting sheet
         </span>
         <span className="rounded-full border border-zinc-700/80 bg-zinc-900/60 px-3 py-1 text-xs font-medium text-zinc-300">
-          Sample charts
+          Demo · FY26 sample charts
         </span>
       </div>
 

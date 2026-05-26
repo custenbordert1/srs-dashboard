@@ -6,6 +6,7 @@ import {
   type BreezyCandidatesResult,
   type BreezyJobsResult,
 } from "@/lib/breezy-api";
+import { logCandidatesDebug, logFirstCandidateKeys } from "@/lib/candidates-debug";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import type { AuthSession } from "@/lib/auth/types";
 import { maskCandidatePii } from "@/lib/security/mask-pii";
@@ -24,10 +25,28 @@ function guardBreezyCandidatesSuccess<T extends BreezyCandidatesResult & { ok: t
   session: AuthSession,
 ): T {
   const beforeCount = result.candidates.length;
+  logCandidatesDebug("before_territory_filtered_candidates", beforeCount, {
+    role: session.role,
+    territoryStates: session.territoryStates?.join(",") ?? "none",
+  });
+  logFirstCandidateKeys(
+    "before_territory_filtered_candidates",
+    result.candidates[0] as unknown as Record<string, unknown> | undefined,
+  );
+
   const candidates = applyTerritoryToCandidates(session, result.candidates).map((candidate) =>
     maskCandidatePii(candidate, session.role),
   );
   const territoryFiltered = Math.max(0, beforeCount - candidates.length);
+  logCandidatesDebug("after_territory_filtered_candidates", candidates.length, {
+    role: session.role,
+    territoryFiltered,
+    territoryStates: session.territoryStates?.join(",") ?? "none",
+  });
+  logFirstCandidateKeys(
+    "after_territory_filtered_candidates",
+    candidates[0] as unknown as Record<string, unknown> | undefined,
+  );
   const skippedCandidatesReason = result.skippedCandidatesReason
     ? {
         ...result.skippedCandidatesReason,

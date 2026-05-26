@@ -6,6 +6,8 @@ import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-aler
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import type { JobCandidateRanking, SmartTerritoryAlert } from "@/lib/recruiting-automation";
 import type { RecruitingRecommendation } from "@/lib/recruiting-recommendation-engine";
 
@@ -126,33 +128,27 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
   const { data, meta, error, loading, refreshing, timedOut, refresh } = useRecruitingIntelligence({
     pollIntervalMs: compact ? 0 : undefined,
   });
+  const loadingCeilingHit = useLoadingCeiling(loading && !data);
   const drawer = useCandidateDrawer({
     territoryStates: data?.territoryStates,
   });
 
-  if (loading && !data) {
-    return <p className="text-sm text-zinc-500">Loading AI recommendations and automation insights…</p>;
-  }
-
-  if (error && !data) {
+  if ((loading && !data) || (error && !data) || !data) {
     return (
-      <div
-        role="alert"
-        className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100"
-      >
-        <p>{error}</p>
-        <button
-          type="button"
-          onClick={refresh}
-          className="shrink-0 rounded-lg border border-red-400/40 px-3 py-1 text-xs font-medium text-red-100 hover:bg-red-500/20"
-        >
-          {timedOut ? "Retry" : "Try again"}
-        </button>
-      </div>
+      <DashboardSectionFallback
+        title="AI recruiting automation"
+        loadingMessage="Loading AI recommendations and automation insights…"
+        isLoading={loading && !data}
+        loadingCeilingHit={loadingCeilingHit}
+        error={error && !data ? error : !data ? "Automation insights unavailable." : null}
+        timedOut={timedOut || Boolean(error?.toLowerCase().includes("timed out"))}
+        onRetry={refresh}
+        retrying={refreshing}
+        skeletonRows={compact ? 2 : 4}
+        skeletonCards={2}
+      />
     );
   }
-
-  if (!data) return null;
 
   const alertLimit = compact ? 8 : 15;
   const actionLimit = compact ? 8 : 15;

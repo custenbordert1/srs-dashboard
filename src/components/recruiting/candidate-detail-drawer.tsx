@@ -13,14 +13,24 @@ import {
   type CandidateRecruitingActions,
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
+import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
 import { buildIntegrationPrep } from "@/lib/integration-prep";
-import { addDmToRoster, addRecruiterToRoster, loadDmRoster, loadRecruiterRoster } from "@/lib/recruiter-roster";
+import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
+import type { PaperworkStatus } from "@/lib/candidate-workflow-types";
+import { addDmToRoster, addRecruiterToRoster } from "@/lib/recruiter-roster";
+import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { CANDIDATE_WORKFLOW_STATUSES } from "@/lib/candidate-workflow-types";
+import { CandidatePayrollOnboardingPanel } from "@/components/recruiting/candidate-payroll-onboarding-panel";
 import { BestRepMatchSection } from "@/components/recruiting/best-rep-match-section";
 import { MatchedOpportunitiesSection } from "@/components/recruiting/matched-opportunities-section";
 import type { CandidateOpportunityMatch } from "@/lib/mel-matching/matching-engine-types";
 import type { OpportunityBestRepMatches } from "@/lib/rep-intelligence/rep-types";
+import {
+  resolveCandidateRowPrimaryAction,
+  type CandidateRowPrimaryAction,
+} from "@/lib/candidate-row-primary-action";
+import type { SendPaperworkBlockReason } from "@/lib/onboarding-send-eligibility";
 import { useEffect, useState } from "react";
 
 export type CandidateDrawerRow = {
@@ -61,6 +71,24 @@ export type CandidateDrawerRow = {
   extractedKeywords: string[];
   recommendedNextAction: string;
   recruitingActions: CandidateRecruitingActions;
+  followUpDueAt: string | null;
+  snoozedUntil: string | null;
+  suggestedDM: string;
+  dmNeedsAssignment: boolean;
+  signatureRequestId: string | null;
+  paperworkTemplateKey: string | null;
+  paperworkSentAt: string | null;
+  paperworkSignedAt: string | null;
+  paperworkStatus: PaperworkStatus;
+  paperworkError: string | null;
+  directDepositStatus: import("@/lib/direct-deposit-types").DirectDepositStatus;
+  directDepositRequestedAt: string | null;
+  directDepositLastReminderAt: string | null;
+  directDepositNotes: string | null;
+  directDepositTriggeredByUserId: string | null;
+  directDepositLastDeliveryMode: "log" | "resend" | null;
+  directDepositLastHrCopyIncluded: boolean | null;
+  directDepositLastHrBccAddress: string | null;
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
   opportunityRepMatches: OpportunityBestRepMatches[];
@@ -68,10 +96,10 @@ export type CandidateDrawerRow = {
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
 
-type HelloSignPrep = {
+type OnboardingTemplateOption = {
+  key: OnboardingTemplateKey;
+  label: string;
   configured: boolean;
-  statusLabel: string;
-  message: string;
 };
 
 type CandidateDetailDrawerProps = {
@@ -84,9 +112,27 @@ type CandidateDetailDrawerProps = {
   statusAgingDays: number | null;
   appliedAgingDays: number | null;
   onRecruitingAction?: (type: RecruitingActionType) => void;
+  rosters: RecruiterRosters;
+  onRostersUpdated?: (rosters: RecruiterRosters) => void;
   loading?: boolean;
   melMatchesLoading?: boolean;
   repMatchesLoading?: boolean;
+  onboardingConfigured?: boolean;
+  templatesAvailable?: boolean;
+  paperworkTemplates?: OnboardingTemplateOption[];
+  paperworkSending?: boolean;
+  onSendPaperwork?: (templateKey: OnboardingTemplateKey) => void;
+  onRefreshPaperworkStatus?: () => void;
+  actingRecruiter?: string;
+  sendBlockReason?: SendPaperworkBlockReason | null;
+  onFlagFollowUp?: () => void;
+  onCompleteFollowUp?: () => void;
+  onAssignActingRecruiter?: () => void;
+  onDirectDepositAction?: (
+    action: "resend" | "mark-received" | "mark-approved" | "set-notes",
+    payload?: { notes?: string },
+  ) => void | Promise<void>;
+  directDepositBusy?: boolean;
 };
 
 const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
@@ -94,7 +140,7 @@ const DRAWER_TABS: Array<{ id: DrawerTab; label: string }> = [
   { id: "workflow", label: "Workflow" },
   { id: "notes", label: "Notes" },
   { id: "assignments", label: "Assignments" },
-  { id: "hellosign", label: "HelloSign" },
+  { id: "hellosign", label: "Paperwork" },
   { id: "ai", label: "AI" },
 ];
 
@@ -125,14 +171,18 @@ function agingBadgeClass(days: number | null): string {
 function AssignmentPanel({
   assignedRecruiter,
   assignedDM,
+  rosters,
+  onRostersUpdated,
   onSave,
 }: {
   assignedRecruiter: string;
   assignedDM: string;
+  rosters: RecruiterRosters;
+  onRostersUpdated?: (rosters: RecruiterRosters) => void;
   onSave: (recruiter: string, dm: string) => void;
 }) {
-  const [recruiters, setRecruiters] = useState(loadRecruiterRoster);
-  const [dms, setDms] = useState(loadDmRoster);
+  const [recruiters, setRecruiters] = useState(rosters.recruiters);
+  const [dms, setDms] = useState(rosters.dms);
   const [recruiter, setRecruiter] = useState(assignedRecruiter);
   const [dm, setDm] = useState(assignedDM);
 
@@ -172,7 +222,12 @@ function AssignmentPanel({
           onClick={() => {
             const name = window.prompt("Add recruiter to roster");
             if (!name?.trim()) return;
-            setRecruiters(addRecruiterToRoster(name.trim()));
+            void addRecruiterToRoster(name.trim())
+              .then((next) => {
+                setRecruiters(next.recruiters);
+                onRostersUpdated?.(next);
+              })
+              .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save recruiter"));
             setRecruiter(name.trim());
           }}
           className="rounded-md border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-800"
@@ -184,7 +239,12 @@ function AssignmentPanel({
           onClick={() => {
             const name = window.prompt("Add DM to roster");
             if (!name?.trim()) return;
-            setDms(addDmToRoster(name.trim()));
+            void addDmToRoster(name.trim())
+              .then((next) => {
+                setDms(next.dms);
+                onRostersUpdated?.(next);
+              })
+              .catch((err) => window.alert(err instanceof Error ? err.message : "Failed to save DM"));
             setDm(name.trim());
           }}
           className="rounded-md border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-800"
@@ -277,6 +337,21 @@ function NoteComposer({ onAddNote }: { onAddNote: (note: string) => void }) {
   );
 }
 
+function drawerPrimaryToneClass(tone: CandidateRowPrimaryAction["tone"]): string {
+  switch (tone) {
+    case "teal":
+      return "border-teal-600/50 bg-teal-600/15 text-teal-100 hover:bg-teal-600/25";
+    case "amber":
+      return "border-amber-600/45 bg-amber-600/12 text-amber-100 hover:bg-amber-600/22";
+    case "sky":
+      return "border-sky-600/45 bg-sky-600/12 text-sky-100 hover:bg-sky-600/22";
+    case "cyan":
+      return "border-cyan-600/45 bg-cyan-600/12 text-cyan-100 hover:bg-cyan-600/22";
+    default:
+      return "border-zinc-600 bg-zinc-900/80 text-zinc-100 hover:bg-zinc-800";
+  }
+}
+
 function scoreTierFromNumeric(score: number): AiScoreTier {
   if (score >= 85) return "elite";
   if (score >= 70) return "strong";
@@ -294,12 +369,26 @@ export function CandidateDetailDrawer({
   statusAgingDays,
   appliedAgingDays,
   onRecruitingAction,
+  rosters,
+  onRostersUpdated,
   loading = false,
   melMatchesLoading = false,
   repMatchesLoading = false,
+  onboardingConfigured = false,
+  templatesAvailable = false,
+  paperworkTemplates = [],
+  paperworkSending = false,
+  onSendPaperwork,
+  onRefreshPaperworkStatus,
+  actingRecruiter = "Unassigned",
+  sendBlockReason = null,
+  onFlagFollowUp,
+  onCompleteFollowUp,
+  onAssignActingRecruiter,
+  onDirectDepositAction,
+  directDepositBusy = false,
 }: CandidateDetailDrawerProps) {
-  const [tab, setTab] = useState<DrawerTab>("overview");
-  const [helloSign, setHelloSign] = useState<HelloSignPrep | null>(null);
+  const [tab, setTab] = useState<DrawerTab>("workflow");
 
   useEffect(() => {
     if (!open) return;
@@ -310,34 +399,45 @@ export function CandidateDetailDrawer({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  useEffect(() => {
-    if (!open) return;
-    let cancelled = false;
-    void fetch("/api/hellosign/status", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((parsed: { configured?: boolean; statusLabel?: string; message?: string }) => {
-        if (cancelled) return;
-        setHelloSign({
-          configured: Boolean(parsed.configured),
-          statusLabel: parsed.statusLabel ?? "Unknown",
-          message: parsed.message ?? "",
-        });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setHelloSign({
-            configured: false,
-            statusLabel: "Unavailable",
-            message: "Could not load HelloSign prep status.",
-          });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open]);
-
   if (!open || !candidate) return null;
+
+  const drawerPrimary = resolveCandidateRowPrimaryAction({
+    candidate,
+    actingRecruiter,
+    sendBlockReason,
+    sendBusy: paperworkSending,
+  });
+
+  function runDrawerPrimary() {
+    if (drawerPrimary.disabled) return;
+    switch (drawerPrimary.kind) {
+      case "send-packet":
+        onSendPaperwork?.("onboarding_packet");
+        setTab("hellosign");
+        break;
+      case "follow-up":
+        onFlagFollowUp?.();
+        break;
+      case "follow-up-done":
+        onCompleteFollowUp?.();
+        break;
+      case "assign-me":
+        onAssignActingRecruiter?.();
+        setTab("assignments");
+        break;
+      case "ready-for-mel":
+        onStatusChange("Ready for MEL");
+        setTab("workflow");
+        break;
+      case "review":
+        setTab("overview");
+        break;
+      default:
+        setTab("workflow");
+    }
+  }
+
+  const configuredTemplates = paperworkTemplates.filter((t) => t.configured);
 
   const timeline = [...candidate.history].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -400,6 +500,69 @@ export function CandidateDetailDrawer({
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {loading ? <p className="mb-4 text-sm text-zinc-500">Loading candidate details…</p> : null}
 
+          <section className="mb-4 rounded-xl border border-teal-500/20 bg-zinc-900/60 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-teal-200/80">
+              Operational workspace
+            </p>
+            <p className="mt-0.5 truncate text-xs text-zinc-400" title={candidate.nextActionNeeded}>
+              {candidate.nextActionNeeded}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={drawerPrimary.disabled}
+                title={drawerPrimary.title ?? drawerPrimary.label}
+                onClick={runDrawerPrimary}
+                className={`rounded-md border px-3 py-1.5 text-xs font-semibold disabled:opacity-40 ${drawerPrimaryToneClass(drawerPrimary.tone)}`}
+              >
+                {paperworkSending && drawerPrimary.kind === "send-packet" ? "Sending…" : drawerPrimary.label}
+              </button>
+              {onSendPaperwork && drawerPrimary.kind !== "send-packet" ? (
+                <button
+                  type="button"
+                  disabled={paperworkSending || sendBlockReason !== null || !candidate.email?.trim()}
+                  onClick={() => {
+                    onSendPaperwork("onboarding_packet");
+                    setTab("hellosign");
+                  }}
+                  className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
+                >
+                  Send packet
+                </button>
+              ) : null}
+              {onFlagFollowUp ? (
+                <button
+                  type="button"
+                  disabled={candidate.recruitingActions.needsFollowUp}
+                  onClick={onFlagFollowUp}
+                  className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
+                >
+                  Follow-up
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setTab("notes")}
+                className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                Notes
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("hellosign")}
+                className="rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                Paperwork
+              </button>
+            </div>
+            {onRecruitingAction ? (
+              <div className="mt-3 border-t border-zinc-800/80 pt-3">
+                <RecruitingActionsPanel actions={candidate.recruitingActions} onAction={onRecruitingAction} />
+              </div>
+            ) : null}
+          </section>
+
+          {tab === "overview" || tab === "ai" ? (
           <section className="mb-5 space-y-4 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-3xl font-semibold tabular-nums text-teal-200">{candidate.aiNumericScore}</span>
@@ -485,20 +648,6 @@ export function CandidateDetailDrawer({
               </div>
             ) : null}
 
-            {onRecruitingAction ? (
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                  Recruiting actions
-                </p>
-                <div className="mt-2">
-                  <RecruitingActionsPanel
-                    actions={candidate.recruitingActions}
-                    onAction={onRecruitingAction}
-                  />
-                </div>
-              </div>
-            ) : null}
-
             <MatchedOpportunitiesSection
               matches={candidate.matchedOpportunities}
               aiSummary={candidate.melMatchingSummary}
@@ -509,6 +658,7 @@ export function CandidateDetailDrawer({
               loading={repMatchesLoading}
             />
           </section>
+          ) : null}
 
           {tab === "overview" ? (
             <div className="space-y-3 text-xs text-zinc-400">
@@ -533,6 +683,31 @@ export function CandidateDetailDrawer({
               <p>
                 <span className="text-zinc-500">Recruiter / DM:</span> {candidate.assignedRecruiter} · {candidate.assignedDM}
               </p>
+              {candidate.suggestedDM && candidate.suggestedDM !== "Unassigned" ? (
+                <p className="flex flex-wrap items-center gap-2">
+                  <span className="text-zinc-500">Territory DM:</span>
+                  <span
+                    className={
+                      candidate.dmNeedsAssignment
+                        ? "inline-flex rounded-full border border-violet-500/40 bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-100"
+                        : "inline-flex rounded-full border border-zinc-700 bg-zinc-900/60 px-2 py-0.5 text-[10px] text-zinc-300"
+                    }
+                  >
+                    {candidate.suggestedDM}
+                    {candidate.dmNeedsAssignment ? " · assign suggested" : " · matched"}
+                  </span>
+                </p>
+              ) : null}
+              {candidate.followUpDueAt ? (
+                <p className="text-zinc-400">
+                  <span className="text-zinc-500">Follow-up due:</span> {formatAppliedDate(candidate.followUpDueAt)}
+                </p>
+              ) : null}
+              {candidate.snoozedUntil ? (
+                <p className="text-zinc-400">
+                  <span className="text-zinc-500">Snoozed until:</span> {formatAppliedDate(candidate.snoozedUntil)}
+                </p>
+              ) : null}
               <div className="flex flex-wrap gap-2 pt-1">
                 <span className={`rounded-full px-2 py-0.5 text-[10px] ring-1 ${agingBadgeClass(statusAgingDays)}`}>
                   Status {statusAgingDays === null ? "—" : `${statusAgingDays}d`}
@@ -604,6 +779,8 @@ export function CandidateDetailDrawer({
                 key={`${candidate.candidateId}-${candidate.assignedRecruiter}-${candidate.assignedDM}`}
                 assignedRecruiter={candidate.assignedRecruiter}
                 assignedDM={candidate.assignedDM}
+                rosters={rosters}
+                onRostersUpdated={onRostersUpdated}
                 onSave={onSaveAssignments}
               />
               {assignmentEvents.length === 0 ? (
@@ -623,17 +800,92 @@ export function CandidateDetailDrawer({
 
           {tab === "hellosign" ? (
             <div className="space-y-2 text-xs">
-              {helloSign ? (
-                <>
-                  <p className="text-zinc-300">{helloSign.statusLabel}</p>
-                  <p className="text-zinc-500">{helloSign.message}</p>
-                  <p className="text-[10px] text-zinc-600">
-                    API key: {helloSign.configured ? "present" : "not configured"} · Send disabled (placeholder)
-                  </p>
-                </>
-              ) : (
-                <p className="text-zinc-600">Loading prep status…</p>
-              )}
+              <p className="text-zinc-300">
+                Dropbox Sign · {onboardingConfigured ? "configured" : "not configured"}
+              </p>
+              <dl className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                <dt className="text-zinc-500">Paperwork status</dt>
+                <dd className="text-zinc-200">{paperworkStatusLabel(candidate.paperworkStatus)}</dd>
+                {candidate.paperworkTemplateKey ? (
+                  <>
+                    <dt className="text-zinc-500">Template</dt>
+                    <dd className="text-zinc-200">{candidate.paperworkTemplateKey}</dd>
+                  </>
+                ) : null}
+                {candidate.signatureRequestId ? (
+                  <>
+                    <dt className="text-zinc-500">Request ID</dt>
+                    <dd className="truncate text-zinc-400" title={candidate.signatureRequestId}>
+                      {candidate.signatureRequestId}
+                    </dd>
+                  </>
+                ) : null}
+                {candidate.paperworkSentAt ? (
+                  <>
+                    <dt className="text-zinc-500">Sent</dt>
+                    <dd className="text-zinc-400">{formatDate(candidate.paperworkSentAt)}</dd>
+                  </>
+                ) : null}
+                {candidate.paperworkSignedAt ? (
+                  <>
+                    <dt className="text-zinc-500">Signed</dt>
+                    <dd className="text-zinc-400">{formatDate(candidate.paperworkSignedAt)}</dd>
+                  </>
+                ) : null}
+              </dl>
+              {candidate.paperworkError ? (
+                <p className="text-amber-300/90">{candidate.paperworkError}</p>
+              ) : null}
+              <div className="flex flex-wrap gap-1 border-t border-zinc-800 pt-2">
+                {configuredTemplates.length > 0 ? (
+                  configuredTemplates.map((template) => (
+                    <button
+                      key={template.key}
+                      type="button"
+                      disabled={!onboardingConfigured || paperworkSending || !candidate.email?.trim()}
+                      onClick={() => onSendPaperwork?.(template.key)}
+                      className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-200 hover:bg-zinc-800 disabled:text-zinc-600"
+                    >
+                      {paperworkSending ? "Sending…" : `Send ${template.label}`}
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-zinc-500">No onboarding templates configured</p>
+                )}
+                {candidate.signatureRequestId ? (
+                  <button
+                    type="button"
+                    onClick={() => onRefreshPaperworkStatus?.()}
+                    className="rounded border border-teal-500/40 px-2 py-0.5 text-[10px] text-teal-200 hover:bg-teal-500/10"
+                  >
+                    Refresh status
+                  </button>
+                ) : null}
+              </div>
+              <p className="text-[10px] text-zinc-600">
+                {templatesAvailable
+                  ? onboardingConfigured
+                    ? "Template-based email signature requests only. No embedded signing. Local workflow status does not write to Breezy."
+                    : "Templates loaded from .env.local — add DROPBOX_SIGN_API_KEY to send."
+                  : "Set DROPBOX_SIGN_TEMPLATE_* variables in .env.local and restart the dev server."}
+              </p>
+              {onDirectDepositAction ? (
+                <CandidatePayrollOnboardingPanel
+                  key={`${candidate.candidateId}-${candidate.directDepositStatus}`}
+                  paperworkStatus={candidate.paperworkStatus}
+                  directDepositStatus={candidate.directDepositStatus}
+                  directDepositRequestedAt={candidate.directDepositRequestedAt}
+                  directDepositLastReminderAt={candidate.directDepositLastReminderAt}
+                  directDepositNotes={candidate.directDepositNotes}
+                  directDepositTriggeredByUserId={candidate.directDepositTriggeredByUserId}
+                  directDepositLastDeliveryMode={candidate.directDepositLastDeliveryMode}
+                  directDepositLastHrCopyIncluded={candidate.directDepositLastHrCopyIncluded}
+                  directDepositLastHrBccAddress={candidate.directDepositLastHrBccAddress}
+                  hasCandidateEmail={Boolean(candidate.email?.trim())}
+                  busy={directDepositBusy}
+                  onAction={onDirectDepositAction}
+                />
+              ) : null}
               <div className="space-y-2 border-t border-zinc-800 pt-3">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Integration prep</p>
                 {buildIntegrationPrep(candidate, candidate.workflowStatus).map((item) => (
@@ -704,7 +956,7 @@ export function CandidateDetailDrawer({
         </div>
 
         <footer className="border-t border-zinc-800 px-4 py-2 text-[10px] text-zinc-600">
-          Local workflow only — no writes to Breezy, HelloSign, or MEL.
+          Local workflow only — Dropbox Sign sends paperwork; no writes to Breezy or MEL.
         </footer>
       </aside>
     </>

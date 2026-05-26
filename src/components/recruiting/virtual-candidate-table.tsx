@@ -2,7 +2,8 @@
 
 import { Fragment, useCallback, useRef, useState, type ReactNode } from "react";
 
-const ROW_HEIGHT_PX = 34;
+/** Must match `CANDIDATE_TABLE_ROW_HEIGHT_PX` in candidates-section (virtual spacer math). */
+export const CANDIDATE_TABLE_ROW_HEIGHT_PX = 54;
 const OVERSCAN = 6;
 
 type VirtualCandidateTableProps<T> = {
@@ -33,11 +34,11 @@ export function VirtualCandidateTable<T>({
     setViewportHeight(node.clientHeight);
   }, []);
 
-  const startIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT_PX) - OVERSCAN);
-  const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT_PX) + OVERSCAN * 2;
+  const startIndex = Math.max(0, Math.floor(scrollTop / CANDIDATE_TABLE_ROW_HEIGHT_PX) - OVERSCAN);
+  const visibleCount = Math.ceil(viewportHeight / CANDIDATE_TABLE_ROW_HEIGHT_PX) + OVERSCAN * 2;
   const endIndex = Math.min(rows.length, startIndex + visibleCount);
-  const topSpacer = startIndex * ROW_HEIGHT_PX;
-  const bottomSpacer = Math.max(0, (rows.length - endIndex) * ROW_HEIGHT_PX);
+  const topSpacer = startIndex * CANDIDATE_TABLE_ROW_HEIGHT_PX;
+  const bottomSpacer = Math.max(0, (rows.length - endIndex) * CANDIDATE_TABLE_ROW_HEIGHT_PX);
   const visibleRows = rows.slice(startIndex, endIndex);
 
   return (
@@ -46,9 +47,9 @@ export function VirtualCandidateTable<T>({
       onScroll={onScroll}
       className={`overflow-auto ${maxHeightClass}`}
     >
-      <table className="min-w-[1580px] w-full text-left">
+      <table className="min-w-[1580px] w-full table-fixed text-left">
         {header}
-        <tbody className="divide-y divide-zinc-800/60">
+        <tbody className="divide-y divide-zinc-800/40">
           {topSpacer > 0 ? (
             <tr aria-hidden>
               <td colSpan={colSpan} style={{ height: topSpacer, padding: 0, border: 0 }} />
@@ -68,4 +69,4 @@ export function VirtualCandidateTable<T>({
   );
 }
 
-export { ROW_HEIGHT_PX };
+export { CANDIDATE_TABLE_ROW_HEIGHT_PX as ROW_HEIGHT_PX };

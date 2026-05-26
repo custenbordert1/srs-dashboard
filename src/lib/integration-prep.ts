@@ -46,7 +46,10 @@ export function buildIntegrationPrep(
 
   const melReady =
     missing.length === 0 &&
-    (workflowStatus === "Signed" || workflowStatus === "Ready for MEL" || workflowStatus === "Loaded in MEL");
+    (workflowStatus === "Signed" ||
+      workflowStatus === "Awaiting DD Verification" ||
+      workflowStatus === "Ready for MEL" ||
+      workflowStatus === "Loaded in MEL");
 
   const trainingReady =
     missing.length === 0 &&

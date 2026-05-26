@@ -1,5 +1,9 @@
 import { getBreezyApiKeySync, loadConfig } from "@/lib/config";
-import { fetchBreezyJobs, peekBreezyCandidatesCache } from "@/lib/breezy-api";
+import {
+  fetchBreezyJobs,
+  peekBreezyCandidatesCache,
+  type BreezySkippedCandidatesReason,
+} from "@/lib/breezy-api";
 
 export type BreezySyncEntity = "job" | "candidate";
 
@@ -45,6 +49,24 @@ export type BrokenPositionCleanupItem = {
     | "Review Breezy permissions";
 };
 
+export type BreezyJobSyncHealth = {
+  publishedCount: number;
+  draftCount: number;
+  fetchedAt: string | null;
+  error: string | null;
+};
+
+export type BreezyCandidateSyncHealth = {
+  fromCache: boolean;
+  candidateCount: number;
+  fetchedAt: string | null;
+  truncated: boolean;
+  positionsScanned: number | null;
+  positionsAvailable: number | null;
+  skippedReason: string | null;
+  warnings: string[];
+};
+
 export type BreezySyncHealthSnapshot = {
   ok: true;
   generatedAt: string;
@@ -61,6 +83,8 @@ export type BreezySyncHealthSnapshot = {
   rateLimitProtection: BreezyRateLimitProtection;
   queue: BreezySyncQueueItem[];
   brokenPositionCleanupQueue: BrokenPositionCleanupItem[];
+  jobSync: BreezyJobSyncHealth;
+  candidateSync: BreezyCandidateSyncHealth;
   notes: string[];
 };
 
@@ -106,6 +130,13 @@ function isAuthError(error: string): boolean {
   return lower.includes("authentication failed") || lower.includes("access token") || lower.includes("unauthorized");
 }
 
+function formatSkippedCandidatesReason(reason: BreezySkippedCandidatesReason): string {
+  const parts = Object.entries(reason)
+    .filter(([, value]) => typeof value === "number" && value > 0)
+    .map(([key, value]) => `${key}: ${value}`);
+  return parts.length > 0 ? parts.join(", ") : "none";
+}
+
 export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthSnapshot> {
   await loadConfig();
   const generatedAt = new Date().toISOString();
@@ -113,6 +144,23 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
   const tokenStatus: BreezyTokenStatus = tokenMissing ? "missing" : "configured";
   const queue: BreezySyncQueueItem[] = [];
   const brokenPositionCleanupQueue: BrokenPositionCleanupItem[] = [];
+
+  const emptyJobSync: BreezyJobSyncHealth = {
+    publishedCount: 0,
+    draftCount: 0,
+    fetchedAt: null,
+    error: null,
+  };
+  const emptyCandidateSync: BreezyCandidateSyncHealth = {
+    fromCache: false,
+    candidateCount: 0,
+    fetchedAt: null,
+    truncated: false,
+    positionsScanned: null,
+    positionsAvailable: null,
+    skippedReason: null,
+    warnings: [],
+  };
 
   if (tokenMissing) {
     const rateLimitProtection = buildRateLimitProtection({
@@ -137,39 +185,96 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
       rateLimitProtection,
       queue,
       brokenPositionCleanupQueue,
+      jobSync: emptyJobSync,
+      candidateSync: emptyCandidateSync,
       notes: ["Breezy API calls are disabled until BREEZY_API_KEY is configured."],
     };
   }
 
-  const jobsResult = await fetchBreezyJobs();
-  const cachedCandidates = peekBreezyCandidatesCache();
+  const [publishedJobsResult, draftJobsResult] = await Promise.all([
+    fetchBreezyJobs("published"),
+    fetchBreezyJobs("draft"),
+  ]);
+  const cachedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
   const candidatesFromCache = Boolean(cachedCandidates?.ok);
 
-  const failures = [jobsResult.ok ? null : jobsResult.error].filter((error): error is string =>
-    Boolean(error),
-  );
+  const jobFailures = [
+    publishedJobsResult.ok ? null : publishedJobsResult.error,
+    draftJobsResult.ok ? null : draftJobsResult.error,
+  ].filter((error): error is string => Boolean(error));
+  const failures = jobFailures;
   const rateLimited = failures.some(isRateLimitError);
   const authFailed = failures.some(isAuthError);
   const rateLimitProtection = buildRateLimitProtection({
     tokenMissing,
     failedRequests: failures.length,
-    requestsAttempted: 1 + (candidatesFromCache ? 1 : 0),
+    requestsAttempted: 2 + (candidatesFromCache ? 1 : 0),
     rateLimited,
   });
+  const candidateWarnings =
+    cachedCandidates?.ok === true ? (cachedCandidates.warnings ?? []) : [];
   const liveWarnings = [
     rateLimitProtection.warning,
-    candidatesFromCache && cachedCandidates?.ok ? cachedCandidates.warnings?.join(" ") : null,
+    ...candidateWarnings,
     !candidatesFromCache ? "Candidate totals use cache peek only (no live full scan on sync-health)." : null,
     ...failures,
   ].filter((warning): warning is string => Boolean(warning));
-  const lastSyncTime = [jobsResult, cachedCandidates]
+  const lastSyncTime = [publishedJobsResult, draftJobsResult, cachedCandidates]
     .filter((result): result is NonNullable<typeof result> => Boolean(result?.ok))
     .map((result) => result.fetchedAt)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
-  const jobsCount = jobsResult.ok ? jobsResult.jobs.length : 0;
+
+  const publishedCount = publishedJobsResult.ok ? publishedJobsResult.jobs.length : 0;
+  const draftCount = draftJobsResult.ok ? draftJobsResult.jobs.length : 0;
   const candidatesCount = cachedCandidates?.ok ? cachedCandidates.candidates.length : 0;
+  const candidateTruncated = cachedCandidates?.ok === true ? Boolean(cachedCandidates.truncated) : false;
+  const positionsScanned =
+    cachedCandidates?.ok === true ? (cachedCandidates.positionsScanned ?? null) : null;
+  const positionsAvailable =
+    cachedCandidates?.ok === true
+      ? (cachedCandidates.totalPositionsAvailable ?? cachedCandidates.totalPositions ?? null)
+      : null;
+
+  const jobSync: BreezyJobSyncHealth = {
+    publishedCount,
+    draftCount,
+    fetchedAt: lastSyncTime,
+    error: jobFailures[0] ?? null,
+  };
+
+  const candidateSync: BreezyCandidateSyncHealth = {
+    fromCache: candidatesFromCache,
+    candidateCount: candidatesCount,
+    fetchedAt: cachedCandidates?.ok ? cachedCandidates.fetchedAt : null,
+    truncated: candidateTruncated,
+    positionsScanned,
+    positionsAvailable,
+    skippedReason: cachedCandidates?.ok
+      ? cachedCandidates.skippedCandidatesReason
+        ? formatSkippedCandidatesReason(cachedCandidates.skippedCandidatesReason)
+        : null
+      : null,
+    warnings: candidateWarnings,
+  };
+
+  if (candidateTruncated && cachedCandidates?.ok) {
+    brokenPositionCleanupQueue.push({
+      positionName: "Candidate aggregation",
+      positionId: "all-positions",
+      errorType: "Candidate link mismatch",
+      retryCount: 0,
+      suggestedAction: "Review Breezy permissions",
+    });
+  }
+
   const syncStatus: BreezySyncStatus =
-    failures.length === 0 ? "ready" : authFailed ? "failed" : rateLimited || lastSyncTime ? "warning" : "failed";
+    failures.length === 0 && !candidateTruncated
+      ? "ready"
+      : authFailed
+        ? "failed"
+        : rateLimited || lastSyncTime || candidateTruncated
+          ? "warning"
+          : "failed";
 
   return {
     ok: true,
@@ -192,12 +297,19 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     rateLimitProtection,
     queue,
     brokenPositionCleanupQueue,
+    jobSync,
+    candidateSync,
     notes: [
-      `Live Breezy jobs visible: ${jobsCount.toLocaleString()}.`,
+      `Published Breezy jobs: ${publishedCount.toLocaleString()}.`,
+      `Draft Breezy jobs: ${draftCount.toLocaleString()}.`,
       candidatesFromCache
         ? `Cached Breezy candidates (fast scan): ${candidatesCount.toLocaleString()}.`
-        : "Candidate cache cold — run dashboard refresh or parity check to warm.",
-      "Sync health is lightweight and does not start a full position scan.",
+        : "Candidate cache cold — open Candidates or Command Center to warm sync.",
+      candidateTruncated
+        ? `Candidate sync truncated (${cachedCandidates?.ok && cachedCandidates.skippedCandidatesReason ? formatSkippedCandidatesReason(cachedCandidates.skippedCandidatesReason) : "see warnings"}).`
+        : positionsScanned !== null && positionsAvailable !== null
+          ? `Positions scanned: ${positionsScanned.toLocaleString()} / ${positionsAvailable.toLocaleString()}.`
+          : "Sync health is lightweight and does not start a full position scan.",
     ],
   };
 }

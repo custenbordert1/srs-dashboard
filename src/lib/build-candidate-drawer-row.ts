@@ -2,11 +2,7 @@ import type { BreezyCandidate } from "@/lib/breezy-api";
 import { buildCandidateIntelligenceProfile } from "@/lib/candidate-intelligence-engine";
 import { buildCandidateScoringInput } from "@/lib/candidate-resume-prep";
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
-import {
-  deriveRecommendedNextAction,
-  emptyRecruitingActions,
-  type CandidateRecruitingActions,
-} from "@/lib/candidate-recruiting-actions";
+import { deriveRecommendedNextAction, type CandidateRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import { buildScoredWorkflowRow, type ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 
@@ -36,7 +32,7 @@ export function buildCandidateDrawerRowFromScored(
     referenceIso,
     territoryStates: options?.territoryStates,
   });
-  const recruitingActions = options?.recruitingActions ?? emptyRecruitingActions();
+  const recruitingActions = options?.recruitingActions ?? scored.recruitingActions;
 
   return {
     candidateId: scored.candidateId,
@@ -80,6 +76,24 @@ export function buildCandidateDrawerRowFromScored(
       intelligence.bestFitReason,
     ),
     recruitingActions,
+    followUpDueAt: scored.followUpDueAt,
+    snoozedUntil: scored.snoozedUntil,
+    suggestedDM: scored.suggestedDM,
+    dmNeedsAssignment: scored.dmNeedsAssignment,
+    signatureRequestId: scored.signatureRequestId,
+    paperworkTemplateKey: scored.paperworkTemplateKey,
+    paperworkSentAt: scored.paperworkSentAt,
+    paperworkSignedAt: scored.paperworkSignedAt,
+    paperworkStatus: scored.paperworkStatus,
+    paperworkError: scored.paperworkError,
+    directDepositStatus: scored.directDepositStatus,
+    directDepositRequestedAt: scored.directDepositRequestedAt,
+    directDepositLastReminderAt: scored.directDepositLastReminderAt,
+    directDepositNotes: scored.directDepositNotes,
+    directDepositTriggeredByUserId: scored.directDepositTriggeredByUserId,
+    directDepositLastDeliveryMode: scored.directDepositLastDeliveryMode,
+    directDepositLastHrCopyIncluded: scored.directDepositLastHrCopyIncluded,
+    directDepositLastHrBccAddress: scored.directDepositLastHrBccAddress,
     matchedOpportunities: [],
     melMatchingSummary: "",
     opportunityRepMatches: [],

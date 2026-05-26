@@ -118,6 +118,7 @@ export function parseRepImportCsv(csv: string): RepImportResult {
     const completionRate = Number.parseInt(get("completion_rate"), 10);
     const noShowRate = Number.parseInt(get("no_show_rate"), 10);
 
+    const isActive = parseBool(get("active"));
     reps.push({
       repId: repId.toLowerCase(),
       name,
@@ -126,14 +127,15 @@ export function parseRepImportCsv(csv: string): RepImportResult {
       zip: get("zip"),
       lat: null,
       lng: null,
-      active: parseBool(get("active")),
+      status: isActive ? "active" : "inactive",
+      active: isActive,
       skills: parseSkills(get("skills")),
       travelRadius: Number.isFinite(travelRadius) ? Math.min(120, Math.max(15, travelRadius)) : 45,
       lastProjectDate: null,
       completionRate: Number.isFinite(completionRate) ? Math.min(100, Math.max(0, completionRate)) : 80,
       noShowRate: Number.isFinite(noShowRate) ? Math.min(100, Math.max(0, noShowRate)) : 5,
       dmOwner: get("dm_owner") || "Unassigned",
-      melStatus: parseBool(get("active")) ? "active" : "inactive",
+      melStatus: isActive ? "active" : "inactive",
       trainingStatus: completionRate >= 90 ? "certified" : completionRate >= 75 ? "in_training" : "needs_training",
       openAssignments: 0,
       completedAssignments: 0,

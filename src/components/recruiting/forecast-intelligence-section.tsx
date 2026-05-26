@@ -10,7 +10,10 @@ import {
   type ForecastMarketRow,
   type ForecastProjectRiskRow,
 } from "@/lib/recruiting-forecast";
-import { useEffect, useMemo, useState } from "react";
+import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
+import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { IntelligenceBarChart } from "./intelligence-bar-chart";
 import { KpiCards } from "./kpi-cards";
 
@@ -20,22 +23,6 @@ type ForecastIntelligenceSectionProps = {
 };
 
 const HORIZONS: ForecastHorizonDays[] = [7, 14, 30];
-
-function ForecastSkeleton() {
-  return (
-    <section className="space-y-6 border-t border-zinc-800/80 pt-8">
-      <div className="h-7 w-56 animate-pulse rounded bg-zinc-800/80" />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {Array.from({ length: 5 }, (_, i) => (
-          <div
-            key={i}
-            className="h-28 animate-pulse rounded-2xl border border-zinc-800/80 bg-zinc-900/40"
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function formatDays(days: number | null): string {
   if (days === null) return "—";
@@ -251,31 +238,29 @@ function ProjectRiskTable({ rows }: { rows: ForecastProjectRiskRow[] }) {
 export function ForecastIntelligenceSection({ recruiting, mel }: ForecastIntelligenceSectionProps) {
   const [candidateData, setCandidateData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [horizon, setHorizon] = useState<ForecastHorizonDays>(14);
+  const [loadingCandidates, setLoadingCandidates] = useState(true);
+  const loadingCeilingHit = useLoadingCeiling(loadingCandidates);
+
+  const loadCandidates = useCallback(async () => {
+    setLoadingCandidates(true);
+    try {
+      const parsed = await fetchCachedBreezyCandidates();
+      setCandidateData(parsed);
+    } catch (err) {
+      setCandidateData({
+        ok: false,
+        error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
+        fetchedAt: new Date().toISOString(),
+      });
+    } finally {
+      setLoadingCandidates(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const res = await fetch("/api/breezy/candidates", { cache: "no-store" });
-        const parsed = (await res.json()) as BreezyCandidatesResult;
-        if (!cancelled) setCandidateData(parsed);
-      } catch (err) {
-        if (!cancelled) {
-          setCandidateData({
-            ok: false,
-            error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
-            fetchedAt: new Date().toISOString(),
-          });
-        }
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    const id = window.setTimeout(() => void loadCandidates(), 0);
+    return () => window.clearTimeout(id);
+  }, [loadCandidates]);
 
   const snapshot = useMemo(() => {
     if (!recruiting.ok || !mel.ok || !candidateData?.ok) return null;
@@ -295,7 +280,19 @@ export function ForecastIntelligenceSection({ recruiting, mel }: ForecastIntelli
     return snapshot.forecast30Day.slice(0, 25);
   }, [horizon, snapshot]);
 
-  if (candidateData === undefined) return <ForecastSkeleton />;
+  if (loadingCandidates || candidateData === undefined) {
+    return (
+      <DashboardSectionFallback
+        title="Forecast intelligence"
+        loadingMessage="Loading Breezy candidates for forecast…"
+        isLoading
+        loadingCeilingHit={loadingCeilingHit}
+        onRetry={() => void loadCandidates()}
+        skeletonRows={3}
+        skeletonCards={2}
+      />
+    );
+  }
 
   if (!recruiting.ok || !mel.ok || !candidateData.ok) {
     const message =
@@ -319,7 +316,16 @@ export function ForecastIntelligenceSection({ recruiting, mel }: ForecastIntelli
     );
   }
 
-  if (!snapshot) return null;
+  if (!snapshot) {
+    return (
+      <DashboardSectionFallback
+        title="Forecast intelligence"
+        isEmpty
+        emptyMessage="No forecast rows matched the current recruiting and MEL data."
+        onRetry={() => void loadCandidates()}
+      />
+    );
+  }
 
   return (
     <section className="space-y-6 border-t border-zinc-800/80 pt-8">

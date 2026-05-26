@@ -40,6 +40,15 @@ export async function getJobDraft(id: string): Promise<JobDraft | null> {
   return (await readDrafts()).drafts.find((d) => d.id === id) ?? null;
 }
 
+/** Reuse an open local draft cloned from the same Breezy position (prevents duplicate drafts). */
+export async function findOpenDraftByClonedBreezyJobId(breezyJobId: string): Promise<JobDraft | null> {
+  return (
+    (await readDrafts()).drafts.find(
+      (draft) => draft.clonedFromBreezyJobId === breezyJobId && draft.status === "draft",
+    ) ?? null
+  );
+}
+
 export async function createJobDraft(
   input: Omit<JobDraft, "id" | "status" | "createdAt" | "updatedAt"> & { status?: JobDraft["status"] },
 ): Promise<JobDraft> {
@@ -105,6 +114,18 @@ export async function updateJobDraft(
   file.updatedAt = updated.updatedAt;
   await writeDrafts(file);
   return updated;
+}
+
+export async function deleteJobDraft(id: string): Promise<boolean> {
+  const file = await readDrafts();
+  const index = file.drafts.findIndex((d) => d.id === id);
+  if (index < 0) return false;
+  const draft = file.drafts[index]!;
+  if (draft.status !== "draft") return false;
+  file.drafts.splice(index, 1);
+  file.updatedAt = new Date().toISOString();
+  await writeDrafts(file);
+  return true;
 }
 
 export async function appendJobPushAudit(entry: JobPushAuditEntry): Promise<void> {

@@ -1,17 +1,26 @@
 import { getBreezyApiKeySync, loadConfigSync } from "@/lib/config";
 import { breezyConfigErrorMessage } from "@/lib/env-validation";
 import { resolveBreezyCompany } from "@/lib/breezy-api";
+import { normalizeBreezyJobLocation } from "@/lib/breezy-job-location";
+import {
+  buildBreezyPositionPayload,
+  verifyBreezyPositionResponse,
+  type BreezyPositionVerification,
+} from "@/lib/job-management/breezy-position-payload";
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_WRITE_TIMEOUT_MS = 20_000;
-const BREEZY_POSITION_TYPES = new Set(["fullTime", "partTime", "contract", "temporary", "other"]);
-const DEFAULT_POSITION_TYPE = "fullTime";
-const DEFAULT_DESCRIPTION = "Posted from SRS Recruiting Dashboard.";
 
 export type BreezyPositionCreateResult =
-  | { ok: true; breezyJobId: string; fetchedAt: string; raw?: unknown }
-  | { ok: false; error: string; fetchedAt: string; rateLimited?: boolean };
+  | {
+      ok: true;
+      breezyJobId: string;
+      fetchedAt: string;
+      raw?: unknown;
+      verification: BreezyPositionVerification;
+    }
+  | { ok: false; error: string; fetchedAt: string; rateLimited?: boolean; fieldErrors?: Record<string, string> };
 
 type BreezyErrorBody = {
   error?: { type?: string; message?: string };
@@ -60,42 +69,18 @@ function sanitizePayloadForLog(payload: Record<string, unknown>) {
   };
 }
 
-function buildPositionPayload(draft: JobDraft): { ok: true; payload: Record<string, unknown> } | { ok: false; error: string } {
-  const name = draft.title.trim();
-  if (!name) {
-    return { ok: false, error: "Draft title is required before pushing to Breezy." };
-  }
-
-  const description = draft.description.trim() || DEFAULT_DESCRIPTION;
-  const city = draft.city.trim();
-  const usState = draft.usState.trim();
-  const typeCandidate = draft.metadata?.breezyPositionType?.trim();
-  const type =
-    typeCandidate && BREEZY_POSITION_TYPES.has(typeCandidate) ? typeCandidate : DEFAULT_POSITION_TYPE;
-
-  const payload: Record<string, unknown> = {
-    name,
-    description,
-    type,
-    location: {
-      country: "US",
-      state: usState || undefined,
-      city: city || undefined,
-      is_remote: false,
-    },
-    tags: ["srs-dashboard"],
-  };
-
-  const department = draft.department.trim();
-  if (department) payload.department = department;
-
-  if (draft.payRate.trim()) {
-    payload.custom_attributes = [
-      { name: "Pay Rate", value: draft.payRate.trim(), secure: false },
-    ];
-  }
-
-  return { ok: true, payload };
+function logDraftBeforePush(draft: JobDraft): void {
+  console.info("[breezy-position-write] draft before push", {
+    draftId: draft.id,
+    title: draft.title,
+    descriptionLength: draft.description?.length ?? 0,
+    city: draft.city,
+    usState: draft.usState,
+    payRate: draft.payRate,
+    department: draft.department,
+    clonedFromBreezyJobId: draft.clonedFromBreezyJobId ?? null,
+    updatedAt: draft.updatedAt,
+  });
 }
 
 async function breezyRequest(
@@ -184,6 +169,33 @@ async function publishBreezyPosition(
   return failureFromResponse("publish", path, response, text, fetchedAt);
 }
 
+async function fetchCreatedPosition(
+  companyId: string,
+  positionId: string,
+  apiKey: string,
+): Promise<unknown | null> {
+  const path = `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(positionId)}`;
+  try {
+    const { response, text } = await breezyRequest("GET", path, apiKey);
+    if (!response.ok) {
+      console.warn("[breezy-position-write] verify fetch failed", {
+        endpoint: path,
+        status: response.status,
+        bodyPreview: responseBodyPreview(text),
+      });
+      return null;
+    }
+    if (!text.trim()) return null;
+    return JSON.parse(text) as unknown;
+  } catch (err) {
+    console.warn("[breezy-position-write] verify fetch error", {
+      endpoint: path,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
+}
+
 /**
  * Creates a Breezy position and publishes it — caller must require explicit user confirmation.
  */
@@ -202,17 +214,25 @@ export async function createBreezyPositionFromDraft(
     return { ok: false, error: company.error, fetchedAt };
   }
 
-  const built = buildPositionPayload(draft);
+  logDraftBeforePush(draft);
+
+  const built = buildBreezyPositionPayload(draft);
   if (!built.ok) {
-    return { ok: false, error: built.error, fetchedAt };
+    const fieldErrors = built.errors
+      ? Object.fromEntries(
+          Object.entries(built.errors).map(([key, value]) => [key, value ?? ""]),
+        )
+      : undefined;
+    return { ok: false, error: built.error, fetchedAt, fieldErrors };
   }
 
   const createPath = `/company/${encodeURIComponent(company.companyId)}/positions`;
-  console.info("[breezy-position-write] create position", {
+  console.info("[breezy-position-write] breezy payload", {
     endpoint: createPath,
     companyId: company.companyId,
     draftId: draft.id,
     payloadShape: sanitizePayloadForLog(built.payload),
+    displayLocation: built.displayLocation,
   });
 
   let response: Response;
@@ -238,17 +258,17 @@ export async function createBreezyPositionFromDraft(
     }
   }
 
+  console.info("[breezy-position-write] breezy create response", {
+    endpoint: createPath,
+    status: response.status,
+    isJson,
+    bodyPreview: responseBodyPreview(text, 400),
+  });
+
   if (!isJson) {
-    const preview = responseBodyPreview(text);
-    console.error("[breezy-position-write] create failed", {
-      endpoint: createPath,
-      status: response.status,
-      isJson: false,
-      bodyPreview: preview,
-    });
     return {
       ok: false,
-      error: `Breezy returned non-JSON (HTTP ${response.status}): ${preview}`,
+      error: `Breezy returned non-JSON (HTTP ${response.status}): ${responseBodyPreview(text)}`,
       fetchedAt,
       rateLimited: response.status === 429,
     };
@@ -260,11 +280,6 @@ export async function createBreezyPositionFromDraft(
 
   const breezyJobId = extractCreatedJobId(parsed);
   if (!breezyJobId) {
-    console.error("[breezy-position-write] create missing job id", {
-      endpoint: createPath,
-      status: response.status,
-      bodyPreview: responseBodyPreview(text),
-    });
     return {
       ok: false,
       error: "Breezy created a position but response did not include a job id.",
@@ -272,11 +287,48 @@ export async function createBreezyPositionFromDraft(
     };
   }
 
-  console.info("[breezy-position-write] create succeeded", {
-    endpoint: createPath,
-    status: response.status,
-    breezyJobId,
+  const createVerification = verifyBreezyPositionResponse(breezyJobId, parsed, {
+    name: built.breezyTitle,
+    city: built.draftSnapshot.city,
+    state: built.draftSnapshot.usState,
+    payRate: built.draftSnapshot.payRate,
   });
+
+  const fetchedPosition = await fetchCreatedPosition(company.companyId, breezyJobId, apiKey);
+  const verification =
+    fetchedPosition !== null
+      ? verifyBreezyPositionResponse(breezyJobId, fetchedPosition, {
+          name: built.breezyTitle,
+          city: built.draftSnapshot.city,
+          state: built.draftSnapshot.usState,
+          payRate: built.draftSnapshot.payRate,
+        })
+      : createVerification;
+
+  if (!verification.ok) {
+    const normalized = normalizeBreezyJobLocation(
+      fetchedPosition && typeof fetchedPosition === "object"
+        ? (fetchedPosition as Record<string, unknown>)
+        : {},
+    );
+    console.warn("[breezy-position-write] post-create verification mismatch", {
+      breezyJobId,
+      mismatches: verification.mismatches,
+      expected: verification.expected,
+      actual: verification.actual,
+      normalizedFromJob: {
+        city: normalized.city,
+        state: normalized.state,
+        displayLocation: normalized.displayLocation,
+      },
+    });
+  } else {
+    console.info("[breezy-position-write] post-create verification ok", {
+      breezyJobId,
+      title: verification.actual.name,
+      location: verification.actual.displayLocation,
+    });
+  }
 
   const publishFailure = await publishBreezyPosition(company.companyId, breezyJobId, apiKey, fetchedAt);
   if (publishFailure && !publishFailure.ok) {
@@ -288,5 +340,13 @@ export async function createBreezyPositionFromDraft(
     };
   }
 
-  return { ok: true, breezyJobId, fetchedAt, raw: parsed };
+  if (!verification.ok) {
+    return {
+      ok: false,
+      error: `Breezy position ${breezyJobId} was created but location/title did not match the draft: ${verification.mismatches.join("; ")}`,
+      fetchedAt,
+    };
+  }
+
+  return { ok: true, breezyJobId, fetchedAt, raw: parsed, verification };
 }

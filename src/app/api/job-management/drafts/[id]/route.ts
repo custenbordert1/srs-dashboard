@@ -1,5 +1,6 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { getJobDraft, updateJobDraft } from "@/lib/job-management/job-draft-store";
+import { deleteJobDraft, getJobDraft, updateJobDraft } from "@/lib/job-management/job-draft-store";
+import { normalizeJobDraftLocationPatch } from "@/lib/job-management/normalize-job-location-fields";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,17 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const updated = await updateJobDraft(id, body);
+  const patch = {
+    ...(body.title !== undefined ? { title: body.title.trim() } : {}),
+    ...(body.description !== undefined ? { description: body.description.trim() } : {}),
+    ...(body.city !== undefined ? { city: body.city.trim() } : {}),
+    ...(body.usState !== undefined ? { usState: body.usState.trim() } : {}),
+    ...(body.payRate !== undefined ? { payRate: body.payRate.trim() } : {}),
+    ...(body.department !== undefined ? { department: body.department.trim() } : {}),
+    ...(body.source !== undefined ? { source: body.source.trim() } : {}),
+  };
+
+  const updated = await updateJobDraft(id, normalizeJobDraftLocationPatch(patch));
   if (!updated) {
     return NextResponse.json({ ok: false, error: "Draft not found." }, { status: 404 });
   }
@@ -57,4 +68,31 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   return NextResponse.json({ ok: true, draft: updated });
+}
+
+export async function DELETE(request: Request, context: RouteContext) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter"],
+    auditAction: "job_draft_delete",
+  });
+  if (isGuardFailure(guard)) return guard;
+
+  const { id } = await context.params;
+  const draft = await getJobDraft(id);
+  if (!draft) {
+    return NextResponse.json({ ok: false, error: "Draft not found." }, { status: 404 });
+  }
+  if (draft.status !== "draft") {
+    return NextResponse.json(
+      { ok: false, error: "Only unpublished drafts can be deleted." },
+      { status: 409 },
+    );
+  }
+
+  const deleted = await deleteJobDraft(id);
+  if (!deleted) {
+    return NextResponse.json({ ok: false, error: "Failed to delete draft." }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, deletedId: id });
 }
