@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   const [jobsResult, candidatesResult, melResult] = await Promise.all([
     fetchBreezyJobs("published"),
-    fetchBreezyCandidates(),
+    fetchBreezyCandidates({ scanMode: "fast" }),
     fetchMelProjectsSheet(),
   ]);
 

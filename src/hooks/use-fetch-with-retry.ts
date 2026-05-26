@@ -10,6 +10,7 @@ import {
   fetchWithTimeout,
   isAbortError,
   isTimeoutError,
+  timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
 
 export type FetchRetryOptions = {
@@ -138,7 +139,9 @@ async function fetchJsonWithRetryUncached<T>(
         const timedOut = isTimeoutError(err);
         return {
           ok: false,
-          error: timedOut ? "Request timed out after 10 seconds" : "Request cancelled",
+          error: timedOut
+            ? timeoutErrorMessage("Territory dashboard", options.timeoutMs)
+            : "Request cancelled",
           status: lastStatus,
           timedOut,
           aborted: !timedOut,
@@ -148,7 +151,9 @@ async function fetchJsonWithRetryUncached<T>(
       if (attempt === options.maxAttempts - 1) {
         return {
           ok: false,
-          error: isTimeoutError(err) ? "Request timed out after 10 seconds" : lastError,
+          error: isTimeoutError(err)
+            ? timeoutErrorMessage("Request", options.timeoutMs)
+            : lastError,
           status: lastStatus,
           timedOut: isTimeoutError(err),
         };

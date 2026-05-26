@@ -26,6 +26,7 @@ export function DmDashboard({ user }: DmDashboardProps) {
   const { data, meta, error, loading, refreshing, timedOut, refresh } =
     useTerritoryDashboard<DmDashboardSnapshot>({
       endpoint: "/api/dm/dashboard",
+      cacheScope: user.id,
     });
   const drawer = useCandidateDrawer({
     territoryStates: data?.territoryStates ?? user.territoryStates,

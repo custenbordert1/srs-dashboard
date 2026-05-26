@@ -64,7 +64,6 @@ export function LoginForm() {
       const destination =
         next && next.startsWith("/") ? next : parsed.redirect ?? (parsed.role === "dm" ? "/dm" : "/");
       router.replace(destination);
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

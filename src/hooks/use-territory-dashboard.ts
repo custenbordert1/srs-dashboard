@@ -2,7 +2,7 @@
 
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
-import { DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { TERRITORY_DASHBOARD_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const DEFAULT_POLL_MS = 90_000;
@@ -16,7 +16,10 @@ type DashboardMeta = {
 
 type UseTerritoryDashboardOptions = {
   endpoint?: string;
+  /** Scopes client cache per user/session so switching DM accounts does not reuse another territory. */
+  cacheScope?: string;
   pollIntervalMs?: number;
+  timeoutMs?: number;
   enabled?: boolean;
 };
 
@@ -32,9 +35,13 @@ type FetchMode = "initial" | "background" | "manual";
 export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions = {}) {
   const {
     endpoint = "/api/dm/dashboard",
+    cacheScope = "",
     pollIntervalMs = DEFAULT_POLL_MS,
+    timeoutMs = TERRITORY_DASHBOARD_TIMEOUT_MS,
     enabled = true,
   } = options;
+
+  const dashboardCacheKey = cacheKey(["dashboard", endpoint, cacheScope]);
 
   const [data, setData] = useState<T | null>(null);
   const [meta, setMeta] = useState<DashboardMeta>();
@@ -55,9 +62,13 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
       const generation = fetchGeneration.current + 1;
       fetchGeneration.current = generation;
 
-      abortRef.current?.abort();
+      if (mode !== "background") {
+        abortRef.current?.abort();
+      }
       const controller = new AbortController();
-      abortRef.current = controller;
+      if (mode !== "background") {
+        abortRef.current = controller;
+      }
 
       const showRefreshing = mode === "manual";
       const showLoading = mode === "initial" && !initialLoadDone.current;
@@ -69,17 +80,20 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
 
       try {
         const result = await fetchJsonWithRetry<DashboardResponse<T>>(endpoint, undefined, {
-          cacheKey: cacheKey(["dashboard", endpoint]),
+          cacheKey: dashboardCacheKey,
           cacheTtlMs: forceRefresh ? 0 : LONG_CLIENT_CACHE_TTL_MS,
           force: forceRefresh,
-          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+          timeoutMs,
           signal: controller.signal,
         });
 
         if (!mountedRef.current || generation !== fetchGeneration.current) return;
 
         if (!result.ok) {
-          if (result.aborted) return;
+          if (result.aborted) {
+            setError(null);
+            return;
+          }
           if (mode === "background" && initialLoadDone.current) return;
           if (result.timedOut) {
             setTimedOut(true);
@@ -109,13 +123,13 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
         setRefreshing(false);
       }
     },
-    [enabled, endpoint],
+    [dashboardCacheKey, enabled, endpoint, timeoutMs],
   );
 
   const refresh = useCallback(() => {
-    invalidateCached(cacheKey(["dashboard", endpoint]));
+    invalidateCached(dashboardCacheKey);
     void runFetch("manual", true);
-  }, [endpoint, runFetch]);
+  }, [dashboardCacheKey, runFetch]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -140,6 +154,7 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
     const interval =
       pollIntervalMs > 0
         ? window.setInterval(() => {
+            if (!initialLoadDone.current) return;
             void runFetch("background", false);
           }, pollIntervalMs)
         : undefined;

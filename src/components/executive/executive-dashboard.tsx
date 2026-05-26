@@ -67,6 +67,7 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
   const { data, meta, error, loading, refreshing, refresh } =
     useTerritoryDashboard<ExecutiveDashboardSnapshot>({
       endpoint: "/api/executive/dashboard",
+      cacheScope: user.id,
     });
   const drawer = useCandidateDrawer();
 
