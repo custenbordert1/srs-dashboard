@@ -18,6 +18,15 @@ function formatSignedAt(raw: string): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
+function contactEmailSourceLabel(
+  source: BackfillApiRow["contactEmailSource"],
+): string | null {
+  if (source === "workflow") return "workflow";
+  if (source === "dropbox_sign") return "Dropbox Sign";
+  if (source === "breezy") return "Breezy";
+  return null;
+}
+
 export function RecentDdBackfillQueue({
   candidateNames,
   onWorkflowUpdated,
@@ -33,6 +42,7 @@ export function RecentDdBackfillQueue({
   const [bulkBusy, setBulkBusy] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmBulkOpen, setConfirmBulkOpen] = useState(false);
+  const [emailOverrides, setEmailOverrides] = useState<Record<string, string>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -83,13 +93,23 @@ export function RecentDdBackfillQueue({
     [eligibleRows, selected],
   );
 
-  async function sendOne(row: BackfillApiRow) {
+  async function sendOne(row: BackfillApiRow, overrideEmail?: string) {
+    const manualEmail = overrideEmail?.trim() || "";
+    const resolvedEmail = row.contactEmail?.trim() || "";
+    if (!manualEmail && !resolvedEmail) {
+      window.alert("Add a contact email before sending.");
+      return;
+    }
     setBusyId(row.candidateId);
     try {
       const res = await fetch("/api/onboarding/direct-deposit/backfill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "send", candidateId: row.candidateId }),
+        body: JSON.stringify({
+          action: "send",
+          candidateId: row.candidateId,
+          ...(manualEmail ? { candidateEmail: manualEmail } : {}),
+        }),
       });
       const parsed = (await res.json()) as {
         ok: boolean;
@@ -216,7 +236,8 @@ export function RecentDdBackfillQueue({
                   <th className="px-2 py-1.5">
                     <span className="sr-only">Select</span>
                   </th>
-                  <th className="px-2 py-1.5">Candidate</th>
+                  <th className="px-2 py-1.5">Name</th>
+                  <th className="px-2 py-1.5">Email</th>
                   <th className="px-2 py-1.5">Signed</th>
                   <th className="px-2 py-1.5">Recruiter / DM</th>
                   <th className="px-2 py-1.5">DD status</th>
@@ -227,9 +248,19 @@ export function RecentDdBackfillQueue({
               </thead>
               <tbody className="divide-y divide-zinc-800/60">
                 {rows.map((row) => {
-                  const name = candidateNames[row.candidateId] ?? row.candidateId;
+                  const name =
+                    row.displayName ||
+                    candidateNames[row.candidateId] ||
+                    row.candidateId;
+                  const emailSource = contactEmailSourceLabel(row.contactEmailSource);
                   const alreadySent = row.outboxAlreadySent;
-                  const disabled = !row.eligible || busyId !== null || bulkBusy;
+                  const overrideEmail = emailOverrides[row.candidateId]?.trim();
+                  const canSend =
+                    !alreadySent &&
+                    row.directDepositStatus === "not_requested" &&
+                    Boolean(row.contactEmail || overrideEmail);
+                  const disabled = !canSend || busyId !== null || bulkBusy;
+                  const sendTitle = row.ineligibleReason ?? undefined;
                   return (
                     <tr key={row.candidateId} className="hover:bg-zinc-800/30">
                       <td className="px-2 py-1.5">
@@ -249,6 +280,39 @@ export function RecentDdBackfillQueue({
                         >
                           {name}
                         </button>
+                        <p className="mt-0.5 font-mono text-[10px] text-zinc-600">{row.candidateId}</p>
+                      </td>
+                      <td className="px-2 py-1.5">
+                        {row.contactEmail ? (
+                          <>
+                            <span className="text-zinc-300">{row.contactEmail}</span>
+                            {emailSource ? (
+                              <span className="mt-0.5 block text-[10px] text-zinc-600">
+                                via {emailSource}
+                              </span>
+                            ) : null}
+                          </>
+                        ) : (
+                          <div className="min-w-[12rem] space-y-1">
+                            <span className="text-red-300/80" title={sendTitle}>
+                              Missing
+                            </span>
+                            {!alreadySent && row.directDepositStatus === "not_requested" ? (
+                              <input
+                                type="email"
+                                placeholder="Override email"
+                                value={emailOverrides[row.candidateId] ?? ""}
+                                onChange={(event) =>
+                                  setEmailOverrides((prev) => ({
+                                    ...prev,
+                                    [row.candidateId]: event.target.value,
+                                  }))
+                                }
+                                className="w-full rounded border border-zinc-700 bg-zinc-950 px-1.5 py-0.5 text-[10px] text-zinc-200"
+                              />
+                            ) : null}
+                          </div>
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-2 py-1.5 text-zinc-400">
                         {formatSignedAt(row.paperworkSignedAt)}
@@ -290,15 +354,23 @@ export function RecentDdBackfillQueue({
                         <button
                           type="button"
                           disabled={disabled}
-                          onClick={() => void sendOne(row)}
+                          title={sendTitle}
+                          onClick={() => void sendOne(row, overrideEmail || undefined)}
                           className="rounded border border-teal-600/40 px-1.5 py-0.5 text-[10px] font-medium text-teal-100 hover:bg-teal-600/15 disabled:opacity-40"
                         >
                           {busyId === row.candidateId
                             ? "Sending…"
                             : alreadySent
                               ? "Already sent"
-                              : "Send DD email"}
+                              : canSend
+                                ? "Send DD email"
+                                : "No email"}
                         </button>
+                        {!row.eligible && row.ineligibleReason && !alreadySent ? (
+                          <p className="mt-0.5 max-w-[10rem] text-[10px] text-zinc-600">
+                            {row.ineligibleReason}
+                          </p>
+                        ) : null}
                       </td>
                     </tr>
                   );

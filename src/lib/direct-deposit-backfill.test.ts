@@ -84,6 +84,8 @@ describe("direct-deposit-backfill", () => {
     assert.equal(rows[0]?.candidateId, "a");
     assert.equal(rows[0]?.outboxAlreadySent, true);
     assert.equal(rows[0]?.eligible, false);
+    assert.equal(rows[0]?.contactEmail, "c@example.com");
+    assert.equal(rows[0]?.displayName, "a");
     const outbox = hasDirectDepositEmailInOutbox({
       candidateId: "a",
       signatureRequestId: "sig-1",
@@ -102,5 +104,23 @@ describe("direct-deposit-backfill", () => {
 
   it("exports 72 hour window constant", () => {
     assert.equal(DIRECT_DEPOSIT_BACKFILL_WINDOW_MS, 72 * 60 * 60 * 1000);
+  });
+
+  it("marks rows without contact email ineligible", async () => {
+    const recent = new Date(REF - 12 * 60 * 60 * 1000).toISOString();
+    const rows = await buildDirectDepositBackfillQueue(
+      {
+        "no-email": wf("no-email", {
+          paperworkSignedAt: recent,
+          onboardingContactEmail: null,
+          signatureRequestId: null,
+        }),
+      },
+      { referenceMs: REF, outboxRows: [] },
+    );
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?.contactEmail, null);
+    assert.equal(rows[0]?.eligible, false);
+    assert.match(rows[0]?.ineligibleReason ?? "", /No contact email/);
   });
 });

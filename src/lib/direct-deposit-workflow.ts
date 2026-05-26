@@ -1,8 +1,8 @@
-import { getSignatureRequest } from "@/lib/dropbox-sign";
 import {
   buildDirectDepositVerificationEmailBody,
   buildDirectDepositVerificationEmailHtml,
 } from "@/lib/direct-deposit-email-copy";
+import { resolveOnboardingContactEmail } from "@/lib/onboarding-contact-email";
 import {
   getDirectDepositBccAddress,
   getDirectDepositHrFromAddress,
@@ -17,25 +17,7 @@ import { sendTransactionalEmail } from "@/lib/transactional-email";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
 
-export async function resolveOnboardingContactEmail(input: {
-  workflow: CandidateWorkflowRecord;
-  signatureRequestId?: string | null;
-  overrideEmail?: string | null;
-}): Promise<string | null> {
-  const override = input.overrideEmail?.trim();
-  if (override) return override;
-  const stored = input.workflow.onboardingContactEmail?.trim();
-  if (stored) return stored;
-  const sigId = input.signatureRequestId ?? input.workflow.signatureRequestId;
-  if (!sigId) return null;
-  try {
-    const summary = await getSignatureRequest(sigId);
-    const email = summary.signatures.map((s) => s.signerEmail.trim()).find(Boolean);
-    return email ?? null;
-  } catch {
-    return null;
-  }
-}
+export { resolveOnboardingContactEmail } from "@/lib/onboarding-contact-email";
 
 async function sendDirectDepositVerificationEmail(input: {
   to: string;
