@@ -16,6 +16,8 @@ type CandidatePayrollOnboardingPanelProps = {
   directDepositNotes: string | null;
   directDepositTriggeredByUserId?: string | null;
   directDepositLastDeliveryMode?: "log" | "resend" | null;
+  directDepositLastHrCopyIncluded?: boolean | null;
+  directDepositLastHrBccAddress?: string | null;
   hasCandidateEmail: boolean;
   busy?: boolean;
   onAction: (
@@ -65,6 +67,8 @@ export function CandidatePayrollOnboardingPanel({
   directDepositNotes,
   directDepositTriggeredByUserId = null,
   directDepositLastDeliveryMode = null,
+  directDepositLastHrCopyIncluded = null,
+  directDepositLastHrBccAddress = null,
   hasCandidateEmail,
   busy = false,
   onAction,
@@ -158,6 +162,14 @@ export function CandidatePayrollOnboardingPanel({
             : directDepositRequestedAt
               ? " · Triggered by automation (webhook)"
               : ""}
+        </p>
+        <p className="mt-0.5">
+          HR copy:{" "}
+          {directDepositLastHrCopyIncluded
+            ? `yes${directDepositLastHrBccAddress ? ` (${directDepositLastHrBccAddress})` : ""}`
+            : directDepositRequestedAt
+              ? "no"
+              : "—"}
         </p>
       </div>
       <p className="text-[10px] text-zinc-600">

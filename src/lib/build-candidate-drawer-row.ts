@@ -92,6 +92,8 @@ export function buildCandidateDrawerRowFromScored(
     directDepositNotes: scored.directDepositNotes,
     directDepositTriggeredByUserId: scored.directDepositTriggeredByUserId,
     directDepositLastDeliveryMode: scored.directDepositLastDeliveryMode,
+    directDepositLastHrCopyIncluded: scored.directDepositLastHrCopyIncluded,
+    directDepositLastHrBccAddress: scored.directDepositLastHrBccAddress,
     matchedOpportunities: [],
     melMatchingSummary: "",
     opportunityRepMatches: [],

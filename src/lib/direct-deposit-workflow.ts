@@ -4,9 +4,11 @@ import {
   buildDirectDepositVerificationEmailHtml,
 } from "@/lib/direct-deposit-email-copy";
 import {
-  DIRECT_DEPOSIT_EMAIL_SUBJECT,
-  DIRECT_DEPOSIT_HR_EMAIL,
-} from "@/lib/direct-deposit-types";
+  getDirectDepositBccAddress,
+  getDirectDepositHrFromAddress,
+  getDirectDepositHrReplyToAddress,
+} from "@/lib/direct-deposit-email-config";
+import { DIRECT_DEPOSIT_EMAIL_SUBJECT } from "@/lib/direct-deposit-types";
 import {
   isEligibleDirectDepositBackfillWorkflow,
 } from "@/lib/direct-deposit-backfill";
@@ -14,14 +16,6 @@ import { hasDirectDepositEmailInOutbox, readTransactionalEmailOutbox } from "@/l
 import { sendTransactionalEmail } from "@/lib/transactional-email";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
-
-function hrFromAddress(): string {
-  return process.env.DIRECT_DEPOSIT_FROM?.trim() || DIRECT_DEPOSIT_HR_EMAIL;
-}
-
-function hrReplyTo(): string {
-  return process.env.DIRECT_DEPOSIT_REPLY_TO?.trim() || DIRECT_DEPOSIT_HR_EMAIL;
-}
 
 export async function resolveOnboardingContactEmail(input: {
   workflow: CandidateWorkflowRecord;
@@ -49,13 +43,20 @@ async function sendDirectDepositVerificationEmail(input: {
   signatureRequestId?: string | null;
   resend: boolean;
   source: "webhook" | "manual" | "backfill" | "resend";
-}): Promise<{ ok: boolean; error?: string; deliveryMode: "log" | "resend" }> {
+}): Promise<{
+  ok: boolean;
+  error?: string;
+  deliveryMode: "log" | "resend";
+  hrBccAddress: string | null;
+}> {
+  const hrBccAddress = getDirectDepositBccAddress();
   const text = buildDirectDepositVerificationEmailBody();
   const result = await sendTransactionalEmail(
     {
-      from: hrFromAddress(),
-      replyTo: hrReplyTo(),
+      from: getDirectDepositHrFromAddress(),
+      replyTo: getDirectDepositHrReplyToAddress(),
       to: input.to,
+      bcc: hrBccAddress ?? undefined,
       subject: DIRECT_DEPOSIT_EMAIL_SUBJECT,
       text,
       html: buildDirectDepositVerificationEmailHtml(),
@@ -72,6 +73,7 @@ async function sendDirectDepositVerificationEmail(input: {
     ok: result.ok,
     error: result.error,
     deliveryMode: result.mode === "resend" ? "resend" : "log",
+    hrBccAddress,
   };
 }
 
@@ -85,6 +87,7 @@ async function applyDirectDepositEmailSent(input: {
   auditAction: string;
   resend: boolean;
   deliveryMode: "log" | "resend";
+  hrBccAddress: string | null;
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
   const existing = input.existing;
@@ -98,6 +101,8 @@ async function applyDirectDepositEmailSent(input: {
     directDepositLastReminderAt: now,
     directDepositTriggeredByUserId: input.byUserId ?? null,
     directDepositLastDeliveryMode: input.deliveryMode,
+    directDepositLastHrCopyIncluded: Boolean(input.hrBccAddress),
+    directDepositLastHrBccAddress: input.hrBccAddress,
     paperworkHistoryMessage: input.historyMessage,
     audit: {
       action: input.auditAction,
@@ -105,6 +110,7 @@ async function applyDirectDepositEmailSent(input: {
       metadata: {
         recipientEmail: input.email,
         deliveryMode: input.deliveryMode,
+        ...(input.hrBccAddress ? { hrBccAddress: input.hrBccAddress } : {}),
         resend: input.resend,
       },
     },
@@ -191,6 +197,7 @@ export async function requestDirectDepositAfterPaperworkSigned(input: {
     auditAction: "direct_deposit_requested",
     resend: false,
     deliveryMode: send.deliveryMode,
+    hrBccAddress: send.hrBccAddress,
   });
 
   return { workflow, emailSent: true };
@@ -253,6 +260,7 @@ export async function requestDirectDepositManualBackfill(input: {
     auditAction: "direct_deposit_backfill",
     resend: false,
     deliveryMode: send.deliveryMode,
+    hrBccAddress: send.hrBccAddress,
   });
 
   return { workflow: updated, emailSent: true };
@@ -305,6 +313,7 @@ export async function resendDirectDepositVerificationEmail(input: {
     auditAction: "direct_deposit_resent",
     resend: true,
     deliveryMode: send.deliveryMode,
+    hrBccAddress: send.hrBccAddress,
   });
 
   return { workflow, emailSent: true };

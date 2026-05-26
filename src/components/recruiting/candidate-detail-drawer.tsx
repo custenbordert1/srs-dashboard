@@ -87,6 +87,8 @@ export type CandidateDrawerRow = {
   directDepositNotes: string | null;
   directDepositTriggeredByUserId: string | null;
   directDepositLastDeliveryMode: "log" | "resend" | null;
+  directDepositLastHrCopyIncluded: boolean | null;
+  directDepositLastHrBccAddress: string | null;
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
   opportunityRepMatches: OpportunityBestRepMatches[];
@@ -877,6 +879,8 @@ export function CandidateDetailDrawer({
                   directDepositNotes={candidate.directDepositNotes}
                   directDepositTriggeredByUserId={candidate.directDepositTriggeredByUserId}
                   directDepositLastDeliveryMode={candidate.directDepositLastDeliveryMode}
+                  directDepositLastHrCopyIncluded={candidate.directDepositLastHrCopyIncluded}
+                  directDepositLastHrBccAddress={candidate.directDepositLastHrBccAddress}
                   hasCandidateEmail={Boolean(candidate.email?.trim())}
                   busy={directDepositBusy}
                   onAction={onDirectDepositAction}

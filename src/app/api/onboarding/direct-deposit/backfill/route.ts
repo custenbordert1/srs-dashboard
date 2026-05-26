@@ -5,6 +5,7 @@ import {
 } from "@/lib/direct-deposit-backfill";
 import { requestDirectDepositManualBackfill } from "@/lib/direct-deposit-workflow";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
+import { getDirectDepositHrCopyConfig } from "@/lib/direct-deposit-email-config";
 import { getTransactionalEmailMode } from "@/lib/transactional-email";
 import { publishWorkflowRealtime } from "@/lib/workflow-realtime-push";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -24,11 +25,14 @@ export async function GET(request: Request) {
   const rows = await buildDirectDepositBackfillQueue(bundle.workflows);
   const windowHours = Math.round(DIRECT_DEPOSIT_BACKFILL_WINDOW_MS / (60 * 60 * 1000));
 
+  const hrCopy = getDirectDepositHrCopyConfig();
+
   return NextResponse.json({
     ok: true,
     rows,
     windowHours,
     deliveryMode: getTransactionalEmailMode(),
+    hrCopy,
     updatedAt: bundle.updatedAt,
   });
 }

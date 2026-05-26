@@ -26,6 +26,7 @@ export function RecentDdBackfillQueue({
   const [rows, setRows] = useState<BackfillApiRow[]>([]);
   const [windowHours, setWindowHours] = useState(72);
   const [deliveryMode, setDeliveryMode] = useState<"log" | "resend">("log");
+  const [hrCopyAddress, setHrCopyAddress] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export function RecentDdBackfillQueue({
         rows?: BackfillApiRow[];
         windowHours?: number;
         deliveryMode?: "log" | "resend";
+        hrCopy?: { configured?: boolean; address?: string | null };
         error?: string;
       };
       if (!res.ok || !parsed.ok || !parsed.rows) {
@@ -51,6 +53,7 @@ export function RecentDdBackfillQueue({
       setRows(parsed.rows);
       setWindowHours(parsed.windowHours ?? 72);
       setDeliveryMode(parsed.deliveryMode === "resend" ? "resend" : "log");
+      setHrCopyAddress(parsed.hrCopy?.address ?? null);
       setSelected((prev) => {
         const next = new Set<string>();
         for (const id of prev) {
@@ -168,6 +171,12 @@ export function RecentDdBackfillQueue({
           <p className="mt-1 max-w-2xl text-xs text-zinc-500">
             Signed in the last {windowHours} hours with DD not yet requested. Manual send only — no
             automatic bulk email. Delivery mode: <span className="text-zinc-300">{deliveryMode}</span>.
+            {" "}
+            HR BCC:{" "}
+            <span className="text-zinc-300">
+              {hrCopyAddress ? hrCopyAddress : "not configured"}
+            </span>
+            .
           </p>
         </div>
         <button
@@ -212,6 +221,7 @@ export function RecentDdBackfillQueue({
                   <th className="px-2 py-1.5">Recruiter / DM</th>
                   <th className="px-2 py-1.5">DD status</th>
                   <th className="px-2 py-1.5">Outbox</th>
+                  <th className="px-2 py-1.5">HR copy</th>
                   <th className="px-2 py-1.5">Action</th>
                 </tr>
               </thead>
@@ -256,6 +266,24 @@ export function RecentDdBackfillQueue({
                           </span>
                         ) : (
                           <span className="text-zinc-600">Not logged</span>
+                        )}
+                      </td>
+                      <td className="px-2 py-1.5 text-zinc-500">
+                        {alreadySent ? (
+                          row.outboxHrCopyIncluded ? (
+                            <span title={row.outboxHrCopyAddress ?? undefined}>
+                              yes
+                              {row.outboxHrCopyAddress ? ` · ${row.outboxHrCopyAddress}` : ""}
+                            </span>
+                          ) : (
+                            "no"
+                          )
+                        ) : row.configuredHrCopyAddress ? (
+                          <span title={row.configuredHrCopyAddress}>
+                            on send: yes · {row.configuredHrCopyAddress}
+                          </span>
+                        ) : (
+                          "on send: no"
                         )}
                       </td>
                       <td className="px-2 py-1.5">

@@ -60,6 +60,10 @@ export type CandidateWorkflowRecord = {
   directDepositTriggeredByUserId: string | null;
   /** Last send transport: log outbox vs Resend API. */
   directDepositLastDeliveryMode: "log" | "resend" | null;
+  /** Whether the last DD send included an HR BCC copy. */
+  directDepositLastHrCopyIncluded: boolean | null;
+  /** BCC address used on the last DD send, if any. */
+  directDepositLastHrBccAddress: string | null;
   updatedAt: string;
 };
 
@@ -149,6 +153,14 @@ export function normalizeWorkflowRecord(
     directDepositLastDeliveryMode:
       raw.directDepositLastDeliveryMode === "log" || raw.directDepositLastDeliveryMode === "resend"
         ? raw.directDepositLastDeliveryMode
+        : null,
+    directDepositLastHrCopyIncluded:
+      typeof raw.directDepositLastHrCopyIncluded === "boolean"
+        ? raw.directDepositLastHrCopyIncluded
+        : null,
+    directDepositLastHrBccAddress:
+      typeof raw.directDepositLastHrBccAddress === "string"
+        ? raw.directDepositLastHrBccAddress
         : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };

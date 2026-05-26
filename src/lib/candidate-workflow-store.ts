@@ -214,6 +214,8 @@ export async function upsertCandidateWorkflow(input: {
   directDepositNotes?: string | null;
   directDepositTriggeredByUserId?: string | null;
   directDepositLastDeliveryMode?: "log" | "resend" | null;
+  directDepositLastHrCopyIncluded?: boolean | null;
+  directDepositLastHrBccAddress?: string | null;
   paperworkHistoryMessage?: string;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
@@ -288,6 +290,14 @@ export async function upsertCandidateWorkflow(input: {
     input.directDepositLastDeliveryMode !== undefined
       ? input.directDepositLastDeliveryMode
       : (existing?.directDepositLastDeliveryMode ?? null);
+  const directDepositLastHrCopyIncluded =
+    input.directDepositLastHrCopyIncluded !== undefined
+      ? input.directDepositLastHrCopyIncluded
+      : (existing?.directDepositLastHrCopyIncluded ?? null);
+  const directDepositLastHrBccAddress =
+    input.directDepositLastHrBccAddress !== undefined
+      ? input.directDepositLastHrBccAddress
+      : (existing?.directDepositLastHrBccAddress ?? null);
 
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
@@ -351,6 +361,8 @@ export async function upsertCandidateWorkflow(input: {
     directDepositNotes,
     directDepositTriggeredByUserId,
     directDepositLastDeliveryMode,
+    directDepositLastHrCopyIncluded,
+    directDepositLastHrBccAddress,
     updatedAt: now,
   };
 

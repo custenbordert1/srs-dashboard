@@ -23,4 +23,20 @@ describe("transactional-email-outbox", () => {
     assert.equal(hasDirectDepositEmailInOutbox({ candidateId: "c1", signatureRequestId: "sig-a", rows }).sent, true);
     assert.equal(hasDirectDepositEmailInOutbox({ candidateId: "c1", signatureRequestId: "sig-other", rows }).sent, false);
   });
+
+  it("reports HR copy from outbox bcc field", () => {
+    const rows = [
+      {
+        id: "1",
+        createdAt: "2026-05-20T10:00:00.000Z",
+        to: "candidate@example.com",
+        bcc: "humanresource@srsmerchandising.com",
+        subject: "Direct Deposit Verification Needed",
+        meta: { candidateId: "c1", kind: "direct_deposit_verification" },
+      },
+    ];
+    const hit = hasDirectDepositEmailInOutbox({ candidateId: "c1", rows });
+    assert.equal(hit.hrCopyIncluded, true);
+    assert.equal(hit.hrCopyAddress, "humanresource@srsmerchandising.com");
+  });
 });

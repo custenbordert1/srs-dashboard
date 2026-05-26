@@ -6,6 +6,8 @@ export type TransactionalEmailPayload = {
   from: string;
   replyTo: string;
   to: string;
+  /** Optional BCC for HR visibility (not shown in candidate body). */
+  bcc?: string;
   subject: string;
   text: string;
   html?: string;
@@ -61,6 +63,7 @@ async function sendViaResend(payload: TransactionalEmailPayload): Promise<Transa
       from: payload.from,
       reply_to: payload.replyTo,
       to: [payload.to],
+      ...(payload.bcc ? { bcc: [payload.bcc] } : {}),
       subject: payload.subject,
       text: payload.text,
       html: payload.html ?? undefined,
@@ -93,6 +96,7 @@ export async function sendTransactionalEmail(
   if (mode === "log") {
     console.info("[transactional-email] logged", {
       to: payload.to,
+      bcc: payload.bcc ?? null,
       subject: payload.subject,
       tags: payload.tags,
       ...meta,

@@ -4,6 +4,7 @@ import {
   readTransactionalEmailOutbox,
   type TransactionalEmailOutboxRow,
 } from "@/lib/transactional-email-outbox";
+import { getDirectDepositHrCopyConfig } from "@/lib/direct-deposit-email-config";
 import { directDepositStatusLabel } from "@/lib/direct-deposit-types";
 
 /** Signed paperwork within this window may appear in the manual DD backfill queue. */
@@ -19,6 +20,9 @@ export type DirectDepositBackfillRow = {
   onboardingContactEmail: string | null;
   outboxAlreadySent: boolean;
   outboxSentAt: string | null;
+  outboxHrCopyIncluded: boolean | null;
+  outboxHrCopyAddress: string | null;
+  configuredHrCopyAddress: string | null;
   eligible: boolean;
   ineligibleReason?: string;
 };
@@ -50,6 +54,7 @@ export async function buildDirectDepositBackfillQueue(
 ): Promise<DirectDepositBackfillRow[]> {
   const referenceMs = options?.referenceMs ?? Date.now();
   const outboxRows = options?.outboxRows ?? (await readTransactionalEmailOutbox());
+  const configuredHrCopy = getDirectDepositHrCopyConfig();
 
   const rows: DirectDepositBackfillRow[] = [];
   for (const workflow of Object.values(workflows)) {
@@ -77,6 +82,9 @@ export async function buildDirectDepositBackfillQueue(
       onboardingContactEmail: workflow.onboardingContactEmail,
       outboxAlreadySent: outbox.sent,
       outboxSentAt: outbox.sentAt,
+      outboxHrCopyIncluded: outbox.sent ? outbox.hrCopyIncluded : null,
+      outboxHrCopyAddress: outbox.sent ? outbox.hrCopyAddress : null,
+      configuredHrCopyAddress: configuredHrCopy.address,
       eligible,
       ineligibleReason: outbox.sent
         ? "Already in email outbox"

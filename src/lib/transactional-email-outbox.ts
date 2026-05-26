@@ -6,6 +6,7 @@ export type TransactionalEmailOutboxRow = {
   id: string;
   createdAt: string;
   to: string;
+  bcc?: string;
   subject: string;
   meta?: {
     candidateId?: string;
@@ -65,18 +66,36 @@ export function indexDirectDepositOutboxByCandidate(
   return map;
 }
 
+export function getDirectDepositOutboxEntry(input: {
+  candidateId: string;
+  signatureRequestId?: string | null;
+  rows?: TransactionalEmailOutboxRow[];
+}): TransactionalEmailOutboxRow | null {
+  const rows = input.rows ?? [];
+  const indexed = indexDirectDepositOutboxByCandidate(rows);
+  const hit = indexed.get(input.candidateId);
+  if (!hit) return null;
+  const sig = input.signatureRequestId?.trim();
+  if (sig && hit.meta?.signatureRequestId && hit.meta.signatureRequestId !== sig) {
+    return null;
+  }
+  return hit;
+}
+
 export function hasDirectDepositEmailInOutbox(input: {
   candidateId: string;
   signatureRequestId?: string | null;
   rows?: TransactionalEmailOutboxRow[];
-}): { sent: boolean; sentAt: string | null } {
-  const rows = input.rows ?? [];
-  const indexed = indexDirectDepositOutboxByCandidate(rows);
-  const hit = indexed.get(input.candidateId);
-  if (!hit) return { sent: false, sentAt: null };
-  const sig = input.signatureRequestId?.trim();
-  if (sig && hit.meta?.signatureRequestId && hit.meta.signatureRequestId !== sig) {
-    return { sent: false, sentAt: null };
+}): { sent: boolean; sentAt: string | null; hrCopyIncluded: boolean; hrCopyAddress: string | null } {
+  const hit = getDirectDepositOutboxEntry(input);
+  if (!hit) {
+    return { sent: false, sentAt: null, hrCopyIncluded: false, hrCopyAddress: null };
   }
-  return { sent: true, sentAt: hit.createdAt };
+  const hrCopyAddress = hit.bcc?.trim() || null;
+  return {
+    sent: true,
+    sentAt: hit.createdAt,
+    hrCopyIncluded: Boolean(hrCopyAddress),
+    hrCopyAddress,
+  };
 }

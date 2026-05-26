@@ -58,6 +58,8 @@ describe("direct-deposit-workflow", () => {
     const prev = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
     process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = dir;
     process.env.DIRECT_DEPOSIT_EMAIL_MODE = "log";
+    const prevBcc = process.env.DIRECT_DEPOSIT_BCC;
+    process.env.DIRECT_DEPOSIT_BCC = "humanresource@srsmerchandising.com";
     try {
       await recordCandidatePaperworkSent({
         candidateId: "c-dd-2",
@@ -74,9 +76,12 @@ describe("direct-deposit-workflow", () => {
         recipientEmail: "outbox@example.com",
       });
       const outbox = await readFile(path.join(dir, "transactional-email-outbox.jsonl"), "utf8");
-      assert.match(outbox, /outbox@example.com/);
+      assert.match(outbox, /"to":"outbox@example.com"/);
+      assert.match(outbox, /"bcc":"humanresource@srsmerchandising.com"/);
       assert.match(outbox, /Direct Deposit Verification Needed/);
     } finally {
+      if (prevBcc === undefined) delete process.env.DIRECT_DEPOSIT_BCC;
+      else process.env.DIRECT_DEPOSIT_BCC = prevBcc;
       if (prev === undefined) delete process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
       else process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = prev;
       await rm(dir, { recursive: true, force: true });
