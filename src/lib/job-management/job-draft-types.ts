@@ -1,3 +1,5 @@
+import type { JobApplicantCountsSource } from "@/lib/job-management/job-applicant-counts";
+
 export type JobDraftStatus = "draft" | "pushed" | "push_failed";
 
 export type JobDraft = {
@@ -69,6 +71,11 @@ export type BreezyJobCatalogSnapshot = {
   companyName?: string;
   publishedCount?: number;
   draftCount?: number;
+  /** How applicant counts were derived for catalog rows. */
+  applicantCountsSource?: JobApplicantCountsSource;
+  applicantCountsFromCache?: boolean;
+  applicantCountsCachedAt?: string | null;
+  applicantCountsCandidatesConsidered?: number;
 };
 
 export type BreezyJobCatalogFailure = {

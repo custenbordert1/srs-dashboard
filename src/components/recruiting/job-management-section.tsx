@@ -15,7 +15,9 @@ import {
   type JobManagementRow,
   type JobManagementSortKey,
 } from "@/lib/job-management/job-management-rows";
+import { warmBreezyCandidatesCache } from "@/lib/breezy-candidates-warm";
 import { fetchJobManagementCatalog } from "@/lib/job-management/job-management-catalog-client";
+import type { JobApplicantCountsSource } from "@/lib/job-management/job-applicant-counts";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -32,6 +34,7 @@ type CatalogMeta = {
   companyName?: string;
   publishedCount?: number;
   draftCount?: number;
+  applicantCountsSource?: JobApplicantCountsSource;
 };
 
 type FeedbackTone = "success" | "error" | "info" | "warning";
@@ -52,6 +55,7 @@ export function JobManagementSection() {
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [refreshingJobs, setRefreshingJobs] = useState(false);
   const jobsCountRef = useRef(0);
+  const applicantCountsHydrateRef = useRef(false);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pushing, setPushing] = useState(false);
@@ -136,6 +140,9 @@ export function JobManagementSection() {
     const emptyAtStart = jobsCountRef.current === 0;
     if (emptyAtStart) setLoadingJobs(true);
     else setRefreshingJobs(true);
+    if (force) {
+      applicantCountsHydrateRef.current = false;
+    }
 
     try {
       const parsed = await fetchJobManagementCatalog({ force });
@@ -153,6 +160,7 @@ export function JobManagementSection() {
           companyName: parsed.companyName,
           publishedCount: parsed.publishedCount,
           draftCount: parsed.draftCount,
+          applicantCountsSource: parsed.applicantCountsSource,
         });
         if (force && !parsed.stale && !parsed.partial) {
           setFeedback({
@@ -194,6 +202,17 @@ export function JobManagementSection() {
     }, 0);
     return () => window.clearTimeout(id);
   }, [loadJobs, loadDrafts]);
+
+  useEffect(() => {
+    if (catalogMeta?.applicantCountsSource != null) return;
+    if (applicantCountsHydrateRef.current) return;
+    applicantCountsHydrateRef.current = true;
+    warmBreezyCandidatesCache();
+    const timer = window.setTimeout(() => {
+      void loadJobs(false);
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [catalogMeta?.applicantCountsSource, loadJobs]);
 
   const updateDraft = (draftId: string, patch: Partial<JobDraft>) => {
     setDrafts((prev) =>
@@ -519,7 +538,7 @@ export function JobManagementSection() {
                     <JobManagementStatusBadge status={row.status} />
                   </td>
                   <td className="px-3 py-2.5 text-right tabular-nums text-zinc-400">
-                    {row.applicants ?? "—"}
+                    {formatApplicantCount(row, loadingJobs || refreshingJobs)}
                   </td>
                   <td className="px-3 py-2.5 text-xs text-zinc-500">
                     {row.postedDate ? new Date(row.postedDate).toLocaleDateString() : "—"}
@@ -585,6 +604,16 @@ export function JobManagementSection() {
       ) : null}
     </div>
   );
+}
+
+function formatApplicantCount(row: JobManagementRow, catalogLoading: boolean): string {
+  if (typeof row.applicants === "number") {
+    return row.applicants.toLocaleString();
+  }
+  if (row.kind === "breezy" && catalogLoading) {
+    return "Loading";
+  }
+  return "—";
 }
 
 function SortHeader({

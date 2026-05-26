@@ -1,4 +1,5 @@
 import { fetchBreezyJobs, type BreezyJob } from "@/lib/breezy-api";
+import { enrichCatalogRowsWithApplicantCounts } from "@/lib/job-management/job-applicant-counts";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import {
   JOB_MANAGEMENT_BREEZY_SOURCE,
@@ -13,9 +14,43 @@ type CatalogCacheEntry = {
   expiresAt: number;
   snapshot: BreezyJobCatalogSnapshot;
   includeDraft: boolean;
+  lookupJobs: BreezyJob[];
 };
 
 let catalogCache: CatalogCacheEntry | null = null;
+
+function buildCatalogSnapshot(
+  lookupJobs: BreezyJob[],
+  meta: Omit<
+    BreezyJobCatalogSnapshot,
+    | "ok"
+    | "jobs"
+    | "applicantCountsSource"
+    | "applicantCountsFromCache"
+    | "applicantCountsCachedAt"
+    | "applicantCountsCandidatesConsidered"
+  >,
+): BreezyJobCatalogSnapshot {
+  const mappedRows = lookupJobs.map(mapJobToCatalogRow);
+  const applicantCounts = enrichCatalogRowsWithApplicantCounts(mappedRows, lookupJobs);
+  return {
+    ok: true,
+    ...meta,
+    jobs: applicantCounts.jobs,
+    applicantCountsSource: applicantCounts.source,
+    applicantCountsFromCache: applicantCounts.fromCache,
+    applicantCountsCachedAt: applicantCounts.cachedAt,
+    applicantCountsCandidatesConsidered: applicantCounts.candidatesConsidered,
+  };
+}
+
+function snapshotFromCacheEntry(entry: CatalogCacheEntry, stale: boolean): BreezyJobCatalogSnapshot {
+  return buildCatalogSnapshot(entry.lookupJobs, {
+    ...entry.snapshot,
+    fromCache: true,
+    stale,
+  });
+}
 
 function mapJobToCatalogRow(job: BreezyJob): BreezyJobCatalogRow {
   const pipelineStatus = job.status || "unknown";
@@ -56,11 +91,16 @@ function dedupeJobsById(jobs: BreezyJob[]): BreezyJob[] {
   return [...map.values()];
 }
 
-function storeCatalogSnapshot(snapshot: BreezyJobCatalogSnapshot, includeDraft: boolean): BreezyJobCatalogSnapshot {
+function storeCatalogSnapshot(
+  snapshot: BreezyJobCatalogSnapshot,
+  includeDraft: boolean,
+  lookupJobs: BreezyJob[],
+): BreezyJobCatalogSnapshot {
   catalogCache = {
     expiresAt: Date.now() + CATALOG_CACHE_TTL_MS,
     snapshot,
     includeDraft,
+    lookupJobs,
   };
   return snapshot;
 }
@@ -68,11 +108,7 @@ function storeCatalogSnapshot(snapshot: BreezyJobCatalogSnapshot, includeDraft: 
 /** Last in-memory catalog (even if TTL expired) for stale fallback on failed refresh. */
 export function getStaleBreezyJobCatalogSnapshot(includeDraft: boolean): BreezyJobCatalogSnapshot | null {
   if (!catalogCache || catalogCache.includeDraft !== includeDraft) return null;
-  return {
-    ...catalogCache.snapshot,
-    fromCache: true,
-    stale: true,
-  };
+  return snapshotFromCacheEntry(catalogCache, true);
 }
 
 export async function fetchBreezyJobCatalog(options?: {
@@ -84,7 +120,7 @@ export async function fetchBreezyJobCatalog(options?: {
   const now = Date.now();
 
   if (!options?.force && catalogCache && catalogCache.expiresAt > now && catalogCache.includeDraft === includeDraft) {
-    return { ...catalogCache.snapshot, fromCache: true };
+    return snapshotFromCacheEntry(catalogCache, false);
   }
 
   const publishedResult = await fetchBreezyJobs("published");
@@ -127,9 +163,7 @@ export async function fetchBreezyJobCatalog(options?: {
   }
 
   const catalogJobs = filterCatalogJobs(merged, "all");
-  const snapshot: BreezyJobCatalogSnapshot = {
-    ok: true,
-    jobs: catalogJobs.map(mapJobToCatalogRow),
+  const snapshot = buildCatalogSnapshot(catalogJobs, {
     fetchedAt: publishedResult.fetchedAt,
     fromCache: false,
     stale: false,
@@ -141,9 +175,9 @@ export async function fetchBreezyJobCatalog(options?: {
     companyName: publishedResult.companyName,
     publishedCount: publishedResult.jobs.length,
     draftCount,
-  };
+  });
 
-  return storeCatalogSnapshot(snapshot, includeDraft);
+  return storeCatalogSnapshot(snapshot, includeDraft, catalogJobs);
 }
 
 /** Published-only catalog (overview compatibility). */
