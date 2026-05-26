@@ -69,6 +69,29 @@ export function CandidateActionsMenu({
   const [recruiters, setRecruiters] = useState<string[]>(rosters.recruiters);
   const [dms, setDms] = useState<string[]>(rosters.dms);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setMenuPosition(null);
+      return;
+    }
+    function updatePosition() {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const menuWidth = 220;
+      const left = Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8));
+      setMenuPosition({ top: rect.bottom + 4, left });
+    }
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -170,31 +193,23 @@ export function CandidateActionsMenu({
     run({ kind: "add-note", note: note.trim() });
   }
 
-  return (
-    <div ref={rootRef} className="relative inline-block" onClick={(event) => event.stopPropagation()}>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onClick={(event) => {
-          event.stopPropagation();
-          setOpen((value) => {
-            const next = !value;
-            if (next) {
-              setRecruiters(rosters.recruiters);
-              setDms(rosters.dms);
-            }
-            return next;
-          });
-        }}
-        className="rounded-md border border-zinc-600 bg-zinc-800/80 px-1.5 py-0.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-700/80"
-      >
-        {overflow ? "More ▾" : "Actions"}
-      </button>
-      {open ? (
+  function positionMenuFromTrigger() {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const menuWidth = 220;
+    const left = Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8));
+    setMenuPosition({ top: rect.bottom + 4, left });
+  }
+
+  const menuPanel = open ? (
         <div
           role="menu"
-          className="absolute right-0 z-30 mt-1 min-w-[12rem] rounded-md border border-zinc-700 bg-zinc-950 py-1 shadow-lg shadow-black/40"
+          style={
+            menuPosition
+              ? { top: menuPosition.top, left: menuPosition.left }
+              : { top: 0, left: 0, visibility: "hidden" as const }
+          }
+          className="fixed z-[200] min-w-[13.5rem] max-w-[min(18rem,calc(100vw-1rem))] rounded-lg border border-zinc-700 bg-zinc-950 py-1 shadow-xl shadow-black/50"
         >
           {overflow && overflowTriage ? (
             <>
@@ -433,7 +448,40 @@ export function CandidateActionsMenu({
             Open drawer
           </button>
         </div>
-      ) : null}
+      ) : null;
+
+  return (
+    <div ref={rootRef} className="inline-flex shrink-0" onClick={(event) => event.stopPropagation()}>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={overflow ? "More candidate actions" : "Candidate actions"}
+        title={overflow ? "More actions" : "Actions"}
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen((value) => {
+            const next = !value;
+            if (next) {
+              setRecruiters(rosters.recruiters);
+              setDms(rosters.dms);
+              queueMicrotask(positionMenuFromTrigger);
+            } else {
+              setMenuPosition(null);
+            }
+            return next;
+          });
+        }}
+        className={
+          overflow
+            ? "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/90 text-sm leading-none text-zinc-200 hover:bg-zinc-700"
+            : "rounded-md border border-zinc-600 bg-zinc-800/80 px-2 py-1 text-[11px] font-medium text-zinc-200 hover:bg-zinc-700/80"
+        }
+      >
+        {overflow ? "⋮" : "Actions"}
+      </button>
+      {menuPanel}
     </div>
   );
 }

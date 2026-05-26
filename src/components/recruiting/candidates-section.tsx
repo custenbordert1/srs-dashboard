@@ -158,6 +158,8 @@ const thClass =
 /** Keep in sync with `CANDIDATE_TABLE_ROW_HEIGHT_PX` (54). */
 const tdClass =
   "max-h-[54px] align-middle overflow-hidden whitespace-nowrap px-1.5 py-0 text-xs text-zinc-300";
+const tdActionClass =
+  "max-h-[54px] align-middle overflow-visible whitespace-nowrap px-1.5 py-0 text-xs text-zinc-300";
 const workflowPillClass =
   "inline-flex h-5 max-w-full items-center truncate rounded-full px-1.5 text-[10px] font-medium leading-none";
 const syncBannerClass =
@@ -1800,7 +1802,7 @@ export function CandidatesSection() {
               </div>
             </div>
           </td>
-          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+          <td className={tdActionClass} onClick={(event) => event.stopPropagation()}>
             <CandidateRowPrimaryActionBar
               primary={resolveCandidateRowPrimaryAction({
                 candidate,
@@ -2366,8 +2368,8 @@ export function CandidatesSection() {
                   <col className="w-[4%]" />
                   <col className="w-[3%]" />
                   <col className="w-[6%]" />
-                  <col className="w-[8%]" />
-                  <col className="w-[7%]" />
+                  <col className="w-[9%]" />
+                  <col className="w-[148px]" />
                   <col className="w-[4%]" />
                   <col className="w-[5%]" />
                   <col className="w-[4%]" />
