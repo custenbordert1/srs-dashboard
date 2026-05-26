@@ -134,6 +134,8 @@ describe("routing intelligence planning snapshot", () => {
       geoClusterId: pack.clusterId,
       burden: computeTravelBurdenIntel(pack),
       routePackScore: scoreRoutePack(pack, computeTravelBurdenIntel(pack)),
+      groupedStores: [],
+      nearbyReps: [],
     }));
     const overview = buildTerritoryOverviewCards(clusters, enriched);
     assert.equal(overview.length, 6);

@@ -15,10 +15,14 @@ import {
   buildTerritoryOverviewCards,
   type TerritoryOverviewCard,
 } from "@/lib/routing-intelligence/territory-overview";
+import { milesBetweenRepAndProject } from "@/lib/rep-intelligence/distance-engine";
 import type {
   EnrichedRoutePack,
+  NearbyRepRoutingRow,
   RoutePack,
   RoutingIntelligenceSnapshot,
+  RoutingStoreRef,
+  StoreCluster,
 } from "@/lib/routing-intelligence/types";
 
 export type { EnrichedRoutePack };
@@ -30,7 +34,40 @@ export type RoutingPlanningSnapshot = RoutingIntelligenceSnapshot & {
   geoVisualization: GeoVisualizationSnapshot;
 };
 
-function enrichPacks(packs: RoutePack[], reps: ActiveRep[]): EnrichedRoutePack[] {
+function storesForPack(pack: RoutePack, clusters: StoreCluster[]): RoutingStoreRef[] {
+  return clusters
+    .filter(
+      (cluster) =>
+        cluster.state === pack.state &&
+        pack.cities.some((city) => city.toLowerCase() === cluster.city.toLowerCase()),
+    )
+    .flatMap((cluster) => cluster.stores);
+}
+
+function nearbyRepsForPack(pack: RoutePack, reps: ActiveRep[]): NearbyRepRoutingRow[] {
+  const anchorCity = pack.cities[0] ?? "";
+  const project = { city: anchorCity, state: pack.state };
+  const rows: NearbyRepRoutingRow[] = [];
+  for (const rep of reps) {
+    rows.push({
+      repId: rep.repId,
+      repName: rep.name,
+      distanceMiles: milesBetweenRepAndProject(rep, project),
+      active: rep.active,
+      travelRadiusMiles: rep.travelRadius,
+    });
+  }
+  return rows
+    .filter((row) => row.distanceMiles !== null)
+    .sort((a, b) => (a.distanceMiles ?? 999) - (b.distanceMiles ?? 999))
+    .slice(0, 6);
+}
+
+function enrichPacks(
+  packs: RoutePack[],
+  clusters: StoreCluster[],
+  reps: ActiveRep[],
+): EnrichedRoutePack[] {
   return packs.map((pack) => {
     const anchor = {
       opportunityId: pack.routePackId,
@@ -55,6 +92,8 @@ function enrichPacks(packs: RoutePack[], reps: ActiveRep[]): EnrichedRoutePack[]
       geoClusterId: pack.clusterId,
       burden,
       routePackScore: scoreRoutePack(pack, burden),
+      groupedStores: storesForPack(pack, clusters),
+      nearbyReps: nearbyRepsForPack(pack, reps),
     };
   });
 }
@@ -69,7 +108,7 @@ export function attachRoutingPlanning(
 ): RoutingPlanningSnapshot {
   const clusters = buildStoreClusters(input.opportunities);
   const packs = base.routePacks.length > 0 ? base.routePacks : buildRoutePacksFromClusters(clusters, input.reps);
-  const enrichedRoutePacks = enrichPacks(packs, input.reps);
+  const enrichedRoutePacks = enrichPacks(packs, clusters, input.reps);
 
   return {
     ...base,

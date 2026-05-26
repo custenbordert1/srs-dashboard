@@ -109,7 +109,28 @@ export function RoutingRouteQueue({ rows, onSelectPack }: RoutingRouteQueueProps
                     }}
                   />
                   <WorkflowChip
-                    label="Automation"
+                    label="Related jobs"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      navigateRecruitingTab({ tab: "job-management" });
+                    }}
+                  />
+                  <WorkflowChip
+                    label="Ad variants"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      navigateRecruitingTab({ tab: "job-management" });
+                    }}
+                  />
+                  <WorkflowChip
+                    label="Nearby territories"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      navigateRecruitingTab({ tab: "mel-projects" });
+                    }}
+                  />
+                  <WorkflowChip
+                    label="Coverage"
                     onClick={(event) => {
                       event.stopPropagation();
                       navigateRecruitingTab({ tab: "automation" });

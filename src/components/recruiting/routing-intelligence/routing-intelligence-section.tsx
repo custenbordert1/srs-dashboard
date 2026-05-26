@@ -9,6 +9,7 @@ import { RoutingTerritoryOverview } from "@/components/recruiting/routing-intell
 import { RoutingRouteQueue } from "@/components/recruiting/routing-intelligence/routing-route-queue";
 import { RoutingPackBuilder } from "@/components/recruiting/routing-intelligence/routing-pack-builder";
 import { RoutingCoverageMapPlaceholder } from "@/components/recruiting/routing-intelligence/routing-coverage-map-placeholder";
+import { RoutingTravelBurdenPanel } from "@/components/recruiting/routing-intelligence/routing-travel-burden-panel";
 import type { EnrichedRoutePack } from "@/lib/routing-intelligence/types";
 
 export function RoutingIntelligenceSection() {
@@ -102,6 +103,11 @@ export function RoutingIntelligenceSection() {
         onSelectPack={setSelectedPackId}
       />
 
+      <RoutingTravelBurdenPanel
+        packs={(routing?.enrichedRoutePacks ?? []) as EnrichedRoutePack[]}
+        selectedPack={selectedPack}
+      />
+
       <div className="grid gap-6 xl:grid-cols-2">
         <RoutingRouteQueue
           rows={routing?.routeQueues ?? []}
@@ -113,6 +119,7 @@ export function RoutingIntelligenceSection() {
           onSelectPack={setSelectedPackId}
           escalations={meta?.escalations ?? []}
           jobContexts={routing?.jobContexts ?? {}}
+          variants={data.decisionIntelligence?.variantPerformance ?? []}
         />
       </div>
 

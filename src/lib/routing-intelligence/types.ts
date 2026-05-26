@@ -97,6 +97,8 @@ export type EnrichedRoutePack = RoutePack & {
   geoClusterId: string;
   routePackScore: number;
   burden: RouteBurdenMetrics;
+  groupedStores: RoutingStoreRef[];
+  nearbyReps: NearbyRepRoutingRow[];
 };
 
 export type RoutingIntelligenceSnapshot = {
