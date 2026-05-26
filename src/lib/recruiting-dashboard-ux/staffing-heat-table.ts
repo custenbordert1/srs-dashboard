@@ -6,6 +6,8 @@ import { expandMetroCities } from "@/lib/job-management/job-metro-expansion";
 
 export type StaffingHeatLevel = "healthy" | "moderate" | "critical";
 
+export type StaffingHeatTrend = "improving" | "declining" | "stable";
+
 export type StaffingHeatRow = {
   id: string;
   level: StaffingHeatLevel;
@@ -18,6 +20,11 @@ export type StaffingHeatRow = {
   applicants7d: number;
   healthScore: number;
   demandScore: number;
+  rank?: number;
+  staffingPressureScore?: number;
+  trend?: StaffingHeatTrend;
+  trendDelta?: number;
+  isHighestRisk?: boolean;
 };
 
 const LEVEL_RANK: Record<StaffingHeatLevel, number> = {
@@ -177,9 +184,43 @@ export function buildStaffingHeatRows(input: {
     existing.level = classifyHealth(existing.healthScore);
   }
 
-  return [...stateAgg.values(), ...metroRows, ...cityRows].sort(
+  const sorted = [...stateAgg.values(), ...metroRows, ...cityRows].sort(
     (a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || b.healthScore - a.healthScore,
   );
+  return enrichStaffingHeatRows(sorted, territoryPressure);
+}
+
+export function enrichStaffingHeatRows(
+  rows: StaffingHeatRow[],
+  staffingPressureScore = 50,
+): StaffingHeatRow[] {
+  if (rows.length === 0) return rows;
+  const maxScore = Math.max(...rows.map((row) => row.healthScore), 1);
+  const topRiskId = rows[0]?.id;
+
+  return rows.map((row, index) => {
+    const zeroRate = row.openJobs > 0 ? row.zeroApplicantJobs / row.openJobs : 0;
+    const applPerJob = row.openJobs > 0 ? row.applicants7d / row.openJobs : 0;
+    let trend: StaffingHeatTrend = "stable";
+    if (zeroRate >= 0.5 || row.escalationCount >= 2) trend = "declining";
+    else if (applPerJob >= 1.5 && row.escalationCount === 0) trend = "improving";
+
+    const trendDelta =
+      trend === "declining"
+        ? Math.round(zeroRate * 20 + row.escalationCount * 5)
+        : trend === "improving"
+          ? -Math.round(applPerJob * 8)
+          : 0;
+
+    return {
+      ...row,
+      rank: index + 1,
+      staffingPressureScore,
+      trend,
+      trendDelta,
+      isHighestRisk: row.id === topRiskId && row.level !== "healthy",
+    };
+  });
 }
 
 export const HEAT_LEVEL_STYLES: Record<StaffingHeatLevel, string> = {
@@ -227,7 +268,8 @@ export function buildStaffingHeatRowsFromSnapshot(
     });
   }
 
-  return [...stateRows, ...cityRows].sort(
+  const sorted = [...stateRows, ...cityRows].sort(
     (a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || b.healthScore - a.healthScore,
   );
+  return enrichStaffingHeatRows(sorted, territory.staffingPressureScore);
 }

@@ -7,14 +7,23 @@ import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-aler
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { RecruiterDecisionIntelligencePanel } from "@/components/recruiting/recruiter-decision-intelligence-panel";
+import { RecruiterImmediateActionsPanel } from "@/components/recruiting/recruiter-immediate-actions-panel";
 import { RecruiterOperationalKpiStrip } from "@/components/recruiting/recruiter-operational-kpi-strip";
-import { RecruiterTopActionsPanel } from "@/components/recruiting/recruiter-top-actions-panel";
+import {
+  RecruiterOperationalWorkspace,
+  type OperationalQuickAction,
+} from "@/components/recruiting/recruiter-operational-workspace";
+import { RecruiterStrategicRecommendationsPanel } from "@/components/recruiting/recruiter-strategic-recommendations-panel";
 import { StaffingRiskHeatPanel } from "@/components/recruiting/staffing-risk-heat-panel";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { buildRecruiterOperationalKpis } from "@/lib/recruiting-dashboard-ux/recruiter-operational-kpis";
-import { buildTopRecommendedActions } from "@/lib/recruiting-dashboard-ux/top-recommended-actions";
+import {
+  buildRecruiterActionCatalog,
+  filterActionsByLane,
+} from "@/lib/recruiting-dashboard-ux/recruiter-action-catalog";
+import { buildOperationalWorkspaceJobs } from "@/lib/recruiting-dashboard-ux/operational-workspace";
 import type { JobCandidateRanking, SmartTerritoryAlert } from "@/lib/recruiting-automation";
 import type { RecruitingRecommendation } from "@/lib/recruiting-recommendation-engine";
 import { useMemo } from "react";
@@ -124,7 +133,30 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     territoryStates: data?.territoryStates,
   });
 
-  const topActions = useMemo(() => (data ? buildTopRecommendedActions(data, compact ? 6 : 10) : []), [data, compact]);
+  const actionCatalog = useMemo(
+    () => (data ? buildRecruiterActionCatalog(data, meta?.escalations ?? []) : []),
+    [data, meta?.escalations],
+  );
+  const immediateActions = useMemo(
+    () => filterActionsByLane(actionCatalog, "immediate"),
+    [actionCatalog],
+  );
+  const strategicActions = useMemo(
+    () => filterActionsByLane(actionCatalog, "strategic"),
+    [actionCatalog],
+  );
+  const workspaceJobs = useMemo(
+    () =>
+      data
+        ? buildOperationalWorkspaceJobs(
+            data,
+            meta?.escalations ?? [],
+            actionCatalog,
+            compact ? 4 : 8,
+          )
+        : [],
+    [data, meta?.escalations, actionCatalog, compact],
+  );
   const kpis = useMemo(
     () =>
       data
@@ -176,7 +208,7 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">Recruiting automation & intelligence</h2>
+          <h2 className="text-lg font-semibold text-zinc-50">Recruiter operational workspace</h2>
           <p className="text-sm text-zinc-500">
             Territory: {data.territoryLabel}
             {refreshing ? <span className="ml-2 text-teal-400/90">Updating…</span> : null}
@@ -203,22 +235,35 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
         retrying={refreshing}
       />
 
-      <RecruiterTopActionsPanel actions={topActions} />
+      <RecruiterImmediateActionsPanel actions={immediateActions} />
+      <RecruiterOperationalWorkspace
+        jobs={workspaceJobs}
+        routingIntelligence={data.routingIntelligence}
+        onQuickAction={(action: OperationalQuickAction) => {
+          if (action === "pipeline" || action === "related-jobs") {
+            document.getElementById("recruiter-candidate-ranking")?.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
+      />
       <RecruiterOperationalKpiStrip kpis={kpis} />
       <StaffingRiskHeatPanel
         snapshot={data}
         escalations={meta?.escalations ?? []}
         activeRepsByState={activeRepsByState}
       />
-
-      <RecruiterDecisionIntelligencePanel data={data.decisionIntelligence} compact={compact} />
+      <RecruiterStrategicRecommendationsPanel actions={strategicActions} />
 
       {!compact ? (
         <details className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
           <summary className="cursor-pointer text-base font-semibold text-zinc-50">
-            Analytics & alerts
+            Analytics & trends
           </summary>
           <div className="mt-4 space-y-6">
+            <RecruiterDecisionIntelligencePanel
+              data={data.decisionIntelligence}
+              compact
+              hideOverlappingSections
+            />
             <RecruitingAlertsSection />
             <CandidateIntelligenceSection />
             <section>
@@ -244,96 +289,94 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
                 ))}
               </ul>
             </section>
+            <section>
+              <h3 className="text-sm font-semibold text-zinc-100">Executive snapshot</h3>
+              <div className="mt-3 space-y-4">
+                <ul className="space-y-1.5 text-sm text-zinc-400">
+                  {data.dailySnapshot.summaryBullets.map((bullet) => (
+                    <li key={bullet}>• {bullet}</li>
+                  ))}
+                </ul>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <IntelligenceBarChart
+                    title="Hottest territories"
+                    data={data.dailySnapshot.hottestTerritories}
+                    barClassName="bg-teal-500/80"
+                  />
+                  <IntelligenceBarChart
+                    title="Highest risk territories"
+                    data={data.dailySnapshot.highestRiskTerritories}
+                    barClassName="bg-red-500/70"
+                  />
+                  <IntelligenceBarChart
+                    title="Best recruiting sources"
+                    data={data.dailySnapshot.bestRecruitingSources}
+                    barClassName="bg-violet-500/80"
+                  />
+                </div>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <IntelligenceBarChart
+                    title="Applicants per day"
+                    subtitle="Last 14 days"
+                    data={data.trends.applicantsPerDay}
+                    barClassName="bg-sky-500/80"
+                  />
+                  <IntelligenceBarChart
+                    title="Hires per week"
+                    subtitle="Rolling 8 weeks"
+                    data={data.trends.hiresPerWeek}
+                    barClassName="bg-emerald-500/80"
+                  />
+                </div>
+              </div>
+            </section>
+            <section id="recruiter-candidate-ranking">
+              <h3 className="text-sm font-semibold text-zinc-100">Candidate ranking & productivity</h3>
+              <div className="mt-3 space-y-4">
+                <JobRankingsTable
+                  rankings={data.jobRankings}
+                  maxJobs={jobLimit}
+                  onCandidateClick={drawer.openCandidate}
+                />
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
+                        <th className="pb-2 pr-3">Recruiter</th>
+                        <th className="pb-2 pr-3">Reviewed</th>
+                        <th className="pb-2 pr-3">Interviews</th>
+                        <th className="pb-2 pr-3">Hires</th>
+                        <th className="pb-2 pr-3">Response</th>
+                        <th className="pb-2">Conversion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.productivity.slice(0, compact ? 6 : 12).map((row) => (
+                        <tr key={row.recruiter} className="border-b border-zinc-800/60">
+                          <td className="py-2 pr-3 font-medium text-zinc-200">{row.recruiter}</td>
+                          <td className="py-2 pr-3 text-zinc-400">{row.candidatesReviewed}</td>
+                          <td className="py-2 pr-3 text-zinc-400">{row.interviewsScheduled}</td>
+                          <td className="py-2 pr-3 text-zinc-400">{row.hires}</td>
+                          <td className="py-2 pr-3 text-zinc-400">{row.responseSpeedLabel}</td>
+                          <td className="py-2 text-zinc-400">
+                            {row.conversionPercent != null ? `${row.conversionPercent}%` : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
           </div>
         </details>
-      ) : null}
-
-      {!compact ? (
-        <details className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-          <summary className="cursor-pointer text-base font-semibold text-zinc-50">
-            Executive snapshot & trends
-          </summary>
-          <div className="mt-4 space-y-4">
-            <ul className="space-y-1.5 text-sm text-zinc-400">
-              {data.dailySnapshot.summaryBullets.map((bullet) => (
-                <li key={bullet}>• {bullet}</li>
-              ))}
-            </ul>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <IntelligenceBarChart
-                title="Hottest territories"
-                data={data.dailySnapshot.hottestTerritories}
-                barClassName="bg-teal-500/80"
-              />
-              <IntelligenceBarChart
-                title="Highest risk territories"
-                data={data.dailySnapshot.highestRiskTerritories}
-                barClassName="bg-red-500/70"
-              />
-              <IntelligenceBarChart
-                title="Best recruiting sources"
-                data={data.dailySnapshot.bestRecruitingSources}
-                barClassName="bg-violet-500/80"
-              />
-            </div>
-            <div className="grid gap-4 lg:grid-cols-2">
-              <IntelligenceBarChart
-                title="Applicants per day"
-                subtitle="Last 14 days"
-                data={data.trends.applicantsPerDay}
-                barClassName="bg-sky-500/80"
-              />
-              <IntelligenceBarChart
-                title="Hires per week"
-                subtitle="Rolling 8 weeks"
-                data={data.trends.hiresPerWeek}
-                barClassName="bg-emerald-500/80"
-              />
-            </div>
-          </div>
-        </details>
-      ) : null}
-
-      <details className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <summary className="cursor-pointer text-base font-semibold text-zinc-50">
-          Candidate ranking & productivity
-        </summary>
-        <div className="mt-4 space-y-4">
-          <JobRankingsTable
-            rankings={data.jobRankings}
-            maxJobs={jobLimit}
-            onCandidateClick={drawer.openCandidate}
-          />
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
-                  <th className="pb-2 pr-3">Recruiter</th>
-                  <th className="pb-2 pr-3">Reviewed</th>
-                  <th className="pb-2 pr-3">Interviews</th>
-                  <th className="pb-2 pr-3">Hires</th>
-                  <th className="pb-2 pr-3">Response</th>
-                  <th className="pb-2">Conversion</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.productivity.slice(0, compact ? 6 : 12).map((row) => (
-                  <tr key={row.recruiter} className="border-b border-zinc-800/60">
-                    <td className="py-2 pr-3 font-medium text-zinc-200">{row.recruiter}</td>
-                    <td className="py-2 pr-3 text-zinc-400">{row.candidatesReviewed}</td>
-                    <td className="py-2 pr-3 text-zinc-400">{row.interviewsScheduled}</td>
-                    <td className="py-2 pr-3 text-zinc-400">{row.hires}</td>
-                    <td className="py-2 pr-3 text-zinc-400">{row.responseSpeedLabel}</td>
-                    <td className="py-2 text-zinc-400">
-                      {row.conversionPercent != null ? `${row.conversionPercent}%` : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </details>
+      ) : (
+        <RecruiterDecisionIntelligencePanel
+          data={data.decisionIntelligence}
+          compact
+          hideOverlappingSections
+        />
+      )}
 
       <CandidateDetailDrawer {...drawer.drawerProps} />
     </div>

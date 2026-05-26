@@ -7,6 +7,13 @@ import {
   buildStaffingHeatRows,
 } from "@/lib/recruiting-dashboard-ux/staffing-heat-table";
 import { buildTopRecommendedActions } from "@/lib/recruiting-dashboard-ux/top-recommended-actions";
+import {
+  buildRecruiterActionCatalog,
+  filterActionsByLane,
+  groupRecruiterActions,
+} from "@/lib/recruiting-dashboard-ux/recruiter-action-catalog";
+import { buildOperationalWorkspaceJobs } from "@/lib/recruiting-dashboard-ux/operational-workspace";
+import { enrichStaffingHeatRows } from "@/lib/recruiting-dashboard-ux/staffing-heat-table";
 import type { BreezyJob } from "@/lib/breezy-api";
 
 function snapshot(): RecruitingIntelligenceSnapshot {
@@ -179,6 +186,50 @@ describe("recruiting dashboard ux", () => {
   it("builds staffing heat rows from snapshot fallback", () => {
     const rows = buildStaffingHeatRowsFromSnapshot(snapshot());
     assert.ok(rows.some((row) => row.level === "critical" || row.level === "moderate"));
+  });
+
+  it("splits unified action catalog into immediate and strategic lanes", () => {
+    const catalog = buildRecruiterActionCatalog(snapshot());
+    const immediate = filterActionsByLane(catalog, "immediate");
+    const strategic = filterActionsByLane(catalog, "strategic");
+    assert.ok(immediate.some((row) => row.actionType === "repost" || row.actionType === "legacy-repost"));
+    assert.ok(strategic.some((row) => row.actionType === "expand-radius" || row.actionType === "increase-pay"));
+    const groups = groupRecruiterActions(catalog);
+    assert.ok(groups.length > 0);
+    assert.equal(catalog.every((row) => row.manualOnly === true), true);
+  });
+
+  it("builds operational workspace rows from coverage snapshot", () => {
+    const catalog = buildRecruiterActionCatalog(snapshot());
+    const jobs = buildOperationalWorkspaceJobs(snapshot(), [], catalog);
+    assert.equal(jobs.length, 1);
+    assert.equal(jobs[0]?.jobId, "job-1");
+    assert.ok(jobs[0]!.territoryRiskScore >= 90);
+    assert.ok(jobs[0]!.recommendedAction.length > 0);
+  });
+
+  it("enriches heat rows with rank and trend metadata", () => {
+    const rows = enrichStaffingHeatRows(
+      [
+        {
+          id: "city:1",
+          level: "critical",
+          label: "Dallas, TX",
+          scope: "city",
+          openJobs: 3,
+          zeroApplicantJobs: 2,
+          activeReps: 0,
+          escalationCount: 2,
+          applicants7d: 0,
+          healthScore: 80,
+          demandScore: 10,
+        },
+      ],
+      62,
+    );
+    assert.equal(rows[0]?.rank, 1);
+    assert.equal(rows[0]?.trend, "declining");
+    assert.equal(rows[0]?.isHighestRisk, true);
   });
 
   it("builds city heat rows from breezy jobs", () => {

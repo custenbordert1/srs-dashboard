@@ -6,6 +6,12 @@ import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import { listJobDrafts } from "@/lib/job-management/job-draft-store";
 import { listRecruiterEscalations } from "@/lib/operational-escalation/operational-escalation-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
+import {
+  filterOpportunitiesByTerritory,
+  parseMelOpportunities,
+} from "@/lib/mel-matching/mel-opportunity-parser";
+import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
+import { buildRoutingIntelligence, emptyRoutingIntelligence } from "@/lib/routing-intelligence";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -31,7 +37,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult, workflows, drafts, escalations, activeReps] =
+  const [jobsResult, candidatesResult, workflows, drafts, escalations, activeReps, melResult] =
     await Promise.all([
       fetchBreezyJobs("published"),
       fetchBreezyCandidates(),
@@ -39,6 +45,7 @@ export async function GET(request: Request) {
       listJobDrafts(),
       listRecruiterEscalations(),
       listActiveRosterReps(),
+      fetchMelProjectsSheet(),
     ]);
 
   const partialErrors: string[] = [];
@@ -89,6 +96,24 @@ export async function GET(request: Request) {
     escalations,
     activeReps: territoryReps,
   });
+
+  if (melResult.ok) {
+    const opportunities = filterOpportunitiesByTerritory(
+      parseMelOpportunities(melResult.rows),
+      session.territoryStates.length > 0 ? session.territoryStates : undefined,
+    );
+    intelligence.routingIntelligence = buildRoutingIntelligence({
+      fetchedAt: melResult.fetchedAt,
+      opportunities,
+      reps: territoryReps,
+      jobs,
+      coverageRecommendations: intelligence.decisionIntelligence.coverageRecommendations,
+      escalations,
+    });
+  } else {
+    partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
+    intelligence.routingIntelligence = emptyRoutingIntelligence(fetchedAt);
+  }
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,

@@ -38,6 +38,7 @@ import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-dec
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
 import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/operational-escalation-types";
 import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
+import type { RoutingIntelligenceSnapshot } from "@/lib/routing-intelligence";
 
 export type RecruitingIntelligenceSnapshot = {
   territoryLabel: string;
@@ -56,6 +57,7 @@ export type RecruitingIntelligenceSnapshot = {
   dailySnapshot: DailyExecutiveSnapshot;
   automationHooks: typeof AUTOMATION_HOOKS;
   decisionIntelligence: RecruiterDecisionIntelligenceSnapshot;
+  routingIntelligence?: RoutingIntelligenceSnapshot;
 };
 
 export function buildRecruitingIntelligence(

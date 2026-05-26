@@ -6,13 +6,15 @@ type RecruiterDecisionIntelligencePanelProps = {
   data: RecruiterDecisionIntelligenceSnapshot | null;
   loading?: boolean;
   compact?: boolean;
+  /** Hides suggested actions & coverage lists when automation workspace owns them. */
+  hideOverlappingSections?: boolean;
   onOpenVariant?: (draftId: string) => void;
 };
 
 const URGENCY_CLASS: Record<string, string> = {
   critical: "border-red-500/30 bg-red-500/5",
   high: "border-amber-500/30 bg-amber-500/5",
-  medium: "border-zinc-700 bg-zinc-950/50",
+  medium: "border-sky-500/30 bg-sky-500/5",
   low: "border-zinc-800 bg-zinc-950/40",
 };
 
@@ -20,6 +22,7 @@ export function RecruiterDecisionIntelligencePanel({
   data,
   loading = false,
   compact = false,
+  hideOverlappingSections = false,
   onOpenVariant,
 }: RecruiterDecisionIntelligencePanelProps) {
   if (loading && !data) {
@@ -65,32 +68,34 @@ export function RecruiterDecisionIntelligencePanel({
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h3 className="text-base font-semibold text-zinc-50">Suggested operational actions</h3>
-        <p className="mt-1 text-xs text-zinc-500">
-          Rules-based, explainable cards — recruiter must act manually.
-        </p>
-        {data.recommendedNextActions.length === 0 ? (
-          <p className="mt-3 text-sm text-zinc-500">No suggested actions for current filters.</p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {data.recommendedNextActions.slice(0, compact ? 6 : 12).map((action) => (
-              <li
-                key={action.id}
-                className={`rounded-lg border px-3 py-2 text-sm ${URGENCY_CLASS[action.urgency] ?? URGENCY_CLASS.medium}`}
-              >
-                <p className="font-medium text-zinc-100">{action.title}</p>
-                <p className="mt-0.5 text-xs text-zinc-500">{action.reason}</p>
-                <p className="mt-1 text-[10px] uppercase tracking-wide text-teal-400/80">
-                  {action.type.replace(/-/g, " ")} · {action.impactEstimate}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {!hideOverlappingSections ? (
+        <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+          <h3 className="text-base font-semibold text-zinc-50">Suggested operational actions</h3>
+          <p className="mt-1 text-xs text-zinc-500">
+            Rules-based, explainable cards — recruiter must act manually.
+          </p>
+          {data.recommendedNextActions.length === 0 ? (
+            <p className="mt-3 text-sm text-zinc-500">No suggested actions for current filters.</p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {data.recommendedNextActions.slice(0, compact ? 6 : 12).map((action) => (
+                <li
+                  key={action.id}
+                  className={`rounded-lg border px-3 py-2 text-sm ${URGENCY_CLASS[action.urgency] ?? URGENCY_CLASS.medium}`}
+                >
+                  <p className="font-medium text-zinc-100">{action.title}</p>
+                  <p className="mt-0.5 text-xs text-zinc-500">{action.reason}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wide text-teal-400/80">
+                    {action.type.replace(/-/g, " ")} · {action.impactEstimate}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
 
-      {!compact ? (
+      {!compact && !hideOverlappingSections ? (
         <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
           <h3 className="text-base font-semibold text-zinc-50">Coverage recommendations</h3>
           <div className="mt-3 space-y-3">
