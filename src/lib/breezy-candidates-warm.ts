@@ -1,17 +1,12 @@
-import { peekBreezyCandidatesCache } from "@/lib/breezy-api";
-import { getLastOkTabCandidatesSnapshot } from "@/lib/breezy-candidates-client";
+import { getLastOkTabCandidatesSnapshot, peekTabCandidatesCache } from "@/lib/breezy-candidates-client";
 import { BREEZY_CANDIDATES_SOURCE } from "@/lib/breezy-candidates-sync";
 
 let warmInflight: Promise<void> | null = null;
 
 function hasWarmCandidatesData(): boolean {
   if ((getLastOkTabCandidatesSnapshot()?.candidates.length ?? 0) > 0) return true;
-  const preview = peekBreezyCandidatesCache({ scanMode: "preview" });
-  if ((preview?.ok && preview.candidates.length > 0) === true) return true;
-  const peeked = peekBreezyCandidatesCache({ scanMode: "fast" });
-  if ((peeked?.ok && peeked.candidates.length > 0) === true) return true;
-  const merged = peekBreezyCandidatesCache({ scanMode: "all" });
-  return (merged?.ok && merged.candidates.length > 0) === true;
+  const cached = peekTabCandidatesCache();
+  return (cached?.ok && cached.candidates.length > 0) === true;
 }
 
 /**
@@ -23,7 +18,7 @@ export function warmBreezyCandidatesCache(): void {
   if (hasWarmCandidatesData()) return;
   if (warmInflight) return;
 
-  warmInflight = fetch(`${BREEZY_CANDIDATES_SOURCE.apiPath}?scan=preview`, {
+  warmInflight = fetch(`${BREEZY_CANDIDATES_SOURCE.apiPath}?scan=fast`, {
     cache: "no-store",
     credentials: "same-origin",
   })

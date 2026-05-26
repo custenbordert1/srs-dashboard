@@ -1,7 +1,12 @@
-import type { BreezyCandidate, BreezyCandidatesScanMode, BreezyJob } from "@/lib/breezy-api";
+import type { BreezyCandidatesScanMode, BreezyJob } from "@/lib/breezy-api";
 import { peekBreezyCandidatesCache } from "@/lib/breezy-api";
-import { buildJobsLookupMap } from "@/lib/breezy-global-candidates";
+import {
+  buildApplicantCountByBreezyJobId,
+  type JobApplicantLookupCandidate,
+} from "@/lib/job-management/job-applicant-counts-core";
 import type { BreezyJobCatalogRow } from "@/lib/job-management/job-draft-types";
+
+export { buildApplicantCountByBreezyJobId } from "@/lib/job-management/job-applicant-counts-core";
 
 export type JobApplicantCountsSource = "candidate_cache" | "breezy_list" | null;
 
@@ -28,56 +33,102 @@ export function peekBestBreezyCandidatesSnapshotForCounts(state = "published") {
   return best;
 }
 
-function candidateDedupeKey(candidate: BreezyCandidate): string {
-  if (candidate.candidateId) return candidate.candidateId;
-  return `${candidate.email}:${candidate.positionId}`;
+function toLookupCandidates(
+  candidates: Array<{
+    candidateId: string;
+    email: string;
+    positionId: string;
+    positionName: string;
+  }>,
+): JobApplicantLookupCandidate[] {
+  return candidates.map((candidate) => ({
+    candidateId: candidate.candidateId,
+    email: candidate.email,
+    positionId: candidate.positionId,
+    positionName: candidate.positionName,
+  }));
 }
 
-/** Count unique applicants per canonical Breezy job id (jobId + friendlyId aliases). */
-export function buildApplicantCountByBreezyJobId(
-  candidates: BreezyCandidate[],
-  jobs: BreezyJob[],
-): Map<string, number> {
-  const lookup = buildJobsLookupMap(jobs);
-  const buckets = new Map<string, Set<string>>();
+function toLookupJobs(
+  jobs: Array<{ jobId: string; friendlyId?: string; name?: string }>,
+) {
+  return jobs.map((job) => ({
+    jobId: job.jobId,
+    friendlyId: job.friendlyId,
+    name: job.name,
+  }));
+}
 
-  for (const candidate of candidates) {
-    const job = lookup.get(candidate.positionId);
-    const jobId = job?.jobId;
-    if (!jobId) continue;
-    const bucket = buckets.get(jobId) ?? new Set<string>();
-    bucket.add(candidateDedupeKey(candidate));
-    buckets.set(jobId, bucket);
+export type JobApplicantCountsSnapshot = {
+  ok: true;
+  counts: Record<string, number>;
+  source: JobApplicantCountsSource;
+  fromCache: boolean;
+  cachedAt: string | null;
+  candidatesConsidered: number;
+};
+
+/** Peek server candidate cache and return per-job applicant totals (no new Breezy scan). */
+export function buildJobApplicantCountsSnapshot(
+  jobsForLookup: Array<{ jobId: string; friendlyId?: string; name?: string }>,
+): JobApplicantCountsSnapshot {
+  const cached = peekBestBreezyCandidatesSnapshotForCounts();
+  if (!cached) {
+    return {
+      ok: true,
+      counts: {},
+      source: null,
+      fromCache: false,
+      cachedAt: null,
+      candidatesConsidered: 0,
+    };
   }
 
-  const counts = new Map<string, number>();
-  for (const [jobId, ids] of buckets) {
-    counts.set(jobId, ids.size);
+  const countsMap = buildApplicantCountByBreezyJobId(
+    toLookupCandidates(cached.candidates),
+    toLookupJobs(jobsForLookup),
+  );
+  const counts: Record<string, number> = {};
+  for (const [jobId, count] of countsMap) {
+    counts[jobId] = count;
   }
-  return counts;
+
+  return {
+    ok: true,
+    counts,
+    source: "candidate_cache",
+    fromCache: true,
+    cachedAt: cached.fetchedAt,
+    candidatesConsidered: cached.candidates.length,
+  };
 }
 
 export function enrichCatalogRowsWithApplicantCounts(
   rows: BreezyJobCatalogRow[],
   jobsForLookup: BreezyJob[],
 ): EnrichCatalogApplicantCountsResult {
-  const cached = peekBestBreezyCandidatesSnapshotForCounts();
-  if (cached) {
-    const counts = buildApplicantCountByBreezyJobId(cached.candidates, jobsForLookup);
+  const snapshot = buildJobApplicantCountsSnapshot(
+    jobsForLookup.map((job) => ({
+      jobId: job.jobId,
+      friendlyId: job.friendlyId,
+      name: job.name,
+    })),
+  );
+  if (snapshot.source === "candidate_cache") {
     const catalogJobIds = new Set(rows.map((row) => row.breezyJobId));
     const jobs = rows.map((row) => {
       if (!catalogJobIds.has(row.breezyJobId)) return row;
       return {
         ...row,
-        applicantCount: counts.get(row.breezyJobId) ?? 0,
+        applicantCount: snapshot.counts[row.breezyJobId] ?? 0,
       };
     });
     return {
       jobs,
-      source: "candidate_cache",
-      fromCache: true,
-      cachedAt: cached.fetchedAt,
-      candidatesConsidered: cached.candidates.length,
+      source: snapshot.source,
+      fromCache: snapshot.fromCache,
+      cachedAt: snapshot.cachedAt,
+      candidatesConsidered: snapshot.candidatesConsidered,
     };
   }
 

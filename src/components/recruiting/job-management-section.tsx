@@ -15,9 +15,12 @@ import {
   type JobManagementRow,
   type JobManagementSortKey,
 } from "@/lib/job-management/job-management-rows";
+import { peekTabCandidatesCache } from "@/lib/breezy-candidates-client";
 import { warmBreezyCandidatesCache } from "@/lib/breezy-candidates-warm";
+import { fetchJobManagementApplicantCounts } from "@/lib/job-management/job-management-applicant-counts-client";
 import { fetchJobManagementCatalog } from "@/lib/job-management/job-management-catalog-client";
 import type { JobApplicantCountsSource } from "@/lib/job-management/job-applicant-counts";
+import { buildApplicantCountByBreezyJobId } from "@/lib/job-management/job-applicant-counts-core";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -56,6 +59,8 @@ export function JobManagementSection() {
   const [refreshingJobs, setRefreshingJobs] = useState(false);
   const jobsCountRef = useRef(0);
   const applicantCountsHydrateRef = useRef(false);
+  const [serverApplicantCounts, setServerApplicantCounts] = useState<Record<string, number>>({});
+  const [loadingApplicantCounts, setLoadingApplicantCounts] = useState(false);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pushing, setPushing] = useState(false);
@@ -80,9 +85,50 @@ export function JobManagementSection() {
   }, [jobs.length]);
 
   const rows = useMemo(() => {
-    if (!catalogMeta) return buildJobManagementRows(jobs, drafts, new Date().toISOString());
-    return buildJobManagementRows(jobs, drafts, catalogMeta.fetchedAt);
-  }, [catalogMeta, drafts, jobs]);
+    const syncedAt = catalogMeta?.fetchedAt ?? new Date().toISOString();
+    const baseRows = buildJobManagementRows(jobs, drafts, syncedAt);
+    const tabCandidates = peekTabCandidatesCache();
+    if (!tabCandidates?.ok || tabCandidates.candidates.length === 0 || jobs.length === 0) {
+      return baseRows;
+    }
+
+    const lookupJobs = jobs.map((job) => ({ jobId: job.breezyJobId, name: job.title }));
+    const tabCounts = buildApplicantCountByBreezyJobId(tabCandidates.candidates, lookupJobs);
+
+    return baseRows.map((row) => {
+      if (row.kind !== "breezy" || !row.breezyJobId) return row;
+      const merged = Math.max(
+        row.applicants ?? 0,
+        serverApplicantCounts[row.breezyJobId] ?? 0,
+        tabCounts.get(row.breezyJobId) ?? 0,
+      );
+      if (merged === 0 && row.applicants === null) return row;
+      return { ...row, applicants: merged };
+    });
+  }, [catalogMeta, drafts, jobs, serverApplicantCounts]);
+
+  const refreshApplicantCounts = useCallback(async (catalogJobs: BreezyJobCatalogRow[]) => {
+    if (catalogJobs.length === 0) {
+      setServerApplicantCounts({});
+      return;
+    }
+    setLoadingApplicantCounts(true);
+    try {
+      const snapshot = await fetchJobManagementApplicantCounts(
+        catalogJobs.map((job) => ({ jobId: job.breezyJobId, title: job.title })),
+      );
+      setServerApplicantCounts(snapshot.counts);
+      if (snapshot.source === null && !applicantCountsHydrateRef.current) {
+        applicantCountsHydrateRef.current = true;
+        warmBreezyCandidatesCache();
+        window.setTimeout(() => {
+          void refreshApplicantCounts(catalogJobs);
+        }, 5000);
+      }
+    } finally {
+      setLoadingApplicantCounts(false);
+    }
+  }, []);
 
   const filteredRows = useMemo(() => {
     if (statusFilter === "all") return rows;
@@ -162,6 +208,7 @@ export function JobManagementSection() {
           draftCount: parsed.draftCount,
           applicantCountsSource: parsed.applicantCountsSource,
         });
+        void refreshApplicantCounts(parsed.jobs);
         if (force && !parsed.stale && !parsed.partial) {
           setFeedback({
             tone: "success",
@@ -193,7 +240,7 @@ export function JobManagementSection() {
       setLoadingJobs(false);
       setRefreshingJobs(false);
     }
-  }, [applyCatalogMeta]);
+  }, [applyCatalogMeta, refreshApplicantCounts]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -202,17 +249,6 @@ export function JobManagementSection() {
     }, 0);
     return () => window.clearTimeout(id);
   }, [loadJobs, loadDrafts]);
-
-  useEffect(() => {
-    if (catalogMeta?.applicantCountsSource != null) return;
-    if (applicantCountsHydrateRef.current) return;
-    applicantCountsHydrateRef.current = true;
-    warmBreezyCandidatesCache();
-    const timer = window.setTimeout(() => {
-      void loadJobs(false);
-    }, 3000);
-    return () => window.clearTimeout(timer);
-  }, [catalogMeta?.applicantCountsSource, loadJobs]);
 
   const updateDraft = (draftId: string, patch: Partial<JobDraft>) => {
     setDrafts((prev) =>
@@ -538,7 +574,7 @@ export function JobManagementSection() {
                     <JobManagementStatusBadge status={row.status} />
                   </td>
                   <td className="px-3 py-2.5 text-right tabular-nums text-zinc-400">
-                    {formatApplicantCount(row, loadingJobs || refreshingJobs)}
+                    {formatApplicantCount(row, loadingJobs || refreshingJobs || loadingApplicantCounts)}
                   </td>
                   <td className="px-3 py-2.5 text-xs text-zinc-500">
                     {row.postedDate ? new Date(row.postedDate).toLocaleDateString() : "—"}

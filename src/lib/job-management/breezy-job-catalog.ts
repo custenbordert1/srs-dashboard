@@ -105,6 +105,12 @@ function storeCatalogSnapshot(
   return snapshot;
 }
 
+/** Jobs used for applicant-count joins (available after at least one catalog fetch in this process). */
+export function peekBreezyJobCatalogLookupJobs(includeDraft = true): BreezyJob[] | null {
+  if (!catalogCache || catalogCache.includeDraft !== includeDraft) return null;
+  return catalogCache.lookupJobs;
+}
+
 /** Last in-memory catalog (even if TTL expired) for stale fallback on failed refresh. */
 export function getStaleBreezyJobCatalogSnapshot(includeDraft: boolean): BreezyJobCatalogSnapshot | null {
   if (!catalogCache || catalogCache.includeDraft !== includeDraft) return null;
