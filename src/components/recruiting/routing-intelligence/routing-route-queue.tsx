@@ -5,6 +5,7 @@ import type { RouteQueueRow } from "@/lib/routing-intelligence/route-queue";
 import {
   filterRouteQueue,
   ROUTE_QUEUE_FILTER_LABELS,
+  ROUTE_QUEUE_SORT_LABELS,
   sortRouteQueue,
   type RouteQueueFilter,
   type RouteQueueSort,
@@ -58,89 +59,83 @@ export function RoutingRouteQueue({ rows, onSelectPack }: RoutingRouteQueueProps
           onChange={(event) => setSort(event.target.value as RouteQueueSort)}
           className="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-xs text-zinc-300"
         >
-          <option value="difficulty">Sort: difficulty</option>
-          <option value="stores">Sort: stores</option>
-          <option value="miles">Sort: miles</option>
-          <option value="tier">Sort: travel tier</option>
+          {(Object.keys(ROUTE_QUEUE_SORT_LABELS) as RouteQueueSort[]).map((key) => (
+            <option key={key} value={key}>
+              Sort: {ROUTE_QUEUE_SORT_LABELS[key]}
+            </option>
+          ))}
         </select>
       </div>
 
       {visible.length === 0 ? (
         <p className="text-sm text-zinc-500">No routes match this filter.</p>
       ) : (
-        <ul className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
-          {visible.map((row) => (
-            <li key={row.id}>
-              <button
-                type="button"
-                onClick={() => row.routePackId && onSelectPack?.(row.routePackId)}
-                className={`w-full rounded-xl border px-3 py-2.5 text-left text-xs ${ROUTE_RISK_STYLES[row.riskLevel]}`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-semibold text-zinc-100">
-                    {row.label} · {row.city}, {row.state}
-                  </p>
-                  <span className="rounded-full border border-zinc-700/80 px-1.5 py-0.5 text-[9px] uppercase">
-                    {row.queueType.replace(/-/g, " ")}
-                  </span>
-                </div>
-                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-zinc-400 sm:grid-cols-4">
-                  <span>{row.openStoreCount} stores</span>
-                  <span>{row.nearbyRepCount} reps ≤25mi</span>
-                  <span>{row.estimatedMiles} mi est.</span>
-                  <span>{row.travelTierLabel}</span>
-                  <span>Difficulty {row.routeDifficulty}</span>
-                  <span>{row.overnightRisk ? "Overnight yes" : "Overnight no"}</span>
-                </div>
-                <p className="mt-2 text-[10px] text-teal-300/90">{row.suggestedAction}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
+        <div className="max-h-[560px] overflow-auto rounded-xl border border-zinc-800">
+          <table className="min-w-full text-left text-[10px] text-zinc-400">
+            <thead className="sticky top-0 bg-zinc-950 text-[9px] uppercase tracking-wide text-zinc-500">
+              <tr>
+                <th className="px-2 py-2 font-medium">Territory</th>
+                <th className="px-2 py-2 font-medium">Burden</th>
+                <th className="px-2 py-2 font-medium">Overnight</th>
+                <th className="px-2 py-2 font-medium">Stores</th>
+                <th className="px-2 py-2 font-medium">Reps</th>
+                <th className="px-2 py-2 font-medium">Pressure</th>
+                <th className="px-2 py-2 font-medium">Efficiency</th>
+                <th className="px-2 py-2 font-medium">Saturation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((row) => (
+                <tr
+                  key={row.id}
+                  className={`cursor-pointer border-t border-zinc-800/80 hover:bg-zinc-800/40 ${ROUTE_RISK_STYLES[row.riskLevel]}`}
+                  onClick={() => row.routePackId && onSelectPack?.(row.routePackId)}
+                >
+                  <td className="px-2 py-2">
+                    <p className="font-semibold text-zinc-100">
+                      {row.label} · {row.city}
+                    </p>
+                    <p className="text-[9px] text-zinc-500">{row.queueType.replace(/-/g, " ")}</p>
+                  </td>
+                  <td className="px-2 py-2 tabular-nums">{row.driveBurden}</td>
+                  <td className="px-2 py-2 tabular-nums">{row.overnightPercent}%</td>
+                  <td className="px-2 py-2 tabular-nums">{row.openStoreCount}</td>
+                  <td className="px-2 py-2 tabular-nums">{row.nearbyRepCount}</td>
+                  <td className="px-2 py-2 tabular-nums">{row.staffingPressure}</td>
+                  <td className="px-2 py-2 tabular-nums">{row.routeEfficiency}</td>
+                  <td className="px-2 py-2 tabular-nums">{row.territorySaturation}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <ul className="space-y-2 border-t border-zinc-800 p-2">
+            {visible.slice(0, 8).map((row) => (
+              <li key={`actions:${row.id}`}>
+                <p className="text-[10px] text-teal-300/90">{row.suggestedAction}</p>
+                <div className="mt-1 flex flex-wrap gap-2">
                   <WorkflowChip
-                    label="Job management"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigateRecruitingTab({ tab: "job-management" });
-                    }}
-                  />
-                  <WorkflowChip
-                    label="Escalations"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigateRecruitingTab({ tab: "job-management", elementId: "recruiter-queue" });
-                    }}
-                  />
-                  <WorkflowChip
-                    label="Related jobs"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigateRecruitingTab({ tab: "job-management" });
-                    }}
+                    label="Open jobs"
+                    onClick={() => navigateRecruitingTab({ tab: "job-management" })}
                   />
                   <WorkflowChip
                     label="Ad variants"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigateRecruitingTab({ tab: "job-management" });
-                    }}
+                    onClick={() => navigateRecruitingTab({ tab: "job-management" })}
                   />
                   <WorkflowChip
                     label="Nearby territories"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigateRecruitingTab({ tab: "mel-projects" });
-                    }}
+                    onClick={() => navigateRecruitingTab({ tab: "mel-projects" })}
                   />
                   <WorkflowChip
-                    label="Coverage"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      navigateRecruitingTab({ tab: "automation" });
-                    }}
+                    label="Escalations"
+                    onClick={() =>
+                      navigateRecruitingTab({ tab: "job-management", elementId: "recruiter-queue" })
+                    }
                   />
                 </div>
-              </button>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

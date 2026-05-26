@@ -16,6 +16,7 @@ import {
   buildRoutingIntelligence,
   emptyRoutingIntelligence,
 } from "@/lib/routing-intelligence";
+import { buildVariantTitlesByMetro } from "@/lib/routing-intelligence/variant-titles-by-metro";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -118,6 +119,10 @@ export async function GET(request: Request) {
       opportunities,
       reps: territoryReps,
       jobs,
+      escalations,
+      variantTitlesByMetro: buildVariantTitlesByMetro(
+        intelligence.decisionIntelligence.variantPerformance,
+      ),
     });
   } else {
     partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
@@ -125,6 +130,10 @@ export async function GET(request: Request) {
       opportunities: [],
       reps: territoryReps,
       jobs,
+      escalations,
+      variantTitlesByMetro: buildVariantTitlesByMetro(
+        intelligence.decisionIntelligence.variantPerformance,
+      ),
     });
   }
 

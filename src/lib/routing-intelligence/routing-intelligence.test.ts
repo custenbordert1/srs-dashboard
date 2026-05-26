@@ -232,5 +232,8 @@ describe("routing intelligence planning snapshot", () => {
       jobs,
     });
     assert.ok(attached.enrichedRoutePacks.length > 0);
+    assert.ok(attached.visualWorkspace);
+    assert.equal(attached.visualWorkspace.storytelling.length, 6);
+    assert.ok(attached.routeQueues.every((row) => typeof row.driveBurden === "number"));
   });
 });

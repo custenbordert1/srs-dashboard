@@ -117,4 +117,5 @@ export type RoutingIntelligenceSnapshot = {
   routeQueues?: import("@/lib/routing-intelligence/route-queue").RouteQueueRow[];
   enrichedRoutePacks?: EnrichedRoutePack[];
   geoVisualization?: import("@/lib/routing-intelligence/geo-visualization").GeoVisualizationSnapshot;
+  visualWorkspace?: import("@/lib/routing-intelligence/routing-workspace").RoutingVisualWorkspace;
 };

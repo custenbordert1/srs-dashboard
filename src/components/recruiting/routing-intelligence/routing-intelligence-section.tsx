@@ -10,6 +10,7 @@ import { RoutingRouteQueue } from "@/components/recruiting/routing-intelligence/
 import { RoutingPackBuilder } from "@/components/recruiting/routing-intelligence/routing-pack-builder";
 import { RoutingCoverageMapPlaceholder } from "@/components/recruiting/routing-intelligence/routing-coverage-map-placeholder";
 import { RoutingTravelBurdenPanel } from "@/components/recruiting/routing-intelligence/routing-travel-burden-panel";
+import { RoutingVisualWorkspacePanel } from "@/components/recruiting/routing-intelligence/routing-visual-workspace";
 import type { EnrichedRoutePack } from "@/lib/routing-intelligence/types";
 
 export function RoutingIntelligenceSection() {
@@ -102,6 +103,19 @@ export function RoutingIntelligenceSection() {
         cards={routing?.territoryOverview ?? []}
         onSelectPack={setSelectedPackId}
       />
+
+      {routing?.visualWorkspace ? (
+        <RoutingVisualWorkspacePanel
+          workspace={routing.visualWorkspace}
+          geo={routing.geoVisualization}
+          enrichedPacks={(routing.enrichedRoutePacks ?? []) as EnrichedRoutePack[]}
+          selectedPackId={selectedPack?.routePackId ?? null}
+          onSelectPack={setSelectedPackId}
+          escalations={meta?.escalations ?? []}
+          jobContexts={routing.jobContexts ?? {}}
+          variants={data.decisionIntelligence?.variantPerformance ?? []}
+        />
+      ) : null}
 
       <RoutingTravelBurdenPanel
         packs={(routing?.enrichedRoutePacks ?? []) as EnrichedRoutePack[]}

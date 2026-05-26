@@ -31,6 +31,21 @@ export const ROUTE_RISK_STYLES: Record<RouteRiskLevel, string> = {
   operational_risk: "border-red-500/35 bg-red-500/10 text-red-100",
 };
 
+/** Visual route canvas tier colors — operational planning workspace. */
+export const TRAVEL_TIER_CANVAS_STYLES: Record<TravelTier, string> = {
+  1: "border-emerald-500/50 bg-emerald-500/15 ring-1 ring-emerald-500/30",
+  2: "border-sky-500/50 bg-sky-500/15 ring-1 ring-sky-500/30",
+  3: "border-amber-500/50 bg-amber-500/15 ring-1 ring-amber-500/30",
+  4: "border-red-500/50 bg-red-500/15 ring-1 ring-red-500/30",
+};
+
+export const TRAVEL_TIER_DOT_STYLES: Record<TravelTier, string> = {
+  1: "bg-emerald-400",
+  2: "bg-sky-400",
+  3: "bg-amber-400",
+  4: "bg-red-400",
+};
+
 export function severityForRouteRisk(risk: RouteRiskLevel): "critical" | "high" | "medium" | "low" {
   if (risk === "operational_risk") return "critical";
   if (risk === "staffing_pressure") return "high";

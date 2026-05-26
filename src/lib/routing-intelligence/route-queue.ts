@@ -33,8 +33,41 @@ export type RouteQueueRow = {
   jobId?: string;
   routePackScore?: number;
   riskLevel: RouteRiskLevel;
+  driveBurden: number;
+  routeEfficiency: number;
+  territorySaturation: number;
+  staffingPressure: number;
+  overnightPercent: number;
+  openJobCount: number;
   manualOnly: true;
 };
+
+function staffingPressureScore(risk: RouteRiskLevel, burden: number): number {
+  const base = risk === "operational_risk" ? 85 : risk === "staffing_pressure" ? 60 : 30;
+  return Math.min(100, Math.round((base + burden) / 2));
+}
+
+function queueMetricsFromPack(
+  pack: EnrichedRoutePack | undefined,
+  risk: RouteRiskLevel,
+): Pick<
+  RouteQueueRow,
+  | "driveBurden"
+  | "routeEfficiency"
+  | "territorySaturation"
+  | "staffingPressure"
+  | "overnightPercent"
+> {
+  const burden = pack?.burden;
+  const driveBurden = burden?.estimatedDriveBurden ?? 70;
+  return {
+    driveBurden,
+    routeEfficiency: burden?.routeEfficiencyScore ?? 40,
+    territorySaturation: burden?.coverageSaturation ?? 50,
+    staffingPressure: staffingPressureScore(risk, driveBurden),
+    overnightPercent: burden?.estimatedOvernightLikelihood ?? (pack?.overnightRequired ? 80 : 20),
+  };
+}
 
 const QUEUE_ACTIONS: Record<RouteQueueType, string> = {
   uncovered: "Recruit or assign coverage — no rep within 45mi",
@@ -45,6 +78,15 @@ const QUEUE_ACTIONS: Record<RouteQueueType, string> = {
   "cluster-merge": "Merge adjacent city clusters into one route",
   "recruiting-needed": "Increase recruiting in high-saturation market",
 };
+
+function openJobsForPack(pack: EnrichedRoutePack | undefined, jobs: BreezyJob[]): number {
+  if (!pack) return 0;
+  const cities = new Set(pack.cities.map((c) => c.toLowerCase()));
+  return jobs.filter((job) => {
+    const city = job.city.toLowerCase();
+    return job.state.toUpperCase() === pack.state.toUpperCase() && cities.has(city);
+  }).length;
+}
 
 export function buildRouteQueues(input: {
   clusters: StoreCluster[];
@@ -60,25 +102,27 @@ export function buildRouteQueues(input: {
     const tier = pack?.travelTier ?? 4;
 
     if (nearest === null || nearest > 45) {
-      rows.push(queueRowFromCluster(cluster, "uncovered", pack, repCount, tier));
+      rows.push(
+        queueRowFromCluster(cluster, "uncovered", pack, repCount, tier, input.jobs),
+      );
     }
     if (pack?.overnightRequired) {
-      rows.push(queueRowFromPack(pack, "overnight", cluster.storeCount));
+      rows.push(queueRowFromPack(pack, "overnight", cluster.storeCount, input.jobs));
     }
     if (pack && pack.estimatedMiles >= 120) {
-      rows.push(queueRowFromPack(pack, "high-mileage", cluster.storeCount));
+      rows.push(queueRowFromPack(pack, "high-mileage", cluster.storeCount, input.jobs));
     }
     if (pack && pack.storeCount >= 4) {
-      rows.push(queueRowFromPack(pack, "multi-store-pack", cluster.storeCount));
+      rows.push(queueRowFromPack(pack, "multi-store-pack", cluster.storeCount, input.jobs));
     }
     if (pack && pack.nearestActiveRepMiles !== null && pack.nearestActiveRepMiles <= 25) {
-      rows.push(queueRowFromPack(pack, "nearby-rep", cluster.storeCount));
+      rows.push(queueRowFromPack(pack, "nearby-rep", cluster.storeCount, input.jobs));
     }
     if (cluster.storeCount >= 3 && (pack?.cities.length ?? 0) > 1) {
-      rows.push(queueRowFromPack(pack!, "cluster-merge", cluster.storeCount));
+      rows.push(queueRowFromPack(pack!, "cluster-merge", cluster.storeCount, input.jobs));
     }
     if (pack && pack.burden.coverageSaturation >= 60) {
-      rows.push(queueRowFromPack(pack, "recruiting-needed", cluster.storeCount));
+      rows.push(queueRowFromPack(pack, "recruiting-needed", cluster.storeCount, input.jobs));
     }
   }
 
@@ -99,7 +143,10 @@ function queueRowFromCluster(
   pack: EnrichedRoutePack | undefined,
   nearbyRepCount: number,
   travelTier: TravelTier,
+  jobs: BreezyJob[],
 ): RouteQueueRow {
+  const risk = pack?.staffingRisk ?? "operational_risk";
+  const metrics = queueMetricsFromPack(pack, risk);
   return {
     id: `${queueType}:${cluster.clusterId}`,
     queueType,
@@ -117,7 +164,9 @@ function queueRowFromCluster(
     routePackId: pack?.routePackId,
     clusterId: cluster.clusterId,
     routePackScore: pack?.routePackScore,
-    riskLevel: pack?.staffingRisk ?? "operational_risk",
+    riskLevel: risk,
+    openJobCount: openJobsForPack(pack, jobs),
+    ...metrics,
     manualOnly: true,
   };
 }
@@ -126,8 +175,10 @@ function queueRowFromPack(
   pack: EnrichedRoutePack,
   queueType: RouteQueueType,
   openStoreCount: number,
+  jobs: BreezyJob[],
 ): RouteQueueRow {
   const repCount = pack.nearestActiveRepMiles !== null && pack.nearestActiveRepMiles <= 25 ? 1 : 0;
+  const metrics = queueMetricsFromPack(pack, pack.staffingRisk);
   return {
     id: `${queueType}:${pack.routePackId}`,
     queueType,
@@ -146,6 +197,8 @@ function queueRowFromPack(
     clusterId: pack.clusterId,
     routePackScore: pack.routePackScore,
     riskLevel: pack.staffingRisk,
+    openJobCount: openJobsForPack(pack, jobs),
+    ...metrics,
     manualOnly: true,
   };
 }

@@ -16,6 +16,7 @@ import {
   type TerritoryOverviewCard,
 } from "@/lib/routing-intelligence/territory-overview";
 import { milesBetweenRepAndProject } from "@/lib/rep-intelligence/distance-engine";
+import { buildRoutingVisualWorkspace } from "@/lib/routing-intelligence/routing-workspace";
 import type {
   EnrichedRoutePack,
   NearbyRepRoutingRow,
@@ -24,6 +25,7 @@ import type {
   RoutingStoreRef,
   StoreCluster,
 } from "@/lib/routing-intelligence/types";
+import type { RoutingVisualWorkspace } from "@/lib/routing-intelligence/routing-workspace";
 
 export type { EnrichedRoutePack };
 
@@ -32,6 +34,7 @@ export type RoutingPlanningSnapshot = RoutingIntelligenceSnapshot & {
   routeQueues: RouteQueueRow[];
   enrichedRoutePacks: EnrichedRoutePack[];
   geoVisualization: GeoVisualizationSnapshot;
+  visualWorkspace: RoutingVisualWorkspace;
 };
 
 function storesForPack(pack: RoutePack, clusters: StoreCluster[]): RoutingStoreRef[] {
@@ -104,19 +107,32 @@ export function attachRoutingPlanning(
     opportunities: MelOpportunity[];
     reps: ActiveRep[];
     jobs: BreezyJob[];
+    escalations?: RecruiterEscalationQueueItem[];
+    variantTitlesByMetro?: Record<string, string[]>;
   },
 ): RoutingPlanningSnapshot {
   const clusters = buildStoreClusters(input.opportunities);
   const packs = base.routePacks.length > 0 ? base.routePacks : buildRoutePacksFromClusters(clusters, input.reps);
   const enrichedRoutePacks = enrichPacks(packs, clusters, input.reps);
+  const geoVisualization = buildGeoVisualization(clusters, enrichedRoutePacks);
+  const routeQueues = buildRouteQueues({ clusters, enrichedPacks: enrichedRoutePacks, jobs: input.jobs });
 
   return {
     ...base,
     routePacks: packs,
     territoryOverview: buildTerritoryOverviewCards(clusters, enrichedRoutePacks),
-    routeQueues: buildRouteQueues({ clusters, enrichedPacks: enrichedRoutePacks, jobs: input.jobs }),
+    routeQueues,
     enrichedRoutePacks,
-    geoVisualization: buildGeoVisualization(clusters, enrichedRoutePacks),
+    geoVisualization,
+    visualWorkspace: buildRoutingVisualWorkspace({
+      enrichedRoutePacks,
+      routeQueues,
+      geoVisualization,
+      jobs: input.jobs,
+      jobContexts: base.jobContexts,
+      escalations: input.escalations,
+      variantTitlesByMetro: input.variantTitlesByMetro,
+    }),
   };
 }
 
@@ -127,11 +143,14 @@ export function buildRoutingPlanningSnapshot(input: {
   jobs: BreezyJob[];
   coverageRecommendations?: CoverageRecommendation[];
   escalations?: RecruiterEscalationQueueItem[];
+  variantTitlesByMetro?: Record<string, string[]>;
 }): RoutingPlanningSnapshot {
   const base = buildRoutingIntelligence(input);
   return attachRoutingPlanning(base, {
     opportunities: input.opportunities,
     reps: input.reps,
     jobs: input.jobs,
+    escalations: input.escalations,
+    variantTitlesByMetro: input.variantTitlesByMetro,
   });
 }
