@@ -5,6 +5,7 @@ import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-c
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
+import { RecruiterDecisionIntelligencePanel } from "@/components/recruiting/recruiter-decision-intelligence-panel";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
@@ -181,6 +182,12 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
       ) : null}
 
       {!compact ? <RecruitingAlertsSection /> : null}
+
+      <RecruiterDecisionIntelligencePanel
+        data={data.decisionIntelligence}
+        loading={loading}
+        compact={compact}
+      />
 
       {!compact ? <CandidateIntelligenceSection /> : null}
 

@@ -33,6 +33,11 @@ import {
   type JobCandidateRanking,
   type RankedCandidateRow,
 } from "@/lib/recruiting-automation/territory-candidate-ranking";
+import { buildRecruiterDecisionIntelligence } from "@/lib/recruiting-decision-intelligence";
+import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence";
+import type { JobDraft } from "@/lib/job-management/job-draft-types";
+import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/operational-escalation-types";
+import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
 
 export type RecruitingIntelligenceSnapshot = {
   territoryLabel: string;
@@ -50,6 +55,7 @@ export type RecruitingIntelligenceSnapshot = {
   trends: RecruitingTrendCharts;
   dailySnapshot: DailyExecutiveSnapshot;
   automationHooks: typeof AUTOMATION_HOOKS;
+  decisionIntelligence: RecruiterDecisionIntelligenceSnapshot;
 };
 
 export function buildRecruitingIntelligence(
@@ -58,6 +64,11 @@ export function buildRecruitingIntelligence(
   candidates: BreezyCandidate[],
   fetchedAt: string,
   workflows: CandidateWorkflowState = {},
+  options?: {
+    drafts?: JobDraft[];
+    escalations?: RecruiterEscalationQueueItem[];
+    activeReps?: ActiveRep[];
+  },
 ): RecruitingIntelligenceSnapshot {
   const territoryStates =
     session.role === "dm" ? session.territoryStates : getAssignedStatesForDm(session.dmName ?? session.name);
@@ -83,5 +94,15 @@ export function buildRecruitingIntelligence(
     trends: buildRecruitingTrendCharts(jobs, candidates, fetchedAt),
     dailySnapshot: buildDailyExecutiveSnapshot(jobs, candidates, fetchedAt),
     automationHooks: AUTOMATION_HOOKS,
+    decisionIntelligence: buildRecruiterDecisionIntelligence({
+      territoryLabel,
+      territoryStates,
+      jobs,
+      candidates,
+      drafts: options?.drafts ?? [],
+      escalations: options?.escalations ?? [],
+      activeReps: options?.activeReps ?? [],
+      fetchedAt,
+    }),
   };
 }

@@ -5,6 +5,14 @@ import { isMockDmLoginEnabled } from "@/lib/auth/mock-dm-logins";
 import { apiRoutePolicy } from "@/lib/security/permissions";
 
 describe("dm api access policy", () => {
+  it("blocks DM from recruiting intelligence and decision support APIs", () => {
+    for (const path of ["/api/recruiting/intelligence", "/api/recruiting/live-snapshot"]) {
+      const policy = apiRoutePolicy(path);
+      assert.ok(policy.allowedRoles);
+      assert.equal(policy.allowedRoles!.includes("dm"), false, path);
+    }
+  });
+
   it("blocks DM from recruiter escalation queue processing", () => {
     for (const path of ["/api/recruiting/escalations", "/api/recruiting/escalations/abc"]) {
       const policy = apiRoutePolicy(path);

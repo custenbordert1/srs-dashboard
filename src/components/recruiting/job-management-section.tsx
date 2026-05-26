@@ -6,6 +6,7 @@ import {
   JobPushResultModal,
   JobViewModal,
 } from "@/components/recruiting/job-management-modals";
+import { RecruiterDecisionIntelligencePanel } from "@/components/recruiting/recruiter-decision-intelligence-panel";
 import { RecruiterOperationalQueueSection } from "@/components/recruiting/recruiter-operational-queue-section";
 import { JobVariantQueueSection } from "@/components/recruiting/job-variant-queue-section";
 import { JobManagementStatusBadge } from "@/components/recruiting/job-management-status-badge";
@@ -25,6 +26,7 @@ import type { JobApplicantCountsSource } from "@/lib/job-management/job-applican
 import { buildApplicantCountByBreezyJobId } from "@/lib/job-management/job-applicant-counts-core";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
+import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence";
 import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/operational-escalation-types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -67,6 +69,9 @@ export function JobManagementSection() {
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [escalations, setEscalations] = useState<RecruiterEscalationQueueItem[]>([]);
   const [loadingEscalations, setLoadingEscalations] = useState(false);
+  const [decisionIntelligence, setDecisionIntelligence] =
+    useState<RecruiterDecisionIntelligenceSnapshot | null>(null);
+  const [loadingDecisionIntelligence, setLoadingDecisionIntelligence] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pushing, setPushing] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
@@ -163,6 +168,22 @@ export function JobManagementSection() {
       if (parsed.ok && parsed.drafts) setDrafts(parsed.drafts);
     } finally {
       setLoadingDrafts(false);
+    }
+  }, []);
+
+  const loadDecisionIntelligence = useCallback(async () => {
+    setLoadingDecisionIntelligence(true);
+    try {
+      const res = await fetch("/api/recruiting/intelligence", { cache: "no-store" });
+      const parsed = (await res.json()) as {
+        ok?: boolean;
+        intelligence?: { decisionIntelligence?: RecruiterDecisionIntelligenceSnapshot };
+      };
+      if (parsed.ok && parsed.intelligence?.decisionIntelligence) {
+        setDecisionIntelligence(parsed.intelligence.decisionIntelligence);
+      }
+    } finally {
+      setLoadingDecisionIntelligence(false);
     }
   }, []);
 
@@ -266,9 +287,10 @@ export function JobManagementSection() {
       void loadJobs(false);
       void loadDrafts();
       void loadEscalations();
+      void loadDecisionIntelligence();
     }, 0);
     return () => window.clearTimeout(id);
-  }, [loadJobs, loadDrafts, loadEscalations]);
+  }, [loadJobs, loadDrafts, loadEscalations, loadDecisionIntelligence]);
 
   const updateDraft = (draftId: string, patch: Partial<JobDraft>) => {
     setDrafts((prev) =>
@@ -667,6 +689,13 @@ export function JobManagementSection() {
           </table>
         </div>
       </section>
+
+      <RecruiterDecisionIntelligencePanel
+        data={decisionIntelligence}
+        loading={loadingDecisionIntelligence}
+        compact
+        onOpenVariant={(draftId) => setEditDraftId(draftId)}
+      />
 
       <RecruiterOperationalQueueSection
         items={escalations}

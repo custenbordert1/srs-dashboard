@@ -1,4 +1,5 @@
 export { buildRecruitingIntelligence, type RecruitingIntelligenceSnapshot } from "@/lib/recruiting-automation/build-recruiting-intelligence";
+export type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence";
 export {
   buildCandidateIntelligenceSnapshot,
   type CandidateIntelligenceProfile,

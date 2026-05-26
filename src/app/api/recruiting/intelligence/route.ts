@@ -1,6 +1,10 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
+import { normalizeStateCode } from "@/lib/dm-territory-map";
+import { listActiveRosterReps } from "@/lib/active-rep-store";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
+import { listJobDrafts } from "@/lib/job-management/job-draft-store";
+import { listRecruiterEscalations } from "@/lib/operational-escalation/operational-escalation-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
@@ -27,11 +31,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult, workflows] = await Promise.all([
-    fetchBreezyJobs("published"),
-    fetchBreezyCandidates(),
-    getCandidateWorkflowState(),
-  ]);
+  const [jobsResult, candidatesResult, workflows, drafts, escalations, activeReps] =
+    await Promise.all([
+      fetchBreezyJobs("published"),
+      fetchBreezyCandidates(),
+      getCandidateWorkflowState(),
+      listJobDrafts(),
+      listRecruiterEscalations(),
+      listActiveRosterReps(),
+    ]);
 
   if (!jobsResult.ok) {
     const status = breezyFailureHttpStatus(jobsResult.error);
@@ -48,7 +56,18 @@ export async function GET(request: Request) {
   const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const fetchedAt = candidatesResult.fetchedAt;
 
-  const intelligence = buildRecruitingIntelligence(session, jobs, candidates, fetchedAt, workflows);
+  const territoryReps =
+    session.territoryStates.length > 0
+      ? activeReps.filter((rep) =>
+          session.territoryStates.includes(normalizeStateCode(rep.state)),
+        )
+      : activeReps;
+
+  const intelligence = buildRecruitingIntelligence(session, jobs, candidates, fetchedAt, workflows, {
+    drafts,
+    escalations,
+    activeReps: territoryReps,
+  });
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
