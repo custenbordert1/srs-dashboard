@@ -2,6 +2,19 @@ import type { JobApplicantCountsSource } from "@/lib/job-management/job-applican
 
 export type JobDraftStatus = "draft" | "pushed" | "push_failed";
 
+export type JobVariantQueueStatus = "pending" | "approved" | "published" | "archived" | "rejected";
+
+export type JobVariantMeta = {
+  variantGroupId: string;
+  variantIndex: number;
+  sourceJobId: string;
+  generatedTitle: string;
+  generatedDescriptionHash: string;
+  cityTarget: string;
+  dmOwner: string;
+  queueStatus: JobVariantQueueStatus;
+};
+
 export type JobDraft = {
   id: string;
   status: JobDraftStatus;
@@ -14,6 +27,7 @@ export type JobDraft = {
   department: string;
   source: string;
   metadata?: Record<string, string>;
+  variant?: JobVariantMeta;
   breezyJobId?: string;
   pushedAt?: string;
   pushError?: string;

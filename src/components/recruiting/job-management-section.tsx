@@ -6,6 +6,7 @@ import {
   JobPushResultModal,
   JobViewModal,
 } from "@/components/recruiting/job-management-modals";
+import { JobVariantQueueSection } from "@/components/recruiting/job-variant-queue-section";
 import { JobManagementStatusBadge } from "@/components/recruiting/job-management-status-badge";
 import type { BreezyJobCatalogRow } from "@/lib/job-management/job-draft-types";
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
@@ -359,6 +360,41 @@ export function JobManagementSection() {
     }
   };
 
+  const cloneGenerateVariants = async (breezyJobId: string) => {
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/job-management/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clone-variants", breezyJobId, variantCount: 5 }),
+      });
+      const parsed = (await res.json()) as {
+        ok?: boolean;
+        drafts?: JobDraft[];
+        error?: string;
+        count?: number;
+      };
+      if (!parsed.ok || !parsed.drafts?.length) {
+        setFeedback({ tone: "error", text: parsed.error ?? "Variant generation failed" });
+        return;
+      }
+      setDrafts((prev) => {
+        const ids = new Set(parsed.drafts!.map((d) => d.id));
+        return [...parsed.drafts!, ...prev.filter((d) => !ids.has(d.id))];
+      });
+      setEditDraftId(parsed.drafts[0]!.id);
+      setFeedback({
+        tone: "success",
+        text: `Created ${parsed.count ?? parsed.drafts.length} ad variants in the review queue — edit and approve before push.`,
+      });
+    } catch (err) {
+      setFeedback({
+        tone: "error",
+        text: err instanceof Error ? err.message : "Variant generation failed",
+      });
+    }
+  };
+
   const cloneAsDraft = async (breezyJobId: string) => {
     setFeedback(null);
     try {
@@ -427,8 +463,8 @@ export function JobManagementSection() {
         <div>
           <h2 className="text-lg font-semibold text-zinc-50">Job management</h2>
           <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-            Table-first workflow: sync Breezy jobs, clone to draft, edit in a modal, and push with
-            confirmation. City and state stay in separate fields.
+            Table-first workflow: sync Breezy jobs, clone to draft, generate safe ad variants for
+            Indeed diversity, review in the variant queue, then push with confirmation.
           </p>
           <p className="mt-2 text-xs text-zinc-600">
             Source:{" "}
@@ -592,6 +628,12 @@ export function JobManagementSection() {
                       {row.canClone && row.breezyJobId ? (
                         <ActionButton label="Clone" onClick={() => void cloneAsDraft(row.breezyJobId!)} />
                       ) : null}
+                      {row.canCloneVariants && row.breezyJobId ? (
+                        <ActionButton
+                          label="Clone & variants"
+                          onClick={() => void cloneGenerateVariants(row.breezyJobId!)}
+                        />
+                      ) : null}
                       {row.canPush && row.draft ? (
                         <ActionButton label="Push" onClick={() => setPushDraftId(row.draft!.id)} />
                       ) : null}
@@ -606,6 +648,13 @@ export function JobManagementSection() {
           </table>
         </div>
       </section>
+
+      <JobVariantQueueSection
+        drafts={drafts}
+        onEdit={(draftId) => setEditDraftId(draftId)}
+        onPush={(draftId) => setPushDraftId(draftId)}
+        onRefresh={loadDrafts}
+      />
 
       {viewRow ? <JobViewModal row={viewRow} onClose={() => setViewRow(null)} /> : null}
       {editDraft ? (

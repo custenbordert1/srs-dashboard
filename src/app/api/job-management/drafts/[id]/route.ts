@@ -1,5 +1,12 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { deleteJobDraft, getJobDraft, updateJobDraft } from "@/lib/job-management/job-draft-store";
+import {
+  deleteJobDraft,
+  getJobDraft,
+  updateJobDraft,
+  updateJobVariantQueueStatus,
+} from "@/lib/job-management/job-draft-store";
+import type { JobVariantQueueStatus } from "@/lib/job-management/job-draft-types";
+import { canTransitionQueueStatus } from "@/lib/job-management/job-variant-queue";
 import { normalizeJobDraftLocationPatch } from "@/lib/job-management/normalize-job-location-fields";
 import { NextResponse } from "next/server";
 
@@ -38,12 +45,42 @@ export async function PATCH(request: Request, context: RouteContext) {
     payRate: string;
     department: string;
     source: string;
+    queueStatus: JobVariantQueueStatus;
+    queueAction: "approve" | "archive" | "reject" | "reopen";
   }>;
 
   try {
     body = (await request.json()) as typeof body;
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const existing = await getJobDraft(id);
+  if (!existing) {
+    return NextResponse.json({ ok: false, error: "Draft not found." }, { status: 404 });
+  }
+
+  if (body.queueStatus || body.queueAction) {
+    if (!existing.variant) {
+      return NextResponse.json({ ok: false, error: "Not a job variant draft." }, { status: 400 });
+    }
+    const nextStatus: JobVariantQueueStatus =
+      body.queueStatus ??
+      (body.queueAction === "approve"
+        ? "approved"
+        : body.queueAction === "archive"
+          ? "archived"
+          : body.queueAction === "reject"
+            ? "rejected"
+            : "pending");
+    if (!canTransitionQueueStatus(existing.variant.queueStatus, nextStatus)) {
+      return NextResponse.json(
+        { ok: false, error: `Cannot transition queue status ${existing.variant.queueStatus} → ${nextStatus}.` },
+        { status: 409 },
+      );
+    }
+    const updated = await updateJobVariantQueueStatus(id, nextStatus);
+    return NextResponse.json({ ok: true, draft: updated });
   }
 
   const patch = {

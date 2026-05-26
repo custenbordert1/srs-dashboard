@@ -1,5 +1,10 @@
 import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
-import type { JobDraft, JobPushAuditEntry } from "@/lib/job-management/job-draft-types";
+import type {
+  JobDraft,
+  JobPushAuditEntry,
+  JobVariantMeta,
+  JobVariantQueueStatus,
+} from "@/lib/job-management/job-draft-types";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
@@ -49,11 +54,13 @@ export async function findOpenDraftByClonedBreezyJobId(breezyJobId: string): Pro
   );
 }
 
-export async function createJobDraft(
-  input: Omit<JobDraft, "id" | "status" | "createdAt" | "updatedAt"> & { status?: JobDraft["status"] },
-): Promise<JobDraft> {
+export async function createJobDrafts(
+  inputs: Array<
+    Omit<JobDraft, "id" | "status" | "createdAt" | "updatedAt"> & { status?: JobDraft["status"] }
+  >,
+): Promise<JobDraft[]> {
   const now = new Date().toISOString();
-  const draft: JobDraft = {
+  const created = inputs.map((input) => ({
     id: randomUUID(),
     status: input.status ?? "draft",
     clonedFromBreezyJobId: input.clonedFromBreezyJobId,
@@ -65,17 +72,26 @@ export async function createJobDraft(
     department: input.department,
     source: input.source,
     metadata: input.metadata,
+    variant: input.variant,
     breezyJobId: input.breezyJobId,
     pushedAt: input.pushedAt,
     pushError: input.pushError,
     createdAt: now,
     updatedAt: now,
-  };
+  })) satisfies JobDraft[];
+
   const file = await readDrafts();
-  file.drafts.unshift(draft);
+  file.drafts.unshift(...created);
   file.updatedAt = now;
   await writeDrafts(file);
-  return draft;
+  return created;
+}
+
+export async function createJobDraft(
+  input: Omit<JobDraft, "id" | "status" | "createdAt" | "updatedAt"> & { status?: JobDraft["status"] },
+): Promise<JobDraft> {
+  const [draft] = await createJobDrafts([input]);
+  return draft!;
 }
 
 export async function updateJobDraft(
@@ -95,6 +111,7 @@ export async function updateJobDraft(
       | "breezyJobId"
       | "pushedAt"
       | "pushError"
+      | "variant"
     >
   >,
 ): Promise<JobDraft | null> {
@@ -102,18 +119,36 @@ export async function updateJobDraft(
   const index = file.drafts.findIndex((d) => d.id === id);
   if (index < 0) return null;
   const existing = file.drafts[index]!;
-  if (existing.status !== "draft" && patch.status === undefined) {
+  const variantQueueOnly =
+    patch.variant?.queueStatus !== undefined &&
+    Object.keys(patch).every((key) => key === "variant");
+  if (existing.status !== "draft" && patch.status === undefined && !variantQueueOnly) {
     return existing;
   }
   const updated: JobDraft = {
     ...existing,
     ...patch,
+    variant:
+      patch.variant && existing.variant
+        ? { ...existing.variant, ...patch.variant }
+        : patch.variant ?? existing.variant,
     updatedAt: new Date().toISOString(),
   };
   file.drafts[index] = updated;
   file.updatedAt = updated.updatedAt;
   await writeDrafts(file);
   return updated;
+}
+
+export async function updateJobVariantQueueStatus(
+  id: string,
+  queueStatus: JobVariantQueueStatus,
+): Promise<JobDraft | null> {
+  const draft = await getJobDraft(id);
+  if (!draft?.variant) return null;
+  return updateJobDraft(id, {
+    variant: { ...draft.variant, queueStatus },
+  });
 }
 
 export async function deleteJobDraft(id: string): Promise<boolean> {

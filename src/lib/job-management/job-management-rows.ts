@@ -1,4 +1,5 @@
 import type { BreezyJobCatalogRow, JobDraft } from "@/lib/job-management/job-draft-types";
+import { variantStatusLabel } from "@/lib/job-management/job-variant-queue";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 
 export type JobManagementStatus = "draft" | "published" | "push_failed" | "needs_review";
@@ -35,6 +36,7 @@ export type JobManagementRow = {
   editable: boolean;
   canPush: boolean;
   canClone: boolean;
+  canCloneVariants?: boolean;
   canDelete: boolean;
 };
 
@@ -79,6 +81,7 @@ function rowFromBreezyJob(job: BreezyJobCatalogRow, lastSynced: string): JobMana
     editable: false,
     canPush: false,
     canClone: true,
+    canCloneVariants: status === "published",
     canDelete: false,
   };
 }
@@ -135,6 +138,7 @@ function dedupeRowsByBreezyJobId(rows: JobManagementRow[]): JobManagementRow[] {
 function rowFromLocalDraft(draft: JobDraft): JobManagementRow {
   const location = normalizeJobLocationFields(draft.city, draft.usState);
   const status = localDraftStatus(draft);
+  const variantLabel = draft.variant ? variantStatusLabel(draft) : null;
   return {
     rowId: `draft:${draft.id}`,
     kind: "local_draft",
@@ -143,7 +147,7 @@ function rowFromLocalDraft(draft: JobDraft): JobManagementRow {
     state: location.usState,
     displayLocation: location.displayLocation,
     status,
-    statusLabel: JOB_STATUS_LABELS[status],
+    statusLabel: variantLabel ?? JOB_STATUS_LABELS[status],
     applicants: null,
     postedDate: draft.pushedAt ?? draft.createdAt,
     source: draft.source || "SRS Dashboard",
@@ -152,8 +156,11 @@ function rowFromLocalDraft(draft: JobDraft): JobManagementRow {
     draftId: draft.id,
     draft,
     editable: draft.status === "draft",
-    canPush: draft.status === "draft",
+    canPush:
+      draft.status === "draft" &&
+      (!draft.variant || draft.variant.queueStatus === "approved"),
     canClone: false,
+    canCloneVariants: false,
     canDelete: draft.status === "draft",
   };
 }

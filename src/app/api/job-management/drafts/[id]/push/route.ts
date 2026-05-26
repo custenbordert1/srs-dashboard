@@ -5,6 +5,7 @@ import {
   updateJobDraft,
 } from "@/lib/job-management/job-draft-store";
 import { validateJobDraftForBreezyPush } from "@/lib/job-management/breezy-position-payload";
+import { variantPushBlockReason } from "@/lib/job-management/job-variant-push-guard";
 import { normalizeJobDraftLocationPatch } from "@/lib/job-management/normalize-job-location-fields";
 import { createBreezyPositionFromDraft } from "@/lib/job-management/breezy-position-write";
 import { assertBreezyConfigured } from "@/lib/breezy-route-log";
@@ -93,6 +94,11 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
+  const variantBlock = variantPushBlockReason(existing);
+  if (variantBlock) {
+    return NextResponse.json({ ok: false, error: variantBlock }, { status: 409 });
+  }
+
   const patch = normalizeJobDraftLocationPatch(trimPatch(body));
   if (Object.keys(patch).length > 0) {
     await updateJobDraft(id, patch);
@@ -164,6 +170,9 @@ export async function POST(request: Request, context: RouteContext) {
     breezyJobId: result.breezyJobId,
     pushedAt: result.fetchedAt,
     pushError: undefined,
+    ...(draft.variant
+      ? { variant: { ...draft.variant, queueStatus: "published" as const } }
+      : {}),
   });
 
   await appendJobPushAudit({
