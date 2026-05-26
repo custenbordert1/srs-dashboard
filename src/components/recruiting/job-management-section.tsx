@@ -6,6 +6,7 @@ import {
   JobPushResultModal,
   JobViewModal,
 } from "@/components/recruiting/job-management-modals";
+import { RecruiterOperationalQueueSection } from "@/components/recruiting/recruiter-operational-queue-section";
 import { JobVariantQueueSection } from "@/components/recruiting/job-variant-queue-section";
 import { JobManagementStatusBadge } from "@/components/recruiting/job-management-status-badge";
 import type { BreezyJobCatalogRow } from "@/lib/job-management/job-draft-types";
@@ -24,6 +25,7 @@ import type { JobApplicantCountsSource } from "@/lib/job-management/job-applican
 import { buildApplicantCountByBreezyJobId } from "@/lib/job-management/job-applicant-counts-core";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
+import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/operational-escalation-types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type CatalogMeta = {
@@ -63,6 +65,8 @@ export function JobManagementSection() {
   const [serverApplicantCounts, setServerApplicantCounts] = useState<Record<string, number>>({});
   const [loadingApplicantCounts, setLoadingApplicantCounts] = useState(false);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
+  const [escalations, setEscalations] = useState<RecruiterEscalationQueueItem[]>([]);
+  const [loadingEscalations, setLoadingEscalations] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pushing, setPushing] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
@@ -162,6 +166,20 @@ export function JobManagementSection() {
     }
   }, []);
 
+  const loadEscalations = useCallback(async () => {
+    setLoadingEscalations(true);
+    try {
+      const res = await fetch("/api/recruiting/escalations", { cache: "no-store" });
+      const parsed = (await res.json()) as {
+        ok?: boolean;
+        items?: RecruiterEscalationQueueItem[];
+      };
+      if (parsed.ok && parsed.items) setEscalations(parsed.items);
+    } finally {
+      setLoadingEscalations(false);
+    }
+  }, []);
+
   const applyCatalogMeta = useCallback((parsed: CatalogMeta) => {
     setCatalogMeta(parsed);
     if (parsed.stale || parsed.partial || parsed.refreshError) {
@@ -247,9 +265,10 @@ export function JobManagementSection() {
     const id = window.setTimeout(() => {
       void loadJobs(false);
       void loadDrafts();
+      void loadEscalations();
     }, 0);
     return () => window.clearTimeout(id);
-  }, [loadJobs, loadDrafts]);
+  }, [loadJobs, loadDrafts, loadEscalations]);
 
   const updateDraft = (draftId: string, patch: Partial<JobDraft>) => {
     setDrafts((prev) =>
@@ -648,6 +667,16 @@ export function JobManagementSection() {
           </table>
         </div>
       </section>
+
+      <RecruiterOperationalQueueSection
+        items={escalations}
+        drafts={drafts}
+        loading={loadingEscalations}
+        onRefresh={async () => {
+          await loadEscalations();
+        }}
+        onEditVariant={(draftId) => setEditDraftId(draftId)}
+      />
 
       <JobVariantQueueSection
         drafts={drafts}

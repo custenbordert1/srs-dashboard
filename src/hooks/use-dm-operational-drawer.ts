@@ -14,6 +14,7 @@ import type {
 import { cityKey } from "@/lib/dm-dashboard/territory-shared";
 import { DM_ESCALATION_ACTION_LABELS } from "@/lib/dm-dashboard/dm-operational-types";
 import { appendDmEscalationLog, listDmEscalationLogs } from "@/lib/dm-escalation-store";
+import { buildSourceEscalationLogId } from "@/lib/operational-escalation/dm-escalation-response";
 import { parseCityLabelToKey } from "@/lib/dm-dashboard/build-dm-operational-index";
 import { useCallback, useMemo, useState } from "react";
 import { useDmToast } from "@/hooks/use-dm-toast";
@@ -200,9 +201,40 @@ export function useDmOperationalDrawer(
       };
       const next = appendDmEscalationLog(entry);
       setEscalationLogs(next.filter((row) => row.dmUserId === user.id).slice(0, 30));
-      showToast(`${entry.label} logged for ${job.title}`);
+
+      const topAlert = view?.relatedAlerts?.[0];
+      const sourceEscalationLogId = buildSourceEscalationLogId(user.id, job.jobId, actionType);
+      void fetch("/api/dm/escalations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourceEscalationLogId,
+          escalationType: actionType,
+          relatedJobId: job.jobId,
+          jobTitle: job.title,
+          city: job.city,
+          state: job.state,
+          priority: job.priority ?? topAlert?.priority ?? null,
+          priorityScore: job.priorityScore ?? topAlert?.priorityScore ?? null,
+          recommendedAction:
+            job.recommendedAction ?? topAlert?.recommendedAction ?? entry.label,
+          alertReason: topAlert?.title ?? entry.label,
+          jobAgeDays: job.jobAgeDays,
+        }),
+      })
+        .then(async (res) => {
+          const parsed = (await res.json()) as { ok?: boolean; error?: string };
+          if (!parsed.ok) {
+            showToast(parsed.error ?? "Could not send escalation to recruiting.", "info");
+            return;
+          }
+          showToast(`${entry.label} sent to recruiter queue for ${job.title}`);
+        })
+        .catch(() => {
+          showToast("Escalation saved locally but recruiter queue sync failed.", "info");
+        });
     },
-    [showToast, user.id, user.name, user.territoryStates, view?.primaryJob],
+    [showToast, user.id, user.name, user.territoryStates, view?.primaryJob, view?.relatedAlerts],
   );
 
   return {

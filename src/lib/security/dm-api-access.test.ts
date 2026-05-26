@@ -5,6 +5,21 @@ import { isMockDmLoginEnabled } from "@/lib/auth/mock-dm-logins";
 import { apiRoutePolicy } from "@/lib/security/permissions";
 
 describe("dm api access policy", () => {
+  it("blocks DM from recruiter escalation queue processing", () => {
+    for (const path of ["/api/recruiting/escalations", "/api/recruiting/escalations/abc"]) {
+      const policy = apiRoutePolicy(path);
+      assert.ok(policy.allowedRoles);
+      assert.equal(policy.allowedRoles!.includes("dm"), false, path);
+      assert.ok(policy.allowedRoles!.includes("recruiter"), path);
+    }
+  });
+
+  it("allows DM to create escalations", () => {
+    const policy = apiRoutePolicy("/api/dm/escalations");
+    assert.ok(policy.allowedRoles?.includes("dm"));
+    assert.ok(policy.requiresTerritory);
+  });
+
   it("blocks DM from job management and DD tools", () => {
     for (const path of [
       "/api/job-management/drafts",

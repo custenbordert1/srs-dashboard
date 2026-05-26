@@ -9,6 +9,9 @@ const ESCALATION_ACTIONS: DmEscalationActionType[] = [
   "request-repost",
   "request-pay-review",
   "expand-radius",
+  "coverage-concern",
+  "low-applicant-flow",
+  "aging-job-review",
 ];
 
 type DmOperationalDrawerProps = {
@@ -194,9 +197,9 @@ export function DmOperationalDrawer({
           ) : null}
 
           <section className="rounded-xl border border-violet-500/25 bg-violet-500/5 p-4">
-            <h3 className="text-sm font-semibold text-violet-100">Recruiter escalation (log only)</h3>
+            <h3 className="text-sm font-semibold text-violet-100">Recruiter escalation</h3>
             <p className="mt-1 text-xs text-zinc-500">
-              Actions are stored locally for audit history — nothing is sent to recruiting yet.
+              Sends to the recruiter action queue for review. A local copy is kept in activity history.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {ESCALATION_ACTIONS.map((action) => (

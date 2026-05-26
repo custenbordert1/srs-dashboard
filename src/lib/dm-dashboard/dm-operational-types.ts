@@ -60,13 +60,19 @@ export type DmEscalationActionType =
   | "escalate-recruiting"
   | "request-repost"
   | "request-pay-review"
-  | "expand-radius";
+  | "expand-radius"
+  | "coverage-concern"
+  | "low-applicant-flow"
+  | "aging-job-review";
 
 export const DM_ESCALATION_ACTION_LABELS: Record<DmEscalationActionType, string> = {
-  "escalate-recruiting": "Escalate to recruiting",
+  "escalate-recruiting": "Escalate recruiting priority",
   "request-repost": "Request repost",
   "request-pay-review": "Request pay review",
   "expand-radius": "Expand radius",
+  "coverage-concern": "Coverage concern",
+  "low-applicant-flow": "Low applicant flow",
+  "aging-job-review": "Aging job review",
 };
 
 export type DmEscalationLogEntry = {
