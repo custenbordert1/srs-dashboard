@@ -21,6 +21,8 @@ type RoutingVisualWorkspaceProps = {
   escalations: RecruiterEscalationQueueItem[];
   jobContexts: Record<string, JobRoutingContext>;
   variants?: VariantPerformanceRow[];
+  showOperational?: boolean;
+  showDetail?: boolean;
 };
 
 export function RoutingVisualWorkspacePanel({
@@ -32,6 +34,8 @@ export function RoutingVisualWorkspacePanel({
   escalations,
   jobContexts,
   variants,
+  showOperational = true,
+  showDetail = true,
 }: RoutingVisualWorkspaceProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -59,24 +63,28 @@ export function RoutingVisualWorkspacePanel({
         onSelectPack={handleSelectPack}
       />
 
-      <RoutingTerritoryRouteCanvas
-        cards={workspace.canvasCards}
-        geo={geo}
-        selectedPackId={selectedPackId}
-        onSelectPack={handleSelectPack}
-      />
+      {showOperational ? (
+        <RoutingTerritoryRouteCanvas
+          cards={workspace.canvasCards}
+          geo={geo}
+          selectedPackId={selectedPackId}
+          onSelectPack={handleSelectPack}
+        />
+      ) : null}
 
-      <RoutingPackDetailDrawer
-        open={drawerOpen}
-        pack={selectedPack}
-        drawerContext={
-          selectedPack ? workspace.drawerContextByPackId[selectedPack.routePackId] : undefined
-        }
-        escalations={escalations}
-        jobContexts={jobContexts}
-        variants={variants}
-        onClose={() => setDrawerOpen(false)}
-      />
+      {showDetail ? (
+        <RoutingPackDetailDrawer
+          open={drawerOpen}
+          pack={selectedPack}
+          drawerContext={
+            selectedPack ? workspace.drawerContextByPackId[selectedPack.routePackId] : undefined
+          }
+          escalations={escalations}
+          jobContexts={jobContexts}
+          variants={variants}
+          onClose={() => setDrawerOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

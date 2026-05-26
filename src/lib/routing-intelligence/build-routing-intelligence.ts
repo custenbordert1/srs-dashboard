@@ -136,16 +136,24 @@ function cardFromPack(pack: ReturnType<typeof buildRoutePacksFromClusters>[numbe
   };
 }
 
-export function buildRoutingIntelligence(input: {
-  fetchedAt: string;
-  opportunities: MelOpportunity[];
-  reps: ActiveRep[];
-  jobs: BreezyJob[];
-  coverageRecommendations?: CoverageRecommendation[];
-  escalations?: RecruiterEscalationQueueItem[];
-}): RoutingIntelligenceSnapshot {
-  const clusters = buildStoreClusters(input.opportunities);
-  const routePacks = buildRoutePacksFromClusters(clusters, input.reps);
+export type RoutingSharedGeometry = {
+  clusters: ReturnType<typeof buildStoreClusters>;
+  routePacks: ReturnType<typeof buildRoutePacksFromClusters>;
+};
+
+export function buildRoutingIntelligence(
+  input: {
+    fetchedAt: string;
+    opportunities: MelOpportunity[];
+    reps: ActiveRep[];
+    jobs: BreezyJob[];
+    coverageRecommendations?: CoverageRecommendation[];
+    escalations?: RecruiterEscalationQueueItem[];
+  },
+  shared?: RoutingSharedGeometry,
+): RoutingIntelligenceSnapshot {
+  const clusters = shared?.clusters ?? buildStoreClusters(input.opportunities);
+  const routePacks = shared?.routePacks ?? buildRoutePacksFromClusters(clusters, input.reps);
   const coverageByJob = new Map(
     (input.coverageRecommendations ?? []).map((row) => [row.jobId, row]),
   );

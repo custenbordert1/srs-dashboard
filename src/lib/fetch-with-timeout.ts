@@ -55,6 +55,8 @@ export function isTimeoutError(err: unknown): boolean {
 
 export const DASHBOARD_REQUEST_TIMEOUT_MS = 10_000;
 export const HEAVY_REQUEST_TIMEOUT_MS = 30_000;
+/** Recruiting intelligence (MEL routing + automation) — larger territories need headroom. */
+export const ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS = HEAVY_REQUEST_TIMEOUT_MS;
 /** DM / executive territory dashboards — server runs Breezy fast-tier + MEL in parallel. */
 export const TERRITORY_DASHBOARD_TIMEOUT_MS = 45_000;
 /** Breezy jobs list — single GET, fits 10s budget. */

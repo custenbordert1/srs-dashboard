@@ -3,7 +3,10 @@
 import { useMemo, useState } from "react";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
-import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { useLoadingCeiling, DASHBOARD_LOADING_CEILING_MS } from "@/hooks/use-loading-ceiling";
+import { ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { RoutingSyncBanner } from "@/components/recruiting/routing-intelligence/routing-sync-banner";
+import type { RoutingLoadPhase } from "@/lib/routing-intelligence/types";
 import { AutomationSyncStatusBanner } from "@/components/recruiting/automation-sync-status-banner";
 import { RoutingTerritoryOverview } from "@/components/recruiting/routing-intelligence/routing-territory-overview";
 import { RoutingRouteQueue } from "@/components/recruiting/routing-intelligence/routing-route-queue";
@@ -25,11 +28,28 @@ export function RoutingIntelligenceSection() {
     stale,
     lastSyncedAt,
     refresh,
-  } = useRecruitingIntelligence();
-  const loadingCeilingHit = useLoadingCeiling(loading && !data);
+  } = useRecruitingIntelligence({
+    requestTimeoutMs: ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS,
+  });
+  const hasCachedRouting = Boolean(
+    data?.routingIntelligence?.territoryOverview?.length ||
+      data?.routingIntelligence?.visualWorkspace?.metrics ||
+      data?.routingIntelligence?.routePacks?.length,
+  );
+  const routingSyncing = (loading || refreshing) && hasCachedRouting;
+  const loadingCeilingHit = useLoadingCeiling(
+    loading && !data,
+    ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS + DASHBOARD_LOADING_CEILING_MS,
+  );
   const [selectedPackId, setSelectedPackId] = useState<string | null>(null);
 
   const routing = data?.routingIntelligence;
+  const loadPhase: RoutingLoadPhase =
+    routing?.loadState?.phase ??
+    (routing?.enrichedRoutePacks?.length ? "detail" : routing?.routeQueues?.length ? "operational" : "core");
+  const showOperational = loadPhase === "operational" || loadPhase === "detail";
+  const showDetail = loadPhase === "detail";
+
   const selectedPack = useMemo(() => {
     const packs = routing?.enrichedRoutePacks ?? [];
     if (!selectedPackId) return packs[0] ?? null;
@@ -52,7 +72,7 @@ export function RoutingIntelligenceSection() {
     );
   }
 
-  if (!data && fatalError) {
+  if (!data && fatalError && !hasCachedRouting) {
     return (
       <DashboardSectionFallback
         title="Routing Intelligence"
@@ -75,7 +95,9 @@ export function RoutingIntelligenceSection() {
           <h2 className="text-lg font-semibold text-zinc-50">Routing Intelligence</h2>
           <p className="mt-1 text-sm text-zinc-500">
             Territory coverage, route packs, travel burden, and staffing logistics for {data.territoryLabel}
-            {refreshing ? <span className="ml-2 text-violet-400/90">Updating…</span> : null}
+            {refreshing || routingSyncing ? (
+              <span className="ml-2 text-violet-400/90">Updating…</span>
+            ) : null}
           </p>
         </div>
         <button
@@ -94,9 +116,15 @@ export function RoutingIntelligenceSection() {
         partialSync={meta?.partialSync}
         partialErrors={meta?.partialErrors}
         error={error}
-        timedOut={timedOut}
+        timedOut={timedOut && !hasCachedRouting}
         onRetry={refresh}
         retrying={refreshing}
+      />
+
+      <RoutingSyncBanner
+        syncing={routingSyncing || Boolean(meta?.routingSyncing)}
+        stale={stale}
+        cacheHit={routing?.loadState?.cacheHit ?? meta?.routingBuild?.cacheHit}
       />
 
       <RoutingTerritoryOverview
@@ -114,30 +142,47 @@ export function RoutingIntelligenceSection() {
           escalations={meta?.escalations ?? []}
           jobContexts={routing.jobContexts ?? {}}
           variants={data.decisionIntelligence?.variantPerformance ?? []}
+          showOperational={showOperational}
+          showDetail={showDetail}
         />
       ) : null}
 
+      {showOperational ? (
       <RoutingTravelBurdenPanel
         packs={(routing?.enrichedRoutePacks ?? []) as EnrichedRoutePack[]}
         selectedPack={selectedPack}
       />
+      ) : null}
 
+      {showOperational ? (
       <div className="grid gap-6 xl:grid-cols-2">
         <RoutingRouteQueue
           rows={routing?.routeQueues ?? []}
           onSelectPack={setSelectedPackId}
         />
-        <RoutingPackBuilder
-          packs={(routing?.enrichedRoutePacks ?? []) as EnrichedRoutePack[]}
-          selectedPack={selectedPack}
-          onSelectPack={setSelectedPackId}
-          escalations={meta?.escalations ?? []}
-          jobContexts={routing?.jobContexts ?? {}}
-          variants={data.decisionIntelligence?.variantPerformance ?? []}
-        />
+        {showDetail ? (
+          <RoutingPackBuilder
+            packs={(routing?.enrichedRoutePacks ?? []) as EnrichedRoutePack[]}
+            selectedPack={selectedPack}
+            onSelectPack={setSelectedPackId}
+            escalations={meta?.escalations ?? []}
+            jobContexts={routing?.jobContexts ?? {}}
+            variants={data.decisionIntelligence?.variantPerformance ?? []}
+          />
+        ) : (
+          <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 text-sm text-zinc-500">
+            Loading route pack details…
+          </section>
+        )}
       </div>
+      ) : null}
 
-      <RoutingCoverageMapPlaceholder geo={routing?.geoVisualization} clusters={routing?.geoVisualization?.nodes ?? []} />
+      {showDetail ? (
+        <RoutingCoverageMapPlaceholder
+          geo={routing?.geoVisualization}
+          clusters={routing?.geoVisualization?.nodes ?? []}
+        />
+      ) : null}
     </div>
   );
 }

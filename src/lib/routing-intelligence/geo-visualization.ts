@@ -58,10 +58,12 @@ export function buildGeoVisualization(
   });
 
   const connections: GeoConnectionLine[] = [];
-  for (const pack of routePacks) {
+  const maxConnectionPacks = nodes.length > 80 ? 24 : routePacks.length;
+  for (const pack of routePacks.slice(0, maxConnectionPacks)) {
     const packNodes = nodes.filter((node) =>
       pack.cities.some((city) => city.toLowerCase() === node.city.toLowerCase() && node.state === pack.state),
     );
+    if (packNodes.length > 12) continue;
     for (let i = 0; i < packNodes.length - 1; i += 1) {
       const from = packNodes[i]!;
       const to = packNodes[i + 1]!;

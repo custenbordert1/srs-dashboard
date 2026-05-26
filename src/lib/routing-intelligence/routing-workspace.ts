@@ -268,20 +268,25 @@ export function buildRoutingVisualWorkspace(input: {
   jobContexts: Record<string, JobRoutingContext>;
   escalations?: RecruiterEscalationQueueItem[];
   variantTitlesByMetro?: Record<string, string[]>;
+  /** Skip drawer/escalation cross-links during operational workspace build. */
+  includeDrawerContext?: boolean;
 }): RoutingVisualWorkspace {
   const packs = input.enrichedRoutePacks;
+  const includeDrawer = input.includeDrawerContext !== false;
   return {
     canvasCards: buildRouteCanvasCards(packs, input.geoVisualization),
     metrics: buildRouteWorkspaceMetrics(packs, input.jobs),
     storytelling: buildTerritoryStorytelling(packs, input.routeQueues),
     visualFoundation: emptyRoutingVisualFoundation(),
-    drawerContextByPackId: buildDrawerContextByPack(
-      packs,
-      input.jobs,
-      input.jobContexts,
-      input.escalations ?? [],
-      input.variantTitlesByMetro ?? {},
-    ),
+    drawerContextByPackId: includeDrawer
+      ? buildDrawerContextByPack(
+          packs,
+          input.jobs,
+          input.jobContexts,
+          input.escalations ?? [],
+          input.variantTitlesByMetro ?? {},
+        )
+      : {},
     manualOnly: true,
   };
 }

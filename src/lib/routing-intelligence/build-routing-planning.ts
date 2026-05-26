@@ -6,7 +6,11 @@ import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/
 import { countRepsNearOpportunity } from "@/lib/coverage-risk-engine/rep-proximity";
 import { buildStoreClusters } from "@/lib/routing-intelligence/route-cluster";
 import { buildRoutePacksFromClusters } from "@/lib/routing-intelligence/route-pack-builder";
-import { buildRoutingIntelligence } from "@/lib/routing-intelligence/build-routing-intelligence";
+import {
+  buildRoutingIntelligence,
+  type RoutingSharedGeometry,
+} from "@/lib/routing-intelligence/build-routing-intelligence";
+import { normalizeStateCode } from "@/lib/dm-territory-map";
 import { computeTravelBurdenIntel, type TravelBurdenIntel } from "@/lib/routing-intelligence/travel-burden";
 import { scoreRoutePack } from "@/lib/routing-intelligence/route-pack-scoring";
 import { buildGeoVisualization, type GeoVisualizationSnapshot } from "@/lib/routing-intelligence/geo-visualization";
@@ -17,6 +21,7 @@ import {
 } from "@/lib/routing-intelligence/territory-overview";
 import { milesBetweenRepAndProject } from "@/lib/rep-intelligence/distance-engine";
 import { buildRoutingVisualWorkspace } from "@/lib/routing-intelligence/routing-workspace";
+import { buildCachedRoutingPlanningSnapshot } from "@/lib/routing-intelligence/build-routing-planning-cached";
 import type {
   EnrichedRoutePack,
   NearbyRepRoutingRow,
@@ -50,8 +55,10 @@ function storesForPack(pack: RoutePack, clusters: StoreCluster[]): RoutingStoreR
 function nearbyRepsForPack(pack: RoutePack, reps: ActiveRep[]): NearbyRepRoutingRow[] {
   const anchorCity = pack.cities[0] ?? "";
   const project = { city: anchorCity, state: pack.state };
+  const packState = normalizeStateCode(pack.state);
   const rows: NearbyRepRoutingRow[] = [];
   for (const rep of reps) {
+    if (normalizeStateCode(rep.state) !== packState) continue;
     rows.push({
       repId: rep.repId,
       repName: rep.name,
@@ -110,9 +117,12 @@ export function attachRoutingPlanning(
     escalations?: RecruiterEscalationQueueItem[];
     variantTitlesByMetro?: Record<string, string[]>;
   },
+  shared?: RoutingSharedGeometry,
 ): RoutingPlanningSnapshot {
-  const clusters = buildStoreClusters(input.opportunities);
-  const packs = base.routePacks.length > 0 ? base.routePacks : buildRoutePacksFromClusters(clusters, input.reps);
+  const clusters = shared?.clusters ?? buildStoreClusters(input.opportunities);
+  const packs =
+    shared?.routePacks ??
+    (base.routePacks.length > 0 ? base.routePacks : buildRoutePacksFromClusters(clusters, input.reps));
   const enrichedRoutePacks = enrichPacks(packs, clusters, input.reps);
   const geoVisualization = buildGeoVisualization(clusters, enrichedRoutePacks);
   const routeQueues = buildRouteQueues({ clusters, enrichedPacks: enrichedRoutePacks, jobs: input.jobs });
@@ -144,13 +154,36 @@ export function buildRoutingPlanningSnapshot(input: {
   coverageRecommendations?: CoverageRecommendation[];
   escalations?: RecruiterEscalationQueueItem[];
   variantTitlesByMetro?: Record<string, string[]>;
+  territoryScope?: string;
+  melFetchedAt?: string;
 }): RoutingPlanningSnapshot {
-  const base = buildRoutingIntelligence(input);
-  return attachRoutingPlanning(base, {
-    opportunities: input.opportunities,
-    reps: input.reps,
-    jobs: input.jobs,
-    escalations: input.escalations,
-    variantTitlesByMetro: input.variantTitlesByMetro,
-  });
+  if (input.territoryScope && input.melFetchedAt) {
+    return buildCachedRoutingPlanningSnapshot({
+      fetchedAt: input.fetchedAt,
+      opportunities: input.opportunities,
+      reps: input.reps,
+      jobs: input.jobs,
+      territoryScope: input.territoryScope,
+      melFetchedAt: input.melFetchedAt,
+      coverageRecommendations: input.coverageRecommendations,
+      escalations: input.escalations,
+      variantTitlesByMetro: input.variantTitlesByMetro,
+    }).snapshot;
+  }
+
+  const clusters = buildStoreClusters(input.opportunities);
+  const routePacks = buildRoutePacksFromClusters(clusters, input.reps);
+  const shared: RoutingSharedGeometry = { clusters, routePacks };
+  const base = buildRoutingIntelligence(input, shared);
+  return attachRoutingPlanning(
+    base,
+    {
+      opportunities: input.opportunities,
+      reps: input.reps,
+      jobs: input.jobs,
+      escalations: input.escalations,
+      variantTitlesByMetro: input.variantTitlesByMetro,
+    },
+    shared,
+  );
 }

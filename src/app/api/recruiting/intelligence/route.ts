@@ -12,11 +12,11 @@ import {
 } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import {
-  attachRoutingPlanning,
-  buildRoutingIntelligence,
-  emptyRoutingIntelligence,
-} from "@/lib/routing-intelligence";
+  buildCachedEmptyRoutingPlanning,
+  buildCachedRoutingPlanningSnapshot,
+} from "@/lib/routing-intelligence/build-routing-planning-cached";
 import { buildVariantTitlesByMetro } from "@/lib/routing-intelligence/variant-titles-by-metro";
+import { logRoutingIntelligence } from "@/lib/routing-intelligence/routing-intelligence-log";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -54,6 +54,16 @@ export async function GET(request: Request) {
     ]);
 
   const partialErrors: string[] = [];
+  let routingBuildMeta:
+    | {
+        cacheHit: boolean;
+        totalMs: number;
+        clusteringMs: number;
+        routePackMs: number;
+        workspaceMs: number;
+        payloadBytes: number;
+      }
+    | undefined;
   const breezyJobsOk = jobsResult.ok;
   const breezyCandidatesOk = candidatesResult.ok;
 
@@ -102,38 +112,47 @@ export async function GET(request: Request) {
     activeReps: territoryReps,
   });
 
+  const territoryScope =
+    session.territoryStates.length > 0
+      ? session.territoryStates.map((state) => normalizeStateCode(state)).sort().join(",")
+      : "all";
+  const variantTitlesByMetro = buildVariantTitlesByMetro(
+    intelligence.decisionIntelligence.variantPerformance,
+  );
+
+  const melLoadStart = performance.now();
   if (melResult.ok) {
+    logRoutingIntelligence("mel-load", { ms: Math.round(performance.now() - melLoadStart), ok: true });
     const opportunities = filterOpportunitiesByTerritory(
       parseMelOpportunities(melResult.rows),
       session.territoryStates.length > 0 ? session.territoryStates : undefined,
     );
-    const routingBase = buildRoutingIntelligence({
+    const { snapshot, meta: routingBuild } = buildCachedRoutingPlanningSnapshot({
       fetchedAt: melResult.fetchedAt,
+      melFetchedAt: melResult.fetchedAt,
+      territoryScope,
       opportunities,
       reps: territoryReps,
       jobs,
       coverageRecommendations: intelligence.decisionIntelligence.coverageRecommendations,
       escalations,
+      variantTitlesByMetro,
     });
-    intelligence.routingIntelligence = attachRoutingPlanning(routingBase, {
-      opportunities,
-      reps: territoryReps,
-      jobs,
-      escalations,
-      variantTitlesByMetro: buildVariantTitlesByMetro(
-        intelligence.decisionIntelligence.variantPerformance,
-      ),
-    });
+    intelligence.routingIntelligence = snapshot;
+    routingBuildMeta = routingBuild;
   } else {
+    logRoutingIntelligence("mel-load", {
+      ms: Math.round(performance.now() - melLoadStart),
+      ok: false,
+      error: melResult.error,
+    });
     partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
-    intelligence.routingIntelligence = attachRoutingPlanning(emptyRoutingIntelligence(fetchedAt), {
-      opportunities: [],
+    intelligence.routingIntelligence = buildCachedEmptyRoutingPlanning(fetchedAt, {
       reps: territoryReps,
       jobs,
+      territoryScope,
       escalations,
-      variantTitlesByMetro: buildVariantTitlesByMetro(
-        intelligence.decisionIntelligence.variantPerformance,
-      ),
+      variantTitlesByMetro,
     });
   }
 
@@ -161,6 +180,10 @@ export async function GET(request: Request) {
         escalations,
         activeRepsByState,
         refreshedAt: new Date().toISOString(),
+        routingBuild: routingBuildMeta,
+        routingSyncing: Boolean(
+          intelligence.routingIntelligence?.loadState?.syncing,
+        ),
       },
     },
     {

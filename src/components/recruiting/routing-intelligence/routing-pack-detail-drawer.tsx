@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { EnrichedRoutePack } from "@/lib/routing-intelligence/types";
 import type { JobRoutingContext } from "@/lib/routing-intelligence/types";
 import type { RoutePackDrawerContext } from "@/lib/routing-intelligence/routing-workspace";
@@ -44,22 +44,33 @@ export function RoutingPackDetailDrawer({
     setMarkedReview(getRecruiterReviewFlags().has(pack.routePackId));
   }, [pack?.routePackId, pack]);
 
+  const relatedJobs = useMemo(() => {
+    if (!pack) return [];
+    return Object.entries(jobContexts).filter(([, ctx]) =>
+      ctx.relatedRoutePackIds.includes(pack.routePackId),
+    );
+  }, [jobContexts, pack]);
+
+  const packEscalations = useMemo(() => {
+    if (!pack || !drawerContext) return [];
+    const ids = new Set(drawerContext.relatedEscalationIds);
+    return escalations.filter((row) => ids.has(row.id));
+  }, [drawerContext, escalations, pack]);
+
+  const packVariants = useMemo(() => {
+    if (!pack) return [];
+    const titles = new Set(drawerContext?.variantTitles ?? []);
+    const cityKeys = pack.cities.map((city) => city.toLowerCase());
+    return variants.filter(
+      (row) =>
+        titles.has(row.title) ||
+        (row.state === pack.state &&
+          cityKeys.some((city) => row.cityTarget.toLowerCase().includes(city))),
+    );
+  }, [drawerContext?.variantTitles, pack, variants]);
+
   if (!open || !pack) return null;
 
-  const relatedJobs = Object.entries(jobContexts).filter(([, ctx]) =>
-    ctx.relatedRoutePackIds.includes(pack.routePackId),
-  );
-  const packEscalations = escalations.filter((row) =>
-    drawerContext?.relatedEscalationIds.includes(row.id),
-  );
-  const packVariants = variants.filter(
-    (row) =>
-      drawerContext?.variantTitles.includes(row.title) ||
-      pack.cities.some(
-        (city) =>
-          row.cityTarget.toLowerCase().includes(city.toLowerCase()) && row.state === pack.state,
-      ),
-  );
   const driveHours = Math.round((pack.estimatedDriveTimeMinutes / 60) * 10) / 10;
 
   return (

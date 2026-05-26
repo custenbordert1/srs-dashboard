@@ -101,6 +101,16 @@ export type EnrichedRoutePack = RoutePack & {
   nearbyReps: NearbyRepRoutingRow[];
 };
 
+/** Client render phases — all fields may be present; phase signals what UI should mount. */
+export type RoutingLoadPhase = "core" | "operational" | "detail";
+
+export type RoutingIntelligenceLoadState = {
+  phase: RoutingLoadPhase;
+  cacheHit: boolean;
+  syncing: boolean;
+  buildMs?: number;
+};
+
 export type RoutingIntelligenceSnapshot = {
   fetchedAt: string;
   manualOnly: true;
@@ -118,4 +128,5 @@ export type RoutingIntelligenceSnapshot = {
   enrichedRoutePacks?: EnrichedRoutePack[];
   geoVisualization?: import("@/lib/routing-intelligence/geo-visualization").GeoVisualizationSnapshot;
   visualWorkspace?: import("@/lib/routing-intelligence/routing-workspace").RoutingVisualWorkspace;
+  loadState?: RoutingIntelligenceLoadState;
 };
