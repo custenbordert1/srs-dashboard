@@ -73,7 +73,10 @@ const TAB_PREVIEW_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "preview"
 const TAB_FAST_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "fast", "v1"]);
 const TAB_FULL_CACHE_KEY = cacheKey(["breezy", "candidates", "tab", "full", "v1"]);
 const TAB_SNAPSHOT_SESSION_KEY = "breezy:candidates:tab:lastOk:v1";
+const TAB_HIGH_WATER_SESSION_KEY = "breezy:candidates:tab:highWater:v1";
 const TAB_SNAPSHOT_SESSION_MAX_AGE_MS = 30 * 60 * 1000;
+/** High-water survives refresh within a work session (explicit TTL expiry allowed). */
+const TAB_HIGH_WATER_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 /** In-memory last ok tab snapshot (survives ok:false writes to client cache). */
 let lastOkTabSnapshot: BreezyCandidatesSuccess | null = null;
@@ -92,10 +95,160 @@ function noteTabSnapshotHighWater(snapshot: BreezyCandidatesSuccess): void {
   if (!snapshot.ok || snapshot.candidates.length === 0) return;
   if (
     !tabSnapshotHighWater ||
+    snapshot.candidates.length > tabSnapshotHighWater.candidates.length ||
     scoreCandidatesCacheRichness(snapshot) > scoreCandidatesCacheRichness(tabSnapshotHighWater)
   ) {
     tabSnapshotHighWater = snapshot;
+    persistTabHighWaterToSession(snapshot);
   }
+}
+
+function readPersistedHighWaterSnapshot(): BreezyCandidatesSuccess | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(TAB_HIGH_WATER_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      savedAt?: number;
+      candidateCount?: number;
+      snapshot?: BreezyCandidatesSuccess;
+    };
+    if (!parsed.snapshot?.ok || !Array.isArray(parsed.snapshot.candidates)) return null;
+    if (parsed.snapshot.candidates.length === 0) return null;
+    if (
+      typeof parsed.savedAt === "number" &&
+      Date.now() - parsed.savedAt > TAB_HIGH_WATER_SESSION_MAX_AGE_MS
+    ) {
+      return null;
+    }
+    return parsed.snapshot;
+  } catch {
+    return null;
+  }
+}
+
+function persistTabHighWaterToSession(snapshot: BreezyCandidatesSuccess): void {
+  if (typeof window === "undefined" || snapshot.candidates.length === 0) return;
+  try {
+    const raw = sessionStorage.getItem(TAB_HIGH_WATER_SESSION_KEY);
+    if (raw) {
+      const prior = JSON.parse(raw) as {
+        candidateCount?: number;
+        snapshot?: BreezyCandidatesSuccess;
+      };
+      const priorCount = prior.snapshot?.candidates.length ?? prior.candidateCount ?? 0;
+      if (priorCount >= snapshot.candidates.length) return;
+    }
+    sessionStorage.setItem(
+      TAB_HIGH_WATER_SESSION_KEY,
+      JSON.stringify({
+        savedAt: Date.now(),
+        candidateCount: snapshot.candidates.length,
+        continuationPoint:
+          snapshot.hydrationJob?.lastContinuationPoint ?? snapshot.positionsScanned ?? 0,
+        snapshot,
+      }),
+    );
+  } catch {
+    // Quota or private mode — in-memory high-water still applies until refresh.
+  }
+}
+
+export function logCandidatesSnapshotCommit(input: {
+  source: string;
+  scanMode?: string;
+  candidateCount: number;
+  continuationPoint: number;
+  restoreSnapshotCount: number;
+  highWaterCount: number;
+  accepted: boolean;
+  rejectionReason?: string;
+  acceptedZeroWrite?: boolean;
+}): void {
+  const payload = {
+    phase: "snapshot_commit",
+    ...input,
+  };
+  logBreezyCandidatesOps("client", input.accepted ? "success" : "fallback", payload);
+  logCandidatesClientTrace("snapshot_commit", payload);
+}
+
+function snapshotContinuationPoint(snapshot: BreezyCandidatesSuccess | null | undefined): number {
+  if (!snapshot) return 0;
+  return Math.max(
+    snapshot.hydrationJob?.lastContinuationPoint ?? 0,
+    snapshot.positionsScanned ?? 0,
+  );
+}
+
+/** Restore in-memory tab snapshots from sessionStorage before any live fetch runs. */
+export function restoreTabSnapshotsFromSession(): BreezyCandidatesSuccess | null {
+  const highWater = readPersistedHighWaterSnapshot();
+  const lastOk = readPersistedTabSnapshot();
+  const richest = pickRichestCandidatesSnapshot([highWater, lastOk]);
+  if (richest) {
+    lastOkTabSnapshot = rememberTabOkSnapshot(richest);
+    noteTabSnapshotHighWater(richest);
+  }
+  return richest;
+}
+
+/** Snapshot for synchronous first paint (module init + useState lazy init). */
+export function getStartupRestoredTabSnapshot(): BreezyCandidatesSuccess | null {
+  return pickRichestCandidatesSnapshot([
+    tabSnapshotHighWater,
+    lastOkTabSnapshot,
+    readPersistedHighWaterSnapshot(),
+    readPersistedTabSnapshot(),
+  ]);
+}
+
+if (typeof window !== "undefined") {
+  restoreTabSnapshotsFromSession();
+}
+
+function guardEmptyOkCandidatesPayload(
+  parsed: BreezyCandidatesSuccess,
+  scan: BreezyCandidatesScanMode,
+  fallbackOk: BreezyCandidatesSuccess | null,
+  source: string,
+): CandidatesTabFetchResult {
+  const recoverable = pickRichestCandidatesSnapshot([
+    fallbackOk,
+    getRecoverableTabCandidatesSnapshot(),
+    tabSnapshotHighWater,
+    readPersistedHighWaterSnapshot(),
+    readPersistedTabSnapshot(),
+    lastOkTabSnapshot,
+  ]);
+  if (recoverable && recoverable.candidates.length > 0) {
+    logCandidatesSnapshotCommit({
+      source: `${source}:guardEmptyOk`,
+      scanMode: scan,
+      candidateCount: recoverable.candidates.length,
+      continuationPoint: snapshotContinuationPoint(recoverable),
+      restoreSnapshotCount: recoverable.candidates.length,
+      highWaterCount: getTabCandidateCountHighWaterMark(),
+      accepted: true,
+      rejectionReason: "blocked_empty_ok_payload",
+    });
+    return toStaleTabCandidatesResult(
+      recoverable,
+      "Breezy returned no candidates for this tier; using prior snapshot.",
+    );
+  }
+  logCandidatesSnapshotCommit({
+    source: `${source}:guardEmptyOk`,
+    scanMode: scan,
+    candidateCount: 0,
+    continuationPoint: snapshotContinuationPoint(parsed),
+    restoreSnapshotCount: 0,
+    highWaterCount: getTabCandidateCountHighWaterMark(),
+    accepted: true,
+    acceptedZeroWrite: true,
+    rejectionReason: "no_richer_snapshot_available",
+  });
+  return parsed;
 }
 
 /** Union incoming with richest known tab snapshot so incremental tiers cannot drop rows. */
@@ -255,6 +408,7 @@ function resolveTabCandidatesFallback(
 export function getRecoverableTabCandidatesSnapshot(): BreezyCandidatesSuccess | null {
   return pickRichestCandidatesSnapshot([
     tabSnapshotHighWater,
+    readPersistedHighWaterSnapshot(),
     getRichestTabSnapshot(),
     readPersistedTabSnapshot(),
     lastOkTabSnapshot,
@@ -294,7 +448,7 @@ export function peekTabCandidatesCache(): BreezyCandidatesSuccess | null {
   if (richest) {
     return rememberTabOkSnapshot(richest);
   }
-  return null;
+  return restoreTabSnapshotsFromSession();
 }
 
 export function toStaleTabCandidatesResult(
@@ -685,7 +839,12 @@ async function fetchCandidatesFromApi(options: {
         ok: true,
         candidateCount: 0,
       });
-      return parsed;
+      return guardEmptyOkCandidatesPayload(
+        parsed,
+        options.scan,
+        fallbackOk,
+        "fetchCandidatesFromApi:empty_ok_no_fallback",
+      );
     }
 
     logCandidatesClientTrace("non_renderable_payload", {

@@ -70,8 +70,11 @@ import {
   getTabCandidateCountHighWaterMark,
   getTabSnapshotHighWater,
   getRecoverableTabCandidatesSnapshot,
+  getStartupRestoredTabSnapshot,
   isFullHydrationInflightActive,
+  logCandidatesSnapshotCommit,
   peekTabCandidatesCache,
+  restoreTabSnapshotsFromSession,
   shouldHydrateFullCandidates,
   shouldSkipFastTierForHydration,
   type CandidatesTabFetchResult,
@@ -96,6 +99,7 @@ import {
   pickRichestCandidatesSnapshot,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
+import { resolveAuthoritativeCandidatesDisplaySnapshot } from "@/lib/breezy-candidates-display";
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
 import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import { cacheKey, fetchCachedJson, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
@@ -454,25 +458,80 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
   );
 }
 
+function readCandidatesSectionStartupSnapshot(): BreezyCandidatesSuccess | null {
+  if (typeof window === "undefined") return null;
+  return getStartupRestoredTabSnapshot();
+}
+
 export function CandidatesSection() {
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities();
+  const startupSnapshotRef = useRef(readCandidatesSectionStartupSnapshot());
   /** Rows always render from this — never cleared on timeout/failed refresh. */
-  const [breezySnapshot, setBreezySnapshot] = useState<BreezyCandidatesSuccess | null>(null);
-  const breezySnapshotRef = useRef<BreezyCandidatesSuccess | null>(null);
+  const [breezySnapshot, setBreezySnapshot] = useState<BreezyCandidatesSuccess | null>(
+    () => startupSnapshotRef.current,
+  );
+  const breezySnapshotRef = useRef<BreezyCandidatesSuccess | null>(startupSnapshotRef.current);
   /** Committed immediately on fast/preview — table paints before deferred scoring. */
-  const [committedCandidates, setCommittedCandidates] = useState<BreezyCandidate[]>([]);
+  const [committedCandidates, setCommittedCandidates] = useState<BreezyCandidate[]>(
+    () => startupSnapshotRef.current?.candidates ?? [],
+  );
   const [enrichedCandidates, setEnrichedCandidates] = useState<ScoredCandidateWorkflowRow[]>([]);
   const [workflowEnrichmentPending, setWorkflowEnrichmentPending] = useState(false);
-  const hasRenderableCandidateRows = committedCandidates.length > 0;
-  const hasCandidateSnapshot = breezySnapshot !== null || committedCandidates.length > 0;
-  const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
-  const [loadingBundle, setLoadingBundle] = useState(true);
+  const [data, setData] = useState<BreezyCandidatesResult | undefined>(
+    () => startupSnapshotRef.current ?? undefined,
+  );
+  const authoritativeCandidatesSnapshot = useMemo(
+    () =>
+      resolveAuthoritativeCandidatesDisplaySnapshot({
+        tableRows: committedCandidates,
+        breezySnapshot,
+        liveData: data?.ok ? data : null,
+        recoverableSnapshot: getRecoverableTabCandidatesSnapshot(),
+        highWaterSnapshot: getTabSnapshotHighWater(),
+        startupSnapshot: startupSnapshotRef.current,
+      }),
+    [committedCandidates, breezySnapshot, data],
+  );
+  const authoritativeCandidates = useMemo(
+    () => authoritativeCandidatesSnapshot?.candidates ?? [],
+    [authoritativeCandidatesSnapshot],
+  );
+  const hasRenderableCandidateRows = authoritativeCandidates.length > 0;
+  const hasCandidateSnapshot = authoritativeCandidatesSnapshot !== null;
+  const [loadingBundle, setLoadingBundle] = useState(
+    () => (startupSnapshotRef.current?.candidates.length ?? 0) === 0,
+  );
   const [refreshingCandidates, setRefreshingCandidates] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const loadingCeilingHit = useLoadingCeiling(
-    loadingBundle && committedCandidates.length === 0,
+    loadingBundle && authoritativeCandidates.length === 0,
     CANDIDATES_TAB_LOADING_CEILING_MS,
   );
+
+  useEffect(() => {
+    if (!data?.ok || !authoritativeCandidatesSnapshot) return;
+    const liveCount = data.candidates.length;
+    const displayCount = authoritativeCandidatesSnapshot.candidates.length;
+    if (liveCount >= displayCount) return;
+    logCandidatesSnapshotCommit({
+      source: "authoritativeDisplay",
+      scanMode: data.scanMode,
+      candidateCount: liveCount,
+      continuationPoint: Math.max(
+        data.hydrationJob?.lastContinuationPoint ?? 0,
+        data.positionsScanned ?? 0,
+      ),
+      restoreSnapshotCount: displayCount,
+      highWaterCount: getTabCandidateCountHighWaterMark(),
+      accepted: false,
+      rejectionReason: "live_payload_poorer_than_authoritative_display",
+    });
+    logCandidatesClientTrace("authoritative_display_suppressed_poorer_live", {
+      liveCandidateCount: liveCount,
+      authoritativeDisplayCount: displayCount,
+      scanMode: data.scanMode,
+    });
+  }, [authoritativeCandidatesSnapshot, data]);
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
   const [workflowNotice, setWorkflowNotice] = useState<string | null>(null);
@@ -537,57 +596,153 @@ export function CandidatesSection() {
     (
       parsed: BreezyCandidatesSuccess,
       timing?: { fetchDurationMs?: number; normalizeDurationMs?: number },
+      commitMeta?: { source?: string },
     ) => {
       const commitStarted = performance.now();
+      const source = commitMeta?.source ?? "commitCandidatesSuccess";
+      const restoreSnapshot = getRecoverableTabCandidatesSnapshot();
+      const highWaterCount = getTabCandidateCountHighWaterMark();
+      const restoreSnapshotCount = restoreSnapshot?.candidates.length ?? 0;
+      const continuationPoint = Math.max(
+        parsed.hydrationJob?.lastContinuationPoint ?? 0,
+        parsed.positionsScanned ?? 0,
+      );
+
       logCandidatesClientTrace("fast_commit_started", {
         priorSnapshotCount: breezySnapshotRef.current?.candidates.length ?? 0,
         incomingCandidateCount: parsed.candidates.length,
         incomingScanMode: parsed.scanMode,
-        highWaterMark: getTabCandidateCountHighWaterMark(),
+        highWaterMark: highWaterCount,
+        restoreSnapshotCount,
         fetchDurationMs: timing?.fetchDurationMs,
         normalizeDurationMs: timing?.normalizeDurationMs,
+        source,
       });
+
       const priorSnapshot = pickRichestCandidatesSnapshot([
         breezySnapshotRef.current,
         getTabSnapshotHighWater(),
+        restoreSnapshot,
+        getStartupRestoredTabSnapshot(),
         peekTabCandidatesCache(),
       ]);
-      const coalesced = coalesceCandidatesSnapshotWithBaseline(parsed, {
-        downgradeSource: "commitCandidatesSuccess",
+      let coalesced = coalesceCandidatesSnapshotWithBaseline(parsed, {
+        downgradeSource: source,
       });
-      const incomingCount = coalesced.candidates.length;
+      let incomingCount = coalesced.candidates.length;
       const priorCount = priorSnapshot?.candidates.length ?? 0;
-      if (incomingCount === 0 && priorCount > 0) {
-        logCandidatesClientTrace("commitCandidatesSuccess_skipped_empty_overwrite", {
-          priorSnapshotCount: priorCount,
-          previewEmptyWouldOverwriteFast: true,
+
+      if (incomingCount === 0 && priorCount > 0 && priorSnapshot) {
+        logCandidatesSnapshotCommit({
+          source,
+          scanMode: parsed.scanMode,
+          candidateCount: 0,
+          continuationPoint,
+          restoreSnapshotCount,
+          highWaterCount,
+          accepted: true,
+          rejectionReason: "blocked_zero_commit_used_prior",
         });
-        setSyncAlert(buildCandidatesSyncAlert(coalesced));
-        return;
+        coalesced = coalesceCandidatesSnapshotWithBaseline(priorSnapshot, {
+          downgradeSource: `${source}:zero_blocked`,
+        });
+        incomingCount = coalesced.candidates.length;
       }
+
       if (priorSnapshot && incomingCount > 0 && priorCount > 0) {
         const decision = shouldAcceptCandidatesCacheWrite(coalesced, priorSnapshot, {
           layer: "ui",
-          downgradeSource: "commitCandidatesSuccess",
+          downgradeSource: source,
         });
-        logCandidatesCacheWriteDecision("ui", "commitCandidatesSuccess", decision);
+        logCandidatesCacheWriteDecision("ui", source, decision);
         if (!decision.accepted) {
+          logCandidatesSnapshotCommit({
+            source,
+            scanMode: coalesced.scanMode,
+            candidateCount: incomingCount,
+            continuationPoint,
+            restoreSnapshotCount,
+            highWaterCount,
+            accepted: false,
+            rejectionReason: decision.reason,
+          });
           logCandidatesClientTrace("commitCandidatesSuccess_skipped_poorer_overwrite", {
             priorSnapshotCount: priorCount,
             incomingCandidateCount: incomingCount,
-            highWaterMark: getTabCandidateCountHighWaterMark(),
+            highWaterMark: highWaterCount,
             reason: decision.reason,
           });
-          setNonBlockingSyncAlert(
-            "Background sync incomplete — table shows last hydrated candidates.",
-          );
+          if (
+            priorSnapshot.candidates.length > 0 &&
+            (breezySnapshotRef.current?.candidates.length ?? 0) < priorCount
+          ) {
+            coalesced = priorSnapshot;
+            incomingCount = priorCount;
+          } else {
+            setNonBlockingSyncAlert(
+              "Background sync incomplete — table shows last hydrated candidates.",
+            );
+            return;
+          }
+        }
+      }
+
+      if (incomingCount === 0 && (highWaterCount > 0 || restoreSnapshotCount > 0)) {
+        const fallback = pickRichestCandidatesSnapshot([priorSnapshot, restoreSnapshot]);
+        if (fallback && fallback.candidates.length > 0) {
+          logCandidatesSnapshotCommit({
+            source,
+            scanMode: parsed.scanMode,
+            candidateCount: 0,
+            continuationPoint,
+            restoreSnapshotCount,
+            highWaterCount,
+            accepted: true,
+            rejectionReason: "blocked_zero_commit_used_high_water",
+          });
+          coalesced = coalesceCandidatesSnapshotWithBaseline(fallback, {
+            downgradeSource: `${source}:high_water_fallback`,
+          });
+          incomingCount = coalesced.candidates.length;
+        }
+      }
+
+      if (incomingCount === 0) {
+        logCandidatesSnapshotCommit({
+          source,
+          scanMode: parsed.scanMode,
+          candidateCount: 0,
+          continuationPoint,
+          restoreSnapshotCount,
+          highWaterCount,
+          accepted: true,
+          acceptedZeroWrite: true,
+          rejectionReason: "no_richer_snapshot_to_apply",
+        });
+        if (priorCount > 0 || committedCandidates.length > 0) {
+          setSyncAlert(buildCandidatesSyncAlert(coalesced));
           return;
         }
       }
+
+      logCandidatesSnapshotCommit({
+        source,
+        scanMode: coalesced.scanMode,
+        candidateCount: incomingCount,
+        continuationPoint: Math.max(
+          coalesced.hydrationJob?.lastContinuationPoint ?? 0,
+          coalesced.positionsScanned ?? 0,
+        ),
+        restoreSnapshotCount,
+        highWaterCount,
+        accepted: incomingCount > 0,
+        rejectionReason: incomingCount === 0 ? "empty_commit_no_rows" : undefined,
+      });
+
       logCandidatesDebug("before_commitCandidatesSuccess", incomingCount, {
         commitCandidatesSuccessCalled: true,
         priorSnapshotCount: priorCount,
-        highWaterMark: getTabCandidateCountHighWaterMark(),
+        highWaterMark: highWaterCount,
         willBecomeEmpty: incomingCount === 0,
       });
       logFirstCandidateKeys(
@@ -603,9 +758,6 @@ export function CandidatesSection() {
           setLoadingBundle(false);
         });
       } else {
-        setCommittedCandidates([]);
-        setEnrichedCandidates([]);
-        setWorkflowEnrichmentPending(false);
         setBreezySnapshot(coalesced);
         setData(coalesced);
       }
@@ -629,7 +781,7 @@ export function CandidatesSection() {
         commitDurationMs,
       });
     },
-    [],
+    [committedCandidates.length],
   );
 
   const commitCandidatesFailure = useCallback(
@@ -843,13 +995,27 @@ export function CandidatesSection() {
       cancelFullHydrationInflight();
     }
 
-    const cached = peekTabCandidatesCache();
-    if (cached && cached.candidates.length > 0) {
-      logCandidatesClientTrace("cache_peek_commit", { candidateCount: cached.candidates.length });
-      logCandidatesDebug("before_cache_peek_commit", cached.candidates.length);
-      commitCandidatesSuccess(cached);
-      logCandidatesDebug("after_cache_peek_commit", cached.candidates.length);
+    const restored =
+      restoreTabSnapshotsFromSession() ??
+      peekTabCandidatesCache() ??
+      getRecoverableTabCandidatesSnapshot();
+    if (restored && restored.candidates.length > 0) {
+      logCandidatesClientTrace("restore_first_commit", {
+        candidateCount: restored.candidates.length,
+        scanMode: restored.scanMode,
+        highWaterMark: getTabCandidateCountHighWaterMark(),
+      });
+      commitCandidatesSuccess(restored, undefined, { source: "loadBundle:restore_first" });
       setLoadingBundle(false);
+    } else {
+      const cached = peekTabCandidatesCache();
+      if (cached && cached.candidates.length > 0) {
+        logCandidatesClientTrace("cache_peek_commit", { candidateCount: cached.candidates.length });
+        logCandidatesDebug("before_cache_peek_commit", cached.candidates.length);
+        commitCandidatesSuccess(cached, undefined, { source: "loadBundle:cache_peek" });
+        logCandidatesDebug("after_cache_peek_commit", cached.candidates.length);
+        setLoadingBundle(false);
+      }
     }
 
     const enrichment: string[] = [];
@@ -959,11 +1125,27 @@ export function CandidatesSection() {
           commitCandidatesFailure(deferredPreviewFailure);
         }
       } else if (stillEmpty && previewResult?.ok) {
-        setData(previewResult);
-        setSyncAlert(buildCandidatesSyncAlert(previewResult));
-        logCandidatesClientTrace("sync_complete_empty_ok", {
-          positionsScanned: previewResult.positionsScanned ?? 0,
-        });
+        const richest =
+          getRecoverableTabCandidatesSnapshot() ??
+          peekTabCandidatesCache() ??
+          getTabSnapshotHighWater();
+        if (richest && richest.candidates.length > 0) {
+          commitCandidatesSuccess(
+            withCandidatesSyncMeta(richest, {
+              fromCache: true,
+              stale: true,
+              refreshError: "Breezy returned no candidates for this tier; using prior snapshot.",
+            }),
+            undefined,
+            { source: "loadBundle:empty_ok_richest_fallback" },
+          );
+        } else {
+          logCandidatesClientTrace("sync_complete_empty_ok_no_richer_snapshot", {
+            positionsScanned: previewResult.positionsScanned ?? 0,
+            highWaterMark: getTabCandidateCountHighWaterMark(),
+          });
+          setSyncAlert(buildCandidatesSyncAlert(previewResult));
+        }
       }
     }
 
@@ -1083,6 +1265,7 @@ export function CandidatesSection() {
     logCandidatesClientTrace("candidates_state_after_render", {
       breezySnapshotCount: breezySnapshot?.candidates.length ?? 0,
       committedCandidateCount: committedCandidates.length,
+      authoritativeDisplayCount: authoritativeCandidatesSnapshot?.candidates.length ?? 0,
       enrichedRowCount: enrichedCandidates.length,
       dataOk: data?.ok,
       dataCandidateCount: data?.ok ? data.candidates.length : 0,
@@ -1092,6 +1275,7 @@ export function CandidatesSection() {
       workflowEnrichmentPending,
     });
   }, [
+    authoritativeCandidatesSnapshot?.candidates.length,
     breezySnapshot,
     committedCandidates.length,
     data,
@@ -1150,19 +1334,19 @@ export function CandidatesSection() {
   );
 
   useEffect(() => {
-    if (committedCandidates.length === 0) {
+    if (authoritativeCandidates.length === 0) {
       return;
     }
 
     const enrichmentStarted = performance.now();
     logCandidatesClientTrace("workflow_enrichment_started", {
-      snapshotCandidateCount: committedCandidates.length,
+      snapshotCandidateCount: authoritativeCandidates.length,
     });
 
     const timerId = window.setTimeout(() => {
       setWorkflowEnrichmentPending(true);
       startTransition(() => {
-        const rows = committedCandidates.map((candidate) => {
+        const rows = authoritativeCandidates.map((candidate) => {
           const job = jobsByPositionId.get(candidate.positionId);
           return buildScoredWorkflowRow(candidate, workflowState[candidate.candidateId], { job });
         });
@@ -1181,7 +1365,7 @@ export function CandidatesSection() {
     }, 0);
 
     return () => window.clearTimeout(timerId);
-  }, [committedCandidates, jobsByPositionId, workflowState]);
+  }, [authoritativeCandidates, jobsByPositionId, workflowState]);
 
   useEffect(() => {
     return () => {
@@ -1251,10 +1435,10 @@ export function CandidatesSection() {
     if (enrichedCandidates.length > 0) {
       return enrichedCandidates;
     }
-    return committedCandidates.map((candidate) =>
+    return authoritativeCandidates.map((candidate) =>
       buildBaselineWorkflowRow(candidate, workflowState[candidate.candidateId]),
     );
-  }, [committedCandidates, enrichedCandidates, workflowState]);
+  }, [authoritativeCandidates, enrichedCandidates, workflowState]);
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
@@ -1340,7 +1524,9 @@ export function CandidatesSection() {
     logCandidatesClientTrace("table_render_state", {
       tableRowsCommittedToState: sorted.length,
       hasRenderableCandidateRows,
-      snapshotCandidateCount: breezySnapshot?.candidates.length ?? 0,
+      snapshotCandidateCount: authoritativeCandidatesSnapshot?.candidates.length ?? 0,
+      committedCandidateCount: committedCandidates.length,
+      liveDataCandidateCount: data?.ok ? data.candidates.length : 0,
       workflowEnrichedRowCount: candidates.length,
       activeFilters: {
         sourceFilter,
@@ -1358,7 +1544,7 @@ export function CandidatesSection() {
     });
     logCandidatesDebug("after_table_filter", sorted.length, {
       tableRowsCommittedToState: sorted.length,
-      snapshotCandidates: breezySnapshot?.candidates.length ?? 0,
+      snapshotCandidates: authoritativeCandidatesSnapshot?.candidates.length ?? 0,
     });
     logFirstCandidateKeys(
       "after_table_filter",
@@ -1369,8 +1555,9 @@ export function CandidatesSection() {
     actingRecruiter,
     appliedFrom,
     appliedTo,
-    breezySnapshot?.candidates.length,
+    authoritativeCandidatesSnapshot?.candidates.length,
     candidates,
+    data,
     cityFilter,
     debouncedSearch,
     matchFilter,
@@ -1488,7 +1675,7 @@ export function CandidatesSection() {
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
     const row = buildCandidateDrawerRowFromScored(selectedCandidate);
-    const breezy = breezySnapshot?.candidates.find(
+    const breezy = authoritativeCandidatesSnapshot?.candidates.find(
       (c) => c.candidateId === selectedCandidate.candidateId,
     );
     if (!breezy || melOpportunities.length === 0) return row;
@@ -1498,7 +1685,7 @@ export function CandidatesSection() {
       matchedOpportunities: melMatch.matches,
       melMatchingSummary: melMatch.aiSummary,
     };
-  }, [breezySnapshot, melOpportunities, selectedCandidate]);
+  }, [authoritativeCandidatesSnapshot, melOpportunities, selectedCandidate]);
 
   const prioritizationQueues = useMemo(
     () =>
@@ -2203,22 +2390,22 @@ export function CandidatesSection() {
     );
   }
 
-  const syncData = data?.ok ? data : breezySnapshot;
+  const displaySnapshot = authoritativeCandidatesSnapshot;
 
   const showSyncAlert =
     Boolean(syncAlert) &&
     !(hasRenderableCandidateRows && syncAlert?.toLowerCase().includes("timed out"));
   const showBackgroundSyncLine =
     hasRenderableCandidateRows && (refreshingCandidates || syncAlert);
-  const syncHeaderLine = syncData
+  const syncHeaderLine = displaySnapshot
     ? formatRecruiterCandidatesSyncHeader({
-        candidateCount: syncData.candidates.length,
-        fetchedAt: syncData.fetchedAt,
-        fromCache: syncData.fromCache,
-        stale: syncData.stale,
-        partial: syncData.partial,
-        positionsScanned: syncData.positionsScanned,
-        totalPositionsAvailable: syncData.totalPositionsAvailable,
+        candidateCount: displaySnapshot.candidates.length,
+        fetchedAt: displaySnapshot.fetchedAt,
+        fromCache: displaySnapshot.fromCache,
+        stale: displaySnapshot.stale,
+        partial: displaySnapshot.partial,
+        positionsScanned: displaySnapshot.positionsScanned,
+        totalPositionsAvailable: displaySnapshot.totalPositionsAvailable,
         refreshing: refreshingCandidates,
       })
     : null;
@@ -2242,7 +2429,7 @@ export function CandidatesSection() {
               className={`${syncBannerClass} flex min-h-[2.25rem] items-center border-teal-500/25 bg-teal-500/10 py-1.5 text-xs text-teal-100`}
             >
               <span className="line-clamp-1 tabular-nums">
-                {formatRecruiterBackgroundSyncLine(committedCandidates.length)}
+                {formatRecruiterBackgroundSyncLine(authoritativeCandidates.length)}
               </span>
             </p>
           ) : null}
@@ -2318,8 +2505,8 @@ export function CandidatesSection() {
             >
               {refreshingCandidates ? "Syncing…" : "Refresh / Sync"}
             </button>
-            {syncData ? (
-              <p className="text-xs text-zinc-500">Fetched {formatDate(syncData.fetchedAt)}</p>
+            {displaySnapshot ? (
+              <p className="text-xs text-zinc-500">Fetched {formatDate(displaySnapshot.fetchedAt)}</p>
             ) : null}
           </div>
         </div>
@@ -2346,8 +2533,8 @@ export function CandidatesSection() {
         onOpenCandidate={setSelectedCandidateId}
         onQueueAction={handleQueueAction}
         queueActionBusy={queueActionBusy}
-        syncPartial={Boolean(syncData?.partial)}
-        syncStale={Boolean(syncData?.stale)}
+        syncPartial={Boolean(displaySnapshot?.partial)}
+        syncStale={Boolean(displaySnapshot?.stale)}
         quickFilter={recruiterQuickFilter}
         onQuickFilterChange={setRecruiterQuickFilter}
       />
