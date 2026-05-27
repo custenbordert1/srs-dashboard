@@ -62,9 +62,14 @@ import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
   CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
   CANDIDATES_TAB_LOADING_CEILING_MS,
+  cancelFullHydrationInflight,
+  coalesceCandidatesSnapshotWithBaseline,
+  continueCandidateHydration,
   fetchAndMergeFastCandidates,
-  fetchAndMergeFullCandidates,
   fetchCandidatesForTab,
+  getTabCandidateCountHighWaterMark,
+  getTabSnapshotHighWater,
+  getRecoverableTabCandidatesSnapshot,
   peekTabCandidatesCache,
   shouldHydrateFullCandidates,
   shouldSkipFastTierForHydration,
@@ -83,9 +88,11 @@ import {
   buildCandidatesSyncAlert,
   CANDIDATES_WORKFLOW_SOURCE,
   timeoutShowsCachedCandidatesMessage,
+  withCandidatesSyncMeta,
 } from "@/lib/breezy-candidates-sync";
 import {
   logCandidatesCacheWriteDecision,
+  pickRichestCandidatesSnapshot,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
@@ -531,31 +538,43 @@ export function CandidatesSection() {
       timing?: { fetchDurationMs?: number; normalizeDurationMs?: number },
     ) => {
       const commitStarted = performance.now();
-      const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
-      const incomingCount = parsed.candidates.length;
       logCandidatesClientTrace("fast_commit_started", {
-        priorSnapshotCount: priorCount,
-        incomingCandidateCount: incomingCount,
+        priorSnapshotCount: breezySnapshotRef.current?.candidates.length ?? 0,
+        incomingCandidateCount: parsed.candidates.length,
         incomingScanMode: parsed.scanMode,
+        highWaterMark: getTabCandidateCountHighWaterMark(),
         fetchDurationMs: timing?.fetchDurationMs,
         normalizeDurationMs: timing?.normalizeDurationMs,
       });
+      const priorSnapshot = pickRichestCandidatesSnapshot([
+        breezySnapshotRef.current,
+        getTabSnapshotHighWater(),
+        peekTabCandidatesCache(),
+      ]);
+      const coalesced = coalesceCandidatesSnapshotWithBaseline(parsed, {
+        downgradeSource: "commitCandidatesSuccess",
+      });
+      const incomingCount = coalesced.candidates.length;
+      const priorCount = priorSnapshot?.candidates.length ?? 0;
       if (incomingCount === 0 && priorCount > 0) {
         logCandidatesClientTrace("commitCandidatesSuccess_skipped_empty_overwrite", {
           priorSnapshotCount: priorCount,
           previewEmptyWouldOverwriteFast: true,
         });
-        setSyncAlert(buildCandidatesSyncAlert(parsed));
+        setSyncAlert(buildCandidatesSyncAlert(coalesced));
         return;
       }
-      const priorSnapshot = breezySnapshotRef.current;
       if (priorSnapshot && incomingCount > 0 && priorCount > 0) {
-        const decision = shouldAcceptCandidatesCacheWrite(parsed, priorSnapshot);
+        const decision = shouldAcceptCandidatesCacheWrite(coalesced, priorSnapshot, {
+          layer: "ui",
+          downgradeSource: "commitCandidatesSuccess",
+        });
         logCandidatesCacheWriteDecision("ui", "commitCandidatesSuccess", decision);
         if (!decision.accepted) {
           logCandidatesClientTrace("commitCandidatesSuccess_skipped_poorer_overwrite", {
             priorSnapshotCount: priorCount,
             incomingCandidateCount: incomingCount,
+            highWaterMark: getTabCandidateCountHighWaterMark(),
             reason: decision.reason,
           });
           setNonBlockingSyncAlert(
@@ -567,29 +586,30 @@ export function CandidatesSection() {
       logCandidatesDebug("before_commitCandidatesSuccess", incomingCount, {
         commitCandidatesSuccessCalled: true,
         priorSnapshotCount: priorCount,
+        highWaterMark: getTabCandidateCountHighWaterMark(),
         willBecomeEmpty: incomingCount === 0,
       });
       logFirstCandidateKeys(
         "before_commitCandidatesSuccess",
-        parsed.candidates[0] as unknown as Record<string, unknown> | undefined,
+        coalesced.candidates[0] as unknown as Record<string, unknown> | undefined,
       );
-      breezySnapshotRef.current = parsed;
+      breezySnapshotRef.current = coalesced;
       if (incomingCount > 0) {
         flushSync(() => {
-          setCommittedCandidates(parsed.candidates);
-          setBreezySnapshot(parsed);
-          setData(parsed);
+          setCommittedCandidates(coalesced.candidates);
+          setBreezySnapshot(coalesced);
+          setData(coalesced);
           setLoadingBundle(false);
         });
       } else {
         setCommittedCandidates([]);
         setEnrichedCandidates([]);
         setWorkflowEnrichmentPending(false);
-        setBreezySnapshot(parsed);
-        setData(parsed);
+        setBreezySnapshot(coalesced);
+        setData(coalesced);
       }
       const commitDurationMs = Math.round(performance.now() - commitStarted);
-      const alert = buildCandidatesSyncAlert(parsed);
+      const alert = buildCandidatesSyncAlert(coalesced);
       if (incomingCount > 0 && alert?.toLowerCase().includes("timed out")) {
         setSyncAlert("Background sync in progress — table shows last loaded candidates.");
       } else {
@@ -597,7 +617,7 @@ export function CandidatesSection() {
       }
       logCandidatesClientTrace("fast_commit_completed", {
         candidatesStateLength: incomingCount,
-        snapshotCandidateCountAfter: parsed.candidates.length,
+        snapshotCandidateCountAfter: coalesced.candidates.length,
         commitDurationMs,
         fetchDurationMs: timing?.fetchDurationMs,
         normalizeDurationMs: timing?.normalizeDurationMs,
@@ -630,6 +650,30 @@ export function CandidatesSection() {
         );
         return;
       }
+      const recovered =
+        getRecoverableTabCandidatesSnapshot() ??
+        peekTabCandidatesCache() ??
+        getTabSnapshotHighWater();
+      if (recovered && recovered.candidates.length > 0) {
+        logBreezyCandidatesOps("client", "fallback", {
+          fallbackSource: "recoverable_tab_snapshot",
+          reason: "commit_cached_rows_on_failure",
+          candidateCount: recovered.candidates.length,
+          error: failureMessage,
+        });
+        commitCandidatesSuccess(
+          withCandidatesSyncMeta(recovered, {
+            fromCache: true,
+            stale: true,
+            refreshError: failureMessage,
+          }),
+        );
+        setSyncAlert(
+          `${failureMessage} Showing loaded candidates — background sync incomplete.`,
+        );
+        setLoadingBundle(false);
+        return;
+      }
       if (breezySnapshotRef.current) {
         setSyncAlert(failureMessage);
         return;
@@ -641,7 +685,7 @@ export function CandidatesSection() {
         fetchedAt: new Date().toISOString(),
       });
     },
-    [committedCandidates.length, hasPopulatedSnapshot],
+    [commitCandidatesSuccess, committedCandidates.length, hasPopulatedSnapshot],
   );
 
   const handlePreviewFetchError = useCallback(
@@ -690,7 +734,10 @@ export function CandidatesSection() {
       setRefreshingCandidates(true);
       try {
         const fetchStarted = performance.now();
-        const merged = await fetchAndMergeFullCandidates(base);
+        const merged = await continueCandidateHydration(base, {
+          reclaimStale: true,
+          forceContinuation: true,
+        });
         logCandidatesClientTrace("hydrateRemainingCandidates_response", {
           ok: merged.ok,
           candidateCount: merged.ok ? merged.candidates.length : 0,
@@ -791,6 +838,10 @@ export function CandidatesSection() {
     const rowsAtStart = breezySnapshotRef.current?.candidates.length ?? 0;
     if (rowsAtStart === 0) setLoadingBundle(true);
 
+    if (force) {
+      cancelFullHydrationInflight();
+    }
+
     const cached = peekTabCandidatesCache();
     if (cached && cached.candidates.length > 0) {
       logCandidatesClientTrace("cache_peek_commit", { candidateCount: cached.candidates.length });
@@ -886,7 +937,26 @@ export function CandidatesSection() {
       await fastWork;
       const stillEmpty = (breezySnapshotRef.current?.candidates.length ?? 0) === 0;
       if (stillEmpty && deferredPreviewFailure) {
-        commitCandidatesFailure(deferredPreviewFailure);
+        const previewFailureMessage =
+          deferredPreviewFailure.ok === false ? deferredPreviewFailure.error : null;
+        const recovered = getRecoverableTabCandidatesSnapshot() ?? peekTabCandidatesCache();
+        if (recovered && recovered.candidates.length > 0) {
+          commitCandidatesSuccess(
+            withCandidatesSyncMeta(recovered, {
+              fromCache: true,
+              stale: true,
+              refreshError: previewFailureMessage ?? undefined,
+            }),
+          );
+          setNonBlockingSyncAlert(
+            previewFailureMessage
+              ? `${previewFailureMessage} Showing cached candidates — background sync continues.`
+              : buildCandidatesSyncAlert(recovered) ??
+                  "Showing cached candidates — background sync continues.",
+          );
+        } else {
+          commitCandidatesFailure(deferredPreviewFailure);
+        }
       } else if (stillEmpty && previewResult?.ok) {
         setData(previewResult);
         setSyncAlert(buildCandidatesSyncAlert(previewResult));
@@ -959,6 +1029,27 @@ export function CandidatesSection() {
     }
 
     setEnrichmentWarnings(enrichment);
+
+    if (force) {
+      await fastWork;
+      const snapshot = breezySnapshotRef.current;
+      if (snapshot) {
+        setRefreshingCandidates(true);
+        try {
+          const continued = await continueCandidateHydration(snapshot, {
+            reclaimStale: true,
+            forceContinuation: true,
+          });
+          if (continued.ok) {
+            commitCandidatesSuccess(continued);
+          }
+        } catch {
+          // Keep visible rows; refresh attempted continuation.
+        } finally {
+          setRefreshingCandidates(false);
+        }
+      }
+    }
   }, [
     commitCandidatesFailure,
     commitCandidatesSuccess,

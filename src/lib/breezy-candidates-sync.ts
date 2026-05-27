@@ -4,8 +4,10 @@ import type {
   BreezyCandidatesSuccess,
 } from "@/lib/breezy-api";
 import { isPartialBreezyPositionSync } from "@/lib/breezy-api";
+import { logBreezyCandidatesOps } from "@/lib/breezy-candidates-ops-log";
 import {
   logCandidatesCacheWriteDecision,
+  pickRichestCandidatesSnapshot,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
 import { mergeHydrationJobSnapshots } from "@/lib/breezy-candidates-hydration";
@@ -15,13 +17,16 @@ export type {
   BreezyCandidatesCacheWriteDecision,
 } from "@/lib/breezy-candidates-cache";
 export {
+  describeCandidatesSnapshotMeta,
   isRicherCandidatesCache,
   logCandidatesCacheWriteDecision,
+  logDowngradeAttemptRejected,
   pickRichestCandidatesSnapshot,
   resolveCandidatesCacheTier,
   scoreCandidatesCacheRichness,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
+export type { BreezyCandidatesSnapshotMeta } from "@/lib/breezy-candidates-cache";
 
 export const BREEZY_CANDIDATES_SOURCE = {
   label: "Breezy HR API",
@@ -56,13 +61,23 @@ export type BreezyCandidatesResultWithSync = BreezyCandidatesResult & Partial<Br
 
 const lastOkByCacheKey = new Map<string, BreezyCandidatesSuccess>();
 
+export function getRichestOkCandidatesSnapshot(): BreezyCandidatesSuccess | null {
+  return pickRichestCandidatesSnapshot([...lastOkByCacheKey.values()]);
+}
+
 export function rememberOkCandidatesSnapshot(
   cacheKey: string,
   snapshot: BreezyCandidatesSuccess,
-  context?: { hydrationRoundId?: string },
+  context?: { hydrationRoundId?: string; downgradeSource?: string },
 ): boolean {
   const prior = lastOkByCacheKey.get(cacheKey) ?? null;
-  const decision = shouldAcceptCandidatesCacheWrite(snapshot, prior, context);
+  const globalRichest = getRichestOkCandidatesSnapshot();
+  const incumbent = pickRichestCandidatesSnapshot([prior, globalRichest]);
+  const decision = shouldAcceptCandidatesCacheWrite(snapshot, incumbent, {
+    ...context,
+    layer: "server",
+    downgradeSource: context?.downgradeSource ?? `rememberOkCandidatesSnapshot:${cacheKey}`,
+  });
   logCandidatesCacheWriteDecision("server", cacheKey, decision);
   if (!decision.accepted) return false;
   lastOkByCacheKey.set(cacheKey, snapshot);
@@ -110,7 +125,12 @@ export function withCandidatesFailureMeta(
 export function mergeCandidatesSnapshots(
   base: BreezyCandidatesSuccess,
   addition: BreezyCandidatesSuccess,
+  context?: { downgradeSource?: string },
 ): BreezyCandidatesSuccess {
+  const continuationBefore = Math.max(
+    base.hydrationJob?.lastContinuationPoint ?? 0,
+    base.positionsScanned ?? 0,
+  );
   const byId = new Map<string, BreezyCandidate>();
   for (const candidate of base.candidates) {
     byId.set(candidate.candidateId, candidate);
@@ -130,12 +150,18 @@ export function mergeCandidatesSnapshots(
     addition.positionsScanned ?? 0,
     mergedHydrationJob?.lastContinuationPoint ?? 0,
   );
+  const continuationAfter = mergedHydrationJob?.lastContinuationPoint ?? scanned;
   const hydrationComplete =
     addition.hydrationComplete ??
     mergedHydrationJob?.hydrationComplete ??
     scanned >= total;
 
-  return {
+  const tierRank = (scan?: string) =>
+    scan === "all" ? 4 : scan === "full" ? 3 : scan === "fast" ? 2 : scan === "preview" ? 1 : 0;
+  const richerScanMode =
+    tierRank(addition.scanMode) >= tierRank(base.scanMode) ? addition.scanMode : base.scanMode;
+
+  const merged: BreezyCandidatesSuccess = {
     ...addition,
     candidates: mergedCandidates,
     totalPositionsAvailable: total,
@@ -143,18 +169,37 @@ export function mergeCandidatesSnapshots(
     positionsScanned: scanned,
     totalCandidatesPulled: mergedCandidates.length,
     totalCandidatesFetched: mergedCandidates.length,
-    truncated: addition.truncated,
+    truncated: addition.truncated && mergedCandidates.length <= base.candidates.length,
     partial: !hydrationComplete && scanned < total,
     hydrationComplete,
     hydrationDiagnostics: addition.hydrationDiagnostics ?? base.hydrationDiagnostics,
     hydrationJob: mergedHydrationJob,
-    scanMode: addition.scanMode ?? base.scanMode,
+    scanMode: richerScanMode ?? addition.scanMode ?? base.scanMode,
     warnings: [...new Set([...(base.warnings ?? []), ...(addition.warnings ?? [])])],
     syncNotes: [...new Set([...(base.syncNotes ?? []), ...(addition.syncNotes ?? [])])],
-    fetchedAt: addition.fetchedAt,
+    fetchedAt:
+      [base.fetchedAt, addition.fetchedAt].sort().at(-1) ?? addition.fetchedAt ?? base.fetchedAt,
     source: base.source ?? addition.source,
     sourcePath: base.sourcePath ?? addition.sourcePath,
   };
+
+  if (continuationAfter < continuationBefore) {
+    logBreezyCandidatesOps("server", "fallback", {
+      phase: "merge_regress_blocked",
+      downgradeSource: context?.downgradeSource ?? "mergeCandidatesSnapshots",
+      hydrationContinuationBefore: continuationBefore,
+      hydrationContinuationAfter: continuationAfter,
+      candidateCountBefore: base.candidates.length,
+      candidateCountAfter: merged.candidates.length,
+    });
+    return {
+      ...base,
+      hydrationJob: mergedHydrationJob ?? base.hydrationJob,
+      positionsScanned: Math.max(base.positionsScanned ?? 0, continuationBefore),
+    };
+  }
+
+  return merged;
 }
 
 export function buildCandidatesSyncAlert(data: BreezyCandidatesSuccess): string | null {

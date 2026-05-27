@@ -25,10 +25,13 @@ import {
   pickRichestCandidatesSnapshot,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
+import { getRichestOkCandidatesSnapshot } from "@/lib/breezy-candidates-sync";
 import {
+  forceReleaseHydrationLock,
   getHydrationJobState,
+  prepareHydrationContinuation,
   recordHydrationBatchProgress,
-  resolveHydrationResumeOffset,
+  releaseHydrationSession,
   toHydrationJobSnapshot,
   touchHydrationHeartbeat,
 } from "@/lib/breezy-candidates-hydration";
@@ -838,10 +841,14 @@ function cachedCandidates(
     if (!entry) return result;
     if (result.ok) {
       const prior = entry.resolved?.ok ? entry.resolved : null;
-      if (prior) {
-        const decision = shouldAcceptCandidatesCacheWrite(result, prior);
+      const incumbent = pickRichestCandidatesSnapshot([prior, getRichestOkCandidatesSnapshot()]);
+      if (incumbent) {
+        const decision = shouldAcceptCandidatesCacheWrite(result, incumbent, {
+          layer: "server",
+          downgradeSource: `cachedCandidates:${key}`,
+        });
         logCandidatesCacheWriteDecision("server", key, decision);
-        if (!decision.accepted) return prior;
+        if (!decision.accepted) return incumbent;
       }
       entry.resolved = result;
       return result;
@@ -1515,6 +1522,8 @@ export async function fetchBreezyCandidates(options?: {
   positionsOffset?: number;
   /** Hydration lock owner (browser session id or server default). */
   hydrationOwnerId?: string;
+  /** Reclaim stalled hydration lock and continue from last continuation point. */
+  reclaimStale?: boolean;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
   if (!getBreezyApiKeySync()) {
@@ -1647,6 +1656,7 @@ export async function fetchBreezyCandidates(options?: {
         scanMode,
         positionsOffset: options?.positionsOffset,
         hydrationOwnerId: options?.hydrationOwnerId,
+        reclaimStale: options?.reclaimStale,
         seedContinuationPoint,
         seedCandidateCount,
       }),
@@ -1656,12 +1666,25 @@ export async function fetchBreezyCandidates(options?: {
   if (result.ok) {
     const {
       mergeCandidatesSnapshots,
+      getRichestOkCandidatesSnapshot,
+      pickRichestCandidatesSnapshot,
     } = await import("@/lib/breezy-candidates-sync");
     let payload = result;
-    if (scanMode === "full") {
+    const richestKnown = pickRichestCandidatesSnapshot([
+      peeked?.ok ? peeked : null,
+      getRichestOkCandidatesSnapshot(),
+      getStaleOkCandidatesSnapshot(fastTierCacheKey),
+    ]);
+    if (richestKnown && richestKnown.candidates.length > payload.candidates.length) {
+      payload = mergeCandidatesSnapshots(richestKnown, payload, {
+        downgradeSource: "fetchBreezyCandidates:richest_peek_merge",
+      });
+    } else if (scanMode === "full") {
       const fastBase = getStaleOkCandidatesSnapshot(fastTierCacheKey);
       if (fastBase) {
-        payload = mergeCandidatesSnapshots(fastBase, result);
+        payload = mergeCandidatesSnapshots(fastBase, result, {
+          downgradeSource: "fetchBreezyCandidates:full_fast_merge",
+        });
       }
     }
     const enriched = withCandidatesSyncMeta(payload, {
@@ -2355,6 +2378,7 @@ async function fetchBreezyCandidatesFastUncached(options?: {
   hydrationOwnerId?: string;
   seedContinuationPoint?: number;
   seedCandidateCount?: number;
+  reclaimStale?: boolean;
 }): Promise<BreezyCandidatesResult> {
   resetBreezyRateLimitFlag();
   return fetchBreezyCandidatesUncachedCore({
@@ -2631,6 +2655,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   hydrationOwnerId?: string;
   seedContinuationPoint?: number;
   seedCandidateCount?: number;
+  reclaimStale?: boolean;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
   const apiKey = getBreezyApiKeySync();
@@ -2749,12 +2774,12 @@ async function fetchBreezyCandidatesUncachedCore(options: {
       scanMode === "full"
         ? Math.min(BREEZY_CANDIDATES_FAST_TIER_POSITIONS, sortedPositions.length)
         : 0;
-    const resumePlan = resolveHydrationResumeOffset({
+    const resumePlan = prepareHydrationContinuation({
       companyId,
       ownerId: hydrationOwnerId,
       totalPositionsAvailable: totalAvailable,
       requestedOffset: options.positionsOffset,
-      force: options.force,
+      reclaimStale: options.reclaimStale,
       seedContinuationPoint: Math.max(
         options.seedContinuationPoint ?? 0,
         getHydrationJobState(companyId)?.lastContinuationPoint ?? 0,
@@ -2872,6 +2897,11 @@ async function fetchBreezyCandidatesUncachedCore(options: {
         maxCandidates:
           scanMode === "preview" ? BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES : undefined,
         batchDelayMs: scanMode === "preview" ? CANDIDATE_PREVIEW_BATCH_DELAY_MS : undefined,
+      }).catch((err) => {
+        if (scanMode === "full" || scanMode === "all") {
+          forceReleaseHydrationLock(companyId, "scan_batch_failed");
+        }
+        throw err;
       });
 
   if (
@@ -2879,6 +2909,9 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     batch.positionFetchFailed > 0 &&
     batch.candidates.length === 0
   ) {
+    if (scanMode === "full" || scanMode === "all") {
+      forceReleaseHydrationLock(companyId, "scan_empty_failure");
+    }
     return {
       ok: false,
       error: batch.warnings[0] ?? "Breezy company candidate list failed",
@@ -2929,6 +2962,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
       ? false
       : hydrationJobState?.hydrationComplete ??
         (positionsScannedTotal >= totalAvailable && !batch.truncated);
+  const responseFetchedAt = hydrationJobState?.lastUpdatedAt ?? fetchedAt;
 
   if (scanMode === "preview") {
     const loaded = batch.candidates.length;
@@ -3018,6 +3052,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
 
   return {
     ...payload,
+    fetchedAt: responseFetchedAt,
     scanMode,
     hydrationComplete,
     hydrationDiagnostics,

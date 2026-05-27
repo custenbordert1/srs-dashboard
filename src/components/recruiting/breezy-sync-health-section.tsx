@@ -275,6 +275,45 @@ export function BreezySyncHealthSection() {
                 }
               />
               <Metric
+                label="Last heartbeat"
+                value={
+                  snapshot.candidateSync.hydrationJob.hydrationHeartbeat
+                    ? new Date(snapshot.candidateSync.hydrationJob.hydrationHeartbeat).toLocaleTimeString()
+                    : "—"
+                }
+                hint={
+                  snapshot.candidateSync.hydrationJob.hydrationStalled
+                    ? "Stalled"
+                    : snapshot.candidateSync.hydrationJob.hydrationInProgress
+                      ? "Healthy"
+                      : "Not running"
+                }
+              />
+              <Metric
+                label="Last progress"
+                value={
+                  snapshot.candidateSync.hydrationJob.lastProgressAt
+                    ? new Date(snapshot.candidateSync.hydrationJob.lastProgressAt).toLocaleTimeString()
+                    : "—"
+                }
+                hint={`Reclaim ${snapshot.candidateSync.hydrationJob.reclaimCount}`}
+              />
+              <Metric
+                label="Hydration age"
+                value={
+                  snapshot.candidateSync.hydrationJob.hydrationStartedAt
+                    ? `${Math.round(
+                        (Date.now() -
+                          Date.parse(snapshot.candidateSync.hydrationJob.hydrationStartedAt)) /
+                          1000,
+                      )}s`
+                    : "—"
+                }
+                hint={
+                  snapshot.candidateSync.hydrationJob.hydrationStalled ? "Stalled job" : "Active session"
+                }
+              />
+              <Metric
                 label="Hydration round"
                 value={snapshot.candidateSync.hydrationJob.hydrationRoundId.slice(0, 8)}
                 hint={`Resume ${snapshot.candidateSync.hydrationJob.resumeCount} · Restart ${snapshot.candidateSync.hydrationJob.restartCount}`}
@@ -288,6 +327,15 @@ export function BreezySyncHealthSection() {
                 label="Queue remaining"
                 value={snapshot.candidateSync.hydrationJob.estimatedRemainingPositions}
                 hint={`${snapshot.candidateSync.hydrationJob.hydrationPercent}% complete`}
+              />
+              <Metric
+                label="Stalled status"
+                value={snapshot.candidateSync.hydrationJob.hydrationStalled ? "Yes" : "No"}
+                hint={
+                  snapshot.candidateSync.hydrationJob.lastUpdatedAt
+                    ? `Updated ${new Date(snapshot.candidateSync.hydrationJob.lastUpdatedAt).toLocaleTimeString()}`
+                    : "No timestamp"
+                }
               />
             </div>
           ) : null}

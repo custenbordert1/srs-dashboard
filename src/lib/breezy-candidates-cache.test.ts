@@ -57,6 +57,62 @@ describe("breezy-candidates-cache richness", () => {
     assert.equal(best?.scanMode, "fast");
   });
 
+  it("rejects incremental full-tier batch with fewer rows than fast-tier snapshot", () => {
+    const fast = snapshot({
+      scanMode: "fast",
+      candidates: Array.from({ length: 72 }, (_, index) => ({
+        candidateId: `fast-${index}`,
+      })) as BreezyCandidatesSuccess["candidates"],
+      positionsScanned: 60,
+      hydrationJob: {
+        hydrationRoundId: "round-1",
+        companyId: "co-1",
+        positionsScanned: 84,
+        totalPositionsAvailable: 295,
+        queueRemaining: 211,
+        hydrationPercent: 28,
+        startedAt: "2026-05-22T12:00:00.000Z",
+        lastSuccessfulHydrationAt: "2026-05-22T12:00:00.000Z",
+        hydrationInProgress: true,
+        hydrationOwnerId: "owner",
+        hydrationHeartbeat: "2026-05-22T12:00:00.000Z",
+        hydrationStartedAt: "2026-05-22T12:00:00.000Z",
+        resumeCount: 1,
+        restartCount: 0,
+        lastContinuationPoint: 84,
+        estimatedRemainingPositions: 211,
+        candidateCountAtLastSuccess: 72,
+        hydrationComplete: false,
+        completedPositionCount: 84,
+        skippedPositionCount: 0,
+        lastProgressAt: "2026-05-22T12:00:00.000Z",
+        lastCandidateIncreaseAt: "2026-05-22T12:00:00.000Z",
+        lastContinuationIncreaseAt: "2026-05-22T12:00:00.000Z",
+        lastUpdatedAt: "2026-05-22T12:00:00.000Z",
+        reclaimCount: 0,
+        hydrationStalled: false,
+      },
+    });
+    const incrementalFull = snapshot({
+      scanMode: "full",
+      candidates: Array.from({ length: 7 }, (_, index) => ({
+        candidateId: `full-${index}`,
+      })) as BreezyCandidatesSuccess["candidates"],
+      positionsScanned: 90,
+      hydrationJob: {
+        ...fast.hydrationJob!,
+        lastContinuationPoint: 90,
+        hydrationPercent: 30,
+      },
+    });
+    const decision = shouldAcceptCandidatesCacheWrite(incrementalFull, fast, {
+      downgradeSource: "test:incremental_full_vs_fast",
+    });
+    assert.equal(decision.accepted, false);
+    assert.equal(decision.reason, "lower_candidate_count");
+    assert.equal(pickRichestCandidatesSnapshot([fast, incrementalFull])?.candidates.length, 72);
+  });
+
   it("accepts richer hydration upgrades", () => {
     const partial = snapshot({
       scanMode: "fast",

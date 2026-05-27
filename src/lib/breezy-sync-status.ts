@@ -276,7 +276,9 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
   const candidateSync: BreezyCandidateSyncHealth = {
     fromCache: candidatesFromCache,
     candidateCount: candidatesCount,
-    fetchedAt: cachedCandidates?.ok ? cachedCandidates.fetchedAt : null,
+    fetchedAt:
+      hydrationJobSnapshot?.lastUpdatedAt ??
+      (cachedCandidates?.ok ? cachedCandidates.fetchedAt : null),
     truncated: candidateTruncated,
     partial: candidatePartial,
     hydrationComplete:

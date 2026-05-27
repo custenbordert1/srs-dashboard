@@ -8,8 +8,12 @@ function newHydrationId(): string {
   return `hydration-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-/** Heartbeat older than this is treated as stale — hydration can be safely resumed. */
-export const BREEZY_HYDRATION_HEARTBEAT_STALE_MS = 120_000;
+/** Heartbeat older than this — owner is considered dead. */
+export const BREEZY_HYDRATION_HEARTBEAT_STALE_MS = 60_000;
+/** No continuation/candidate progress for this long → stalled. */
+export const BREEZY_HYDRATION_PROGRESS_STALE_MS = 45_000;
+/** Client in-flight full hydration older than this can be superseded by Refresh. */
+export const BREEZY_HYDRATION_INFLIGHT_STALE_MS = 90_000;
 /** In-memory hydration job TTL when not actively heartbeating. */
 export const BREEZY_HYDRATION_STATE_TTL_MS = 30 * 60 * 1000;
 
@@ -34,6 +38,12 @@ export type BreezyHydrationJobState = {
   estimatedRemainingPositions: number;
   candidateCountAtLastSuccess: number;
   hydrationComplete: boolean;
+  lastProgressAt: string | null;
+  lastCandidateIncreaseAt: string | null;
+  lastContinuationIncreaseAt: string | null;
+  lastUpdatedAt: string | null;
+  reclaimCount: number;
+  hydrationStalled: boolean;
   expiresAt: number;
 };
 
@@ -48,6 +58,12 @@ export type HydrationResumePlan = {
   attachedToExisting: boolean;
   resumedFromStale: boolean;
   restarted: boolean;
+  reclaimed: boolean;
+  stalled: boolean;
+};
+
+export type HydrationContinuationResult = HydrationResumePlan & {
+  hydrationJob: BreezyHydrationJobState | null;
 };
 
 const hydrationJobs = new Map<string, BreezyHydrationJobState>();
@@ -60,11 +76,60 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+function parseMs(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? null : ms;
+}
+
 function isHeartbeatStale(state: BreezyHydrationJobState, now = Date.now()): boolean {
-  if (!state.hydrationHeartbeat) return true;
-  const heartbeatMs = Date.parse(state.hydrationHeartbeat);
-  if (Number.isNaN(heartbeatMs)) return true;
+  const heartbeatMs = parseMs(state.hydrationHeartbeat);
+  if (heartbeatMs === null) return state.hydrationInProgress;
   return now - heartbeatMs > BREEZY_HYDRATION_HEARTBEAT_STALE_MS;
+}
+
+function isProgressStale(state: BreezyHydrationJobState, now = Date.now()): boolean {
+  if (!state.hydrationInProgress || state.hydrationComplete) return false;
+  const progressMs = parseMs(state.lastProgressAt ?? state.lastSuccessfulHydrationAt ?? state.startedAt);
+  if (progressMs === null) return true;
+  return now - progressMs > BREEZY_HYDRATION_PROGRESS_STALE_MS;
+}
+
+export function isHydrationJobStalled(state: BreezyHydrationJobState, now = Date.now()): boolean {
+  if (state.hydrationComplete) return false;
+  if (!state.hydrationInProgress) return false;
+  return isHeartbeatStale(state, now) || isProgressStale(state, now);
+}
+
+function touchProgressTimestamps(
+  state: BreezyHydrationJobState,
+  input: {
+    candidateCount?: number;
+    continuationPoint?: number;
+    heartbeat?: boolean;
+  },
+): void {
+  const now = nowIso();
+  state.lastProgressAt = now;
+  state.lastUpdatedAt = now;
+  if (input.heartbeat !== false) {
+    state.hydrationHeartbeat = now;
+  }
+  if (
+    input.candidateCount !== undefined &&
+    input.candidateCount > state.candidateCountAtLastSuccess
+  ) {
+    state.candidateCountAtLastSuccess = input.candidateCount;
+    state.lastCandidateIncreaseAt = now;
+  }
+  if (
+    input.continuationPoint !== undefined &&
+    input.continuationPoint > (state.lastContinuationPoint ?? 0)
+  ) {
+    state.lastContinuationPoint = input.continuationPoint;
+    state.lastContinuationIncreaseAt = now;
+  }
+  state.expiresAt = Date.now() + BREEZY_HYDRATION_STATE_TTL_MS;
 }
 
 function isStateExpired(state: BreezyHydrationJobState, now = Date.now()): boolean {
@@ -120,6 +185,12 @@ export function resetHydrationJobState(companyId: string, reason: string): Breez
     estimatedRemainingPositions: prior?.totalPositionsAvailable ?? 0,
     candidateCountAtLastSuccess: prior?.candidateCountAtLastSuccess ?? 0,
     hydrationComplete: false,
+    lastProgressAt: null,
+    lastCandidateIncreaseAt: null,
+    lastContinuationIncreaseAt: null,
+    lastUpdatedAt: nowIso(),
+    reclaimCount: prior?.reclaimCount ?? 0,
+    hydrationStalled: false,
     expiresAt: Date.now() + BREEZY_HYDRATION_STATE_TTL_MS,
   };
   hydrationJobs.set(key, restarted);
@@ -131,6 +202,116 @@ export function resetHydrationJobState(companyId: string, reason: string): Breez
     restartCount: restarted.restartCount,
   });
   return restarted;
+}
+
+export function forceReleaseHydrationLock(companyId: string, reason: string): BreezyHydrationJobState | null {
+  const state = getHydrationJobState(companyId);
+  if (!state) return null;
+  state.hydrationInProgress = false;
+  state.hydrationOwnerId = null;
+  state.hydrationStalled = true;
+  state.lastUpdatedAt = nowIso();
+  state.expiresAt = Date.now() + BREEZY_HYDRATION_STATE_TTL_MS;
+  hydrationJobs.set(hydrationKey(companyId), state);
+  logBreezyCandidatesOps("server", "fallback", {
+    phase: "hydration_lock_released",
+    companyId: hydrationKey(companyId),
+    reason,
+    lastContinuationPoint: state.lastContinuationPoint,
+  });
+  return state;
+}
+
+export function reclaimStalledHydrationJob(
+  companyId: string,
+  newOwnerId: string,
+  reason: string,
+): BreezyHydrationJobState | null {
+  const key = hydrationKey(companyId);
+  const state = getHydrationJobState(key);
+  if (!state) return null;
+
+  const continuation = state.lastContinuationPoint;
+  state.hydrationInProgress = false;
+  state.hydrationOwnerId = null;
+  state.hydrationStalled = true;
+  state.reclaimCount += 1;
+  state.resumeCount += 1;
+  touchProgressTimestamps(state, { continuationPoint: continuation, heartbeat: true });
+  state.hydrationStalled = false;
+  state.hydrationInProgress = true;
+  state.hydrationOwnerId = newOwnerId;
+  state.hydrationStartedAt = state.hydrationStartedAt ?? nowIso();
+  hydrationJobs.set(key, state);
+
+  logBreezyCandidatesOps("server", "fallback", {
+    phase: "hydration_reclaim",
+    companyId: key,
+    reason,
+    newOwnerId,
+    hydrationRoundId: state.hydrationRoundId,
+    lastContinuationPoint: continuation,
+    reclaimCount: state.reclaimCount,
+    resumeCount: state.resumeCount,
+  });
+
+  return state;
+}
+
+export function prepareHydrationContinuation(input: {
+  companyId: string;
+  ownerId: string;
+  totalPositionsAvailable: number;
+  requestedOffset?: number;
+  force?: boolean;
+  reclaimStale?: boolean;
+  seedContinuationPoint?: number;
+  seedCandidateCount?: number;
+}): HydrationContinuationResult {
+  const key = hydrationKey(input.companyId);
+  if (input.force) {
+    resetHydrationJobState(key, "hard_reset_requested");
+  }
+
+  let state = getHydrationJobState(key);
+  let reclaimed = false;
+  const now = Date.now();
+
+  if (state && !input.force) {
+    const stalled = isHydrationJobStalled(state, now);
+    const shouldReclaim =
+      Boolean(input.reclaimStale) ||
+      stalled ||
+      (state.hydrationInProgress &&
+        state.hydrationOwnerId !== input.ownerId &&
+        (isHeartbeatStale(state, now) || isProgressStale(state, now)));
+
+    if (shouldReclaim) {
+      reclaimStalledHydrationJob(input.companyId, input.ownerId, stalled ? "stalled_job" : "reclaim_requested");
+      reclaimed = true;
+      state = getHydrationJobState(key);
+    }
+  }
+
+  const plan = beginHydrationSession({
+    companyId: input.companyId,
+    ownerId: input.ownerId,
+    totalPositionsAvailable: input.totalPositionsAvailable,
+    seedContinuationPoint: Math.max(
+      input.seedContinuationPoint ?? 0,
+      input.requestedOffset ?? 0,
+      state?.lastContinuationPoint ?? 0,
+    ),
+    seedCandidateCount: input.seedCandidateCount,
+    force: false,
+  });
+
+  return {
+    ...plan,
+    reclaimed,
+    stalled: state ? isHydrationJobStalled(state, now) : false,
+    hydrationJob: getHydrationJobState(key),
+  };
 }
 
 export function beginHydrationSession(input: {
@@ -180,6 +361,12 @@ export function beginHydrationSession(input: {
       estimatedRemainingPositions: Math.max(0, input.totalPositionsAvailable - seed),
       candidateCountAtLastSuccess: input.seedCandidateCount ?? 0,
       hydrationComplete: seed >= input.totalPositionsAvailable && input.totalPositionsAvailable > 0,
+      lastProgressAt: seed > 0 ? nowIso() : null,
+      lastCandidateIncreaseAt: (input.seedCandidateCount ?? 0) > 0 ? nowIso() : null,
+      lastContinuationIncreaseAt: seed > 0 ? nowIso() : null,
+      lastUpdatedAt: nowIso(),
+      reclaimCount: 0,
+      hydrationStalled: false,
       expiresAt: now + BREEZY_HYDRATION_STATE_TTL_MS,
     };
     hydrationJobs.set(key, state);
@@ -189,12 +376,36 @@ export function beginHydrationSession(input: {
       attachedToExisting: false,
       resumedFromStale: false,
       restarted: Boolean(input.force),
+      reclaimed: false,
+      stalled: false,
     };
   }
 
-  const stale = isHeartbeatStale(state, now);
-  const attachedToExisting = state.hydrationInProgress && !stale && state.hydrationOwnerId !== input.ownerId;
-  const resumedFromStale = state.hydrationInProgress && stale;
+  const seedContinuation = Math.max(0, input.seedContinuationPoint ?? 0);
+  if (seedContinuation > state.lastContinuationPoint) {
+    state.lastContinuationPoint = seedContinuation;
+    state.positionsScanned = seedContinuation;
+    state.queueRemaining = Math.max(0, state.totalPositionsAvailable - seedContinuation);
+    state.estimatedRemainingPositions = state.queueRemaining;
+    state.hydrationPercent =
+      state.totalPositionsAvailable > 0
+        ? Math.min(100, Math.round((seedContinuation / state.totalPositionsAvailable) * 100))
+        : state.hydrationPercent;
+    if (seedContinuation > 0) {
+      state.lastSuccessfulHydrationAt = state.lastSuccessfulHydrationAt ?? nowIso();
+    }
+  }
+  if (input.seedCandidateCount !== undefined) {
+    state.candidateCountAtLastSuccess = Math.max(
+      state.candidateCountAtLastSuccess,
+      input.seedCandidateCount,
+    );
+  }
+
+  const stale = isHydrationJobStalled(state, now);
+  const attachedToExisting =
+    state.hydrationInProgress && !stale && state.hydrationOwnerId === input.ownerId;
+  const resumedFromStale = stale;
 
   if (attachedToExisting || resumedFromStale) {
     state.resumeCount += 1;
@@ -207,15 +418,23 @@ export function beginHydrationSession(input: {
       attachedToExisting: true,
       resumedFromStale: false,
       restarted: false,
+      reclaimed: false,
+      stalled: false,
     };
+  }
+
+  if (stale) {
+    state.hydrationInProgress = false;
+    state.hydrationOwnerId = null;
+    state.hydrationStalled = true;
   }
 
   state.totalPositionsAvailable = Math.max(state.totalPositionsAvailable, input.totalPositionsAvailable);
   state.hydrationInProgress = true;
   state.hydrationOwnerId = input.ownerId;
-  state.hydrationHeartbeat = nowIso();
+  state.hydrationStalled = false;
+  touchProgressTimestamps(state, { heartbeat: true });
   state.hydrationStartedAt = state.hydrationStartedAt ?? nowIso();
-  state.expiresAt = now + BREEZY_HYDRATION_STATE_TTL_MS;
   state.queueRemaining = Math.max(0, state.totalPositionsAvailable - state.lastContinuationPoint);
   state.estimatedRemainingPositions = state.queueRemaining;
   state.hydrationPercent =
@@ -231,22 +450,36 @@ export function beginHydrationSession(input: {
     attachedToExisting,
     resumedFromStale,
     restarted: false,
+    reclaimed: resumedFromStale,
+    stalled: stale,
   };
 }
 
 export function touchHydrationHeartbeat(companyId: string, ownerId: string): void {
   const state = getHydrationJobState(companyId);
-  if (!state || state.hydrationOwnerId !== ownerId) return;
-  state.hydrationHeartbeat = nowIso();
-  state.expiresAt = Date.now() + BREEZY_HYDRATION_STATE_TTL_MS;
+  if (!state) return;
+  if (state.hydrationOwnerId && state.hydrationOwnerId !== ownerId && !isHydrationJobStalled(state)) {
+    return;
+  }
+  if (state.hydrationOwnerId !== ownerId) {
+    state.hydrationOwnerId = ownerId;
+    state.hydrationInProgress = true;
+    state.hydrationStalled = false;
+  }
+  touchProgressTimestamps(state, { heartbeat: true });
 }
 
 export function releaseHydrationSession(companyId: string, ownerId: string, complete = false): void {
   const state = getHydrationJobState(companyId);
-  if (!state || state.hydrationOwnerId !== ownerId) return;
+  if (!state) return;
+  if (state.hydrationOwnerId && state.hydrationOwnerId !== ownerId && !isHydrationJobStalled(state)) {
+    return;
+  }
   state.hydrationInProgress = false;
   state.hydrationOwnerId = null;
   state.hydrationComplete = complete || state.hydrationComplete;
+  state.hydrationStalled = false;
+  state.lastUpdatedAt = nowIso();
   state.expiresAt = Date.now() + BREEZY_HYDRATION_STATE_TTL_MS;
 }
 
@@ -256,23 +489,20 @@ export function resolveHydrationResumeOffset(input: {
   totalPositionsAvailable: number;
   requestedOffset?: number;
   force?: boolean;
+  reclaimStale?: boolean;
   seedContinuationPoint?: number;
   seedCandidateCount?: number;
 }): HydrationResumePlan {
-  if (input.force) {
-    resetHydrationJobState(input.companyId, "force_reset");
-  }
-  return beginHydrationSession({
-    companyId: input.companyId,
-    ownerId: input.ownerId,
-    totalPositionsAvailable: input.totalPositionsAvailable,
-    seedContinuationPoint: Math.max(
-      input.seedContinuationPoint ?? 0,
-      input.requestedOffset ?? 0,
-    ),
-    seedCandidateCount: input.seedCandidateCount,
-    force: false,
-  });
+  const result = prepareHydrationContinuation(input);
+  return {
+    hydrationRoundId: result.hydrationRoundId,
+    resumeOffset: result.resumeOffset,
+    attachedToExisting: result.attachedToExisting,
+    resumedFromStale: result.resumedFromStale,
+    restarted: result.restarted,
+    reclaimed: result.reclaimed,
+    stalled: result.stalled,
+  };
 }
 
 export function recordHydrationBatchProgress(input: {
@@ -328,14 +558,18 @@ export function recordHydrationBatchProgress(input: {
 
   state.candidateCountAtLastSuccess = Math.max(state.candidateCountAtLastSuccess, input.candidateCount);
   state.lastSuccessfulHydrationAt = nowIso();
-  state.hydrationHeartbeat = nowIso();
-  state.expiresAt = Date.now() + BREEZY_HYDRATION_STATE_TTL_MS;
+  touchProgressTimestamps(state, {
+    candidateCount: input.candidateCount,
+    continuationPoint: nextContinuation,
+    heartbeat: true,
+  });
   state.hydrationComplete =
     nextContinuation >= state.totalPositionsAvailable && state.totalPositionsAvailable > 0 && !input.truncated;
 
   if (state.hydrationComplete) {
     state.hydrationInProgress = false;
     state.hydrationOwnerId = null;
+    state.hydrationStalled = false;
   }
 
   logBreezyCandidatesOps("server", "success", {
@@ -347,7 +581,9 @@ export function recordHydrationBatchProgress(input: {
     hydrationPercent: state.hydrationPercent,
     resumeCount: state.resumeCount,
     restartCount: state.restartCount,
+    reclaimCount: state.reclaimCount,
     lastContinuationPoint: state.lastContinuationPoint,
+    lastProgressAt: state.lastProgressAt,
   });
 
   return state;

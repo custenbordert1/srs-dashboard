@@ -2,8 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   beginHydrationSession,
+  BREEZY_HYDRATION_HEARTBEAT_STALE_MS,
+  BREEZY_HYDRATION_PROGRESS_STALE_MS,
+  forceReleaseHydrationLock,
   getHydrationJobState,
+  isHydrationJobStalled,
+  prepareHydrationContinuation,
   recordHydrationBatchProgress,
+  reclaimStalledHydrationJob,
   resetHydrationJobState,
 } from "@/lib/breezy-candidates-hydration";
 import { shouldAcceptCandidatesCacheWrite } from "@/lib/breezy-candidates-cache";
@@ -39,7 +45,8 @@ describe("breezy-candidates-hydration", () => {
     });
 
     assert.equal(attached.resumeOffset, 84);
-    assert.equal(attached.attachedToExisting, true);
+    assert.equal(attached.attachedToExisting, false);
+    assert.equal(attached.resumedFromStale, false);
     const state = getHydrationJobState(companyId);
     assert.equal(state?.lastContinuationPoint, 84);
     assert.equal(state?.candidateCountAtLastSuccess, 72);
@@ -81,6 +88,80 @@ describe("breezy-candidates-hydration", () => {
 
     assert.equal(getHydrationJobState(companyId)?.lastContinuationPoint, 84);
     assert.equal(getHydrationJobState(companyId)?.candidateCountAtLastSuccess, 72);
+  });
+
+  it("reclaims stalled hydration without resetting continuation point", () => {
+    const companyId = "co-reclaim-test";
+    resetHydrationJobState(companyId, "test_reset");
+    beginHydrationSession({
+      companyId,
+      ownerId: "owner-dead",
+      totalPositionsAvailable: 295,
+      seedContinuationPoint: 84,
+      seedCandidateCount: 72,
+    });
+    const state = getHydrationJobState(companyId);
+    assert.ok(state);
+    state!.hydrationHeartbeat = new Date(
+      Date.now() - BREEZY_HYDRATION_HEARTBEAT_STALE_MS - 1_000,
+    ).toISOString();
+    state!.lastProgressAt = new Date(
+      Date.now() - BREEZY_HYDRATION_PROGRESS_STALE_MS - 1_000,
+    ).toISOString();
+    assert.equal(isHydrationJobStalled(state!), true);
+
+    const plan = prepareHydrationContinuation({
+      companyId,
+      ownerId: "owner-new",
+      totalPositionsAvailable: 295,
+      reclaimStale: true,
+    });
+
+    assert.equal(plan.reclaimed, true);
+    assert.equal(plan.resumeOffset, 84);
+    const reclaimed = getHydrationJobState(companyId);
+    assert.equal(reclaimed?.hydrationOwnerId, "owner-new");
+    assert.equal(reclaimed?.lastContinuationPoint, 84);
+    assert.equal(reclaimed?.candidateCountAtLastSuccess, 72);
+    assert.equal(reclaimed?.reclaimCount, 1);
+    assert.equal(reclaimed?.hydrationInProgress, true);
+  });
+
+  it("force release clears lock but preserves continuation", () => {
+    const companyId = "co-release-test";
+    resetHydrationJobState(companyId, "test_reset");
+    beginHydrationSession({
+      companyId,
+      ownerId: "owner-a",
+      totalPositionsAvailable: 295,
+      seedContinuationPoint: 60,
+      seedCandidateCount: 7,
+    });
+    forceReleaseHydrationLock(companyId, "test_release");
+    const state = getHydrationJobState(companyId);
+    assert.equal(state?.hydrationInProgress, false);
+    assert.equal(state?.hydrationOwnerId, null);
+    assert.equal(state?.lastContinuationPoint, 60);
+    assert.equal(state?.candidateCountAtLastSuccess, 7);
+  });
+
+  it("reclaimStalledHydrationJob transfers ownership and increments reclaim count", () => {
+    const companyId = "co-reclaim-direct";
+    resetHydrationJobState(companyId, "test_reset");
+    beginHydrationSession({
+      companyId,
+      ownerId: "owner-old",
+      totalPositionsAvailable: 295,
+      seedContinuationPoint: 18,
+      seedCandidateCount: 7,
+    });
+    forceReleaseHydrationLock(companyId, "simulated_stall");
+    reclaimStalledHydrationJob(companyId, "owner-fresh", "manual_reclaim");
+    const state = getHydrationJobState(companyId);
+    assert.equal(state?.hydrationOwnerId, "owner-fresh");
+    assert.equal(state?.lastContinuationPoint, 18);
+    assert.equal(state?.reclaimCount, 1);
+    assert.equal(state?.hydrationInProgress, true);
   });
 });
 
