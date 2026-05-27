@@ -334,6 +334,12 @@ function tableRowUrgencyClass(candidate: ScoredCandidateWorkflowRow): string {
   if (sla.followUpOverdue || candidate.recruitingActions.needsFollowUp) {
     return "border-l-2 border-l-red-500/70";
   }
+  if (candidate.recruitingActions.priorityList) {
+    return "border-l-2 border-l-amber-500/70";
+  }
+  if (candidate.assignedRecruiter === "Unassigned") {
+    return "border-l-2 border-l-violet-500/60";
+  }
   if (
     isPaperworkPendingStatus(candidate.workflowStatus) &&
     candidate.paperworkStatus !== "signed"
@@ -1246,12 +1252,58 @@ export function CandidatesSection() {
 
   const breakdown = useMemo(() => sourceBreakdown(filtered), [filtered]);
   const buckets = useMemo(() => workflowBuckets(filtered), [filtered]);
-  const statusCounts = useMemo(
-    () =>
-      CANDIDATE_WORKFLOW_STATUSES.map((status) => ({
-        status,
-        count: filtered.filter((candidate) => candidate.workflowStatus === status).length,
-      })),
+  const operationalSnapshotCards = useMemo(
+    () => [
+      {
+        id: "needs-review",
+        label: "Needs Review",
+        count: filtered.filter(
+          (candidate) =>
+            candidate.workflowStatus === "Applied" || candidate.workflowStatus === "Needs Review",
+        ).length,
+        tone: "neutral" as const,
+      },
+      {
+        id: "awaiting-paperwork",
+        label: "Awaiting Paperwork",
+        count: filtered.filter(
+          (candidate) =>
+            candidate.workflowStatus === "Paperwork Needed" ||
+            candidate.workflowStatus === "Paperwork Sent",
+        ).length,
+        tone: "warn" as const,
+      },
+      {
+        id: "pending-onboarding",
+        label: "Signed - Pending Onboarding",
+        count: filtered.filter(
+          (candidate) =>
+            candidate.workflowStatus === "Signed" ||
+            candidate.workflowStatus === "Awaiting DD Verification",
+        ).length,
+        tone: "neutral" as const,
+      },
+      {
+        id: "ready-mel",
+        label: "Ready for MEL",
+        count: filtered.filter(
+          (candidate) => candidate.workflowStatus === "Ready for MEL",
+        ).length,
+        tone: "ok" as const,
+      },
+      {
+        id: "escalated",
+        label: "Escalated",
+        count: filtered.filter((candidate) => candidate.recruitingActions.priorityList).length,
+        tone: "warn" as const,
+      },
+      {
+        id: "unassigned",
+        label: "Unassigned Candidates",
+        count: filtered.filter((candidate) => candidate.assignedRecruiter === "Unassigned").length,
+        tone: "warn" as const,
+      },
+    ],
     [filtered],
   );
 
@@ -1795,7 +1847,11 @@ export function CandidatesSection() {
                   {operationalWorkflowState(candidate)}
                 </span>
                 <span
-                  className="inline-flex max-w-[8rem] truncate rounded border border-zinc-700/80 bg-zinc-900/70 px-1.5 py-0.5 text-[9px] text-zinc-400"
+                  className={`inline-flex max-w-[8rem] truncate rounded border px-1.5 py-0.5 text-[9px] ${
+                    candidate.assignedRecruiter === "Unassigned"
+                      ? "border-violet-500/50 bg-violet-500/10 text-violet-200"
+                      : "border-zinc-700/80 bg-zinc-900/70 text-zinc-400"
+                  }`}
                   title={`${candidate.assignedRecruiter} · ${candidate.assignedDM}`}
                 >
                   {candidate.assignedRecruiter}
@@ -2204,25 +2260,55 @@ export function CandidatesSection() {
       </RecruiterCollapsibleSection>
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Status Counts</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Operational workflow snapshot</h2>
         <p className="mt-1 text-sm text-zinc-500">
-          Local lifecycle statuses for candidate workflow triage. These do not write back to Breezy, HelloSign, or MEL.
+          Recruiter-first counts for active workflow movement and handoff readiness.
         </p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-          {statusCounts.map((row) => {
-            const active = workflowFilter === row.status;
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {operationalSnapshotCards.map((row) => {
+            const interactive = row.id !== "unassigned";
+            const active =
+              (row.id === "escalated" && recruiterQuickFilter === "priority") ||
+              (row.id === "needs-review" && workflowFilter === "Needs Review") ||
+              (row.id === "awaiting-paperwork" && workflowFilter === "Paperwork Needed") ||
+              (row.id === "pending-onboarding" && workflowFilter === "Awaiting DD Verification") ||
+              (row.id === "ready-mel" && workflowFilter === "Ready for MEL");
             return (
               <button
-                key={row.status}
+                key={row.id}
                 type="button"
-                onClick={() => toggleWorkflowStatusFilter(row.status)}
+                disabled={!interactive}
+                onClick={() => {
+                  if (row.id === "escalated") {
+                    setRecruiterQuickFilter((current) =>
+                      current === "priority" ? "all" : "priority",
+                    );
+                    return;
+                  }
+                  const targetStatus =
+                    row.id === "needs-review"
+                      ? "Needs Review"
+                      : row.id === "awaiting-paperwork"
+                        ? "Paperwork Needed"
+                        : row.id === "pending-onboarding"
+                          ? "Awaiting DD Verification"
+                          : row.id === "ready-mel"
+                            ? "Ready for MEL"
+                            : null;
+                  if (!targetStatus) return;
+                  toggleWorkflowStatusFilter(targetStatus);
+                }}
                 className={`rounded-xl border px-3 py-2 text-left transition-colors ${
                   active
                     ? "border-teal-500/50 bg-teal-500/10 ring-1 ring-teal-500/30"
-                    : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
-                }`}
+                    : row.tone === "warn"
+                      ? "border-amber-500/30 bg-amber-500/5 hover:border-amber-400/60 hover:bg-amber-500/10"
+                      : row.tone === "ok"
+                        ? "border-teal-500/30 bg-teal-500/5 hover:border-teal-400/60 hover:bg-teal-500/10"
+                        : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
+                } ${interactive ? "" : "cursor-default opacity-90"}`}
               >
-                <p className="text-xs text-zinc-500">{row.status}</p>
+                <p className="text-xs text-zinc-500">{row.label}</p>
                 <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
               </button>
             );
