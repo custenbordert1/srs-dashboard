@@ -63,7 +63,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
   const sheetLiveEnabled = isGoogleSheetRecruitingLiveEnabled();
   const primarySource = getPrimaryRecruitingSourceLabel();
 
-  const peekedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
+  const peekedCandidates = peekBreezyCandidatesCache();
 
   if (!breezyConfigured) {
     return {
@@ -92,7 +92,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
   if (options?.force) {
     const [jobsResult, candidatesResult] = await Promise.all([
       fetchBreezyJobs("published"),
-      fetchBreezyCandidates({ scanMode: "preview", force: true }),
+      fetchBreezyCandidates({ scanMode: "fast", force: true }),
     ]);
 
     if (!jobsResult.ok && !candidatesResult.ok && !peekedCandidates) {
@@ -170,7 +170,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
     fetchBreezyJobs("published"),
     peekedCandidates
       ? Promise.resolve(peekedCandidates)
-      : fetchBreezyCandidates({ scanMode: "preview" }),
+      : fetchBreezyCandidates({ scanMode: "fast" }),
   ]);
 
   const jobsOk = jobsResult.ok;
@@ -225,6 +225,14 @@ export async function buildRecruitingLiveSnapshot(options?: {
     });
   }
 
+  const candidatesPartial =
+    candidatesResult.ok &&
+    Boolean(
+      candidatesResult.partial ||
+        candidatesResult.hydrationComplete === false ||
+        candidatesResult.truncated,
+    );
+
   return successSnapshot({
     jobs: jobsResult,
     candidates: candidatesResult,
@@ -233,7 +241,7 @@ export async function buildRecruitingLiveSnapshot(options?: {
     primarySource,
     sheetLiveEnabled,
     fetchedAt,
-    syncStatus: usedPeek ? "cache_only" : "ready",
+    syncStatus: candidatesPartial ? "partial" : usedPeek ? "cache_only" : "ready",
   });
 }
 

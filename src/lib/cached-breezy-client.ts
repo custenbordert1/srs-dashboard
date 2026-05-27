@@ -2,7 +2,6 @@ import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/clien
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import {
-  BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
   BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
   isTimeoutError,
@@ -49,7 +48,7 @@ export async function fetchCachedBreezyCandidates(
   force = false,
   dateRange?: { from?: string; to?: string },
 ): Promise<BreezyCandidatesResult> {
-  const params = new URLSearchParams({ scan: "preview" });
+  const params = new URLSearchParams({ scan: "fast" });
   if (force) params.set("force", "true");
   if (dateRange?.from && dateRange?.to) {
     params.set("from", dateRange.from);
@@ -57,12 +56,12 @@ export async function fetchCachedBreezyCandidates(
   }
   const query = `?${params.toString()}`;
   return fetchCachedJson(
-    cacheKey(["breezy", "candidates", "preview", dateRange?.from ?? "", dateRange?.to ?? ""]),
+    cacheKey(["breezy", "candidates", "fast", dateRange?.from ?? "", dateRange?.to ?? ""]),
     async () => {
       const parsed = await fetchBreezyJson<BreezyCandidatesResult>(
         `/api/breezy/candidates${query}`,
         "Breezy candidates",
-        BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
+        BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
       );
       return parsed;
     },

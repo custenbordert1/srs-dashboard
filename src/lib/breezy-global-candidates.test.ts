@@ -75,3 +75,37 @@ describe("buildJobsLookupMap", () => {
     assert.equal(map.get("friendly-123")?.name, "Role");
   });
 });
+
+describe("selectBestBreezyCandidatesCacheEntry", () => {
+  it("prefers entry with highest candidate count", async () => {
+    const { selectBestBreezyCandidatesCacheEntry } = await import("@/lib/breezy-api");
+    const now = Date.now();
+    const best = selectBestBreezyCandidatesCacheEntry(
+      [
+        {
+          scanMode: "preview",
+          resolved: {
+            ok: true,
+            candidates: [{ candidateId: "p1" }],
+            fetchedAt: "2026-05-27T00:00:00.000Z",
+            companyId: "co-1",
+          },
+          expiresAt: now + 10_000,
+        },
+        {
+          scanMode: "fast",
+          resolved: {
+            ok: true,
+            candidates: [{ candidateId: "f1" }, { candidateId: "f2" }],
+            fetchedAt: "2026-05-27T00:00:00.000Z",
+            companyId: "co-1",
+          },
+          expiresAt: now + 10_000,
+        },
+      ] as Parameters<typeof selectBestBreezyCandidatesCacheEntry>[0],
+      now,
+    );
+    assert.equal(best?.ok, true);
+    assert.equal(best?.ok && best.candidates.length, 2);
+  });
+});

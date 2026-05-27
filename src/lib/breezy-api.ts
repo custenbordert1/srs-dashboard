@@ -812,6 +812,37 @@ export function breezyFastCandidatesCacheKey(options?: {
   return `candidates:fast:v6:${scanMode}:${positionId || "all"}:${state}:${pageSize}:${maxPages}:${maxPositions ?? "all"}`;
 }
 
+/** Prefer richest warmed snapshot when no explicit scan tier is requested. */
+export const BREEZY_CANDIDATES_CACHE_SCAN_ORDER: BreezyCandidatesScanMode[] = ["all", "fast", "preview"];
+
+export function selectBestBreezyCandidatesCacheEntry(
+  entries: Array<{
+    scanMode: BreezyCandidatesScanMode;
+    resolved: BreezyCandidatesResult | null;
+    expiresAt: number;
+  }>,
+  now = Date.now(),
+): BreezyCandidatesResult | null {
+  let best: BreezyCandidatesResult | null = null;
+  let bestCount = -1;
+
+  for (const entry of entries) {
+    if (!entry.resolved || entry.expiresAt <= now) continue;
+    if (!entry.resolved.ok) continue;
+
+    const count = entry.resolved.candidates.length;
+    const acceptEmpty = entry.scanMode === "all" || entry.scanMode === "full";
+    if (count === 0 && !acceptEmpty) continue;
+
+    if (count > bestCount) {
+      best = entry.resolved;
+      bestCount = count;
+    }
+  }
+
+  return best;
+}
+
 /** Returns last cached scan without starting a new Breezy aggregation. */
 export function peekBreezyCandidatesCache(options?: {
   positionId?: string;
@@ -823,13 +854,28 @@ export function peekBreezyCandidatesCache(options?: {
 }): BreezyCandidatesResult | null {
   const scanOrder: BreezyCandidatesScanMode[] = options?.scanMode
     ? [options.scanMode]
-    : ["preview", "fast", "all"];
-  for (const scanMode of scanOrder) {
+    : BREEZY_CANDIDATES_CACHE_SCAN_ORDER;
+  const now = Date.now();
+  const entries = scanOrder.map((scanMode) => {
     const key = breezyFastCandidatesCacheKey({ ...options, scanMode });
     const entry = candidatesCache.get(key);
-    if (!entry || entry.expiresAt <= Date.now() || !entry.resolved) continue;
+    return {
+      scanMode,
+      resolved: entry?.resolved ?? null,
+      expiresAt: entry?.expiresAt ?? 0,
+    };
+  });
+
+  if (!options?.scanMode) {
+    return selectBestBreezyCandidatesCacheEntry(entries, now);
+  }
+
+  for (const entry of entries) {
+    if (!entry.resolved || entry.expiresAt <= now) continue;
     if (isPopulatedCandidatesResult(entry.resolved)) return entry.resolved;
-    if (scanMode !== "preview" && scanMode !== "fast" && entry.resolved.ok) return entry.resolved;
+    if (entry.scanMode !== "preview" && entry.scanMode !== "fast" && entry.resolved.ok) {
+      return entry.resolved;
+    }
   }
   return null;
 }
@@ -845,10 +891,25 @@ export function buildBreezyCandidatesHealthProbe(
   company: { companyId: string; companyName?: string },
 ): BreezyCandidatesHealthProbe {
   if (cached?.ok) {
-    return { ...cached, healthProbe: true, fromCache: true };
+    const partial = Boolean(cached.partial || cached.hydrationComplete === false);
+    const warnings = [...(cached.warnings ?? [])];
+    if (partial) {
+      warnings.push(
+        cached.candidates.length > 0
+          ? `Partial Breezy sync (${cached.scanMode ?? "cached"} tier) — counts may increase after full hydration.`
+          : "Partial Breezy sync tier returned no rows yet.",
+      );
+    }
+    return {
+      ...cached,
+      healthProbe: true,
+      fromCache: true,
+      partial,
+      warnings: warnings.length > 0 ? warnings : undefined,
+    };
   }
   if (cached && !cached.ok) {
-    return { ...cached, healthProbe: true, fromCache: true };
+    return { ...cached, healthProbe: true, fromCache: true, partial: true };
   }
 
   const fetchedAt = new Date().toISOString();
@@ -868,11 +929,12 @@ export function buildBreezyCandidatesHealthProbe(
     totalCandidatesFetched: 0,
     candidatesLast7Days: 0,
     truncated: false,
+    hydrationComplete: false,
     warnings: [
-      "No warmed Breezy candidate cache — health probe did not start a full position scan.",
-      "Open the recruiting dashboard or run Full Breezy parity check to warm data.",
+      "Candidate cache cold — health probe did not start a live position scan.",
+      "Open Candidates or Command Center to warm sync, or run Full Breezy parity check in Data Health.",
     ],
-    syncNotes: ["Lightweight health probe only (published fast-scan cache)."],
+    syncNotes: ["Lightweight health probe only (cache peek — all → fast → preview tiers)."],
   };
 }
 
@@ -1360,7 +1422,8 @@ export async function fetchBreezyCandidates(options?: {
   const maxPositions = options?.maxPositions;
   const rangeStart = parseDateRangeParam(options?.dateRangeStart);
   const rangeEnd = parseDateRangeParam(options?.dateRangeEnd);
-  const scanMode = options?.scanMode ?? "preview";
+  const requestedScanMode = options?.scanMode;
+  const scanMode = requestedScanMode ?? "fast";
   const cacheKey = breezyFastCandidatesCacheKey({
     positionId,
     state,
@@ -1385,6 +1448,23 @@ export async function fetchBreezyCandidates(options?: {
     withCandidatesFailureMeta,
     withCandidatesSyncMeta,
   } = await import("@/lib/breezy-candidates-sync");
+
+  if (!options?.force && !requestedScanMode) {
+    const peeked = peekBreezyCandidatesCache({
+      positionId,
+      state,
+      pageSize,
+      maxPages,
+      maxPositions,
+    });
+    if (peeked?.ok) {
+      return withCandidatesSyncMeta(peeked, {
+        fromCache: true,
+        stale: false,
+        partial: peeked.partial ?? isPartialCandidatesSync(peeked),
+      });
+    }
+  }
 
   if (!options?.force) {
     const fresh = candidatesCache.get(cacheKey);
@@ -1722,6 +1802,9 @@ async function fetchCandidatesForPosition(
   const positionIds: Array<{ id: string; kind: "jobId" | "friendlyId" }> = [
     { id: position.jobId, kind: "jobId" },
   ];
+  if (position.friendlyId && position.friendlyId !== position.jobId) {
+    positionIds.push({ id: position.friendlyId, kind: "friendlyId" });
+  }
   let best: PositionScanResult | null = null;
   for (const entry of positionIds) {
     const result = await fetchCandidatesForPositionWithId(

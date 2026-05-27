@@ -61,6 +61,9 @@ export type BreezyCandidateSyncHealth = {
   candidateCount: number;
   fetchedAt: string | null;
   truncated: boolean;
+  partial: boolean;
+  hydrationComplete: boolean | null;
+  scanMode: string | null;
   positionsScanned: number | null;
   positionsAvailable: number | null;
   skippedReason: string | null;
@@ -156,6 +159,9 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     candidateCount: 0,
     fetchedAt: null,
     truncated: false,
+    partial: false,
+    hydrationComplete: null,
+    scanMode: null,
     positionsScanned: null,
     positionsAvailable: null,
     skippedReason: null,
@@ -195,7 +201,7 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     fetchBreezyJobs("published"),
     fetchBreezyJobs("draft"),
   ]);
-  const cachedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
+  const cachedCandidates = peekBreezyCandidatesCache();
   const candidatesFromCache = Boolean(cachedCandidates?.ok);
 
   const jobFailures = [
@@ -242,11 +248,24 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     error: jobFailures[0] ?? null,
   };
 
+  const candidatePartial =
+    cachedCandidates?.ok === true
+      ? Boolean(
+          cachedCandidates.partial ||
+            cachedCandidates.hydrationComplete === false ||
+            candidateTruncated,
+        )
+      : !candidatesFromCache;
+
   const candidateSync: BreezyCandidateSyncHealth = {
     fromCache: candidatesFromCache,
     candidateCount: candidatesCount,
     fetchedAt: cachedCandidates?.ok ? cachedCandidates.fetchedAt : null,
     truncated: candidateTruncated,
+    partial: candidatePartial,
+    hydrationComplete:
+      cachedCandidates?.ok === true ? (cachedCandidates.hydrationComplete ?? null) : null,
+    scanMode: cachedCandidates?.ok === true ? (cachedCandidates.scanMode ?? null) : null,
     positionsScanned,
     positionsAvailable,
     skippedReason: cachedCandidates?.ok
@@ -303,7 +322,7 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
       `Published Breezy jobs: ${publishedCount.toLocaleString()}.`,
       `Draft Breezy jobs: ${draftCount.toLocaleString()}.`,
       candidatesFromCache
-        ? `Cached Breezy candidates (fast scan): ${candidatesCount.toLocaleString()}.`
+        ? `Cached Breezy candidates (${cachedCandidates?.ok && cachedCandidates.scanMode ? cachedCandidates.scanMode : "warmed"} tier): ${candidatesCount.toLocaleString()}${candidatePartial ? " (partial)" : ""}.`
         : "Candidate cache cold — open Candidates or Command Center to warm sync.",
       candidateTruncated
         ? `Candidate sync truncated (${cachedCandidates?.ok && cachedCandidates.skippedCandidatesReason ? formatSkippedCandidatesReason(cachedCandidates.skippedCandidatesReason) : "see warnings"}).`

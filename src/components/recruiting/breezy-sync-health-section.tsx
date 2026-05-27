@@ -205,7 +205,20 @@ export function BreezySyncHealthSection() {
             />
             <Metric
               label="Candidate sync"
-              value={snapshot.candidateSync.truncated ? "Truncated" : snapshot.candidateSync.fromCache ? "Cached" : "Cold"}
+              value={
+                snapshot.candidateSync.fromCache
+                  ? snapshot.candidateSync.partial
+                    ? "Partial"
+                    : snapshot.candidateSync.truncated
+                      ? "Truncated"
+                      : "Cached"
+                  : "Cold"
+              }
+              hint={
+                snapshot.candidateSync.scanMode
+                  ? `${snapshot.candidateSync.scanMode} tier`
+                  : undefined
+              }
             />
             <Metric label="Failed job fetches" value={snapshot.failedJobs} />
             <Metric

@@ -1,4 +1,4 @@
-import type { BreezyCandidatesScanMode, BreezyJob } from "@/lib/breezy-api";
+import type { BreezyJob } from "@/lib/breezy-api";
 import { peekBreezyCandidatesCache } from "@/lib/breezy-api";
 import {
   buildApplicantCountByBreezyJobId,
@@ -18,19 +18,10 @@ export type EnrichCatalogApplicantCountsResult = {
   candidatesConsidered: number;
 };
 
-const COUNT_SCAN_MODES: BreezyCandidatesScanMode[] = ["all", "fast", "preview"];
-
 /** Prefer the richest in-memory candidate snapshot (no new Breezy scan). */
 export function peekBestBreezyCandidatesSnapshotForCounts(state = "published") {
-  let best: Extract<ReturnType<typeof peekBreezyCandidatesCache>, { ok: true }> | null = null;
-  for (const scanMode of COUNT_SCAN_MODES) {
-    const hit = peekBreezyCandidatesCache({ scanMode, state });
-    if (!hit?.ok) continue;
-    if (!best || hit.candidates.length > best.candidates.length) {
-      best = hit;
-    }
-  }
-  return best;
+  const hit = peekBreezyCandidatesCache({ state });
+  return hit?.ok ? hit : null;
 }
 
 function toLookupCandidates(

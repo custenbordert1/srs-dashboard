@@ -326,8 +326,13 @@ export function analyzeBreezyCandidatesHealth(
     data.positionId ? `Position: ${data.positionId}` : null,
     data.positionsScanned !== undefined ? `Positions scanned: ${data.positionsScanned}` : null,
     data.truncated ? "Aggregation truncated (scan limit)" : null,
-    probe.fromCache ? "Source: warmed fast-scan cache" : null,
-    probe.partial ? "Source: lightweight health probe (cache cold)" : null,
+    probe.fromCache
+      ? `Source: warmed cache (${data.scanMode ?? "unknown"} tier${data.partial ? ", partial" : ""})`
+      : null,
+    probe.partial && !probe.fromCache ? "Source: cache cold (health probe only)" : null,
+    data.positionsScanned !== undefined && data.totalPositionsAvailable
+      ? `Positions scanned: ${data.positionsScanned}/${data.totalPositionsAvailable}`
+      : null,
   ].filter(Boolean);
 
   const report = baseBreezyReport(
@@ -341,9 +346,13 @@ export function analyzeBreezyCandidatesHealth(
   );
 
   const extraWarnings = [...(data.warnings ?? [])];
-  if (probe.partial) {
+  if (probe.partial && !probe.fromCache) {
     extraWarnings.push(
-      "Lightweight probe only — record count may be 0 until dashboard warms the Breezy cache.",
+      "Candidate cache cold — record count is 0 until Candidates or Command Center warms Breezy sync.",
+    );
+  } else if (probe.partial && rows.length > 0) {
+    extraWarnings.push(
+      "Partial Breezy sync — open Candidates tab and wait for background full hydration for complete totals.",
     );
   }
 
