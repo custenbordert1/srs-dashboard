@@ -337,6 +337,49 @@ export function BreezySyncHealthSection() {
                     : "No timestamp"
                 }
               />
+              <Metric
+                label="Candidates / round"
+                value={
+                  snapshot.candidateSync.hydrationDiagnostics?.candidatesAddedPerRound ??
+                  snapshot.candidateSync.hydrationJob.candidatesAddedLastRound ??
+                  "—"
+                }
+                hint={`${snapshot.candidateSync.hydrationDiagnostics?.hydrationRoundsCompleted ?? snapshot.candidateSync.hydrationJob.hydrationRoundsCompleted ?? 0} rounds completed`}
+              />
+              <Metric
+                label="Queue drain"
+                value={
+                  snapshot.candidateSync.hydrationDiagnostics?.positionsCompletedPerMinute != null
+                    ? `${snapshot.candidateSync.hydrationDiagnostics.positionsCompletedPerMinute}/min`
+                    : "—"
+                }
+                hint={
+                  snapshot.candidateSync.hydrationDiagnostics?.queueDrainRate != null
+                    ? `Drain ${snapshot.candidateSync.hydrationDiagnostics.queueDrainRate} pos/min`
+                    : "Awaiting next round"
+                }
+              />
+              <Metric
+                label="Est. complete"
+                value={
+                  snapshot.candidateSync.hydrationDiagnostics?.estimatedTimeToCompleteMs
+                    ? `${Math.round(snapshot.candidateSync.hydrationDiagnostics.estimatedTimeToCompleteMs / 60_000)}m`
+                    : "—"
+                }
+                hint={
+                  snapshot.candidateSync.hydrationDiagnostics?.avgCandidatesPerPosition != null
+                    ? `~${snapshot.candidateSync.hydrationDiagnostics.avgCandidatesPerPosition} candidates/position`
+                    : "Throughput warming up"
+                }
+              />
+              <Metric
+                label="Hydration idle"
+                value={
+                  snapshot.candidateSync.hydrationDiagnostics?.hydrationIdleReason ??
+                  (snapshot.candidateSync.hydrationJob.hydrationInProgress ? "active" : "awaiting_client_round")
+                }
+                hint={`Timeouts ${snapshot.candidateSync.hydrationDiagnostics?.consecutiveTimeouts ?? snapshot.candidateSync.hydrationJob.consecutiveTimeouts ?? 0}${snapshot.candidateSync.hydrationDiagnostics?.rateLimitBackoffActive ? " · rate limit backoff" : ""}`}
+              />
             </div>
           ) : null}
 

@@ -70,6 +70,7 @@ import {
   getTabCandidateCountHighWaterMark,
   getTabSnapshotHighWater,
   getRecoverableTabCandidatesSnapshot,
+  isFullHydrationInflightActive,
   peekTabCandidatesCache,
   shouldHydrateFullCandidates,
   shouldSkipFastTierForHydration,
@@ -1064,6 +1065,19 @@ export function CandidatesSection() {
     const id = window.setTimeout(() => void loadBundle(), 0);
     return () => window.clearTimeout(id);
   }, [loadBundle]);
+
+  /** Keep draining the hydration queue across idle periods without waiting for manual refresh. */
+  useEffect(() => {
+    if (!breezySnapshot || !shouldHydrateFullCandidates(breezySnapshot)) return undefined;
+    const pump = () => {
+      const current = breezySnapshotRef.current;
+      if (!current || !shouldHydrateFullCandidates(current)) return;
+      if (loadingBundle || refreshingCandidates || isFullHydrationInflightActive()) return;
+      void hydrateRemainingCandidates(current);
+    };
+    const intervalId = window.setInterval(pump, 45_000);
+    return () => window.clearInterval(intervalId);
+  }, [breezySnapshot, hydrateRemainingCandidates, loadingBundle, refreshingCandidates]);
 
   useEffect(() => {
     logCandidatesClientTrace("candidates_state_after_render", {

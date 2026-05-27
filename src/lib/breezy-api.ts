@@ -26,6 +26,7 @@ import {
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
 import { getRichestOkCandidatesSnapshot } from "@/lib/breezy-candidates-sync";
+import { computeHydrationThroughput } from "@/lib/breezy-hydration-throughput";
 import {
   forceReleaseHydrationLock,
   getHydrationJobState,
@@ -80,7 +81,11 @@ const CANDIDATES_PAGE_SIZE = 50;
 const MAX_CANDIDATE_PAGES_PER_POSITION = 500;
 /** Concurrent position candidate fetches during full sync (keep low to avoid 429s). */
 const CANDIDATE_POSITION_CONCURRENCY = 3;
+/** Higher concurrency during resumable full-tier hydration rounds. */
+const CANDIDATE_HYDRATION_CONCURRENCY = 4;
 const CANDIDATE_POSITION_BATCH_DELAY_MS = 350;
+/** Reduced pacing between hydration batches to improve queue drain rate. */
+const CANDIDATE_HYDRATION_BATCH_DELAY_MS = 80;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -244,6 +249,16 @@ export type BreezyHydrationDiagnostics = {
   averagePositionLatencyMs: number | null;
   timeoutSource: "none" | "server_budget" | "target_candidates" | "max_positions" | "client" | null;
   scanDurationMs: number;
+  candidatesAddedPerRound?: number | null;
+  positionsCompletedPerMinute?: number | null;
+  avgCandidatesPerPosition?: number | null;
+  estimatedTimeToCompleteMs?: number | null;
+  queueDrainRate?: number | null;
+  hydrationRoundsCompleted?: number | null;
+  hydrationIdleReason?: string | null;
+  lastSuccessfulPositionId?: string | null;
+  consecutiveTimeouts?: number | null;
+  rateLimitBackoffActive?: boolean | null;
 };
 
 export type BreezyPreviewScanDiagnostics = {
@@ -2201,6 +2216,7 @@ async function scanPositionsBatch(input: {
   filterToDateRange: boolean;
   maxCandidates?: number;
   batchDelayMs?: number;
+  positionConcurrency?: number;
 }): Promise<ScanBatchStats> {
   const candidates: BreezyCandidate[] = [];
   const warnings: string[] = [];
@@ -2225,6 +2241,7 @@ async function scanPositionsBatch(input: {
 
   const completedPositionIds: string[] = [];
   const skippedPositionIds: string[] = [];
+  const concurrency = Math.max(1, input.positionConcurrency ?? CANDIDATE_POSITION_CONCURRENCY);
 
   const mergeResult = (position: BreezyJob, result: PositionScanResult, isRetry = false) => {
     if (!isRetry) {
@@ -2264,7 +2281,7 @@ async function scanPositionsBatch(input: {
     candidates.push(...rows);
   };
 
-  for (let offset = 0; offset < total; offset += CANDIDATE_POSITION_CONCURRENCY) {
+  for (let offset = 0; offset < total; offset += concurrency) {
     if (Date.now() >= input.deadlineMs) {
       truncated = true;
       previewStoppedReason = "server_budget";
@@ -2272,7 +2289,7 @@ async function scanPositionsBatch(input: {
       break;
     }
 
-    const batch = input.positions.slice(offset, Math.min(offset + CANDIDATE_POSITION_CONCURRENCY, total));
+    const batch = input.positions.slice(offset, Math.min(offset + concurrency, total));
     const batchWallStart = Date.now();
     const results = await Promise.all(
       batch.map((position) =>
@@ -2302,7 +2319,7 @@ async function scanPositionsBatch(input: {
       break;
     }
 
-    if (offset + CANDIDATE_POSITION_CONCURRENCY < total) {
+    if (offset + concurrency < total) {
       await sleep(input.batchDelayMs ?? CANDIDATE_POSITION_BATCH_DELAY_MS);
     }
   }
@@ -2896,7 +2913,16 @@ async function fetchBreezyCandidatesUncachedCore(options: {
         filterToDateRange: Boolean(effectiveDateRangeStart && effectiveDateRangeEnd),
         maxCandidates:
           scanMode === "preview" ? BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES : undefined,
-        batchDelayMs: scanMode === "preview" ? CANDIDATE_PREVIEW_BATCH_DELAY_MS : undefined,
+        batchDelayMs:
+          scanMode === "preview"
+            ? CANDIDATE_PREVIEW_BATCH_DELAY_MS
+            : scanMode === "full" || scanMode === "all"
+              ? CANDIDATE_HYDRATION_BATCH_DELAY_MS
+              : CANDIDATE_POSITION_BATCH_DELAY_MS,
+        positionConcurrency:
+          scanMode === "full" || scanMode === "all"
+            ? CANDIDATE_HYDRATION_CONCURRENCY
+            : CANDIDATE_POSITION_CONCURRENCY,
       }).catch((err) => {
         if (scanMode === "full" || scanMode === "all") {
           forceReleaseHydrationLock(companyId, "scan_batch_failed");
@@ -2942,21 +2968,43 @@ async function fetchBreezyCandidatesUncachedCore(options: {
       candidateCount: batch.candidates.length,
       truncated: batch.truncated,
       hydrationRoundId: activeHydrationRoundId,
+      roundDurationMs: batch.scanDurationMs,
+      rateLimitHit: wasBreezyRateLimitHit(),
     });
     touchHydrationHeartbeat(companyId, hydrationOwnerId);
   }
-  const hydrationDiagnostics = buildHydrationDiagnostics({
-    totalPositionsAvailable: totalAvailable,
-    positionsScanned: positionsScannedTotal,
-    positionsAttempted: scanPositions.length,
-    positionsCompleted: batch.positionsScanned,
-    positionsSkipped: batch.positionsSkipped,
-    scanDurationMs: batch.scanDurationMs,
-    averagePositionLatencyMs: batch.averagePositionLatencyMs,
-    previewStoppedReason: batch.previewStoppedReason,
-    truncated: batch.truncated,
-  });
   const hydrationJobState = getHydrationJobState(companyId);
+  const throughput =
+    hydrationJobState && (scanMode === "full" || scanMode === "all")
+      ? computeHydrationThroughput({
+          state: hydrationJobState,
+          truncated: batch.truncated,
+          rateLimitHit: wasBreezyRateLimitHit(),
+        })
+      : null;
+  const hydrationDiagnostics = {
+    ...buildHydrationDiagnostics({
+      totalPositionsAvailable: totalAvailable,
+      positionsScanned: positionsScannedTotal,
+      positionsAttempted: scanPositions.length,
+      positionsCompleted: batch.positionsScanned,
+      positionsSkipped: batch.positionsSkipped,
+      scanDurationMs: batch.scanDurationMs,
+      averagePositionLatencyMs: batch.averagePositionLatencyMs,
+      previewStoppedReason: batch.previewStoppedReason,
+      truncated: batch.truncated,
+    }),
+    candidatesAddedPerRound: throughput?.candidatesAddedPerRound ?? null,
+    positionsCompletedPerMinute: throughput?.positionsCompletedPerMinute ?? null,
+    avgCandidatesPerPosition: throughput?.avgCandidatesPerPosition ?? null,
+    estimatedTimeToCompleteMs: throughput?.estimatedTimeToCompleteMs ?? null,
+    queueDrainRate: throughput?.queueDrainRate ?? null,
+    hydrationRoundsCompleted: throughput?.hydrationRoundsCompleted ?? null,
+    hydrationIdleReason: throughput?.hydrationIdleReason ?? null,
+    lastSuccessfulPositionId: throughput?.lastSuccessfulPositionId ?? null,
+    consecutiveTimeouts: throughput?.consecutiveTimeouts ?? null,
+    rateLimitBackoffActive: throughput?.rateLimitBackoffActive ?? null,
+  };
   const hydrationComplete =
     scanMode === "fast" || scanMode === "preview"
       ? false

@@ -55,8 +55,14 @@ export const CANDIDATES_TAB_LOADING_CEILING_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_
 export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_MS;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
 export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = BREEZY_CANDIDATES_FULL_HYDRATION_TIMEOUT_MS;
-/** Max incremental full-tier rounds (295 positions / ~115s budget per round). */
-const MAX_FULL_HYDRATION_ROUNDS = 6;
+/** Max incremental full-tier rounds per client hydration session. */
+const MAX_FULL_HYDRATION_ROUNDS = 48;
+/** Short pause between successful continuation rounds. */
+const HYDRATION_ROUND_COOLDOWN_MS = 250;
+/** Rate-limit / no-progress backoff between rounds. */
+const HYDRATION_RATE_LIMIT_COOLDOWN_MS = 2_500;
+/** Wall-clock budget for client-driven hydration pumping per attach. */
+const MAX_CLIENT_HYDRATION_WALL_MS = 20 * 60_000;
 let fullHydrationInflight: Promise<CandidatesTabFetchResult> | null = null;
 let fullHydrationInflightStartedAt: number | null = null;
 const hydrationOwnerId = typeof window !== "undefined" ? createHydrationOwnerId() : "server-tab";
@@ -358,6 +364,14 @@ function isSnapshotHydrationStalled(snapshot: BreezyCandidatesSuccess, now = Dat
 export function cancelFullHydrationInflight(): void {
   fullHydrationInflight = null;
   fullHydrationInflightStartedAt = null;
+}
+
+export function isFullHydrationInflightActive(): boolean {
+  return fullHydrationInflight !== null;
+}
+
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function cacheKeyForScan(scan: BreezyCandidatesScanMode): string {
@@ -893,8 +907,17 @@ export async function fetchAndMergeFullCandidates(
     let lastProgressAt = Date.now();
     let lastCandidateCount = merged.candidates.length;
     let lastContinuation = resolveClientHydrationResumeOffset(merged);
+    let consecutiveNoProgressRounds = 0;
+    const wallStarted = Date.now();
 
     for (let round = 0; round < MAX_FULL_HYDRATION_ROUNDS; round += 1) {
+      if (Date.now() - wallStarted > MAX_CLIENT_HYDRATION_WALL_MS) {
+        logCandidatesClientTrace("hydration_wall_budget_reached", {
+          round,
+          wallMs: Date.now() - wallStarted,
+        });
+        break;
+      }
       if (!shouldHydrateFullCandidates(merged)) {
         return preserveRicherTabSnapshot(merged, TAB_FULL_CACHE_KEY, {
           hydrationRoundId: `full-complete-${round}`,
@@ -908,6 +931,7 @@ export async function fetchAndMergeFullCandidates(
         totalPositionsAvailable: merged.totalPositionsAvailable ?? 0,
         hydrationRoundId: merged.hydrationJob?.hydrationRoundId,
         reclaimStale: reclaimNextRound,
+        hydrationIdleReason: merged.hydrationJob?.hydrationStalled ? "stalled" : "active",
       });
       const full = await fetchCandidatesForTab({
         scan: "full",
@@ -916,7 +940,19 @@ export async function fetchAndMergeFullCandidates(
         reclaimStale: reclaimNextRound,
       });
       reclaimNextRound = false;
-      if (!full.ok) return full;
+      if (!full.ok) {
+        if (full.clientTimedOut) {
+          consecutiveNoProgressRounds += 1;
+          reclaimNextRound = true;
+          if (consecutiveNoProgressRounds < 8) {
+            await sleepMs(HYDRATION_RATE_LIMIT_COOLDOWN_MS);
+            continue;
+          }
+        }
+        return full;
+      }
+      const beforeCount = merged.candidates.length;
+      const beforeContinuation = resolveClientHydrationResumeOffset(merged);
       merged = preserveRicherTabSnapshot(
         mergeCandidatesSnapshots(merged, full, {
           downgradeSource: `fetchAndMergeFullCandidates:round-${round}`,
@@ -928,19 +964,25 @@ export async function fetchAndMergeFullCandidates(
       );
       const nextContinuation = resolveClientHydrationResumeOffset(merged);
       const nextCount = merged.candidates.length;
-      if (nextContinuation > lastContinuation || nextCount > lastCandidateCount) {
+      const madeProgress =
+        nextContinuation > beforeContinuation || nextCount > beforeCount;
+      if (madeProgress) {
+        consecutiveNoProgressRounds = 0;
         lastProgressAt = Date.now();
         lastContinuation = nextContinuation;
         lastCandidateCount = nextCount;
-      } else if (Date.now() - lastProgressAt > BREEZY_HYDRATION_PROGRESS_STALE_MS) {
-        logCandidatesClientTrace("hydration_progress_stalled", {
-          round,
-          lastContinuation,
-          lastCandidateCount,
-          stallMs: Date.now() - lastProgressAt,
-        });
-        reclaimNextRound = true;
-        lastProgressAt = Date.now();
+      } else {
+        consecutiveNoProgressRounds += 1;
+        if (Date.now() - lastProgressAt > BREEZY_HYDRATION_PROGRESS_STALE_MS) {
+          logCandidatesClientTrace("hydration_progress_stalled", {
+            round,
+            lastContinuation,
+            lastCandidateCount,
+            stallMs: Date.now() - lastProgressAt,
+          });
+          reclaimNextRound = true;
+          lastProgressAt = Date.now();
+        }
       }
       logCandidatesClientTrace("hydrate_full_round_complete", {
         round,
@@ -948,10 +990,35 @@ export async function fetchAndMergeFullCandidates(
         positionsScanned: merged.positionsScanned ?? 0,
         hydrationComplete: merged.hydrationComplete ?? false,
         hydrationPercent: merged.hydrationDiagnostics?.hydrationPercent ?? null,
-        fetchedAt: merged.fetchedAt,
+        candidatesAddedPerRound: merged.hydrationDiagnostics?.candidatesAddedPerRound ?? null,
+        positionsCompletedPerMinute:
+          merged.hydrationDiagnostics?.positionsCompletedPerMinute ?? null,
+        queueDrainRate: merged.hydrationDiagnostics?.queueDrainRate ?? null,
+        estimatedTimeToCompleteMs: merged.hydrationDiagnostics?.estimatedTimeToCompleteMs ?? null,
+        hydrationRoundsCompleted: merged.hydrationDiagnostics?.hydrationRoundsCompleted ?? null,
+        hydrationIdleReason: merged.hydrationDiagnostics?.hydrationIdleReason ?? null,
+        consecutiveTimeouts: merged.hydrationDiagnostics?.consecutiveTimeouts ?? null,
+        rateLimitBackoffActive: merged.hydrationDiagnostics?.rateLimitBackoffActive ?? null,
+        clientTimedOut: full.clientTimedOut ?? false,
+        madeProgress,
       });
-      if (full.clientTimedOut) break;
       if (merged.hydrationComplete || merged.hydrationJob?.hydrationComplete) break;
+      if (!shouldHydrateFullCandidates(merged)) break;
+      if (consecutiveNoProgressRounds >= 5) {
+        logCandidatesClientTrace("hydration_no_progress_stop", { round, consecutiveNoProgressRounds });
+        break;
+      }
+      const rateLimited = Boolean(
+        merged.hydrationDiagnostics?.rateLimitBackoffActive ||
+          merged.hydrationJob?.rateLimitBackoffActive,
+      );
+      await sleepMs(
+        rateLimited || full.clientTimedOut
+          ? HYDRATION_RATE_LIMIT_COOLDOWN_MS
+          : madeProgress
+            ? HYDRATION_ROUND_COOLDOWN_MS
+            : HYDRATION_RATE_LIMIT_COOLDOWN_MS,
+      );
     }
     const finalSnapshot = preserveRicherTabSnapshot(merged, TAB_FULL_CACHE_KEY, {
       hydrationRoundId: merged.hydrationJob?.hydrationRoundId ?? "full-final",

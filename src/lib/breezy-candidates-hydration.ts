@@ -1,4 +1,5 @@
 import type { BreezyCandidatesScanMode } from "@/lib/breezy-api";
+import { computeHydrationThroughput } from "@/lib/breezy-hydration-throughput";
 import { logBreezyCandidatesOps } from "@/lib/breezy-candidates-ops-log";
 
 function newHydrationId(): string {
@@ -44,6 +45,13 @@ export type BreezyHydrationJobState = {
   lastUpdatedAt: string | null;
   reclaimCount: number;
   hydrationStalled: boolean;
+  hydrationRoundsCompleted: number;
+  candidatesAddedLastRound: number;
+  positionsCompletedLastRound: number;
+  lastRoundDurationMs: number | null;
+  lastSuccessfulPositionId: string | null;
+  consecutiveTimeouts: number;
+  rateLimitBackoffActive: boolean;
   expiresAt: number;
 };
 
@@ -191,6 +199,13 @@ export function resetHydrationJobState(companyId: string, reason: string): Breez
     lastUpdatedAt: nowIso(),
     reclaimCount: prior?.reclaimCount ?? 0,
     hydrationStalled: false,
+    hydrationRoundsCompleted: prior?.hydrationRoundsCompleted ?? 0,
+    candidatesAddedLastRound: 0,
+    positionsCompletedLastRound: 0,
+    lastRoundDurationMs: null,
+    lastSuccessfulPositionId: prior?.lastSuccessfulPositionId ?? null,
+    consecutiveTimeouts: 0,
+    rateLimitBackoffActive: false,
     expiresAt: Date.now() + BREEZY_HYDRATION_STATE_TTL_MS,
   };
   hydrationJobs.set(key, restarted);
@@ -367,6 +382,13 @@ export function beginHydrationSession(input: {
       lastUpdatedAt: nowIso(),
       reclaimCount: 0,
       hydrationStalled: false,
+      hydrationRoundsCompleted: 0,
+      candidatesAddedLastRound: 0,
+      positionsCompletedLastRound: 0,
+      lastRoundDurationMs: null,
+      lastSuccessfulPositionId: null,
+      consecutiveTimeouts: 0,
+      rateLimitBackoffActive: false,
       expiresAt: now + BREEZY_HYDRATION_STATE_TTL_MS,
     };
     hydrationJobs.set(key, state);
@@ -516,6 +538,8 @@ export function recordHydrationBatchProgress(input: {
   candidateCount: number;
   truncated: boolean;
   hydrationRoundId?: string;
+  roundDurationMs?: number;
+  rateLimitHit?: boolean;
 }): BreezyHydrationJobState | null {
   if (input.scanMode === "preview" || input.scanMode === "fast") {
     return getHydrationJobState(input.companyId);
@@ -528,6 +552,7 @@ export function recordHydrationBatchProgress(input: {
   }
 
   const priorContinuation = state.lastContinuationPoint;
+  const priorCandidateCount = state.candidateCountAtLastSuccess;
   const nextContinuation = Math.max(priorContinuation, input.absolutePositionsScanned);
   if (nextContinuation < priorContinuation) {
     logBreezyCandidatesOps("server", "fallback", {
@@ -538,6 +563,23 @@ export function recordHydrationBatchProgress(input: {
     });
     return state;
   }
+
+  const positionsCompletedThisRound = Math.max(0, nextContinuation - priorContinuation);
+  const candidatesAddedThisRound = Math.max(0, input.candidateCount - priorCandidateCount);
+
+  state.hydrationRoundsCompleted += 1;
+  state.positionsCompletedLastRound = positionsCompletedThisRound;
+  state.candidatesAddedLastRound = candidatesAddedThisRound;
+  state.lastRoundDurationMs = input.roundDurationMs ?? state.lastRoundDurationMs;
+  state.lastSuccessfulPositionId =
+    input.completedPositionIds[input.completedPositionIds.length - 1] ??
+    state.lastSuccessfulPositionId;
+  if (input.truncated) {
+    state.consecutiveTimeouts += 1;
+  } else {
+    state.consecutiveTimeouts = 0;
+  }
+  state.rateLimitBackoffActive = Boolean(input.rateLimitHit);
 
   state.totalPositionsAvailable = Math.max(state.totalPositionsAvailable, input.totalPositionsAvailable);
   state.positionsScanned = nextContinuation;
@@ -572,6 +614,12 @@ export function recordHydrationBatchProgress(input: {
     state.hydrationStalled = false;
   }
 
+  const throughput = computeHydrationThroughput({
+    state,
+    truncated: input.truncated,
+    rateLimitHit: input.rateLimitHit,
+  });
+
   logBreezyCandidatesOps("server", "success", {
     phase: "hydration_progress",
     companyId: input.companyId,
@@ -584,6 +632,15 @@ export function recordHydrationBatchProgress(input: {
     reclaimCount: state.reclaimCount,
     lastContinuationPoint: state.lastContinuationPoint,
     lastProgressAt: state.lastProgressAt,
+    hydrationRoundsCompleted: throughput.hydrationRoundsCompleted,
+    candidatesAddedPerRound: throughput.candidatesAddedPerRound,
+    positionsCompletedPerMinute: throughput.positionsCompletedPerMinute,
+    queueDrainRate: throughput.queueDrainRate,
+    estimatedTimeToCompleteMs: throughput.estimatedTimeToCompleteMs,
+    hydrationIdleReason: throughput.hydrationIdleReason,
+    consecutiveTimeouts: throughput.consecutiveTimeouts,
+    rateLimitBackoffActive: throughput.rateLimitBackoffActive,
+    lastSuccessfulPositionId: throughput.lastSuccessfulPositionId,
   });
 
   return state;
