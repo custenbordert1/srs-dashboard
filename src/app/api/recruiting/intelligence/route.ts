@@ -6,17 +6,7 @@ import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import { listJobDrafts } from "@/lib/job-management/job-draft-store";
 import { listRecruiterEscalations } from "@/lib/operational-escalation/operational-escalation-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
-import {
-  filterOpportunitiesByTerritory,
-  parseMelOpportunities,
-} from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
-import {
-  buildCachedEmptyRoutingPlanning,
-  buildCachedRoutingPlanningSnapshot,
-} from "@/lib/routing-intelligence/build-routing-planning-cached";
-import { buildVariantTitlesByMetro } from "@/lib/routing-intelligence/variant-titles-by-metro";
-import { logRoutingIntelligence } from "@/lib/routing-intelligence/routing-intelligence-log";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -54,16 +44,6 @@ export async function GET(request: Request) {
     ]);
 
   const partialErrors: string[] = [];
-  let routingBuildMeta:
-    | {
-        cacheHit: boolean;
-        totalMs: number;
-        clusteringMs: number;
-        routePackMs: number;
-        workspaceMs: number;
-        payloadBytes: number;
-      }
-    | undefined;
   const breezyJobsOk = jobsResult.ok;
   const breezyCandidatesOk = candidatesResult.ok;
 
@@ -112,48 +92,8 @@ export async function GET(request: Request) {
     activeReps: territoryReps,
   });
 
-  const territoryScope =
-    session.territoryStates.length > 0
-      ? session.territoryStates.map((state) => normalizeStateCode(state)).sort().join(",")
-      : "all";
-  const variantTitlesByMetro = buildVariantTitlesByMetro(
-    intelligence.decisionIntelligence.variantPerformance,
-  );
-
-  const melLoadStart = performance.now();
-  if (melResult.ok) {
-    logRoutingIntelligence("mel-load", { ms: Math.round(performance.now() - melLoadStart), ok: true });
-    const opportunities = filterOpportunitiesByTerritory(
-      parseMelOpportunities(melResult.rows),
-      session.territoryStates.length > 0 ? session.territoryStates : undefined,
-    );
-    const { snapshot, meta: routingBuild } = buildCachedRoutingPlanningSnapshot({
-      fetchedAt: melResult.fetchedAt,
-      melFetchedAt: melResult.fetchedAt,
-      territoryScope,
-      opportunities,
-      reps: territoryReps,
-      jobs,
-      coverageRecommendations: intelligence.decisionIntelligence.coverageRecommendations,
-      escalations,
-      variantTitlesByMetro,
-    });
-    intelligence.routingIntelligence = snapshot;
-    routingBuildMeta = routingBuild;
-  } else {
-    logRoutingIntelligence("mel-load", {
-      ms: Math.round(performance.now() - melLoadStart),
-      ok: false,
-      error: melResult.error,
-    });
+  if (!melResult.ok) {
     partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
-    intelligence.routingIntelligence = buildCachedEmptyRoutingPlanning(fetchedAt, {
-      reps: territoryReps,
-      jobs,
-      territoryScope,
-      escalations,
-      variantTitlesByMetro,
-    });
   }
 
   logBreezyRouteResult(ROUTE, 200, {
@@ -180,10 +120,6 @@ export async function GET(request: Request) {
         escalations,
         activeRepsByState,
         refreshedAt: new Date().toISOString(),
-        routingBuild: routingBuildMeta,
-        routingSyncing: Boolean(
-          intelligence.routingIntelligence?.loadState?.syncing,
-        ),
       },
     },
     {

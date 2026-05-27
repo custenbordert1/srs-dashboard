@@ -6,7 +6,7 @@ import { apiRoutePolicy } from "@/lib/security/permissions";
 
 describe("dm api access policy", () => {
   it("blocks DM from recruiting intelligence and decision support APIs", () => {
-    for (const path of ["/api/recruiting/intelligence", "/api/recruiting/live-snapshot"]) {
+    for (const path of ["/api/recruiting/intelligence", "/api/recruiting/routing-intelligence", "/api/recruiting/live-snapshot"]) {
       const policy = apiRoutePolicy(path);
       assert.ok(policy.allowedRoles);
       assert.equal(policy.allowedRoles!.includes("dm"), false, path);
