@@ -8,6 +8,7 @@ import {
   logCandidatesCacheWriteDecision,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
+import { mergeHydrationJobSnapshots } from "@/lib/breezy-candidates-hydration";
 
 export type {
   BreezyCandidatesCacheTier,
@@ -123,8 +124,16 @@ export function mergeCandidatesSnapshots(
     base.totalPositionsAvailable ?? 0,
     addition.totalPositionsAvailable ?? 0,
   );
-  const scanned = Math.max(base.positionsScanned ?? 0, addition.positionsScanned ?? 0);
-  const hydrationComplete = addition.hydrationComplete ?? scanned >= total;
+  const mergedHydrationJob = mergeHydrationJobSnapshots(base.hydrationJob, addition.hydrationJob);
+  const scanned = Math.max(
+    base.positionsScanned ?? 0,
+    addition.positionsScanned ?? 0,
+    mergedHydrationJob?.lastContinuationPoint ?? 0,
+  );
+  const hydrationComplete =
+    addition.hydrationComplete ??
+    mergedHydrationJob?.hydrationComplete ??
+    scanned >= total;
 
   return {
     ...addition,
@@ -138,6 +147,7 @@ export function mergeCandidatesSnapshots(
     partial: !hydrationComplete && scanned < total,
     hydrationComplete,
     hydrationDiagnostics: addition.hydrationDiagnostics ?? base.hydrationDiagnostics,
+    hydrationJob: mergedHydrationJob,
     scanMode: addition.scanMode ?? base.scanMode,
     warnings: [...new Set([...(base.warnings ?? []), ...(addition.warnings ?? [])])],
     syncNotes: [...new Set([...(base.syncNotes ?? []), ...(addition.syncNotes ?? [])])],

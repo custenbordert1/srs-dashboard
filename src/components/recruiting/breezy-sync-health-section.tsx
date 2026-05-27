@@ -263,6 +263,35 @@ export function BreezySyncHealthSection() {
             </div>
           ) : null}
 
+          {snapshot.candidateSync.hydrationJob ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Metric
+                label="Hydration owner"
+                value={snapshot.candidateSync.hydrationJob.hydrationOwnerId ?? "—"}
+                hint={
+                  snapshot.candidateSync.hydrationJob.hydrationInProgress
+                    ? "Active hydration lock"
+                    : "Idle"
+                }
+              />
+              <Metric
+                label="Hydration round"
+                value={snapshot.candidateSync.hydrationJob.hydrationRoundId.slice(0, 8)}
+                hint={`Resume ${snapshot.candidateSync.hydrationJob.resumeCount} · Restart ${snapshot.candidateSync.hydrationJob.restartCount}`}
+              />
+              <Metric
+                label="Continuation point"
+                value={snapshot.candidateSync.hydrationJob.lastContinuationPoint}
+                hint={`${snapshot.candidateSync.hydrationJob.positionsScanned} positions scanned`}
+              />
+              <Metric
+                label="Queue remaining"
+                value={snapshot.candidateSync.hydrationJob.estimatedRemainingPositions}
+                hint={`${snapshot.candidateSync.hydrationJob.hydrationPercent}% complete`}
+              />
+            </div>
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
             <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
               <h3 className="font-semibold text-zinc-100">Rate Limit Protection</h3>

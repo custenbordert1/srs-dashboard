@@ -4,6 +4,7 @@ import {
   peekBreezyCandidatesCache,
   type BreezySkippedCandidatesReason,
 } from "@/lib/breezy-api";
+import { getHydrationJobState, toHydrationJobSnapshot } from "@/lib/breezy-candidates-hydration";
 
 export type BreezySyncEntity = "job" | "candidate";
 
@@ -69,6 +70,7 @@ export type BreezyCandidateSyncHealth = {
   skippedReason: string | null;
   warnings: string[];
   hydrationDiagnostics?: import("@/lib/breezy-api").BreezyHydrationDiagnostics | null;
+  hydrationJob?: import("@/lib/breezy-candidates-hydration").BreezyHydrationJobSnapshot | null;
 };
 
 export type BreezySyncHealthSnapshot = {
@@ -258,6 +260,19 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
         )
       : !candidatesFromCache;
 
+  const activeHydrationJob =
+    cachedCandidates?.ok === true
+      ? getHydrationJobState(cachedCandidates.companyId) ??
+        (cachedCandidates.hydrationJob
+          ? cachedCandidates.hydrationJob
+          : null)
+      : null;
+  const hydrationJobSnapshot = activeHydrationJob
+    ? "expiresAt" in activeHydrationJob
+      ? toHydrationJobSnapshot(activeHydrationJob)
+      : activeHydrationJob
+    : null;
+
   const candidateSync: BreezyCandidateSyncHealth = {
     fromCache: candidatesFromCache,
     candidateCount: candidatesCount,
@@ -265,10 +280,12 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     truncated: candidateTruncated,
     partial: candidatePartial,
     hydrationComplete:
-      cachedCandidates?.ok === true ? (cachedCandidates.hydrationComplete ?? null) : null,
+      hydrationJobSnapshot?.hydrationComplete ??
+      (cachedCandidates?.ok === true ? (cachedCandidates.hydrationComplete ?? null) : null),
     scanMode: cachedCandidates?.ok === true ? (cachedCandidates.scanMode ?? null) : null,
-    positionsScanned,
-    positionsAvailable,
+    positionsScanned: hydrationJobSnapshot?.positionsScanned ?? positionsScanned,
+    positionsAvailable:
+      hydrationJobSnapshot?.totalPositionsAvailable ?? positionsAvailable,
     skippedReason: cachedCandidates?.ok
       ? cachedCandidates.skippedCandidatesReason
         ? formatSkippedCandidatesReason(cachedCandidates.skippedCandidatesReason)
@@ -277,6 +294,7 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
     warnings: candidateWarnings,
     hydrationDiagnostics:
       cachedCandidates?.ok === true ? (cachedCandidates.hydrationDiagnostics ?? null) : null,
+    hydrationJob: hydrationJobSnapshot,
   };
 
   if (candidateTruncated && cachedCandidates?.ok) {

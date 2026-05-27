@@ -50,6 +50,7 @@ export async function GET(request: Request) {
   const maxPages = Number.parseInt(searchParams.get("max_pages") ?? "", 10);
   const maxPositions = Number.parseInt(searchParams.get("max_positions") ?? "", 10);
   const positionsOffset = Number.parseInt(searchParams.get("positions_offset") ?? "", 10);
+  const hydrationOwnerId = searchParams.get("hydration_owner")?.trim() || undefined;
   const dateRangeStart =
     searchParams.get("from")?.trim() || searchParams.get("date_from")?.trim() || undefined;
   const dateRangeEnd =
@@ -75,6 +76,7 @@ export async function GET(request: Request) {
       force,
       scanMode,
       positionsOffset: Number.isFinite(positionsOffset) ? positionsOffset : undefined,
+      hydrationOwnerId,
     });
   const result = guardBreezyCandidatesResult(breezyResult, session);
   const status = result.ok ? 200 : breezyFailureHttpStatus(result.error);

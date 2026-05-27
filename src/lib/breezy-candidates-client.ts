@@ -19,6 +19,13 @@ import {
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
 import {
+  createHydrationOwnerId,
+  persistClientHydrationBackup,
+  readClientHydrationBackup,
+  resolveClientHydrationResumeOffset,
+  shouldSkipFastTierForActiveHydration,
+} from "@/lib/breezy-candidates-hydration";
+import {
   cacheKey,
   fetchCachedJson,
   getCached,
@@ -47,6 +54,7 @@ export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = BREEZY_CANDIDATES_FULL_HYDRA
 /** Max incremental full-tier rounds (295 positions / ~115s budget per round). */
 const MAX_FULL_HYDRATION_ROUNDS = 6;
 let fullHydrationInflight: Promise<CandidatesTabFetchResult> | null = null;
+const hydrationOwnerId = typeof window !== "undefined" ? createHydrationOwnerId() : "server-tab";
 /** Client cache TTL for preview responses (populated snapshots only). */
 export const CANDIDATES_PREVIEW_CACHE_TTL_MS = 300_000;
 
@@ -145,6 +153,7 @@ function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidate
   if (hasPopulatedCandidatesSnapshot(enriched)) {
     persistTabSnapshotToSession(enriched);
   }
+  if (enriched.hydrationJob) persistClientHydrationBackup(enriched.hydrationJob);
   return enriched;
 }
 
@@ -217,12 +226,16 @@ function buildCandidatesQuery(options?: {
   force?: boolean;
   scan?: BreezyCandidatesScanMode;
   positionsOffset?: number;
+  hydrationOwnerId?: string;
 }): string {
   const params = new URLSearchParams();
   if (options?.scan) params.set("scan", options.scan);
   if (options?.force) params.set("force", "true");
   if (options?.positionsOffset !== undefined && options.positionsOffset > 0) {
     params.set("positions_offset", String(Math.floor(options.positionsOffset)));
+  }
+  if (options?.hydrationOwnerId) {
+    params.set("hydration_owner", options.hydrationOwnerId);
   }
   const query = params.toString();
   return query ? `?${query}` : "";
@@ -413,6 +426,7 @@ async function fetchCandidatesFromApi(options: {
       scan: options.scan,
       force: forceFetch,
       positionsOffset: options.positionsOffset,
+      hydrationOwnerId,
     })}`;
 
     const parsed = await fetchCachedJson<BreezyCandidatesResult>(
@@ -502,6 +516,7 @@ async function fetchCandidatesFromApi(options: {
           fromCache: parsed.fromCache ?? false,
           partial: parsed.partial ?? false,
         });
+        if (preserved.hydrationJob) persistClientHydrationBackup(preserved.hydrationJob);
         return preserved;
       }
       if (fallbackOk && fallbackOk.candidates.length > 0) {
@@ -660,9 +675,18 @@ export async function fetchCandidatesForTab(options?: {
 }
 
 export function shouldHydrateFullCandidates(snapshot: BreezyCandidatesSuccess): boolean {
-  const total = snapshot.totalPositionsAvailable ?? 0;
-  const scanned = snapshot.positionsScanned ?? 0;
+  if (snapshot.hydrationJob?.hydrationComplete) return false;
+  const total = snapshot.totalPositionsAvailable ?? snapshot.hydrationJob?.totalPositionsAvailable ?? 0;
+  const scanned = resolveClientHydrationResumeOffset(snapshot);
   return snapshot.hydrationComplete === false || (total > 0 && scanned < total);
+}
+
+export function shouldSkipFastTierForHydration(snapshot: BreezyCandidatesSuccess): boolean {
+  return shouldSkipFastTierForActiveHydration({
+    candidateCount: snapshot.candidates.length,
+    hydrationJob: snapshot.hydrationJob ?? readClientHydrationBackup(),
+    positionsScanned: snapshot.positionsScanned,
+  });
 }
 
 export async function fetchAndMergeFullCandidates(
@@ -678,12 +702,13 @@ export async function fetchAndMergeFullCandidates(
           hydrationRoundId: `full-complete-${round}`,
         });
       }
-      const offset = merged.positionsScanned ?? 0;
+      const offset = resolveClientHydrationResumeOffset(merged);
       logCandidatesClientTrace("hydrate_full_round_start", {
         round,
         offset,
         candidateCount: merged.candidates.length,
         totalPositionsAvailable: merged.totalPositionsAvailable ?? 0,
+        hydrationRoundId: merged.hydrationJob?.hydrationRoundId,
       });
       const full = await fetchCandidatesForTab({
         scan: "full",
@@ -702,9 +727,15 @@ export async function fetchAndMergeFullCandidates(
         hydrationPercent: merged.hydrationDiagnostics?.hydrationPercent ?? null,
       });
       if (full.clientTimedOut) break;
-      if (merged.hydrationComplete) break;
+      if (merged.hydrationComplete || merged.hydrationJob?.hydrationComplete) break;
     }
-    return preserveRicherTabSnapshot(merged, TAB_FULL_CACHE_KEY, { hydrationRoundId: "full-final" });
+    const finalSnapshot = preserveRicherTabSnapshot(merged, TAB_FULL_CACHE_KEY, {
+      hydrationRoundId: merged.hydrationJob?.hydrationRoundId ?? "full-final",
+    });
+    if (finalSnapshot.ok && finalSnapshot.hydrationJob) {
+      persistClientHydrationBackup(finalSnapshot.hydrationJob);
+    }
+    return finalSnapshot;
   })();
 
   try {

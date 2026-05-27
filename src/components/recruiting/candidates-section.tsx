@@ -67,6 +67,7 @@ import {
   fetchCandidatesForTab,
   peekTabCandidatesCache,
   shouldHydrateFullCandidates,
+  shouldSkipFastTierForHydration,
   type CandidatesTabFetchResult,
 } from "@/lib/breezy-candidates-client";
 import { candidatePrimaryEmail, hasCandidatePrimaryEmail } from "@/lib/onboarding-signer";
@@ -718,10 +719,19 @@ export function CandidatesSection() {
         }
       };
 
+      const baseNow = breezySnapshotRef.current;
+      if (baseNow && shouldSkipFastTierForHydration(baseNow)) {
+        logCandidatesClientTrace("fast_tier_skipped_active_hydration", {
+          candidateCount: baseNow.candidates.length,
+          continuation: baseNow.hydrationJob?.lastContinuationPoint ?? baseNow.positionsScanned ?? 0,
+        });
+        scheduleHydrationIfNeeded();
+        return;
+      }
+
       setRefreshingCandidates(true);
       const fetchStarted = performance.now();
       try {
-        const baseNow = breezySnapshotRef.current;
         const baseCount = baseNow?.candidates.length ?? 0;
         logCandidatesClientTrace("fast_tier_start", {
           baseSnapshotCount: baseCount,

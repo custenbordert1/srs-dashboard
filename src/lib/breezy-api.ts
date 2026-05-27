@@ -26,6 +26,13 @@ import {
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
 import {
+  getHydrationJobState,
+  recordHydrationBatchProgress,
+  resolveHydrationResumeOffset,
+  toHydrationJobSnapshot,
+  touchHydrationHeartbeat,
+} from "@/lib/breezy-candidates-hydration";
+import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
 } from "@/lib/recruiting-intelligence/resume-parser";
@@ -220,6 +227,8 @@ export type BreezyCandidatesSuccess = {
   candidateFetchEndpoint?: string;
   /** Scan progress metrics for partial / background hydration. */
   hydrationDiagnostics?: BreezyHydrationDiagnostics;
+  /** Resumable hydration job state (full/all tiers only — preview does not write). */
+  hydrationJob?: import("@/lib/breezy-candidates-hydration").BreezyHydrationJobSnapshot;
 };
 
 export type BreezyHydrationDiagnostics = {
@@ -1435,6 +1444,8 @@ type ScanBatchStats = {
   previewStoppedReason?: BreezyPreviewScanDiagnostics["previewStoppedReason"];
   scanDurationMs: number;
   averagePositionLatencyMs: number | null;
+  completedPositionIds: string[];
+  skippedPositionIds: string[];
 };
 
 function buildHydrationDiagnostics(input: {
@@ -1502,6 +1513,8 @@ export async function fetchBreezyCandidates(options?: {
   scanMode?: BreezyCandidatesScanMode;
   /** Resume full-tier scan after this published-position index (0-based). */
   positionsOffset?: number;
+  /** Hydration lock owner (browser session id or server default). */
+  hydrationOwnerId?: string;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
   if (!getBreezyApiKeySync()) {
@@ -1601,6 +1614,25 @@ export async function fetchBreezyCandidates(options?: {
     logCandidatesDebug("preview_force_server_refetch", 0, { scanMode, forceRequested: true });
   }
 
+  const peeked = !options?.force
+    ? peekBreezyCandidatesCache({
+        positionId,
+        state,
+        pageSize,
+        maxPages,
+        maxPositions,
+      })
+    : null;
+  const peekHydration = peeked?.ok ? peeked.hydrationJob : null;
+  const seedContinuationPoint = Math.max(
+    peeked?.ok ? (peeked.positionsScanned ?? 0) : 0,
+    peekHydration?.lastContinuationPoint ?? 0,
+  );
+  const seedCandidateCount = Math.max(
+    peeked?.ok ? peeked.candidates.length : 0,
+    peekHydration?.candidateCountAtLastSuccess ?? 0,
+  );
+
   const result = await cachedCandidates(
     cacheKey,
     () =>
@@ -1614,6 +1646,9 @@ export async function fetchBreezyCandidates(options?: {
         dateRangeEnd: rangeEnd,
         scanMode,
         positionsOffset: options?.positionsOffset,
+        hydrationOwnerId: options?.hydrationOwnerId,
+        seedContinuationPoint,
+        seedCandidateCount,
       }),
     BREEZY_CANDIDATES_CACHE_TTL_MS,
   );
@@ -2075,6 +2110,8 @@ async function scanCandidatesViaGlobalCompanyList(input: {
       previewStoppedReason: "complete",
       scanDurationMs: 0,
       averagePositionLatencyMs: null,
+      completedPositionIds: [],
+      skippedPositionIds: [],
     };
   }
 
@@ -2124,6 +2161,8 @@ async function scanCandidatesViaGlobalCompanyList(input: {
     previewStoppedReason: globalResult.truncated ? "server_budget" : "complete",
     scanDurationMs: 0,
     averagePositionLatencyMs: null,
+    completedPositionIds: [],
+    skippedPositionIds: [],
   };
 }
 
@@ -2161,9 +2200,14 @@ async function scanPositionsBatch(input: {
   const rangeStart = input.filterToDateRange ? input.dateRangeStart : undefined;
   const rangeEnd = input.filterToDateRange ? input.dateRangeEnd : undefined;
 
+  const completedPositionIds: string[] = [];
+  const skippedPositionIds: string[] = [];
+
   const mergeResult = (position: BreezyJob, result: PositionScanResult, isRetry = false) => {
     if (!isRetry) {
       positionsScanned += 1;
+      completedPositionIds.push(position.jobId);
+      if (result.failed) skippedPositionIds.push(position.jobId);
       if (result.extractedCandidatesCount > 0) {
         previewCandidatePositionsFound += 1;
       } else if (!result.failed) {
@@ -2292,6 +2336,8 @@ async function scanPositionsBatch(input: {
     scanDurationMs: Date.now() - scanStartedAt,
     averagePositionLatencyMs:
       positionsScanned > 0 ? Math.round(totalPositionWallMs / positionsScanned) : null,
+    completedPositionIds,
+    skippedPositionIds,
   };
 }
 
@@ -2306,6 +2352,9 @@ async function fetchBreezyCandidatesFastUncached(options?: {
   scanMode?: BreezyCandidatesScanMode;
   force?: boolean;
   positionsOffset?: number;
+  hydrationOwnerId?: string;
+  seedContinuationPoint?: number;
+  seedCandidateCount?: number;
 }): Promise<BreezyCandidatesResult> {
   resetBreezyRateLimitFlag();
   return fetchBreezyCandidatesUncachedCore({
@@ -2579,6 +2628,9 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   scanMode: BreezyCandidatesScanMode;
   force?: boolean;
   positionsOffset?: number;
+  hydrationOwnerId?: string;
+  seedContinuationPoint?: number;
+  seedCandidateCount?: number;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
   const apiKey = getBreezyApiKeySync();
@@ -2666,6 +2718,8 @@ async function fetchBreezyCandidatesUncachedCore(options: {
       : sortPublishedJobsByRecentUpdated(publishedJobs);
   const totalAvailable = sortedPositions.length;
   const scanMode = options.scanMode;
+  const hydrationOwnerId = options.hydrationOwnerId?.trim() || "server-hydration";
+  let activeHydrationRoundId: string | undefined;
 
   let scanPositions: BreezyJob[] = sortedPositions;
   let fastTierSize = 0;
@@ -2690,19 +2744,31 @@ async function fetchBreezyCandidatesUncachedCore(options: {
         : BREEZY_CANDIDATES_FAST_TIER_POSITIONS;
     fastTierSize = Math.min(cap, sortedPositions.length);
     scanPositions = sortedPositions.slice(0, fastTierSize);
-  } else if (scanMode === "full") {
-    fastTierSize = Math.min(BREEZY_CANDIDATES_FAST_TIER_POSITIONS, sortedPositions.length);
-    const defaultOffset = fastTierSize;
-    const requestedOffset = options?.positionsOffset;
+  } else if (scanMode === "full" || scanMode === "all") {
+    fastTierSize =
+      scanMode === "full"
+        ? Math.min(BREEZY_CANDIDATES_FAST_TIER_POSITIONS, sortedPositions.length)
+        : 0;
+    const resumePlan = resolveHydrationResumeOffset({
+      companyId,
+      ownerId: hydrationOwnerId,
+      totalPositionsAvailable: totalAvailable,
+      requestedOffset: options.positionsOffset,
+      force: options.force,
+      seedContinuationPoint: Math.max(
+        options.seedContinuationPoint ?? 0,
+        getHydrationJobState(companyId)?.lastContinuationPoint ?? 0,
+      ),
+      seedCandidateCount: options.seedCandidateCount,
+    });
+    activeHydrationRoundId = resumePlan.hydrationRoundId;
     const startOffset = Math.max(
       0,
-      Math.min(
-        sortedPositions.length,
-        requestedOffset !== undefined ? requestedOffset : defaultOffset,
-      ),
+      Math.min(sortedPositions.length, resumePlan.resumeOffset),
     );
     fullScanStartOffset = startOffset;
     scanPositions = sortedPositions.slice(startOffset);
+    touchHydrationHeartbeat(companyId, hydrationOwnerId);
     if (scanPositions.length === 0) {
       const {
         getStaleOkCandidatesSnapshot,
@@ -2827,9 +2893,25 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   }
 
   const positionsScannedTotal =
-    scanMode === "full"
+    scanMode === "full" || scanMode === "all"
       ? fullScanStartOffset + batch.positionsScanned
       : batch.positionsScanned;
+
+  if (scanMode === "full" || scanMode === "all") {
+    recordHydrationBatchProgress({
+      companyId,
+      ownerId: hydrationOwnerId,
+      scanMode,
+      totalPositionsAvailable: totalAvailable,
+      absolutePositionsScanned: positionsScannedTotal,
+      completedPositionIds: batch.completedPositionIds,
+      skippedPositionIds: batch.skippedPositionIds,
+      candidateCount: batch.candidates.length,
+      truncated: batch.truncated,
+      hydrationRoundId: activeHydrationRoundId,
+    });
+    touchHydrationHeartbeat(companyId, hydrationOwnerId);
+  }
   const hydrationDiagnostics = buildHydrationDiagnostics({
     totalPositionsAvailable: totalAvailable,
     positionsScanned: positionsScannedTotal,
@@ -2841,12 +2923,12 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     previewStoppedReason: batch.previewStoppedReason,
     truncated: batch.truncated,
   });
+  const hydrationJobState = getHydrationJobState(companyId);
   const hydrationComplete =
-    scanMode === "all"
-      ? !batch.truncated && positionsScannedTotal >= totalAvailable
-      : scanMode === "fast" || scanMode === "preview"
-        ? false
-        : positionsScannedTotal >= totalAvailable && !batch.truncated;
+    scanMode === "fast" || scanMode === "preview"
+      ? false
+      : hydrationJobState?.hydrationComplete ??
+        (positionsScannedTotal >= totalAvailable && !batch.truncated);
 
   if (scanMode === "preview") {
     const loaded = batch.candidates.length;
@@ -2939,6 +3021,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     scanMode,
     hydrationComplete,
     hydrationDiagnostics,
+    hydrationJob: hydrationJobState ? toHydrationJobSnapshot(hydrationJobState) : undefined,
     partial:
       scanMode === "fast" || scanMode === "preview"
         ? true
