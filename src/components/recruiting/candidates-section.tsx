@@ -691,6 +691,13 @@ export function CandidatesSection() {
 
   const runFastTier = useCallback(
     async (force: boolean) => {
+      const scheduleHydrationIfNeeded = () => {
+        const snapshot = breezySnapshotRef.current;
+        if (snapshot && shouldHydrateFullCandidates(snapshot)) {
+          void hydrateRemainingCandidates(snapshot);
+        }
+      };
+
       setRefreshingCandidates(true);
       const fetchStarted = performance.now();
       try {
@@ -728,6 +735,9 @@ export function CandidatesSection() {
               ? "Fast sync returned no new candidates. Showing loaded candidates — background sync continues."
               : `${"error" in fastMerged ? fastMerged.error : "Fast sync failed"} Showing loaded candidates — background sync continues.`,
           );
+          scheduleHydrationIfNeeded();
+        } else if (fastMerged.ok && shouldHydrateFullCandidates(fastMerged)) {
+          scheduleHydrationIfNeeded();
         }
       } catch (err) {
         if (hasPopulatedSnapshot()) {
@@ -738,6 +748,7 @@ export function CandidatesSection() {
               ? "Background sync still running — table shows last loaded candidates."
               : `${message} Showing loaded candidates — background sync continues.`,
           );
+          scheduleHydrationIfNeeded();
         }
       } finally {
         setRefreshingCandidates(false);

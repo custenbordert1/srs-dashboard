@@ -213,6 +213,20 @@ export type BreezyCandidatesSuccess = {
   /** How candidates were loaded from Breezy (global list vs per-position scan). */
   candidateFetchStrategy?: string;
   candidateFetchEndpoint?: string;
+  /** Scan progress metrics for partial / background hydration. */
+  hydrationDiagnostics?: BreezyHydrationDiagnostics;
+};
+
+export type BreezyHydrationDiagnostics = {
+  positionsAttempted: number;
+  positionsCompleted: number;
+  positionsSkipped: number;
+  queueDepthRemaining: number;
+  hydrationPercent: number;
+  estimatedRemainingScanMs: number | null;
+  averagePositionLatencyMs: number | null;
+  timeoutSource: "none" | "server_budget" | "target_candidates" | "max_positions" | "client" | null;
+  scanDurationMs: number;
 };
 
 export type BreezyPreviewScanDiagnostics = {
@@ -1381,7 +1395,53 @@ type ScanBatchStats = {
   previewCandidatePositionsFound?: number;
   previewEmptyPositions?: number;
   previewStoppedReason?: BreezyPreviewScanDiagnostics["previewStoppedReason"];
+  scanDurationMs: number;
+  averagePositionLatencyMs: number | null;
 };
+
+function buildHydrationDiagnostics(input: {
+  totalPositionsAvailable: number;
+  positionsScanned: number;
+  positionsAttempted: number;
+  positionsCompleted: number;
+  positionsSkipped: number;
+  scanDurationMs: number;
+  averagePositionLatencyMs: number | null;
+  previewStoppedReason?: BreezyPreviewScanDiagnostics["previewStoppedReason"];
+  truncated: boolean;
+}): BreezyHydrationDiagnostics {
+  const queueDepthRemaining = Math.max(0, input.totalPositionsAvailable - input.positionsScanned);
+  const hydrationPercent =
+    input.totalPositionsAvailable > 0
+      ? Math.min(100, Math.round((input.positionsScanned / input.totalPositionsAvailable) * 100))
+      : 100;
+  const timeoutSource: BreezyHydrationDiagnostics["timeoutSource"] =
+    !input.truncated || input.previewStoppedReason === "complete"
+      ? "none"
+      : input.previewStoppedReason === "target_candidates"
+        ? "target_candidates"
+        : input.previewStoppedReason === "max_positions"
+          ? "max_positions"
+          : "server_budget";
+  const estimatedRemainingScanMs =
+    input.averagePositionLatencyMs && queueDepthRemaining > 0
+      ? Math.round(
+          (input.averagePositionLatencyMs * queueDepthRemaining) / CANDIDATE_POSITION_CONCURRENCY,
+        )
+      : null;
+
+  return {
+    positionsAttempted: input.positionsAttempted,
+    positionsCompleted: input.positionsCompleted,
+    positionsSkipped: input.positionsSkipped,
+    queueDepthRemaining,
+    hydrationPercent,
+    estimatedRemainingScanMs,
+    averagePositionLatencyMs: input.averagePositionLatencyMs,
+    timeoutSource,
+    scanDurationMs: input.scanDurationMs,
+  };
+}
 
 export async function fetchBreezyCandidates(options?: {
   positionId?: string;
@@ -1402,6 +1462,8 @@ export async function fetchBreezyCandidates(options?: {
    * all — legacy full scan (other dashboard APIs).
    */
   scanMode?: BreezyCandidatesScanMode;
+  /** Resume full-tier scan after this published-position index (0-based). */
+  positionsOffset?: number;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
   if (!getBreezyApiKeySync()) {
@@ -1514,6 +1576,7 @@ export async function fetchBreezyCandidates(options?: {
         dateRangeStart: rangeStart,
         dateRangeEnd: rangeEnd,
         scanMode,
+        positionsOffset: options?.positionsOffset,
       }),
     BREEZY_CANDIDATES_CACHE_TTL_MS,
   );
@@ -1976,6 +2039,8 @@ async function scanCandidatesViaGlobalCompanyList(input: {
       rawBreezyResponseCount: 0,
       extractedCandidatesCount: 0,
       previewStoppedReason: "complete",
+      scanDurationMs: 0,
+      averagePositionLatencyMs: null,
     };
   }
 
@@ -2023,6 +2088,8 @@ async function scanCandidatesViaGlobalCompanyList(input: {
     previewCandidatePositionsFound: new Set(candidates.map((c) => c.positionId).filter(Boolean)).size,
     previewEmptyPositions: 0,
     previewStoppedReason: globalResult.truncated ? "server_budget" : "complete",
+    scanDurationMs: 0,
+    averagePositionLatencyMs: null,
   };
 }
 
@@ -2054,6 +2121,8 @@ async function scanPositionsBatch(input: {
   let previewEmptyPositions = 0;
   let previewStoppedReason: ScanBatchStats["previewStoppedReason"] = "complete";
   const failedPositions: BreezyJob[] = [];
+  const scanStartedAt = Date.now();
+  let totalPositionWallMs = 0;
 
   const rangeStart = input.filterToDateRange ? input.dateRangeStart : undefined;
   const rangeEnd = input.filterToDateRange ? input.dateRangeEnd : undefined;
@@ -2103,6 +2172,7 @@ async function scanPositionsBatch(input: {
     }
 
     const batch = input.positions.slice(offset, Math.min(offset + CANDIDATE_POSITION_CONCURRENCY, total));
+    const batchWallStart = Date.now();
     const results = await Promise.all(
       batch.map((position) =>
         fetchCandidatesForPosition(
@@ -2116,6 +2186,7 @@ async function scanPositionsBatch(input: {
         ),
       ),
     );
+    totalPositionWallMs += Date.now() - batchWallStart;
 
     for (let index = 0; index < batch.length; index += 1) {
       mergeResult(batch[index]!, results[index]!);
@@ -2184,6 +2255,9 @@ async function scanPositionsBatch(input: {
     previewCandidatePositionsFound,
     previewEmptyPositions,
     previewStoppedReason,
+    scanDurationMs: Date.now() - scanStartedAt,
+    averagePositionLatencyMs:
+      positionsScanned > 0 ? Math.round(totalPositionWallMs / positionsScanned) : null,
   };
 }
 
@@ -2197,6 +2271,7 @@ async function fetchBreezyCandidatesFastUncached(options?: {
   dateRangeEnd?: string;
   scanMode?: BreezyCandidatesScanMode;
   force?: boolean;
+  positionsOffset?: number;
 }): Promise<BreezyCandidatesResult> {
   resetBreezyRateLimitFlag();
   return fetchBreezyCandidatesUncachedCore({
@@ -2469,6 +2544,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   jobState: string;
   scanMode: BreezyCandidatesScanMode;
   force?: boolean;
+  positionsOffset?: number;
 }): Promise<BreezyCandidatesResult> {
   ensureBreezyConfigLoaded();
   const apiKey = getBreezyApiKeySync();
@@ -2559,6 +2635,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
 
   let scanPositions: BreezyJob[] = sortedPositions;
   let fastTierSize = 0;
+  let fullScanStartOffset = 0;
 
   const previewPageSize = Math.min(CANDIDATES_PAGE_SIZE, BREEZY_CANDIDATES_PREVIEW_TARGET_CANDIDATES);
   const effectivePageSize = scanMode === "preview" ? previewPageSize : pageSize;
@@ -2581,7 +2658,17 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     scanPositions = sortedPositions.slice(0, fastTierSize);
   } else if (scanMode === "full") {
     fastTierSize = Math.min(BREEZY_CANDIDATES_FAST_TIER_POSITIONS, sortedPositions.length);
-    scanPositions = sortedPositions.slice(fastTierSize);
+    const defaultOffset = fastTierSize;
+    const requestedOffset = options?.positionsOffset;
+    const startOffset = Math.max(
+      0,
+      Math.min(
+        sortedPositions.length,
+        requestedOffset !== undefined ? requestedOffset : defaultOffset,
+      ),
+    );
+    fullScanStartOffset = startOffset;
+    scanPositions = sortedPositions.slice(startOffset);
     if (scanPositions.length === 0) {
       const {
         getStaleOkCandidatesSnapshot,
@@ -2706,7 +2793,20 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   }
 
   const positionsScannedTotal =
-    scanMode === "full" ? fastTierSize + batch.positionsScanned : batch.positionsScanned;
+    scanMode === "full"
+      ? fullScanStartOffset + batch.positionsScanned
+      : batch.positionsScanned;
+  const hydrationDiagnostics = buildHydrationDiagnostics({
+    totalPositionsAvailable: totalAvailable,
+    positionsScanned: positionsScannedTotal,
+    positionsAttempted: scanPositions.length,
+    positionsCompleted: batch.positionsScanned,
+    positionsSkipped: batch.positionsSkipped,
+    scanDurationMs: batch.scanDurationMs,
+    averagePositionLatencyMs: batch.averagePositionLatencyMs,
+    previewStoppedReason: batch.previewStoppedReason,
+    truncated: batch.truncated,
+  });
   const hydrationComplete =
     scanMode === "all"
       ? !batch.truncated && positionsScannedTotal >= totalAvailable
@@ -2804,6 +2904,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
     ...payload,
     scanMode,
     hydrationComplete,
+    hydrationDiagnostics,
     partial:
       scanMode === "fast" || scanMode === "preview"
         ? true

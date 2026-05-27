@@ -21,18 +21,27 @@ import {
   invalidateCached,
   LONG_CLIENT_CACHE_TTL_MS,
 } from "@/lib/client-api-cache";
-import { fetchWithTimeout, isTimeoutError } from "@/lib/fetch-with-timeout";
+import {
+  BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS,
+  BREEZY_CANDIDATES_FULL_HYDRATION_TIMEOUT_MS,
+  BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
+  fetchWithTimeout,
+  isTimeoutError,
+} from "@/lib/fetch-with-timeout";
 
-/** Preview tier — must cover server preview budget (~10s) + jobs list fetch + Breezy latency. */
-export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 30_000;
+/** Preview tier — must cover server preview budget (~18s) + jobs list fetch + Breezy latency. */
+export const CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS;
 /** Fast-tier scan (60 positions) — must not abort before server can return populated rows. */
-export const CANDIDATES_FAST_CLIENT_TIMEOUT_MS = 75_000;
+export const CANDIDATES_FAST_CLIENT_TIMEOUT_MS = BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS;
 /** Candidates tab loading ceiling — wait through preview + fast before timeout messaging. */
 export const CANDIDATES_TAB_LOADING_CEILING_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_MS + 5_000;
 /** @deprecated Use CANDIDATES_FAST_CLIENT_TIMEOUT_MS */
 export const CANDIDATES_BREEZY_CLIENT_TIMEOUT_MS = CANDIDATES_FAST_CLIENT_TIMEOUT_MS;
 /** Full-tier hydration can exceed the fast-tier client ceiling. */
-export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = 120_000;
+export const CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = BREEZY_CANDIDATES_FULL_HYDRATION_TIMEOUT_MS;
+/** Max incremental full-tier rounds (295 positions / ~115s budget per round). */
+const MAX_FULL_HYDRATION_ROUNDS = 6;
+let fullHydrationInflight: Promise<CandidatesTabFetchResult> | null = null;
 /** Client cache TTL for preview responses (populated snapshots only). */
 export const CANDIDATES_PREVIEW_CACHE_TTL_MS = 300_000;
 
@@ -175,10 +184,14 @@ export type CandidatesTabFetchResult = BreezyCandidatesResult & {
 function buildCandidatesQuery(options?: {
   force?: boolean;
   scan?: BreezyCandidatesScanMode;
+  positionsOffset?: number;
 }): string {
   const params = new URLSearchParams();
   if (options?.scan) params.set("scan", options.scan);
   if (options?.force) params.set("force", "true");
+  if (options?.positionsOffset !== undefined && options.positionsOffset > 0) {
+    params.set("positions_offset", String(Math.floor(options.positionsOffset)));
+  }
   const query = params.toString();
   return query ? `?${query}` : "";
 }
@@ -308,6 +321,7 @@ async function fetchCandidatesLiveJson(input: {
 async function fetchCandidatesFromApi(options: {
   scan: BreezyCandidatesScanMode;
   force?: boolean;
+  positionsOffset?: number;
   timeoutMs: number;
   cacheKey: string;
   label: string;
@@ -366,6 +380,7 @@ async function fetchCandidatesFromApi(options: {
     const requestUrl = `${BREEZY_CANDIDATES_SOURCE.apiPath}${buildCandidatesQuery({
       scan: options.scan,
       force: forceFetch,
+      positionsOffset: options.positionsOffset,
     })}`;
 
     const parsed = await fetchCachedJson<BreezyCandidatesResult>(
@@ -557,6 +572,7 @@ async function fetchCandidatesFromApi(options: {
 export async function fetchCandidatesForTab(options?: {
   force?: boolean;
   scan?: BreezyCandidatesScanMode;
+  positionsOffset?: number;
 }): Promise<CandidatesTabFetchResult> {
   const scan = options?.scan ?? "preview";
   if (!options?.force) {
@@ -575,6 +591,7 @@ export async function fetchCandidatesForTab(options?: {
   return fetchCandidatesFromApi({
     scan,
     force: options?.force,
+    positionsOffset: options?.positionsOffset,
     timeoutMs: timeoutForScan(scan),
     cacheKey: cacheKeyForScan(scan),
     label: `candidates-tab-${scan}`,
@@ -591,9 +608,46 @@ export function shouldHydrateFullCandidates(snapshot: BreezyCandidatesSuccess): 
 export async function fetchAndMergeFullCandidates(
   base: BreezyCandidatesSuccess,
 ): Promise<CandidatesTabFetchResult> {
-  const full = await fetchCandidatesForTab({ scan: "full", force: true });
-  if (!full.ok) return full;
-  return rememberTabOkSnapshot(mergeCandidatesSnapshots(base, full));
+  if (fullHydrationInflight) return fullHydrationInflight;
+
+  fullHydrationInflight = (async (): Promise<CandidatesTabFetchResult> => {
+    let merged: BreezyCandidatesSuccess = base;
+    for (let round = 0; round < MAX_FULL_HYDRATION_ROUNDS; round += 1) {
+      if (!shouldHydrateFullCandidates(merged)) {
+        return rememberTabOkSnapshot(merged);
+      }
+      const offset = merged.positionsScanned ?? 0;
+      logCandidatesClientTrace("hydrate_full_round_start", {
+        round,
+        offset,
+        candidateCount: merged.candidates.length,
+        totalPositionsAvailable: merged.totalPositionsAvailable ?? 0,
+      });
+      const full = await fetchCandidatesForTab({
+        scan: "full",
+        force: true,
+        positionsOffset: offset,
+      });
+      if (!full.ok) return full;
+      merged = rememberTabOkSnapshot(mergeCandidatesSnapshots(merged, full));
+      logCandidatesClientTrace("hydrate_full_round_complete", {
+        round,
+        candidateCount: merged.candidates.length,
+        positionsScanned: merged.positionsScanned ?? 0,
+        hydrationComplete: merged.hydrationComplete ?? false,
+        hydrationPercent: merged.hydrationDiagnostics?.hydrationPercent ?? null,
+      });
+      if (full.clientTimedOut) break;
+      if (merged.hydrationComplete) break;
+    }
+    return merged;
+  })();
+
+  try {
+    return await fullHydrationInflight;
+  } finally {
+    fullHydrationInflight = null;
+  }
 }
 
 export async function fetchAndMergeFastCandidates(

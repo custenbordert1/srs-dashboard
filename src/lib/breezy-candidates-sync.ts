@@ -114,6 +114,7 @@ export function mergeCandidatesSnapshots(
     truncated: addition.truncated,
     partial: !hydrationComplete && scanned < total,
     hydrationComplete,
+    hydrationDiagnostics: addition.hydrationDiagnostics ?? base.hydrationDiagnostics,
     scanMode: addition.scanMode ?? base.scanMode,
     warnings: [...new Set([...(base.warnings ?? []), ...(addition.warnings ?? [])])],
     syncNotes: [...new Set([...(base.syncNotes ?? []), ...(addition.syncNotes ?? [])])],

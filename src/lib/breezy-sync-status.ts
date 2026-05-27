@@ -68,6 +68,7 @@ export type BreezyCandidateSyncHealth = {
   positionsAvailable: number | null;
   skippedReason: string | null;
   warnings: string[];
+  hydrationDiagnostics?: import("@/lib/breezy-api").BreezyHydrationDiagnostics | null;
 };
 
 export type BreezySyncHealthSnapshot = {
@@ -274,6 +275,8 @@ export async function buildBreezySyncHealthSnapshot(): Promise<BreezySyncHealthS
         : null
       : null,
     warnings: candidateWarnings,
+    hydrationDiagnostics:
+      cachedCandidates?.ok === true ? (cachedCandidates.hydrationDiagnostics ?? null) : null,
   };
 
   if (candidateTruncated && cachedCandidates?.ok) {

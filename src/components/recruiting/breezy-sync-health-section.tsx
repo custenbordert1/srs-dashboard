@@ -228,6 +228,41 @@ export function BreezySyncHealthSection() {
             />
           </div>
 
+          {snapshot.candidateSync.hydrationDiagnostics ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Metric
+                label="Hydration progress"
+                value={`${snapshot.candidateSync.hydrationDiagnostics.hydrationPercent}%`}
+                hint={`${snapshot.candidateSync.hydrationDiagnostics.positionsCompleted.toLocaleString()} completed this scan · ${snapshot.candidateSync.hydrationDiagnostics.queueDepthRemaining.toLocaleString()} queued`}
+              />
+              <Metric
+                label="Positions attempted"
+                value={snapshot.candidateSync.hydrationDiagnostics.positionsAttempted}
+                hint={`${snapshot.candidateSync.hydrationDiagnostics.positionsSkipped.toLocaleString()} skipped in last scan`}
+              />
+              <Metric
+                label="Timeout source"
+                value={snapshot.candidateSync.hydrationDiagnostics.timeoutSource ?? "none"}
+                hint={
+                  snapshot.candidateSync.hydrationDiagnostics.averagePositionLatencyMs
+                    ? `~${snapshot.candidateSync.hydrationDiagnostics.averagePositionLatencyMs}ms avg / position`
+                    : undefined
+                }
+              />
+              <Metric
+                label="Est. remaining scan"
+                value={
+                  snapshot.candidateSync.hydrationDiagnostics.estimatedRemainingScanMs
+                    ? `${Math.round(snapshot.candidateSync.hydrationDiagnostics.estimatedRemainingScanMs / 1000)}s`
+                    : snapshot.candidateSync.hydrationComplete
+                      ? "Complete"
+                      : "—"
+                }
+                hint={`Last scan ${Math.round(snapshot.candidateSync.hydrationDiagnostics.scanDurationMs / 1000)}s`}
+              />
+            </div>
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
             <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
               <h3 className="font-semibold text-zinc-100">Rate Limit Protection</h3>

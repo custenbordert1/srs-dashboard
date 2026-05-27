@@ -2,6 +2,7 @@ import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/clien
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import {
+  BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS,
   BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
   isTimeoutError,
@@ -61,7 +62,7 @@ export async function fetchCachedBreezyCandidates(
       const parsed = await fetchBreezyJson<BreezyCandidatesResult>(
         `/api/breezy/candidates${query}`,
         "Breezy candidates",
-        BREEZY_CLIENT_REQUEST_TIMEOUT_MS,
+        BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS,
       );
       return parsed;
     },

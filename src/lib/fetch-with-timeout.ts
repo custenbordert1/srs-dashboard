@@ -63,6 +63,10 @@ export const TERRITORY_DASHBOARD_TIMEOUT_MS = 45_000;
 export const BREEZY_CLIENT_REQUEST_TIMEOUT_MS = DASHBOARD_REQUEST_TIMEOUT_MS;
 /** Breezy preview-tier candidate sync — server budget ~18s + jobs list. */
 export const BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = HEAVY_REQUEST_TIMEOUT_MS;
+/** Breezy fast-tier candidate sync (~60 positions) — must exceed server scan budget. */
+export const BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS = 75_000;
+/** Background full-tier hydration — aligned with route maxDuration (120s). */
+export const BREEZY_CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = 115_000;
 
 export function timeoutErrorMessage(label: string, timeoutMs: number): string {
   const seconds = Math.round(timeoutMs / 1000);
