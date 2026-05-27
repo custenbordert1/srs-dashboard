@@ -181,6 +181,17 @@ const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   "Active Rep": "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30",
 };
 
+const OPERATIONAL_WORKFLOW_LABELS: Partial<Record<CandidateWorkflowStatus, string>> = {
+  Applied: "Needs Review",
+  "Needs Review": "Needs Review",
+  Qualified: "Needs Recruiter Action",
+  "Paperwork Needed": "Awaiting Paperwork",
+  "Paperwork Sent": "Awaiting Paperwork",
+  Signed: "Signed - Pending Onboarding",
+  "Awaiting DD Verification": "Signed - Pending Onboarding",
+  "Ready for MEL": "Ready for MEL",
+};
+
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }
@@ -350,6 +361,14 @@ function workflowStatusPillClass(
   return base;
 }
 
+function operationalWorkflowState(
+  candidate: ScoredCandidateWorkflowRow,
+): string {
+  if (candidate.recruitingActions.priorityList) return "Escalated";
+  if (candidate.assignedRecruiter === "Unassigned") return "Awaiting Assignment";
+  return OPERATIONAL_WORKFLOW_LABELS[candidate.workflowStatus] ?? candidate.workflowStatus;
+}
+
 function RecruiterCollapsibleSection({
   title,
   description,
@@ -468,6 +487,16 @@ export function CandidatesSection() {
   >([]);
   const [paperworkSendingId, setPaperworkSendingId] = useState<string | null>(null);
   const [directDepositBusyId, setDirectDepositBusyId] = useState<string | null>(null);
+
+  const confirmBulkApply = useCallback(
+    (actionLabel: string): boolean => {
+      const count = selectedIds.size;
+      return window.confirm(
+        `Apply "${actionLabel}" to ${count} selected candidate${count === 1 ? "" : "s"}?`,
+      );
+    },
+    [selectedIds.size],
+  );
 
   const hasPopulatedSnapshot = useCallback(
     () =>
@@ -1754,30 +1783,38 @@ export function CandidatesSection() {
               rowBg: "bg-zinc-950",
             })} !whitespace-normal`}
           >
-            <div className="flex min-w-0 flex-col justify-center gap-0.5 py-0.5">
-              <div className="truncate font-medium leading-tight text-zinc-100">{candidateName(candidate)}</div>
+            <div className="flex min-w-0 flex-col justify-center gap-1 py-0.5">
+              <div className="truncate text-sm font-semibold leading-tight text-zinc-100">
+                {candidateName(candidate)}
+              </div>
               <div className="flex min-w-0 flex-wrap items-center gap-1">
                 <span
                   className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
-                  title={candidate.workflowStatus}
+                  title={operationalWorkflowState(candidate)}
                 >
-                  {candidate.workflowStatus}
+                  {operationalWorkflowState(candidate)}
                 </span>
                 <span
-                  className="inline-flex max-w-[7rem] truncate rounded border border-zinc-700/80 bg-zinc-900/70 px-1 text-[9px] text-zinc-400"
+                  className="inline-flex max-w-[8rem] truncate rounded border border-zinc-700/80 bg-zinc-900/70 px-1.5 py-0.5 text-[9px] text-zinc-400"
                   title={`${candidate.assignedRecruiter} · ${candidate.assignedDM}`}
                 >
                   {candidate.assignedRecruiter}
                 </span>
+                {candidate.recruitingActions.priorityList ? (
+                  <span className="inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-200">
+                    Escalated
+                  </span>
+                ) : null}
               </div>
-              <CandidateRowAttentionBadges candidate={candidate} />
-              <CandidateRowFitSignals candidate={candidate} />
+              <p className="truncate text-[10px] text-zinc-500">
+                {candidate.assignedDM} · {candidate.positionName || "No position"}
+              </p>
             </div>
           </td>
           <td className={`${tdClass} truncate`}>{candidate.email || "—"}</td>
           <td className={`${tdClass} truncate`}>{candidate.phone || "—"}</td>
-          <td className={`${tdClass} truncate text-zinc-400`}>{candidate.source || "—"}</td>
-          <td className={`${tdClass} truncate`}>{candidate.stage || "—"}</td>
+          <td className={`${tdClass} truncate text-zinc-500`}>{candidate.source || "—"}</td>
+          <td className={`${tdClass} truncate text-zinc-400`}>{candidate.stage || "—"}</td>
           <td className={`${tdClass} truncate text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
           <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
           <td className={tdClass}>{candidate.city || "—"}</td>
@@ -1792,13 +1829,13 @@ export function CandidatesSection() {
           <td className={tdClass}>
             <div className="flex min-w-0 flex-col justify-center overflow-hidden leading-tight">
               <div
-                className="truncate text-sm font-semibold text-teal-50/95"
+                className="truncate text-sm font-semibold text-teal-100"
                 title={candidate.nextActionNeeded}
               >
                 {candidate.nextActionNeeded}
               </div>
-              <div className="truncate text-[10px] text-zinc-600">
-                {candidate.assignedRecruiter} · {candidate.assignedDM}
+              <div className="truncate text-[10px] text-zinc-500">
+                Recruiter: {candidate.assignedRecruiter}
               </div>
             </div>
           </td>
@@ -1882,7 +1919,7 @@ export function CandidatesSection() {
             />
           </td>
           <td
-            className={`${tdClass} truncate text-[10px] text-zinc-500`}
+            className={`${tdClass} truncate text-[10px] text-zinc-600`}
             title={candidate.intelligenceSummary || candidate.skillTags.join(", ")}
           >
             {buildRecruiterFitSignals(candidate, 2)
@@ -2211,78 +2248,9 @@ export function CandidatesSection() {
             <p className="text-[10px] text-zinc-600">Filtering…</p>
           ) : null}
           {selectedIds.size > 0 ? (
-            <div className="flex flex-wrap items-center gap-2 rounded-md border border-teal-500/30 bg-teal-500/5 px-2 py-1.5">
-              <span className="text-[11px] font-medium text-teal-200">{selectedIds.size} selected</span>
-              <select
-                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
-                defaultValue=""
-                disabled={bulkBusy}
-                onChange={(event) => {
-                  const status = event.target.value as CandidateWorkflowStatus | "";
-                  if (!status) return;
-                  void runBulkUpdate({ workflowStatus: status });
-                  event.target.value = "";
-                }}
-              >
-                <option value="">Bulk set status…</option>
-                {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
-                defaultValue=""
-                disabled={bulkBusy}
-                onChange={(event) => {
-                  const recruiter = event.target.value;
-                  if (!recruiter) return;
-                  void runBulkUpdate({ assignedRecruiter: recruiter });
-                  event.target.value = "";
-                }}
-              >
-                <option value="">Bulk assign recruiter…</option>
-                {rosters.recruiters.map((recruiter) => (
-                  <option key={recruiter} value={recruiter}>
-                    {recruiter}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                disabled={bulkBusy}
-                onClick={() =>
-                  void runBulkUpdate({
-                    workflowStatus: "Paperwork Needed",
-                    note: "Bulk paperwork prep queued",
-                  })
-                }
-                className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-100 hover:bg-amber-500/20"
-              >
-                Bulk paperwork prep
-              </button>
-              <button
-                type="button"
-                disabled={bulkBusy}
-                onClick={() => {
-                  const note = window.prompt("Note to add for all selected candidates:");
-                  if (!note?.trim()) return;
-                  void runBulkUpdate({ note: note.trim() });
-                }}
-                className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
-              >
-                Bulk add note
-              </button>
-              <button
-                type="button"
-                disabled={bulkBusy}
-                onClick={() => setSelectedIds(new Set())}
-                className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
-              >
-                Clear
-              </button>
-            </div>
+            <p className="text-[11px] text-teal-200">
+              {selectedIds.size} selected — use the bulk toolbar at bottom right.
+            </p>
           ) : null}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
           <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
@@ -2392,13 +2360,13 @@ export function CandidatesSection() {
                   <th className={thClass}>Email</th>
                   <th className={thClass}>Phone</th>
                   <th className={thClass}>Source</th>
-                  <th className={thClass}>Stage</th>
+                  <th className={thClass}>Pipeline</th>
                   <th className={thClass}>Applied</th>
                   <th className={thClass}>Position</th>
                   <th className={thClass}>City</th>
                   <th className={thClass}>State</th>
                   <th className={thClass}>Aging</th>
-                  <th className={thClass}>Next Action</th>
+                  <th className={thClass}>Next Recruiter Action</th>
                   <th className={thClass}>Action</th>
                   <th className={thClass}>Notes</th>
                   <th className={thClass}>HelloSign</th>
@@ -2413,6 +2381,97 @@ export function CandidatesSection() {
           />
         )}
       </section>
+
+      {selectedIds.size > 0 ? (
+        <div className="fixed bottom-4 right-4 z-40 w-[min(92vw,38rem)] rounded-xl border border-teal-500/35 bg-zinc-950/95 p-3 shadow-2xl shadow-black/60 backdrop-blur">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-sm font-medium text-teal-100">
+              {selectedIds.size} selected
+            </p>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => setSelectedIds(new Set())}
+              className="rounded-md border border-zinc-700 px-2 py-0.5 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              Clear selection
+            </button>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <select
+              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+              defaultValue=""
+              disabled={bulkBusy}
+              onChange={(event) => {
+                const status = event.target.value as CandidateWorkflowStatus | "";
+                if (!status) return;
+                if (!confirmBulkApply(`Set status to ${status}`)) {
+                  event.target.value = "";
+                  return;
+                }
+                void runBulkUpdate({ workflowStatus: status });
+                event.target.value = "";
+              }}
+            >
+              <option value="">Bulk set workflow status…</option>
+              {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+            <select
+              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+              defaultValue=""
+              disabled={bulkBusy}
+              onChange={(event) => {
+                const recruiter = event.target.value;
+                if (!recruiter) return;
+                if (!confirmBulkApply(`Assign recruiter ${recruiter}`)) {
+                  event.target.value = "";
+                  return;
+                }
+                void runBulkUpdate({ assignedRecruiter: recruiter });
+                event.target.value = "";
+              }}
+            >
+              <option value="">Bulk assign recruiter…</option>
+              {rosters.recruiters.map((recruiter) => (
+                <option key={recruiter} value={recruiter}>
+                  {recruiter}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => {
+                if (!confirmBulkApply("Move to Paperwork Needed")) return;
+                void runBulkUpdate({
+                  workflowStatus: "Paperwork Needed",
+                  note: "Bulk paperwork prep queued",
+                });
+              }}
+              className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-100 hover:bg-amber-500/20"
+            >
+              Bulk paperwork prep
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => {
+                const note = window.prompt("Note to add for all selected candidates:");
+                if (!note?.trim()) return;
+                if (!confirmBulkApply("Add note")) return;
+                void runBulkUpdate({ note: note.trim() });
+              }}
+              className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              Bulk add note
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <CandidateDetailDrawer
         key={selectedDrawerRow?.candidateId ?? "closed"}
