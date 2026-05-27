@@ -1,5 +1,10 @@
-import { cacheKey, fetchCachedJson, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
+import { cacheKey, fetchCachedJson, getCachedAllowExpired, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
+import {
+  logCandidatesCacheWriteDecision,
+  shouldAcceptCandidatesCacheWrite,
+} from "@/lib/breezy-candidates-cache";
+import { hasPopulatedCandidatesSnapshot, withCandidatesSyncMeta } from "@/lib/breezy-candidates-sync";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import {
   BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS,
@@ -56,17 +61,43 @@ export async function fetchCachedBreezyCandidates(
     params.set("to", dateRange.to);
   }
   const query = `?${params.toString()}`;
+  const clientCacheKey = cacheKey(["breezy", "candidates", "fast", dateRange?.from ?? "", dateRange?.to ?? ""]);
   return fetchCachedJson(
-    cacheKey(["breezy", "candidates", "fast", dateRange?.from ?? "", dateRange?.to ?? ""]),
+    clientCacheKey,
     async () => {
       const parsed = await fetchBreezyJson<BreezyCandidatesResult>(
         `/api/breezy/candidates${query}`,
         "Breezy candidates",
         BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS,
       );
+      if (parsed.ok) {
+        const prior = getCachedAllowExpired<BreezyCandidatesResult>(clientCacheKey);
+        if (prior?.ok) {
+          const decision = shouldAcceptCandidatesCacheWrite(parsed, prior);
+          logCandidatesCacheWriteDecision("client", clientCacheKey, decision);
+          if (!decision.accepted) {
+            return withCandidatesSyncMeta(prior, {
+              fromCache: true,
+              stale: true,
+              refreshError: `Preserving richer cache (${decision.reason}).`,
+            });
+          }
+        }
+      }
       return parsed;
     },
-    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-candidates" },
+    {
+      ttlMs: LONG_CLIENT_CACHE_TTL_MS,
+      force,
+      label: "breezy-candidates",
+      shouldCache: (data) => {
+        if (!data.ok) return false;
+        if (!hasPopulatedCandidatesSnapshot(data)) return false;
+        const prior = getCachedAllowExpired<BreezyCandidatesResult>(clientCacheKey);
+        if (prior?.ok) return shouldAcceptCandidatesCacheWrite(data, prior).accepted;
+        return true;
+      },
+    },
   );
 }
 

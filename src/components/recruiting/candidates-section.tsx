@@ -83,6 +83,10 @@ import {
   CANDIDATES_WORKFLOW_SOURCE,
   timeoutShowsCachedCandidatesMessage,
 } from "@/lib/breezy-candidates-sync";
+import {
+  logCandidatesCacheWriteDecision,
+  shouldAcceptCandidatesCacheWrite,
+} from "@/lib/breezy-candidates-cache";
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
 import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import { cacheKey, fetchCachedJson, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
@@ -542,6 +546,22 @@ export function CandidatesSection() {
         });
         setSyncAlert(buildCandidatesSyncAlert(parsed));
         return;
+      }
+      const priorSnapshot = breezySnapshotRef.current;
+      if (priorSnapshot && incomingCount > 0 && priorCount > 0) {
+        const decision = shouldAcceptCandidatesCacheWrite(parsed, priorSnapshot);
+        logCandidatesCacheWriteDecision("ui", "commitCandidatesSuccess", decision);
+        if (!decision.accepted) {
+          logCandidatesClientTrace("commitCandidatesSuccess_skipped_poorer_overwrite", {
+            priorSnapshotCount: priorCount,
+            incomingCandidateCount: incomingCount,
+            reason: decision.reason,
+          });
+          setNonBlockingSyncAlert(
+            "Background sync incomplete — table shows last hydrated candidates.",
+          );
+          return;
+        }
       }
       logCandidatesDebug("before_commitCandidatesSuccess", incomingCount, {
         commitCandidatesSuccessCalled: true,

@@ -14,6 +14,11 @@ import {
   withCandidatesSyncMeta,
 } from "@/lib/breezy-candidates-sync";
 import {
+  logCandidatesCacheWriteDecision,
+  pickRichestCandidatesSnapshot,
+  shouldAcceptCandidatesCacheWrite,
+} from "@/lib/breezy-candidates-cache";
+import {
   cacheKey,
   fetchCachedJson,
   getCached,
@@ -110,6 +115,12 @@ function readPersistedTabSnapshot(): BreezyCandidatesSuccess | null {
 
 function persistTabSnapshotToSession(snapshot: BreezyCandidatesSuccess): void {
   if (typeof window === "undefined" || snapshot.candidates.length === 0) return;
+  const prior = readPersistedTabSnapshot();
+  if (prior) {
+    const decision = shouldAcceptCandidatesCacheWrite(snapshot, prior);
+    logCandidatesCacheWriteDecision("client", TAB_SNAPSHOT_SESSION_KEY, decision);
+    if (!decision.accepted) return;
+  }
   try {
     sessionStorage.setItem(
       TAB_SNAPSHOT_SESSION_KEY,
@@ -125,6 +136,11 @@ function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidate
     result.source === BREEZY_CANDIDATES_SOURCE.label
       ? result
       : withCandidatesSyncMeta(result, { fromCache: result.fromCache ?? false, stale: result.stale });
+  if (lastOkTabSnapshot) {
+    const decision = shouldAcceptCandidatesCacheWrite(enriched, lastOkTabSnapshot);
+    logCandidatesCacheWriteDecision("client", "tab:lastOk", decision);
+    if (!decision.accepted) return lastOkTabSnapshot;
+  }
   lastOkTabSnapshot = enriched;
   if (hasPopulatedCandidatesSnapshot(enriched)) {
     persistTabSnapshotToSession(enriched);
@@ -132,32 +148,48 @@ function rememberTabOkSnapshot(result: BreezyCandidatesSuccess): BreezyCandidate
   return enriched;
 }
 
+function collectTabSnapshotCandidates(): BreezyCandidatesSuccess[] {
+  const snapshots: BreezyCandidatesSuccess[] = [];
+  for (const key of [TAB_FULL_CACHE_KEY, TAB_FAST_CACHE_KEY, TAB_PREVIEW_CACHE_KEY]) {
+    const hit = getCachedAllowExpired<BreezyCandidatesResult>(key);
+    if (hit?.ok && hit.candidates.length > 0) snapshots.push(hit);
+  }
+  if (lastOkTabSnapshot && lastOkTabSnapshot.candidates.length > 0) {
+    snapshots.push(lastOkTabSnapshot);
+  }
+  const persisted = readPersistedTabSnapshot();
+  if (persisted) snapshots.push(persisted);
+  return snapshots;
+}
+
+function getRichestTabSnapshot(): BreezyCandidatesSuccess | null {
+  return pickRichestCandidatesSnapshot(collectTabSnapshotCandidates());
+}
+
+function preserveRicherTabSnapshot(
+  incoming: BreezyCandidatesSuccess,
+  cacheKey: string,
+  context?: { hydrationRoundId?: string },
+): BreezyCandidatesSuccess {
+  const richest = getRichestTabSnapshot();
+  const baseline = pickRichestCandidatesSnapshot([richest, lastOkTabSnapshot]);
+  const incumbent = baseline ?? lastOkTabSnapshot;
+  if (!incumbent) return rememberTabOkSnapshot(incoming);
+  const decision = shouldAcceptCandidatesCacheWrite(incoming, incumbent, context);
+  logCandidatesCacheWriteDecision("client", cacheKey, decision);
+  if (!decision.accepted) return incumbent;
+  return rememberTabOkSnapshot(incoming);
+}
+
 export function getLastOkTabCandidatesSnapshot(): BreezyCandidatesSuccess | null {
   return lastOkTabSnapshot;
 }
 
-/** Instant tab paint from client cache or last in-memory ok snapshot. */
+/** Instant tab paint from richest client cache tier (never prefer preview over hydrated fast/full). */
 export function peekTabCandidatesCache(): BreezyCandidatesSuccess | null {
-  const preview = getCachedAllowExpired<BreezyCandidatesResult>(TAB_PREVIEW_CACHE_KEY);
-  if (preview && hasPopulatedCandidatesSnapshot(preview)) {
-    return rememberTabOkSnapshot(preview);
-  }
-  const fast = getCachedAllowExpired<BreezyCandidatesResult>(TAB_FAST_CACHE_KEY);
-  if (fast && hasPopulatedCandidatesSnapshot(fast)) {
-    return rememberTabOkSnapshot(fast);
-  }
-  const last = getLastOkTabCandidatesSnapshot();
-  if (last && last.candidates.length > 0) {
-    return last;
-  }
-  const persisted = readPersistedTabSnapshot();
-  if (persisted) {
-    logBreezyCandidatesOps("client", "fallback", {
-      fallbackSource: "session_storage",
-      candidateCount: persisted.candidates.length,
-      reason: "peek_tab_cache",
-    });
-    return rememberTabOkSnapshot(persisted);
+  const richest = getRichestTabSnapshot();
+  if (richest) {
+    return rememberTabOkSnapshot(richest);
   }
   return null;
 }
@@ -398,7 +430,17 @@ async function fetchCandidatesFromApi(options: {
         label: options.label,
         // Do not return stale ok:false payloads on timeout — outer catch uses populated fallbackOk.
         staleOnError: false,
-        shouldCache: (payload) => shouldCacheCandidatesPayload(payload, options.scan),
+        shouldCache: (payload) => {
+          if (!shouldCacheCandidatesPayload(payload, options.scan)) return false;
+          if (!payload.ok) return false;
+          const prior = getCachedAllowExpired<BreezyCandidatesResult>(options.cacheKey);
+          if (prior?.ok) {
+            const decision = shouldAcceptCandidatesCacheWrite(payload, prior);
+            logCandidatesCacheWriteDecision("client", options.cacheKey, decision);
+            return decision.accepted;
+          }
+          return true;
+        },
       },
     );
 
@@ -441,13 +483,26 @@ async function fetchCandidatesFromApi(options: {
         partial: parsed.partial ?? false,
       });
       if (hasPopulatedCandidatesSnapshot(parsed)) {
+        const preserved = preserveRicherTabSnapshot(parsed, options.cacheKey);
+        if (preserved.candidates.length > parsed.candidates.length) {
+          logBreezyCandidatesOps("client", "fallback", {
+            scan: options.scan,
+            fallbackSource: "richest_tab_snapshot",
+            candidateCount: preserved.candidates.length,
+            reason: "reject_poorer_live_payload",
+          });
+          return toStaleTabCandidatesResult(
+            preserved,
+            "Sync returned fewer candidates — showing last hydrated snapshot.",
+          );
+        }
         logBreezyCandidatesOps("client", "success", {
           scan: options.scan,
           candidateCount: parsed.candidates.length,
           fromCache: parsed.fromCache ?? false,
           partial: parsed.partial ?? false,
         });
-        return rememberTabOkSnapshot(parsed);
+        return preserved;
       }
       if (fallbackOk && fallbackOk.candidates.length > 0) {
         logBreezyCandidatesOps("client", "fallback", {
@@ -578,14 +633,19 @@ export async function fetchCandidatesForTab(options?: {
   if (!options?.force) {
     const warmKey = cacheKeyForScan(scan);
     const warmHit = getCached<BreezyCandidatesResult>(warmKey);
-    if (warmHit && isUsableTabCacheHit(warmHit, scan)) {
+    const best = pickRichestCandidatesSnapshot([
+      getRichestTabSnapshot(),
+      warmHit?.ok ? warmHit : null,
+    ]);
+    if (best && isUsableTabCacheHit(best, scan)) {
       logBreezyCandidatesOps("client", "success", {
         scan,
-        candidateCount: warmHit.candidates.length,
+        candidateCount: best.candidates.length,
         fromCache: true,
         phase: "warm_client_cache",
+        cacheTier: best.scanMode ?? "unknown",
       });
-      return rememberTabOkSnapshot(warmHit);
+      return rememberTabOkSnapshot(best);
     }
   }
   return fetchCandidatesFromApi({
@@ -614,7 +674,9 @@ export async function fetchAndMergeFullCandidates(
     let merged: BreezyCandidatesSuccess = base;
     for (let round = 0; round < MAX_FULL_HYDRATION_ROUNDS; round += 1) {
       if (!shouldHydrateFullCandidates(merged)) {
-        return rememberTabOkSnapshot(merged);
+        return preserveRicherTabSnapshot(merged, TAB_FULL_CACHE_KEY, {
+          hydrationRoundId: `full-complete-${round}`,
+        });
       }
       const offset = merged.positionsScanned ?? 0;
       logCandidatesClientTrace("hydrate_full_round_start", {
@@ -629,7 +691,9 @@ export async function fetchAndMergeFullCandidates(
         positionsOffset: offset,
       });
       if (!full.ok) return full;
-      merged = rememberTabOkSnapshot(mergeCandidatesSnapshots(merged, full));
+      merged = preserveRicherTabSnapshot(mergeCandidatesSnapshots(merged, full), TAB_FULL_CACHE_KEY, {
+        hydrationRoundId: `full-${round}`,
+      });
       logCandidatesClientTrace("hydrate_full_round_complete", {
         round,
         candidateCount: merged.candidates.length,
@@ -640,7 +704,7 @@ export async function fetchAndMergeFullCandidates(
       if (full.clientTimedOut) break;
       if (merged.hydrationComplete) break;
     }
-    return merged;
+    return preserveRicherTabSnapshot(merged, TAB_FULL_CACHE_KEY, { hydrationRoundId: "full-final" });
   })();
 
   try {
@@ -673,5 +737,5 @@ export async function fetchAndMergeFastCandidates(
     baseCandidateCount: base.candidates.length,
     mergedCandidateCount: merged.candidates.length,
   });
-  return rememberTabOkSnapshot(merged);
+  return preserveRicherTabSnapshot(merged, TAB_FAST_CACHE_KEY);
 }

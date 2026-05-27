@@ -21,6 +21,11 @@ import {
 } from "@/lib/candidates-debug";
 import { logBreezyCandidatesExtract } from "@/lib/breezy-candidates-ops-log";
 import {
+  logCandidatesCacheWriteDecision,
+  pickRichestCandidatesSnapshot,
+  shouldAcceptCandidatesCacheWrite,
+} from "@/lib/breezy-candidates-cache";
+import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
 } from "@/lib/recruiting-intelligence/resume-parser";
@@ -806,6 +811,44 @@ function cached<T>(
   return promise;
 }
 
+function cachedCandidates(
+  key: string,
+  load: () => Promise<BreezyCandidatesResult>,
+  ttlMs = BREEZY_CANDIDATES_CACHE_TTL_MS,
+): Promise<BreezyCandidatesResult> {
+  const now = Date.now();
+  const existing = candidatesCache.get(key);
+  if (existing && existing.expiresAt > now) return existing.promise;
+
+  const promise = load().then((result) => {
+    if (isMissingApiKeyResult(result)) {
+      candidatesCache.delete(key);
+      return result;
+    }
+    const entry = candidatesCache.get(key);
+    if (!entry) return result;
+    if (result.ok) {
+      const prior = entry.resolved?.ok ? entry.resolved : null;
+      if (prior) {
+        const decision = shouldAcceptCandidatesCacheWrite(result, prior);
+        logCandidatesCacheWriteDecision("server", key, decision);
+        if (!decision.accepted) return prior;
+      }
+      entry.resolved = result;
+      return result;
+    }
+    if (entry.resolved?.ok) return entry.resolved;
+    entry.resolved = result;
+    return result;
+  });
+  candidatesCache.set(key, {
+    expiresAt: now + ttlMs,
+    promise,
+    resolved: existing?.resolved,
+  });
+  return promise;
+}
+
 /** Cache key for the default fast published candidates scan. */
 export function breezyFastCandidatesCacheKey(options?: {
   positionId?: string;
@@ -827,7 +870,12 @@ export function breezyFastCandidatesCacheKey(options?: {
 }
 
 /** Prefer richest warmed snapshot when no explicit scan tier is requested. */
-export const BREEZY_CANDIDATES_CACHE_SCAN_ORDER: BreezyCandidatesScanMode[] = ["all", "fast", "preview"];
+export const BREEZY_CANDIDATES_CACHE_SCAN_ORDER: BreezyCandidatesScanMode[] = [
+  "all",
+  "full",
+  "fast",
+  "preview",
+];
 
 export function selectBestBreezyCandidatesCacheEntry(
   entries: Array<{
@@ -837,24 +885,14 @@ export function selectBestBreezyCandidatesCacheEntry(
   }>,
   now = Date.now(),
 ): BreezyCandidatesResult | null {
-  let best: BreezyCandidatesResult | null = null;
-  let bestCount = -1;
-
-  for (const entry of entries) {
-    if (!entry.resolved || entry.expiresAt <= now) continue;
-    if (!entry.resolved.ok) continue;
-
-    const count = entry.resolved.candidates.length;
-    const acceptEmpty = entry.scanMode === "all" || entry.scanMode === "full";
-    if (count === 0 && !acceptEmpty) continue;
-
-    if (count > bestCount) {
-      best = entry.resolved;
-      bestCount = count;
-    }
-  }
-
-  return best;
+  const viable = entries
+    .filter((entry) => entry.resolved && entry.expiresAt > now && entry.resolved.ok)
+    .map((entry) => entry.resolved as BreezyCandidatesSuccess)
+    .filter((result) => {
+      const acceptEmpty = result.scanMode === "all" || result.scanMode === "full";
+      return result.candidates.length > 0 || acceptEmpty;
+    });
+  return pickRichestCandidatesSnapshot(viable);
 }
 
 /** Returns last cached scan without starting a new Breezy aggregation. */
@@ -1563,8 +1601,7 @@ export async function fetchBreezyCandidates(options?: {
     logCandidatesDebug("preview_force_server_refetch", 0, { scanMode, forceRequested: true });
   }
 
-  const result = await cached(
-    candidatesCache,
+  const result = await cachedCandidates(
     cacheKey,
     () =>
       fetchBreezyCandidatesFastUncached({
@@ -1600,10 +1637,7 @@ export async function fetchBreezyCandidates(options?: {
     if (shouldPersistServerCandidatesCache(scanMode, enriched)) {
       rememberOkCandidatesSnapshot(cacheKey, enriched);
     }
-    if (
-      (scanMode === "fast" || scanMode === "preview") &&
-      enriched.candidates.length > 0
-    ) {
+    if (scanMode === "fast" && enriched.candidates.length > 0) {
       rememberOkCandidatesSnapshot(fastTierCacheKey, enriched);
     }
     if (!enriched.partial) {

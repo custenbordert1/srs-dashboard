@@ -37,10 +37,35 @@ describe("breezy-candidates-sync", () => {
   it("returns stale snapshot remembered by cache key", () => {
     const key = "test-cache-key";
     const snapshot = withCandidatesSyncMeta(baseSuccess(), { fromCache: false });
-    rememberOkCandidatesSnapshot(key, snapshot);
+    assert.equal(rememberOkCandidatesSnapshot(key, snapshot), true);
     const stale = getStaleOkCandidatesSnapshot(key);
     assert.ok(stale);
     assert.equal(stale?.candidates.length, 1);
+  });
+
+  it("does not overwrite richer remembered snapshot with poorer payload", async () => {
+    const { rememberOkCandidatesSnapshot: remember, getStaleOkCandidatesSnapshot: getStale } =
+      await import("@/lib/breezy-candidates-sync");
+    const key = "richness-key";
+    const rich = withCandidatesSyncMeta(
+      baseSuccess({
+        scanMode: "fast",
+        candidates: Array.from({ length: 10 }, (_, index) => ({
+          candidateId: `c-${index}`,
+        })) as BreezyCandidatesSuccess["candidates"],
+      }),
+      { fromCache: false },
+    );
+    const poor = withCandidatesSyncMeta(
+      baseSuccess({
+        scanMode: "preview",
+        candidates: [{ candidateId: "only-one" } as BreezyCandidatesSuccess["candidates"][number]],
+      }),
+      { fromCache: false },
+    );
+    assert.equal(remember(key, rich), true);
+    assert.equal(remember(key, poor), false);
+    assert.equal(getStale(key)?.candidates.length, 10);
   });
 
   it("timeout copy states when cached data is shown", () => {

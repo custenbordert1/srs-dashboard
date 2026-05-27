@@ -4,6 +4,23 @@ import type {
   BreezyCandidatesSuccess,
 } from "@/lib/breezy-api";
 import { isPartialBreezyPositionSync } from "@/lib/breezy-api";
+import {
+  logCandidatesCacheWriteDecision,
+  shouldAcceptCandidatesCacheWrite,
+} from "@/lib/breezy-candidates-cache";
+
+export type {
+  BreezyCandidatesCacheTier,
+  BreezyCandidatesCacheWriteDecision,
+} from "@/lib/breezy-candidates-cache";
+export {
+  isRicherCandidatesCache,
+  logCandidatesCacheWriteDecision,
+  pickRichestCandidatesSnapshot,
+  resolveCandidatesCacheTier,
+  scoreCandidatesCacheRichness,
+  shouldAcceptCandidatesCacheWrite,
+} from "@/lib/breezy-candidates-cache";
 
 export const BREEZY_CANDIDATES_SOURCE = {
   label: "Breezy HR API",
@@ -41,8 +58,14 @@ const lastOkByCacheKey = new Map<string, BreezyCandidatesSuccess>();
 export function rememberOkCandidatesSnapshot(
   cacheKey: string,
   snapshot: BreezyCandidatesSuccess,
-): void {
+  context?: { hydrationRoundId?: string },
+): boolean {
+  const prior = lastOkByCacheKey.get(cacheKey) ?? null;
+  const decision = shouldAcceptCandidatesCacheWrite(snapshot, prior, context);
+  logCandidatesCacheWriteDecision("server", cacheKey, decision);
+  if (!decision.accepted) return false;
   lastOkByCacheKey.set(cacheKey, snapshot);
+  return true;
 }
 
 export function getStaleOkCandidatesSnapshot(cacheKey: string): BreezyCandidatesSuccess | null {
