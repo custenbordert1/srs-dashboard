@@ -55,7 +55,7 @@ function trimPatch(body: PushBody): Partial<{
 
 export async function POST(request: Request, context: RouteContext) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     auditAction: "job_draft_push_breezy",
   });
   if (isGuardFailure(guard)) return guard;

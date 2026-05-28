@@ -181,26 +181,37 @@ function snapshotContinuationPoint(snapshot: BreezyCandidatesSuccess | null | un
   );
 }
 
+function markSessionRestoredSnapshot(snapshot: BreezyCandidatesSuccess): BreezyCandidatesSuccess {
+  return withCandidatesSyncMeta(snapshot, {
+    fromCache: true,
+    stale: true,
+    partial: snapshot.partial,
+  });
+}
+
 /** Restore in-memory tab snapshots from sessionStorage before any live fetch runs. */
 export function restoreTabSnapshotsFromSession(): BreezyCandidatesSuccess | null {
   const highWater = readPersistedHighWaterSnapshot();
   const lastOk = readPersistedTabSnapshot();
   const richest = pickRichestCandidatesSnapshot([highWater, lastOk]);
   if (richest) {
-    lastOkTabSnapshot = rememberTabOkSnapshot(richest);
-    noteTabSnapshotHighWater(richest);
+    const restored = markSessionRestoredSnapshot(richest);
+    lastOkTabSnapshot = rememberTabOkSnapshot(restored);
+    noteTabSnapshotHighWater(restored);
+    return restored;
   }
-  return richest;
+  return null;
 }
 
 /** Snapshot for synchronous first paint (module init + useState lazy init). */
 export function getStartupRestoredTabSnapshot(): BreezyCandidatesSuccess | null {
-  return pickRichestCandidatesSnapshot([
+  const richest = pickRichestCandidatesSnapshot([
     tabSnapshotHighWater,
     lastOkTabSnapshot,
     readPersistedHighWaterSnapshot(),
     readPersistedTabSnapshot(),
   ]);
+  return richest ? markSessionRestoredSnapshot(richest) : null;
 }
 
 if (typeof window !== "undefined") {

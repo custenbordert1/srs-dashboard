@@ -9,7 +9,7 @@ export const maxDuration = 60;
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     auditAction: "job_management_breezy_jobs_read",
   });
   if (isGuardFailure(guard)) return guard;

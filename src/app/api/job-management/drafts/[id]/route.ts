@@ -16,7 +16,7 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     auditAction: "job_draft_read",
   });
   if (isGuardFailure(guard)) return guard;
@@ -31,7 +31,7 @@ export async function GET(request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     auditAction: "job_draft_update",
   });
   if (isGuardFailure(guard)) return guard;
@@ -109,7 +109,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(request: Request, context: RouteContext) {
   const guard = guardApiRoute(request, {
-    allowedRoles: ["executive", "recruiter"],
+    allowedRoles: ["admin", "executive", "recruiter"],
     auditAction: "job_draft_delete",
   });
   if (isGuardFailure(guard)) return guard;

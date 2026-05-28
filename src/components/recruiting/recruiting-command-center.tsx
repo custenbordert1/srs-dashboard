@@ -55,12 +55,16 @@ function SyncStatusBanner({
   connected,
   lastSyncLabel,
   partialPositionSync,
+  fromCache,
+  stale,
   errorMessage,
   failureKind,
 }: {
   connected: boolean;
   lastSyncLabel: string;
   partialPositionSync: boolean;
+  fromCache?: boolean;
+  stale?: boolean;
   errorMessage?: string;
   failureKind?: BreezyFailureKind;
 }) {
@@ -98,6 +102,15 @@ function SyncStatusBanner({
         <p className="text-sm font-semibold text-teal-100">Breezy connected</p>
         <p className="mt-0.5 text-sm text-teal-200/80">Last successful sync: {lastSyncLabel}</p>
       </div>
+      {stale ? (
+        <p className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-100">
+          Showing cached snapshot while live refresh recovers.
+        </p>
+      ) : fromCache ? (
+        <p className="rounded-lg border border-sky-500/35 bg-sky-500/10 px-3 py-1.5 text-xs text-sky-100">
+          Loaded from recent cache.
+        </p>
+      ) : null}
       {partialPositionSync ? (
         <p className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-100">
           Partial Breezy sync — more positions/candidates available.
@@ -262,6 +275,8 @@ export function RecruitingCommandCenter() {
         connected={snapshot.connected}
         lastSyncLabel={snapshot.lastSyncLabel}
         partialPositionSync={snapshot.partialPositionSync}
+        fromCache={loadState.candidates.fromCache}
+        stale={loadState.candidates.stale}
       />
 
       <KpiCards items={snapshot.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />

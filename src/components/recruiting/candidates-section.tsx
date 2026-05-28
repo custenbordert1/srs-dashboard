@@ -2396,7 +2396,7 @@ export function CandidatesSection() {
     Boolean(syncAlert) &&
     !(hasRenderableCandidateRows && syncAlert?.toLowerCase().includes("timed out"));
   const showBackgroundSyncLine =
-    hasRenderableCandidateRows && (refreshingCandidates || syncAlert);
+    hasRenderableCandidateRows && (refreshingCandidates || isFullHydrationInflightActive());
   const syncHeaderLine = displaySnapshot
     ? formatRecruiterCandidatesSyncHeader({
         candidateCount: displaySnapshot.candidates.length,
