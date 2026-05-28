@@ -10,6 +10,7 @@ type VirtualCandidateTableProps<T> = {
   rows: T[];
   colSpan: number;
   maxHeightClass?: string;
+  tableMinWidthClass?: string;
   header: ReactNode;
   renderRow: (row: T, index: number) => ReactNode;
   getRowKey: (row: T) => string;
@@ -19,6 +20,7 @@ export function VirtualCandidateTable<T>({
   rows,
   colSpan,
   maxHeightClass = "max-h-[min(70vh,960px)]",
+  tableMinWidthClass = "min-w-[1620px]",
   header,
   renderRow,
   getRowKey,
@@ -47,7 +49,7 @@ export function VirtualCandidateTable<T>({
       onScroll={onScroll}
       className={`overflow-auto ${maxHeightClass}`}
     >
-      <table className="min-w-[1620px] w-full table-fixed text-left">
+      <table className={`${tableMinWidthClass} w-full table-fixed text-left`}>
         {header}
         <tbody className="divide-y divide-zinc-800/40">
           {topSpacer > 0 ? (

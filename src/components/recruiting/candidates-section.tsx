@@ -117,8 +117,6 @@ import {
 import {
   computeRecruiterAgingBucket,
   matchesRecruiterQuickFilter,
-  RECRUITER_AGING_BUCKET_LABELS,
-  type RecruiterAgingBucket,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
 import {
@@ -225,6 +223,105 @@ function formatDate(raw: string): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
 }
 
+/** Summary card only — compact US short date (e.g. 5/28/26). */
+function formatNewestApplicantSummaryDate(date: Date): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = date.getFullYear() % 100;
+  return `${month}/${day}/${year}`;
+}
+
+type CandidateTableSortKey =
+  | "candidate"
+  | "email"
+  | "phone"
+  | "source"
+  | "applied"
+  | "city"
+  | "state"
+  | "nextAction"
+  | "paperwork"
+  | "match"
+  | "skills"
+  | "aiGrade"
+  | "recommendations";
+
+function compareCandidatesForTableSort(
+  a: ScoredCandidateWorkflowRow,
+  b: ScoredCandidateWorkflowRow,
+  key: CandidateTableSortKey,
+): number {
+  switch (key) {
+    case "candidate":
+      return candidateName(a).localeCompare(candidateName(b));
+    case "email":
+      return (a.email || "").localeCompare(b.email || "");
+    case "phone":
+      return (a.phone || "").localeCompare(b.phone || "");
+    case "source":
+      return (a.source || "").localeCompare(b.source || "");
+    case "applied": {
+      const appliedA = parseDate(a.appliedDate)?.getTime() ?? 0;
+      const appliedB = parseDate(b.appliedDate)?.getTime() ?? 0;
+      return appliedA - appliedB;
+    }
+    case "city":
+      return (a.city || "").localeCompare(b.city || "");
+    case "state":
+      return (a.state || "").localeCompare(b.state || "");
+    case "nextAction":
+      return (a.nextActionNeeded || "").localeCompare(b.nextActionNeeded || "");
+    case "paperwork":
+      return (a.paperworkStatus || "").localeCompare(b.paperworkStatus || "");
+    case "match":
+      return a.matchPercent - b.matchPercent;
+    case "skills": {
+      const skillsA = buildRecruiterFitSignals(a, 2).map((signal) => signal.label).join(" ") || a.skillTags[0] || "";
+      const skillsB = buildRecruiterFitSignals(b, 2).map((signal) => signal.label).join(" ") || b.skillTags[0] || "";
+      return skillsA.localeCompare(skillsB);
+    }
+    case "aiGrade":
+      return a.ai.numericScore - b.ai.numericScore;
+    case "recommendations":
+      return a.aiRecommendations.length - b.aiRecommendations.length;
+    default:
+      return 0;
+  }
+}
+
+function CandidateTableSortHeader({
+  label,
+  sortKey,
+  activeKey,
+  direction,
+  onSort,
+  className,
+}: {
+  label: string;
+  sortKey: CandidateTableSortKey;
+  activeKey: CandidateTableSortKey | null;
+  direction: "asc" | "desc";
+  onSort: (key: CandidateTableSortKey) => void;
+  className?: string;
+}) {
+  const active = activeKey === sortKey;
+  return (
+    <th className={className ?? thClass}>
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className="inline-flex min-h-[44px] w-full touch-manipulation items-center gap-1 text-left uppercase tracking-wider text-zinc-500 transition-colors hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500/50"
+        aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
+      >
+        <span className="truncate">{label}</span>
+        <span className="shrink-0 text-[10px] text-zinc-600" aria-hidden>
+          {active ? (direction === "asc" ? "▲" : "▼") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 function candidateName(candidate: BreezyCandidate): string {
   return `${candidate.firstName} ${candidate.lastName}`.trim() || candidate.email || "Unknown candidate";
 }
@@ -279,25 +376,6 @@ function daysSince(raw: string | null): number | null {
   const now = new Date();
   const end = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.max(0, Math.round((end - start) / (24 * 60 * 60 * 1000)));
-}
-
-function formatDays(days: number | null): string {
-  return days === null ? "—" : `${days}d`;
-}
-
-function agingBucketTextClass(bucket: RecruiterAgingBucket): string {
-  if (bucket === "fresh") return "font-medium text-emerald-300";
-  if (bucket === "24h") return "font-medium text-amber-300";
-  return "font-medium text-red-300";
-}
-
-function StatusTouchAging({ candidate }: { candidate: ScoredCandidateWorkflowRow }) {
-  const bucket = computeRecruiterAgingBucket(candidate);
-  return (
-    <span className={agingBucketTextClass(bucket)}>
-      Touch {RECRUITER_AGING_BUCKET_LABELS[bucket]}
-    </span>
-  );
 }
 
 const CandidateRowAttentionBadges = memo(function CandidateRowAttentionBadges({
@@ -547,6 +625,8 @@ export function CandidatesSection() {
   const [stateFilter, setStateFilter] = useState(ALL);
   const [workflowFilter, setWorkflowFilter] = useState(ALL);
   const [matchFilter, setMatchFilter] = useState(ALL);
+  const [tableSortKey, setTableSortKey] = useState<CandidateTableSortKey | null>(null);
+  const [tableSortDirection, setTableSortDirection] = useState<"asc" | "desc">("desc");
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
@@ -565,6 +645,18 @@ export function CandidatesSection() {
   >([]);
   const [paperworkSendingId, setPaperworkSendingId] = useState<string | null>(null);
   const [directDepositBusyId, setDirectDepositBusyId] = useState<string | null>(null);
+
+  const handleTableColumnSort = useCallback(
+    (key: CandidateTableSortKey) => {
+      if (tableSortKey === key) {
+        setTableSortDirection((direction) => (direction === "asc" ? "desc" : "asc"));
+        return;
+      }
+      setTableSortKey(key);
+      setTableSortDirection("asc");
+    },
+    [tableSortKey],
+  );
 
   const confirmBulkApply = useCallback(
     (actionLabel: string): boolean => {
@@ -1515,12 +1607,20 @@ export function CandidatesSection() {
       return true;
     });
 
-    const sorted = [...rows].sort(
-      (a, b) =>
+    const sorted = [...rows].sort((a, b) => {
+      if (tableSortKey) {
+        const compared = compareCandidatesForTableSort(a, b, tableSortKey);
+        if (compared !== 0) {
+          return tableSortDirection === "asc" ? compared : -compared;
+        }
+        return candidateName(a).localeCompare(candidateName(b));
+      }
+      return (
         b.matchPercent - a.matchPercent ||
-        b.ai.numericScore - a.ai.numericScore ||
-        candidateName(a).localeCompare(candidateName(b)),
-    );
+        b.ai.numericScore - b.ai.numericScore ||
+        candidateName(a).localeCompare(candidateName(b))
+      );
+    });
     logCandidatesClientTrace("table_render_state", {
       tableRowsCommittedToState: sorted.length,
       hasRenderableCandidateRows,
@@ -1568,6 +1668,8 @@ export function CandidatesSection() {
     sourceFilter,
     stageFilter,
     stateFilter,
+    tableSortDirection,
+    tableSortKey,
     workflowFilter,
   ]);
 
@@ -1580,7 +1682,7 @@ export function CandidatesSection() {
       .map((candidate) => parseDate(candidate.appliedDate))
       .filter((date): date is Date => Boolean(date))
       .sort((a, b) => b.getTime() - a.getTime())[0];
-    return newest ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(newest) : "—";
+    return newest ? formatNewestApplicantSummaryDate(newest) : "—";
   }, [filtered]);
 
   const breakdown = useMemo(() => sourceBreakdown(filtered), [filtered]);
@@ -2131,7 +2233,6 @@ export function CandidatesSection() {
 
   const renderCandidateRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
-      const appliedDays = daysSince(candidate.appliedDate);
       const rowSelected = selectedCandidateId === candidate.candidateId;
       const paperworkUrgent =
         isPaperworkPendingStatus(candidate.workflowStatus) &&
@@ -2203,18 +2304,9 @@ export function CandidatesSection() {
           <td className={`${tdClass} truncate`}>{candidate.email || "—"}</td>
           <td className={`${tdClass} truncate`}>{candidate.phone || "—"}</td>
           <td className={`${tdClass} truncate text-zinc-500`}>{candidate.source || "—"}</td>
-          <td className={`${tdClass} truncate text-zinc-400`}>{candidate.stage || "—"}</td>
           <td className={`${tdClass} truncate text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
-          <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
           <td className={tdClass}>{candidate.city || "—"}</td>
           <td className={tdClass}>{candidate.state || "—"}</td>
-          <td className={`${tdClass} truncate text-[10px] leading-tight`}>
-            <span className="text-zinc-500">
-              Applied {formatDays(appliedDays)}
-              <span className="text-zinc-600"> · </span>
-              <StatusTouchAging candidate={candidate} />
-            </span>
-          </td>
           <td className={tdClass}>
             <div className="flex min-w-0 flex-col justify-center overflow-hidden leading-tight">
               <div
@@ -2269,9 +2361,6 @@ export function CandidatesSection() {
               paperworkTemplates={paperworkTemplates}
               hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
             />
-          </td>
-          <td className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`} title="Open candidate drawer">
-            Notes: {candidate.notes.length}
           </td>
           <td
             className={`${tdClass}${paperworkUrgent ? " bg-amber-500/5" : ""}`}
@@ -2738,31 +2827,28 @@ export function CandidatesSection() {
         ) : (
           <VirtualCandidateTable
             rows={filtered}
-            colSpan={19}
+            colSpan={15}
+            tableMinWidthClass="min-w-[1240px]"
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
               <>
                 <colgroup>
                   <col className="w-[40px]" />
-                  <col className="w-[272px]" />
-                  <col className="w-[9%]" />
-                  <col className="w-[6%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[5%]" />
+                  <col className="w-[300px]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[8%]" />
                   <col className="w-[7%]" />
-                  <col className="w-[4%]" />
-                  <col className="w-[3%]" />
+                  <col className="w-[7%]" />
                   <col className="w-[6%]" />
-                  <col className="w-[9%]" />
-                  <col className="w-[148px]" />
-                  <col className="w-[4%]" />
                   <col className="w-[5%]" />
-                  <col className="w-[4%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[4%]" />
+                  <col className="w-[11%]" />
+                  <col className="w-[156px]" />
+                  <col className="w-[7%]" />
                   <col className="w-[6%]" />
+                  <col className="w-[6%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[8%]" />
                 </colgroup>
                 <thead className="border-b border-zinc-800/60">
                 <tr>
@@ -2775,24 +2861,99 @@ export function CandidatesSection() {
                       onClick={(event) => event.stopPropagation()}
                     />
                   </th>
-                  <th className={stickyIdentityHeaderClass(thClass)}>Candidate</th>
-                  <th className={thClass}>Email</th>
-                  <th className={thClass}>Phone</th>
-                  <th className={thClass}>Source</th>
-                  <th className={thClass}>Pipeline</th>
-                  <th className={thClass}>Applied</th>
-                  <th className={thClass}>Position</th>
-                  <th className={thClass}>City</th>
-                  <th className={thClass}>State</th>
-                  <th className={thClass}>Aging</th>
-                  <th className={thClass}>Next Recruiter Action</th>
+                  <CandidateTableSortHeader
+                    label="Candidate"
+                    sortKey="candidate"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                    className={stickyIdentityHeaderClass(thClass)}
+                  />
+                  <CandidateTableSortHeader
+                    label="Email"
+                    sortKey="email"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Phone"
+                    sortKey="phone"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Source"
+                    sortKey="source"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Applied"
+                    sortKey="applied"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="City"
+                    sortKey="city"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="State"
+                    sortKey="state"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Next Recruiter Action"
+                    sortKey="nextAction"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
                   <th className={thClass}>Action</th>
-                  <th className={thClass}>Notes</th>
-                  <th className={thClass}>HelloSign</th>
-                  <th className={thClass}>Match</th>
-                  <th className={thClass}>Skills</th>
-                  <th className={thClass}>AI Grade</th>
-                  <th className={thClass}>Recommendations</th>
+                  <CandidateTableSortHeader
+                    label="HelloSign"
+                    sortKey="paperwork"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Match"
+                    sortKey="match"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Skills"
+                    sortKey="skills"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="AI Grade"
+                    sortKey="aiGrade"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
+                  <CandidateTableSortHeader
+                    label="Recommendations"
+                    sortKey="recommendations"
+                    activeKey={tableSortKey}
+                    direction={tableSortDirection}
+                    onSort={handleTableColumnSort}
+                  />
                 </tr>
               </thead>
               </>
