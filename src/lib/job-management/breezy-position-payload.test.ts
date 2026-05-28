@@ -125,4 +125,14 @@ describe("verifyBreezyPositionResponse", () => {
     assert.equal(verification.ok, false);
     assert.ok(verification.mismatches.some((m) => m.includes("pay rate")));
   });
+
+  it("does not fail verification when Breezy omits location on sparse create response", () => {
+    const verification = verifyBreezyPositionResponse(
+      "pos-789",
+      { _id: "pos-789", name: "Retail Merchandiser" },
+      { name: "Retail Merchandiser", city: "Dallas", state: "TX", payRate: "$18/hr" },
+    );
+    assert.equal(verification.ok, true);
+    assert.equal(verification.mismatches.length, 0);
+  });
 });

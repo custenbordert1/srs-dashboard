@@ -135,14 +135,18 @@ export async function POST(request: Request, context: RouteContext) {
   const result = await createBreezyPositionFromDraft(draft);
   const auditId = randomUUID();
   const pushedAt = new Date().toISOString();
+  const breezyJobId = result.ok ? result.breezyJobId.trim() : "";
 
-  if (!result.ok) {
-    await updateJobDraft(id, { status: "push_failed", pushError: result.error });
+  if (!result.ok || !breezyJobId) {
+    const error = !result.ok
+      ? result.error
+      : "Breezy did not return a position id. The draft was not marked published.";
+    await updateJobDraft(id, { status: "push_failed", pushError: error });
     await appendJobPushAudit({
       id: auditId,
       draftId: id,
       ok: false,
-      error: result.error,
+      error,
       pushedAt,
       pushedBy: guard.session.email,
       title: draft.title,
@@ -153,22 +157,22 @@ export async function POST(request: Request, context: RouteContext) {
       action: "api_access",
       entityType: "system",
       entityId: id,
-      metadata: { push: "failed", error: result.error, rateLimited: result.rateLimited ?? false },
+      metadata: { push: "failed", error, rateLimited: result.ok ? false : (result.rateLimited ?? false) },
     });
     return NextResponse.json(
       {
         ok: false,
-        error: result.error,
-        rateLimited: result.rateLimited ?? false,
-        fieldErrors: result.fieldErrors,
+        error,
+        rateLimited: result.ok ? false : (result.rateLimited ?? false),
+        fieldErrors: result.ok ? undefined : result.fieldErrors,
       },
-      { status: result.rateLimited ? 429 : result.fieldErrors ? 400 : 502 },
+      { status: result.ok ? 502 : result.rateLimited ? 429 : result.fieldErrors ? 400 : 502 },
     );
   }
 
   const updated = await updateJobDraft(id, {
     status: "pushed",
-    breezyJobId: result.breezyJobId,
+    breezyJobId,
     pushedAt: result.fetchedAt,
     pushError: undefined,
     ...(draft.variant
@@ -180,7 +184,7 @@ export async function POST(request: Request, context: RouteContext) {
     id: auditId,
     draftId: id,
     ok: true,
-    breezyJobId: result.breezyJobId,
+    breezyJobId,
     pushedAt: result.fetchedAt,
     pushedBy: guard.session.email,
     title: draft.title,
@@ -192,13 +196,13 @@ export async function POST(request: Request, context: RouteContext) {
     action: "api_access",
     entityType: "system",
     entityId: id,
-    metadata: { push: "success", breezyJobId: result.breezyJobId },
+    metadata: { push: "success", breezyJobId },
   });
 
   return NextResponse.json({
     ok: true,
     draft: updated,
-    breezyJobId: result.breezyJobId,
+    breezyJobId,
     postedAt: result.fetchedAt,
     verification: result.verification,
   });

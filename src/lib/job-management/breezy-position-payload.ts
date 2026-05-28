@@ -220,12 +220,9 @@ export function verifyBreezyPositionResponse(
   if (state && state !== expected.state) {
     mismatches.push(`state (expected "${expected.state}", got "${state}")`);
   }
-  if (!city) mismatches.push("city missing in Breezy response");
-  if (!state) mismatches.push("state missing in Breezy response");
   if (expectedPayRate && payRate && payRate !== expectedPayRate) {
     mismatches.push(`pay rate (expected "${expectedPayRate}", got "${payRate}")`);
   }
-  if (expectedPayRate && !payRate) mismatches.push("pay rate missing in Breezy response");
 
   return {
     ok: mismatches.length === 0,
