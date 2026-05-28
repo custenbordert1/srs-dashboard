@@ -4,6 +4,10 @@ import {
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
 
+export type CandidatesTabDisplaySnapshotInput = AuthoritativeCandidatesDisplayInput & {
+  cachePeekSnapshot?: BreezyCandidatesSuccess | null | undefined;
+};
+
 /** Prefer table row count when committed rows exceed snapshot metadata. */
 export function buildTableBackedCandidatesSnapshot(
   rows: BreezyCandidate[],
@@ -71,4 +75,21 @@ export function resolveAuthoritativeCandidatesDisplaySnapshot(
 
   if (candidates.length === 0) return null;
   return pickRichestCandidatesSnapshot(candidates);
+}
+
+/**
+ * Display snapshot for the Candidates tab, including recoverable/cache tiers when live
+ * fetch failed or committed state is empty (timeout must not hide cached rows).
+ */
+export function resolveCandidatesTabDisplaySnapshot(
+  input: CandidatesTabDisplaySnapshotInput,
+): BreezyCandidatesSuccess | null {
+  const authoritative = resolveAuthoritativeCandidatesDisplaySnapshot(input);
+  return pickRichestCandidatesSnapshot([
+    authoritative,
+    input.recoverableSnapshot,
+    input.highWaterSnapshot,
+    input.cachePeekSnapshot,
+    input.startupSnapshot,
+  ]);
 }

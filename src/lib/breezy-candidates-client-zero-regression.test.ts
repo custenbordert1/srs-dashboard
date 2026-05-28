@@ -53,6 +53,23 @@ describe("breezy candidates zero regression", () => {
     sessionStore.clear();
   });
 
+  it("getRecoverable reads persisted high-water when in-memory watermark is unset", async () => {
+    const rich = makeSnapshot(48, "full");
+    sessionStorage.setItem(
+      "breezy:candidates:tab:highWater:v1",
+      JSON.stringify({
+        savedAt: Date.now(),
+        candidateCount: 48,
+        continuationPoint: 30,
+        snapshot: rich,
+      }),
+    );
+
+    const client = await import("@/lib/breezy-candidates-client");
+    const recovered = client.getRecoverableTabCandidatesSnapshot();
+    assert.equal(recovered?.candidates.length, 48);
+  });
+
   it("restores high-water snapshot from sessionStorage on startup", async () => {
     const rich = makeSnapshot(72, "full");
     sessionStorage.setItem(

@@ -99,7 +99,7 @@ import {
   pickRichestCandidatesSnapshot,
   shouldAcceptCandidatesCacheWrite,
 } from "@/lib/breezy-candidates-cache";
-import { resolveAuthoritativeCandidatesDisplaySnapshot } from "@/lib/breezy-candidates-display";
+import { resolveCandidatesTabDisplaySnapshot } from "@/lib/breezy-candidates-display";
 import { buildJobsByPositionId } from "@/lib/recruiting-intelligence";
 import { CandidateMatchBadge } from "@/components/recruiting/candidate-match-badge";
 import { cacheKey, fetchCachedJson, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
@@ -155,6 +155,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -558,24 +559,25 @@ export function CandidatesSection() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(
     () => startupSnapshotRef.current ?? undefined,
   );
-  const authoritativeCandidatesSnapshot = useMemo(
+  const displayCandidatesSnapshot = useMemo(
     () =>
-      resolveAuthoritativeCandidatesDisplaySnapshot({
+      resolveCandidatesTabDisplaySnapshot({
         tableRows: committedCandidates,
         breezySnapshot,
         liveData: data?.ok ? data : null,
         recoverableSnapshot: getRecoverableTabCandidatesSnapshot(),
         highWaterSnapshot: getTabSnapshotHighWater(),
         startupSnapshot: startupSnapshotRef.current,
+        cachePeekSnapshot: peekTabCandidatesCache(),
       }),
     [committedCandidates, breezySnapshot, data],
   );
   const authoritativeCandidates = useMemo(
-    () => authoritativeCandidatesSnapshot?.candidates ?? [],
-    [authoritativeCandidatesSnapshot],
+    () => displayCandidatesSnapshot?.candidates ?? [],
+    [displayCandidatesSnapshot],
   );
   const hasRenderableCandidateRows = authoritativeCandidates.length > 0;
-  const hasCandidateSnapshot = authoritativeCandidatesSnapshot !== null;
+  const hasCandidateSnapshot = displayCandidatesSnapshot !== null;
   const [loadingBundle, setLoadingBundle] = useState(
     () => (startupSnapshotRef.current?.candidates.length ?? 0) === 0,
   );
@@ -586,10 +588,49 @@ export function CandidatesSection() {
     CANDIDATES_TAB_LOADING_CEILING_MS,
   );
 
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    if (committedCandidates.length > 0 && (breezySnapshotRef.current?.candidates.length ?? 0) > 0) {
+      return;
+    }
+    const restored =
+      getStartupRestoredTabSnapshot() ??
+      getRecoverableTabCandidatesSnapshot() ??
+      peekTabCandidatesCache();
+    if (!restored?.candidates.length) return;
+    breezySnapshotRef.current = restored;
+    setCommittedCandidates(restored.candidates);
+    setBreezySnapshot(restored);
+    if (!data?.ok) {
+      setData(restored);
+    }
+    setLoadingBundle(false);
+  }, []);
+
   useEffect(() => {
-    if (!data?.ok || !authoritativeCandidatesSnapshot) return;
+    if (!hasRenderableCandidateRows) return;
+    if (committedCandidates.length > 0 && breezySnapshot) return;
+    const snapshot = displayCandidatesSnapshot;
+    if (!snapshot?.candidates.length) return;
+    breezySnapshotRef.current = snapshot;
+    setCommittedCandidates(snapshot.candidates);
+    setBreezySnapshot(snapshot);
+    if (!data?.ok) {
+      setData(snapshot);
+    }
+    setLoadingBundle(false);
+  }, [
+    breezySnapshot,
+    committedCandidates.length,
+    data?.ok,
+    displayCandidatesSnapshot,
+    hasRenderableCandidateRows,
+  ]);
+
+  useEffect(() => {
+    if (!data?.ok || !displayCandidatesSnapshot) return;
     const liveCount = data.candidates.length;
-    const displayCount = authoritativeCandidatesSnapshot.candidates.length;
+    const displayCount = displayCandidatesSnapshot.candidates.length;
     if (liveCount >= displayCount) return;
     logCandidatesSnapshotCommit({
       source: "authoritativeDisplay",
@@ -609,7 +650,7 @@ export function CandidatesSection() {
       authoritativeDisplayCount: displayCount,
       scanMode: data.scanMode,
     });
-  }, [authoritativeCandidatesSnapshot, data]);
+  }, [displayCandidatesSnapshot, data]);
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
   const [workflowNotice, setWorkflowNotice] = useState<string | null>(null);
@@ -896,6 +937,7 @@ export function CandidatesSection() {
         return;
       }
       const recovered =
+        restoreTabSnapshotsFromSession() ??
         getRecoverableTabCandidatesSnapshot() ??
         peekTabCandidatesCache() ??
         getTabSnapshotHighWater();
@@ -945,6 +987,30 @@ export function CandidatesSection() {
         );
         return;
       }
+      const recovered =
+        restoreTabSnapshotsFromSession() ??
+        getRecoverableTabCandidatesSnapshot() ??
+        peekTabCandidatesCache();
+      if (recovered?.candidates.length) {
+        commitCandidatesSuccess(
+          withCandidatesSyncMeta(recovered, {
+            fromCache: true,
+            stale: true,
+            refreshError: timedOut
+              ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, true)
+              : message,
+          }),
+          undefined,
+          { source: "preview_fetch_error:recoverable" },
+        );
+        setSyncAlert(
+          timedOut
+            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, true)
+            : `${message} Showing loaded candidates — background sync incomplete.`,
+        );
+        setLoadingBundle(false);
+        return;
+      }
       if (!timedOut) {
         setSyncAlert(null);
         setData({
@@ -960,7 +1026,7 @@ export function CandidatesSection() {
         fetchedAt: new Date().toISOString(),
       });
     },
-    [commitCandidatesFailure, hasPopulatedSnapshot, setNonBlockingSyncAlert],
+    [commitCandidatesFailure, commitCandidatesSuccess, hasPopulatedSnapshot, setNonBlockingSyncAlert],
   );
 
   const hydrateRemainingCandidates = useCallback(
@@ -1357,7 +1423,7 @@ export function CandidatesSection() {
     logCandidatesClientTrace("candidates_state_after_render", {
       breezySnapshotCount: breezySnapshot?.candidates.length ?? 0,
       committedCandidateCount: committedCandidates.length,
-      authoritativeDisplayCount: authoritativeCandidatesSnapshot?.candidates.length ?? 0,
+      authoritativeDisplayCount: displayCandidatesSnapshot?.candidates.length ?? 0,
       enrichedRowCount: enrichedCandidates.length,
       dataOk: data?.ok,
       dataCandidateCount: data?.ok ? data.candidates.length : 0,
@@ -1367,7 +1433,7 @@ export function CandidatesSection() {
       workflowEnrichmentPending,
     });
   }, [
-    authoritativeCandidatesSnapshot?.candidates.length,
+    displayCandidatesSnapshot?.candidates.length,
     breezySnapshot,
     committedCandidates.length,
     data,
@@ -1624,7 +1690,7 @@ export function CandidatesSection() {
     logCandidatesClientTrace("table_render_state", {
       tableRowsCommittedToState: sorted.length,
       hasRenderableCandidateRows,
-      snapshotCandidateCount: authoritativeCandidatesSnapshot?.candidates.length ?? 0,
+      snapshotCandidateCount: displayCandidatesSnapshot?.candidates.length ?? 0,
       committedCandidateCount: committedCandidates.length,
       liveDataCandidateCount: data?.ok ? data.candidates.length : 0,
       workflowEnrichedRowCount: candidates.length,
@@ -1644,7 +1710,7 @@ export function CandidatesSection() {
     });
     logCandidatesDebug("after_table_filter", sorted.length, {
       tableRowsCommittedToState: sorted.length,
-      snapshotCandidates: authoritativeCandidatesSnapshot?.candidates.length ?? 0,
+      snapshotCandidates: displayCandidatesSnapshot?.candidates.length ?? 0,
     });
     logFirstCandidateKeys(
       "after_table_filter",
@@ -1655,7 +1721,7 @@ export function CandidatesSection() {
     actingRecruiter,
     appliedFrom,
     appliedTo,
-    authoritativeCandidatesSnapshot?.candidates.length,
+    displayCandidatesSnapshot?.candidates.length,
     candidates,
     data,
     cityFilter,
@@ -1777,7 +1843,7 @@ export function CandidatesSection() {
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
     const row = buildCandidateDrawerRowFromScored(selectedCandidate);
-    const breezy = authoritativeCandidatesSnapshot?.candidates.find(
+    const breezy = displayCandidatesSnapshot?.candidates.find(
       (c) => c.candidateId === selectedCandidate.candidateId,
     );
     if (!breezy || melOpportunities.length === 0) return row;
@@ -1787,7 +1853,7 @@ export function CandidatesSection() {
       matchedOpportunities: melMatch.matches,
       melMatchingSummary: melMatch.aiSummary,
     };
-  }, [authoritativeCandidatesSnapshot, melOpportunities, selectedCandidate]);
+  }, [displayCandidatesSnapshot, melOpportunities, selectedCandidate]);
 
   const prioritizationQueues = useMemo(
     () =>
@@ -2455,7 +2521,12 @@ export function CandidatesSection() {
     );
   }
 
-  if (!hasRenderableCandidateRows && data !== undefined && !data.ok) {
+  if (
+    !hasRenderableCandidateRows &&
+    data !== undefined &&
+    !data.ok &&
+    !(getRecoverableTabCandidatesSnapshot() ?? peekTabCandidatesCache())?.candidates.length
+  ) {
     return (
       <DashboardSectionFallback
         title="Candidates"
@@ -2479,11 +2550,9 @@ export function CandidatesSection() {
     );
   }
 
-  const displaySnapshot = authoritativeCandidatesSnapshot;
+  const displaySnapshot = displayCandidatesSnapshot;
 
-  const showSyncAlert =
-    Boolean(syncAlert) &&
-    !(hasRenderableCandidateRows && syncAlert?.toLowerCase().includes("timed out"));
+  const showSyncAlert = Boolean(syncAlert);
   const showBackgroundSyncLine =
     hasRenderableCandidateRows && (refreshingCandidates || isFullHydrationInflightActive());
   const syncHeaderLine = displaySnapshot

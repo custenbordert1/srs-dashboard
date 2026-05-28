@@ -4,6 +4,7 @@ import type { BreezyCandidatesSuccess } from "@/lib/breezy-api";
 import {
   buildTableBackedCandidatesSnapshot,
   resolveAuthoritativeCandidatesDisplaySnapshot,
+  resolveCandidatesTabDisplaySnapshot,
 } from "@/lib/breezy-candidates-display";
 
 function snapshot(
@@ -35,6 +36,20 @@ describe("authoritative candidates display snapshot", () => {
       startupSnapshot: null,
     });
     assert.equal(resolved?.candidates.length, 72);
+  });
+
+  it("resolves display rows from recoverable snapshot when live fetch failed", () => {
+    const highWater = snapshot(48, "full");
+    const resolved = resolveCandidatesTabDisplaySnapshot({
+      tableRows: [],
+      breezySnapshot: null,
+      liveData: null,
+      recoverableSnapshot: highWater,
+      highWaterSnapshot: highWater,
+      startupSnapshot: null,
+      cachePeekSnapshot: null,
+    });
+    assert.equal(resolved?.candidates.length, 48);
   });
 
   it("uses table rows when committed count exceeds snapshot metadata", () => {

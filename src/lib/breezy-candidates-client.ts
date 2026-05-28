@@ -423,6 +423,7 @@ export function getRecoverableTabCandidatesSnapshot(): BreezyCandidatesSuccess |
     getRichestTabSnapshot(),
     readPersistedTabSnapshot(),
     lastOkTabSnapshot,
+    restoreTabSnapshotsFromSession(),
   ]);
 }
 
