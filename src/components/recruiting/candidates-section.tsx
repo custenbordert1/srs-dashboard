@@ -61,7 +61,6 @@ import { isAppliedDateInRange } from "@/lib/breezy-api";
 import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
   CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
-  CANDIDATES_TAB_LOADING_CEILING_MS,
   cancelFullHydrationInflight,
   coalesceCandidatesSnapshotWithBaseline,
   continueCandidateHydration,
@@ -134,6 +133,11 @@ import {
   formatRecruiterSyncAlert,
   formatRecruiterCandidatesSyncHeader,
 } from "@/lib/recruiter-sync-status-copy";
+import {
+  CANDIDATES_NO_CACHE_EMPTY_MESSAGE,
+  formatCandidatesSafeModeDiagnostics,
+  resolveCandidatesSafeModeState,
+} from "@/lib/candidates-safe-mode";
 import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
 import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
@@ -149,8 +153,6 @@ import {
   sendPaperworkBlockMessage,
   type SendPaperworkEligibilityInput,
 } from "@/lib/onboarding-send-eligibility";
-import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
-import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import {
   memo,
   useCallback,
@@ -577,15 +579,29 @@ export function CandidatesSection() {
     [displayCandidatesSnapshot],
   );
   const hasRenderableCandidateRows = authoritativeCandidates.length > 0;
-  const hasCandidateSnapshot = displayCandidatesSnapshot !== null;
-  const [loadingBundle, setLoadingBundle] = useState(
-    () => (startupSnapshotRef.current?.candidates.length ?? 0) === 0,
-  );
+  const [liveSyncPending, setLiveSyncPending] = useState(false);
+  const backgroundSyncInFlightRef = useRef(false);
   const [refreshingCandidates, setRefreshingCandidates] = useState(false);
-  const [retrying, setRetrying] = useState(false);
-  const loadingCeilingHit = useLoadingCeiling(
-    loadingBundle && authoritativeCandidates.length === 0,
-    CANDIDATES_TAB_LOADING_CEILING_MS,
+  const candidatesSafeMode = useMemo(
+    () =>
+      resolveCandidatesSafeModeState({
+        snapshot: displayCandidatesSnapshot,
+        hasRenderableRows: hasRenderableCandidateRows,
+        liveDataOk: data?.ok === true,
+        liveSyncPending,
+        refreshing: refreshingCandidates || isFullHydrationInflightActive(),
+      }),
+    [
+      data?.ok,
+      displayCandidatesSnapshot,
+      hasRenderableCandidateRows,
+      liveSyncPending,
+      refreshingCandidates,
+    ],
+  );
+  const safeModeDiagnosticsLine = useMemo(
+    () => formatCandidatesSafeModeDiagnostics(candidatesSafeMode),
+    [candidatesSafeMode],
   );
 
   useLayoutEffect(() => {
@@ -604,7 +620,6 @@ export function CandidatesSection() {
     if (!data?.ok) {
       setData(restored);
     }
-    setLoadingBundle(false);
   }, []);
 
   useEffect(() => {
@@ -618,7 +633,6 @@ export function CandidatesSection() {
     if (!data?.ok) {
       setData(snapshot);
     }
-    setLoadingBundle(false);
   }, [
     breezySnapshot,
     committedCandidates.length,
@@ -888,7 +902,6 @@ export function CandidatesSection() {
           setCommittedCandidates(coalesced.candidates);
           setBreezySnapshot(coalesced);
           setData(coalesced);
-          setLoadingBundle(false);
         });
       } else {
         setBreezySnapshot(coalesced);
@@ -958,7 +971,6 @@ export function CandidatesSection() {
         setSyncAlert(
           `${failureMessage} Showing loaded candidates — background sync incomplete.`,
         );
-        setLoadingBundle(false);
         return;
       }
       if (breezySnapshotRef.current) {
@@ -1008,7 +1020,6 @@ export function CandidatesSection() {
             ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, true)
             : `${message} Showing loaded candidates — background sync incomplete.`,
         );
-        setLoadingBundle(false);
         return;
       }
       if (!timedOut) {
@@ -1145,133 +1156,47 @@ export function CandidatesSection() {
     [commitCandidatesSuccess, hasPopulatedSnapshot, hydrateRemainingCandidates, setNonBlockingSyncAlert],
   );
 
-  const loadBundle = useCallback(async (force = false) => {
-    const rowsAtStart = breezySnapshotRef.current?.candidates.length ?? 0;
-    if (rowsAtStart === 0) setLoadingBundle(true);
-
-    if (force) {
-      cancelFullHydrationInflight();
-    }
-
+  const bootstrapCachedCandidatesView = useCallback(() => {
     const restored =
       restoreTabSnapshotsFromSession() ??
       peekTabCandidatesCache() ??
       getRecoverableTabCandidatesSnapshot();
-    if (restored && restored.candidates.length > 0) {
-      logCandidatesClientTrace("restore_first_commit", {
-        candidateCount: restored.candidates.length,
-        scanMode: restored.scanMode,
-        highWaterMark: getTabCandidateCountHighWaterMark(),
-      });
-      commitCandidatesSuccess(restored, undefined, { source: "loadBundle:restore_first" });
-      setLoadingBundle(false);
-    } else {
-      const cached = peekTabCandidatesCache();
-      if (cached && cached.candidates.length > 0) {
-        logCandidatesClientTrace("cache_peek_commit", { candidateCount: cached.candidates.length });
-        logCandidatesDebug("before_cache_peek_commit", cached.candidates.length);
-        commitCandidatesSuccess(cached, undefined, { source: "loadBundle:cache_peek" });
-        logCandidatesDebug("after_cache_peek_commit", cached.candidates.length);
-        setLoadingBundle(false);
-      }
-    }
+    if (!restored?.candidates.length) return;
+    logCandidatesClientTrace("safe_mode_bootstrap", {
+      candidateCount: restored.candidates.length,
+      scanMode: restored.scanMode,
+      highWaterMark: getTabCandidateCountHighWaterMark(),
+    });
+    commitCandidatesSuccess(
+      withCandidatesSyncMeta(restored, {
+        fromCache: true,
+        stale: true,
+      }),
+      undefined,
+      { source: "safe_mode:bootstrap" },
+    );
+  }, [commitCandidatesSuccess]);
 
-    const enrichment: string[] = [];
-    let deferredPreviewFailure: CandidatesTabFetchResult | null = null;
-    let previewResult: CandidatesTabFetchResult | null = null;
+  const reconcileEmptyAfterBackgroundSync = useCallback(
+    (
+      deferredPreviewFailure: CandidatesTabFetchResult | null,
+      previewResult: CandidatesTabFetchResult | null,
+    ) => {
+      if ((breezySnapshotRef.current?.candidates.length ?? 0) > 0) return;
 
-    const fastWork = runFastTier(force);
-
-    try {
-      const previewStarted = performance.now();
-      const preview = await fetchCandidatesForTab({ force, scan: "preview" });
-      previewResult = preview;
-      const previewFetchDurationMs = Math.round(performance.now() - previewStarted);
-      const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
-      logCandidatesClientTrace("preview_tier_response", {
-        ok: preview.ok,
-        candidateCount: preview.ok ? preview.candidates.length : 0,
-        priorSnapshotCount: priorCount,
-        fetchDurationMs: previewFetchDurationMs,
-        showingCachedSnapshot: preview.ok ? preview.showingCachedSnapshot : undefined,
-      });
-      if (preview.ok) {
-        logCandidatesDebug("before_preview_fetch_commit", preview.candidates.length, {
-          positionsScanned: preview.positionsScanned ?? 0,
-          priorSnapshotCount: priorCount,
-          willCallCommit: preview.candidates.length > 0,
-        });
-        logRecruiterTerritoryFilters({
-          actingRecruiter,
-          sourceFilter,
-          workflowFilter,
-          stageFilter,
-          territoryNote: "Territory filter runs server-side on /api/breezy/candidates (DM role).",
-        });
-        if (preview.candidates.length > 0) {
-          logCandidatesClientTrace("preview_commit", {
-            candidateCount: preview.candidates.length,
-            fetchDurationMs: previewFetchDurationMs,
-            fromCache: preview.fromCache ?? false,
-            showingCachedSnapshot: preview.showingCachedSnapshot ?? false,
-          });
-          commitCandidatesSuccess(preview, { fetchDurationMs: previewFetchDurationMs });
-        } else if (priorCount > 0) {
-          logCandidatesClientTrace("preview_skip_commit_keeps_snapshot", {
-            priorSnapshotCount: priorCount,
-            previewEmptyWouldOverwriteFast: true,
-          });
-          logCandidatesDebug("preview_fetch_skip_commit", 0, {
-            reason: "empty_preview_keeps_prior_snapshot",
-            priorSnapshotCount: priorCount,
-          });
-          setSyncAlert(buildCandidatesSyncAlert(preview));
-        } else {
-          logCandidatesClientTrace("preview_empty_no_prior_snapshot", {
-            positionsScanned: preview.positionsScanned ?? 0,
-          });
-          setSyncAlert(buildCandidatesSyncAlert(preview));
-        }
-      } else if (hasPopulatedSnapshot()) {
-        setNonBlockingSyncAlert(
-          `${preview.error} Showing loaded candidates — background sync incomplete.`,
-        );
-      } else {
-        deferredPreviewFailure = preview;
-      }
-    } catch (err) {
-      if (hasPopulatedSnapshot()) {
-        handlePreviewFetchError(err);
-      } else {
-        const timedOut = isTimeoutError(err);
-        const message = err instanceof Error ? err.message : "Failed to load Breezy candidates";
-        deferredPreviewFailure = {
-          ok: false,
-          error: timedOut
-            ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, false)
-            : message,
-          fetchedAt: new Date().toISOString(),
-        };
-      }
-    }
-
-    if ((breezySnapshotRef.current?.candidates.length ?? 0) === 0) {
-      logCandidatesClientTrace("await_fast_tier_before_give_up", {
-        reason: "no_committed_rows_after_preview",
-      });
-      await fastWork;
-      const stillEmpty = (breezySnapshotRef.current?.candidates.length ?? 0) === 0;
-      if (stillEmpty && deferredPreviewFailure) {
+      if (deferredPreviewFailure) {
         const previewFailureMessage =
           deferredPreviewFailure.ok === false ? deferredPreviewFailure.error : null;
         const recovered = getRecoverableTabCandidatesSnapshot() ?? peekTabCandidatesCache();
-        if (recovered && recovered.candidates.length > 0) {
+        if (recovered?.candidates.length) {
           commitCandidatesSuccess(
             withCandidatesSyncMeta(recovered, {
               fromCache: true,
               stale: true,
               refreshError: previewFailureMessage ?? undefined,
             }),
+            undefined,
+            { source: "safe_mode:recover_after_failure" },
           );
           setNonBlockingSyncAlert(
             previewFailureMessage
@@ -1279,15 +1204,18 @@ export function CandidatesSection() {
               : buildCandidatesSyncAlert(recovered) ??
                   "Showing cached candidates — background sync continues.",
           );
-        } else {
-          commitCandidatesFailure(deferredPreviewFailure);
+          return;
         }
-      } else if (stillEmpty && previewResult?.ok) {
+        commitCandidatesFailure(deferredPreviewFailure);
+        return;
+      }
+
+      if (previewResult?.ok) {
         const richest =
           getRecoverableTabCandidatesSnapshot() ??
           peekTabCandidatesCache() ??
           getTabSnapshotHighWater();
-        if (richest && richest.candidates.length > 0) {
+        if (richest?.candidates.length) {
           commitCandidatesSuccess(
             withCandidatesSyncMeta(richest, {
               fromCache: true,
@@ -1295,115 +1223,219 @@ export function CandidatesSection() {
               refreshError: "Breezy returned no candidates for this tier; using prior snapshot.",
             }),
             undefined,
-            { source: "loadBundle:empty_ok_richest_fallback" },
+            { source: "safe_mode:empty_ok_richest_fallback" },
+          );
+          return;
+        }
+        logCandidatesClientTrace("sync_complete_empty_ok_no_richer_snapshot", {
+          positionsScanned: previewResult.positionsScanned ?? 0,
+          highWaterMark: getTabCandidateCountHighWaterMark(),
+        });
+        setSyncAlert(buildCandidatesSyncAlert(previewResult));
+      }
+    },
+    [commitCandidatesFailure, commitCandidatesSuccess, setNonBlockingSyncAlert],
+  );
+
+  const runBackgroundBreezySync = useCallback(
+    async (force = false) => {
+      if (backgroundSyncInFlightRef.current && !force) return;
+      backgroundSyncInFlightRef.current = true;
+      setLiveSyncPending(true);
+
+      try {
+      if (force) {
+        cancelFullHydrationInflight();
+      }
+
+      const enrichment: string[] = [];
+      let deferredPreviewFailure: CandidatesTabFetchResult | null = null;
+      let previewResult: CandidatesTabFetchResult | null = null;
+      const fastWorkPromise = runFastTier(force);
+
+      try {
+        const previewStarted = performance.now();
+        const preview = await fetchCandidatesForTab({ force, scan: "preview" });
+        previewResult = preview;
+        const previewFetchDurationMs = Math.round(performance.now() - previewStarted);
+        const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
+        logCandidatesClientTrace("preview_tier_response", {
+          ok: preview.ok,
+          candidateCount: preview.ok ? preview.candidates.length : 0,
+          priorSnapshotCount: priorCount,
+          fetchDurationMs: previewFetchDurationMs,
+          showingCachedSnapshot: preview.ok ? preview.showingCachedSnapshot : undefined,
+        });
+        if (preview.ok) {
+          logCandidatesDebug("before_preview_fetch_commit", preview.candidates.length, {
+            positionsScanned: preview.positionsScanned ?? 0,
+            priorSnapshotCount: priorCount,
+            willCallCommit: preview.candidates.length > 0,
+          });
+          logRecruiterTerritoryFilters({
+            actingRecruiter,
+            sourceFilter,
+            workflowFilter,
+            stageFilter,
+            territoryNote: "Territory filter runs server-side on /api/breezy/candidates (DM role).",
+          });
+          if (preview.candidates.length > 0) {
+            logCandidatesClientTrace("preview_commit", {
+              candidateCount: preview.candidates.length,
+              fetchDurationMs: previewFetchDurationMs,
+              fromCache: preview.fromCache ?? false,
+              showingCachedSnapshot: preview.showingCachedSnapshot ?? false,
+            });
+            commitCandidatesSuccess(preview, { fetchDurationMs: previewFetchDurationMs });
+          } else if (priorCount > 0) {
+            logCandidatesClientTrace("preview_skip_commit_keeps_snapshot", {
+              priorSnapshotCount: priorCount,
+              previewEmptyWouldOverwriteFast: true,
+            });
+            setSyncAlert(buildCandidatesSyncAlert(preview));
+          } else {
+            logCandidatesClientTrace("preview_empty_no_prior_snapshot", {
+              positionsScanned: preview.positionsScanned ?? 0,
+            });
+            setSyncAlert(buildCandidatesSyncAlert(preview));
+          }
+        } else if (hasPopulatedSnapshot()) {
+          setNonBlockingSyncAlert(
+            `${preview.error} Showing loaded candidates — background sync incomplete.`,
           );
         } else {
-          logCandidatesClientTrace("sync_complete_empty_ok_no_richer_snapshot", {
-            positionsScanned: previewResult.positionsScanned ?? 0,
-            highWaterMark: getTabCandidateCountHighWaterMark(),
-          });
-          setSyncAlert(buildCandidatesSyncAlert(previewResult));
+          deferredPreviewFailure = preview;
+        }
+      } catch (err) {
+        if (hasPopulatedSnapshot()) {
+          handlePreviewFetchError(err);
+        } else {
+          const timedOut = isTimeoutError(err);
+          const message = err instanceof Error ? err.message : "Failed to load Breezy candidates";
+          deferredPreviewFailure = {
+            ok: false,
+            error: timedOut
+              ? timeoutShowsCachedCandidatesMessage(CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS, false)
+              : message,
+            fetchedAt: new Date().toISOString(),
+          };
         }
       }
-    }
 
-    if ((breezySnapshotRef.current?.candidates.length ?? 0) === 0) {
-      setLoadingBundle(false);
-    }
-
-    const [jobsSettled, workflowsSettled] = await Promise.allSettled([
-      fetchCachedBreezyJobs(),
-      fetchCachedJson(
-        cacheKey(["candidates", "workflows"]),
-        async () => {
-          const workflowRes = await fetchWithTimeout(CANDIDATES_WORKFLOW_SOURCE.apiPath, {
-            cache: "no-store",
-            timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
-          });
-          return (await workflowRes.json()) as {
-            ok: boolean;
-            workflows?: CandidateWorkflowState;
-            rosters?: RecruiterRosters;
-            error?: string;
-          };
-        },
-        { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows", staleOnError: true },
-      ),
-    ]);
-
-    if (jobsSettled.status === "fulfilled" && jobsSettled.value.ok) {
-      setJobsData(jobsSettled.value);
-    } else {
-      const jobsErr =
-        jobsSettled.status === "rejected"
-          ? jobsSettled.reason instanceof Error
-            ? jobsSettled.reason.message
-            : "Breezy jobs request failed"
-          : !jobsSettled.value.ok
-            ? jobsSettled.value.error
-            : "Breezy jobs unavailable";
-      enrichment.push(`Job enrichment unavailable (${jobsErr}) — position match fields may be limited.`);
-    }
-
-    if (workflowsSettled.status === "fulfilled" && workflowsSettled.value.ok) {
-      if (workflowsSettled.value.workflows) {
-        setWorkflowState(workflowsSettled.value.workflows);
+      try {
+        await fastWorkPromise;
+        reconcileEmptyAfterBackgroundSync(deferredPreviewFailure, previewResult);
+      } catch {
+        reconcileEmptyAfterBackgroundSync(deferredPreviewFailure, previewResult);
       }
-      if (workflowsSettled.value.rosters) {
-        setRosters(workflowsSettled.value.rosters);
-        setActingRecruiter((current) =>
-          workflowsSettled.value.rosters!.recruiters.includes(current)
-            ? current
-            : pickActingRecruiter(workflowsSettled.value.rosters!),
+
+      const [jobsSettled, workflowsSettled] = await Promise.allSettled([
+        fetchCachedBreezyJobs(),
+        fetchCachedJson(
+          cacheKey(["candidates", "workflows"]),
+          async () => {
+            const workflowRes = await fetchWithTimeout(CANDIDATES_WORKFLOW_SOURCE.apiPath, {
+              cache: "no-store",
+              timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+            });
+            return (await workflowRes.json()) as {
+              ok: boolean;
+              workflows?: CandidateWorkflowState;
+              rosters?: RecruiterRosters;
+              error?: string;
+            };
+          },
+          { ttlMs: LONG_CLIENT_CACHE_TTL_MS, label: "candidate-workflows", staleOnError: true },
+        ),
+      ]);
+
+      if (jobsSettled.status === "fulfilled" && jobsSettled.value.ok) {
+        setJobsData(jobsSettled.value);
+      } else {
+        const jobsErr =
+          jobsSettled.status === "rejected"
+            ? jobsSettled.reason instanceof Error
+              ? jobsSettled.reason.message
+              : "Breezy jobs request failed"
+            : !jobsSettled.value.ok
+              ? jobsSettled.value.error
+              : "Breezy jobs unavailable";
+        enrichment.push(
+          `Job enrichment unavailable (${jobsErr}) — position match fields may be limited.`,
         );
       }
-    } else {
-      const wfErr =
-        workflowsSettled.status === "rejected"
-          ? isTimeoutError(workflowsSettled.reason)
-            ? timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS)
-            : workflowsSettled.reason instanceof Error
-              ? workflowsSettled.reason.message
-              : "Workflow request failed"
-          : "Workflow overlay unavailable";
-      enrichment.push(`${wfErr} (${CANDIDATES_WORKFLOW_SOURCE.label}) — using Breezy stage only.`);
-    }
 
-    setEnrichmentWarnings(enrichment);
+      if (workflowsSettled.status === "fulfilled" && workflowsSettled.value.ok) {
+        if (workflowsSettled.value.workflows) {
+          setWorkflowState(workflowsSettled.value.workflows);
+        }
+        if (workflowsSettled.value.rosters) {
+          setRosters(workflowsSettled.value.rosters);
+          setActingRecruiter((current) =>
+            workflowsSettled.value.rosters!.recruiters.includes(current)
+              ? current
+              : pickActingRecruiter(workflowsSettled.value.rosters!),
+          );
+        }
+      } else {
+        const wfErr =
+          workflowsSettled.status === "rejected"
+            ? isTimeoutError(workflowsSettled.reason)
+              ? timeoutErrorMessage("Candidate workflows", DASHBOARD_REQUEST_TIMEOUT_MS)
+              : workflowsSettled.reason instanceof Error
+                ? workflowsSettled.reason.message
+                : "Workflow request failed"
+            : "Workflow overlay unavailable";
+        enrichment.push(`${wfErr} (${CANDIDATES_WORKFLOW_SOURCE.label}) — using Breezy stage only.`);
+      }
 
-    if (force) {
-      await fastWork;
-      const snapshot = breezySnapshotRef.current;
-      if (snapshot) {
-        setRefreshingCandidates(true);
-        try {
-          const continued = await continueCandidateHydration(snapshot, {
-            reclaimStale: true,
-            forceContinuation: true,
-          });
-          if (continued.ok) {
-            commitCandidatesSuccess(continued);
+      setEnrichmentWarnings(enrichment);
+
+      if (force) {
+        const snapshot = breezySnapshotRef.current;
+        if (snapshot) {
+          setRefreshingCandidates(true);
+          try {
+            const continued = await continueCandidateHydration(snapshot, {
+              reclaimStale: true,
+              forceContinuation: true,
+            });
+            if (continued.ok) {
+              commitCandidatesSuccess(continued);
+            }
+          } catch {
+            // Keep visible rows; refresh attempted continuation.
+          } finally {
+            setRefreshingCandidates(false);
           }
-        } catch {
-          // Keep visible rows; refresh attempted continuation.
-        } finally {
-          setRefreshingCandidates(false);
         }
       }
-    }
-  }, [
+      } finally {
+        setLiveSyncPending(false);
+        backgroundSyncInFlightRef.current = false;
+      }
+    },
+    [
     commitCandidatesFailure,
     commitCandidatesSuccess,
-    committedCandidates.length,
     handlePreviewFetchError,
     hasPopulatedSnapshot,
+    reconcileEmptyAfterBackgroundSync,
     runFastTier,
     setNonBlockingSyncAlert,
-  ]);
+  ],
+  );
+
+  const loadBundle = useCallback(
+    (force = false) => {
+      bootstrapCachedCandidatesView();
+      return runBackgroundBreezySync(force);
+    },
+    [bootstrapCachedCandidatesView, runBackgroundBreezySync],
+  );
 
   useEffect(() => {
-    const id = window.setTimeout(() => void loadBundle(), 0);
-    return () => window.clearTimeout(id);
+    void loadBundle(false);
   }, [loadBundle]);
 
   /** Keep draining the hydration queue across idle periods without waiting for manual refresh. */
@@ -1412,12 +1444,12 @@ export function CandidatesSection() {
     const pump = () => {
       const current = breezySnapshotRef.current;
       if (!current || !shouldHydrateFullCandidates(current)) return;
-      if (loadingBundle || refreshingCandidates || isFullHydrationInflightActive()) return;
+      if (liveSyncPending || refreshingCandidates || isFullHydrationInflightActive()) return;
       void hydrateRemainingCandidates(current);
     };
     const intervalId = window.setInterval(pump, 45_000);
     return () => window.clearInterval(intervalId);
-  }, [breezySnapshot, hydrateRemainingCandidates, loadingBundle, refreshingCandidates]);
+  }, [breezySnapshot, hydrateRemainingCandidates, liveSyncPending, refreshingCandidates]);
 
   useEffect(() => {
     logCandidatesClientTrace("candidates_state_after_render", {
@@ -1428,7 +1460,7 @@ export function CandidatesSection() {
       dataOk: data?.ok,
       dataCandidateCount: data?.ok ? data.candidates.length : 0,
       hasRenderableCandidateRows,
-      loadingBundle,
+      liveSyncPending,
       refreshingCandidates,
       workflowEnrichmentPending,
     });
@@ -1439,7 +1471,7 @@ export function CandidatesSection() {
     data,
     enrichedCandidates.length,
     hasRenderableCandidateRows,
-    loadingBundle,
+    liveSyncPending,
     refreshingCandidates,
     workflowEnrichmentPending,
   ]);
@@ -1480,11 +1512,6 @@ export function CandidatesSection() {
       })
       .finally(() => setOnboardingConfigLoaded(true));
   }, []);
-
-  const retry = useCallback(() => {
-    setRetrying(true);
-    void loadBundle(true).finally(() => setRetrying(false));
-  }, [loadBundle]);
 
   const jobsByPositionId = useMemo(
     () => (jobsData?.ok ? buildJobsByPositionId(jobsData.jobs) : new Map()),
@@ -2506,55 +2533,14 @@ export function CandidatesSection() {
     ],
   );
 
-  if (loadingBundle && !hasRenderableCandidateRows) {
-    return (
-      <DashboardSectionFallback
-        title="Candidates"
-        loadingMessage="Loading first Breezy candidates, jobs, and workflow overlay…"
-        isLoading
-        loadingCeilingHit={loadingCeilingHit}
-        onRetry={retry}
-        retrying={retrying}
-        skeletonRows={3}
-        skeletonCards={3}
-      />
-    );
-  }
-
-  if (
-    !hasRenderableCandidateRows &&
-    data !== undefined &&
-    !data.ok &&
-    !(getRecoverableTabCandidatesSnapshot() ?? peekTabCandidatesCache())?.candidates.length
-  ) {
-    return (
-      <DashboardSectionFallback
-        title="Candidates"
-        error={data.error}
-        timedOut={data.error.toLowerCase().includes("timed out")}
-        onRetry={retry}
-        retrying={retrying}
-      />
-    );
-  }
-
-  if (hasCandidateSnapshot && !hasRenderableCandidateRows && !refreshingCandidates && !loadingBundle) {
-    return (
-      <DashboardSectionFallback
-        title="Candidates"
-        isEmpty
-        emptyMessage="No candidates in the latest Breezy sync. Try refresh after sync completes."
-        onRetry={retry}
-        retrying={retrying}
-      />
-    );
-  }
-
   const displaySnapshot = displayCandidatesSnapshot;
 
   const showSyncAlert = Boolean(syncAlert);
+  const showSafeModeDiagnostics = Boolean(safeModeDiagnosticsLine);
   const showBackgroundSyncLine =
-    hasRenderableCandidateRows && (refreshingCandidates || isFullHydrationInflightActive());
+    candidatesSafeMode.liveSyncPending ||
+    refreshingCandidates ||
+    isFullHydrationInflightActive();
   const syncHeaderLine = displaySnapshot
     ? formatRecruiterCandidatesSyncHeader({
         candidateCount: displaySnapshot.candidates.length,
@@ -2564,9 +2550,15 @@ export function CandidatesSection() {
         partial: displaySnapshot.partial,
         positionsScanned: displaySnapshot.positionsScanned,
         totalPositionsAvailable: displaySnapshot.totalPositionsAvailable,
-        refreshing: refreshingCandidates,
+        refreshing: candidatesSafeMode.liveSyncPending || refreshingCandidates,
       })
-    : null;
+    : candidatesSafeMode.liveSyncPending
+      ? formatRecruiterCandidatesSyncHeader({
+          candidateCount: 0,
+          fetchedAt: new Date().toISOString(),
+          refreshing: true,
+        })
+      : null;
 
   return (
     <div className="space-y-5">
@@ -2581,13 +2573,25 @@ export function CandidatesSection() {
             </p>
           ) : null}
         </div>
+        <div className={syncBannerSlotClass}>
+          {showSafeModeDiagnostics ? (
+            <p
+              role="status"
+              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-zinc-600/40 bg-zinc-800/50 py-2 text-zinc-200`}
+            >
+              <span className="line-clamp-2">{safeModeDiagnosticsLine}</span>
+            </p>
+          ) : null}
+        </div>
         <div className="min-h-[2.25rem]">
           {showBackgroundSyncLine ? (
             <p
               className={`${syncBannerClass} flex min-h-[2.25rem] items-center border-teal-500/25 bg-teal-500/10 py-1.5 text-xs text-teal-100`}
             >
               <span className="line-clamp-1 tabular-nums">
-                {formatRecruiterBackgroundSyncLine(authoritativeCandidates.length)}
+                {hasRenderableCandidateRows
+                  ? formatRecruiterBackgroundSyncLine(authoritativeCandidates.length)
+                  : "Live Breezy sync in progress — cached candidates will appear when available"}
               </span>
             </p>
           ) : null}
@@ -2657,11 +2661,15 @@ export function CandidatesSection() {
           <div className="flex flex-col items-end gap-2">
             <button
               type="button"
-              disabled={refreshingCandidates}
-              onClick={() => void loadBundle(true)}
-              className="rounded-lg border border-teal-600/40 bg-teal-600/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/20 disabled:opacity-50"
+              onClick={() => {
+                bootstrapCachedCandidatesView();
+                void runBackgroundBreezySync(true);
+              }}
+              className="rounded-lg border border-teal-600/40 bg-teal-600/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/20"
             >
-              {refreshingCandidates ? "Syncing…" : "Refresh / Sync"}
+              {candidatesSafeMode.liveSyncPending || refreshingCandidates
+                ? "Syncing…"
+                : "Refresh / Sync"}
             </button>
             {displaySnapshot ? (
               <p className="text-xs text-zinc-500">Fetched {formatDate(displaySnapshot.fetchedAt)}</p>
@@ -2891,10 +2899,7 @@ export function CandidatesSection() {
               : "Refreshing Breezy candidates — table stays visible"}
           </p>
         </div>
-        {filtered.length === 0 ? (
-          <p className="px-3 py-8 text-xs text-zinc-500 sm:px-4">No candidates match the selected filters.</p>
-        ) : (
-          <VirtualCandidateTable
+        <VirtualCandidateTable
             rows={filtered}
             colSpan={15}
             tableMinWidthClass="min-w-[1240px]"
@@ -3028,7 +3033,13 @@ export function CandidatesSection() {
               </>
             }
           />
-        )}
+        {filtered.length === 0 ? (
+          <p className="border-t border-zinc-800/40 px-3 py-8 text-xs text-zinc-500 sm:px-4">
+            {!hasRenderableCandidateRows
+              ? CANDIDATES_NO_CACHE_EMPTY_MESSAGE
+              : "No candidates match the selected filters."}
+          </p>
+        ) : null}
       </section>
 
       {selectedIds.size > 0 ? (
