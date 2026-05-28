@@ -8,6 +8,12 @@ import {
   type BreezyPositionVerification,
 } from "@/lib/job-management/breezy-position-payload";
 import type { JobDraft } from "@/lib/job-management/job-draft-types";
+import {
+  bodyPreview,
+  breezyNonJsonErrorMessage,
+  logBreezyNonJsonResponse,
+  parseHttpBody,
+} from "@/lib/job-management/breezy-http-response";
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_WRITE_TIMEOUT_MS = 20_000;
@@ -49,12 +55,6 @@ function parseBreezyErrorMessage(body: unknown, status: number): string {
     if (err?.type) return err.type;
   }
   return `Breezy API request failed (HTTP ${status})`;
-}
-
-function responseBodyPreview(text: string, maxLen = 240): string {
-  const compact = text.replace(/\s+/g, " ").trim();
-  if (!compact) return "(empty body)";
-  return compact.length <= maxLen ? compact : `${compact.slice(0, maxLen)}…`;
 }
 
 function sanitizePayloadForLog(payload: Record<string, unknown>) {
@@ -110,32 +110,36 @@ function failureFromResponse(
   text: string,
   fetchedAt: string,
 ): BreezyPositionCreateResult {
-  const preview = responseBodyPreview(text);
-  let parsed: unknown = null;
-  let isJson = false;
-  if (text.trim()) {
-    try {
-      parsed = JSON.parse(text);
-      isJson = true;
-    } catch {
-      isJson = false;
-    }
+  const preview = bodyPreview(text);
+  const body = parseHttpBody(text);
+
+  if (!body.isJson) {
+    logBreezyNonJsonResponse({
+      endpoint: path,
+      status: response.status,
+      statusText: response.statusText,
+      bodyPreview: preview,
+      label: `${label} failed`,
+    });
+    return {
+      ok: false,
+      error: breezyNonJsonErrorMessage(response.status),
+      fetchedAt,
+      rateLimited: response.status === 429,
+    };
   }
 
   console.error(`[breezy-position-write] ${label} failed`, {
     endpoint: path,
     status: response.status,
-    isJson,
+    statusText: response.statusText,
+    isJson: true,
     bodyPreview: preview,
   });
 
-  const error = isJson
-    ? parseBreezyErrorMessage(parsed, response.status)
-    : `Breezy returned non-JSON (HTTP ${response.status}): ${preview}`;
-
   return {
     ok: false,
-    error,
+    error: parseBreezyErrorMessage(body.parsed, response.status),
     fetchedAt,
     rateLimited: response.status === 429,
   };
@@ -181,12 +185,23 @@ async function fetchCreatedPosition(
       console.warn("[breezy-position-write] verify fetch failed", {
         endpoint: path,
         status: response.status,
-        bodyPreview: responseBodyPreview(text),
+        statusText: response.statusText,
+        bodyPreview: bodyPreview(text),
       });
       return null;
     }
-    if (!text.trim()) return null;
-    return JSON.parse(text) as unknown;
+    const body = parseHttpBody(text);
+    if (!body.isJson) {
+      logBreezyNonJsonResponse({
+        endpoint: path,
+        status: response.status,
+        statusText: response.statusText,
+        bodyPreview: bodyPreview(text),
+        label: "verify fetch non-json",
+      });
+      return null;
+    }
+    return body.parsed;
   } catch (err) {
     console.warn("[breezy-position-write] verify fetch error", {
       endpoint: path,
@@ -247,28 +262,28 @@ export async function createBreezyPositionFromDraft(
     };
   }
 
-  let parsed: unknown = null;
-  let isJson = false;
-  if (text.trim()) {
-    try {
-      parsed = JSON.parse(text);
-      isJson = true;
-    } catch {
-      isJson = false;
-    }
-  }
+  const body = parseHttpBody(text);
+  const isJson = body.isJson;
 
   console.info("[breezy-position-write] breezy create response", {
     endpoint: createPath,
     status: response.status,
+    statusText: response.statusText,
     isJson,
-    bodyPreview: responseBodyPreview(text, 400),
+    bodyPreview: bodyPreview(text),
   });
 
   if (!isJson) {
+    logBreezyNonJsonResponse({
+      endpoint: createPath,
+      status: response.status,
+      statusText: response.statusText,
+      bodyPreview: bodyPreview(text),
+      label: "create non-json",
+    });
     return {
       ok: false,
-      error: `Breezy returned non-JSON (HTTP ${response.status}): ${responseBodyPreview(text)}`,
+      error: breezyNonJsonErrorMessage(response.status),
       fetchedAt,
       rateLimited: response.status === 429,
     };
@@ -278,7 +293,7 @@ export async function createBreezyPositionFromDraft(
     return failureFromResponse("create", createPath, response, text, fetchedAt);
   }
 
-  const breezyJobId = extractCreatedJobId(parsed);
+  const breezyJobId = extractCreatedJobId(body.parsed);
   if (!breezyJobId) {
     return {
       ok: false,
@@ -287,7 +302,7 @@ export async function createBreezyPositionFromDraft(
     };
   }
 
-  const createVerification = verifyBreezyPositionResponse(breezyJobId, parsed, {
+  const createVerification = verifyBreezyPositionResponse(breezyJobId, body.parsed, {
     name: built.breezyTitle,
     city: built.draftSnapshot.city,
     state: built.draftSnapshot.usState,
@@ -348,5 +363,5 @@ export async function createBreezyPositionFromDraft(
     };
   }
 
-  return { ok: true, breezyJobId, fetchedAt, raw: parsed, verification };
+  return { ok: true, breezyJobId, fetchedAt, raw: body.parsed, verification };
 }

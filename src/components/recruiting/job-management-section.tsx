@@ -26,6 +26,7 @@ import type { JobApplicantCountsSource } from "@/lib/job-management/job-applican
 import { buildApplicantCountByBreezyJobId } from "@/lib/job-management/job-applicant-counts-core";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
+import { parseJobManagementPushResponse } from "@/lib/job-management/breezy-http-response";
 import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence";
 import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/operational-escalation-types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -352,15 +353,7 @@ export function JobManagementSection() {
           department: draftForPush.department,
         }),
       });
-      const parsed = (await res.json()) as {
-        ok?: boolean;
-        draft?: JobDraft;
-        breezyJobId?: string;
-        error?: string;
-        rateLimited?: boolean;
-        fieldErrors?: Record<string, string>;
-        verification?: BreezyPositionVerification;
-      };
+      const parsed = await parseJobManagementPushResponse(res);
 
       setPushDraftId(null);
 

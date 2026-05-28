@@ -54,6 +54,7 @@ function trimPatch(body: PushBody): Partial<{
 }
 
 export async function POST(request: Request, context: RouteContext) {
+  try {
   const guard = guardApiRoute(request, {
     allowedRoles: ["admin", "executive", "recruiter"],
     auditAction: "job_draft_push_breezy",
@@ -201,4 +202,18 @@ export async function POST(request: Request, context: RouteContext) {
     postedAt: result.fetchedAt,
     verification: result.verification,
   });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Push to Breezy failed unexpectedly.";
+    console.error("[job-draft-push] unhandled error", {
+      error: message,
+      stack: err instanceof Error ? err.stack : undefined,
+    });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: message,
+      },
+      { status: 500 },
+    );
+  }
 }
