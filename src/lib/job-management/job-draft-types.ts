@@ -1,6 +1,12 @@
 import type { JobApplicantCountsSource } from "@/lib/job-management/job-applicant-counts";
 
-export type JobDraftStatus = "draft" | "pushed" | "push_failed";
+export type JobDraftStatus = "draft" | "pending_push" | "published" | "push_failed";
+
+export type JobDraftVerificationSnapshot = {
+  ok: boolean;
+  mismatches: string[];
+  checkedAt: string;
+};
 
 export type JobVariantQueueStatus = "pending" | "approved" | "published" | "archived" | "rejected";
 
@@ -30,7 +36,10 @@ export type JobDraft = {
   variant?: JobVariantMeta;
   breezyJobId?: string;
   pushedAt?: string;
+  pushedBy?: string;
   pushError?: string;
+  lastSyncAt?: string;
+  lastVerificationResult?: JobDraftVerificationSnapshot;
   createdAt: string;
   updatedAt: string;
 };

@@ -51,7 +51,7 @@ export function buildVariantPerformanceRows(
     const breezyId = breezyIdForDraft(draft);
     const pushedMetrics = breezyId ? metricsForBreezyJob(breezyId, jobs, candidates) : { applicants: 0, interviews: 0, hires: 0 };
     const applicants =
-      breezyId && draft.status === "pushed"
+      breezyId && draft.status === "published"
         ? pushedMetrics.applicants
         : breezyId
           ? applicantCounts.get(breezyId) ?? 0
@@ -61,7 +61,7 @@ export function buildVariantPerformanceRows(
     const conversionPercent =
       applicants > 0 ? Math.round((hires / applicants) * 1000) / 10 : null;
     const ageDays = daysSince(draft.createdAt, reference) ?? 0;
-    const published = draft.variant!.queueStatus === "published" || draft.status === "pushed";
+    const published = draft.variant!.queueStatus === "published" || draft.status === "published";
 
     return {
       draftId: draft.id,

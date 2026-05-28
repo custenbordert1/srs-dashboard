@@ -183,7 +183,7 @@ export function buildCoverageRecommendations(input: {
       if (draft.variant?.queueStatus === "pending") pendingVariantsNearby += 1;
       else if (draft.variant?.queueStatus === "approved" && draft.status === "draft") {
         approvedUnpublishedVariantsNearby += 1;
-      } else if (draft.variant?.queueStatus === "published" || draft.status === "pushed") {
+      } else if (draft.variant?.queueStatus === "published" || draft.status === "published") {
         publishedVariantsNearby += 1;
       }
     }

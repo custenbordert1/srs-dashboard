@@ -2,6 +2,11 @@
 
 import type { JobDraft, JobVariantQueueStatus } from "@/lib/job-management/job-draft-types";
 import {
+  isJobDraftPendingPush,
+  isJobDraftPublished,
+  normalizeJobDraftStatus,
+} from "@/lib/job-management/job-draft-status";
+import {
   filterVariantDrafts,
   type JobVariantQueueTab,
 } from "@/lib/job-management/job-variant-queue";
@@ -9,7 +14,7 @@ import {
 type JobVariantQueueSectionProps = {
   drafts: JobDraft[];
   onEdit: (draftId: string) => void;
-  onPush: (draftId: string) => void;
+  onPush: (draftId: string, republish?: boolean) => void;
   onRefresh: () => Promise<void>;
 };
 
@@ -86,8 +91,20 @@ export function JobVariantQueueSection({
                             }
                           />
                         ) : null}
-                        {draft.variant?.queueStatus === "approved" && draft.status === "draft" ? (
+                        {draft.variant?.queueStatus === "approved" &&
+                        normalizeJobDraftStatus(draft.status) === "draft" ? (
                           <QueueButton label="Push" onClick={() => onPush(draft.id)} />
+                        ) : null}
+                        {normalizeJobDraftStatus(draft.status) === "push_failed" ? (
+                          <QueueButton label="Retry push" onClick={() => onPush(draft.id)} />
+                        ) : null}
+                        {isJobDraftPendingPush(draft) ? (
+                          <span className="rounded border border-sky-700/50 px-2 py-0.5 text-[10px] text-sky-200">
+                            Posting…
+                          </span>
+                        ) : null}
+                        {isJobDraftPublished(draft) ? (
+                          <QueueButton label="Republish" onClick={() => onPush(draft.id, true)} />
                         ) : null}
                         {draft.variant?.queueStatus !== "archived" &&
                         draft.variant?.queueStatus !== "rejected" ? (

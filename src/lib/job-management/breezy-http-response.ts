@@ -64,6 +64,9 @@ export type JobManagementPushResponse = {
   fieldErrors?: Record<string, string>;
   verification?: BreezyPositionVerification;
   postedAt?: string;
+  breezyCompanyId?: string;
+  alreadyPublished?: boolean;
+  republish?: boolean;
 };
 
 /** Parse Job Management draft push API responses without throwing on HTML error pages. */

@@ -5,6 +5,7 @@ import {
   findOpenDraftByClonedBreezyJobId,
   listJobDrafts,
 } from "@/lib/job-management/job-draft-store";
+import { reconcileAndPersistJobDrafts } from "@/lib/job-management/job-draft-reconcile-store";
 import { generateJobAdVariants } from "@/lib/job-management/job-ad-variation-engine";
 import {
   fetchBreezyJobCatalog,
@@ -22,8 +23,15 @@ export async function GET(request: Request) {
   });
   if (isGuardFailure(guard)) return guard;
 
-  const drafts = await listJobDrafts();
-  return NextResponse.json({ ok: true, drafts });
+  let drafts = await listJobDrafts();
+  const catalog = await fetchBreezyJobCatalog({ includeDraft: true });
+  let recoveredCount = 0;
+  if (catalog.ok) {
+    const reconciled = await reconcileAndPersistJobDrafts(catalog.jobs, catalog.fetchedAt);
+    drafts = reconciled.drafts;
+    recoveredCount = reconciled.recoveredCount;
+  }
+  return NextResponse.json({ ok: true, drafts, recoveredCount });
 }
 
 export async function POST(request: Request) {

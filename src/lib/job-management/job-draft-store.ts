@@ -5,6 +5,7 @@ import type {
   JobVariantMeta,
   JobVariantQueueStatus,
 } from "@/lib/job-management/job-draft-types";
+import { normalizeJobDraft, normalizeJobDraftStatus } from "@/lib/job-management/job-draft-status";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
@@ -36,13 +37,14 @@ async function writeDrafts(file: JobDraftStoreFile): Promise<void> {
 }
 
 export async function listJobDrafts(): Promise<JobDraft[]> {
-  return (await readDrafts()).drafts.sort(
+  return (await readDrafts()).drafts.map(normalizeJobDraft).sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   );
 }
 
 export async function getJobDraft(id: string): Promise<JobDraft | null> {
-  return (await readDrafts()).drafts.find((d) => d.id === id) ?? null;
+  const draft = (await readDrafts()).drafts.find((d) => d.id === id) ?? null;
+  return draft ? normalizeJobDraft(draft) : null;
 }
 
 /** Reuse an open local draft cloned from the same Breezy position (prevents duplicate drafts). */
@@ -110,7 +112,10 @@ export async function updateJobDraft(
       | "status"
       | "breezyJobId"
       | "pushedAt"
+      | "pushedBy"
       | "pushError"
+      | "lastSyncAt"
+      | "lastVerificationResult"
       | "variant"
     >
   >,
@@ -118,14 +123,24 @@ export async function updateJobDraft(
   const file = await readDrafts();
   const index = file.drafts.findIndex((d) => d.id === id);
   if (index < 0) return null;
-  const existing = file.drafts[index]!;
+  const existing = normalizeJobDraft(file.drafts[index]!);
   const variantQueueOnly =
     patch.variant?.queueStatus !== undefined &&
     Object.keys(patch).every((key) => key === "variant");
-  if (existing.status !== "draft" && patch.status === undefined && !variantQueueOnly) {
+  const lifecycleOnly =
+    patch.status !== undefined &&
+    Object.keys(patch).every((key) =>
+      ["status", "breezyJobId", "pushedAt", "pushedBy", "pushError", "lastSyncAt", "lastVerificationResult", "variant"].includes(
+        key,
+      ),
+    );
+  const editableContent =
+    normalizeJobDraftStatus(existing.status) === "draft" ||
+    normalizeJobDraftStatus(existing.status) === "push_failed";
+  if (!editableContent && patch.status === undefined && !variantQueueOnly && !lifecycleOnly) {
     return existing;
   }
-  const updated: JobDraft = {
+  const updated: JobDraft = normalizeJobDraft({
     ...existing,
     ...patch,
     variant:
@@ -133,7 +148,7 @@ export async function updateJobDraft(
         ? { ...existing.variant, ...patch.variant }
         : patch.variant ?? existing.variant,
     updatedAt: new Date().toISOString(),
-  };
+  });
   file.drafts[index] = updated;
   file.updatedAt = updated.updatedAt;
   await writeDrafts(file);

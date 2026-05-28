@@ -64,7 +64,7 @@ describe("buildJobManagementRows", () => {
     const drafts: JobDraft[] = [
       {
         id: "draft-pushed",
-        status: "pushed",
+        status: "published",
         clonedFromBreezyJobId: "breezy-source",
         breezyJobId: "breezy-new",
         title: "Merchandiser (Draft)",

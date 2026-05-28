@@ -1,8 +1,18 @@
 import type { BreezyJobCatalogRow, JobDraft } from "@/lib/job-management/job-draft-types";
+import {
+  isJobDraftPendingPush,
+  isJobDraftPublished,
+  normalizeJobDraftStatus,
+} from "@/lib/job-management/job-draft-status";
 import { variantStatusLabel } from "@/lib/job-management/job-variant-queue";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 
-export type JobManagementStatus = "draft" | "published" | "push_failed" | "needs_review";
+export type JobManagementStatus =
+  | "draft"
+  | "pending_push"
+  | "published"
+  | "push_failed"
+  | "needs_review";
 
 export type JobManagementRowKind = "breezy" | "local_draft";
 
@@ -35,6 +45,7 @@ export type JobManagementRow = {
   breezyJob?: BreezyJobCatalogRow;
   editable: boolean;
   canPush: boolean;
+  canRepublish: boolean;
   canClone: boolean;
   canCloneVariants?: boolean;
   canDelete: boolean;
@@ -42,6 +53,7 @@ export type JobManagementRow = {
 
 export const JOB_STATUS_LABELS: Record<JobManagementStatus, string> = {
   draft: "Draft",
+  pending_push: "Posting…",
   published: "Published",
   push_failed: "Push Failed",
   needs_review: "Needs Review",
@@ -55,8 +67,10 @@ function breezyRowStatus(pipelineStatus: string): JobManagementStatus {
 }
 
 function localDraftStatus(draft: JobDraft): JobManagementStatus {
-  if (draft.status === "push_failed") return "push_failed";
-  if (draft.status === "pushed") return "published";
+  const status = normalizeJobDraftStatus(draft.status);
+  if (status === "push_failed") return "push_failed";
+  if (status === "pending_push") return "pending_push";
+  if (status === "published") return "published";
   return "draft";
 }
 
@@ -83,12 +97,14 @@ function rowFromBreezyJob(job: BreezyJobCatalogRow, lastSynced: string): JobMana
     canClone: true,
     canCloneVariants: status === "published",
     canDelete: false,
+    canRepublish: false,
   };
 }
 
-/** Unpublished local drafts only — pushed drafts are represented by Breezy catalog rows. */
+/** Local drafts still in the operational table (published rows dedupe to Breezy catalog). */
 function isActiveLocalDraft(draft: JobDraft): boolean {
-  return draft.status === "draft" || draft.status === "push_failed";
+  const status = normalizeJobDraftStatus(draft.status);
+  return status === "draft" || status === "push_failed" || status === "pending_push";
 }
 
 function dedupeBreezyCatalogRows(jobs: BreezyJobCatalogRow[]): BreezyJobCatalogRow[] {
@@ -112,6 +128,7 @@ function dedupeBreezyCatalogRows(jobs: BreezyJobCatalogRow[]): BreezyJobCatalogR
 }
 
 function rowPriorityForDedupe(row: JobManagementRow): number {
+  if (row.kind === "local_draft" && row.draft && isJobDraftPendingPush(row.draft)) return 4;
   if (row.kind === "local_draft" && row.draft?.status === "draft") return 3;
   if (row.kind === "local_draft" && row.draft?.status === "push_failed") return 2;
   return 1;
@@ -155,13 +172,19 @@ function rowFromLocalDraft(draft: JobDraft): JobManagementRow {
     breezyJobId: draft.breezyJobId,
     draftId: draft.id,
     draft,
-    editable: draft.status === "draft",
+    editable: normalizeJobDraftStatus(draft.status) === "draft",
     canPush:
-      draft.status === "draft" &&
+      (normalizeJobDraftStatus(draft.status) === "draft" ||
+        normalizeJobDraftStatus(draft.status) === "push_failed") &&
+      !isJobDraftPendingPush(draft) &&
+      !isJobDraftPublished(draft) &&
       (!draft.variant || draft.variant.queueStatus === "approved"),
+    canRepublish:
+      isJobDraftPublished(draft) &&
+      Boolean(draft.variant && draft.variant.queueStatus === "approved"),
     canClone: false,
     canCloneVariants: false,
-    canDelete: draft.status === "draft",
+    canDelete: normalizeJobDraftStatus(draft.status) === "draft",
   };
 }
 

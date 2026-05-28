@@ -1,5 +1,6 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { fetchBreezyJobCatalog } from "@/lib/job-management/breezy-job-catalog";
+import { reconcileAndPersistJobDrafts } from "@/lib/job-management/job-draft-reconcile-store";
 import { JOB_MANAGEMENT_BREEZY_SOURCE } from "@/lib/job-management/job-draft-types";
 import { assertBreezyConfigured } from "@/lib/breezy-route-log";
 import { NextResponse } from "next/server";
@@ -36,9 +37,17 @@ export async function GET(request: Request) {
     return NextResponse.json(snapshot, { status: 503 });
   }
 
-  return NextResponse.json(snapshot, {
-    headers: {
-      "Cache-Control": force ? "no-store" : "private, max-age=120, stale-while-revalidate=60",
+  const reconcile = await reconcileAndPersistJobDrafts(snapshot.jobs, snapshot.fetchedAt);
+
+  return NextResponse.json(
+    {
+      ...snapshot,
+      draftsRecoveredCount: reconcile.recoveredCount,
     },
-  });
+    {
+      headers: {
+        "Cache-Control": force ? "no-store" : "private, max-age=120, stale-while-revalidate=60",
+      },
+    },
+  );
 }

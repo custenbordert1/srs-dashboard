@@ -20,7 +20,9 @@ export function filterVariantDrafts(
       const status = draft.variant!.queueStatus;
       if (tab === "pending") return status === "pending";
       if (tab === "approved") return status === "approved";
-      if (tab === "published") return status === "published" || draft.status === "pushed";
+      if (tab === "published") {
+        return status === "published" || draft.status === "published";
+      }
       return status === "archived" || status === "rejected";
     })
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -40,7 +42,10 @@ export function canTransitionQueueStatus(
 
 export function variantStatusLabel(draft: JobDraft): string {
   if (!draft.variant) return "Variant";
-  if (draft.status === "pushed" || draft.variant.queueStatus === "published") return "Published";
+  if (draft.status === "published" || draft.variant.queueStatus === "published") {
+    return "Published";
+  }
+  if (draft.status === "pending_push") return "Posting…";
   if (draft.variant.queueStatus === "approved") return "Approved";
   if (draft.variant.queueStatus === "archived") return "Archived";
   if (draft.variant.queueStatus === "rejected") return "Rejected";

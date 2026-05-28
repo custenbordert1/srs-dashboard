@@ -9,6 +9,7 @@ import {
 } from "@/lib/job-management/breezy-position-payload";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import { BREEZY_COUNTRY_CODE } from "@/lib/job-management/us-location-rules";
+import { buildBreezyPositionAppUrl } from "@/lib/job-management/breezy-position-app-url";
 import type { JobManagementRow } from "@/lib/job-management/job-management-rows";
 
 const inputClass =
@@ -43,6 +44,7 @@ export function JobViewModal({
         {row.breezyJobId ? <Field label="Breezy job ID" value={row.breezyJobId} /> : null}
         {row.draftId ? <Field label="Draft ID" value={row.draftId} /> : null}
       </dl>
+      {row.draft ? <JobDraftAuditPanel draft={row.draft} /> : null}
       {row.draft?.description ? (
         <div className="mt-4">
           <p className={labelClass}>Description</p>
@@ -179,11 +181,13 @@ export function JobDraftEditModal({
 export function JobPushConfirmModal({
   draft,
   pushing,
+  republish = false,
   onClose,
   onConfirm,
 }: {
   draft: JobDraft;
   pushing: boolean;
+  republish?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }) {
@@ -191,9 +195,11 @@ export function JobPushConfirmModal({
   const validation = validateJobDraftForBreezyPush(draft);
 
   return (
-    <ModalShell title="Confirm push to Breezy" onClose={onClose} wide>
+    <ModalShell title={republish ? "Republish to Breezy" : "Confirm push to Breezy"} onClose={onClose} wide>
       <p className="text-sm text-zinc-400">
-        This creates a new published position in Breezy using the saved draft below.
+        {republish
+          ? "This posts a new Breezy position (duplicate posting). The previous Breezy job id stays on record until this succeeds."
+          : "This creates a new published position in Breezy using the saved draft below."}
       </p>
 
       {!validation.ok ? (
@@ -243,7 +249,7 @@ export function JobPushConfirmModal({
           onClick={onConfirm}
           className="rounded-lg bg-teal-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-50"
         >
-          {pushing ? "Saving & posting…" : "Confirm and post"}
+          {pushing ? "Posting to Breezy…" : republish ? "Confirm republish" : "Confirm and post"}
         </button>
       </div>
     </ModalShell>
@@ -252,46 +258,57 @@ export function JobPushConfirmModal({
 
 export function JobPushResultModal({
   breezyJobId,
+  postedAt,
+  breezyCompanyId,
   verification,
+  auditDraft,
   onClose,
 }: {
   breezyJobId: string;
+  postedAt?: string;
+  breezyCompanyId?: string;
   verification?: BreezyPositionVerification;
+  auditDraft?: JobDraft | null;
   onClose: () => void;
 }) {
-  const matched = verification?.ok === true;
+  const hasMismatch = Boolean(verification && verification.mismatches.length > 0);
+  const breezyUrl = breezyCompanyId ? buildBreezyPositionAppUrl(breezyCompanyId, breezyJobId) : null;
+
   return (
-    <ModalShell title={matched ? "Push successful" : "Push completed with warnings"} onClose={onClose}>
-      <p className="text-sm text-zinc-300">
-        Breezy job ID: <span className="font-mono text-teal-200">{breezyJobId}</span>
-      </p>
-      {verification ? (
-        <div className="mt-4 space-y-2 text-sm">
-          <p className={matched ? "text-emerald-200" : "text-amber-200"}>
-            {matched
-              ? "Breezy returned matching title, location, and pay rate."
-              : "Breezy returned data that did not fully match the draft."}
-          </p>
-          <Field label="Expected title" value={verification.expected.name || "—"} />
-          <Field label="Breezy title" value={verification.actual.name || "—"} />
-          <Field
-            label="Expected location"
-            value={
-              verification.expected.city && verification.expected.state
-                ? `${verification.expected.city}, ${verification.expected.state}`
-                : "—"
-            }
-          />
-          <Field label="Breezy location" value={verification.actual.displayLocation || "—"} />
-          <Field label="Expected pay rate" value={verification.expected.payRate || "—"} />
-          <Field label="Breezy pay rate" value={verification.actual.payRate || "—"} />
-          {verification.mismatches.length > 0 ? (
-            <ul className="list-disc pl-5 text-xs text-amber-100">
-              {verification.mismatches.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : null}
+    <ModalShell title="Push successful" onClose={onClose}>
+      <p className="text-sm text-emerald-200">Published to Breezy successfully.</p>
+      <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+        <Field label="Breezy job ID" value={breezyJobId} />
+        <Field
+          label="Published"
+          value={postedAt ? new Date(postedAt).toLocaleString() : "—"}
+        />
+      </dl>
+      {breezyUrl ? (
+        <p className="mt-3">
+          <a
+            href={breezyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-teal-300 underline hover:text-teal-200"
+          >
+            Open in Breezy
+          </a>
+        </p>
+      ) : null}
+      {hasMismatch && verification ? (
+        <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          <p className="font-medium">Advisory verification differences</p>
+          <ul className="mt-2 list-disc pl-5 text-xs">
+            {verification.mismatches.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {auditDraft ? (
+        <div className="mt-4">
+          <JobDraftAuditPanel draft={auditDraft} />
         </div>
       ) : null}
       <div className="mt-5 flex justify-end">
@@ -300,6 +317,30 @@ export function JobPushResultModal({
         </button>
       </div>
     </ModalShell>
+  );
+}
+
+function JobDraftAuditPanel({ draft }: { draft: JobDraft }) {
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-2">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Push audit</p>
+      <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+        <Field label="Pushed at" value={draft.pushedAt ? new Date(draft.pushedAt).toLocaleString() : "—"} />
+        <Field label="Pushed by" value={draft.pushedBy || "—"} />
+        <Field label="Breezy job ID" value={draft.breezyJobId || "—"} />
+        <Field label="Last sync" value={draft.lastSyncAt ? new Date(draft.lastSyncAt).toLocaleString() : "—"} />
+        <Field
+          label="Last verification"
+          value={
+            draft.lastVerificationResult
+              ? draft.lastVerificationResult.ok
+                ? "OK"
+                : `Advisory (${draft.lastVerificationResult.mismatches.length} note(s))`
+              : "—"
+          }
+        />
+      </dl>
+    </div>
   );
 }
 

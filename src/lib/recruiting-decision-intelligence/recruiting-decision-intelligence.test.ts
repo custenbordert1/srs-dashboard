@@ -49,7 +49,7 @@ describe("recruiting decision intelligence", () => {
     const drafts: JobDraft[] = [
       {
         id: "d1",
-        status: "pushed",
+        status: "published",
         title: "Variant Dallas",
         description: "",
         city: "Dallas",

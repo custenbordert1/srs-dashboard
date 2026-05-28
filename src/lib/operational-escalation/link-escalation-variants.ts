@@ -36,7 +36,7 @@ function classifyVariantLane(
   if (draft.variant?.queueStatus === "approved" && draft.status === "draft") {
     return "approved_unpublished";
   }
-  if (draft.variant?.queueStatus === "published" || draft.status === "pushed") {
+  if (draft.variant?.queueStatus === "published" || draft.status === "published") {
     return "published";
   }
   if (isNearby) return "nearby_city";

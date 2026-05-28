@@ -27,6 +27,10 @@ import { buildApplicantCountByBreezyJobId } from "@/lib/job-management/job-appli
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import type { BreezyPositionVerification } from "@/lib/job-management/breezy-position-payload";
 import { parseJobManagementPushResponse } from "@/lib/job-management/breezy-http-response";
+import {
+  isJobDraftPendingPush,
+  isJobDraftPublished,
+} from "@/lib/job-management/job-draft-status";
 import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence";
 import type { RecruiterEscalationQueueItem } from "@/lib/operational-escalation/operational-escalation-types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -83,10 +87,19 @@ export function JobManagementSection() {
   const [viewRow, setViewRow] = useState<JobManagementRow | null>(null);
   const [editDraftId, setEditDraftId] = useState<string | null>(null);
   const [pushDraftId, setPushDraftId] = useState<string | null>(null);
+  const [pushRepublish, setPushRepublish] = useState(false);
   const [pushResult, setPushResult] = useState<{
     breezyJobId: string;
+    postedAt?: string;
+    breezyCompanyId?: string;
     verification?: BreezyPositionVerification;
+    auditDraft?: JobDraft | null;
   } | null>(null);
+
+  const openPushModal = (draftId: string, republish = false) => {
+    setPushRepublish(republish);
+    setPushDraftId(draftId);
+  };
 
   const editDraft = drafts.find((d) => d.id === editDraftId) ?? null;
   const pushDraft = drafts.find((d) => d.id === pushDraftId) ?? null;
@@ -165,8 +178,20 @@ export function JobManagementSection() {
     setLoadingDrafts(true);
     try {
       const res = await fetch("/api/job-management/drafts", { cache: "no-store" });
-      const parsed = (await res.json()) as { ok?: boolean; drafts?: JobDraft[] };
-      if (parsed.ok && parsed.drafts) setDrafts(parsed.drafts);
+      const parsed = (await res.json()) as {
+        ok?: boolean;
+        drafts?: JobDraft[];
+        recoveredCount?: number;
+      };
+      if (parsed.ok && parsed.drafts) {
+        setDrafts(parsed.drafts);
+        if (parsed.recoveredCount && parsed.recoveredCount > 0) {
+          setFeedback({
+            tone: "success",
+            text: "Recovered published state from Breezy sync.",
+          });
+        }
+      }
     } finally {
       setLoadingDrafts(false);
     }
@@ -234,6 +259,10 @@ export function JobManagementSection() {
     try {
       const parsed = await fetchJobManagementCatalog({ force });
       if (parsed.ok) {
+        const recoveredCount =
+          "draftsRecoveredCount" in parsed && typeof parsed.draftsRecoveredCount === "number"
+            ? parsed.draftsRecoveredCount
+            : 0;
         setJobs(parsed.jobs);
         applyCatalogMeta({
           fetchedAt: parsed.fetchedAt,
@@ -250,7 +279,13 @@ export function JobManagementSection() {
           applicantCountsSource: parsed.applicantCountsSource,
         });
         void refreshApplicantCounts(parsed.jobs);
-        if (force && !parsed.stale && !parsed.partial) {
+        if (recoveredCount > 0) {
+          await loadDrafts();
+          setFeedback({
+            tone: "success",
+            text: "Recovered published state from Breezy sync.",
+          });
+        } else if (force && !parsed.stale && !parsed.partial) {
           setFeedback({
             tone: "success",
             text: `Synced ${parsed.jobs.length.toLocaleString()} Breezy job(s) from ${parsed.source}.`,
@@ -281,7 +316,7 @@ export function JobManagementSection() {
       setLoadingJobs(false);
       setRefreshingJobs(false);
     }
-  }, [applyCatalogMeta, refreshApplicantCounts]);
+  }, [applyCatalogMeta, loadDrafts, refreshApplicantCounts]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -332,9 +367,19 @@ export function JobManagementSection() {
     }
   };
 
-  const pushDraftToBreezy = async (draft: JobDraft) => {
+  const pushDraftToBreezy = async (draft: JobDraft, republish = false) => {
+    if (isJobDraftPendingPush(draft)) {
+      setFeedback({ tone: "info", text: "Push already in progress for this draft." });
+      return;
+    }
+    if (isJobDraftPublished(draft) && !republish) {
+      setFeedback({ tone: "info", text: "Push already completed earlier. Use Republish to post again." });
+      return;
+    }
+
     setPushing(true);
     setFeedback(null);
+    updateDraft(draft.id, { status: "pending_push", pushError: undefined });
     try {
       const saved = await saveDraft(draft);
       const draftForPush = saved ?? draft;
@@ -345,6 +390,7 @@ export function JobManagementSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           confirmed: true,
+          republish,
           title: draftForPush.title,
           description: draftForPush.description,
           city: normalized.city,
@@ -356,32 +402,40 @@ export function JobManagementSection() {
       const parsed = await parseJobManagementPushResponse(res);
 
       setPushDraftId(null);
+      setPushRepublish(false);
 
       if (!parsed.ok) {
-        const fieldHint =
-          parsed.fieldErrors && Object.keys(parsed.fieldErrors).length > 0
-            ? ` ${Object.values(parsed.fieldErrors).join(" ")}`
-            : "";
-        setFeedback({
-          tone: "error",
-          text: parsed.rateLimited
-            ? `${parsed.error ?? "Rate limited"} — wait and retry.`
-            : `${parsed.error ?? "Push failed"}${fieldHint}`,
-        });
+        if (parsed.alreadyPublished) {
+          setFeedback({ tone: "info", text: "Push already completed earlier." });
+        } else {
+          const fieldHint =
+            parsed.fieldErrors && Object.keys(parsed.fieldErrors).length > 0
+              ? ` ${Object.values(parsed.fieldErrors).join(" ")}`
+              : "";
+          setFeedback({
+            tone: "error",
+            text: parsed.rateLimited
+              ? `${parsed.error ?? "Rate limited"} — wait and retry.`
+              : `${parsed.error ?? "Push failed"}${fieldHint}`,
+          });
+        }
         await loadDrafts();
         return;
       }
 
+      const breezyJobId = parsed.breezyJobId ?? parsed.draft?.breezyJobId ?? "";
       setPushResult({
-        breezyJobId: parsed.breezyJobId ?? parsed.draft?.breezyJobId ?? "",
+        breezyJobId,
+        postedAt: parsed.postedAt ?? parsed.draft?.pushedAt,
+        breezyCompanyId: parsed.breezyCompanyId,
         verification: parsed.verification,
+        auditDraft: parsed.draft ?? null,
       });
       setFeedback({
-        tone: parsed.verification?.ok === false ? "warning" : "success",
-        text:
-          parsed.verification?.ok === false
-            ? "Posted to Breezy, but returned location did not fully match the draft."
-            : `Push successful. Breezy job ${parsed.breezyJobId ?? ""}`.trim(),
+        tone: "success",
+        text: republish
+          ? "Republished to Breezy successfully."
+          : "Published to Breezy successfully.",
       });
       await loadDrafts();
       // Breezy list APIs can lag briefly after publish; wait before forced catalog refresh.
@@ -668,8 +722,16 @@ export function JobManagementSection() {
                           onClick={() => void cloneGenerateVariants(row.breezyJobId!)}
                         />
                       ) : null}
-                      {row.canPush && row.draft ? (
-                        <ActionButton label="Push" onClick={() => setPushDraftId(row.draft!.id)} />
+                      {row.canPush && row.draft && !isJobDraftPendingPush(row.draft) ? (
+                        <ActionButton label="Push" onClick={() => openPushModal(row.draft!.id)} />
+                      ) : null}
+                      {row.draft && isJobDraftPendingPush(row.draft) ? (
+                        <span className="rounded border border-sky-700/50 px-1.5 py-0.5 text-[10px] text-sky-200">
+                          Posting…
+                        </span>
+                      ) : null}
+                      {row.canRepublish && row.draft ? (
+                        <ActionButton label="Republish" onClick={() => openPushModal(row.draft!.id, true)} />
                       ) : null}
                       {row.canDelete && row.draftId ? (
                         <ActionButton label="Delete" onClick={() => void deleteDraft(row.draftId!)} />
@@ -703,7 +765,7 @@ export function JobManagementSection() {
       <JobVariantQueueSection
         drafts={drafts}
         onEdit={(draftId) => setEditDraftId(draftId)}
-        onPush={(draftId) => setPushDraftId(draftId)}
+        onPush={(draftId, republish) => openPushModal(draftId, republish)}
         onRefresh={loadDrafts}
       />
 
@@ -716,7 +778,7 @@ export function JobManagementSection() {
           onChange={(patch) => updateDraft(editDraft.id, patch)}
           onSave={() => void saveDraft(editDraft)}
           onPush={() => {
-            setPushDraftId(editDraft.id);
+            openPushModal(editDraft.id);
           }}
         />
       ) : null}
@@ -724,17 +786,24 @@ export function JobManagementSection() {
         <JobPushConfirmModal
           draft={pushDraft}
           pushing={pushing}
-          onClose={() => setPushDraftId(null)}
+          republish={pushRepublish}
+          onClose={() => {
+            setPushDraftId(null);
+            setPushRepublish(false);
+          }}
           onConfirm={() => {
             const latest = drafts.find((d) => d.id === pushDraftId);
-            if (latest) void pushDraftToBreezy(latest);
+            if (latest) void pushDraftToBreezy(latest, pushRepublish);
           }}
         />
       ) : null}
       {pushResult ? (
         <JobPushResultModal
           breezyJobId={pushResult.breezyJobId}
+          postedAt={pushResult.postedAt}
+          breezyCompanyId={pushResult.breezyCompanyId}
           verification={pushResult.verification}
+          auditDraft={pushResult.auditDraft}
           onClose={() => setPushResult(null)}
         />
       ) : null}
