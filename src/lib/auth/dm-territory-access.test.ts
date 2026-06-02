@@ -76,10 +76,10 @@ describe("dm territory access", () => {
 
   it("filters workflows to territory candidates only", () => {
     const session = dmSession("Mindie Rodriguez");
-    const breezy = [candidate("in-oh", "OH"), candidate("out-ca", "CA")];
+    const breezy = [candidate("in-pa", "PA"), candidate("out-ca", "CA")];
     const workflows: CandidateWorkflowState = {
-      "in-oh": {
-        candidateId: "in-oh",
+      "in-pa": {
+        candidateId: "in-pa",
         workflowStatus: "Applied",
         notes: [],
         assignedRecruiter: "Taylor",
@@ -143,7 +143,7 @@ describe("dm territory access", () => {
     };
     const filtered = filterWorkflowsForSession(session, workflows, breezy);
     assert.equal(Object.keys(filtered).length, 1);
-    assert.ok(filtered["in-oh"]);
+    assert.ok(filtered["in-pa"]);
     assert.equal(filtered["out-ca"], undefined);
   });
 });

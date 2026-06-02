@@ -14,7 +14,7 @@ describe("candidate-dm-suggest", () => {
 
   it("prefers job state over candidate state when provided", () => {
     assert.equal(
-      suggestDmForCandidate({ candidateState: "TX", jobState: "OH" }),
+      suggestDmForCandidate({ candidateState: "TX", jobState: "PA" }),
       "Mindie Rodriguez",
     );
   });

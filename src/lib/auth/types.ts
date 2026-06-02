@@ -1,3 +1,4 @@
+/** Stored session roles. Portal-facing labels (Admin / Recruiter / DistrictManager) live in `@/lib/dm-portal/roles`. */
 export type UserRole = "admin" | "executive" | "recruiter" | "dm";
 
 export type DashboardUser = {

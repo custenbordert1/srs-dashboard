@@ -4,8 +4,10 @@ import { AppShell } from "@/components/auth/app-shell";
 import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widget";
 import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
 import { DmOperationalDashboard } from "@/components/dm/dm-operational-dashboard";
+import { DmPortalDashboardPrototype } from "@/components/dm/dm-portal-dashboard-prototype";
 import { RecruitingAutomationSection } from "@/components/recruiting/recruiting-automation-section";
 import { isDmRole } from "@/lib/auth/roles";
+import { getDmViewVisibility, resolveDmViewModeFromUser } from "@/lib/dm-portal/dm-view-mode";
 import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import type { UserPublic } from "@/lib/auth/types";
@@ -23,6 +25,8 @@ type DmDashboardProps = {
 };
 
 export function DmDashboard({ user }: DmDashboardProps) {
+  const viewMode = resolveDmViewModeFromUser(user);
+  const visibility = getDmViewVisibility(viewMode);
   const { data, meta, error, loading, refreshing, timedOut, refresh } =
     useTerritoryDashboard<DmDashboardSnapshot>({
       endpoint: "/api/dm/dashboard",
@@ -32,7 +36,11 @@ export function DmDashboard({ user }: DmDashboardProps) {
     territoryStates: data?.territoryStates ?? user.territoryStates,
   });
 
-  const subtitle = isDmRole(user.role)
+  const territorySubtitle =
+    data?.territoryLabel ?? (user.territoryStates.join(", ") || "—");
+  const subtitle = viewMode.enabled
+    ? `DM portal · ${territorySubtitle}`
+    : isDmRole(user.role)
     ? `Territory: ${user.territoryStates.join(", ") || "—"}`
     : "Admin view — all territories";
 
@@ -88,7 +96,13 @@ export function DmDashboard({ user }: DmDashboardProps) {
       ) : null}
 
       {data ? (
-        isDmRole(user.role) ? (
+        viewMode.enabled ? (
+          <DmPortalDashboardPrototype
+            data={data}
+            visibility={visibility}
+            territoryLabel={data.territoryLabel}
+          />
+        ) : isDmRole(user.role) ? (
           <DmOperationalDashboard
             data={data}
             user={user}
@@ -215,7 +229,9 @@ export function DmDashboard({ user }: DmDashboardProps) {
         )
       ) : null}
 
-      <CandidateDetailDrawer {...drawer.drawerProps} />
+      {!visibility.hideFullCandidateDatabase ? (
+        <CandidateDetailDrawer {...drawer.drawerProps} />
+      ) : null}
     </AppShell>
   );
 }
