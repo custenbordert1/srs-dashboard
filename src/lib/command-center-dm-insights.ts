@@ -1,21 +1,20 @@
-import { countCandidatesLast7Days, type BreezyCandidate, type BreezyJob } from "@/lib/breezy-api";
-import { isMelReadyStatus } from "@/lib/candidate-action-sla";
+import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
-import { buildTerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
+import type { DistrictManager } from "@/lib/dm-territory-map";
 import {
-  DISTRICT_MANAGERS,
-  getAssignedStatesForDm,
-  normalizeStateCode,
-  type DistrictManager,
-} from "@/lib/dm-territory-map";
-import {
-  resolveCoverageHealthTier,
-  type CoverageHealthTier,
-} from "@/lib/dm-portal/dm-portal-operational";
+  buildDmTerritoryRollups,
+  buildRecruitingPipelineMetrics,
+  TERRITORY_COVERAGE_THRESHOLD,
+  topTerritoriesNeedingAttention,
+  type RecruitingPipelineMetrics,
+  type TerritoryIntelligenceContext,
+  type TerritoryMetrics,
+} from "@/lib/territory-intelligence";
 import type { CommandCenterSnapshot } from "@/lib/recruiting-command-center";
 
-export const COMMAND_CENTER_DM_COVERAGE_THRESHOLD = 50;
+/** @deprecated Use `TERRITORY_COVERAGE_THRESHOLD` from `@/lib/territory-intelligence`. */
+export const COMMAND_CENTER_DM_COVERAGE_THRESHOLD = TERRITORY_COVERAGE_THRESHOLD;
 
 export type CommandCenterTerritoryInsight = {
   dmName: DistrictManager;
@@ -24,16 +23,11 @@ export type CommandCenterTerritoryInsight = {
   openCalls: number;
   activeReps: number;
   coveragePercent: number;
-  coverageTier: CoverageHealthTier;
+  coverageTier: TerritoryMetrics["coverageTier"];
   attentionScore: number;
 };
 
-export type CommandCenterRecruitingHealthSummary = {
-  applicantsLast7Days: number;
-  paperworkSent: number;
-  readyForMel: number;
-  hired: number;
-};
+export type CommandCenterRecruitingHealthSummary = RecruitingPipelineMetrics;
 
 export type CommandCenterTerritoryRiskAlert = {
   id: string;
@@ -57,88 +51,41 @@ export type CommandCenterDmInsightsSnapshot = {
   hasCoverageData: boolean;
 };
 
-function isHiredStage(stage: string): boolean {
-  const normalized = stage.toLowerCase();
-  return (
-    normalized.includes("hired") ||
-    normalized.includes("offer") ||
-    normalized.includes("onboard") ||
-    normalized.includes("active rep")
-  );
-}
-
-function countHiredFromCandidates(candidates: BreezyCandidate[]): number {
-  return candidates.filter((c) => isHiredStage(c.stage)).length;
-}
-
-function countWorkflowPaperworkSent(workflows: CandidateWorkflowState): number {
-  let count = 0;
-  for (const workflow of Object.values(workflows)) {
-    if (workflow.paperworkStatus === "sent" || workflow.paperworkStatus === "viewed") {
-      count += 1;
-    }
-  }
-  return count;
-}
-
-function countWorkflowReadyForMel(workflows: CandidateWorkflowState): number {
-  let count = 0;
-  for (const workflow of Object.values(workflows)) {
-    if (isMelReadyStatus(workflow.workflowStatus)) count += 1;
-  }
-  return count;
-}
-
-function aggregateCoverageByState(coverage: CoverageRiskSnapshot | null): Map<string, number> {
-  const activeRepsByState = new Map<string, number>();
-  if (!coverage) return activeRepsByState;
-  for (const row of coverage.opportunities) {
-    const state = normalizeStateCode(row.state);
-    const nearby = row.nearby.activeWithin50;
-    activeRepsByState.set(state, Math.max(activeRepsByState.get(state) ?? 0, nearby));
-  }
-  for (const row of coverage.executiveSummary.lowDensityStates) {
-    const state = normalizeStateCode(row.state);
-    activeRepsByState.set(state, Math.max(activeRepsByState.get(state) ?? 0, row.activeReps));
-  }
-  return activeRepsByState;
-}
-
-function openCallsForDm(dmName: string, coverage: CoverageRiskSnapshot | null): number {
-  if (!coverage) return 0;
-  return coverage.opportunities.filter((row) => row.territoryOwner === dmName).length;
-}
-
-function activeRepsForDm(dmName: string, activeRepsByState: Map<string, number>): number {
-  const states = getAssignedStatesForDm(dmName);
-  return states.reduce((sum, state) => sum + (activeRepsByState.get(state) ?? 0), 0);
-}
-
-function attentionScoreFor(territory: Omit<CommandCenterTerritoryInsight, "attentionScore">): number {
-  const coverageGap = Math.max(0, 100 - territory.coveragePercent);
-  return coverageGap + territory.openCalls * 2 + Math.max(0, 5 - territory.activeReps) * 3;
+function rollupToTerritoryInsight(
+  rollup: ReturnType<typeof buildDmTerritoryRollups>[number],
+): CommandCenterTerritoryInsight {
+  const { metrics } = rollup;
+  return {
+    dmName: rollup.dmName,
+    states: rollup.states,
+    openJobs: metrics.openJobs,
+    openCalls: metrics.openCalls,
+    activeReps: metrics.activeReps,
+    coveragePercent: metrics.coveragePercent,
+    coverageTier: metrics.coverageTier,
+    attentionScore: rollup.attentionScore,
+  };
 }
 
 export function buildCommandCenterRecruitingHealth(input: {
-  commandCenter: Pick<
-    CommandCenterSnapshot,
-    "applicantsLast7Days" | "funnel" | "fetchedAt"
-  >;
+  commandCenter: Pick<CommandCenterSnapshot, "applicantsLast7Days" | "funnel" | "fetchedAt">;
   candidates: BreezyCandidate[];
   workflows: CandidateWorkflowState | null;
 }): CommandCenterRecruitingHealthSummary {
-  const hiredFromFunnel =
-    input.commandCenter.funnel.find((row) => row.label === "Hired")?.value ??
-    countHiredFromCandidates(input.candidates);
-
-  return {
-    applicantsLast7Days:
-      input.commandCenter.applicantsLast7Days ||
-      countCandidatesLast7Days(input.candidates, input.commandCenter.fetchedAt),
-    paperworkSent: input.workflows ? countWorkflowPaperworkSent(input.workflows) : 0,
-    readyForMel: input.workflows ? countWorkflowReadyForMel(input.workflows) : 0,
-    hired: hiredFromFunnel,
+  const ctx: TerritoryIntelligenceContext = {
+    jobs: [],
+    candidates: input.candidates,
+    fetchedAt: input.commandCenter.fetchedAt,
+    coverage: null,
+    workflows: input.workflows,
   };
+
+  const hiredFromFunnel = input.commandCenter.funnel.find((row) => row.label === "Hired")?.value;
+
+  return buildRecruitingPipelineMetrics(ctx, {
+    applicantsLast7Days: input.commandCenter.applicantsLast7Days,
+    hired: hiredFromFunnel,
+  });
 }
 
 export function buildCommandCenterDmInsights(input: {
@@ -147,37 +94,19 @@ export function buildCommandCenterDmInsights(input: {
   fetchedAt: string;
   coverage: CoverageRiskSnapshot | null;
   workflows: CandidateWorkflowState | null;
-  commandCenter: Pick<
-    CommandCenterSnapshot,
-    "applicantsLast7Days" | "funnel" | "fetchedAt"
-  >;
+  commandCenter: Pick<CommandCenterSnapshot, "applicantsLast7Days" | "funnel" | "fetchedAt">;
 }): CommandCenterDmInsightsSnapshot {
-  const activeRepsByState = aggregateCoverageByState(input.coverage);
+  const ctx: TerritoryIntelligenceContext = {
+    jobs: input.jobs,
+    candidates: input.candidates,
+    fetchedAt: input.fetchedAt,
+    coverage: input.coverage,
+    workflows: input.workflows,
+  };
 
-  const territories: CommandCenterTerritoryInsight[] = DISTRICT_MANAGERS.map((dmName) => {
-    const states = getAssignedStatesForDm(dmName);
-    const stateSet = new Set(states);
-    const dmJobs = input.jobs.filter((job) => stateSet.has(normalizeStateCode(job.state)));
-    const dmCandidates = input.candidates.filter((candidate) =>
-      stateSet.has(normalizeStateCode(candidate.state)),
-    );
-    const health = buildTerritoryHealthScore(dmJobs, dmCandidates, input.fetchedAt);
-    const coveragePercent = health.score;
-    const base = {
-      dmName,
-      states,
-      openJobs: dmJobs.length,
-      openCalls: openCallsForDm(dmName, input.coverage),
-      activeReps: activeRepsForDm(dmName, activeRepsByState),
-      coveragePercent,
-      coverageTier: resolveCoverageHealthTier(coveragePercent),
-    };
-    return { ...base, attentionScore: attentionScoreFor(base) };
-  });
-
-  const topTerritoriesNeedingAttention = [...territories]
-    .sort((a, b) => b.attentionScore - a.attentionScore || a.dmName.localeCompare(b.dmName))
-    .slice(0, 5);
+  const rollups = buildDmTerritoryRollups(ctx);
+  const territories = rollups.map(rollupToTerritoryInsight);
+  const top = topTerritoriesNeedingAttention(rollups).map(rollupToTerritoryInsight);
 
   const recruitingHealth = buildCommandCenterRecruitingHealth({
     commandCenter: input.commandCenter,
@@ -227,7 +156,7 @@ export function buildCommandCenterDmInsights(input: {
   }
 
   for (const territory of territories) {
-    if (territory.coveragePercent >= COMMAND_CENTER_DM_COVERAGE_THRESHOLD) continue;
+    if (territory.coveragePercent >= TERRITORY_COVERAGE_THRESHOLD) continue;
     belowThreshold.push({
       id: `health-${territory.dmName}`,
       severity: territory.coveragePercent < 50 ? "critical" : "high",
@@ -240,7 +169,7 @@ export function buildCommandCenterDmInsights(input: {
   return {
     fetchedAt: input.fetchedAt,
     territories,
-    topTerritoriesNeedingAttention,
+    topTerritoriesNeedingAttention: top,
     recruitingHealth,
     riskAlerts: {
       criticalShortages,

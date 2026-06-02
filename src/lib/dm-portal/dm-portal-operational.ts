@@ -1,8 +1,14 @@
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
 import type { DmPrioritizedAlert } from "@/lib/dm-dashboard/dm-alert-priority";
-import { buildDmPortalCardMetrics } from "@/lib/dm-portal/dm-portal-metrics";
+import {
+  buildRecruitingPipelineFromDashboardSnapshot,
+  buildTerritoryMetricsFromDashboardSnapshot,
+  countNeedsAttentionFromAlertSummary,
+  resolveCoverageHealthTier,
+  type CoverageHealthTier,
+} from "@/lib/territory-intelligence";
 
-export type CoverageHealthTier = "green" | "yellow" | "red";
+export type { CoverageHealthTier } from "@/lib/territory-intelligence";
 
 export type DmPortalTerritorySummary = {
   states: string[];
@@ -67,11 +73,7 @@ export const DM_PORTAL_NAV_LINKS = [
 
 const NEEDS_ATTENTION_TOP_N = 10;
 
-export function resolveCoverageHealthTier(coveragePercent: number): CoverageHealthTier {
-  if (coveragePercent >= 80) return "green";
-  if (coveragePercent >= 50) return "yellow";
-  return "red";
-}
+export { resolveCoverageHealthTier } from "@/lib/territory-intelligence";
 
 export function coverageTierLabel(tier: CoverageHealthTier): string {
   switch (tier) {
@@ -115,34 +117,27 @@ export function coverageTierStyles(tier: CoverageHealthTier): {
   }
 }
 
-/**
- * Ready-for-MEL proxy: DD-approved candidates in territory (workflow detail not on DM snapshot).
- */
+/** @deprecated Prefer `TerritoryMetrics.readyForMel` from territory intelligence rollup. */
 export function countReadyForMel(snapshot: DmDashboardSnapshot): number {
-  return snapshot.onboarding.ddApproved + snapshot.melMatching.bestCandidateForOpenProjects.length;
+  return buildTerritoryMetricsFromDashboardSnapshot(snapshot).readyForMel;
 }
 
 export function buildDmPortalOperationalView(snapshot: DmDashboardSnapshot): DmPortalOperationalView {
-  const cards = buildDmPortalCardMetrics(snapshot);
-  const coverageTier = resolveCoverageHealthTier(cards.coveragePercent);
+  const metrics = buildTerritoryMetricsFromDashboardSnapshot(snapshot);
+  const pipeline = buildRecruitingPipelineFromDashboardSnapshot(snapshot);
 
   return {
     territory: {
       states: snapshot.territoryStates,
       stateCount: snapshot.territoryStates.length,
-      openJobs: cards.openJobs,
-      openCalls: cards.openCalls,
-      activeReps: cards.activeReps,
-      coveragePercent: cards.coveragePercent,
-      coverageTier,
+      openJobs: metrics.openJobs,
+      openCalls: metrics.openCalls,
+      activeReps: metrics.activeReps,
+      coveragePercent: metrics.coveragePercent,
+      coverageTier: metrics.coverageTier,
     },
-    pipeline: {
-      applicantsLast7Days: snapshot.candidatesLast7Days,
-      paperworkSent: snapshot.onboarding.paperworkSent,
-      readyForMel: countReadyForMel(snapshot),
-      hired: snapshot.pipeline.counts.hired,
-    },
-    needsAttentionTotal: cards.needsAttention,
+    pipeline,
+    needsAttentionTotal: countNeedsAttentionFromAlertSummary(snapshot),
   };
 }
 
