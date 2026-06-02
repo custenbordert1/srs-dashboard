@@ -1,25 +1,37 @@
 "use client";
 
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
+import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
+import { buildDataTrustState } from "@/lib/data-trust-state";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 import type { WorkforceImportStats } from "@/lib/workforce-intelligence/workforce-csv-import";
 
 type WorkforceMetricsDashboardProps = {
   stats: WorkforceImportStats;
+  trustState?: DataTrustState;
+  trustInput?: DataTrustInput;
 };
 
-export function WorkforceMetricsDashboard({ stats }: WorkforceMetricsDashboardProps) {
+export function WorkforceMetricsDashboard({
+  stats,
+  trustState: trustStateProp,
+  trustInput,
+}: WorkforceMetricsDashboardProps) {
+  const trustState = trustStateProp ?? buildDataTrustState(trustInput ?? { hasData: true });
+
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-semibold text-zinc-50">Workforce metrics</h2>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <MetricCard label="Active roster" value={stats.totalReps} />
-        <MetricCard label="Active imported" value={stats.activeCount} tone="emerald" />
-        <MetricCard label="Inactive archived" value={stats.inactiveCount} tone="amber" />
-        <MetricCard label="Terminated archived" value={stats.terminatedCount} tone="amber" />
-        <MetricCard label="States covered" value={stats.statesCovered} />
-        <MetricCard label="Unique skills" value={stats.uniqueSkillSets} />
-        <MetricCard label="Recent logins (14d)" value={stats.recentLoginCount} tone="teal" />
+        <MetricCard statId="active-roster" label="Active roster" value={stats.totalReps} trustState={trustState} trustInput={trustInput} />
+        <MetricCard statId="active-imported" label="Active imported" value={stats.activeCount} tone="emerald" trustState={trustState} trustInput={trustInput} />
+        <MetricCard statId="inactive-archived" label="Inactive archived" value={stats.inactiveCount} tone="amber" trustState={trustState} trustInput={trustInput} />
+        <MetricCard statId="terminated-archived" label="Terminated archived" value={stats.terminatedCount} tone="amber" trustState={trustState} trustInput={trustInput} />
+        <MetricCard statId="states-covered" label="States covered" value={stats.statesCovered} trustState={trustState} trustInput={trustInput} />
+        <MetricCard statId="unique-skills" label="Unique skills" value={stats.uniqueSkillSets} trustState={trustState} trustInput={trustInput} />
+        <MetricCard statId="recent-logins" label="Recent logins (14d)" value={stats.recentLoginCount} tone="teal" trustState={trustState} trustInput={trustInput} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -67,14 +79,26 @@ export function WorkforceMetricsDashboard({ stats }: WorkforceMetricsDashboardPr
 }
 
 function MetricCard({
+  statId,
   label,
   value,
   tone = "zinc",
+  trustState,
+  trustInput,
 }: {
+  statId: string;
   label: string;
   value: number;
   tone?: "zinc" | "emerald" | "amber" | "teal";
+  trustState: DataTrustState;
+  trustInput?: DataTrustInput;
 }) {
+  const presentation = resolveKpiTrustPresentation(
+    trustState,
+    statId,
+    "workforce-roster",
+    trustInput,
+  );
   const toneClass =
     tone === "emerald"
       ? "text-emerald-200"
@@ -84,9 +108,12 @@ function MetricCard({
           ? "text-teal-200"
           : "text-zinc-50";
   return (
-    <article className="rounded-xl border border-zinc-800/80 bg-zinc-950/50 px-4 py-3">
+    <TrustGatedKpiShell
+      presentation={presentation}
+      className="rounded-xl border border-zinc-800/80 bg-zinc-950/50 px-4 py-3"
+    >
       <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">{label}</p>
       <p className={`mt-1 text-2xl font-semibold tabular-nums ${toneClass}`}>{value}</p>
-    </article>
+    </TrustGatedKpiShell>
   );
 }

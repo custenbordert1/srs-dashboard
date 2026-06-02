@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/auth/app-shell";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
@@ -11,8 +12,12 @@ import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
 import { DeferredSection } from "@/components/ui/deferred-section";
+import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
+import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 
 type ExecutiveDashboardProps = {
   user: UserPublic;
@@ -21,10 +26,21 @@ type ExecutiveDashboardProps = {
 function TerritoryTable({
   title,
   rows,
+  trustState,
+  trustInput,
 }: {
   title: string;
   rows: ExecutiveDashboardSnapshot["bestTerritories"];
+  trustState: DataTrustState;
+  trustInput: DataTrustInput;
 }) {
+  const healthPresentation = () =>
+    resolveKpiTrustPresentation(trustState, "health-score", "executive-territory-row", trustInput);
+  const apps7dPresentation = () =>
+    resolveKpiTrustPresentation(trustState, "candidates-7d", "executive-territory-row", trustInput);
+  const totalPresentation = () =>
+    resolveKpiTrustPresentation(trustState, "candidates-total", "executive-territory-row", trustInput);
+
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
       <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
@@ -43,18 +59,31 @@ function TerritoryTable({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.dmName} className="border-b border-zinc-800/60">
-                  <td className="py-2 pr-3 font-medium text-zinc-200">{row.dmName}</td>
-                  <td className="py-2 pr-3 tabular-nums text-zinc-300">
-                    {row.healthScore}{" "}
-                    <span className="text-xs text-zinc-500">({row.healthLabel})</span>
-                  </td>
-                  <td className="py-2 pr-3 text-zinc-400">{row.activeJobs}</td>
-                  <td className="py-2 pr-3 text-zinc-400">{row.candidatesLast7Days}</td>
-                  <td className="py-2 text-zinc-400">{row.candidates}</td>
-                </tr>
-              ))}
+              {rows.map((row) => {
+                const health = healthPresentation();
+                const apps7d = apps7dPresentation();
+                const total = totalPresentation();
+                return (
+                  <tr key={row.dmName} className="border-b border-zinc-800/60">
+                    <td className="py-2 pr-3 font-medium text-zinc-200">{row.dmName}</td>
+                    <td
+                      className={`py-2 pr-3 tabular-nums text-zinc-300 ${health.dim ? "opacity-55" : ""}`}
+                    >
+                      {row.healthScore}{" "}
+                      <span className="text-xs text-zinc-500">({row.healthLabel})</span>
+                    </td>
+                    <td className="py-2 pr-3 text-zinc-400">{row.activeJobs}</td>
+                    <td
+                      className={`py-2 pr-3 text-zinc-400 ${apps7d.dim ? "opacity-55" : ""}`}
+                    >
+                      {row.candidatesLast7Days}
+                    </td>
+                    <td className={`py-2 text-zinc-400 ${total.dim ? "opacity-55" : ""}`}>
+                      {row.candidates}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -63,13 +92,97 @@ function TerritoryTable({
   );
 }
 
+function ExecutiveMetricCard({
+  statId,
+  className,
+  label,
+  value,
+  hint,
+  trustState,
+  trustInput,
+}: {
+  statId: string;
+  className: string;
+  label: string;
+  value: ReactNode;
+  hint?: string;
+  trustState: DataTrustState;
+  trustInput: DataTrustInput;
+}) {
+  const presentation = resolveKpiTrustPresentation(
+    trustState,
+    statId,
+    "executive-dashboard",
+    trustInput,
+  );
+  return (
+    <TrustGatedKpiShell presentation={presentation} className={className}>
+      <article>
+        <p className="text-xs uppercase tracking-wide opacity-80">{label}</p>
+        <p className="mt-1 text-3xl font-semibold tabular-nums">{value}</p>
+        {hint ? <p className="mt-1 text-xs opacity-70">{hint}</p> : null}
+      </article>
+    </TrustGatedKpiShell>
+  );
+}
+
+function ExecutiveStatCell({
+  statId,
+  label,
+  value,
+  trustState,
+  trustInput,
+}: {
+  statId: string;
+  label: string;
+  value: string | number;
+  trustState: DataTrustState;
+  trustInput: DataTrustInput;
+}) {
+  const presentation = resolveKpiTrustPresentation(
+    trustState,
+    statId,
+    "executive-dashboard",
+    trustInput,
+  );
+  return (
+    <TrustGatedKpiShell
+      presentation={presentation}
+      className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3"
+    >
+      <p className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{value}</p>
+    </TrustGatedKpiShell>
+  );
+}
+
 export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
-  const { data, meta, error, loading, refreshing, refresh } =
-    useTerritoryDashboard<ExecutiveDashboardSnapshot>({
-      endpoint: "/api/executive/dashboard",
-      cacheScope: user.id,
-    });
+  const {
+    data,
+    meta,
+    error,
+    loading,
+    refreshing,
+    timedOut,
+    refresh,
+    dataTrust,
+  } = useTerritoryDashboard<ExecutiveDashboardSnapshot>({
+    endpoint: "/api/executive/dashboard",
+    cacheScope: user.id,
+  });
   const drawer = useCandidateDrawer();
+
+  const trustInput: DataTrustInput = {
+    loading,
+    refreshing,
+    error,
+    timedOut,
+    hasData: Boolean(data),
+    partialSync: meta?.partialSync,
+    scanMode: meta?.scanMode,
+    positionsScanned: meta?.positionsScanned,
+    totalPositionsAvailable: meta?.totalPositionsAvailable,
+  };
 
   return (
     <AppShell
@@ -78,10 +191,12 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
       subtitle={`Nationwide health ${data?.nationwideHealthScore ?? "—"}/100 · live Breezy rollup`}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-zinc-500">
-          Best/worst territories, sources, fill-rate trends, weekly candidates
-          {refreshing ? <span className="ml-2 text-teal-400/90">Updating…</span> : null}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm text-zinc-500">
+            Best/worst territories, sources, fill-rate trends, weekly candidates
+          </p>
+          <DataTrustBadge trust={trustInput} state={dataTrust} />
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/executive/workforce-intelligence"
@@ -100,88 +215,89 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
         </div>
       </div>
 
-      {error ? (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100"
-        >
-          <p>{error}</p>
-          <button
-            type="button"
-            onClick={refresh}
-            className="shrink-0 rounded-lg border border-red-400/40 px-3 py-1 text-xs font-medium text-red-100 hover:bg-red-500/20"
-          >
-            Retry
-          </button>
-        </div>
-      ) : null}
-
-      {meta?.partialSync ? (
-        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          Partial Breezy sync — nationwide totals may be understated.
-        </p>
-      ) : null}
+      <DataTrustStatusBanner
+        trust={trustInput}
+        state={dataTrust}
+        onRetry={refresh}
+        retrying={refreshing}
+      />
 
       {loading && !data ? <p className="text-sm text-zinc-500">Loading executive rollup…</p> : null}
 
       {data ? (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <article className="rounded-2xl border border-teal-500/30 bg-teal-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
-              <p className="text-xs uppercase tracking-wide text-teal-200/80">Territory health</p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums text-teal-100">
-                {data.executiveInsights.territoryHealthScore}
-                <span className="text-base text-teal-200/60">/100</span>
-              </p>
-              <p className="mt-1 text-xs text-teal-200/70">{data.executiveInsights.territoryHealthLabel}</p>
-            </article>
-            <article className="rounded-2xl border border-red-500/25 bg-red-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
-              <p className="text-xs uppercase tracking-wide text-red-200/80">Fill risk</p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums text-red-100">
-                {data.executiveInsights.fillRiskScore}
-              </p>
-              <p className="mt-1 text-xs text-red-200/70">{data.executiveInsights.fillRiskLabel}</p>
-            </article>
-            <article className="rounded-2xl border border-violet-500/25 bg-violet-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
-              <p className="text-xs uppercase tracking-wide text-violet-200/80">Recruiter productivity</p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums text-violet-100">
-                {data.executiveInsights.recruiterProductivityScore}
-              </p>
-            </article>
-            <article className="rounded-2xl border border-sky-500/25 bg-sky-500/10 px-5 py-4 transition-transform duration-300 hover:-translate-y-0.5">
-              <p className="text-xs uppercase tracking-wide text-sky-200/80">Pipeline velocity</p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums text-sky-100">
-                {data.executiveInsights.pipelineVelocity}%
-              </p>
-              <p className="mt-1 text-xs text-sky-200/70">14d hire rate</p>
-            </article>
+            <ExecutiveMetricCard
+              statId="territory-health"
+              className="rounded-2xl border border-teal-500/30 bg-teal-500/10 px-5 py-4 text-teal-100 transition-transform duration-300 hover:-translate-y-0.5"
+              label="Territory health"
+              value={
+                <>
+                  {data.executiveInsights.territoryHealthScore}
+                  <span className="text-base text-teal-200/60">/100</span>
+                </>
+              }
+              hint={data.executiveInsights.territoryHealthLabel}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <ExecutiveMetricCard
+              statId="fill-risk"
+              className="rounded-2xl border border-red-500/25 bg-red-500/10 px-5 py-4 text-red-100 transition-transform duration-300 hover:-translate-y-0.5"
+              label="Fill risk"
+              value={data.executiveInsights.fillRiskScore}
+              hint={data.executiveInsights.fillRiskLabel}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <ExecutiveMetricCard
+              statId="recruiter-productivity"
+              className="rounded-2xl border border-violet-500/25 bg-violet-500/10 px-5 py-4 text-violet-100 transition-transform duration-300 hover:-translate-y-0.5"
+              label="Recruiter productivity"
+              value={data.executiveInsights.recruiterProductivityScore}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <ExecutiveMetricCard
+              statId="pipeline-velocity"
+              className="rounded-2xl border border-sky-500/25 bg-sky-500/10 px-5 py-4 text-sky-100 transition-transform duration-300 hover:-translate-y-0.5"
+              label="Pipeline velocity"
+              value={`${data.executiveInsights.pipelineVelocity}%`}
+              hint="14d hire rate"
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-wide text-zinc-500">Applicants / opening</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
-                {data.executiveInsights.applicantsPerOpening}
-              </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-wide text-zinc-500">Active jobs</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
-                {data.executiveInsights.activeJobs}
-              </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-wide text-zinc-500">7d applicants</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
-                {data.executiveInsights.candidatesLast7Days}
-              </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-wide text-zinc-500">Interviews active</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
-                {data.executiveInsights.interviewsActive}
-              </p>
-            </div>
+            <ExecutiveStatCell
+              statId="applicants-per-opening"
+              label="Applicants / opening"
+              value={data.executiveInsights.applicantsPerOpening}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <ExecutiveStatCell
+              statId="active-jobs"
+              label="Active jobs"
+              value={data.executiveInsights.activeJobs}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <ExecutiveStatCell
+              statId="candidates-7d"
+              label="7d applicants"
+              value={data.executiveInsights.candidatesLast7Days}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <ExecutiveStatCell
+              statId="interviews-active"
+              label="Interviews active"
+              value={data.executiveInsights.interviewsActive}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
           </div>
 
           <ExecutiveMelMatchingPanel
@@ -214,8 +330,18 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
           </DeferredSection>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <TerritoryTable title="Best territories" rows={data.bestTerritories} />
-            <TerritoryTable title="Worst territories" rows={data.worstTerritories} />
+            <TerritoryTable
+              title="Best territories"
+              rows={data.bestTerritories}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <TerritoryTable
+              title="Worst territories"
+              rows={data.worstTerritories}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">

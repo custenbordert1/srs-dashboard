@@ -56,4 +56,20 @@ describe("kpi-trust-gating", () => {
       "4 of 12 positions scanned",
     );
   });
+
+  it("dims executive Breezy insight cards on partial sync", () => {
+    const presentation = resolveKpiTrustPresentation("partial", "fill-risk", "executive-dashboard");
+    assert.equal(presentation.dim, true);
+    assert.equal(presentation.disclaimer, "Based on partial sync");
+  });
+
+  it("does not dim executive active jobs on partial sync", () => {
+    const presentation = resolveKpiTrustPresentation("partial", "active-jobs", "executive-dashboard");
+    assert.equal(presentation.dim, false);
+  });
+
+  it("dims workforce roster metrics when unavailable", () => {
+    const presentation = resolveKpiTrustPresentation("unavailable", "active-roster", "workforce-roster");
+    assert.equal(presentation.dim, true);
+  });
 });

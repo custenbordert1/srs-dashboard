@@ -65,6 +65,9 @@ export async function GET(request: Request) {
       dashboard,
       meta: {
         partialSync: candidatesResult.truncated ?? false,
+        scanMode: candidatesResult.scanMode ?? "fast",
+        positionsScanned: candidatesResult.positionsScanned ?? 0,
+        totalPositionsAvailable: candidatesResult.totalPositionsAvailable ?? 0,
         totalJobs: jobsResult.jobs.length,
         totalCandidates: candidatesResult.candidates.length,
         refreshedAt: new Date().toISOString(),

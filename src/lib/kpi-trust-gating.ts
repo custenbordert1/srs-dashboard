@@ -16,7 +16,10 @@ export type KpiTrustCategory =
   | "recruiter-operational"
   | "recruiting-intelligence"
   | "command-center-territory"
-  | "command-center-recruiting-health";
+  | "command-center-recruiting-health"
+  | "executive-dashboard"
+  | "executive-territory-row"
+  | "workforce-roster";
 
 export type KpiTrustPresentation = {
   dim: boolean;
@@ -79,6 +82,33 @@ const CC_TERRITORY_RECRUITING_BREEZY = new Set(["applicants-7d", "hired"]);
 
 const CC_TERRITORY_STAT_BREEZY = new Set(["territory-health", "open-calls"]);
 
+const EXECUTIVE_DASHBOARD_BREEZY = new Set([
+  "territory-health",
+  "fill-risk",
+  "recruiter-productivity",
+  "pipeline-velocity",
+  "applicants-per-opening",
+  "candidates-7d",
+  "interviews-active",
+]);
+
+const EXECUTIVE_TERRITORY_ROW_BREEZY = new Set([
+  "health-score",
+  "candidates-7d",
+  "candidates-total",
+]);
+
+/** Roster CSV metrics — gated when trust is degraded/unavailable (not Breezy partial). */
+const WORKFORCE_ROSTER_METRICS = new Set([
+  "active-roster",
+  "active-imported",
+  "inactive-archived",
+  "terminated-archived",
+  "states-covered",
+  "unique-skills",
+  "recent-logins",
+]);
+
 /** KPI states that should dim Breezy-dependent metrics. */
 export function shouldApplyKpiTrustGating(state: DataTrustState): boolean {
   return state === "partial" || state === "degraded" || state === "unavailable";
@@ -105,6 +135,12 @@ export function isBreezyCandidateDependentKpi(
       return CC_TERRITORY_STAT_BREEZY.has(kpiId);
     case "command-center-recruiting-health":
       return CC_TERRITORY_RECRUITING_BREEZY.has(kpiId);
+    case "executive-dashboard":
+      return EXECUTIVE_DASHBOARD_BREEZY.has(kpiId);
+    case "executive-territory-row":
+      return EXECUTIVE_TERRITORY_ROW_BREEZY.has(kpiId);
+    case "workforce-roster":
+      return WORKFORCE_ROSTER_METRICS.has(kpiId);
     default:
       return false;
   }
@@ -146,7 +182,9 @@ export function resolveKpiTrustPresentation(
   if (!dim) return empty;
 
   const scanLabel =
-    state === "partial" && breezyDependent ? formatScanCompletenessLabel(input) : null;
+    state === "partial" && breezyDependent && category !== "workforce-roster"
+      ? formatScanCompletenessLabel(input)
+      : null;
 
   return {
     dim: true,
