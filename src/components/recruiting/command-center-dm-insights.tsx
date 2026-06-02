@@ -1,5 +1,7 @@
 "use client";
 
+import { DataTrustBadge } from "@/components/ui/data-trust-badge";
+import type { DataTrustInput } from "@/lib/data-trust-state";
 import {
   coverageTierLabel,
   coverageTierStyles,
@@ -15,6 +17,7 @@ import Link from "next/link";
 type CommandCenterDmInsightsProps = {
   insights: CommandCenterDmInsightsSnapshot;
   loadingExtras?: boolean;
+  territoryTrust?: DataTrustInput | null;
 };
 
 function StatCell({ label, value, hint }: { label: string; value: string; hint?: string }) {
@@ -128,7 +131,11 @@ function RiskAlertList({
   );
 }
 
-export function CommandCenterDmInsights({ insights, loadingExtras }: CommandCenterDmInsightsProps) {
+export function CommandCenterDmInsights({
+  insights,
+  loadingExtras,
+  territoryTrust,
+}: CommandCenterDmInsightsProps) {
   const { recruitingHealth, topTerritoriesNeedingAttention, riskAlerts } = insights;
 
   return (
@@ -141,9 +148,12 @@ export function CommandCenterDmInsights({ insights, loadingExtras }: CommandCent
             {insights.hasCoverageData ? ", MEL coverage risk" : ""}, and workflow state.
           </p>
         </div>
-        {loadingExtras ? (
-          <span className="text-xs text-teal-400/90">Loading coverage & workflow context…</span>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {territoryTrust ? <DataTrustBadge trust={territoryTrust} /> : null}
+          {loadingExtras ? (
+            <span className="text-xs text-teal-400/90">Syncing coverage & workflows…</span>
+          ) : null}
+        </div>
       </header>
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">

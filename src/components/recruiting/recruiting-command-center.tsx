@@ -11,7 +11,9 @@ import {
 import { buildCommandCenterDmInsights } from "@/lib/command-center-dm-insights";
 import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
-import { fetchWithTimeout, HEAVY_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
+import { buildDataTrustState } from "@/lib/data-trust-state";
+import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import {
   buildRecruitingCommandCenter,
   formatCommandCenterSyncTime,
@@ -225,11 +227,11 @@ export function RecruitingCommandCenter() {
         const [coverageRes, workflowsRes] = await Promise.all([
           fetchWithTimeout("/api/coverage-risk", {
             cache: "no-store",
-            timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+            timeoutMs: FETCH_T4_INTELLIGENCE_MS,
           }),
           fetchWithTimeout("/api/candidates/workflows", {
             cache: "no-store",
-            timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+            timeoutMs: FETCH_T4_INTELLIGENCE_MS,
           }),
         ]);
 
@@ -274,6 +276,21 @@ export function RecruitingCommandCenter() {
       commandCenter: snapshot,
     });
   }, [extras, loadState, snapshot]);
+
+  const breezyTrustInput = useMemo(() => {
+    if (loadState.status !== "ready" || !loadState.candidates.ok) return null;
+    const candidates = loadState.candidates;
+    return {
+      hasData: Boolean(snapshot),
+      partialSync: snapshot?.partialPositionSync,
+      truncated: candidates.truncated,
+      scanMode: candidates.scanMode,
+      positionsScanned: candidates.positionsScanned,
+      totalPositionsAvailable: candidates.totalPositionsAvailable,
+      fromCache: candidates.fromCache,
+      stale: candidates.stale,
+    };
+  }, [loadState, snapshot]);
 
   if (loadState.status === "loading") {
     if (loadingCeilingHit) {
@@ -340,25 +357,34 @@ export function RecruitingCommandCenter() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Recruiting Command Center</h1>
-        <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-          Executive view of live Breezy hiring activity — jobs, applicants, funnel health, and source performance.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Recruiting Command Center</h1>
+          <p className="mt-1 max-w-3xl text-sm text-zinc-500">
+            Executive view of live Breezy hiring activity — jobs, applicants, funnel health, and source performance.
+            Last sync: {snapshot.lastSyncLabel}.
+          </p>
+        </div>
+        {breezyTrustInput ? <DataTrustBadge trust={breezyTrustInput} showHint /> : null}
       </header>
 
-      <SyncStatusBanner
-        connected={snapshot.connected}
-        lastSyncLabel={snapshot.lastSyncLabel}
-        partialPositionSync={snapshot.partialPositionSync}
-        fromCache={loadState.candidates.fromCache}
-        stale={loadState.candidates.stale}
-      />
+      {breezyTrustInput ? <DataTrustStatusBanner trust={breezyTrustInput} /> : null}
 
       <KpiCards items={snapshot.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />
 
       {dmInsights ? (
-        <CommandCenterDmInsights insights={dmInsights} loadingExtras={extrasLoading} />
+        <CommandCenterDmInsights
+          insights={dmInsights}
+          loadingExtras={extrasLoading}
+          territoryTrust={
+            breezyTrustInput
+              ? {
+                  ...breezyTrustInput,
+                  loading: extrasLoading,
+                }
+              : null
+          }
+        />
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">

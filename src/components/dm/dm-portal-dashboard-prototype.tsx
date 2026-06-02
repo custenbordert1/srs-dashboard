@@ -24,6 +24,8 @@ import {
   severityLabel,
   topNeedsAttentionAlerts,
 } from "@/lib/dm-portal/dm-portal-operational";
+import { DataTrustBadge } from "@/components/ui/data-trust-badge";
+import { buildDataTrustState } from "@/lib/data-trust-state";
 import type { DmViewVisibility } from "@/lib/dm-portal/dm-view-mode";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -33,7 +35,13 @@ type DmPortalDashboardProps = {
   visibility: DmViewVisibility;
   territoryLabel: string;
   user: UserPublic;
-  meta?: { partialSync?: boolean } | null;
+  meta?: {
+    partialSync?: boolean;
+    scanMode?: string;
+    positionsScanned?: number;
+    totalPositionsAvailable?: number;
+  } | null;
+  refreshing?: boolean;
   onCandidateClick: (candidateId: string) => void;
   selectedCandidateId: string | null;
 };
@@ -151,6 +159,7 @@ export function DmPortalDashboard({
   territoryLabel,
   user,
   meta,
+  refreshing = false,
   onCandidateClick,
   selectedCandidateId,
 }: DmPortalDashboardProps) {
@@ -158,6 +167,14 @@ export function DmPortalDashboard({
   const { territory, pipeline } = operational;
   const tierStyles = coverageTierStyles(territory.coverageTier);
   const topAlerts = topNeedsAttentionAlerts(data);
+  const dataTrust = buildDataTrustState({
+    refreshing,
+    hasData: true,
+    partialSync: meta?.partialSync,
+    scanMode: meta?.scanMode,
+    positionsScanned: meta?.positionsScanned,
+    totalPositionsAvailable: meta?.totalPositionsAvailable,
+  });
   const ops = useDmOperationalDrawer(data, user);
   const [prioritySeed, setPrioritySeed] = useState<DmAlertPriorityFilter>("all");
 
@@ -177,10 +194,24 @@ export function DmPortalDashboard({
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-teal-500/25 bg-teal-500/5 px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-teal-300/90">DM territory operations</p>
-        <p className="mt-1 text-sm text-zinc-300">
-          Live view for <span className="font-medium text-zinc-100">{data.dmName}</span> · {territoryLabel}
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-teal-300/90">DM territory operations</p>
+            <p className="mt-1 text-sm text-zinc-300">
+              Live view for <span className="font-medium text-zinc-100">{data.dmName}</span> · {territoryLabel}
+            </p>
+          </div>
+          <DataTrustBadge
+            trust={{
+              hasData: true,
+              partialSync: meta?.partialSync,
+              scanMode: meta?.scanMode,
+              positionsScanned: meta?.positionsScanned,
+              totalPositionsAvailable: meta?.totalPositionsAvailable,
+            }}
+            state={dataTrust}
+          />
+        </div>
       </div>
 
       <section id={DM_PORTAL_SECTION_IDS.quickNav} className="scroll-mt-24">
@@ -437,7 +468,6 @@ export function DmPortalDashboard({
       <p className="text-xs text-zinc-600">
         Snapshot {new Date(data.fetchedAt).toLocaleString()} · {data.activeJobs} active jobs ·{" "}
         {data.territoryLabel}
-        {meta?.partialSync ? " · partial Breezy sync" : ""}
       </p>
 
       <DmOperationalDrawer

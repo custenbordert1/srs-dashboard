@@ -6,7 +6,7 @@ import {
 import {
   DASHBOARD_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
-  HEAVY_REQUEST_TIMEOUT_MS,
+  FETCH_T4_INTELLIGENCE_MS,
   isTimeoutError,
 } from "@/lib/fetch-with-timeout";
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
@@ -60,7 +60,7 @@ export async function fetchRecruitingSheetData(force = false): Promise<SheetData
 export async function fetchMelProjectsData(force = false): Promise<MelProjectsDataResult> {
   return fetchCachedJson(
     cacheKey(["mel-projects"]),
-    () => fetchJson<MelProjectsDataResult>("/api/mel-projects", "MEL projects", HEAVY_REQUEST_TIMEOUT_MS),
+    () => fetchJson<MelProjectsDataResult>("/api/mel-projects", "MEL projects", FETCH_T4_INTELLIGENCE_MS),
     { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "mel-projects" },
   );
 }

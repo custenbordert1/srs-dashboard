@@ -2,7 +2,7 @@
 
 import { cacheKey, fetchCachedJson, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
-import { fetchWithTimeout, HEAVY_REQUEST_TIMEOUT_MS, isTimeoutError } from "@/lib/fetch-with-timeout";
+import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS, isTimeoutError } from "@/lib/fetch-with-timeout";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type UseCoverageRiskOptions = {
@@ -12,7 +12,7 @@ type UseCoverageRiskOptions = {
 async function fetchCoverageRisk(signal?: AbortSignal): Promise<CoverageRiskSnapshot> {
   const res = await fetchWithTimeout("/api/coverage-risk", {
     cache: "no-store",
-    timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+    timeoutMs: FETCH_T4_INTELLIGENCE_MS,
     signal,
   });
   const parsed = (await res.json()) as {

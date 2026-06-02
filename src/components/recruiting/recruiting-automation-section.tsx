@@ -1,6 +1,6 @@
 "use client";
 
-import { AutomationSyncStatusBanner } from "@/components/recruiting/automation-sync-status-banner";
+import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
 import { CandidateIntelligenceSection } from "@/components/recruiting/candidate-intelligence-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
@@ -125,6 +125,7 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     stale,
     lastSyncedAt,
     refresh,
+    dataTrust,
   } = useRecruitingIntelligence({
     pollIntervalMs: compact ? 0 : undefined,
   });
@@ -208,11 +209,22 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">Recruiter operational workspace</h2>
-          <p className="text-sm text-zinc-500">
-            Territory: {data.territoryLabel}
-            {refreshing ? <span className="ml-2 text-teal-400/90">Updating…</span> : null}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold text-zinc-50">Recruiter operational workspace</h2>
+            <DataTrustBadge
+              trust={{
+                loading,
+                refreshing,
+                error: error ?? fatalError,
+                timedOut,
+                hasData: Boolean(data),
+                partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+                stale,
+              }}
+              state={dataTrust}
+            />
+          </div>
+          <p className="text-sm text-zinc-500">Territory: {data.territoryLabel}</p>
         </div>
         <button
           type="button"
@@ -224,13 +236,17 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
         </button>
       </div>
 
-      <AutomationSyncStatusBanner
-        lastSyncedAt={lastSyncedAt}
-        stale={stale}
-        partialSync={meta?.partialSync}
-        partialErrors={meta?.partialErrors}
-        error={error}
-        timedOut={timedOut}
+      <DataTrustStatusBanner
+        trust={{
+          loading,
+          refreshing,
+          error: error ?? fatalError,
+          timedOut,
+          hasData: Boolean(data),
+          partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+          stale,
+        }}
+        state={dataTrust}
         onRetry={refresh}
         retrying={refreshing}
       />

@@ -5,12 +5,12 @@ import {
   DEFAULT_CLIENT_CACHE_TTL_MS,
   fetchCachedJson,
 } from "@/lib/client-api-cache";
+import { fetchAbortedMessage, fetchTimeoutMessage } from "@/lib/fetch-request-messages";
 import {
   DASHBOARD_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
   isAbortError,
   isTimeoutError,
-  timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
 
 export type FetchRetryOptions = {
@@ -39,7 +39,14 @@ export async function fetchJsonWithRetry<T>(
   options: FetchRetryOptions = {},
 ): Promise<
   | { ok: true; data: T; status: number }
-  | { ok: false; error: string; status: number; timedOut?: boolean; aborted?: boolean }
+  | {
+      ok: false;
+      error: string | null;
+      status: number;
+      timedOut?: boolean;
+      aborted?: boolean;
+      suppressError?: boolean;
+    }
 > {
   const maxAttempts = options.maxAttempts ?? 3;
   const baseDelayMs = options.baseDelayMs ?? 1200;
@@ -50,7 +57,13 @@ export async function fetchJsonWithRetry<T>(
   const signal = options.signal;
 
   if (signal?.aborted) {
-    return { ok: false, error: "Request cancelled", status: 0, aborted: true };
+    return {
+      ok: false,
+      error: fetchAbortedMessage("superseded"),
+      status: 0,
+      aborted: true,
+      suppressError: true,
+    };
   }
 
   if (ttlMs > 0 && !options.force) {
@@ -65,7 +78,7 @@ export async function fetchJsonWithRetry<T>(
             timeoutMs,
             signal,
           });
-          if (!result.ok) throw new Error(result.error);
+          if (!result.ok) throw new Error(result.error ?? "Request failed");
           return result.data;
         },
         { ttlMs, label: url, force: false },
@@ -108,14 +121,27 @@ async function fetchJsonWithRetryUncached<T>(
   },
 ): Promise<
   | { ok: true; data: T; status: number }
-  | { ok: false; error: string; status: number; timedOut?: boolean; aborted?: boolean }
+  | {
+      ok: false;
+      error: string | null;
+      status: number;
+      timedOut?: boolean;
+      aborted?: boolean;
+      suppressError?: boolean;
+    }
 > {
   let lastError = "Request failed";
   let lastStatus = 0;
 
   for (let attempt = 0; attempt < options.maxAttempts; attempt += 1) {
     if (options.signal?.aborted) {
-      return { ok: false, error: "Request cancelled", status: 0, aborted: true };
+      return {
+        ok: false,
+        error: fetchAbortedMessage("superseded"),
+        status: 0,
+        aborted: true,
+        suppressError: true,
+      };
     }
 
     try {
@@ -137,14 +163,22 @@ async function fetchJsonWithRetryUncached<T>(
     } catch (err) {
       if (isAbortError(err)) {
         const timedOut = isTimeoutError(err);
+        if (timedOut) {
+          return {
+            ok: false,
+            error: fetchTimeoutMessage("Territory dashboard", options.timeoutMs),
+            status: lastStatus,
+            timedOut: true,
+            aborted: false,
+          };
+        }
         return {
           ok: false,
-          error: timedOut
-            ? timeoutErrorMessage("Territory dashboard", options.timeoutMs)
-            : "Request cancelled",
+          error: fetchAbortedMessage("superseded"),
           status: lastStatus,
-          timedOut,
-          aborted: !timedOut,
+          timedOut: false,
+          aborted: true,
+          suppressError: true,
         };
       }
       lastError = err instanceof Error ? err.message : "Network error";
@@ -152,7 +186,7 @@ async function fetchJsonWithRetryUncached<T>(
         return {
           ok: false,
           error: isTimeoutError(err)
-            ? timeoutErrorMessage("Request", options.timeoutMs)
+            ? fetchTimeoutMessage("Request", options.timeoutMs)
             : lastError,
           status: lastStatus,
           timedOut: isTimeoutError(err),
@@ -161,7 +195,13 @@ async function fetchJsonWithRetryUncached<T>(
     }
 
     if (options.signal?.aborted) {
-      return { ok: false, error: "Request cancelled", status: 0, aborted: true };
+      return {
+        ok: false,
+        error: fetchAbortedMessage("superseded"),
+        status: 0,
+        aborted: true,
+        suppressError: true,
+      };
     }
 
     await new Promise((resolve) => window.setTimeout(resolve, options.baseDelayMs * (attempt + 1)));

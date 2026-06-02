@@ -7,8 +7,8 @@ import { WorkforceMetricsDashboard } from "@/components/workforce/workforce-metr
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import {
-  DASHBOARD_REQUEST_TIMEOUT_MS,
   fetchWithTimeout,
+  FETCH_T3_TERRITORY_MS,
   isTimeoutError,
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
@@ -42,7 +42,7 @@ export function WorkforceIntelligencePage({ user }: { user: UserPublic }) {
     try {
       const res = await fetchWithTimeout(route, {
         cache: "no-store",
-        timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+        timeoutMs: FETCH_T3_TERRITORY_MS,
       });
       const parsed = (await res.json()) as {
         ok?: boolean;
@@ -61,7 +61,7 @@ export function WorkforceIntelligencePage({ user }: { user: UserPublic }) {
       }
     } catch (err) {
       const message = isTimeoutError(err)
-        ? timeoutErrorMessage("Workforce intelligence", DASHBOARD_REQUEST_TIMEOUT_MS)
+        ? timeoutErrorMessage("Workforce intelligence", FETCH_T3_TERRITORY_MS)
         : err instanceof Error
           ? err.message
           : "Failed to load workforce intelligence";

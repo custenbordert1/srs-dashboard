@@ -2,13 +2,17 @@
 
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
-import { TERRITORY_DASHBOARD_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { buildDataTrustState, dataTrustStatusMessage, type DataTrustState } from "@/lib/data-trust-state";
+import { FETCH_T3_TERRITORY_MS } from "@/lib/fetch-with-timeout";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_POLL_MS = 90_000;
 
-type DashboardMeta = {
+export type DashboardMeta = {
   partialSync?: boolean;
+  scanMode?: string;
+  positionsScanned?: number;
+  totalPositionsAvailable?: number;
   filteredJobs?: number;
   filteredCandidates?: number;
   refreshedAt?: string;
@@ -37,7 +41,7 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
     endpoint = "/api/dm/dashboard",
     cacheScope = "",
     pollIntervalMs = DEFAULT_POLL_MS,
-    timeoutMs = TERRITORY_DASHBOARD_TIMEOUT_MS,
+    timeoutMs = FETCH_T3_TERRITORY_MS,
     enabled = true,
   } = options;
 
@@ -90,15 +94,18 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
         if (!mountedRef.current || generation !== fetchGeneration.current) return;
 
         if (!result.ok) {
-          if (result.aborted) {
+          if (result.aborted || result.suppressError) {
             setError(null);
             return;
           }
           if (mode === "background" && initialLoadDone.current) return;
           if (result.timedOut) {
             setTimedOut(true);
-            setError(result.error);
-          } else {
+            setError(
+              result.error ??
+                dataTrustStatusMessage("degraded", { timedOut: true }),
+            );
+          } else if (result.error) {
             setError(result.error);
             if (mode === "initial") setData(null);
           }
@@ -167,5 +174,30 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
     };
   }, [enabled, pollIntervalMs, runFetch]);
 
-  return { data, meta, error, loading, refreshing, timedOut, refresh };
+  const dataTrust = useMemo((): DataTrustState => {
+    return buildDataTrustState({
+      loading,
+      refreshing,
+      error,
+      timedOut,
+      hasData: Boolean(data),
+      partialSync: meta?.partialSync,
+      scanMode: meta?.scanMode,
+      positionsScanned: meta?.positionsScanned,
+      totalPositionsAvailable: meta?.totalPositionsAvailable,
+    });
+  }, [data, error, loading, meta, refreshing, timedOut]);
+
+  const statusMessage = useMemo(() => {
+    if (refreshing) return "Refreshing…";
+    if (loading && !data) return "Syncing…";
+    return dataTrustStatusMessage(dataTrust, {
+      error,
+      timedOut,
+      positionsScanned: meta?.positionsScanned,
+      totalPositionsAvailable: meta?.totalPositionsAvailable,
+    });
+  }, [data, dataTrust, error, loading, meta, refreshing, timedOut]);
+
+  return { data, meta, error, loading, refreshing, timedOut, refresh, dataTrust, statusMessage };
 }

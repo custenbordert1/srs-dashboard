@@ -18,6 +18,7 @@ import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-secti
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
 import { DeferredSection } from "@/components/ui/deferred-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
+import { DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 
 type DmDashboardProps = {
@@ -27,7 +28,7 @@ type DmDashboardProps = {
 export function DmDashboard({ user }: DmDashboardProps) {
   const viewMode = resolveDmViewModeFromUser(user);
   const visibility = getDmViewVisibility(viewMode);
-  const { data, meta, error, loading, refreshing, timedOut, refresh } =
+  const { data, meta, error, loading, refreshing, timedOut, refresh, dataTrust } =
     useTerritoryDashboard<DmDashboardSnapshot>({
       endpoint: "/api/dm/dashboard",
       cacheScope: user.id,
@@ -53,9 +54,6 @@ export function DmDashboard({ user }: DmDashboardProps) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-zinc-500">
           Live territory health · fill-risk alerts · coverage intelligence
-          {refreshing ? (
-            <span className="ml-2 text-teal-400/90">Updating…</span>
-          ) : null}
         </p>
         <button
           type="button"
@@ -67,29 +65,22 @@ export function DmDashboard({ user }: DmDashboardProps) {
         </button>
       </div>
 
-      {error ? (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100"
-        >
-          <p>{error}</p>
-          {timedOut || error ? (
-            <button
-              type="button"
-              onClick={refresh}
-              className="shrink-0 rounded-lg border border-red-400/40 px-3 py-1 text-xs font-medium text-red-100 hover:bg-red-500/20"
-            >
-              Retry
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
-      {meta?.partialSync ? (
-        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          Partial Breezy sync — some positions may not be included in candidate counts yet.
-        </p>
-      ) : null}
+      <DataTrustStatusBanner
+        trust={{
+          loading,
+          refreshing,
+          error,
+          timedOut,
+          hasData: Boolean(data),
+          partialSync: meta?.partialSync,
+          scanMode: meta?.scanMode,
+          positionsScanned: meta?.positionsScanned,
+          totalPositionsAvailable: meta?.totalPositionsAvailable,
+        }}
+        state={dataTrust}
+        onRetry={refresh}
+        retrying={refreshing}
+      />
 
       {loading && !data ? (
         <p className="text-sm text-zinc-500">Loading territory intelligence…</p>
@@ -103,6 +94,7 @@ export function DmDashboard({ user }: DmDashboardProps) {
             territoryLabel={data.territoryLabel}
             user={user}
             meta={meta}
+            refreshing={refreshing}
             onCandidateClick={drawer.openCandidate}
             selectedCandidateId={drawer.selectedCandidateId}
           />

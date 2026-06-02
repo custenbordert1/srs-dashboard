@@ -53,20 +53,35 @@ export function isTimeoutError(err: unknown): boolean {
   return false;
 }
 
-export const DASHBOARD_REQUEST_TIMEOUT_MS = 10_000;
-export const HEAVY_REQUEST_TIMEOUT_MS = 30_000;
-/** Recruiting intelligence (MEL routing + automation) — larger territories need headroom. */
-export const ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS = HEAVY_REQUEST_TIMEOUT_MS;
-/** DM / executive territory dashboards — server runs Breezy fast-tier + MEL in parallel. */
-export const TERRITORY_DASHBOARD_TIMEOUT_MS = 45_000;
-/** Breezy jobs list — single GET, fits 10s budget. */
-export const BREEZY_CLIENT_REQUEST_TIMEOUT_MS = DASHBOARD_REQUEST_TIMEOUT_MS;
-/** Breezy preview-tier candidate sync — server budget ~18s + jobs list + network headroom. */
-export const BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = 45_000;
-/** Breezy fast-tier candidate sync (~60 positions) — must exceed server scan budget. */
-export const BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS = 75_000;
-/** Background full-tier hydration — aligned with route maxDuration (120s). */
-export const BREEZY_CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = 115_000;
+/** T1 — instant reads (workflows, session, default fetch). Server routes typically ≤30s. */
+export const FETCH_T1_INSTANT_MS = 10_000;
+/** T2 — sheet / single GET (jobs list, workforce meta). */
+export const FETCH_T2_SHEET_MS = 15_000;
+/** T3 — territory dashboards (DM, executive). Aligns with server maxDuration 120s. */
+export const FETCH_T3_TERRITORY_MS = 110_000;
+/** T4 — intelligence bundles (recruiting intelligence, coverage-risk). */
+export const FETCH_T4_INTELLIGENCE_MS = 110_000;
+/** T5 — Breezy candidate scan tiers (fast / full). */
+export const FETCH_T5_BREEZY_SCAN_MS = 125_000;
+/** Preview scan server budget ~18s — client margin without matching full T5. */
+export const FETCH_T5_BREEZY_PREVIEW_MS = 30_000;
+
+/** @deprecated Use FETCH_T1_INSTANT_MS */
+export const DASHBOARD_REQUEST_TIMEOUT_MS = FETCH_T1_INSTANT_MS;
+/** @deprecated Use FETCH_T4_INTELLIGENCE_MS */
+export const HEAVY_REQUEST_TIMEOUT_MS = FETCH_T4_INTELLIGENCE_MS;
+/** @deprecated Use FETCH_T4_INTELLIGENCE_MS */
+export const ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS = FETCH_T4_INTELLIGENCE_MS;
+/** @deprecated Use FETCH_T3_TERRITORY_MS */
+export const TERRITORY_DASHBOARD_TIMEOUT_MS = FETCH_T3_TERRITORY_MS;
+/** @deprecated Use FETCH_T1_INSTANT_MS */
+export const BREEZY_CLIENT_REQUEST_TIMEOUT_MS = FETCH_T1_INSTANT_MS;
+/** @deprecated Use FETCH_T5_BREEZY_PREVIEW_MS */
+export const BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = FETCH_T5_BREEZY_PREVIEW_MS;
+/** @deprecated Use FETCH_T5_BREEZY_SCAN_MS */
+export const BREEZY_CANDIDATES_FAST_CLIENT_TIMEOUT_MS = FETCH_T5_BREEZY_SCAN_MS;
+/** @deprecated Use FETCH_T5_BREEZY_SCAN_MS */
+export const BREEZY_CANDIDATES_FULL_HYDRATION_TIMEOUT_MS = FETCH_T5_BREEZY_SCAN_MS;
 
 export function timeoutErrorMessage(label: string, timeoutMs: number): string {
   const seconds = Math.round(timeoutMs / 1000);

@@ -10,11 +10,9 @@ import {
   LONG_CLIENT_CACHE_TTL_MS,
 } from "@/lib/client-api-cache";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
-import {
-  DASHBOARD_REQUEST_TIMEOUT_MS,
-  ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS,
-} from "@/lib/fetch-with-timeout";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { buildDataTrustState, dataTrustStatusMessage, type DataTrustState } from "@/lib/data-trust-state";
+import { FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_POLL_MS = 90_000;
 const INTELLIGENCE_CACHE_KEY = cacheKey(["recruiting", "intelligence"]);
@@ -50,7 +48,7 @@ type IntelligenceResponse = {
 type UseRecruitingIntelligenceOptions = {
   pollIntervalMs?: number;
   enabled?: boolean;
-  /** Defaults to dashboard 10s; routing tab should pass ROUTING_INTELLIGENCE_CLIENT_TIMEOUT_MS. */
+  /** Defaults to FETCH_T4_INTELLIGENCE_MS (110s). */
   requestTimeoutMs?: number;
 };
 
@@ -59,7 +57,7 @@ type FetchMode = "initial" | "background" | "manual";
 export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOptions = {}) {
   const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_MS;
   const enabled = options.enabled ?? true;
-  const requestTimeoutMs = options.requestTimeoutMs ?? DASHBOARD_REQUEST_TIMEOUT_MS;
+  const requestTimeoutMs = options.requestTimeoutMs ?? FETCH_T4_INTELLIGENCE_MS;
 
   const [data, setData] = useState<RecruitingIntelligenceSnapshot | null>(() => {
     const cached = getCachedAllowExpired<IntelligenceResponse>(INTELLIGENCE_CACHE_KEY);
@@ -136,7 +134,7 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
         if (!mountedRef.current || generation !== fetchGeneration.current) return;
 
         if (!result.ok) {
-          if (result.aborted) return;
+          if (result.aborted || result.suppressError) return;
           const cached = getCachedAllowExpired<IntelligenceResponse>(INTELLIGENCE_CACHE_KEY);
           if (cached?.intelligence || initialDone.current) {
             if (cached?.intelligence) applySuccess(cached);
@@ -153,15 +151,17 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
             });
             return;
           }
+          const message =
+            result.error ?? "Failed to load recruiting intelligence";
           logDashboardFetch(result.timedOut ? "timeout" : "error", {
             route,
             label: "recruiting-intelligence-api",
             ms: Math.round(performance.now() - started),
-            error: result.error,
+            error: message,
           });
           if (result.timedOut) setTimedOut(true);
-          setError(result.error);
-          setFatalError(result.error);
+          setError(message);
+          setFatalError(message);
           return;
         }
 
@@ -245,6 +245,24 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
     };
   }, [enabled, pollIntervalMs, runFetch]);
 
+  const dataTrust = useMemo((): DataTrustState => {
+    return buildDataTrustState({
+      loading,
+      refreshing,
+      error: error ?? fatalError,
+      timedOut,
+      hasData: Boolean(data),
+      partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+      stale,
+    });
+  }, [data, error, fatalError, loading, meta, refreshing, stale, timedOut]);
+
+  const statusMessage = useMemo(() => {
+    if (refreshing) return "Refreshing…";
+    if (loading && !data) return "Syncing…";
+    return dataTrustStatusMessage(dataTrust, { error: error ?? fatalError, timedOut });
+  }, [data, dataTrust, error, fatalError, loading, refreshing, timedOut]);
+
   return {
     data,
     meta,
@@ -256,5 +274,7 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
     stale,
     lastSyncedAt,
     refresh,
+    dataTrust,
+    statusMessage,
   };
 }
