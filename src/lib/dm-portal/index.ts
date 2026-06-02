@@ -34,3 +34,19 @@ export {
   territoryOwnerForState,
 } from "@/lib/dm-portal/territory-filter-service";
 export { buildDmPortalCardMetrics, type DmPortalCardMetrics } from "@/lib/dm-portal/dm-portal-metrics";
+export {
+  DM_PORTAL_NAV_LINKS,
+  DM_PORTAL_SECTION_IDS,
+  buildDmPortalOperationalView,
+  countReadyForMel,
+  coverageTierLabel,
+  coverageTierStyles,
+  resolveCoverageHealthTier,
+  resolveDmPortalAlertHref,
+  severityLabel,
+  topNeedsAttentionAlerts,
+  type CoverageHealthTier,
+  type DmPortalOperationalView,
+  type DmPortalPipelineSummary,
+  type DmPortalTerritorySummary,
+} from "@/lib/dm-portal/dm-portal-operational";
