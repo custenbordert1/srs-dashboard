@@ -8,10 +8,15 @@ import {
   classifyBreezyError,
   type BreezyFailureKind,
 } from "@/lib/breezy-error-ui";
+import { buildCommandCenterDmInsights } from "@/lib/command-center-dm-insights";
+import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
+import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
+import { fetchWithTimeout, HEAVY_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import {
   buildRecruitingCommandCenter,
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
+import { CommandCenterDmInsights } from "@/components/recruiting/command-center-dm-insights";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -159,8 +164,15 @@ function FunnelVisualization({ applied, interviewing, hired }: { applied: number
 }
 
 
+type CommandCenterExtras = {
+  coverage: CoverageRiskSnapshot | null;
+  workflows: CandidateWorkflowState | null;
+};
+
 export function RecruitingCommandCenter() {
   const [loadState, setLoadState] = useState<CommandCenterLoadState>({ status: "loading" });
+  const [extras, setExtras] = useState<CommandCenterExtras | null>(null);
+  const [extrasLoading, setExtrasLoading] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const loadingCeilingHit = useLoadingCeiling(loadState.status === "loading");
   const breezyCandidates =
@@ -198,6 +210,70 @@ export function RecruitingCommandCenter() {
     if (!loadState.candidates.ok || !loadState.jobs.ok) return null;
     return buildRecruitingCommandCenter(loadState.candidates, loadState.jobs);
   }, [loadState]);
+
+  useEffect(() => {
+    if (loadState.status !== "ready" || !loadState.candidates.ok || !loadState.jobs.ok) {
+      setExtras(null);
+      return;
+    }
+
+    let cancelled = false;
+    setExtrasLoading(true);
+
+    void (async () => {
+      try {
+        const [coverageRes, workflowsRes] = await Promise.all([
+          fetchWithTimeout("/api/coverage-risk", {
+            cache: "no-store",
+            timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+          }),
+          fetchWithTimeout("/api/candidates/workflows", {
+            cache: "no-store",
+            timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+          }),
+        ]);
+
+        const coverageJson = (await coverageRes.json()) as {
+          ok?: boolean;
+          snapshot?: CoverageRiskSnapshot;
+        };
+        const workflowsJson = (await workflowsRes.json()) as {
+          ok?: boolean;
+          workflows?: CandidateWorkflowState;
+        };
+
+        if (cancelled) return;
+        setExtras({
+          coverage: coverageJson.ok && coverageJson.snapshot ? coverageJson.snapshot : null,
+          workflows: workflowsJson.ok && workflowsJson.workflows ? workflowsJson.workflows : null,
+        });
+      } catch {
+        if (!cancelled) {
+          setExtras({ coverage: null, workflows: null });
+        }
+      } finally {
+        if (!cancelled) setExtrasLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loadState]);
+
+  const dmInsights = useMemo(() => {
+    if (loadState.status !== "ready" || !snapshot || !loadState.candidates.ok || !loadState.jobs.ok) {
+      return null;
+    }
+    return buildCommandCenterDmInsights({
+      jobs: loadState.jobs.jobs,
+      candidates: loadState.candidates.candidates,
+      fetchedAt: loadState.candidates.fetchedAt,
+      coverage: extras?.coverage ?? null,
+      workflows: extras?.workflows ?? null,
+      commandCenter: snapshot,
+    });
+  }, [extras, loadState, snapshot]);
 
   if (loadState.status === "loading") {
     if (loadingCeilingHit) {
@@ -280,6 +356,10 @@ export function RecruitingCommandCenter() {
       />
 
       <KpiCards items={snapshot.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />
+
+      {dmInsights ? (
+        <CommandCenterDmInsights insights={dmInsights} loadingExtras={extrasLoading} />
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <FunnelVisualization applied={applied} interviewing={interviewing} hired={hired} />
