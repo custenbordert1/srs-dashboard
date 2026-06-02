@@ -21,6 +21,7 @@ import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fall
 import { DeferredSection } from "@/components/ui/deferred-section";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
+import { buildDataTrustState, type DataTrustInput, type DataTrustState } from "@/lib/data-trust-state";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
@@ -155,6 +156,7 @@ export function RecruitingIntelligenceSection() {
   const [breezyIntelligence, setBreezyIntelligence] = useState<RecruitingIntelligenceSnapshot | null>(
     null,
   );
+  const [breezyTrustInput, setBreezyTrustInput] = useState<DataTrustInput | null>(null);
   const [phase, setPhase] = useState<IntelligenceLoadPhase>("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
@@ -194,6 +196,15 @@ export function RecruitingIntelligenceSection() {
           const live = liveResult.value;
           if (live.ok && live.intelligence) {
             setBreezyIntelligence(live.intelligence);
+            setBreezyTrustInput({
+              hasData: true,
+              partialSync: live.syncStatus === "partial" || Boolean(live.partial),
+              truncated: live.candidates.truncated,
+              scanMode: live.candidates.scanMode,
+              positionsScanned: live.candidates.positionsScanned,
+              totalPositionsAvailable: live.candidates.totalPositionsAvailable,
+              fromCache: live.syncStatus === "cache_only",
+            });
             setPhase("ready");
             logDashboardFetch(live.partial ? "partial" : "success", {
               route,
@@ -207,6 +218,7 @@ export function RecruitingIntelligenceSection() {
             ? "Breezy live snapshot returned no intelligence payload."
             : live.error;
           setBreezyIntelligence(null);
+          setBreezyTrustInput(null);
           setLoadError(message);
           setPhase("error");
           logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: message });
@@ -218,6 +230,7 @@ export function RecruitingIntelligenceSection() {
             ? liveResult.reason.message
             : "Failed to load Breezy live snapshot";
         setBreezyIntelligence(null);
+        setBreezyTrustInput(null);
         setLoadError(message);
         setPhase("error");
         logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: message });
@@ -297,6 +310,11 @@ export function RecruitingIntelligenceSection() {
     if (!snapshot) return [];
     return intelligenceSnapshotToKpis(snapshot);
   }, [data, snapshot]);
+
+  const breezyTrustState: DataTrustState = useMemo(
+    () => buildDataTrustState(breezyTrustInput ?? { hasData: Boolean(snapshot) }),
+    [breezyTrustInput, snapshot],
+  );
 
   const dataQualityDiagnostics = useMemo<MarketIdentityDiagnostics | null>(() => {
     if (!data?.ok || !melData?.ok) return null;
@@ -395,6 +413,9 @@ export function RecruitingIntelligenceSection() {
       <KpiCards
         items={kpiItems}
         gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        trustCategory={sheetLive ? undefined : "recruiting-intelligence"}
+        trustState={sheetLive ? undefined : breezyTrustState}
+        trustInput={sheetLive ? undefined : (breezyTrustInput ?? undefined)}
       />
 
       {dataQualityKpis.length > 0 ? (

@@ -11,7 +11,10 @@ import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import { DeferredSection } from "@/components/ui/deferred-section";
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
 import { useDmOperationalDrawer } from "@/hooks/use-dm-operational-drawer";
+import { buildDataTrustState, type DataTrustInput } from "@/lib/data-trust-state";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 import type { UserPublic } from "@/lib/auth/types";
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
 import type { DmAlertPriorityFilter } from "@/lib/dm-dashboard/dm-alert-priority";
@@ -20,7 +23,12 @@ import { useState } from "react";
 type DmOperationalDashboardShellProps = {
   data: DmDashboardSnapshot;
   user: UserPublic;
-  meta?: { partialSync?: boolean } | null;
+  meta?: {
+    partialSync?: boolean;
+    scanMode?: string | null;
+    positionsScanned?: number;
+    totalPositionsAvailable?: number;
+  } | null;
   onCandidateClick: (candidateId: string) => void;
   selectedCandidateId: string | null;
 };
@@ -34,6 +42,14 @@ export function DmOperationalDashboardShell({
 }: DmOperationalDashboardShellProps) {
   const ops = useDmOperationalDrawer(data, user);
   const [prioritySeed, setPrioritySeed] = useState<DmAlertPriorityFilter>("all");
+  const trustInput: DataTrustInput = {
+    hasData: true,
+    partialSync: meta?.partialSync,
+    scanMode: meta?.scanMode,
+    positionsScanned: meta?.positionsScanned,
+    totalPositionsAvailable: meta?.totalPositionsAvailable,
+  };
+  const dataTrust = buildDataTrustState(trustInput);
 
   return (
     <>
@@ -41,6 +57,8 @@ export function DmOperationalDashboardShell({
 
       <DmAlertOperationsKpis
         summary={data.alertSummary}
+        trustState={dataTrust}
+        trustInput={trustInput}
         onCriticalClick={() => setPrioritySeed("critical")}
         onHighClick={() => setPrioritySeed("high")}
         onAgingClick={() => {
@@ -58,16 +76,29 @@ export function DmOperationalDashboardShell({
           .filter((kpi) =>
             ["active-jobs", "candidates-7d", "paperwork-signed", "dd-pending"].includes(kpi.id),
           )
-          .map((kpi) => (
-            <article
-              key={kpi.id}
-              className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-4 py-3 shadow-sm shadow-black/10"
-            >
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{kpi.label}</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{kpi.value}</p>
-              <p className="mt-1 text-[11px] leading-snug text-zinc-500">{kpi.hint}</p>
-            </article>
-          ))}
+          .map((kpi) => {
+            const presentation = resolveKpiTrustPresentation(
+              dataTrust,
+              kpi.id,
+              "dm-dashboard",
+              trustInput,
+            );
+            return (
+              <TrustGatedKpiShell
+                key={kpi.id}
+                presentation={presentation}
+                className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-4 py-3 shadow-sm shadow-black/10"
+              >
+                <article>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    {kpi.label}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{kpi.value}</p>
+                  <p className="mt-1 text-[11px] leading-snug text-zinc-500">{kpi.hint}</p>
+                </article>
+              </TrustGatedKpiShell>
+            );
+          })}
       </section>
 
       <DmOnboardingStatusCard onboarding={data.onboarding} />

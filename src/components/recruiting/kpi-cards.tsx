@@ -1,3 +1,8 @@
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
+import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
+import { buildDataTrustState } from "@/lib/data-trust-state";
+import type { KpiTrustCategory } from "@/lib/kpi-trust-gating";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 import type { Kpi } from "@/lib/recruiting-sample-data";
 
 function ChangeBadge({ kpi }: { kpi: Kpi }) {
@@ -25,6 +30,10 @@ type KpiCardsProps = {
   activeCardId?: string | null;
   onCardClick?: (kpi: Kpi) => void;
   gridClassName?: string;
+  /** When set, Breezy-dependent KPIs dim under partial/degraded/unavailable trust. */
+  trustCategory?: KpiTrustCategory;
+  trustState?: DataTrustState;
+  trustInput?: DataTrustInput;
 };
 
 export function KpiCards({
@@ -32,13 +41,28 @@ export function KpiCards({
   activeCardId = null,
   onCardClick,
   gridClassName = "grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
+  trustCategory,
+  trustState,
+  trustInput,
 }: KpiCardsProps) {
+  const resolvedTrustState =
+    trustState ??
+    (trustInput || trustCategory ? buildDataTrustState(trustInput ?? { hasData: true }) : "live");
   return (
     <section aria-labelledby="kpi-heading" className={gridClassName}>
       <h2 id="kpi-heading" className="sr-only">
         Key performance indicators
       </h2>
       {items.map((kpi) => {
+        const presentation =
+          trustCategory != null
+            ? resolveKpiTrustPresentation(
+                resolvedTrustState,
+                kpi.id,
+                trustCategory,
+                trustInput,
+              )
+            : { dim: false, disclaimer: null, scanLabel: null, preliminaryAlert: false };
         const interactive = Boolean(onCardClick);
         const isActive = activeCardId === kpi.id;
         const className = [
@@ -51,29 +75,8 @@ export function KpiCards({
             : "",
         ].join(" ");
 
-        if (!interactive) {
-          return (
-            <article key={kpi.id} className={className}>
-              <p className="text-sm font-medium text-zinc-400">{kpi.label}</p>
-              <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
-                <p className="text-3xl font-semibold tracking-tight text-zinc-50 tabular-nums sm:text-4xl">
-                  {kpi.value}
-                </p>
-                <ChangeBadge kpi={kpi} />
-              </div>
-              <p className="mt-2 text-xs text-zinc-500">{kpi.hint}</p>
-            </article>
-          );
-        }
-
-        return (
-          <button
-            key={kpi.id}
-            type="button"
-            onClick={() => onCardClick?.(kpi)}
-            aria-pressed={isActive}
-            className={className}
-          >
+        const cardBody = (
+          <>
             <p className="text-sm font-medium text-zinc-400">{kpi.label}</p>
             <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
               <p className="text-3xl font-semibold tracking-tight text-zinc-50 tabular-nums sm:text-4xl">
@@ -82,8 +85,31 @@ export function KpiCards({
               <ChangeBadge kpi={kpi} />
             </div>
             <p className="mt-2 text-xs text-zinc-500">{kpi.hint}</p>
-            <p className="mt-2 text-xs text-teal-400/80">Click to filter table below</p>
-          </button>
+            {interactive ? (
+              <p className="mt-2 text-xs text-teal-400/80">Click to filter table below</p>
+            ) : null}
+          </>
+        );
+
+        if (!interactive) {
+          return (
+            <TrustGatedKpiShell key={kpi.id} presentation={presentation} className={className}>
+              <article className="h-full">{cardBody}</article>
+            </TrustGatedKpiShell>
+          );
+        }
+
+        return (
+          <TrustGatedKpiShell key={kpi.id} presentation={presentation} className={className}>
+            <button
+              type="button"
+              onClick={() => onCardClick?.(kpi)}
+              aria-pressed={isActive}
+              className="h-full w-full text-left"
+            >
+              {cardBody}
+            </button>
+          </TrustGatedKpiShell>
         );
       })}
     </section>

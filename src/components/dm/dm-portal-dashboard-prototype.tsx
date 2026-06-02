@@ -25,7 +25,9 @@ import {
   topNeedsAttentionAlerts,
 } from "@/lib/dm-portal/dm-portal-operational";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
-import { buildDataTrustState } from "@/lib/data-trust-state";
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
+import { buildDataTrustState, type DataTrustInput, type DataTrustState } from "@/lib/data-trust-state";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 import type { DmViewVisibility } from "@/lib/dm-portal/dm-view-mode";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -69,13 +71,36 @@ function SectionShell({
   );
 }
 
-function StatCell({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function StatCell({
+  statId,
+  label,
+  value,
+  hint,
+  trustState,
+  trustInput,
+}: {
+  statId: string;
+  label: string;
+  value: string;
+  hint?: string;
+  trustState: DataTrustState;
+  trustInput: DataTrustInput;
+}) {
+  const presentation = resolveKpiTrustPresentation(
+    trustState,
+    statId,
+    "dm-territory-stat",
+    trustInput,
+  );
   return (
-    <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2.5">
+    <TrustGatedKpiShell
+      presentation={presentation}
+      className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2.5"
+    >
       <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">{label}</p>
       <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-50">{value}</p>
       {hint ? <p className="mt-1 text-[10px] leading-snug text-zinc-600">{hint}</p> : null}
-    </div>
+    </TrustGatedKpiShell>
   );
 }
 
@@ -167,14 +192,15 @@ export function DmPortalDashboard({
   const { territory, pipeline } = operational;
   const tierStyles = coverageTierStyles(territory.coverageTier);
   const topAlerts = topNeedsAttentionAlerts(data);
-  const dataTrust = buildDataTrustState({
+  const trustInput: DataTrustInput = {
     refreshing,
     hasData: true,
     partialSync: meta?.partialSync,
     scanMode: meta?.scanMode,
     positionsScanned: meta?.positionsScanned,
     totalPositionsAvailable: meta?.totalPositionsAvailable,
-  });
+  };
+  const dataTrust = buildDataTrustState(trustInput);
   const ops = useDmOperationalDrawer(data, user);
   const [prioritySeed, setPrioritySeed] = useState<DmAlertPriorityFilter>("all");
 
@@ -235,18 +261,43 @@ export function DmPortalDashboard({
             {territory.states.join(", ") || "—"}
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            <StatCell label="Open jobs" value={territory.openJobs.toLocaleString()} />
-            <StatCell label="Open calls" value={territory.openCalls.toLocaleString()} />
-            <StatCell label="Active reps" value={territory.activeReps.toLocaleString()} hint="Onboarded + hired proxy" />
             <StatCell
+              statId="open-jobs"
+              label="Open jobs"
+              value={territory.openJobs.toLocaleString()}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <StatCell
+              statId="open-calls"
+              label="Open calls"
+              value={territory.openCalls.toLocaleString()}
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <StatCell
+              statId="active-reps"
+              label="Active reps"
+              value={territory.activeReps.toLocaleString()}
+              hint="Onboarded + hired proxy"
+              trustState={dataTrust}
+              trustInput={trustInput}
+            />
+            <StatCell
+              statId="territory-health"
               label="Territory health"
               value={`${territory.coveragePercent}%`}
               hint={`${coverageTierLabel(territory.coverageTier)} · composite recruiting index`}
+              trustState={dataTrust}
+              trustInput={trustInput}
             />
             <StatCell
+              statId="alerts"
               label="Alerts"
               value={operational.needsAttentionTotal.toLocaleString()}
               hint={`${data.alertSummary.criticalCount} critical`}
+              trustState={dataTrust}
+              trustInput={trustInput}
             />
           </div>
         </SectionShell>
@@ -271,12 +322,21 @@ export function DmPortalDashboard({
             </span>
           </div>
           <div className="mt-4">
+            <TrustGatedKpiShell
+              presentation={resolveKpiTrustPresentation(
+                dataTrust,
+                "territory-health",
+                "dm-territory-stat",
+                trustInput,
+              )}
+            >
             <div className="flex items-baseline justify-between gap-2">
               <p className={`text-4xl font-semibold tabular-nums ${tierStyles.text}`}>
                 {territory.coveragePercent}%
               </p>
               <p className="text-xs text-zinc-500">Green ≥80% · Yellow 50–79% · Red &lt;50%</p>
             </div>
+            </TrustGatedKpiShell>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-950/80">
               <div
                 className={`h-full rounded-full transition-all ${tierStyles.meter}`}
@@ -301,6 +361,8 @@ export function DmPortalDashboard({
       <div id={DM_PORTAL_SECTION_IDS.alertKpis} className="scroll-mt-24">
         <DmAlertOperationsKpis
           summary={data.alertSummary}
+          trustState={dataTrust}
+          trustInput={trustInput}
           onCriticalClick={() => setPrioritySeed("critical")}
           onHighClick={() => setPrioritySeed("high")}
           onAgingClick={() => {
@@ -321,16 +383,34 @@ export function DmPortalDashboard({
       >
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <StatCell
+            statId="candidates-7d"
             label="Applicants (7 days)"
             value={pipeline.applicantsLast7Days.toLocaleString()}
+            trustState={dataTrust}
+            trustInput={trustInput}
           />
-          <StatCell label="Paperwork sent" value={pipeline.paperworkSent.toLocaleString()} />
           <StatCell
+            statId="paperwork-signed"
+            label="Paperwork sent"
+            value={pipeline.paperworkSent.toLocaleString()}
+            trustState={dataTrust}
+            trustInput={trustInput}
+          />
+          <StatCell
+            statId="ready-for-mel"
             label="Ready for MEL"
             value={pipeline.readyForMel.toLocaleString()}
             hint="DD approved + MEL project matches"
+            trustState={dataTrust}
+            trustInput={trustInput}
           />
-          <StatCell label="Hired" value={pipeline.hired.toLocaleString()} />
+          <StatCell
+            statId="hired"
+            label="Hired"
+            value={pipeline.hired.toLocaleString()}
+            trustState={dataTrust}
+            trustInput={trustInput}
+          />
         </div>
       </SectionShell>
 

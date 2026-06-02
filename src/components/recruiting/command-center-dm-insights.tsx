@@ -1,7 +1,9 @@
 "use client";
 
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
-import type { DataTrustInput } from "@/lib/data-trust-state";
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
+import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
+import { KPI_PRELIMINARY_ALERT_LABEL, resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 import {
   coverageTierLabel,
   coverageTierStyles,
@@ -18,15 +20,41 @@ type CommandCenterDmInsightsProps = {
   insights: CommandCenterDmInsightsSnapshot;
   loadingExtras?: boolean;
   territoryTrust?: DataTrustInput | null;
+  territoryTrustState?: DataTrustState;
 };
 
-function StatCell({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function StatCell({
+  statId,
+  category,
+  label,
+  value,
+  hint,
+  trustState,
+  trustInput,
+}: {
+  statId: string;
+  category: "command-center-territory" | "command-center-recruiting-health";
+  label: string;
+  value: string;
+  hint?: string;
+  trustState: DataTrustState;
+  trustInput?: DataTrustInput | null;
+}) {
+  const presentation = resolveKpiTrustPresentation(
+    trustState,
+    statId,
+    category,
+    trustInput ?? undefined,
+  );
   return (
-    <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2.5">
+    <TrustGatedKpiShell
+      presentation={presentation}
+      className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2.5"
+    >
       <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">{label}</p>
       <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-50">{value}</p>
       {hint ? <p className="mt-1 text-[10px] text-zinc-600">{hint}</p> : null}
-    </div>
+    </TrustGatedKpiShell>
   );
 }
 
@@ -64,21 +92,48 @@ function QuickLinkCard({
   );
 }
 
-function TerritoryRow({ row }: { row: CommandCenterTerritoryInsight }) {
+function TerritoryRow({
+  row,
+  trustState,
+  trustInput,
+}: {
+  row: CommandCenterTerritoryInsight;
+  trustState: DataTrustState;
+  trustInput?: DataTrustInput | null;
+}) {
   const tier = coverageTierStyles(row.coverageTier);
+  const healthPresentation = resolveKpiTrustPresentation(
+    trustState,
+    "territory-health",
+    "command-center-territory",
+    trustInput ?? undefined,
+  );
+  const callsPresentation = resolveKpiTrustPresentation(
+    trustState,
+    "open-calls",
+    "command-center-territory",
+    trustInput ?? undefined,
+  );
   return (
     <tr className="border-t border-zinc-800/80">
       <td className="py-2.5 pr-3 text-sm font-medium text-zinc-100">{row.dmName}</td>
       <td className="py-2.5 pr-3 text-xs text-zinc-500">{row.states.length} states</td>
       <td className="py-2.5 pr-3 text-right tabular-nums text-sm text-zinc-200">{row.openJobs}</td>
-      <td className="py-2.5 pr-3 text-right tabular-nums text-sm text-zinc-200">{row.openCalls}</td>
+      <td
+        className={`py-2.5 pr-3 text-right tabular-nums text-sm text-zinc-200 ${callsPresentation.dim ? "opacity-55" : ""}`}
+      >
+        {row.openCalls}
+      </td>
       <td className="py-2.5 pr-3 text-right tabular-nums text-sm text-zinc-200">{row.activeReps}</td>
-      <td className="py-2.5 text-right">
+      <td className={`py-2.5 text-right ${healthPresentation.dim ? "opacity-55" : ""}`}>
         <span
           className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold tabular-nums ${tier.border} ${tier.bg} ${tier.text}`}
         >
           {row.coveragePercent}% · {coverageTierLabel(row.coverageTier)}
         </span>
+        {healthPresentation.preliminaryAlert ? (
+          <p className="mt-1 text-[10px] italic text-zinc-500">{KPI_PRELIMINARY_ALERT_LABEL}</p>
+        ) : null}
       </td>
     </tr>
   );
@@ -88,10 +143,12 @@ function RiskAlertList({
   title,
   alerts,
   emptyLabel,
+  preliminary,
 }: {
   title: string;
   alerts: CommandCenterTerritoryRiskAlert[];
   emptyLabel: string;
+  preliminary?: boolean;
 }) {
   return (
     <div>
@@ -103,7 +160,7 @@ function RiskAlertList({
           {alerts.map((alert) => (
             <li
               key={alert.id}
-              className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2"
+              className={`rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2 ${preliminary ? "opacity-55" : ""}`}
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span
@@ -115,6 +172,7 @@ function RiskAlertList({
                         : "bg-amber-500/10 text-amber-100"
                   }`}
                 >
+                  {preliminary ? `${KPI_PRELIMINARY_ALERT_LABEL} · ` : ""}
                   {alert.severity}
                 </span>
                 {alert.dmName ? (
@@ -135,8 +193,13 @@ export function CommandCenterDmInsights({
   insights,
   loadingExtras,
   territoryTrust,
+  territoryTrustState = "live",
 }: CommandCenterDmInsightsProps) {
   const { recruitingHealth, topTerritoriesNeedingAttention, riskAlerts } = insights;
+  const alertListsPreliminary =
+    territoryTrustState === "partial" ||
+    territoryTrustState === "degraded" ||
+    territoryTrustState === "unavailable";
 
   return (
     <div className="space-y-6">
@@ -196,7 +259,12 @@ export function CommandCenterDmInsights({
               </thead>
               <tbody>
                 {topTerritoriesNeedingAttention.map((row) => (
-                  <TerritoryRow key={row.dmName} row={row} />
+                  <TerritoryRow
+                    key={row.dmName}
+                    row={row}
+                    trustState={territoryTrustState}
+                    trustInput={territoryTrust}
+                  />
                 ))}
               </tbody>
             </table>
@@ -208,16 +276,38 @@ export function CommandCenterDmInsights({
           <p className="mt-1 text-xs text-zinc-500">Organization-wide pipeline from Breezy and workflows.</p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <StatCell
+              statId="applicants-7d"
+              category="command-center-recruiting-health"
               label="Applicants (7 days)"
               value={recruitingHealth.applicantsLast7Days.toLocaleString()}
+              trustState={territoryTrustState}
+              trustInput={territoryTrust}
             />
-            <StatCell label="Paperwork sent" value={recruitingHealth.paperworkSent.toLocaleString()} />
             <StatCell
+              statId="paperwork-sent"
+              category="command-center-recruiting-health"
+              label="Paperwork sent"
+              value={recruitingHealth.paperworkSent.toLocaleString()}
+              trustState={territoryTrustState}
+              trustInput={territoryTrust}
+            />
+            <StatCell
+              statId="ready-for-mel"
+              category="command-center-recruiting-health"
               label="Ready for MEL"
               value={recruitingHealth.readyForMel.toLocaleString()}
               hint="Workflow status Ready for MEL / Signed"
+              trustState={territoryTrustState}
+              trustInput={territoryTrust}
             />
-            <StatCell label="Hired" value={recruitingHealth.hired.toLocaleString()} />
+            <StatCell
+              statId="hired"
+              category="command-center-recruiting-health"
+              label="Hired"
+              value={recruitingHealth.hired.toLocaleString()}
+              trustState={territoryTrustState}
+              trustInput={territoryTrust}
+            />
           </div>
         </section>
       </div>
@@ -233,16 +323,19 @@ export function CommandCenterDmInsights({
             title="Critical shortages"
             alerts={riskAlerts.criticalShortages}
             emptyLabel="No critical MEL shortages flagged."
+            preliminary={alertListsPreliminary}
           />
           <RiskAlertList
             title="Unstaffed high-priority"
             alerts={riskAlerts.unstaffedHighPriority}
             emptyLabel="No high-priority unstaffed stores."
+            preliminary={alertListsPreliminary}
           />
           <RiskAlertList
             title="Below coverage threshold"
             alerts={riskAlerts.belowThreshold}
             emptyLabel="All territories at or above threshold."
+            preliminary={alertListsPreliminary}
           />
         </div>
       </section>

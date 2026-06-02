@@ -1,8 +1,15 @@
 "use client";
 
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
+import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
+import { buildDataTrustState } from "@/lib/data-trust-state";
+import {
+  KPI_PRELIMINARY_ALERT_LABEL,
+  resolveKpiTrustPresentation,
+  shouldApplyKpiTrustGating,
+  type KpiTrustCategory,
+} from "@/lib/kpi-trust-gating";
 import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence";
-import { coveragePercentTone } from "@/lib/recruiting-decision-intelligence/needs-attention-alerts";
-
 type RecruiterDecisionIntelligencePanelProps = {
   data: RecruiterDecisionIntelligenceSnapshot | null;
   loading?: boolean;
@@ -10,6 +17,8 @@ type RecruiterDecisionIntelligencePanelProps = {
   /** Hides suggested actions & coverage lists when automation workspace owns them. */
   hideOverlappingSections?: boolean;
   onOpenVariant?: (draftId: string) => void;
+  trustState?: DataTrustState;
+  trustInput?: DataTrustInput;
 };
 
 const URGENCY_CLASS: Record<string, string> = {
@@ -19,12 +28,46 @@ const URGENCY_CLASS: Record<string, string> = {
   low: "border-zinc-800 bg-zinc-950/40",
 };
 
+function IntelStatGated({
+  statId,
+  category,
+  label,
+  value,
+  trustState,
+  trustInput,
+}: {
+  statId: string;
+  category: KpiTrustCategory;
+  label: string;
+  value: string;
+  trustState: DataTrustState;
+  trustInput?: DataTrustInput;
+}) {
+  const presentation = resolveKpiTrustPresentation(
+    trustState,
+    statId,
+    category,
+    trustInput,
+  );
+  return (
+    <TrustGatedKpiShell
+      presentation={presentation}
+      className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2"
+    >
+      <p className="text-[10px] uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className="mt-1 text-sm font-medium text-zinc-200">{value}</p>
+    </TrustGatedKpiShell>
+  );
+}
+
 export function RecruiterDecisionIntelligencePanel({
   data,
   loading = false,
   compact = false,
   hideOverlappingSections = false,
   onOpenVariant,
+  trustState: trustStateProp,
+  trustInput,
 }: RecruiterDecisionIntelligencePanelProps) {
   if (loading && !data) {
     return (
@@ -35,6 +78,9 @@ export function RecruiterDecisionIntelligencePanel({
   }
   if (!data) return null;
 
+  const trustState = trustStateProp ?? buildDataTrustState(trustInput ?? { hasData: true });
+  const alertsPreliminary = shouldApplyKpiTrustGating(trustState);
+
   const territory = data.territory;
   const coverageHealth = data.coverageHealth ?? {
     openCalls: null,
@@ -42,16 +88,6 @@ export function RecruiterDecisionIntelligencePanel({
     coveragePercent: null,
   };
   const needsAttentionAlerts = data.needsAttentionAlerts ?? [];
-  const coverageTone = coveragePercentTone(coverageHealth.coveragePercent);
-  const coverageToneClass =
-    coverageTone === "good"
-      ? "text-emerald-300"
-      : coverageTone === "warn"
-        ? "text-amber-300"
-        : coverageTone === "critical"
-          ? "text-red-300"
-          : "text-zinc-400";
-
   return (
     <div className="space-y-4">
       <section className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4 sm:p-5">
@@ -62,26 +98,34 @@ export function RecruiterDecisionIntelligencePanel({
           </p>
         </header>
         <div className="mb-4 grid gap-2 sm:grid-cols-3">
-          <IntelStat
+          <IntelStatGated
+            statId="open-calls"
+            category="dm-territory-stat"
             label="Open calls"
             value={
               coverageHealth.openCalls != null
                 ? coverageHealth.openCalls.toLocaleString()
                 : "Insufficient data"
             }
+            trustState={trustState}
+            trustInput={trustInput}
           />
           <IntelStat
             label="Active reps"
             value={coverageHealth.activeReps.toLocaleString()}
           />
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2">
-            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Staffing coverage %</p>
-            <p className={`mt-1 text-sm font-medium tabular-nums ${coverageToneClass}`}>
-              {coverageHealth.coveragePercent != null
+          <IntelStatGated
+            statId="territory-health"
+            category="dm-territory-stat"
+            label="Staffing coverage %"
+            value={
+              coverageHealth.coveragePercent != null
                 ? `${coverageHealth.coveragePercent}%`
-                : "Insufficient data"}
-            </p>
-          </div>
+                : "Insufficient data"
+            }
+            trustState={trustState}
+            trustInput={trustInput}
+          />
         </div>
         {needsAttentionAlerts.length === 0 ? (
           <p className="text-sm text-zinc-500">No urgent recruiting alerts for current data.</p>
@@ -90,10 +134,11 @@ export function RecruiterDecisionIntelligencePanel({
             {needsAttentionAlerts.slice(0, compact ? 6 : 12).map((alert) => (
               <li
                 key={alert.id}
-                className="rounded-lg border border-amber-500/20 bg-zinc-950/40 px-3 py-2 text-sm"
+                className={`rounded-lg border border-amber-500/20 bg-zinc-950/40 px-3 py-2 text-sm ${alertsPreliminary ? "opacity-55" : ""}`}
               >
                 <p className="font-medium text-amber-100">
                   <span aria-hidden>⚠ </span>
+                  {alertsPreliminary ? `${KPI_PRELIMINARY_ALERT_LABEL}: ` : ""}
                   {alert.label}
                 </p>
                 <p className="mt-0.5 text-xs text-zinc-400">
@@ -119,15 +164,26 @@ export function RecruiterDecisionIntelligencePanel({
           </p>
         </header>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <IntelStatGated
+            statId="highest-risk"
+            category="recruiter-operational"
+            label="Highest risk"
+            value={territory.highestRiskTerritory ?? "—"}
+            trustState={trustState}
+            trustInput={trustInput}
+          />
+          <IntelStatGated
+            statId="top-metro"
+            category="recruiter-operational"
+            label="Top opportunity"
+            value={territory.topOpportunityCities[0]?.label ?? "—"}
+            trustState={trustState}
+            trustInput={trustInput}
+          />
           <IntelStat label="Best conversion" value={territory.bestConversionTerritory ?? "—"} />
-          <IntelStat label="Highest risk" value={territory.highestRiskTerritory ?? "—"} />
           <IntelStat
             label="Top risk city"
             value={territory.topRiskCities[0]?.label ?? "—"}
-          />
-          <IntelStat
-            label="Top opportunity"
-            value={territory.topOpportunityCities[0]?.label ?? "—"}
           />
         </div>
         {!compact ? (

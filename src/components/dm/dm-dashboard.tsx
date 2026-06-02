@@ -19,7 +19,10 @@ import { WorkforceOperationsSection } from "@/components/recruiting/workforce-op
 import { DeferredSection } from "@/components/ui/deferred-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
+import type { DataTrustInput } from "@/lib/data-trust-state";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 
 type DmDashboardProps = {
   user: UserPublic;
@@ -36,6 +39,18 @@ export function DmDashboard({ user }: DmDashboardProps) {
   const drawer = useCandidateDrawer({
     territoryStates: data?.territoryStates ?? user.territoryStates,
   });
+
+  const dmTrustInput: DataTrustInput = {
+    loading,
+    refreshing,
+    error,
+    timedOut,
+    hasData: Boolean(data),
+    partialSync: meta?.partialSync,
+    scanMode: meta?.scanMode,
+    positionsScanned: meta?.positionsScanned,
+    totalPositionsAvailable: meta?.totalPositionsAvailable,
+  };
 
   const territorySubtitle =
     data?.territoryLabel ?? (user.territoryStates.join(", ") || "—");
@@ -66,17 +81,7 @@ export function DmDashboard({ user }: DmDashboardProps) {
       </div>
 
       <DataTrustStatusBanner
-        trust={{
-          loading,
-          refreshing,
-          error,
-          timedOut,
-          hasData: Boolean(data),
-          partialSync: meta?.partialSync,
-          scanMode: meta?.scanMode,
-          positionsScanned: meta?.positionsScanned,
-          totalPositionsAvailable: meta?.totalPositionsAvailable,
-        }}
+        trust={dmTrustInput}
         state={dataTrust}
         onRetry={refresh}
         retrying={refreshing}
@@ -111,16 +116,29 @@ export function DmDashboard({ user }: DmDashboardProps) {
           <TerritoryHealthCard health={data.health} />
 
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-            {data.kpis.map((kpi) => (
-              <article
-                key={kpi.id}
-                className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-4 py-3 shadow-sm shadow-black/10"
-              >
-                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{kpi.label}</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{kpi.value}</p>
-                <p className="mt-1 text-[11px] leading-snug text-zinc-500">{kpi.hint}</p>
-              </article>
-            ))}
+            {data.kpis.map((kpi) => {
+              const presentation = resolveKpiTrustPresentation(
+                dataTrust,
+                kpi.id,
+                "dm-dashboard",
+                dmTrustInput,
+              );
+              return (
+                <TrustGatedKpiShell
+                  key={kpi.id}
+                  presentation={presentation}
+                  className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-4 py-3 shadow-sm shadow-black/10"
+                >
+                  <article>
+                    <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                      {kpi.label}
+                    </p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{kpi.value}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-zinc-500">{kpi.hint}</p>
+                  </article>
+                </TrustGatedKpiShell>
+              );
+            })}
           </section>
 
           <DmMelMatchingPanel metrics={data.melMatching} onCandidateClick={drawer.openCandidate} />

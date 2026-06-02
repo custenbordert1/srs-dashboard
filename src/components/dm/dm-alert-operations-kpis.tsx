@@ -1,4 +1,10 @@
+"use client";
+
+import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
+import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
+import { buildDataTrustState } from "@/lib/data-trust-state";
 import type { DmAlertOperationsSummary } from "@/lib/dm-dashboard/dm-alert-priority";
+import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 
 type DmAlertOperationsKpisProps = {
   summary: DmAlertOperationsSummary;
@@ -6,6 +12,8 @@ type DmAlertOperationsKpisProps = {
   onHighClick?: () => void;
   onAgingClick?: () => void;
   onZeroApplicantsClick?: () => void;
+  trustState?: DataTrustState;
+  trustInput?: DataTrustInput;
 };
 
 const KPI_CARDS: Array<{
@@ -67,6 +75,8 @@ export function DmAlertOperationsKpis({
   onHighClick,
   onAgingClick,
   onZeroApplicantsClick,
+  trustState,
+  trustInput,
 }: DmAlertOperationsKpisProps) {
   const handlers = {
     onCriticalClick,
@@ -74,26 +84,45 @@ export function DmAlertOperationsKpis({
     onAgingClick,
     onZeroApplicantsClick,
   };
+  const resolvedTrustState =
+    trustState ?? buildDataTrustState(trustInput ?? { hasData: true });
 
   return (
     <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
       {KPI_CARDS.map((card) => {
         const handlerKey = KPI_CLICK_MAP[card.key];
         const onClick = handlerKey ? handlers[handlerKey] : undefined;
-        const Tag = onClick ? "button" : "article";
-        return (
-          <Tag
-            key={card.key}
-            type={onClick ? "button" : undefined}
-            onClick={onClick}
-            className={`rounded-xl border px-4 py-3 text-left shadow-sm shadow-black/10 ${card.accent ?? "border-zinc-800/80 bg-zinc-900/50"} ${onClick ? "hover:brightness-110" : ""}`}
-          >
+        const presentation = resolveKpiTrustPresentation(
+          resolvedTrustState,
+          card.key,
+          "dm-alert",
+          trustInput,
+        );
+        const shellClass = `rounded-xl border px-4 py-3 text-left shadow-sm shadow-black/10 ${card.accent ?? "border-zinc-800/80 bg-zinc-900/50"} ${onClick ? "hover:brightness-110" : ""}`;
+        const body = (
+          <>
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{card.label}</p>
             <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">
               {summary[card.key].toLocaleString()}
             </p>
             <p className="mt-1 text-[11px] leading-snug text-zinc-500">{card.hint}</p>
-          </Tag>
+          </>
+        );
+
+        if (onClick) {
+          return (
+            <TrustGatedKpiShell key={card.key} presentation={presentation} className={shellClass}>
+              <button type="button" onClick={onClick} className="w-full text-left">
+                {body}
+              </button>
+            </TrustGatedKpiShell>
+          );
+        }
+
+        return (
+          <TrustGatedKpiShell key={card.key} presentation={presentation} className={shellClass}>
+            <article>{body}</article>
+          </TrustGatedKpiShell>
         );
       })}
     </section>

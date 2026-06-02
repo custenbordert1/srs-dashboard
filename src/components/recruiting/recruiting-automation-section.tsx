@@ -261,7 +261,19 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           }
         }}
       />
-      <RecruiterOperationalKpiStrip kpis={kpis} />
+      <RecruiterOperationalKpiStrip
+        kpis={kpis}
+        trustState={dataTrust}
+        trustInput={{
+          loading,
+          refreshing,
+          error: error ?? fatalError,
+          timedOut,
+          hasData: Boolean(data),
+          partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+          stale,
+        }}
+      />
       <StaffingRiskHeatPanel
         snapshot={data}
         escalations={meta?.escalations ?? []}
@@ -279,6 +291,16 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
               data={data.decisionIntelligence}
               compact
               hideOverlappingSections
+              trustState={dataTrust}
+              trustInput={{
+                loading,
+                refreshing,
+                error: error ?? fatalError,
+                timedOut,
+                hasData: Boolean(data),
+                partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+                stale,
+              }}
             />
             <RecruitingAlertsSection />
             <CandidateIntelligenceSection />
@@ -391,6 +413,16 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           data={data.decisionIntelligence}
           compact
           hideOverlappingSections
+          trustState={dataTrust}
+          trustInput={{
+            loading,
+            refreshing,
+            error: error ?? fatalError,
+            timedOut,
+            hasData: Boolean(data),
+            partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+            stale,
+          }}
         />
       )}
 

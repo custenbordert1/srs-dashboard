@@ -12,7 +12,7 @@ import { buildCommandCenterDmInsights } from "@/lib/command-center-dm-insights";
 import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
-import { buildDataTrustState } from "@/lib/data-trust-state";
+import { buildDataTrustState, type DataTrustState } from "@/lib/data-trust-state";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import {
   buildRecruitingCommandCenter,
@@ -292,6 +292,11 @@ export function RecruitingCommandCenter() {
     };
   }, [loadState, snapshot]);
 
+  const breezyTrustState: DataTrustState = useMemo(
+    () => buildDataTrustState(breezyTrustInput ?? { hasData: Boolean(snapshot) }),
+    [breezyTrustInput, snapshot],
+  );
+
   if (loadState.status === "loading") {
     if (loadingCeilingHit) {
       return (
@@ -370,7 +375,13 @@ export function RecruitingCommandCenter() {
 
       {breezyTrustInput ? <DataTrustStatusBanner trust={breezyTrustInput} /> : null}
 
-      <KpiCards items={snapshot.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />
+      <KpiCards
+        items={snapshot.kpis}
+        gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        trustCategory="command-center"
+        trustState={breezyTrustState}
+        trustInput={breezyTrustInput ?? undefined}
+      />
 
       {dmInsights ? (
         <CommandCenterDmInsights
@@ -384,6 +395,7 @@ export function RecruitingCommandCenter() {
                 }
               : null
           }
+          territoryTrustState={breezyTrustState}
         />
       ) : null}
 
