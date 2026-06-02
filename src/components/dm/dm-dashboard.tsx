@@ -4,7 +4,7 @@ import { AppShell } from "@/components/auth/app-shell";
 import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widget";
 import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
 import { DmOperationalDashboard } from "@/components/dm/dm-operational-dashboard";
-import { DmPortalDashboardPrototype } from "@/components/dm/dm-portal-dashboard-prototype";
+import { DmPortalDashboard } from "@/components/dm/dm-portal-dashboard-prototype";
 import { RecruitingAutomationSection } from "@/components/recruiting/recruiting-automation-section";
 import { isDmRole } from "@/lib/auth/roles";
 import { getDmViewVisibility, resolveDmViewModeFromUser } from "@/lib/dm-portal/dm-view-mode";
@@ -97,10 +97,14 @@ export function DmDashboard({ user }: DmDashboardProps) {
 
       {data ? (
         viewMode.enabled ? (
-          <DmPortalDashboardPrototype
+          <DmPortalDashboard
             data={data}
             visibility={visibility}
             territoryLabel={data.territoryLabel}
+            user={user}
+            meta={meta}
+            onCandidateClick={drawer.openCandidate}
+            selectedCandidateId={drawer.selectedCandidateId}
           />
         ) : isDmRole(user.role) ? (
           <DmOperationalDashboard
@@ -229,9 +233,7 @@ export function DmDashboard({ user }: DmDashboardProps) {
         )
       ) : null}
 
-      {!visibility.hideFullCandidateDatabase ? (
-        <CandidateDetailDrawer {...drawer.drawerProps} />
-      ) : null}
+      {data ? <CandidateDetailDrawer {...drawer.drawerProps} /> : null}
     </AppShell>
   );
 }

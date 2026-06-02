@@ -1,26 +1,45 @@
 "use client";
 
+import { DmAlertOperationsKpis } from "@/components/dm/dm-alert-operations-kpis";
+import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widget";
+import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
+import { DmOnboardingStatusCard } from "@/components/dm/dm-onboarding-status-card";
+import { DmOperationalDrawer } from "@/components/dm/dm-operational-drawer";
+import { DmPriorityAlertsPanel } from "@/components/dm/dm-priority-alerts-panel";
+import { DmToast } from "@/components/dm/dm-toast";
+import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
+import { DmMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
+import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
+import { DeferredSection } from "@/components/ui/deferred-section";
+import { useDmOperationalDrawer } from "@/hooks/use-dm-operational-drawer";
+import type { UserPublic } from "@/lib/auth/types";
+import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
+import type { DmAlertPriorityFilter, DmPrioritizedAlert } from "@/lib/dm-dashboard/dm-alert-priority";
 import {
   DM_PORTAL_NAV_LINKS,
   DM_PORTAL_SECTION_IDS,
   buildDmPortalOperationalView,
   coverageTierLabel,
   coverageTierStyles,
-  resolveDmPortalAlertHref,
   severityLabel,
   topNeedsAttentionAlerts,
 } from "@/lib/dm-portal/dm-portal-operational";
 import type { DmViewVisibility } from "@/lib/dm-portal/dm-view-mode";
-import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
-import type { DmPrioritizedAlert } from "@/lib/dm-dashboard/dm-alert-priority";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-type DmPortalDashboardPrototypeProps = {
+type DmPortalDashboardProps = {
   data: DmDashboardSnapshot;
   visibility: DmViewVisibility;
   territoryLabel: string;
+  user: UserPublic;
+  meta?: { partialSync?: boolean } | null;
+  onCandidateClick: (candidateId: string) => void;
+  selectedCandidateId: string | null;
 };
+
+/** @deprecated Use `DmPortalDashboard` — alias kept for imports. */
+export type DmPortalDashboardPrototypeProps = DmPortalDashboardProps;
 
 function SectionShell({
   id,
@@ -65,33 +84,40 @@ function priorityBadgeClass(priority: DmPrioritizedAlert["priority"]): string {
   }
 }
 
-function NeedsAttentionList({ alerts }: { alerts: DmPrioritizedAlert[] }) {
+function NeedsAttentionList({
+  alerts,
+  onAlertClick,
+}: {
+  alerts: DmPrioritizedAlert[];
+  onAlertClick: (alert: DmPrioritizedAlert) => void;
+}) {
   if (alerts.length === 0) {
     return <p className="text-sm text-zinc-500">No territory alerts right now.</p>;
   }
   return (
     <ul className="divide-y divide-zinc-800/80">
       {alerts.map((alert) => (
-        <li key={alert.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${priorityBadgeClass(alert.priority)}`}
-              >
-                {severityLabel(alert.priority)}
-              </span>
-              <span className="text-[10px] uppercase tracking-wide text-zinc-600">{alert.alertTypeLabel}</span>
+        <li key={alert.id}>
+          <button
+            type="button"
+            onClick={() => onAlertClick(alert)}
+            className="flex w-full flex-wrap items-start justify-between gap-3 py-3 text-left transition hover:bg-zinc-950/40"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${priorityBadgeClass(alert.priority)}`}
+                >
+                  {severityLabel(alert.priority)}
+                </span>
+                <span className="text-[10px] uppercase tracking-wide text-zinc-600">{alert.alertTypeLabel}</span>
+              </div>
+              <p className="mt-1.5 text-sm font-medium text-zinc-100">{alert.title}</p>
+              <p className="mt-0.5 text-xs text-zinc-500">{alert.detail}</p>
+              <p className="mt-1 text-[11px] text-zinc-600">{alert.recommendedAction}</p>
+              <span className="mt-2 inline-flex text-xs font-medium text-teal-400">Open operational detail →</span>
             </div>
-            <p className="mt-1.5 text-sm font-medium text-zinc-100">{alert.title}</p>
-            <p className="mt-0.5 text-xs text-zinc-500">{alert.detail}</p>
-            <p className="mt-1 text-[11px] text-zinc-600">{alert.recommendedAction}</p>
-            <Link
-              href={resolveDmPortalAlertHref(alert)}
-              className="mt-2 inline-flex text-xs font-medium text-teal-400 hover:text-teal-300"
-            >
-              View in territory dashboard →
-            </Link>
-          </div>
+          </button>
         </li>
       ))}
     </ul>
@@ -119,38 +145,48 @@ function NavCard({
   );
 }
 
-export function DmPortalDashboardPrototype({
+export function DmPortalDashboard({
   data,
   visibility,
   territoryLabel,
-}: DmPortalDashboardPrototypeProps) {
+  user,
+  meta,
+  onCandidateClick,
+  selectedCandidateId,
+}: DmPortalDashboardProps) {
   const operational = buildDmPortalOperationalView(data);
   const { territory, pipeline } = operational;
   const tierStyles = coverageTierStyles(territory.coverageTier);
   const topAlerts = topNeedsAttentionAlerts(data);
+  const ops = useDmOperationalDrawer(data, user);
+  const [prioritySeed, setPrioritySeed] = useState<DmAlertPriorityFilter>("all");
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.location.hash) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const candidateId = params.get("candidateId");
+    if (candidateId) onCandidateClick(candidateId);
+    const jobId = params.get("jobId");
+    if (jobId) ops.openJob(jobId);
+    if (!window.location.hash) return;
     const id = window.location.hash.replace(/^#/, "");
     const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [data.fetchedAt, onCandidateClick, ops.openJob]);
 
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-teal-500/25 bg-teal-500/5 px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-teal-300/90">DM operations</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-teal-300/90">DM territory operations</p>
         <p className="mt-1 text-sm text-zinc-300">
-          Daily view for <span className="font-medium text-zinc-100">{data.dmName}</span> · {territoryLabel}
+          Live view for <span className="font-medium text-zinc-100">{data.dmName}</span> · {territoryLabel}
         </p>
       </div>
 
       <section id={DM_PORTAL_SECTION_IDS.quickNav} className="scroll-mt-24">
         <h2 className="text-sm font-semibold text-zinc-100">Quick navigation</h2>
-        <p className="mt-1 text-xs text-zinc-500">Jump to operational sections on this dashboard.</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="mt-1 text-xs text-zinc-500">Jump to sections on this dashboard.</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {DM_PORTAL_NAV_LINKS.map((item) => (
             <NavCard key={item.id} label={item.label} description={item.description} href={item.href} />
           ))}
@@ -197,7 +233,9 @@ export function DmPortalDashboardPrototype({
                 Territory health score · {data.health.label}
               </p>
             </div>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${tierStyles.text} border ${tierStyles.border}`}>
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${tierStyles.text} ${tierStyles.border}`}
+            >
               {coverageTierLabel(territory.coverageTier)}
             </span>
           </div>
@@ -214,9 +252,36 @@ export function DmPortalDashboardPrototype({
                 style={{ width: `${Math.min(100, Math.max(0, territory.coveragePercent))}%` }}
               />
             </div>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {data.health.factors.map((factor) => (
+                <li key={factor.id} className="rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-xs">
+                  <div className="flex justify-between gap-2">
+                    <span className="font-medium text-zinc-300">{factor.label}</span>
+                    <span className="tabular-nums text-zinc-500">{factor.score}</span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-zinc-600">{factor.detail}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       ) : null}
+
+      <div id={DM_PORTAL_SECTION_IDS.alertKpis} className="scroll-mt-24">
+        <DmAlertOperationsKpis
+          summary={data.alertSummary}
+          onCriticalClick={() => setPrioritySeed("critical")}
+          onHighClick={() => setPrioritySeed("high")}
+          onAgingClick={() => {
+            const hit = data.prioritizedAlerts.find((row) => row.category.includes("job-aging"));
+            if (hit) ops.openAlert(hit);
+          }}
+          onZeroApplicantsClick={() => {
+            const hit = data.prioritizedAlerts.find((row) => row.category === "no-applicants-7d");
+            if (hit) ops.openAlert(hit);
+          }}
+        />
+      </div>
 
       <SectionShell
         id={DM_PORTAL_SECTION_IDS.recruitingPipeline}
@@ -238,75 +303,92 @@ export function DmPortalDashboardPrototype({
         </div>
       </SectionShell>
 
+      <DmOnboardingStatusCard onboarding={data.onboarding} />
+
       {visibility.showNeedsAttention ? (
         <SectionShell
           id={DM_PORTAL_SECTION_IDS.needsAttention}
           title="Needs attention"
-          description="Top 10 prioritized alerts — severity ranked for your territory."
+          description="Top 10 prioritized alerts — tap to open job or city detail."
         >
-          <NeedsAttentionList alerts={topAlerts} />
+          <NeedsAttentionList alerts={topAlerts} onAlertClick={ops.openAlert} />
         </SectionShell>
       ) : null}
 
+      <div id={DM_PORTAL_SECTION_IDS.priorityAlerts} className="scroll-mt-24">
+        <DmPriorityAlertsPanel
+          key={prioritySeed}
+          alerts={data.prioritizedAlerts}
+          onAlertClick={ops.openAlert}
+          initialPriorityFilter={prioritySeed}
+        />
+      </div>
+
+      <div id={DM_PORTAL_SECTION_IDS.candidates} className="scroll-mt-24 space-y-6">
+        <DmAttentionPanel
+          needsAttention={data.needsAttention}
+          highestFillRisk={data.highestFillRisk}
+          topCandidates={data.topCandidates}
+          recentApplicants={data.recentApplicants}
+          onCandidateClick={onCandidateClick}
+          selectedCandidateId={selectedCandidateId}
+          candidatesOnly
+        />
+
+        <CandidatePipelineWidget
+          pipeline={data.pipeline}
+          onCandidateClick={onCandidateClick}
+          selectedCandidateId={selectedCandidateId}
+        />
+      </div>
+
       {visibility.showOpenOpportunities ? (
-        <SectionShell
-          id={DM_PORTAL_SECTION_IDS.openOpportunities}
-          title="Open opportunities"
-          description="High-priority unstaffed MEL stores in your territory."
-        >
-          {data.melMatching.unstaffedHighPriorityStores.length === 0 ? (
-            <p className="text-sm text-zinc-500">No high-priority unstaffed stores flagged.</p>
-          ) : (
-            <ul className="divide-y divide-zinc-800/80">
-              {data.melMatching.unstaffedHighPriorityStores.slice(0, 8).map((row, index) => (
-                <li key={`${row.projectName}-${row.state}-${index}`} className="py-2.5">
-                  <p className="text-sm font-medium text-zinc-100">{row.projectName}</p>
-                  <p className="text-xs text-zinc-500">
-                    {row.client} · {row.storeName} · {row.state}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionShell>
+        <>
+          <DmMelMatchingPanel metrics={data.melMatching} onCandidateClick={onCandidateClick} />
+
+          <SectionShell
+            id={DM_PORTAL_SECTION_IDS.openOpportunities}
+            title="Open opportunities"
+            description="High-priority unstaffed MEL stores in your territory."
+          >
+            {data.melMatching.unstaffedHighPriorityStores.length === 0 ? (
+              <p className="text-sm text-zinc-500">No high-priority unstaffed stores flagged.</p>
+            ) : (
+              <ul className="divide-y divide-zinc-800/80">
+                {data.melMatching.unstaffedHighPriorityStores.slice(0, 8).map((row, index) => (
+                  <li key={`${row.projectName}-${row.state}-${index}`} className="py-2.5">
+                    <p className="text-sm font-medium text-zinc-100">{row.projectName}</p>
+                    <p className="text-xs text-zinc-500">
+                      {row.client} · {row.storeName} · {row.state}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionShell>
+        </>
       ) : null}
 
       <SectionShell
         id={DM_PORTAL_SECTION_IDS.coverageIssues}
         title="Coverage issues"
-        description="Cities and states with the highest shortage signals."
+        description="Cities and states with the highest shortage signals — tap a bar to drill down."
       >
         <div className="grid gap-4 lg:grid-cols-2">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Top problem cities</p>
-            {data.coverage.topProblemCities.length === 0 ? (
-              <p className="mt-2 text-sm text-zinc-500">No city-level gaps flagged.</p>
-            ) : (
-              <ul className="mt-2 space-y-1.5">
-                {data.coverage.topProblemCities.slice(0, 6).map((row) => (
-                  <li key={row.label} className="flex justify-between text-sm text-zinc-300">
-                    <span>{row.label}</span>
-                    <span className="tabular-nums text-zinc-500">{row.value}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Shortages by state</p>
-            {data.coverage.candidateShortagesByState.length === 0 ? (
-              <p className="mt-2 text-sm text-zinc-500">No state shortages flagged.</p>
-            ) : (
-              <ul className="mt-2 space-y-1.5">
-                {data.coverage.candidateShortagesByState.slice(0, 6).map((row) => (
-                  <li key={row.label} className="flex justify-between text-sm text-zinc-300">
-                    <span>{row.label}</span>
-                    <span className="tabular-nums text-zinc-500">{row.value}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <IntelligenceBarChart
+            title="Open opportunities by state"
+            subtitle="MEL demand in your territory"
+            data={data.coverage.candidateShortagesByState}
+            barClassName="bg-teal-500/80"
+            onItemClick={(item) => ops.openState(item.label)}
+          />
+          <IntelligenceBarChart
+            title="Coverage gaps by city"
+            subtitle="Highest risk cities"
+            data={data.coverage.topProblemCities}
+            barClassName="bg-red-500/70"
+            onItemClick={(item) => ops.openCityLabel(item.label)}
+          />
         </div>
         <p className="mt-3 text-xs text-zinc-600">
           {data.alertSummary.criticalCount} critical · {data.alertSummary.highCount} high ·{" "}
@@ -314,10 +396,18 @@ export function DmPortalDashboardPrototype({
         </p>
       </SectionShell>
 
+      <DeferredSection
+        title="Live coverage risk"
+        description="MEL staffing gaps and nearby rep coverage in your territory."
+        summary={<p className="text-sm text-zinc-500">Expand to load live coverage intelligence.</p>}
+      >
+        <CoverageRiskSection variant="dm" />
+      </DeferredSection>
+
       <SectionShell
         id={DM_PORTAL_SECTION_IDS.candidateQueue}
-        title="Candidate queue"
-        description="Most recent applicants in your territory (from dashboard snapshot)."
+        title="Recent applicants"
+        description="Latest applicants in your territory — open a profile for workflow context."
       >
         {data.recentApplicants.length === 0 ? (
           <p className="text-sm text-zinc-500">No recent applicants in this snapshot.</p>
@@ -331,12 +421,13 @@ export function DmPortalDashboardPrototype({
                     {row.position} · {row.city}, {row.state} · {row.stage}
                   </p>
                 </div>
-                <Link
-                  href={`/dm?section=queue&candidateId=${encodeURIComponent(row.candidateId)}#${DM_PORTAL_SECTION_IDS.candidateQueue}`}
+                <button
+                  type="button"
+                  onClick={() => onCandidateClick(row.candidateId)}
                   className="text-xs font-medium text-teal-400 hover:text-teal-300"
                 >
-                  View
-                </Link>
+                  View profile
+                </button>
               </li>
             ))}
           </ul>
@@ -344,8 +435,23 @@ export function DmPortalDashboardPrototype({
       </SectionShell>
 
       <p className="text-xs text-zinc-600">
-        Snapshot {new Date(data.fetchedAt).toLocaleString()} · {data.activeJobs} active jobs · DM operations view
+        Snapshot {new Date(data.fetchedAt).toLocaleString()} · {data.activeJobs} active jobs ·{" "}
+        {data.territoryLabel}
+        {meta?.partialSync ? " · partial Breezy sync" : ""}
       </p>
+
+      <DmOperationalDrawer
+        open={ops.open}
+        view={ops.view}
+        escalationLogs={ops.escalationLogs}
+        onClose={ops.close}
+        onEscalation={ops.logEscalation}
+        onSelectJob={ops.openJob}
+      />
+      <DmToast toast={ops.toast} onDismiss={ops.dismissToast} />
     </div>
   );
 }
+
+/** @deprecated Use `DmPortalDashboard`. */
+export const DmPortalDashboardPrototype = DmPortalDashboard;

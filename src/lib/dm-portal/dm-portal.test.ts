@@ -29,7 +29,7 @@ describe("dm-portal", () => {
     assert.equal(isDmViewModeEnabled({ role: "admin" }), false);
     assert.equal(isDmViewModeEnabled({ role: "admin", preview: true }), true);
     const visibility = getDmViewVisibility({ enabled: true, portalRole: "district_manager", territoryStates: ["TX"] });
-    assert.equal(visibility.hideFullCandidateDatabase, true);
+    assert.equal(visibility.hideFullCandidateDatabase, false);
     assert.equal(visibility.showOpenJobs, true);
   });
 

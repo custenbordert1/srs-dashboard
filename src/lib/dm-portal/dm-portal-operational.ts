@@ -37,7 +37,10 @@ export const DM_PORTAL_SECTION_IDS = {
   territorySummary: "dm-territory-summary",
   territoryHealth: "dm-territory-health",
   recruitingPipeline: "dm-recruiting-pipeline",
+  alertKpis: "dm-alert-kpis",
   needsAttention: "dm-needs-attention",
+  priorityAlerts: "dm-priority-alerts",
+  candidates: "dm-candidates",
   openOpportunities: "dm-open-opportunities",
   coverageIssues: "dm-coverage-issues",
   candidateQueue: "dm-candidate-queue",
@@ -46,10 +49,28 @@ export const DM_PORTAL_SECTION_IDS = {
 
 export const DM_PORTAL_NAV_LINKS = [
   {
+    id: "summary",
+    label: "Territory summary",
+    description: "Jobs, calls, health, and alerts",
+    href: `#${DM_PORTAL_SECTION_IDS.territorySummary}`,
+  },
+  {
     id: "recruiting",
-    label: "Recruiting",
-    description: "Pipeline and applicant flow",
+    label: "Recruiting pipeline",
+    description: "Applicant flow and onboarding",
     href: `#${DM_PORTAL_SECTION_IDS.recruitingPipeline}`,
+  },
+  {
+    id: "alerts",
+    label: "Alerts",
+    description: "Prioritized territory risks",
+    href: `#${DM_PORTAL_SECTION_IDS.priorityAlerts}`,
+  },
+  {
+    id: "candidates",
+    label: "Candidates",
+    description: "Top scored and recent applicants",
+    href: `#${DM_PORTAL_SECTION_IDS.candidates}`,
   },
   {
     id: "opportunities",
@@ -62,12 +83,6 @@ export const DM_PORTAL_NAV_LINKS = [
     label: "Coverage issues",
     description: "Risk cities and shortage signals",
     href: `#${DM_PORTAL_SECTION_IDS.coverageIssues}`,
-  },
-  {
-    id: "queue",
-    label: "Candidate queue",
-    description: "Recent applicants in your states",
-    href: `#${DM_PORTAL_SECTION_IDS.candidateQueue}`,
   },
 ] as const;
 

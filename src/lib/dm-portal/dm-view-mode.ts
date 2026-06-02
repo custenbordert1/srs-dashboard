@@ -66,6 +66,7 @@ export function getDmViewVisibility(state: DmViewModeState): DmViewVisibility {
     hideOtherDmTerritories: on,
     hideAdminSettings: on,
     hideSystemDiagnostics: on,
-    hideFullCandidateDatabase: on,
+    /** DMs open candidates via the detail drawer on territory operations. */
+    hideFullCandidateDatabase: false,
   };
 }
