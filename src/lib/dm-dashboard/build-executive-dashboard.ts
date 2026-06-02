@@ -1,8 +1,8 @@
-import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
+import { countCandidatesLast7Days, type BreezyCandidate, type BreezyJob } from "@/lib/breezy-api";
 import { DISTRICT_MANAGERS, getAssignedStatesForDm, normalizeStateCode } from "@/lib/dm-territory-map";
 import { buildCoverageIntelligence } from "@/lib/dm-dashboard/coverage-intelligence";
 import { buildTerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
-import { countBuckets, parseDate, MS_PER_DAY } from "@/lib/dm-dashboard/territory-shared";
+import { countBuckets, MS_PER_DAY, parseDate } from "@/lib/dm-dashboard/territory-shared";
 import { buildExecutiveInsightsKpis, type ExecutiveInsightsKpis } from "@/lib/executive-insights-engine";
 import {
   buildExecutiveMelMatchingMetrics,
@@ -34,15 +34,6 @@ export type ExecutiveDashboardSnapshot = {
   executiveInsights: ExecutiveInsightsKpis;
   melMatching: ExecutiveMelMatchingMetrics;
 };
-
-function candidatesLast7Days(candidates: BreezyCandidate[], referenceIso: string): number {
-  const reference = new Date(referenceIso);
-  const since7d = new Date(reference.getTime() - 7 * MS_PER_DAY);
-  return candidates.filter((c) => {
-    const applied = parseDate(c.appliedDate);
-    return applied !== null && applied >= since7d;
-  }).length;
-}
 
 function weeklyCandidateBuckets(candidates: BreezyCandidate[], referenceIso: string): ChartBar[] {
   const reference = new Date(referenceIso);
@@ -101,7 +92,7 @@ export function buildExecutiveDashboard(
       healthLabel: health.label,
       activeJobs: dmJobs.length,
       candidates: dmCandidates.length,
-      candidatesLast7Days: candidatesLast7Days(dmCandidates, fetchedAt),
+      candidatesLast7Days: countCandidatesLast7Days(dmCandidates, fetchedAt),
       fillRiskCount: coverage.topProblemCities.reduce((sum, row) => sum + row.value, 0),
     };
   });

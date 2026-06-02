@@ -7,17 +7,16 @@ import {
   type CandidatePipelineSnapshot,
 } from "@/lib/dm-dashboard/candidate-pipeline";
 import { buildCoverageIntelligence, type TerritoryCoverageSnapshot } from "@/lib/dm-dashboard/coverage-intelligence";
-import {
-  buildPrioritizedTerritoryAlerts,
-  mergeTerritoryAlertSources,
-  type DmAlertOperationsSummary,
-  type DmPrioritizedAlert,
-} from "@/lib/dm-dashboard/dm-alert-priority";
+import type { DmAlertOperationsSummary, DmPrioritizedAlert } from "@/lib/dm-dashboard/dm-alert-priority";
 import { buildDmOperationalIndex } from "@/lib/dm-dashboard/build-dm-operational-index";
 import type { DmOperationalIndex } from "@/lib/dm-dashboard/dm-operational-types";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
-import { buildTerritoryFillRiskAlerts } from "@/lib/dm-dashboard/fill-risk-alerts";
-import { buildDmNeedsAttention, topScoredCandidates, type DmAttentionItem } from "@/lib/dm-dashboard/dm-needs-attention";
+import { topScoredCandidates, type DmAttentionItem } from "@/lib/dm-dashboard/dm-needs-attention";
+import {
+  buildTerritoryAlertPipeline,
+  countFillRiskAlerts,
+  countNeedsAttentionAlerts,
+} from "@/lib/dm-dashboard/territory-alert-pipeline";
 import {
   buildTerritoryHealthScore,
   type TerritoryHealthScore,
@@ -115,16 +114,11 @@ export function buildDmDashboardSnapshot(
 
   const reference = new Date(fetchedAt);
   const health = buildTerritoryHealthScore(jobs, candidates, fetchedAt);
-  const needsAttentionRaw = buildDmNeedsAttention(jobs, candidates, fetchedAt);
-  const fillRiskAlerts = buildTerritoryFillRiskAlerts(jobs, candidates, fetchedAt);
-  const mergedAlerts = mergeTerritoryAlertSources(fillRiskAlerts, needsAttentionRaw);
-  const { alerts: prioritizedAlerts, summary: alertSummary } = buildPrioritizedTerritoryAlerts(
-    mergedAlerts,
-    jobs,
-    candidates,
-    fetchedAt,
-    { healthScore: health.score },
-  );
+  const {
+    fillRiskAlerts,
+    prioritizedAlerts,
+    alertSummary,
+  } = buildTerritoryAlertPipeline(jobs, candidates, fetchedAt, { healthScore: health.score });
   const needsAttention = prioritizedAlerts;
   const highestFillRisk = prioritizedAlerts.slice(0, 12);
   const operationalIndex = buildDmOperationalIndex(
@@ -192,14 +186,14 @@ export function buildDmDashboardSnapshot(
     {
       id: "fill-risk",
       label: "Fill-risk alerts",
-      value: fillRiskAlerts.length.toLocaleString(),
+      value: countFillRiskAlerts(fillRiskAlerts).toLocaleString(),
       hint: "No applicants, no interviews, aging tiers, low-flow cities",
     },
     {
       id: "attention",
       label: "Needs attention",
-      value: needsAttention.length.toLocaleString(),
-      hint: "Combined attention queue items",
+      value: countNeedsAttentionAlerts(alertSummary).toLocaleString(),
+      hint: "Prioritized critical, high, and medium alerts (excludes low)",
     },
     {
       id: "stalled",

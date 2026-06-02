@@ -112,6 +112,7 @@ export function filterCandidatesByStates(
   return candidates.filter((candidate) => stateSet.has(normalizeStateCode(candidate.state)));
 }
 
+/** Canonical 7-day applicant count — see `@/lib/metric-definitions` APPLICANTS_7D. */
 export function countApplicantsLast7Days(
   candidates: BreezyCandidate[],
   fetchedAt: string,

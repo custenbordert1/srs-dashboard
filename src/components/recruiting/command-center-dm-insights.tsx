@@ -181,7 +181,7 @@ export function CommandCenterDmInsights({ insights, loadingExtras }: CommandCent
                   <th className="pb-2 pr-3 text-right">Open jobs</th>
                   <th className="pb-2 pr-3 text-right">Open calls</th>
                   <th className="pb-2 pr-3 text-right">Active reps</th>
-                  <th className="pb-2 text-right">Coverage</th>
+                  <th className="pb-2 text-right">Territory health</th>
                 </tr>
               </thead>
               <tbody>

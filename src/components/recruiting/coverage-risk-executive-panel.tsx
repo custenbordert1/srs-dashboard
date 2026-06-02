@@ -30,7 +30,7 @@ export function CoverageRiskExecutivePanel({ snapshot }: CoverageRiskExecutivePa
         <MetricCard label="High-risk projects" value={summary.highRiskProjectCount} tone="red" />
         <MetricCard label="Zero nearby reps" value={summary.zeroNearbyRepProjects} tone="amber" />
         <MetricCard label="Open opportunities" value={summary.totalOpenOpportunities} />
-        <MetricCard label="Avg coverage score" value={summary.averageCoverageScore} />
+        <MetricCard label="Avg MEL coverage score" value={summary.averageCoverageScore} />
         <MetricCard label="Yellow risk" value={summary.yellowRiskProjectCount} tone="amber" />
       </div>
 

@@ -2,6 +2,7 @@ import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
+import { countNeedsAttentionAlerts } from "@/lib/dm-dashboard/territory-alert-pipeline";
 import {
   DISTRICT_MANAGERS,
   getAssignedStatesForDm,
@@ -226,9 +227,5 @@ export function topTerritoriesNeedingAttention(
 }
 
 export function countNeedsAttentionFromAlertSummary(snapshot: DmDashboardSnapshot): number {
-  return (
-    snapshot.alertSummary.criticalCount +
-    snapshot.alertSummary.highCount +
-    snapshot.alertSummary.mediumCount
-  );
+  return countNeedsAttentionAlerts(snapshot.alertSummary);
 }

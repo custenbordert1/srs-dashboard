@@ -1,4 +1,4 @@
-import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
+import { countCandidatesLast7Days, type BreezyCandidate, type BreezyJob } from "@/lib/breezy-api";
 import type { AuthSession } from "@/lib/auth/types";
 import { isDmRole } from "@/lib/auth/roles";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
@@ -148,7 +148,7 @@ export function buildDmRecruitingFoundation(
 
   const coverage: DmCoverageAnalyticsPlaceholder = {
     openJobs: jobRows.length,
-    candidatesLast7Days: scopedCandidates.length,
+    candidatesLast7Days: countCandidatesLast7Days(scopedCandidates, breezyFetchedAt),
     zeroApplicantJobs,
     interviewingCount,
     coverageScore: null,

@@ -32,6 +32,12 @@ export {
   type DmAlertPriority,
   type DmPrioritizedAlert,
 } from "@/lib/dm-dashboard/dm-alert-priority";
+export {
+  buildTerritoryAlertPipeline,
+  countFillRiskAlerts,
+  countNeedsAttentionAlerts,
+  type TerritoryAlertPipelineResult,
+} from "@/lib/dm-dashboard/territory-alert-pipeline";
 export { buildDmOperationalIndex, parseCityLabelToKey } from "@/lib/dm-dashboard/build-dm-operational-index";
 export type {
   DmEscalationActionType,

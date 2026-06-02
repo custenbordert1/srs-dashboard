@@ -172,9 +172,9 @@ export function DmPortalDashboardPrototype({
             <StatCell label="Open calls" value={territory.openCalls.toLocaleString()} />
             <StatCell label="Active reps" value={territory.activeReps.toLocaleString()} hint="Onboarded + hired proxy" />
             <StatCell
-              label="Coverage %"
+              label="Territory health"
               value={`${territory.coveragePercent}%`}
-              hint={coverageTierLabel(territory.coverageTier)}
+              hint={`${coverageTierLabel(territory.coverageTier)} · composite recruiting index`}
             />
             <StatCell
               label="Alerts"
@@ -194,7 +194,7 @@ export function DmPortalDashboardPrototype({
             <div>
               <h2 className={`text-sm font-semibold ${tierStyles.text}`}>Territory health</h2>
               <p className="mt-1 text-xs text-zinc-500">
-                Coverage index from territory health score · {data.health.label}
+                Territory health score · {data.health.label}
               </p>
             </div>
             <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${tierStyles.text} border ${tierStyles.border}`}>

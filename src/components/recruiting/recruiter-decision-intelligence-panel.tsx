@@ -75,7 +75,7 @@ export function RecruiterDecisionIntelligencePanel({
             value={coverageHealth.activeReps.toLocaleString()}
           />
           <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2">
-            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Coverage %</p>
+            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Staffing coverage %</p>
             <p className={`mt-1 text-sm font-medium tabular-nums ${coverageToneClass}`}>
               {coverageHealth.coveragePercent != null
                 ? `${coverageHealth.coveragePercent}%`
