@@ -66,12 +66,35 @@ describe("job ad variation engine", () => {
       baseDescription: base,
       payRate: "$18/hr",
       cityTarget: "Dallas",
+      usState: "TX",
       variantIndex: 1,
     });
-    assert.ok(description.includes("Independent contractor role."));
+    assert.ok(description.includes("Retail merchandising support in the Dallas, TX area."));
+    assert.ok(description.includes("1099 independent contractor"));
+    assert.ok(description.includes("as-needed gig scheduling"));
     assert.ok(description.includes("Pay: $18/hr"));
-    assert.ok(description.includes("Equal opportunity employer."));
+    assert.ok(description.includes("vary by client assignment"));
     assert.ok(isLockedDescriptionLine("Pay: $18/hr", "$18/hr"));
+  });
+
+  it("dedupes repeated Benefits sections from source description", () => {
+    const base = [
+      "Benefits",
+      "- Health stipend",
+      "What We Offer",
+      "- Flexible schedule",
+      "Benefits",
+      "- Duplicate block",
+    ].join("\n");
+    const description = buildVariantDescription({
+      baseDescription: base,
+      payRate: "$19/hr",
+      cityTarget: "Houston",
+      usState: "TX",
+      variantIndex: 0,
+    });
+    assert.ok(!description.includes("Duplicate block"));
+    assert.ok(description.includes("$19/hr"));
   });
 
   it("produces stable description hashes", () => {
@@ -79,6 +102,7 @@ describe("job ad variation engine", () => {
       baseDescription: "Line one\n- bullet",
       payRate: "$20/hr",
       cityTarget: "Plano",
+      usState: "TX",
       variantIndex: 2,
     });
     assert.equal(hashJobDescription(description).length, 16);

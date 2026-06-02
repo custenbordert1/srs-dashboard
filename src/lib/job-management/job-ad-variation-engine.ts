@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { BreezyJobCatalogRow } from "@/lib/job-management/job-draft-types";
 import type { JobVariantQueueStatus } from "@/lib/job-management/job-draft-types";
+import { buildVariantDescriptionBody } from "@/lib/job-management/job-variant-description-template";
 import { expandMetroCities } from "@/lib/job-management/job-metro-expansion";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import { getDmForState } from "@/lib/dm-territory-map";
-import { randomUUID } from "node:crypto";
 
 export const JOB_VARIANT_TITLE_TEMPLATES = [
   "Retail Merchandiser",
@@ -12,32 +13,6 @@ export const JOB_VARIANT_TITLE_TEMPLATES = [
   "Store Reset Representative",
   "Retail Project Support",
   "Traveling Merchandiser",
-] as const;
-
-const INTRO_VARIANTS = [
-  "Join our retail field team supporting in-store merchandising programs.",
-  "We are hiring dependable merchandising professionals for retail field work.",
-  "Support retail reset and merchandising projects across the local market.",
-] as const;
-
-const CTA_VARIANTS = [
-  "Apply today to join the field team.",
-  "Submit your application for immediate recruiter review.",
-  "Ready to get started? Apply now.",
-] as const;
-
-const MARKET_PHRASES = [
-  (city: string) => `${city} area`,
-  (city: string) => `${city} market`,
-  (city: string) => `Greater ${city}`,
-  (city: string) => `${city} metro`,
-] as const;
-
-const TRAVEL_WORDING = [
-  "traveling retail merchandising",
-  "field merchandising",
-  "retail reset support",
-  "in-store merchandising",
 ] as const;
 
 /** Lines matching these patterns are copied verbatim — pay, employment, and compliance language. */
@@ -90,13 +65,6 @@ export function hashJobDescription(description: string): string {
   return createHash("sha256").update(description.trim()).digest("hex").slice(0, 16);
 }
 
-function preservePayLine(description: string, payRate: string): string {
-  if (!payRate.trim()) return description;
-  const payLine = payRate.trim();
-  if (description.toLowerCase().includes(payLine.toLowerCase())) return description;
-  return `${description.trim()}\n\nPay: ${payLine}`;
-}
-
 function rotate<T>(items: readonly T[], index: number): T {
   return items[index % items.length]!;
 }
@@ -133,28 +101,17 @@ export function buildVariantDescription(options: {
   baseDescription: string;
   payRate: string;
   cityTarget: string;
+  usState: string;
   variantIndex: number;
 }): string {
-  const market = rotate(MARKET_PHRASES, options.variantIndex)(options.cityTarget);
-  const intro = rotate(INTRO_VARIANTS, options.variantIndex);
-  const cta = rotate(CTA_VARIANTS, options.variantIndex);
-  const travel = rotate(TRAVEL_WORDING, options.variantIndex);
-
-  const baseLines = options.baseDescription.split(/\r?\n/);
-  const shuffledLines = shuffleMutableBullets(baseLines, options.variantIndex, options.payRate);
-  const lockedCore = shuffledLines.join("\n").trim();
-
-  const composed = [
-    `${intro} This ${travel} role supports the ${market}.`,
-    "",
-    lockedCore,
-    "",
-    cta,
-  ]
-    .filter((line, index, arr) => !(line === "" && arr[index - 1] === ""))
-    .join("\n");
-
-  return preservePayLine(composed, options.payRate);
+  return buildVariantDescriptionBody({
+    baseDescription: options.baseDescription,
+    payRate: options.payRate,
+    cityTarget: options.cityTarget,
+    usState: options.usState,
+    variantIndex: options.variantIndex,
+    shuffleMutableBullets,
+  });
 }
 
 export function generateJobAdVariants(
@@ -192,6 +149,7 @@ export function generateJobAdVariants(
       baseDescription,
       payRate,
       cityTarget,
+      usState: location.usState,
       variantIndex: index,
     });
 

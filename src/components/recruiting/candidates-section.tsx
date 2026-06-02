@@ -161,6 +161,7 @@ import {
 import { CandidatesSyncDiagnosticsPanel } from "@/components/recruiting/candidates-sync-diagnostics";
 import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
+import { CandidateTableQuickActions } from "@/components/recruiting/candidate-table-quick-actions";
 import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
 import {
   stickyCheckboxCellClass,
@@ -716,6 +717,7 @@ export function CandidatesSection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
+  const [inlineActionBusyId, setInlineActionBusyId] = useState<string | null>(null);
   const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
@@ -2181,10 +2183,15 @@ export function CandidatesSection() {
   }, [commitWorkflowToView]);
 
   const handleQueueAction = useCallback(
-    (candidateId: string, payload: CandidateQueueActionPayload) => {
+    (
+      candidateId: string,
+      payload: CandidateQueueActionPayload,
+      options?: { source?: "queue" | "table" },
+    ) => {
       const row = candidates.find((c) => c.candidateId === candidateId);
       if (!row) return;
-      setQueueActionBusy(true);
+      if (options?.source === "table") setInlineActionBusyId(candidateId);
+      else setQueueActionBusy(true);
       const finish = (workflow: CandidateWorkflowRecord, notice?: string) => {
         commitWorkflowToView(workflow, { notice });
       };
@@ -2207,6 +2214,7 @@ export function CandidatesSection() {
                 assignedDM: payload.dm,
                 workflowStatus: row.workflowStatus,
               }),
+              `DM assigned: ${payload.dm}`,
             );
             break;
           case "apply-suggested-dm":
@@ -2216,6 +2224,7 @@ export function CandidatesSection() {
                 assignedDM: row.suggestedDM,
                 workflowStatus: row.workflowStatus,
               }),
+              row.suggestedDM ? `DM assigned: ${row.suggestedDM}` : undefined,
             );
             break;
           case "mark-follow-up":
@@ -2225,7 +2234,7 @@ export function CandidatesSection() {
             finish(await completeCandidateFollowUp(candidateId));
             break;
           case "snooze-24h":
-            finish(await snoozeCandidate24h(candidateId));
+            finish(await snoozeCandidate24h(candidateId), "Candidate snoozed for 24 hours.");
             break;
           case "move-paperwork":
             finish(
@@ -2253,7 +2262,10 @@ export function CandidatesSection() {
         .catch((err) => {
           window.alert(err instanceof Error ? err.message : "Queue action failed");
         })
-        .finally(() => setQueueActionBusy(false));
+        .finally(() => {
+          if (options?.source === "table") setInlineActionBusyId(null);
+          else setQueueActionBusy(false);
+        });
     },
     [candidates, commitWorkflowToView],
   );
@@ -2553,6 +2565,14 @@ export function CandidatesSection() {
               paperworkTemplates={paperworkTemplates}
               hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
             />
+            <CandidateTableQuickActions
+              candidateId={candidate.candidateId}
+              suggestedDM={candidate.suggestedDM}
+              dmNeedsAssignment={candidate.dmNeedsAssignment}
+              rosters={rosters}
+              busy={inlineActionBusyId === candidate.candidateId}
+              onAction={(id, payload) => handleQueueAction(id, payload, { source: "table" })}
+            />
           </td>
           <td
             className={`${tdClass}${paperworkUrgent ? " bg-amber-500/5" : ""}`}
@@ -2611,6 +2631,8 @@ export function CandidatesSection() {
     },
     [
       handleCandidateAction,
+      handleQueueAction,
+      inlineActionBusyId,
       onboardingConfigured,
       onboardingConfigLoaded,
       onboardingConfigError,

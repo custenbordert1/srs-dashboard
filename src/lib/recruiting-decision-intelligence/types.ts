@@ -1,5 +1,9 @@
 import type { DmAlertPriority } from "@/lib/dm-dashboard/dm-alert-priority";
 import type { JobVariantQueueStatus } from "@/lib/job-management/job-draft-types";
+import type {
+  CoverageHealthMetrics,
+  NeedsAttentionAlert,
+} from "@/lib/recruiting-decision-intelligence/needs-attention-alerts";
 
 export type RecruiterSuggestedActionType =
   | "increase-pay"
@@ -95,6 +99,12 @@ export type TerritoryIntelligenceSnapshot = {
   topOpportunityCities: TerritoryMarketRow[];
 };
 
+export type {
+  CoverageHealthMetrics,
+  NeedsAttentionAlert,
+  NeedsAttentionAlertKind,
+} from "@/lib/recruiting-decision-intelligence/needs-attention-alerts";
+
 export type RecruiterDecisionIntelligenceSnapshot = {
   fetchedAt: string;
   coverageRecommendations: CoverageRecommendation[];
@@ -102,4 +112,6 @@ export type RecruiterDecisionIntelligenceSnapshot = {
   variantPerformance: VariantPerformanceRow[];
   territory: TerritoryIntelligenceSnapshot;
   recommendedNextActions: RecruiterSuggestedAction[];
+  needsAttentionAlerts: NeedsAttentionAlert[];
+  coverageHealth: CoverageHealthMetrics;
 };

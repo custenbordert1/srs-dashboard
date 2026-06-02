@@ -8,6 +8,10 @@ import { buildRecruiterSuggestedActions } from "@/lib/recruiting-decision-intell
 import { buildTerritoryIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence/territory-intelligence";
 import type { RecruiterDecisionIntelligenceSnapshot } from "@/lib/recruiting-decision-intelligence/types";
 import { buildVariantPerformanceRows } from "@/lib/recruiting-decision-intelligence/variant-performance";
+import {
+  buildCoverageHealthMetrics,
+  buildNeedsAttentionAlerts,
+} from "@/lib/recruiting-decision-intelligence/needs-attention-alerts";
 
 export function buildRecruiterDecisionIntelligence(input: {
   territoryLabel: string;
@@ -52,6 +56,20 @@ export function buildRecruiterDecisionIntelligence(input: {
 
   assertRecommendationsOnly(suggestedActions);
 
+  const needsAttentionAlerts = buildNeedsAttentionAlerts({
+    jobs: input.jobs,
+    candidates: input.candidates,
+    coverageRecommendations,
+    activeReps: input.activeReps,
+    referenceIso: input.fetchedAt,
+  });
+
+  const coverageHealth = buildCoverageHealthMetrics({
+    jobs: input.jobs,
+    activeReps: input.activeReps,
+    coverageRecommendations,
+  });
+
   return {
     fetchedAt: input.fetchedAt,
     coverageRecommendations,
@@ -59,5 +77,7 @@ export function buildRecruiterDecisionIntelligence(input: {
     variantPerformance,
     territory,
     recommendedNextActions: suggestedActions.slice(0, 12),
+    needsAttentionAlerts,
+    coverageHealth,
   };
 }
