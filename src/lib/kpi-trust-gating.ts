@@ -70,6 +70,11 @@ const RECRUITER_OPERATIONAL_BREEZY = new Set([
 ]);
 
 const RECRUITING_INTELLIGENCE_BREEZY = new Set([
+  "ats-candidates-loaded",
+  "ats-active-jobs",
+  "ats-applicants-today",
+  "ats-applicants-7d",
+  "ats-applicants-per-opening",
   "open-posts",
   "zero-applicant",
   "avg-applicants",
@@ -87,8 +92,11 @@ const EXECUTIVE_DASHBOARD_BREEZY = new Set([
   "fill-risk",
   "recruiter-productivity",
   "pipeline-velocity",
-  "applicants-per-opening",
-  "candidates-7d",
+  "ats-candidates-loaded",
+  "ats-active-jobs",
+  "ats-applicants-today",
+  "ats-applicants-7d",
+  "ats-applicants-per-opening",
   "interviews-active",
 ]);
 

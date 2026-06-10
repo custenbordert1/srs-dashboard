@@ -1,7 +1,7 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
-import { buildBreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
-import { fetchBreezyCandidates, fetchBreezyJobs, isPartialBreezyPositionSync } from "@/lib/breezy-api";
+import { fetchOrgAtsReportingBundle } from "@/lib/breezy-ats-reporting";
+import { isPartialBreezyPositionSync } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
@@ -28,22 +28,34 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult, melResult] = await Promise.all([
-    fetchBreezyJobs("published"),
-    fetchBreezyCandidates(),
+  const [atsBundle, melResult] = await Promise.all([
+    fetchOrgAtsReportingBundle(),
     fetchMelProjectsSheet(),
   ]);
 
-  if (!jobsResult.ok) {
-    const status = breezyFailureHttpStatus(jobsResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "jobs" });
-    return NextResponse.json(breezyFailureBody(jobsResult), { status });
+  if (!atsBundle.ok) {
+    const status = breezyFailureHttpStatus(atsBundle.error);
+    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "ats" });
+    return NextResponse.json(
+      breezyFailureBody({
+        ok: false,
+        error: atsBundle.error,
+        fetchedAt: new Date().toISOString(),
+      }),
+      { status },
+    );
   }
-  if (!candidatesResult.ok) {
-    const status = breezyFailureHttpStatus(candidatesResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "candidates" });
-    return NextResponse.json(breezyFailureBody(candidatesResult), { status });
-  }
+
+  const { jobs: jobsResult, candidates: candidatesResult, ats: baseAts } = atsBundle;
+  const ats = {
+    ...baseAts,
+    ancillaryPartialErrors: melResult.ok
+      ? baseAts.ancillaryPartialErrors
+      : [
+          ...baseAts.ancillaryPartialErrors,
+          `MEL store routing data unavailable: ${melResult.error}`,
+        ],
+  };
 
   const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
   const dashboard = buildExecutiveDashboard(
@@ -52,12 +64,6 @@ export async function GET(request: Request) {
     candidatesResult.fetchedAt,
     melOpportunities,
   );
-
-  const ats = buildBreezyAtsMetrics(candidatesResult, jobsResult, {
-    ancillaryPartialErrors: melResult.ok
-      ? []
-      : [`MEL store routing data unavailable: ${melResult.error}`],
-  });
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,

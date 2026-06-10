@@ -2,6 +2,7 @@
 
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
+import type { BreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
 import { buildDataTrustState, dataTrustStatusMessage, type DataTrustState } from "@/lib/data-trust-state";
 import { FETCH_T3_TERRITORY_MS } from "@/lib/fetch-with-timeout";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -16,6 +17,8 @@ export type DashboardMeta = {
   filteredJobs?: number;
   filteredCandidates?: number;
   refreshedAt?: string;
+  ats?: BreezyAtsMetrics;
+  lastSuccessfulSync?: string;
 };
 
 type UseTerritoryDashboardOptions = {

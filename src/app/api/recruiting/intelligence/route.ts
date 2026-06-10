@@ -108,6 +108,7 @@ export async function GET(request: Request) {
       ? buildBreezyAtsMetrics(candidatesResult, breezyJobsOk ? jobsResult : null, {
           candidatesLoadedOverride: candidates.length,
           publishedJobsOverride: jobs.length,
+          scopeCandidates: candidates,
           ancillaryPartialErrors,
         })
       : null;

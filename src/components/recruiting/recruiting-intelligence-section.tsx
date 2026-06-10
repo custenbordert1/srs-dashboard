@@ -3,6 +3,10 @@
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
+import { breezyAtsToDataTrustInput, type BreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { buildAtsHeadlineKpis } from "@/lib/breezy-ats-reporting";
+import { BreezyAtsSyncStatus } from "@/components/recruiting/breezy-ats-sync-status";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { isGoogleSheetRecruitingLiveEnabledClient } from "@/lib/recruiting-data-architecture";
 import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-intelligence";
 import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
@@ -157,6 +161,7 @@ export function RecruitingIntelligenceSection() {
     null,
   );
   const [breezyTrustInput, setBreezyTrustInput] = useState<DataTrustInput | null>(null);
+  const [atsMetrics, setAtsMetrics] = useState<BreezyAtsMetrics | null>(null);
   const [phase, setPhase] = useState<IntelligenceLoadPhase>("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
@@ -171,9 +176,18 @@ export function RecruitingIntelligenceSection() {
 
     try {
       if (!sheetLive) {
-        const [melResult, liveResult] = await Promise.allSettled([
+        const [melResult, liveResult, atsResult] = await Promise.allSettled([
           fetchMelProjectsData(),
           fetchRecruitingLiveSnapshot(false),
+          fetchWithTimeout("/api/recruiting/ats-reporting", {
+            timeoutMs: 15_000,
+          }).then(async (res) => {
+            const parsed = (await res.json()) as { ok: boolean; ats?: BreezyAtsMetrics; error?: string };
+            if (!parsed.ok || !parsed.ats) {
+              throw new Error(parsed.error ?? "ATS reporting unavailable");
+            }
+            return parsed.ats;
+          }),
         ]);
 
         const melParsed =
@@ -192,48 +206,41 @@ export function RecruitingIntelligenceSection() {
         setMelData(melParsed);
         setData({ ok: true, rows: [], headers: [], fetchedAt: new Date().toISOString(), csvUrl: "" });
 
-        if (liveResult.status === "fulfilled") {
-          const live = liveResult.value;
-          if (live.ok && live.intelligence) {
-            setBreezyIntelligence(live.intelligence);
-            setBreezyTrustInput({
-              hasData: true,
-              partialSync: live.syncStatus === "partial" || Boolean(live.partial),
-              truncated: live.candidates.truncated,
-              scanMode: live.candidates.scanMode,
-              positionsScanned: live.candidates.positionsScanned,
-              totalPositionsAvailable: live.candidates.totalPositionsAvailable,
-              fromCache: live.syncStatus === "cache_only",
-            });
-            setPhase("ready");
-            logDashboardFetch(live.partial ? "partial" : "success", {
-              route,
-              label: "intelligence-bundle",
-              ms: Math.round(performance.now() - started),
-              partial: Boolean(live.partial),
-            });
-            return;
-          }
-          const message = live.ok
-            ? "Breezy live snapshot returned no intelligence payload."
-            : live.error;
-          setBreezyIntelligence(null);
+        if (atsResult.status !== "fulfilled") {
+          const message =
+            atsResult.reason instanceof Error
+              ? atsResult.reason.message
+              : "Failed to load ATS reporting bundle";
+          setAtsMetrics(null);
           setBreezyTrustInput(null);
+          setBreezyIntelligence(null);
           setLoadError(message);
           setPhase("error");
-          logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: message });
+          logDashboardFetch("error", {
+            route,
+            label: "intelligence-bundle",
+            ms: Math.round(performance.now() - started),
+            error: message,
+          });
           return;
         }
 
-        const message =
-          liveResult.reason instanceof Error
-            ? liveResult.reason.message
-            : "Failed to load Breezy live snapshot";
-        setBreezyIntelligence(null);
-        setBreezyTrustInput(null);
-        setLoadError(message);
-        setPhase("error");
-        logDashboardFetch("error", { route, label: "intelligence-bundle", ms: Math.round(performance.now() - started), error: message });
+        setAtsMetrics(atsResult.value);
+        setBreezyTrustInput(breezyAtsToDataTrustInput(atsResult.value));
+
+        if (liveResult.status === "fulfilled" && liveResult.value.ok && liveResult.value.intelligence) {
+          setBreezyIntelligence(liveResult.value.intelligence);
+        } else {
+          setBreezyIntelligence(null);
+        }
+
+        setPhase("ready");
+        logDashboardFetch(atsResult.value.partialSync ? "partial" : "success", {
+          route,
+          label: "intelligence-bundle",
+          ms: Math.round(performance.now() - started),
+          partial: atsResult.value.partialSync,
+        });
         return;
       }
 
@@ -305,11 +312,12 @@ export function RecruitingIntelligenceSection() {
   }, [sheetLive, breezyIntelligence, data]);
 
   const kpiItems = useMemo(() => {
+    if (!sheetLive && atsMetrics) return buildAtsHeadlineKpis(atsMetrics);
     if (!data) return [];
     if (!data.ok) return intelligenceSnapshotToKpis(emptySnapshot(), data.error);
     if (!snapshot) return [];
     return intelligenceSnapshotToKpis(snapshot);
-  }, [data, snapshot]);
+  }, [atsMetrics, data, sheetLive, snapshot]);
 
   const breezyTrustState: DataTrustState = useMemo(
     () => buildDataTrustState(breezyTrustInput ?? { hasData: Boolean(snapshot) }),
@@ -381,7 +389,8 @@ export function RecruitingIntelligenceSection() {
       csvUrl: "",
     } as MelProjectsDataResult);
 
-  if (phase === "loading" || phase === "error" || !snapshot) {
+  const breezyReady = sheetLive ? Boolean(snapshot) : Boolean(atsMetrics);
+  if (phase === "loading" || phase === "error" || !breezyReady) {
     const timedOut = loadingCeilingHit || Boolean(loadError?.toLowerCase().includes("timed out"));
     return (
       <DashboardSectionFallback
@@ -389,7 +398,7 @@ export function RecruitingIntelligenceSection() {
         loadingMessage="Loading recruiting intelligence (Breezy + MEL)…"
         isLoading={phase === "loading"}
         loadingCeilingHit={loadingCeilingHit}
-        error={phase === "error" || !snapshot ? loadError ?? "No intelligence data available." : null}
+        error={phase === "error" || !breezyReady ? loadError ?? "No intelligence data available." : null}
         timedOut={timedOut}
         onRetry={retry}
         retrying={retrying}
@@ -410,6 +419,10 @@ export function RecruitingIntelligenceSection() {
         </p>
       </div>
 
+      {!sheetLive && atsMetrics ? (
+        <BreezyAtsSyncStatus metrics={atsMetrics} compact={atsMetrics.syncTier === "full"} />
+      ) : null}
+
       <KpiCards
         items={kpiItems}
         gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
@@ -417,6 +430,13 @@ export function RecruitingIntelligenceSection() {
         trustState={sheetLive ? undefined : breezyTrustState}
         trustInput={sheetLive ? undefined : (breezyTrustInput ?? undefined)}
       />
+
+      {!sheetLive && !snapshot ? (
+        <p className="text-sm text-amber-200/90">
+          Distribution charts unavailable — live snapshot did not load. Headline counts above use the canonical
+          ATS reporting bundle (same as Executive Rollup).
+        </p>
+      ) : null}
 
       {dataQualityKpis.length > 0 ? (
         <section className="space-y-3">
@@ -501,41 +521,45 @@ export function RecruitingIntelligenceSection() {
         </section>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        <IntelligenceBarChart
-          title="Applicants by state"
-          subtitle="Total applicants on open posts"
-          data={snapshot.applicantsByState}
-          valueLabel="applicants"
-          barClassName="bg-sky-500/80"
-        />
-        <IntelligenceBarChart
-          title="Openings by DM"
-          subtitle="Open post count by hiring manager"
-          data={snapshot.openingsByManager}
-          valueLabel="openings"
-          barClassName="bg-teal-500/80"
-        />
-        <IntelligenceBarChart
-          title="Zero applicant trend"
-          subtitle="Zero-applicant posts by week opened"
-          data={snapshot.zeroApplicantTrend}
-          valueLabel="posts"
-          barClassName="bg-rose-500/70"
-        />
-      </div>
+      {snapshot ? (
+        <>
+          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            <IntelligenceBarChart
+              title="Applicants by state"
+              subtitle="Distribution by state (operational — not headline totals)"
+              data={snapshot.applicantsByState}
+              valueLabel="applicants"
+              barClassName="bg-sky-500/80"
+            />
+            <IntelligenceBarChart
+              title="Openings by DM"
+              subtitle="Open post count by hiring manager"
+              data={snapshot.openingsByManager}
+              valueLabel="openings"
+              barClassName="bg-teal-500/80"
+            />
+            <IntelligenceBarChart
+              title="Zero applicant trend"
+              subtitle="Zero-applicant posts by week opened"
+              data={snapshot.zeroApplicantTrend}
+              valueLabel="posts"
+              barClassName="bg-rose-500/70"
+            />
+          </div>
 
-      <DeferredSection
-        title="A+ Opportunity queue"
-        description="Prioritized open posts — expand for full table."
-        summary={
-          <p className="text-sm text-zinc-500">
-            {snapshot.aPlusOpportunities.length} prioritized opportunities ready to review.
-          </p>
-        }
-      >
-        <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
-      </DeferredSection>
+          <DeferredSection
+            title="A+ Opportunity queue"
+            description="Prioritized open posts — expand for full table."
+            summary={
+              <p className="text-sm text-zinc-500">
+                {snapshot.aPlusOpportunities.length} prioritized opportunities ready to review.
+              </p>
+            }
+          >
+            <APlusOpportunityTable rows={snapshot.aPlusOpportunities} />
+          </DeferredSection>
+        </>
+      ) : null}
 
       {!sheetLive && archiveSheetData.ok && archiveSheetData.rows.length === 0 ? (
         <div

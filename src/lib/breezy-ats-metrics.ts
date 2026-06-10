@@ -115,6 +115,8 @@ export function buildBreezyAtsMetrics(
     /** When territory filtering reduces visible rows (Automation, Executive). */
     candidatesLoadedOverride?: number;
     publishedJobsOverride?: number;
+    /** When set, today/7d counts use this array (must match loaded scope). */
+    scopeCandidates?: BreezyCandidate[];
   },
 ): BreezyAtsMetrics {
   const positionsScanned = candidates.positionsScanned ?? 0;
@@ -127,14 +129,13 @@ export function buildBreezyAtsMetrics(
 
   const candidatesLoaded = options?.candidatesLoadedOverride ?? candidates.candidates.length;
   const publishedJobs = options?.publishedJobsOverride ?? jobs?.jobs.length ?? 0;
+  const countCandidates = options?.scopeCandidates ?? candidates.candidates;
 
   return {
     candidatesLoaded,
     publishedJobs,
-    applicantsToday: countBreezyApplicantsToday(candidates.candidates, candidates.fetchedAt),
-    applicants7d:
-      candidates.candidatesLast7Days ??
-      countCandidatesLast7Days(candidates.candidates, candidates.fetchedAt),
+    applicantsToday: countBreezyApplicantsToday(countCandidates, candidates.fetchedAt),
+    applicants7d: countCandidatesLast7Days(countCandidates, candidates.fetchedAt),
     positionsScanned,
     totalPositionsAvailable,
     positionsNotScanned,

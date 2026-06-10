@@ -2,8 +2,9 @@
 
 import type { SheetDataResult } from "@/lib/google-sheet-csv";
 import { fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
-import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
-import { breezyKpisFromSnapshot } from "@/lib/recruiting-breezy-adapters";
+import { buildAtsHeadlineKpis } from "@/lib/breezy-ats-reporting";
+import type { BreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { isGoogleSheetRecruitingLiveEnabledClient } from "@/lib/recruiting-data-architecture";
 import type { Kpi } from "@/lib/recruiting-sample-data";
 import {
@@ -49,20 +50,41 @@ export function SheetKpiCards() {
     async function load() {
       try {
         if (!sheetLive) {
-          const snap = await fetchRecruitingLiveSnapshot(false);
+          const res = await fetchWithTimeout("/api/recruiting/ats-reporting", {
+            timeoutMs: 15_000,
+          });
+          const parsed = (await res.json()) as { ok: boolean; ats?: BreezyAtsMetrics; error?: string };
           if (cancelled) return;
-          if (snap.ok && snap.jobs.ok && snap.candidates.ok) {
-            setBreezyKpis(breezyKpisFromSnapshot(snap.jobs.jobs, snap.candidates.candidates));
+          if (parsed.ok && parsed.ats) {
+            setBreezyKpis(buildAtsHeadlineKpis(parsed.ats));
             setData(undefined);
             return;
           }
-          setLoadError(snap.ok ? "Breezy snapshot incomplete" : snap.error);
-          setBreezyKpis(
-            sheetSnapshotToKpis(
-              { openPosts: 0, totalApplicants: 0, zeroApplicantPosts: 0, breezyLinkedPercent: null, breezyLinkedCount: 0, columnHints: "" },
-              snap.ok ? undefined : snap.error,
-            ),
-          );
+          const err = parsed.error ?? "ATS reporting bundle unavailable";
+          setLoadError(err);
+          setBreezyKpis(buildAtsHeadlineKpis(
+            {
+              candidatesLoaded: 0,
+              publishedJobs: 0,
+              applicantsToday: 0,
+              applicants7d: 0,
+              positionsScanned: 0,
+              totalPositionsAvailable: 0,
+              positionsNotScanned: 0,
+              scanMode: null,
+              syncTier: "partial",
+              partialSync: true,
+              fromCache: false,
+              stale: false,
+              truncated: false,
+              hydrationComplete: undefined,
+              lastSuccessfulSync: new Date().toISOString(),
+              lastSuccessfulSyncLabel: "—",
+              partialReasons: [],
+              ancillaryPartialErrors: [],
+            },
+            err,
+          ));
           return;
         }
 

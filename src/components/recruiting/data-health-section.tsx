@@ -16,6 +16,7 @@ import {
 import { fetchMelProjectsData, fetchRecruitingSheetData } from "@/lib/dashboard-api-client";
 import type { BreezyCandidatesHealthProbe, BreezyJobsResult } from "@/lib/breezy-api";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AtsParityDiagnosticsPanel } from "./ats-parity-diagnostics-panel";
 import { BreezyParityDiagnostics } from "./breezy-parity-diagnostics";
 import { BreezySyncHealthSection } from "./breezy-sync-health-section";
 import { RecruitingDataSourcesPanel } from "./recruiting-data-sources-panel";
@@ -459,6 +460,8 @@ export function DataHealthSection() {
       <RecruitingDataSourcesPanel />
 
       <BreezySyncHealthSection />
+
+      <AtsParityDiagnosticsPanel />
 
       <BreezyParityDiagnostics />
 

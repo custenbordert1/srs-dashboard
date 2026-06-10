@@ -16,7 +16,8 @@ import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trus
 import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
-import { breezyAtsToDataTrustInput, type BreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { applicantsPerOpeningFromAts } from "@/lib/breezy-ats-reporting";
+import { breezyAtsToDataTrustInput } from "@/lib/breezy-ats-metrics";
 import { BreezyAtsSyncStatus } from "@/components/recruiting/breezy-ats-sync-status";
 import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
 import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
@@ -174,11 +175,9 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
     cacheScope: user.id,
   });
   const drawer = useCandidateDrawer();
-
   const trustInput: DataTrustInput = useMemo(() => {
-    const ats = (meta as { ats?: BreezyAtsMetrics } | undefined)?.ats;
-    if (ats) {
-      return breezyAtsToDataTrustInput(ats, { loading, refreshing, error, timedOut });
+    if (meta?.ats) {
+      return breezyAtsToDataTrustInput(meta.ats, { loading, refreshing, error, timedOut });
     }
     return {
       loading,
@@ -231,11 +230,8 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
         retrying={refreshing}
       />
 
-      {(meta as { ats?: BreezyAtsMetrics } | undefined)?.ats ? (
-        <BreezyAtsSyncStatus
-          metrics={(meta as { ats: BreezyAtsMetrics }).ats}
-          compact={(meta as { ats: BreezyAtsMetrics }).ats.syncTier === "full"}
-        />
+      {meta?.ats ? (
+        <BreezyAtsSyncStatus metrics={meta.ats} compact={meta.ats.syncTier === "full"} />
       ) : null}
 
       {loading && !data ? <p className="text-sm text-zinc-500">Loading executive rollup…</p> : null}
@@ -285,25 +281,48 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             />
           </div>
 
+          {meta?.ats ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <ExecutiveStatCell
+                statId="ats-candidates-loaded"
+                label="Candidates loaded"
+                value={meta.ats.candidatesLoaded}
+                trustState={dataTrust}
+                trustInput={trustInput}
+              />
+              <ExecutiveStatCell
+                statId="ats-active-jobs"
+                label="Active jobs"
+                value={meta.ats.publishedJobs}
+                trustState={dataTrust}
+                trustInput={trustInput}
+              />
+              <ExecutiveStatCell
+                statId="ats-applicants-today"
+                label="Applicants today"
+                value={meta.ats.applicantsToday}
+                trustState={dataTrust}
+                trustInput={trustInput}
+              />
+              <ExecutiveStatCell
+                statId="ats-applicants-7d"
+                label="7d applicants"
+                value={meta.ats.applicants7d}
+                trustState={dataTrust}
+                trustInput={trustInput}
+              />
+            </div>
+          ) : null}
+
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <ExecutiveStatCell
-              statId="applicants-per-opening"
+              statId="ats-applicants-per-opening"
               label="Applicants / opening"
-              value={data.executiveInsights.applicantsPerOpening}
-              trustState={dataTrust}
-              trustInput={trustInput}
-            />
-            <ExecutiveStatCell
-              statId="active-jobs"
-              label="Active jobs"
-              value={data.executiveInsights.activeJobs}
-              trustState={dataTrust}
-              trustInput={trustInput}
-            />
-            <ExecutiveStatCell
-              statId="candidates-7d"
-              label="7d applicants"
-              value={data.executiveInsights.candidatesLast7Days}
+              value={
+                meta?.ats
+                  ? applicantsPerOpeningFromAts(meta.ats)
+                  : data.executiveInsights.applicantsPerOpening
+              }
               trustState={dataTrust}
               trustInput={trustInput}
             />

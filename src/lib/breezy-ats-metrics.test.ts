@@ -28,9 +28,14 @@ describe("breezy-ats-metrics", () => {
     assert.ok(metrics.partialReasons.length > 0);
   });
 
-  it("uses countCandidatesLast7Days path for applicants7d", () => {
-    const metrics = buildBreezyAtsMetrics(snapshot({ candidatesLast7Days: 42 }));
-    assert.equal(metrics.applicants7d, 42);
+  it("computes applicants7d from candidate array calendar window", () => {
+    const now = new Date();
+    const metrics = buildBreezyAtsMetrics(
+      snapshot({
+        candidates: [{ appliedDate: now.toISOString() } as never],
+      }),
+    );
+    assert.equal(metrics.applicants7d, 1);
   });
 
   it("separates ancillary partial errors in automation message", () => {

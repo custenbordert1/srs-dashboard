@@ -17,12 +17,9 @@ import {
   isGoogleSheetRecruitingLiveEnabled,
   type RecruitingCacheDiagnostics,
 } from "@/lib/recruiting-data-architecture";
-import {
-  computeBreezyKpiSnapshot,
-  computeRecruitingIntelligenceFromBreezy,
-} from "@/lib/recruiting-breezy-adapters";
+import { buildBreezyAtsMetrics, type BreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { computeRecruitingIntelligenceFromBreezy } from "@/lib/recruiting-breezy-adapters";
 import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-intelligence";
-import type { SheetKpiSnapshot } from "@/lib/sheet-kpi-metrics";
 
 export type RecruitingLiveSnapshot = {
   ok: true;
@@ -31,7 +28,7 @@ export type RecruitingLiveSnapshot = {
   jobs: BreezyJobsResult & { ok: true };
   candidates: BreezyCandidatesResult & { ok: true };
   intelligence: RecruitingIntelligenceSnapshot;
-  kpiSnapshot: SheetKpiSnapshot;
+  ats: BreezyAtsMetrics;
   diagnostics: RecruitingCacheDiagnostics;
   jobLocationDiagnostics: BreezyJobLocationDiagnostics;
   syncStatus: "ready" | "partial" | "cache_only" | "unavailable";
@@ -259,7 +256,7 @@ function successSnapshot(input: {
     input.jobs.jobs,
     input.candidates.candidates,
   );
-  const kpiSnapshot = computeBreezyKpiSnapshot(input.jobs.jobs, input.candidates.candidates);
+  const ats = buildBreezyAtsMetrics(input.candidates, input.jobs);
 
   const diagnostics = buildCacheDiagnostics({
     jobsFetchedAt: input.jobs.fetchedAt,
@@ -282,7 +279,7 @@ function successSnapshot(input: {
     jobs: input.jobs,
     candidates: input.candidates,
     intelligence,
-    kpiSnapshot,
+    ats,
     diagnostics,
     jobLocationDiagnostics,
     syncStatus: input.syncStatus ?? "ready",
