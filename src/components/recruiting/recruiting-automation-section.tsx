@@ -16,6 +16,8 @@ import {
 import { RecruiterStrategicRecommendationsPanel } from "@/components/recruiting/recruiter-strategic-recommendations-panel";
 import { StaffingRiskHeatPanel } from "@/components/recruiting/staffing-risk-heat-panel";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
+import { breezyAtsToDataTrustInput } from "@/lib/breezy-ats-metrics";
+import { BreezyAtsSyncStatus } from "@/components/recruiting/breezy-ats-sync-status";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { buildRecruiterOperationalKpis } from "@/lib/recruiting-dashboard-ux/recruiter-operational-kpis";
@@ -123,7 +125,6 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     refreshing,
     timedOut,
     stale,
-    lastSyncedAt,
     refresh,
     dataTrust,
   } = useRecruitingIntelligence({
@@ -170,6 +171,30 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     [meta?.activeRepsByState],
   );
 
+  const automationTrustInput = useMemo(
+    () =>
+      meta?.ats
+        ? breezyAtsToDataTrustInput(meta.ats, {
+            loading,
+            refreshing,
+            error: error ?? fatalError,
+            timedOut,
+          })
+        : {
+            loading,
+            refreshing,
+            error: error ?? fatalError,
+            timedOut,
+            hasData: Boolean(data),
+            partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
+            stale,
+            positionsScanned: meta?.positionsScanned,
+            totalPositionsAvailable: meta?.totalPositionsAvailable,
+            scanMode: meta?.scanMode ?? undefined,
+          },
+    [data, error, fatalError, loading, meta, refreshing, stale, timedOut],
+  );
+
   if (loading && !data) {
     return (
       <DashboardSectionFallback
@@ -211,18 +236,7 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-semibold text-zinc-50">Recruiter operational workspace</h2>
-            <DataTrustBadge
-              trust={{
-                loading,
-                refreshing,
-                error: error ?? fatalError,
-                timedOut,
-                hasData: Boolean(data),
-                partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
-                stale,
-              }}
-              state={dataTrust}
-            />
+            <DataTrustBadge trust={automationTrustInput} state={dataTrust} />
           </div>
           <p className="text-sm text-zinc-500">Territory: {data.territoryLabel}</p>
         </div>
@@ -237,19 +251,13 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
       </div>
 
       <DataTrustStatusBanner
-        trust={{
-          loading,
-          refreshing,
-          error: error ?? fatalError,
-          timedOut,
-          hasData: Boolean(data),
-          partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
-          stale,
-        }}
+        trust={automationTrustInput}
         state={dataTrust}
         onRetry={refresh}
         retrying={refreshing}
       />
+
+      {meta?.ats ? <BreezyAtsSyncStatus metrics={meta.ats} /> : null}
 
       <RecruiterImmediateActionsPanel actions={immediateActions} />
       <RecruiterOperationalWorkspace
@@ -264,15 +272,7 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
       <RecruiterOperationalKpiStrip
         kpis={kpis}
         trustState={dataTrust}
-        trustInput={{
-          loading,
-          refreshing,
-          error: error ?? fatalError,
-          timedOut,
-          hasData: Boolean(data),
-          partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
-          stale,
-        }}
+        trustInput={automationTrustInput}
       />
       <StaffingRiskHeatPanel
         snapshot={data}
@@ -292,15 +292,7 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
               compact
               hideOverlappingSections
               trustState={dataTrust}
-              trustInput={{
-                loading,
-                refreshing,
-                error: error ?? fatalError,
-                timedOut,
-                hasData: Boolean(data),
-                partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
-                stale,
-              }}
+              trustInput={automationTrustInput}
             />
             <RecruitingAlertsSection />
             <CandidateIntelligenceSection />
@@ -414,15 +406,7 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           compact
           hideOverlappingSections
           trustState={dataTrust}
-          trustInput={{
-            loading,
-            refreshing,
-            error: error ?? fatalError,
-            timedOut,
-            hasData: Boolean(data),
-            partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
-            stale,
-          }}
+          trustInput={automationTrustInput}
         />
       )}
 

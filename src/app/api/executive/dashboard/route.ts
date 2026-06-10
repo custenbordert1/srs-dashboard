@@ -1,6 +1,7 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { buildBreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { fetchBreezyCandidates, fetchBreezyJobs, isPartialBreezyPositionSync } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
@@ -52,6 +53,12 @@ export async function GET(request: Request) {
     melOpportunities,
   );
 
+  const ats = buildBreezyAtsMetrics(candidatesResult, jobsResult, {
+    ancillaryPartialErrors: melResult.ok
+      ? []
+      : [`MEL store routing data unavailable: ${melResult.error}`],
+  });
+
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
     breezyOk: true,
@@ -64,13 +71,15 @@ export async function GET(request: Request) {
       ok: true,
       dashboard,
       meta: {
-        partialSync: candidatesResult.truncated ?? false,
-        scanMode: candidatesResult.scanMode ?? "fast",
-        positionsScanned: candidatesResult.positionsScanned ?? 0,
-        totalPositionsAvailable: candidatesResult.totalPositionsAvailable ?? 0,
-        totalJobs: jobsResult.jobs.length,
-        totalCandidates: candidatesResult.candidates.length,
+        partialSync: isPartialBreezyPositionSync(candidatesResult) || !melResult.ok,
+        scanMode: ats.scanMode ?? "fast",
+        positionsScanned: ats.positionsScanned,
+        totalPositionsAvailable: ats.totalPositionsAvailable,
+        totalJobs: ats.publishedJobs,
+        totalCandidates: ats.candidatesLoaded,
         refreshedAt: new Date().toISOString(),
+        ats,
+        lastSuccessfulSync: ats.lastSuccessfulSync,
       },
     },
     {

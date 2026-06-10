@@ -1,4 +1,5 @@
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
+import { countCandidatesLast7Days } from "@/lib/breezy-api";
 import { buildTerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
 import { buildTerritoryFillRiskAlerts } from "@/lib/dm-dashboard/fill-risk-alerts";
 import { buildRecruiterProductivityLive } from "@/lib/recruiting-automation/recruiter-productivity-live";
@@ -92,11 +93,7 @@ export function buildExecutiveInsightsKpis(
   const fillRiskScore = Math.max(0, Math.min(100, 100 - criticalRisks * 12 - fillRisks.length * 3));
   const productivityRows = buildRecruiterProductivityLive(candidates, workflows, fetchedAt);
 
-  const since7d = new Date(new Date(fetchedAt).getTime() - 7 * MS_PER_DAY);
-  const candidatesLast7Days = candidates.filter((c) => {
-    const applied = parseDate(c.appliedDate);
-    return applied !== null && applied >= since7d;
-  }).length;
+  const candidatesLast7Days = countCandidatesLast7Days(candidates, fetchedAt);
 
   const interviewsActive = candidates.filter((c) => {
     const stage = c.stage.toLowerCase();

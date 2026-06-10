@@ -1,4 +1,5 @@
 import { scoreCandidate, type AiScoreTier } from "@/lib/candidate-ai-scoring";
+import { buildBreezyAtsMetrics, countBreezyApplicantsToday } from "@/lib/breezy-ats-metrics";
 import {
   countCandidatesLast7Days,
   isPartialBreezyPositionSync,
@@ -15,7 +16,6 @@ import {
 } from "@/lib/recruiting-intelligence";
 
 const MS_PER_HOUR = 60 * 60 * 1000;
-const MS_PER_DAY = 24 * MS_PER_HOUR;
 
 export const TRACKED_SOURCE_CHANNELS = [
   {
@@ -116,13 +116,6 @@ export function formatCommandCenterSyncTime(iso: string): string {
 function candidateName(candidate: BreezyCandidate): string {
   const name = `${candidate.firstName} ${candidate.lastName}`.trim();
   return name || candidate.email || "Unknown candidate";
-}
-
-function countAppliedSince(candidates: BreezyCandidate[], since: Date): number {
-  return candidates.filter((candidate) => {
-    const applied = parseAppliedDate(candidate.appliedDate);
-    return applied !== null && applied >= since;
-  }).length;
 }
 
 function normalizeText(value: string): string {
@@ -287,23 +280,22 @@ export function buildRecruitingCommandCenter(
   candidatesData: BreezyCandidatesSuccess,
   jobsData: BreezyJobsSuccess,
 ): CommandCenterSnapshot {
+  const ats = buildBreezyAtsMetrics(candidatesData, jobsData);
   const {
     candidates,
     fetchedAt,
-    positionsScanned = 0,
-    totalPositionsAvailable = positionsScanned,
+    positionsScanned = ats.positionsScanned,
+    totalPositionsAvailable = ats.totalPositionsAvailable,
     candidatesLast7Days,
   } = candidatesData;
   const partialPositionSync = isPartialBreezyPositionSync(candidatesData);
   const syncTime = new Date(fetchedAt);
-  const syncMs = Number.isNaN(syncTime.getTime()) ? Date.now() : syncTime.getTime();
-  const sinceToday = new Date(syncMs - MS_PER_DAY);
-  const lastSyncLabel = formatCommandCenterSyncTime(fetchedAt);
+  const lastSyncLabel = ats.lastSuccessfulSyncLabel;
 
-  const applicantsToday = countAppliedSince(candidates, sinceToday);
+  const applicantsToday = countBreezyApplicantsToday(candidates, fetchedAt);
   const applicantsLast7Days =
     candidatesLast7Days ?? countCandidatesLast7Days(candidates, fetchedAt);
-  const activeJobs = jobsData.jobs.length;
+  const activeJobs = ats.publishedJobs;
   const interviewing = candidates.filter((candidate) => isInterviewingStage(candidate.stage)).length;
   const topSource = topSourceLabel(candidates);
 
@@ -340,10 +332,10 @@ export function buildRecruitingCommandCenter(
       "Positions Scanned",
       `${positionsScanned.toLocaleString()} / ${totalPositionsAvailable.toLocaleString()}`,
       partialPositionSync
-        ? "Not all published positions were scanned"
+        ? `${ats.positionsNotScanned.toLocaleString()} published position(s) not scanned yet`
         : "All published positions included in candidate aggregation",
     ),
-    flatKpi("cc-sync", "Last Sync Time", lastSyncLabel, "Last successful Breezy candidates sync"),
+    flatKpi("cc-sync", "Last successful sync", lastSyncLabel, "Last successful Breezy candidates sync"),
   ];
 
   const jobsByPositionId = buildJobsByPositionId(jobsData.jobs);

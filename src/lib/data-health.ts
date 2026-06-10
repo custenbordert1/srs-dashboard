@@ -1,4 +1,5 @@
 import type { BreezyCandidatesHealthProbe, BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
+import { buildBreezyAtsMetrics, formatBreezyAtsStatusDetails } from "@/lib/breezy-ats-metrics";
 import { buildBreezyJobLocationDiagnostics } from "@/lib/breezy-job-location";
 import type { SheetDataResult, SheetRow } from "@/lib/google-sheet-csv";
 import { resolveMelProjectColumnKeys } from "@/lib/mel-projects-metrics";
@@ -320,19 +321,17 @@ export function analyzeBreezyCandidatesHealth(
   const probe = data as BreezyCandidatesHealthProbe;
   const rows = data.candidates as Record<string, unknown>[];
   const missingRequired = missingObjectFields(rows[0], BREEZY_CANDIDATE_REQUIRED_FIELDS);
+  const atsMetrics = buildBreezyAtsMetrics(data);
+  const atsDetailLines = formatBreezyAtsStatusDetails(atsMetrics);
   const metaParts = [
     data.companyName ? `Company: ${data.companyName}` : null,
     `Company ID: ${data.companyId}`,
     data.positionId ? `Position: ${data.positionId}` : null,
-    data.positionsScanned !== undefined ? `Positions scanned: ${data.positionsScanned}` : null,
-    data.truncated ? "Aggregation truncated (scan limit)" : null,
     probe.fromCache
       ? `Source: warmed cache (${data.scanMode ?? "unknown"} tier${data.partial ? ", partial" : ""})`
       : null,
     probe.partial && !probe.fromCache ? "Source: cache cold (health probe only)" : null,
-    data.positionsScanned !== undefined && data.totalPositionsAvailable
-      ? `Positions scanned: ${data.positionsScanned}/${data.totalPositionsAvailable}`
-      : null,
+    ...atsDetailLines,
   ].filter(Boolean);
 
   const report = baseBreezyReport(
@@ -352,7 +351,11 @@ export function analyzeBreezyCandidatesHealth(
     );
   } else if (probe.partial && rows.length > 0) {
     extraWarnings.push(
-      "Partial Breezy sync — open Candidates tab and wait for background full hydration for complete totals.",
+      `Partial Breezy sync (${atsMetrics.positionsScanned}/${atsMetrics.totalPositionsAvailable} positions scanned, ${atsMetrics.candidatesLoaded} candidates loaded) — open Candidates tab for full hydration.`,
+    );
+  } else if (atsMetrics.partialSync && rows.length > 0) {
+    extraWarnings.push(
+      `${atsMetrics.positionsNotScanned.toLocaleString()} published position(s) not scanned — candidate totals may be lower than Breezy until scan completes.`,
     );
   }
 

@@ -7,7 +7,8 @@ import { listJobDrafts } from "@/lib/job-management/job-draft-store";
 import { listRecruiterEscalations } from "@/lib/operational-escalation/operational-escalation-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { buildBreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { fetchBreezyCandidates, fetchBreezyJobs, isPartialBreezyPositionSync } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { NextResponse } from "next/server";
@@ -96,12 +97,33 @@ export async function GET(request: Request) {
     partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
   }
 
+  const ancillaryPartialErrors = partialErrors.filter(
+    (line) =>
+      !line.startsWith("Published jobs unavailable:") &&
+      !line.startsWith("Candidate sync unavailable:"),
+  );
+
+  const ats =
+    breezyCandidatesOk
+      ? buildBreezyAtsMetrics(candidatesResult, breezyJobsOk ? jobsResult : null, {
+          candidatesLoadedOverride: candidates.length,
+          publishedJobsOverride: jobs.length,
+          ancillaryPartialErrors,
+        })
+      : null;
+
+  const partialSync =
+    !breezyCandidatesOk ||
+    !breezyJobsOk ||
+    (breezyCandidatesOk && isPartialBreezyPositionSync(candidatesResult)) ||
+    ancillaryPartialErrors.length > 0;
+
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
     breezyOk: breezyJobsOk && breezyCandidatesOk,
     filteredJobs: jobs.length,
     filteredCandidates: candidates.length,
-    partial: partialErrors.length > 0,
+    partial: partialSync,
   });
 
   return NextResponse.json(
@@ -113,13 +135,18 @@ export async function GET(request: Request) {
         filteredJobs: jobs.length,
         filteredCandidates: candidates.length,
         workflowCount: Object.keys(workflows).length,
-        partialSync: candidatesResult.ok ? candidatesResult.truncated ?? false : true,
+        partialSync,
         partialErrors,
         breezyJobsOk,
         breezyCandidatesOk,
         escalations,
         activeRepsByState,
         refreshedAt: new Date().toISOString(),
+        ats,
+        positionsScanned: ats?.positionsScanned ?? 0,
+        totalPositionsAvailable: ats?.totalPositionsAvailable ?? 0,
+        scanMode: ats?.scanMode ?? null,
+        lastSuccessfulSync: ats?.lastSuccessfulSync ?? fetchedAt,
       },
     },
     {

@@ -4,6 +4,7 @@ import type { BreezyCandidatesResult } from "@/lib/breezy-api";
 import { buildBreezyCandidateSummary } from "@/lib/breezy-candidate-summary";
 import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
+import { BreezyAtsSyncStatus } from "@/components/recruiting/breezy-ats-sync-status";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
@@ -134,17 +135,12 @@ export function BreezyDashboardSummary() {
       <div>
         <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Breezy recruiting summary</h2>
         <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-          Live candidate metrics from the Breezy API. Counts are computed directly from the synced candidate
-          array ({summary.totalCandidates.toLocaleString()} records).
+          Live candidate metrics from the Breezy API. Counts use the shared ATS metrics service (
+          {summary.totalCandidates.toLocaleString()} candidates loaded).
         </p>
-        {summary.partialPositionSync ? (
-          <p
-            role="status"
-            className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"
-          >
-            Partial Breezy sync — more positions/candidates available.
-          </p>
-        ) : null}
+        <div className="mt-3">
+          <BreezyAtsSyncStatus metrics={summary.ats} compact={summary.ats.syncTier === "full"} />
+        </div>
       </div>
 
       <KpiCards items={summary.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />

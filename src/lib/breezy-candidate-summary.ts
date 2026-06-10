@@ -1,4 +1,9 @@
 import {
+  buildBreezyAtsMetrics,
+  countBreezyApplicantsToday,
+  type BreezyAtsMetrics,
+} from "@/lib/breezy-ats-metrics";
+import {
   BREEZY_ADDED_DATE_TIMEZONE,
   calendarDateKeyInTimezone,
   countCandidatesLast7Days,
@@ -32,7 +37,9 @@ export type BreezyCandidateSummary = {
   last7Days: number;
   positionsScanned: number;
   totalPositionsAvailable: number;
+  positionsNotScanned: number;
   partialPositionSync: boolean;
+  syncTier: BreezyAtsMetrics["syncTier"];
   fetchedAt: string;
   fetchedAtLabel: string;
   bySource: BreezyCountBucket[];
@@ -40,6 +47,7 @@ export type BreezyCandidateSummary = {
   newestCandidates: BreezyRecentCandidateRow[];
   truncated: boolean;
   kpis: Kpi[];
+  ats: BreezyAtsMetrics;
 };
 
 function parseAppliedDate(raw: string): Date | null {
@@ -57,15 +65,6 @@ function formatAppliedDate(raw: string): string {
   const date = parseAppliedDate(raw);
   if (!date) return raw.trim() || "—";
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
-}
-
-function formatFetchedAt(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
 
 function countBuckets(candidates: BreezyCandidate[], field: "source" | "stage"): BreezyCountBucket[] {
@@ -86,13 +85,6 @@ function bucketHint(buckets: BreezyCountBucket[], limit = 4): string {
     .slice(0, limit)
     .map((row) => `${row.label}: ${row.count.toLocaleString()}`)
     .join(" · ");
-}
-
-function countAppliedSince(candidates: BreezyCandidate[], since: Date): number {
-  return candidates.filter((candidate) => {
-    const applied = parseAppliedDate(candidate.appliedDate);
-    return applied !== null && applied >= since;
-  }).length;
 }
 
 function buildNewestCandidates(candidates: BreezyCandidate[], limit = 10): BreezyRecentCandidateRow[] {
@@ -140,11 +132,12 @@ function flatKpi(
 }
 
 export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): BreezyCandidateSummary {
+  const ats = buildBreezyAtsMetrics(data);
   const {
     candidates,
     fetchedAt,
-    positionsScanned = 0,
-    totalPositionsAvailable = positionsScanned,
+    positionsScanned = ats.positionsScanned,
+    totalPositionsAvailable = ats.totalPositionsAvailable,
     candidatesLast7Days,
   } = data;
   const partialPositionSync = isPartialBreezyPositionSync(data);
@@ -153,15 +146,14 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
   const since24h = new Date(syncMs - MS_PER_DAY);
   const last7EndKey = calendarDateKeyInTimezone(syncTime, BREEZY_ADDED_DATE_TIMEZONE);
 
-  const totalCandidates = candidates.length;
-  const last24Hours = countAppliedSince(candidates, since24h);
+  const totalCandidates = ats.candidatesLoaded;
+  const last24Hours = countBreezyApplicantsToday(candidates, fetchedAt);
   const last7Days = candidatesLast7Days ?? countCandidatesLast7Days(candidates, fetchedAt);
   const customRangeCount =
     data.dateRangeStart && data.dateRangeEnd ? (data.candidatesInDateRange ?? 0) : undefined;
   const bySource = countBuckets(candidates, "source");
   const byStage = countBuckets(candidates, "stage");
   const newestCandidates = buildNewestCandidates(candidates);
-  const fetchedAtLabel = formatFetchedAt(fetchedAt);
 
   const topSource = bySource[0];
   const topStage = byStage[0];
@@ -212,10 +204,10 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
       "Positions scanned",
       `${positionsScanned.toLocaleString()} / ${totalPositionsAvailable.toLocaleString()}`,
       partialPositionSync
-        ? "Not all published positions were scanned"
+        ? `${ats.positionsNotScanned.toLocaleString()} published position(s) not scanned yet`
         : "All published positions included in this pull",
     ),
-    flatKpi("breezy-sync", "Last sync time", fetchedAtLabel, "Breezy candidates API fetchedAt timestamp"),
+    flatKpi("breezy-sync", "Last successful sync", ats.lastSuccessfulSyncLabel, "Breezy candidates API fetchedAt timestamp"),
   ];
 
   return {
@@ -224,13 +216,16 @@ export function buildBreezyCandidateSummary(data: BreezyCandidatesSuccess): Bree
     last7Days,
     positionsScanned,
     totalPositionsAvailable,
+    positionsNotScanned: ats.positionsNotScanned,
     partialPositionSync,
+    syncTier: ats.syncTier,
     fetchedAt,
-    fetchedAtLabel,
+    fetchedAtLabel: ats.lastSuccessfulSyncLabel,
     bySource,
     byStage,
     newestCandidates,
     truncated: partialPositionSync,
     kpis,
+    ats,
   };
 }

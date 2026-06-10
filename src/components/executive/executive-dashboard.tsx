@@ -16,8 +16,11 @@ import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trus
 import { TrustGatedKpiShell } from "@/components/ui/trust-gated-kpi";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
+import { breezyAtsToDataTrustInput, type BreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { BreezyAtsSyncStatus } from "@/components/recruiting/breezy-ats-sync-status";
 import type { DataTrustInput, DataTrustState } from "@/lib/data-trust-state";
 import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
+import { useMemo } from "react";
 
 type ExecutiveDashboardProps = {
   user: UserPublic;
@@ -172,17 +175,23 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
   });
   const drawer = useCandidateDrawer();
 
-  const trustInput: DataTrustInput = {
-    loading,
-    refreshing,
-    error,
-    timedOut,
-    hasData: Boolean(data),
-    partialSync: meta?.partialSync,
-    scanMode: meta?.scanMode,
-    positionsScanned: meta?.positionsScanned,
-    totalPositionsAvailable: meta?.totalPositionsAvailable,
-  };
+  const trustInput: DataTrustInput = useMemo(() => {
+    const ats = (meta as { ats?: BreezyAtsMetrics } | undefined)?.ats;
+    if (ats) {
+      return breezyAtsToDataTrustInput(ats, { loading, refreshing, error, timedOut });
+    }
+    return {
+      loading,
+      refreshing,
+      error,
+      timedOut,
+      hasData: Boolean(data),
+      partialSync: meta?.partialSync,
+      scanMode: meta?.scanMode,
+      positionsScanned: meta?.positionsScanned,
+      totalPositionsAvailable: meta?.totalPositionsAvailable,
+    };
+  }, [data, error, loading, meta, refreshing, timedOut]);
 
   return (
     <AppShell
@@ -221,6 +230,13 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
         onRetry={refresh}
         retrying={refreshing}
       />
+
+      {(meta as { ats?: BreezyAtsMetrics } | undefined)?.ats ? (
+        <BreezyAtsSyncStatus
+          metrics={(meta as { ats: BreezyAtsMetrics }).ats}
+          compact={(meta as { ats: BreezyAtsMetrics }).ats.syncTier === "full"}
+        />
+      ) : null}
 
       {loading && !data ? <p className="text-sm text-zinc-500">Loading executive rollup…</p> : null}
 

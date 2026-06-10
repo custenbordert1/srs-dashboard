@@ -10,6 +10,11 @@ import {
   LONG_CLIENT_CACHE_TTL_MS,
 } from "@/lib/client-api-cache";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
+import {
+  breezyAtsToDataTrustInput,
+  formatAutomationAtsStatusMessage,
+  type BreezyAtsMetrics,
+} from "@/lib/breezy-ats-metrics";
 import { buildDataTrustState, dataTrustStatusMessage, type DataTrustState } from "@/lib/data-trust-state";
 import { FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +32,11 @@ type IntelligenceMeta = {
   breezyCandidatesOk?: boolean;
   escalations?: RecruiterEscalationQueueItem[];
   activeRepsByState?: Record<string, number>;
+  ats?: BreezyAtsMetrics | null;
+  positionsScanned?: number;
+  totalPositionsAvailable?: number;
+  scanMode?: string | null;
+  lastSuccessfulSync?: string;
   routingBuild?: {
     cacheHit: boolean;
     totalMs: number;
@@ -193,8 +203,13 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
           partial: Boolean(parsed.meta?.partialSync || parsed.meta?.partialErrors?.length),
         });
         applySuccess(parsed);
-        if (parsed.meta?.partialErrors?.length || parsed.meta?.partialSync) {
-          setError("Some ATS sections are partial — operational recommendations remain available.");
+        const atsMessage = parsed.meta?.ats
+          ? formatAutomationAtsStatusMessage(parsed.meta.ats)
+          : parsed.meta?.partialErrors?.length || parsed.meta?.partialSync
+            ? `Partial sync — ${parsed.meta.partialErrors?.join("; ") ?? "Breezy scan incomplete"}. Operational recommendations remain available.`
+            : null;
+        if (atsMessage) {
+          setError(atsMessage);
         }
       } finally {
         if (!mountedRef.current || generation !== fetchGeneration.current) return;
@@ -246,6 +261,16 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
   }, [enabled, pollIntervalMs, runFetch]);
 
   const dataTrust = useMemo((): DataTrustState => {
+    if (meta?.ats) {
+      return buildDataTrustState(
+        breezyAtsToDataTrustInput(meta.ats, {
+          loading,
+          refreshing,
+          error: error ?? fatalError,
+          timedOut,
+        }),
+      );
+    }
     return buildDataTrustState({
       loading,
       refreshing,
@@ -254,6 +279,9 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
       hasData: Boolean(data),
       partialSync: meta?.partialSync ?? Boolean(meta?.partialErrors?.length),
       stale,
+      positionsScanned: meta?.positionsScanned,
+      totalPositionsAvailable: meta?.totalPositionsAvailable,
+      scanMode: meta?.scanMode ?? undefined,
     });
   }, [data, error, fatalError, loading, meta, refreshing, stale, timedOut]);
 

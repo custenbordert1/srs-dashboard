@@ -12,6 +12,8 @@ import { buildCommandCenterDmInsights } from "@/lib/command-center-dm-insights";
 import type { CoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import { DataTrustBadge, DataTrustStatusBanner } from "@/components/ui/data-trust-badge";
+import { breezyAtsToDataTrustInput, buildBreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
+import { BreezyAtsSyncStatus } from "@/components/recruiting/breezy-ats-sync-status";
 import { buildDataTrustState, type DataTrustState } from "@/lib/data-trust-state";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import {
@@ -277,7 +279,15 @@ export function RecruitingCommandCenter() {
     });
   }, [extras, loadState, snapshot]);
 
+  const atsMetrics = useMemo(() => {
+    if (loadState.status !== "ready" || !loadState.candidates.ok || !loadState.jobs.ok) return null;
+    return buildBreezyAtsMetrics(loadState.candidates, loadState.jobs);
+  }, [loadState]);
+
   const breezyTrustInput = useMemo(() => {
+    if (atsMetrics) {
+      return breezyAtsToDataTrustInput(atsMetrics);
+    }
     if (loadState.status !== "ready" || !loadState.candidates.ok) return null;
     const candidates = loadState.candidates;
     return {
@@ -290,7 +300,7 @@ export function RecruitingCommandCenter() {
       fromCache: candidates.fromCache,
       stale: candidates.stale,
     };
-  }, [loadState, snapshot]);
+  }, [atsMetrics, loadState, snapshot]);
 
   const breezyTrustState: DataTrustState = useMemo(
     () => buildDataTrustState(breezyTrustInput ?? { hasData: Boolean(snapshot) }),
@@ -374,6 +384,8 @@ export function RecruitingCommandCenter() {
       </header>
 
       {breezyTrustInput ? <DataTrustStatusBanner trust={breezyTrustInput} /> : null}
+
+      {atsMetrics ? <BreezyAtsSyncStatus metrics={atsMetrics} compact={atsMetrics.syncTier === "full"} /> : null}
 
       <KpiCards
         items={snapshot.kpis}
