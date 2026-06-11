@@ -21,6 +21,7 @@ import {
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
 import { CommandCenterDmInsights } from "@/components/recruiting/command-center-dm-insights";
+import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -394,6 +395,8 @@ export function RecruitingCommandCenter() {
         trustState={breezyTrustState}
         trustInput={breezyTrustInput ?? undefined}
       />
+
+      <NotificationCriticalAlertsPanel compact />
 
       {dmInsights ? (
         <CommandCenterDmInsights

@@ -11,6 +11,7 @@ import {
   LazyCandidatesSection,
   LazyRecruiterProductivityCenter,
   LazyTerritoryIntelligenceCenter,
+  LazyNotificationCenter,
   LazyDataHealthSection,
   LazyDmLeaderboard,
   LazyLiveSheetSection,
@@ -171,6 +172,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="territory-intelligence" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="territory-intelligence">
             <LazyTerritoryIntelligenceCenter />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="notifications" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="notifications">
+            <LazyNotificationCenter />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

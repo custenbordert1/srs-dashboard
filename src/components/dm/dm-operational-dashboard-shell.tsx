@@ -5,6 +5,7 @@ import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widg
 import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
 import { DmOnboardingStatusCard } from "@/components/dm/dm-onboarding-status-card";
 import { DmOperationalDrawer } from "@/components/dm/dm-operational-drawer";
+import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
 import { DmPriorityAlertsPanel } from "@/components/dm/dm-priority-alerts-panel";
 import { DmToast } from "@/components/dm/dm-toast";
 import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
@@ -102,6 +103,12 @@ export function DmOperationalDashboardShell({
       </section>
 
       <DmOnboardingStatusCard onboarding={data.onboarding} />
+
+      <NotificationCriticalAlertsPanel
+        title="DM notifications"
+        description="Coverage risk, zero-applicant jobs, and territory health alerts."
+        compact
+      />
 
       <DmPriorityAlertsPanel
         key={prioritySeed}

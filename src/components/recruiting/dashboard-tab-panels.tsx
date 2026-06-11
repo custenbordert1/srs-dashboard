@@ -92,6 +92,14 @@ export const LazyTerritoryIntelligenceCenter = dynamic(
   { loading: tabLoading("Loading territory intelligence…"), ssr: false },
 );
 
+export const LazyNotificationCenter = dynamic(
+  () =>
+    import("@/components/notifications/notification-center").then((m) => ({
+      default: m.NotificationCenter,
+    })),
+  { loading: tabLoading("Loading notifications…"), ssr: false },
+);
+
 export const LazyMelProjectsSection = dynamic(
   () =>
     import("@/components/recruiting/mel-projects-section").then((m) => ({

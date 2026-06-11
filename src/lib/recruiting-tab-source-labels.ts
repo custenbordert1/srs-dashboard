@@ -7,6 +7,7 @@ export type DashboardTabId =
   | "candidates"
   | "recruiter-productivity"
   | "territory-intelligence"
+  | "notifications"
   | "mel-projects"
   | "data-health"
   | "recruiting-intelligence"
@@ -102,6 +103,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "mixed",
     bannerMessage:
       "Per-DM coverage, applicant velocity, recruiter workload, and heat map signals from Breezy, MEL, and workflow overlays.",
+  },
+  notifications: {
+    navLabel: "Notifications",
+    sourceTag: "Automation engine",
+    badgeLabel: "Proactive alerts",
+    kind: "system",
+    bannerMessage:
+      "Centralized recruiter, DM, and executive notifications with read/dismiss tracking and automation rules.",
   },
   "mel-projects": {
     navLabel: "MEL Projects",

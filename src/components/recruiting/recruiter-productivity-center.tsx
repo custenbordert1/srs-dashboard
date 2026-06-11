@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
 import { RecruiterOperationalKpiStrip } from "@/components/recruiting/recruiter-operational-kpi-strip";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { buildDataTrustState } from "@/lib/data-trust-state";
@@ -143,6 +144,12 @@ export function RecruiterProductivityCenter() {
           </button>
         </div>
       </div>
+
+      <NotificationCriticalAlertsPanel
+        title="Recruiter notifications"
+        description="Follow-ups, aging candidates, and paperwork alerts for your queue."
+        compact
+      />
 
       <div className="flex flex-wrap gap-3">
         <label className="text-xs text-zinc-400">
