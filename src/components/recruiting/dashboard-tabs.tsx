@@ -41,6 +41,11 @@ export const DASHBOARD_TABS: DashboardTab[] = (
   return { id, label: meta.navLabel };
 });
 
+export const SYSTEM_ADMIN_TAB: DashboardTab = {
+  id: "system-admin",
+  label: getRecruitingTabSource("system-admin").navLabel,
+};
+
 export const EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB: DashboardTab = {
   id: "workforce-intelligence",
   label: getRecruitingTabSource("workforce-intelligence").navLabel,

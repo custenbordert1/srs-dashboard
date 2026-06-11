@@ -13,6 +13,7 @@ import {
   LazyTerritoryIntelligenceCenter,
   LazyNotificationCenter,
   LazyDataHealthSection,
+  LazySystemAdminCenter,
   LazyDmLeaderboard,
   LazyLiveSheetSection,
   LazyMelProjectsSection,
@@ -29,6 +30,7 @@ import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
   EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
+  SYSTEM_ADMIN_TAB,
   type DashboardTabId,
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
@@ -71,8 +73,10 @@ export function RecruitingDashboardContent({
   userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
-  const executiveTabs =
-    userRole === "admin" || userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
+  const adminTabs =
+    userRole === "admin" || userRole === "executive"
+      ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB, SYSTEM_ADMIN_TAB]
+      : [];
 
   useEffect(() => {
     const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
@@ -99,7 +103,7 @@ export function RecruitingDashboardContent({
       <DashboardTabNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        extraTabs={executiveTabs}
+        extraTabs={adminTabs}
       />
 
       <main
@@ -190,6 +194,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="data-health" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="data-health">
             <LazyDataHealthSection />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="system-admin" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="system-admin">
+            <LazySystemAdminCenter />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

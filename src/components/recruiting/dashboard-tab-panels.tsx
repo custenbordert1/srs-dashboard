@@ -116,6 +116,14 @@ export const LazyDataHealthSection = dynamic(
   { loading: tabLoading("Loading data health…") },
 );
 
+export const LazySystemAdminCenter = dynamic(
+  () =>
+    import("@/components/admin/system-admin-center").then((m) => ({
+      default: m.SystemAdminCenter,
+    })),
+  { loading: tabLoading("Loading system administration…") },
+);
+
 export const LazyRecruitingIntelligenceSection = dynamic(
   () =>
     import("@/components/recruiting/recruiting-intelligence-section").then((m) => ({

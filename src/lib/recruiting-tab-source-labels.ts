@@ -10,6 +10,7 @@ export type DashboardTabId =
   | "notifications"
   | "mel-projects"
   | "data-health"
+  | "system-admin"
   | "recruiting-intelligence"
   | "automation"
   | "routing-intelligence"
@@ -127,6 +128,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "system",
     bannerMessage:
       "Endpoint probes and parity tools for operators — not a recruiter workflow tab. Does not change live or archive data.",
+  },
+  "system-admin": {
+    navLabel: "System Admin",
+    sourceTag: "Admin · ops",
+    badgeLabel: "Enterprise administration",
+    kind: "system",
+    bannerMessage:
+      "User management, audit trail, integration status, data quality, deployment readiness, and demo mode controls.",
   },
   "recruiting-intelligence": {
     navLabel: "Recruiting Intelligence",
