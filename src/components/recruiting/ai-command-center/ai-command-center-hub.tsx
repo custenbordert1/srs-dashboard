@@ -1,7 +1,10 @@
 "use client";
 
+import { AiActionEnginePanel } from "@/components/recruiting/ai-command-center/ai-action-engine-panel";
+import { AiInsightActionButton } from "@/components/recruiting/ai-command-center/ai-insight-action-button";
 import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import type { AiCommandCenterSnapshot, ExecutiveAiAnswer } from "@/lib/ai-recruiting-command-center";
+import type { AiActionProposal } from "@/lib/ai-action-engine";
 import { useEffect, useState } from "react";
 
 const CATEGORY_STYLES = {
@@ -32,6 +35,7 @@ export function AiCommandCenterHub() {
   const [answer, setAnswer] = useState<ExecutiveAiAnswer | null>(null);
   const [querying, setQuerying] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
+  const [insightProposals, setInsightProposals] = useState<Record<string, AiActionProposal[]>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +52,17 @@ export function AiCommandCenterHub() {
         }
         setError(null);
         setSnapshot(parsed.snapshot);
+
+        const actionRes = await fetchWithTimeout("/api/recruiting/ai-action-engine", {
+          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+        });
+        const actionParsed = (await actionRes.json()) as {
+          ok?: boolean;
+          center?: { insightProposals: Record<string, AiActionProposal[]> };
+        };
+        if (!cancelled && actionParsed.ok && actionParsed.center) {
+          setInsightProposals(actionParsed.center.insightProposals);
+        }
       } catch {
         if (!cancelled) setError("Unable to load AI command center.");
       } finally {
@@ -208,6 +223,16 @@ export function AiCommandCenterHub() {
               <p className="mt-1 text-sm font-medium text-zinc-100">{insight.title}</p>
               <p className="mt-0.5 text-sm text-zinc-400">{insight.explanation}</p>
               <p className="mt-1 text-xs text-teal-300/90">→ {insight.action}</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {(insightProposals[insight.id] ?? []).slice(0, 3).map((proposal) => (
+                  <AiInsightActionButton
+                    key={proposal.id}
+                    proposal={proposal}
+                    recommendation={`${insight.title}: ${insight.action}`}
+                    compact
+                  />
+                ))}
+              </div>
             </article>
           ))}
         </div>
@@ -292,6 +317,8 @@ export function AiCommandCenterHub() {
           </table>
         </div>
       </section>
+
+      <AiActionEnginePanel />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
+import { ExecutiveActionCenterSummary } from "@/components/recruiting/ai-command-center/executive-action-center-summary";
 import { CoverageOptimizationExecutiveSummary } from "@/components/coverage-optimization/coverage-optimization-executive-summary";
 import { WorkforceOpsExecutiveSummary } from "@/components/workforce-ops/workforce-ops-executive-summary";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
@@ -351,6 +352,8 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
           <WorkforceOpsExecutiveSummary />
 
           <CoverageOptimizationExecutiveSummary />
+
+          <ExecutiveActionCenterSummary />
 
           <DeferredSection
             title="Coverage risk intelligence"
