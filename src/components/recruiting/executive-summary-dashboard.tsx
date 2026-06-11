@@ -7,7 +7,8 @@ import { buildExecutiveSummaryDisplay } from "@/lib/executive-summary/build-exec
 import type { AiCommandCenterSnapshot } from "@/lib/ai-recruiting-command-center";
 import type { NotificationCenterSnapshot } from "@/lib/notification-engine";
 import type { TerritoryIntelligenceCenterSnapshot } from "@/lib/territory-intelligence/types";
-import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { fetchAiCommandCenterSnapshot } from "@/lib/cached-ai-command-center-client";
+import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
@@ -24,14 +25,14 @@ export function ExecutiveSummaryDashboard() {
     let cancelled = false;
     (async () => {
       try {
-        const [territoryRes, aiRes, notifRes, workforceRes, liveRes] = await Promise.all([
-          fetchWithTimeout("/api/territory-intelligence", { timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS }),
-          fetchWithTimeout("/api/recruiting/ai-command-center", { timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS }),
+        const [territoryRes, aiResult, notifRes, workforceRes, liveRes] = await Promise.all([
+          fetchWithTimeout("/api/territory-intelligence", { timeoutMs: FETCH_T4_INTELLIGENCE_MS }),
+          fetchAiCommandCenterSnapshot(),
           fetchWithTimeout("/api/notifications?includeDismissed=true", {
             timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
           }),
-          fetchWithTimeout("/api/workforce-ops", { timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS }),
-          fetchWithTimeout("/api/recruiting/live-snapshot", { timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS }),
+          fetchWithTimeout("/api/workforce-ops", { timeoutMs: FETCH_T4_INTELLIGENCE_MS }),
+          fetchWithTimeout("/api/recruiting/live-snapshot", { timeoutMs: FETCH_T4_INTELLIGENCE_MS }),
         ]);
 
         if (cancelled) return;
@@ -39,8 +40,7 @@ export function ExecutiveSummaryDashboard() {
         const territoryParsed = (await territoryRes.json()) as { ok?: boolean; center?: TerritoryIntelligenceCenterSnapshot };
         if (territoryParsed.ok && territoryParsed.center) setTerritory(territoryParsed.center);
 
-        const aiParsed = (await aiRes.json()) as { ok?: boolean; snapshot?: AiCommandCenterSnapshot };
-        if (aiParsed.ok && aiParsed.snapshot) setAi(aiParsed.snapshot);
+        if (aiResult.snapshot) setAi(aiResult.snapshot);
 
         const notifParsed = (await notifRes.json()) as { ok?: boolean; center?: NotificationCenterSnapshot };
         if (notifParsed.ok && notifParsed.center) setNotifications(notifParsed.center);

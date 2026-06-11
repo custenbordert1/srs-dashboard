@@ -4,10 +4,11 @@ import { AiActionEnginePanel } from "@/components/recruiting/ai-command-center/a
 import { AiInsightActionButton } from "@/components/recruiting/ai-command-center/ai-insight-action-button";
 import { DeferredSection } from "@/components/ui/deferred-section";
 import { STATUS_TONE_STYLES } from "@/lib/ui/status-tone";
-import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { fetchAiCommandCenterSnapshot } from "@/lib/cached-ai-command-center-client";
+import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import type { AiCommandCenterSnapshot, ExecutiveAiAnswer } from "@/lib/ai-recruiting-command-center";
 import type { AiActionProposal } from "@/lib/ai-action-engine";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const SEVERITY_ACCENT = {
   critical: STATUS_TONE_STYLES.critical,
@@ -16,59 +17,58 @@ const SEVERITY_ACCENT = {
   low: STATUS_TONE_STYLES.info,
 } as const;
 
-type AiResponse = {
-  ok?: boolean;
-  snapshot?: AiCommandCenterSnapshot;
-  error?: string;
-};
-
 export function AiCommandCenterHub() {
   const [snapshot, setSnapshot] = useState<AiCommandCenterSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stale, setStale] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<ExecutiveAiAnswer | null>(null);
   const [querying, setQuerying] = useState(false);
-  const [reloadToken, setReloadToken] = useState(0);
   const [insightProposals, setInsightProposals] = useState<Record<string, AiActionProposal[]>>({});
   const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetchWithTimeout("/api/recruiting/ai-command-center", {
-          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
-        });
-        const parsed = (await res.json()) as AiResponse;
-        if (cancelled) return;
-        if (!parsed.ok || !parsed.snapshot) {
-          setError(parsed.error ?? "Unable to load AI command center.");
-          return;
+  const loadSnapshot = useCallback(async (force = false) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await fetchAiCommandCenterSnapshot({ force });
+      if (result.snapshot) {
+        setSnapshot(result.snapshot);
+        setStale(Boolean(result.stale));
+        if (result.stale && result.error) {
+          setError(result.error);
+        } else {
+          setError(null);
         }
-        setError(null);
-        setSnapshot(parsed.snapshot);
-
-        const actionRes = await fetchWithTimeout("/api/recruiting/ai-action-engine", {
-          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
-        });
-        const actionParsed = (await actionRes.json()) as {
-          ok?: boolean;
-          center?: { insightProposals: Record<string, AiActionProposal[]> };
-        };
-        if (!cancelled && actionParsed.ok && actionParsed.center) {
-          setInsightProposals(actionParsed.center.insightProposals);
-        }
-      } catch {
-        if (!cancelled) setError("Unable to load AI command center.");
-      } finally {
-        if (!cancelled) setLoading(false);
+      } else {
+        setError(result.error ?? "Unable to load AI command center.");
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [reloadToken]);
+
+      if (result.snapshot) {
+        try {
+          const actionRes = await fetchWithTimeout("/api/recruiting/ai-action-engine", {
+            timeoutMs: FETCH_T4_INTELLIGENCE_MS,
+          });
+          const actionParsed = (await actionRes.json()) as {
+            ok?: boolean;
+            center?: { insightProposals: Record<string, AiActionProposal[]> };
+          };
+          if (actionParsed.ok && actionParsed.center) {
+            setInsightProposals(actionParsed.center.insightProposals);
+          }
+        } catch {
+          // Action proposals are optional — briefing still renders.
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSnapshot(false);
+  }, [loadSnapshot]);
 
   const askQuestion = async (prompt: string) => {
     if (!prompt.trim()) return;
@@ -78,7 +78,7 @@ export function AiCommandCenterHub() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: prompt }),
-        timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
       });
       const parsed = (await res.json()) as {
         ok?: boolean;
@@ -98,15 +98,22 @@ export function AiCommandCenterHub() {
     return <p className="text-sm text-zinc-500">Loading AI command center…</p>;
   }
 
-  if (error && !snapshot) {
+  if (!snapshot) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-200">
-        {error}
+      <div className="space-y-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+        <p className="text-sm text-amber-100">
+          {error ?? "Unable to load AI command center."}
+        </p>
+        <button
+          type="button"
+          onClick={() => void loadSnapshot(true)}
+          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800"
+        >
+          Retry
+        </button>
       </div>
     );
   }
-
-  if (!snapshot) return null;
 
   const briefing = snapshot.briefing;
   const topTerritories = snapshot.territoryAdvisor
@@ -125,15 +132,29 @@ export function AiCommandCenterHub() {
         </div>
         <button
           type="button"
-          onClick={() => {
-            setLoading(true);
-            setReloadToken((token) => token + 1);
-          }}
-          className="rounded-lg border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+          onClick={() => void loadSnapshot(true)}
+          disabled={loading}
+          className="rounded-lg border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
         >
-          Refresh
+          {loading ? "Refreshing…" : "Refresh"}
         </button>
       </header>
+
+      {error ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <p className="text-xs text-amber-100">
+            {stale ? "Showing last cached snapshot — " : ""}
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={() => void loadSnapshot(true)}
+            className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-300 hover:bg-zinc-800"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
 
       <section className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
         <h2 className="text-sm font-semibold text-zinc-100">Executive briefing</h2>
@@ -177,8 +198,9 @@ export function AiCommandCenterHub() {
             const accent = SEVERITY_ACCENT[insight.severity];
             const proposals = insightProposals[insight.id] ?? [];
             const primary = proposals[0];
-            const assignProposal = proposals.find((row) =>
-              row.actionKind.includes("assign") || row.actionKind.includes("escalat"),
+            const assignProposal = proposals.find(
+              (row) =>
+                String(row.actionKind).includes("assign") || String(row.actionKind).includes("escalat"),
             );
             const expanded = expandedInsightId === insight.id;
             return (
