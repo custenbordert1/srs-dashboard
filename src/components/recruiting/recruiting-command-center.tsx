@@ -21,6 +21,7 @@ import {
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
 import { CommandCenterDmInsights } from "@/components/recruiting/command-center-dm-insights";
+import { AiCommandCenterHub } from "@/components/recruiting/ai-command-center/ai-command-center-hub";
 import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
@@ -397,6 +398,8 @@ export function RecruitingCommandCenter() {
       />
 
       <NotificationCriticalAlertsPanel compact />
+
+      <AiCommandCenterHub />
 
       {dmInsights ? (
         <CommandCenterDmInsights
