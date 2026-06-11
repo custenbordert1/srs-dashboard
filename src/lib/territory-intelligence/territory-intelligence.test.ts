@@ -3,8 +3,13 @@ import { describe, it } from "node:test";
 import {
   buildDmTerritoryRollups,
   buildRecruitingPipelineMetrics,
+  buildTerritoryIntelligenceCenter,
   buildTerritoryMetricsFromDashboardSnapshot,
+  computeApplicantVelocityTrend,
+  computeCoverageRiskScoreForDm,
+  countLowApplicantFlowJobs,
   countOpenCallsFromDemandSignals,
+  countZeroApplicantJobs,
   resolveCoverageHealthTier,
   TERRITORY_COVERAGE_THRESHOLD,
   topTerritoriesNeedingAttention,
@@ -222,5 +227,190 @@ describe("territory-intelligence", () => {
     );
     assert.equal(pipeline.applicantsLast7Days, 12);
     assert.equal(pipeline.hired, 5);
+  });
+
+  it("counts zero and low applicant flow jobs", () => {
+    const jobs: BreezyJob[] = [
+      {
+        jobId: "j1",
+        name: "A",
+        city: "Dallas",
+        state: "TX",
+        zip: "",
+        displayLocation: "",
+        locationSource: "raw",
+        status: "published",
+        createdDate: "2026-05-01",
+        updatedDate: "2026-05-01",
+      },
+      {
+        jobId: "j2",
+        name: "B",
+        city: "Houston",
+        state: "TX",
+        zip: "",
+        displayLocation: "",
+        locationSource: "raw",
+        status: "published",
+        createdDate: "2026-05-01",
+        updatedDate: "2026-05-01",
+      },
+    ];
+    const candidates: BreezyCandidate[] = [
+      {
+        candidateId: "c1",
+        firstName: "A",
+        lastName: "B",
+        email: "a@b.com",
+        phone: "",
+        source: "",
+        stage: "Applied",
+        appliedDate: "2026-05-20",
+        createdDate: "",
+        addedDate: "",
+        updatedDate: "",
+        addedDateSource: "",
+        positionId: "j2",
+        positionName: "B",
+        city: "Houston",
+        state: "TX",
+        zipCode: "",
+        resumeText: "",
+        hasResume: false,
+      },
+    ];
+    assert.equal(countZeroApplicantJobs(jobs, candidates), 1);
+    assert.equal(countLowApplicantFlowJobs(jobs, candidates), 1);
+  });
+
+  it("computes applicant velocity trend", () => {
+    const fetchedAt = "2026-05-28T12:00:00.000Z";
+    const candidates: BreezyCandidate[] = [
+      {
+        candidateId: "c1",
+        firstName: "A",
+        lastName: "B",
+        email: "a@b.com",
+        phone: "",
+        source: "",
+        stage: "Applied",
+        appliedDate: "2026-05-27",
+        createdDate: "",
+        addedDate: "",
+        updatedDate: "",
+        addedDateSource: "",
+        positionId: "p1",
+        positionName: "Role",
+        city: "City",
+        state: "TX",
+        zipCode: "",
+        resumeText: "",
+        hasResume: false,
+      },
+      {
+        candidateId: "c2",
+        firstName: "C",
+        lastName: "D",
+        email: "c@d.com",
+        phone: "",
+        source: "",
+        stage: "Applied",
+        appliedDate: "2026-05-18",
+        createdDate: "",
+        addedDate: "",
+        updatedDate: "",
+        addedDateSource: "",
+        positionId: "p1",
+        positionName: "Role",
+        city: "City",
+        state: "TX",
+        zipCode: "",
+        resumeText: "",
+        hasResume: false,
+      },
+    ];
+    const trend = computeApplicantVelocityTrend(candidates, fetchedAt);
+    assert.equal(trend.current7d, 1);
+    assert.equal(trend.prior7d, 1);
+    assert.equal(trend.direction, "flat");
+  });
+
+  it("builds territory intelligence center with executive rollup top 10", () => {
+    const job: BreezyJob = {
+      jobId: "j-tx",
+      name: "Role",
+      city: "Omaha",
+      state: "NE",
+      zip: "",
+      displayLocation: "",
+      locationSource: "raw",
+      status: "published",
+      createdDate: "2026-05-01",
+      updatedDate: "2026-05-01",
+    };
+    const coverage: CoverageRiskSnapshot = {
+      fetchedAt: new Date().toISOString(),
+      territoryStates: null,
+      opportunities: [
+        {
+          opportunityId: "o-ne",
+          projectName: "P",
+          client: "C",
+          storeName: "S",
+          city: "Omaha",
+          state: "NE",
+          territoryOwner: "Amy Harp",
+          priority: "high",
+          nearby: { within10: 0, within25: 0, within50: 0, activeWithin50: 0, inactiveWithin50: 0 },
+          activeRepDensity: 0,
+          skillMatchScore: 0,
+          recentLoginScore: 0,
+          territoryAlignmentScore: 0,
+          pipelineScore: 0,
+          coverageScore: 15,
+          staffingRisk: "RED",
+          recommendedAction: "Staff",
+          topRecommendedReps: [],
+        },
+      ],
+      executiveSummary: {
+        totalOpenOpportunities: 1,
+        highRiskProjectCount: 1,
+        yellowRiskProjectCount: 0,
+        zeroNearbyRepProjects: 1,
+        averageCoverageScore: 15,
+        lowDensityStates: [],
+        highOpportunityLowRepMarkets: [],
+      },
+      dmAlerts: {
+        highRiskProjects: [],
+        noNearbyReps: [],
+        recruitingUrgency: [],
+        bestAvailableReps: [],
+      },
+    };
+
+    const center = buildTerritoryIntelligenceCenter({
+      jobs: [job],
+      candidates: [],
+      fetchedAt: "2026-05-28T12:00:00.000Z",
+      coverage,
+      workflows: null,
+    });
+
+    assert.ok(center.territories.length > 0);
+    assert.equal(center.executiveRollup.highestRiskTerritories.length, Math.min(10, center.territories.length));
+    assert.equal(center.executiveRollup.healthiestTerritories.length, Math.min(10, center.territories.length));
+
+    const amy = center.territories.find((row) => row.dmName === "Amy Harp");
+    assert.ok(amy);
+    assert.equal(amy!.metrics.zeroApplicantJobs, 1);
+    assert.ok(amy!.metrics.coverageRiskScore > 0);
+    assert.ok(
+      amy!.recommendations.some((rec) => rec.message.includes("Post additional ads")),
+    );
+
+    const riskScore = computeCoverageRiskScoreForDm("Amy Harp", coverage);
+    assert.ok(riskScore >= 60);
   });
 });

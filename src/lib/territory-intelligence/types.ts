@@ -43,3 +43,65 @@ export type TerritoryOnboardingSignals = {
   ddApproved: number;
   hired: number;
 };
+
+export type ApplicantVelocityTrend = {
+  direction: "up" | "down" | "flat";
+  current7d: number;
+  prior7d: number;
+  delta: number;
+};
+
+/** P9.3 territory intelligence center metrics per DM. */
+export type TerritoryIntelligenceCenterMetrics = {
+  openCalls: number;
+  activeReps: number;
+  coveragePercent: number;
+  coverageTier: CoverageHealthTier;
+  zeroApplicantJobs: number;
+  lowApplicantFlowJobs: number;
+  coverageRiskScore: number;
+  recruiterWorkloadScore: number;
+  hiresLast7Days: number;
+  applicantVelocity: ApplicantVelocityTrend;
+};
+
+export type TerritoryRecommendation = {
+  id: string;
+  severity: "critical" | "high" | "medium";
+  message: string;
+  dmName: DistrictManager;
+  state?: string;
+  city?: string;
+};
+
+export type TerritoryHeatMapCell = {
+  id: string;
+  label: string;
+  state: string;
+  city?: string;
+  tier: CoverageHealthTier;
+  score: number;
+  openJobs: number;
+  zeroApplicantJobs: number;
+};
+
+export type TerritoryIntelligenceTerritoryRow = {
+  dmName: DistrictManager;
+  states: string[];
+  metrics: TerritoryIntelligenceCenterMetrics;
+  attentionScore: number;
+  recommendations: TerritoryRecommendation[];
+  heatMap: TerritoryHeatMapCell[];
+};
+
+export type TerritoryIntelligenceExecutiveRollup = {
+  highestRiskTerritories: TerritoryIntelligenceTerritoryRow[];
+  healthiestTerritories: TerritoryIntelligenceTerritoryRow[];
+};
+
+export type TerritoryIntelligenceCenterSnapshot = {
+  fetchedAt: string;
+  territories: TerritoryIntelligenceTerritoryRow[];
+  executiveRollup: TerritoryIntelligenceExecutiveRollup;
+  orgHeatMap: TerritoryHeatMapCell[];
+};

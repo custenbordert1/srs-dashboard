@@ -6,6 +6,7 @@ export type DashboardTabId =
   | "live-sheet"
   | "candidates"
   | "recruiter-productivity"
+  | "territory-intelligence"
   | "mel-projects"
   | "data-health"
   | "recruiting-intelligence"
@@ -93,6 +94,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "live-breezy",
     bannerMessage:
       "KPIs, scorecards, aging, and daily tasks from Breezy candidates plus local recruiter workflow overlays.",
+  },
+  "territory-intelligence": {
+    navLabel: "Territory Intelligence",
+    sourceTag: "Breezy + MEL",
+    badgeLabel: "Territory intelligence",
+    kind: "mixed",
+    bannerMessage:
+      "Per-DM coverage, applicant velocity, recruiter workload, and heat map signals from Breezy, MEL, and workflow overlays.",
   },
   "mel-projects": {
     navLabel: "MEL Projects",

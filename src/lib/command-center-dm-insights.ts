@@ -106,7 +106,7 @@ export function buildCommandCenterDmInsights(input: {
 
   const rollups = buildDmTerritoryRollups(ctx);
   const territories = rollups.map(rollupToTerritoryInsight);
-  const top = topTerritoriesNeedingAttention(rollups).map(rollupToTerritoryInsight);
+  const top = topTerritoriesNeedingAttention(rollups, 10).map(rollupToTerritoryInsight);
 
   const recruitingHealth = buildCommandCenterRecruitingHealth({
     commandCenter: input.commandCenter,

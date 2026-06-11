@@ -30,10 +30,29 @@ export {
   topTerritoriesNeedingAttention,
   type TerritoryIntelligenceContext,
 } from "@/lib/territory-intelligence/build-territory-rollup";
+export {
+  buildTerritoryIntelligenceCenter,
+  buildTerritoryIntelligenceExecutiveRollup,
+} from "@/lib/territory-intelligence/build-territory-intelligence-center";
+export {
+  computeApplicantVelocityTrend,
+  computeCoverageRiskScoreForDm,
+  computeRecruiterWorkloadScore,
+  countHiresLast7Days,
+  countLowApplicantFlowJobs,
+  countZeroApplicantJobs,
+} from "@/lib/territory-intelligence/territory-intelligence-metrics";
 export type {
+  ApplicantVelocityTrend,
   RecruitingPipelineMetrics,
   TerritoryDemandSignals,
+  TerritoryHeatMapCell,
+  TerritoryIntelligenceCenterMetrics,
+  TerritoryIntelligenceCenterSnapshot,
+  TerritoryIntelligenceExecutiveRollup,
+  TerritoryIntelligenceTerritoryRow,
   TerritoryMetrics,
   TerritoryOnboardingSignals,
+  TerritoryRecommendation,
   TerritoryRollupRow,
 } from "@/lib/territory-intelligence/types";

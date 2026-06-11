@@ -102,8 +102,8 @@ export function buildExecutiveDashboard(
 
   return {
     fetchedAt,
-    bestTerritories: sorted.slice(0, 5),
-    worstTerritories: [...sorted].reverse().slice(0, 5),
+    bestTerritories: sorted.slice(0, 10),
+    worstTerritories: [...sorted].reverse().slice(0, 10),
     topRecruitingSources: countBuckets(
       candidates.map((c) => ({ label: c.source.trim() || "Unknown" })),
       (r) => r.label,

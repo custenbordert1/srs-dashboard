@@ -178,7 +178,7 @@ describe("command-center-dm-insights", () => {
       },
     });
 
-    assert.equal(insights.topTerritoriesNeedingAttention.length, 5);
+    assert.equal(insights.topTerritoriesNeedingAttention.length, 7);
     assert.equal(insights.topTerritoriesNeedingAttention[0]?.dmName, "Amy Harp");
     assert.ok(insights.topTerritoriesNeedingAttention[0]!.openJobs >= 2);
     assert.equal(insights.riskAlerts.unstaffedHighPriority.length, 1);

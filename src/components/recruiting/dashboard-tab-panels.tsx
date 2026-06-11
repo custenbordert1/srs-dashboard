@@ -84,6 +84,14 @@ export const LazyRecruiterProductivityCenter = dynamic(
   { loading: tabLoading("Loading recruiter productivity…"), ssr: false },
 );
 
+export const LazyTerritoryIntelligenceCenter = dynamic(
+  () =>
+    import("@/components/recruiting/territory-intelligence-center").then((m) => ({
+      default: m.TerritoryIntelligenceCenter,
+    })),
+  { loading: tabLoading("Loading territory intelligence…"), ssr: false },
+);
+
 export const LazyMelProjectsSection = dynamic(
   () =>
     import("@/components/recruiting/mel-projects-section").then((m) => ({

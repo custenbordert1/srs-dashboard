@@ -10,6 +10,7 @@ import {
   LazyBreezyOverviewJobsTable,
   LazyCandidatesSection,
   LazyRecruiterProductivityCenter,
+  LazyTerritoryIntelligenceCenter,
   LazyDataHealthSection,
   LazyDmLeaderboard,
   LazyLiveSheetSection,
@@ -164,6 +165,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="recruiter-productivity" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="recruiter-productivity">
             <LazyRecruiterProductivityCenter />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="territory-intelligence" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="territory-intelligence">
+            <LazyTerritoryIntelligenceCenter />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

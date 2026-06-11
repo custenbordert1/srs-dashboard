@@ -26,6 +26,7 @@ export const DASHBOARD_TABS: DashboardTab[] = (
     "live-sheet",
     "candidates",
     "recruiter-productivity",
+    "territory-intelligence",
     "mel-projects",
     "data-health",
     "recruiting-intelligence",
