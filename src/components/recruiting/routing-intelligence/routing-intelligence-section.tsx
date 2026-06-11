@@ -13,6 +13,7 @@ import { RoutingTravelBurdenPanel } from "@/components/recruiting/routing-intell
 import { RoutingVisualWorkspacePanel } from "@/components/recruiting/routing-intelligence/routing-visual-workspace";
 import { RoutingWorkspaceMetricsStrip } from "@/components/recruiting/routing-intelligence/routing-workspace-metrics-strip";
 import { RoutingScopeFilters } from "@/components/recruiting/routing-intelligence/routing-scope-filters";
+import { CoverageOptimizationCenter } from "@/components/coverage-optimization/coverage-optimization-center";
 import { useRoutingIntelligence } from "@/hooks/use-routing-intelligence";
 import type { EnrichedRoutePack } from "@/lib/routing-intelligence/types";
 
@@ -107,6 +108,8 @@ export function RoutingIntelligenceSection() {
       ) : null}
 
       <p className="text-xs text-zinc-500">Last synced: {lastSyncedAt ?? summary.fetchedAt}</p>
+
+      <CoverageOptimizationCenter />
 
       <RoutingWorkspaceMetricsStrip metrics={summary.metrics} />
 
