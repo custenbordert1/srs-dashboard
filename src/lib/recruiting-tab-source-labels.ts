@@ -153,12 +153,12 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
       "Route packs, travel burden, and store clusters use the MEL projects sheet and active rep roster — no live map APIs. All staffing actions are manual-only.",
   },
   workforce: {
-    navLabel: "Workforce",
-    sourceTag: "Rep roster",
-    badgeLabel: "Imported rep data",
-    kind: "live-workforce",
+    navLabel: "Workforce Ops",
+    sourceTag: "MEL + reps",
+    badgeLabel: "Workforce operations",
+    kind: "mixed",
     bannerMessage:
-      "Rep import, geocoding, and staffing models use workforce CSV / local store — not Breezy candidate or job APIs.",
+      "Workforce operations center connects recruiting pipeline to MEL opportunities, rep roster, and execution outcomes.",
   },
   "job-management": {
     navLabel: "Job Management",

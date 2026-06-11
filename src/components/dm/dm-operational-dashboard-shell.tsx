@@ -6,6 +6,7 @@ import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
 import { DmOnboardingStatusCard } from "@/components/dm/dm-onboarding-status-card";
 import { DmOperationalDrawer } from "@/components/dm/dm-operational-drawer";
 import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
+import { WorkforceOpsDmSummary } from "@/components/workforce-ops/workforce-ops-dm-summary";
 import { DmPriorityAlertsPanel } from "@/components/dm/dm-priority-alerts-panel";
 import { DmToast } from "@/components/dm/dm-toast";
 import { TerritoryHealthCard } from "@/components/dm/territory-health-card";
@@ -109,6 +110,8 @@ export function DmOperationalDashboardShell({
         description="Coverage risk, zero-applicant jobs, and territory health alerts."
         compact
       />
+
+      <WorkforceOpsDmSummary />
 
       <DmPriorityAlertsPanel
         key={prioritySeed}

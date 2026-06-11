@@ -10,6 +10,7 @@ import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
+import { WorkforceOpsExecutiveSummary } from "@/components/workforce-ops/workforce-ops-executive-summary";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
 import { DeferredSection } from "@/components/ui/deferred-section";
@@ -345,6 +346,8 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             title="Executive alerts"
             description="Critical territories, workload spikes, and open calls at risk."
           />
+
+          <WorkforceOpsExecutiveSummary />
 
           <DeferredSection
             title="Coverage risk intelligence"

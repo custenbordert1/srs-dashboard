@@ -142,10 +142,10 @@ export const LazyRoutingIntelligenceSection = dynamic(
 
 export const LazyWorkforceOperationsSection = dynamic(
   () =>
-    import("@/components/recruiting/workforce-operations-section").then((m) => ({
-      default: m.WorkforceOperationsSection,
+    import("@/components/workforce-ops/workforce-ops-center").then((m) => ({
+      default: m.WorkforceOpsCenter,
     })),
-  { loading: tabLoading("Loading workforce…"), ssr: false },
+  { loading: tabLoading("Loading workforce operations…"), ssr: false },
 );
 
 export const LazyJobManagementSection = dynamic(
