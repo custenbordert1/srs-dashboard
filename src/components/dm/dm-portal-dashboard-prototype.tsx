@@ -428,7 +428,7 @@ export function DmPortalDashboard({
           />
           <StatCell
             statId="hired"
-            label="Hired"
+            label="New hires"
             value={pipeline.hired.toLocaleString()}
             trustState={dataTrust}
             trustInput={trustInput}

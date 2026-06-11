@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/login"];
-const PUBLIC_API_PREFIXES = ["/api/auth/login", "/api/auth/session"];
+const PUBLIC_API_PREFIXES = ["/api/auth/login", "/api/auth/demo-login", "/api/auth/session"];
 
 /** Dropbox Sign callbacks — no session; secured in route via event_hash (+ optional webhook secret). */
 export const DROPBOX_SIGN_WEBHOOK_PATH = "/api/dropbox-sign/webhook";

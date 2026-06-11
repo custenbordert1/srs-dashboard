@@ -76,6 +76,14 @@ export const LazyCandidatesSection = dynamic(
   { loading: tabLoading("Loading candidates…"), ssr: false },
 );
 
+export const LazyRecruiterProductivityCenter = dynamic(
+  () =>
+    import("@/components/recruiting/recruiter-productivity-center").then((m) => ({
+      default: m.RecruiterProductivityCenter,
+    })),
+  { loading: tabLoading("Loading recruiter productivity…"), ssr: false },
+);
+
 export const LazyMelProjectsSection = dynamic(
   () =>
     import("@/components/recruiting/mel-projects-section").then((m) => ({

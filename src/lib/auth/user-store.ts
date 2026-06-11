@@ -93,13 +93,46 @@ function buildSeedUsers(): DashboardUser[] {
   return users;
 }
 
+function sortedStates(states: string[]): string[] {
+  return [...states].map((state) => state.trim().toUpperCase()).filter(Boolean).sort();
+}
+
+function statesEqual(a: string[], b: string[]): boolean {
+  const left = sortedStates(a);
+  const right = sortedStates(b);
+  return left.length === right.length && left.every((state, index) => state === right[index]);
+}
+
+async function syncDmTerritoryAssignments(file: UsersFile): Promise<UsersFile> {
+  let changed = false;
+  const users = file.users.map((user) => {
+    if (user.role !== "dm" || !user.dmName) return user;
+    const territoryStates = getAssignedStatesForDm(user.dmName);
+    if (statesEqual(user.territoryStates, territoryStates)) return user;
+    changed = true;
+    return {
+      ...user,
+      territoryStates,
+      updatedAt: new Date().toISOString(),
+    };
+  });
+  if (!changed) return file;
+  return { ...file, users };
+}
+
 export async function ensureUsersSeeded(): Promise<void> {
   const file = await readUsersFile();
-  if (file.users.length > 0) return;
-  await writeUsersFile({
-    users: buildSeedUsers(),
-    seededAt: new Date().toISOString(),
-  });
+  if (file.users.length === 0) {
+    await writeUsersFile({
+      users: buildSeedUsers(),
+      seededAt: new Date().toISOString(),
+    });
+    return;
+  }
+  const synced = await syncDmTerritoryAssignments(file);
+  if (synced !== file) {
+    await writeUsersFile(synced);
+  }
 }
 
 export async function findUserByEmail(email: string): Promise<DashboardUser | null> {

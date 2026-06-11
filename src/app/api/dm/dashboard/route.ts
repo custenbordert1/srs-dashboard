@@ -4,7 +4,11 @@ import { buildDmDashboardSnapshot } from "@/lib/dm-dashboard/build-dm-dashboard"
 import { buildDmOnboardingSnapshot } from "@/lib/dm-dashboard/dm-onboarding-snapshot";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
-import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
+import {
+  filterOpportunitiesByTerritory,
+  parseMelOpportunities,
+} from "@/lib/mel-matching/mel-opportunity-parser";
+import { refreshSessionTerritories } from "@/lib/auth/session-territories";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
@@ -22,7 +26,7 @@ export async function GET(request: Request) {
     auditAction: "dm_dashboard",
   });
   if (isGuardFailure(guard)) return guard;
-  const { session } = guard;
+  const session = refreshSessionTerritories(guard.session);
   auditTerritoryAccess(session, "/api/dm/dashboard");
 
   await logBreezyRouteStart(ROUTE, session);
@@ -52,7 +56,9 @@ export async function GET(request: Request) {
   const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const fetchedAt = candidatesResult.fetchedAt;
 
-  const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
+  const melOpportunities = melResult.ok
+    ? filterOpportunitiesByTerritory(parseMelOpportunities(melResult.rows), session.territoryStates)
+    : [];
   const workflowBundle = await getCandidateWorkflowBundle();
   const onboarding = buildDmOnboardingSnapshot(session, workflowBundle.workflows, candidates);
   const dashboard = buildDmDashboardSnapshot(

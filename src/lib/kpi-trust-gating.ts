@@ -67,6 +67,12 @@ const RECRUITER_OPERATIONAL_BREEZY = new Set([
   "top-variant",
   "top-metro",
   "highest-risk",
+  "applicants-assigned",
+  "new-applicants-today",
+  "follow-ups-due",
+  "paperwork-pending",
+  "ready-for-mel",
+  "hired-this-week",
 ]);
 
 const RECRUITING_INTELLIGENCE_BREEZY = new Set([

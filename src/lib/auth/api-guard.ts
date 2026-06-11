@@ -1,4 +1,5 @@
 import { getSessionFromRequest } from "@/lib/auth/request-session";
+import { refreshSessionTerritories } from "@/lib/auth/session-territories";
 import type { AuthSession, UserRole } from "@/lib/auth/types";
 import { auditFromSession, territoryLabel } from "@/lib/security/audit-log";
 import {
@@ -75,7 +76,7 @@ export function guardApiRoute(
 
   const sessionResult = requireSession(request);
   if (sessionResult instanceof NextResponse) return sessionResult;
-  const session = sessionResult;
+  const session = refreshSessionTerritories(sessionResult);
 
   const roles = options?.allowedRoles ?? policy.allowedRoles;
   if (roles) {

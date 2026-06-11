@@ -1,4 +1,5 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { filterMelProjectsDataForSession } from "@/lib/auth/mel-projects-territory-filter";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { blockMelWriteRoute } from "@/lib/security/read-only";
 import { NextResponse } from "next/server";
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
   });
   if (isGuardFailure(guard)) return guard;
 
-  const data = await fetchMelProjectsSheet();
+  const data = filterMelProjectsDataForSession(await fetchMelProjectsSheet(), guard.session);
   return NextResponse.json(data, {
     headers: {
       "Cache-Control": "private, max-age=60, stale-while-revalidate=120",

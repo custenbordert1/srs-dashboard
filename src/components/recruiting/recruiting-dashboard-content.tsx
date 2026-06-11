@@ -9,6 +9,7 @@ import {
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
   LazyCandidatesSection,
+  LazyRecruiterProductivityCenter,
   LazyDataHealthSection,
   LazyDmLeaderboard,
   LazyLiveSheetSection,
@@ -157,6 +158,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="candidates" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="candidates">
             <LazyCandidatesSection />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="recruiter-productivity" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="recruiter-productivity">
+            <LazyRecruiterProductivityCenter />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

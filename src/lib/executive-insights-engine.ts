@@ -2,6 +2,7 @@ import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import { countCandidatesLast7Days } from "@/lib/breezy-api";
 import { buildTerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
 import { buildTerritoryFillRiskAlerts } from "@/lib/dm-dashboard/fill-risk-alerts";
+import { buildRecruiterProductivitySnapshot } from "@/lib/recruiter-productivity-center";
 import { buildRecruiterProductivityLive } from "@/lib/recruiting-automation/recruiter-productivity-live";
 import { parseDate, MS_PER_DAY } from "@/lib/dm-dashboard/territory-shared";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
@@ -71,7 +72,7 @@ function conversionFunnel(candidates: BreezyCandidate[]): ChartBar[] {
   }));
 }
 
-function recruiterProductivityScore(
+function legacyRecruiterProductivityScore(
   rows: ReturnType<typeof buildRecruiterProductivityLive>,
 ): number {
   if (rows.length === 0) return 0;
@@ -92,6 +93,15 @@ export function buildExecutiveInsightsKpis(
   const criticalRisks = fillRisks.filter((r) => r.severity === "critical").length;
   const fillRiskScore = Math.max(0, Math.min(100, 100 - criticalRisks * 12 - fillRisks.length * 3));
   const productivityRows = buildRecruiterProductivityLive(candidates, workflows, fetchedAt);
+  const productivitySnapshot = buildRecruiterProductivitySnapshot({
+    candidates,
+    workflows,
+    fetchedAt,
+  });
+  const recruiterProductivityScoreValue =
+    productivitySnapshot.scorecards.length > 0
+      ? productivitySnapshot.productivityScore
+      : legacyRecruiterProductivityScore(productivityRows);
 
   const candidatesLast7Days = countCandidatesLast7Days(candidates, fetchedAt);
 
@@ -111,7 +121,7 @@ export function buildExecutiveInsightsKpis(
       fillRiskScore >= 75 ? "Low risk" : fillRiskScore >= 50 ? "Moderate risk" : "Elevated risk",
     territoryHealthScore: health.score,
     territoryHealthLabel: health.label,
-    recruiterProductivityScore: recruiterProductivityScore(productivityRows),
+    recruiterProductivityScore: recruiterProductivityScoreValue,
     pipelineVelocity: pipelineVelocity(candidates, fetchedAt),
     applicantsPerOpening:
       jobs.length > 0 ? Math.round((candidates.length / jobs.length) * 10) / 10 : 0,

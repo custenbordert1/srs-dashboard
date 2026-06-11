@@ -45,6 +45,35 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  async function completeLogin(parsed: LoginResponse, resOk: boolean) {
+    if (!resOk || !parsed.ok) {
+      setError(parsed.ok ? "Login failed" : parsed.error);
+      return;
+    }
+    const next = searchParams.get("next");
+    const destination =
+      next && next.startsWith("/") ? next : parsed.redirect ?? (parsed.role === "dm" ? "/dm" : "/");
+    router.replace(destination);
+  }
+
+  async function handleDemoLogin(mockEmail: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/demo-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: mockEmail }),
+      });
+      const parsed = await parseLoginResponse(res);
+      await completeLogin(parsed, res.ok);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Demo login failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true);
@@ -56,14 +85,7 @@ export function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
       const parsed = await parseLoginResponse(res);
-      if (!res.ok || !parsed.ok) {
-        setError(parsed.ok ? "Login failed" : parsed.error);
-        return;
-      }
-      const next = searchParams.get("next");
-      const destination =
-        next && next.startsWith("/") ? next : parsed.redirect ?? (parsed.role === "dm" ? "/dm" : "/");
-      router.replace(destination);
+      await completeLogin(parsed, res.ok);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -120,28 +142,27 @@ export function LoginForm() {
         <div className="mt-6 rounded-lg border border-violet-500/25 bg-violet-500/5 px-3 py-3">
           <p className="text-[11px] font-medium text-violet-200/90">Dev: quick DM login</p>
           <p className="mt-1 text-[10px] text-zinc-500">
-            Uses seeded DM accounts and default password from <code className="text-zinc-400">.env.local</code>.
+            One-click sign-in for seeded DMs (dev / ENABLE_MOCK_DM_LOGIN only).
           </p>
           <div className="mt-2 flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
-            {MOCK_DM_LOGINS.map((mock) => (
-              <button
-                key={mock.email}
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  setEmail(mock.email);
-                  setPassword("");
-                  setError(null);
-                }}
-                className="rounded border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] text-zinc-300 hover:border-violet-500/40 hover:bg-violet-500/10 disabled:opacity-50"
-                title={`${mock.territoryStates.join(", ")} (${mock.stateCount} states)`}
-              >
-                {mock.dmName}
-              </button>
-            ))}
+            {MOCK_DM_LOGINS.map((mock) => {
+              const firstName = mock.dmName.split(/\s+/)[0] ?? mock.dmName;
+              return (
+                <button
+                  key={mock.email}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void handleDemoLogin(mock.email)}
+                  className="rounded border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] text-zinc-300 hover:border-violet-500/40 hover:bg-violet-500/10 disabled:opacity-50"
+                  title={`${mock.dmName} · ${mock.territoryStates.join(", ")} (${mock.stateCount} states)`}
+                >
+                  {firstName}
+                </button>
+              );
+            })}
           </div>
           <p className="mt-2 text-[10px] text-zinc-600">
-            Click a DM, enter password, then Sign in. Recruiter: recruiter@srsmerchandising.com · Admin:
+            Or enter email + password manually. Recruiter: recruiter@srsmerchandising.com · Admin:
             admin@srsmerchandising.com
           </p>
         </div>

@@ -1,4 +1,10 @@
-import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import {
+  dmRequiresCandidateTerritoryCheck,
+  findCandidateInList,
+  isCandidateInSessionTerritory,
+} from "@/lib/auth/candidate-territory-access";
+import { guardApiRoute, forbiddenJson, isGuardFailure } from "@/lib/auth/api-guard";
+import { fetchBreezyCandidates } from "@/lib/breezy-api";
 import { mapSignatureRequestToPaperworkStatus } from "@/lib/candidate-paperwork";
 import {
   applyCandidatePaperworkSigned,
@@ -36,6 +42,20 @@ export async function GET(request: Request, context: RouteContext) {
     const paperworkStatus = mapSignatureRequestToPaperworkStatus(signature);
     const workflows = await getCandidateWorkflowState();
     const candidateId = findCandidateIdBySignatureRequest(workflows, id);
+
+    if (dmRequiresCandidateTerritoryCheck(session) && candidateId) {
+      const candidatesResult = await fetchBreezyCandidates({ scanMode: "fast" });
+      if (!candidatesResult.ok) {
+        return NextResponse.json(
+          { ok: false, error: "Unable to verify candidate territory." },
+          { status: 503 },
+        );
+      }
+      const candidate = findCandidateInList(candidatesResult.candidates, candidateId);
+      if (!isCandidateInSessionTerritory(session, candidate)) {
+        return forbiddenJson("Candidate is outside your assigned territory.");
+      }
+    }
 
     let workflow = candidateId
       ? workflows[candidateId]

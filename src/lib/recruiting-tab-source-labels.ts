@@ -5,6 +5,7 @@ export type DashboardTabId =
   | "dm-scorecards"
   | "live-sheet"
   | "candidates"
+  | "recruiter-productivity"
   | "mel-projects"
   | "data-health"
   | "recruiting-intelligence"
@@ -84,6 +85,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "live-breezy",
     bannerMessage:
       "Candidate rows sync from Breezy HR. Workflow buckets are stored locally and keyed by Breezy candidate ID.",
+  },
+  "recruiter-productivity": {
+    navLabel: "Recruiter Productivity",
+    sourceTag: "Live · Breezy",
+    badgeLabel: "Recruiter operations",
+    kind: "live-breezy",
+    bannerMessage:
+      "KPIs, scorecards, aging, and daily tasks from Breezy candidates plus local recruiter workflow overlays.",
   },
   "mel-projects": {
     navLabel: "MEL Projects",
