@@ -12,6 +12,22 @@ function tabLoading(message: string) {
   return TabLoadingFallback;
 }
 
+export const LazyExecutiveSummaryDashboard = dynamic(
+  () =>
+    import("@/components/recruiting/executive-summary-dashboard").then((m) => ({
+      default: m.ExecutiveSummaryDashboard,
+    })),
+  { loading: tabLoading("Loading executive summary…") },
+);
+
+export const LazyAiCommandCenterHub = dynamic(
+  () =>
+    import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({
+      default: m.AiCommandCenterHub,
+    })),
+  { loading: tabLoading("Loading AI command center…"), ssr: false },
+);
+
 export const LazyRecruitingCommandCenter = dynamic(
   () =>
     import("@/components/recruiting/recruiting-command-center").then((m) => ({

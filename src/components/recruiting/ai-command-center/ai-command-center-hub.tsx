@@ -2,23 +2,18 @@
 
 import { AiActionEnginePanel } from "@/components/recruiting/ai-command-center/ai-action-engine-panel";
 import { AiInsightActionButton } from "@/components/recruiting/ai-command-center/ai-insight-action-button";
+import { DeferredSection } from "@/components/ui/deferred-section";
+import { STATUS_TONE_STYLES } from "@/lib/ui/status-tone";
 import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import type { AiCommandCenterSnapshot, ExecutiveAiAnswer } from "@/lib/ai-recruiting-command-center";
 import type { AiActionProposal } from "@/lib/ai-action-engine";
 import { useEffect, useState } from "react";
 
-const CATEGORY_STYLES = {
-  recommendation: "text-teal-300 border-teal-500/30",
-  prediction: "text-violet-300 border-violet-500/30",
-  explanation: "text-sky-300 border-sky-500/30",
-  action: "text-amber-300 border-amber-500/30",
-} as const;
-
-const SEVERITY_STYLES = {
-  critical: "bg-red-500/15 text-red-100",
-  high: "bg-orange-500/15 text-orange-100",
-  medium: "bg-amber-500/15 text-amber-100",
-  low: "bg-zinc-500/15 text-zinc-200",
+const SEVERITY_ACCENT = {
+  critical: STATUS_TONE_STYLES.critical,
+  high: STATUS_TONE_STYLES.warning,
+  medium: STATUS_TONE_STYLES.info,
+  low: STATUS_TONE_STYLES.info,
 } as const;
 
 type AiResponse = {
@@ -36,6 +31,7 @@ export function AiCommandCenterHub() {
   const [querying, setQuerying] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
   const [insightProposals, setInsightProposals] = useState<Record<string, AiActionProposal[]>>({});
+  const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,12 +95,12 @@ export function AiCommandCenterHub() {
   };
 
   if (loading && !snapshot) {
-    return <p className="text-sm text-zinc-500">Loading AI decision layer…</p>;
+    return <p className="text-sm text-zinc-500">Loading AI command center…</p>;
   }
 
   if (error && !snapshot) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
+      <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-200">
         {error}
       </div>
     );
@@ -116,15 +112,16 @@ export function AiCommandCenterHub() {
   const topTerritories = snapshot.territoryAdvisor
     .filter((row) => row.attentionScore >= 50)
     .slice(0, 4);
+  const priorityInsights = snapshot.insightsFeed
+    .filter((row) => row.severity === "critical" || row.severity === "high")
+    .slice(0, 8);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="space-y-4">
+      <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">AI Recruiting Command Center</h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            What needs attention, why, and what action to take — unified across all systems
-          </p>
+          <h1 className="text-xl font-semibold text-zinc-50">AI Command Center</h1>
+          <p className="text-xs text-zinc-500">What needs attention, why it matters, and what to do next</p>
         </div>
         <button
           type="button"
@@ -132,193 +129,238 @@ export function AiCommandCenterHub() {
             setLoading(true);
             setReloadToken((token) => token + 1);
           }}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
         >
-          Refresh insights
+          Refresh
         </button>
-      </div>
+      </header>
 
-      <section className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-4">
-        <h3 className="text-base font-semibold text-violet-100">Executive AI assistant</h3>
-        <p className="mt-1 text-xs text-violet-200/70">{briefing.summary}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {snapshot.suggestedQuestions.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              onClick={() => {
-                setQuestion(prompt);
-                void askQuestion(prompt);
-              }}
-              className="rounded-full border border-violet-500/30 px-3 py-1 text-xs text-violet-100 hover:bg-violet-500/10"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <input
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void askQuestion(question);
-            }}
-            placeholder="Ask about territories, hires, workload, or project risk…"
-            className="min-w-[240px] flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
-          />
-          <button
-            type="button"
-            disabled={querying || !question.trim()}
-            onClick={() => void askQuestion(question)}
-            className="rounded-lg border border-violet-600/40 px-3 py-2 text-xs text-violet-100 hover:bg-violet-500/10 disabled:opacity-50"
-          >
-            {querying ? "Thinking…" : "Ask"}
-          </button>
-        </div>
-        {answer ? (
-          <div className="mt-3 rounded-lg border border-violet-500/20 bg-zinc-950/50 p-3 text-sm text-violet-50/90">
-            <p className="text-xs text-violet-300/70">Confidence {answer.confidence}%</p>
-            <p className="mt-1">{answer.answer}</p>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
-        <h3 className="text-base font-semibold text-zinc-50">Daily executive briefing</h3>
-        <div className="mt-3 grid gap-4 lg:grid-cols-2">
-          {[briefing.topRisks, briefing.topWins, briefing.hiringTrends, briefing.criticalAlerts].map((section) => (
-            <div key={section.title}>
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{section.title}</p>
-              <ul className="mt-2 space-y-1 text-sm text-zinc-300">
-                {section.items.slice(0, 4).map((item) => (
-                  <li key={item} className="list-inside list-disc">
+      <section className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+        <h2 className="text-sm font-semibold text-zinc-100">Executive briefing</h2>
+        <p className="mt-1 text-xs text-zinc-500">{briefing.summary}</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[briefing.topRisks, briefing.topWins, briefing.criticalAlerts].map((section) => (
+            <div key={section.title} className="rounded-lg border border-zinc-800/60 bg-zinc-950/30 p-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{section.title}</p>
+              <ul className="mt-2 space-y-1 text-xs text-zinc-300">
+                {section.items.slice(0, 3).map((item) => (
+                  <li key={item} className="line-clamp-2">
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
+          <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-400/80">
+              Recommended actions
+            </p>
+            <ul className="mt-2 space-y-1 text-xs text-zinc-300">
+              {priorityInsights.slice(0, 3).map((row) => (
+                <li key={row.id} className="line-clamp-2">
+                  → {row.action}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
-        <h3 className="text-base font-semibold text-zinc-50">AI insights feed</h3>
-        <div className="mt-3 space-y-2">
-          {snapshot.insightsFeed.slice(0, 10).map((insight) => (
-            <article
-              key={insight.id}
-              className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2.5"
+      <section className="space-y-2">
+        <h2 className="text-sm font-semibold text-zinc-100">Priority recommendations</h2>
+        {priorityInsights.length === 0 ? (
+          <p className="rounded-lg border border-zinc-800/60 bg-zinc-900/20 px-3 py-2 text-xs text-zinc-600">
+            Data not available yet
+          </p>
+        ) : (
+          priorityInsights.map((insight) => {
+            const accent = SEVERITY_ACCENT[insight.severity];
+            const proposals = insightProposals[insight.id] ?? [];
+            const primary = proposals[0];
+            const assignProposal = proposals.find((row) =>
+              row.actionKind.includes("assign") || row.actionKind.includes("escalat"),
+            );
+            const expanded = expandedInsightId === insight.id;
+            return (
+              <article
+                key={insight.id}
+                className={`rounded-lg border bg-zinc-900/40 px-3 py-2.5 ${accent.border}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-100">{insight.title}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">
+                      <span className="text-zinc-400">Why:</span> {insight.explanation}
+                    </p>
+                    <p className="mt-1 text-xs text-sky-300/90">
+                      <span className="text-zinc-500">Action:</span> {insight.action}
+                    </p>
+                    {expanded ? (
+                      <p className="mt-2 text-xs text-zinc-500">Source: {insight.source}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-1">
+                    <ActionButton label="Review" onClick={() => setExpandedInsightId(expanded ? null : insight.id)} />
+                    {assignProposal ? (
+                      <AiInsightActionButton
+                        proposal={assignProposal}
+                        recommendation={`${insight.title}: ${insight.action}`}
+                        compact
+                      />
+                    ) : (
+                      <ActionButton label="Assign" disabled />
+                    )}
+                    {primary ? (
+                      <AiInsightActionButton
+                        proposal={primary}
+                        recommendation={`${insight.title}: ${insight.action}`}
+                        compact
+                      />
+                    ) : (
+                      <ActionButton label="Resolve" disabled />
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </section>
+
+      <DeferredSection
+        title="Executive AI assistant"
+        description="Ask questions about territories, hires, workload, or project risk"
+        summary={<p className="text-xs text-zinc-500">{snapshot.suggestedQuestions[0] ?? "Ask the assistant"}</p>}
+      >
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {snapshot.suggestedQuestions.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => {
+                  setQuestion(prompt);
+                  void askQuestion(prompt);
+                }}
+                className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void askQuestion(question);
+              }}
+              placeholder="Ask about territories, hires, workload, or project risk…"
+              className="min-w-[240px] flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+            />
+            <button
+              type="button"
+              disabled={querying || !question.trim()}
+              onClick={() => void askQuestion(question)}
+              className="rounded-lg border border-sky-600/40 px-3 py-2 text-xs text-sky-200 hover:bg-sky-500/10 disabled:opacity-50"
             >
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`rounded-full border px-2 py-0.5 text-[10px] uppercase ${CATEGORY_STYLES[insight.category]}`}
-                >
-                  {insight.category}
-                </span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${SEVERITY_STYLES[insight.severity]}`}>
-                  {insight.severity}
-                </span>
-                <span className="text-xs text-zinc-500">{insight.source}</span>
-              </div>
-              <p className="mt-1 text-sm font-medium text-zinc-100">{insight.title}</p>
-              <p className="mt-0.5 text-sm text-zinc-400">{insight.explanation}</p>
-              <p className="mt-1 text-xs text-teal-300/90">→ {insight.action}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {(insightProposals[insight.id] ?? []).slice(0, 3).map((proposal) => (
-                  <AiInsightActionButton
-                    key={proposal.id}
-                    proposal={proposal}
-                    recommendation={`${insight.title}: ${insight.action}`}
-                    compact
-                  />
-                ))}
-              </div>
-            </article>
-          ))}
+              {querying ? "Thinking…" : "Ask"}
+            </button>
+          </div>
+          {answer ? (
+            <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 p-3 text-sm text-zinc-200">
+              <p className="text-xs text-zinc-500">Confidence {answer.confidence}%</p>
+              <p className="mt-1">{answer.answer}</p>
+            </div>
+          ) : null}
         </div>
-      </section>
+      </DeferredSection>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
-          <h3 className="text-base font-semibold text-zinc-50">Territory AI advisor</h3>
-          <div className="mt-3 space-y-3">
+      {topTerritories.length === 0 ? (
+        <p className="rounded-lg border border-zinc-800/60 bg-zinc-900/20 px-3 py-2 text-xs text-zinc-600">
+          Data not available yet
+        </p>
+      ) : (
+        <DeferredSection
+          title="Territory AI advisor"
+          defaultOpen={topTerritories.length <= 2}
+          summary={
+            <p className="text-xs text-zinc-500">
+              {topTerritories.length} territor{topTerritories.length === 1 ? "y" : "ies"} flagged
+            </p>
+          }
+        >
+          <div className="grid gap-2 sm:grid-cols-2">
             {topTerritories.map((territory) => (
               <div key={String(territory.dmName)} className="rounded-lg border border-zinc-800/80 p-3">
                 <p className="text-sm font-medium text-zinc-100">
                   {territory.dmName} · attention {territory.attentionScore}
                 </p>
                 <p className="mt-1 text-xs text-zinc-400">{territory.coverageRiskExplanation}</p>
-                <p className="mt-1 text-xs text-zinc-500">{territory.applicantShortageExplanation}</p>
-                <ul className="mt-2 text-xs text-teal-300/90">
-                  {territory.recommendedActions.slice(0, 2).map((action) => (
-                    <li key={action}>→ {action}</li>
-                  ))}
-                </ul>
               </div>
             ))}
           </div>
-        </section>
+        </DeferredSection>
+      )}
 
-        <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
-          <h3 className="text-base font-semibold text-zinc-50">Recruiter AI coach</h3>
-          <div className="mt-3 space-y-2 text-sm text-zinc-300">
+      <DeferredSection
+        title="Recruiter coach & opportunity risk"
+        summary={<p className="text-xs text-zinc-500">Pipeline coaching and MEL risk table</p>}
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-2 text-sm text-zinc-300">
             <p>{snapshot.recruiterCoach.pipelineSummary}</p>
             <p>{snapshot.recruiterCoach.followUpSummary}</p>
-            <p>{snapshot.recruiterCoach.conversionSummary}</p>
-            <p className="text-zinc-400">{snapshot.recruiterCoach.productivityTrend}</p>
           </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div>
-              <p className="text-xs uppercase text-zinc-500">Contact today</p>
-              <ul className="mt-1 space-y-1 text-xs text-zinc-300">
-                {snapshot.recruiterCoach.candidatesToContact.slice(0, 4).map((row) => (
-                  <li key={row.candidateId}>
-                    {row.name}: {row.reason}
-                  </li>
-                ))}
-              </ul>
+          {snapshot.opportunityRisks.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-xs">
+                <thead className="uppercase text-zinc-500">
+                  <tr>
+                    <th className="px-2 py-1">Project</th>
+                    <th className="px-2 py-1">Risk</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/80 text-zinc-300">
+                  {snapshot.opportunityRisks.slice(0, 6).map((row) => (
+                    <tr key={row.opportunityId}>
+                      <td className="px-2 py-1.5">{row.projectName}</td>
+                      <td className="px-2 py-1.5">{row.overallRiskScore}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div>
-              <p className="text-xs uppercase text-zinc-500">Jobs needing applicants</p>
-              <ul className="mt-1 space-y-1 text-xs text-zinc-300">
-                {snapshot.recruiterCoach.jobsNeedingApplicants.slice(0, 4).map((row) => (
-                  <li key={row.jobId}>
-                    {row.title}: {row.reason}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
-        <h3 className="text-base font-semibold text-zinc-50">Opportunity risk prediction</h3>
-        <div className="mt-3 overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="text-xs uppercase text-zinc-500">
-              <tr>
-                <th className="px-2 py-2">Project</th>
-                <th className="px-2 py-2">Fill %</th>
-                <th className="px-2 py-2">Coverage</th>
-                <th className="px-2 py-2">Risk</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/80 text-zinc-200">
-              {snapshot.opportunityRisks.slice(0, 8).map((row) => (
-                <tr key={row.opportunityId}>
-                  <td className="px-2 py-2">{row.projectName}</td>
-                  <td className="px-2 py-2">{row.fillProbability}%</td>
-                  <td className="px-2 py-2">{row.coverageRisk}</td>
-                  <td className="px-2 py-2">{row.overallRiskScore}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          ) : (
+            <p className="text-xs text-zinc-600">Data not available yet</p>
+          )}
         </div>
-      </section>
+      </DeferredSection>
 
-      <AiActionEnginePanel />
+      <DeferredSection title="Action engine" summary={<p className="text-xs text-zinc-500">Bulk actions and history</p>}>
+        <AiActionEnginePanel />
+      </DeferredSection>
     </div>
+  );
+}
+
+function ActionButton({
+  label,
+  onClick,
+  disabled = false,
+}: {
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
+    >
+      {label}
+    </button>
   );
 }

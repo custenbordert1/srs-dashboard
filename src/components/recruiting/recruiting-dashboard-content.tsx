@@ -6,6 +6,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ApplicantPipeline } from "./applicant-pipeline";
 import {
   DashboardTabPanel,
+  LazyExecutiveSummaryDashboard,
+  LazyAiCommandCenterHub,
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
   LazyCandidatesSection,
@@ -29,8 +31,6 @@ import {
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
-  EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
-  SYSTEM_ADMIN_TAB,
   type DashboardTabId,
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
@@ -53,13 +53,15 @@ type RecruitingDashboardContentProps = {
 function TabPanelWithSourceBanner({
   tabId,
   children,
+  hideBanner = false,
 }: {
   tabId: DashboardTabId;
   children: ReactNode;
+  hideBanner?: boolean;
 }) {
   return (
-    <div className="space-y-6">
-      <RecruitingTabSourceBanner tabId={tabId} />
+    <div className="space-y-4">
+      {!hideBanner ? <RecruitingTabSourceBanner tabId={tabId} /> : null}
       {children}
     </div>
   );
@@ -72,11 +74,7 @@ export function RecruitingDashboardContent({
   dmLeaderboard,
   userRole,
 }: RecruitingDashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
-  const adminTabs =
-    userRole === "admin" || userRole === "executive"
-      ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB, SYSTEM_ADMIN_TAB]
-      : [];
+  const [activeTab, setActiveTab] = useState<DashboardTabId>("executive-summary");
 
   useEffect(() => {
     const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
@@ -103,14 +101,26 @@ export function RecruitingDashboardContent({
       <DashboardTabNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        extraTabs={adminTabs}
+        userRole={userRole}
       />
 
       <main
         id="dashboard-main"
         role="tabpanel"
-        className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8"
+        className="mx-auto max-w-7xl space-y-4 px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
       >
+        <DashboardTabPanel tabId="executive-summary" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-summary" hideBanner>
+            <LazyExecutiveSummaryDashboard />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="ai-command-center" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="ai-command-center" hideBanner>
+            <LazyAiCommandCenterHub />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
         <DashboardTabPanel tabId="command-center" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="command-center">
             <LazyRecruitingCommandCenter />

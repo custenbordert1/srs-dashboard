@@ -21,8 +21,9 @@ import {
   formatCommandCenterSyncTime,
 } from "@/lib/recruiting-command-center";
 import { CommandCenterDmInsights } from "@/components/recruiting/command-center-dm-insights";
-import { AiCommandCenterHub } from "@/components/recruiting/ai-command-center/ai-command-center-hub";
 import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
+import { DeferredSection } from "@/components/ui/deferred-section";
+import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -87,11 +88,11 @@ function SyncStatusBanner({
     return (
       <div
         role="alert"
-        className="flex flex-col gap-2 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+        className="flex flex-col gap-2 rounded-xl border border-amber-500/35 bg-amber-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <p className="text-sm font-semibold text-red-100">{title}</p>
-          <p className="mt-0.5 text-sm text-red-200/80">{detail}</p>
+          <p className="text-sm font-semibold text-amber-100">{title}</p>
+          <p className="mt-0.5 text-sm text-amber-200/80">{detail}</p>
           {kind === "missing_config" ? (
             <p className="mt-2 text-xs text-red-200/70">
               Paste <code className="rounded bg-red-950/60 px-1 py-0.5">BREEZY_API_KEY</code> from your old Mac
@@ -399,7 +400,19 @@ export function RecruitingCommandCenter() {
 
       <NotificationCriticalAlertsPanel compact />
 
-      <AiCommandCenterHub />
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sky-500/20 bg-sky-500/5 px-4 py-3">
+        <div>
+          <p className="text-sm font-medium text-zinc-200">AI Command Center</p>
+          <p className="text-xs text-zinc-500">Briefing, insights, and one-click actions live in the executive AI tab.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigateRecruitingTab({ tab: "ai-command-center" })}
+          className="rounded-lg border border-sky-500/30 px-3 py-1.5 text-xs text-sky-200 hover:bg-sky-500/10"
+        >
+          Open AI Command Center
+        </button>
+      </section>
 
       {dmInsights ? (
         <CommandCenterDmInsights
@@ -417,25 +430,33 @@ export function RecruitingCommandCenter() {
         />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <FunnelVisualization applied={applied} interviewing={interviewing} hired={hired} />
-        <IntelligenceBarChart
-          title="Source breakdown"
-          subtitle="Tracked channels from live Breezy applicant sources"
-          data={snapshot.sourceBreakdown}
-          valueLabel="applicants"
-          barClassName="bg-teal-500/80"
-        />
-      </div>
+      <DeferredSection
+        title="Pipeline charts & candidate tables"
+        description="Funnel, source breakdown, and ranked candidates"
+        summary={<p className="text-sm text-zinc-500">Expand for detailed pipeline and candidate tables.</p>}
+      >
+        <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <FunnelVisualization applied={applied} interviewing={interviewing} hired={hired} />
+            <IntelligenceBarChart
+              title="Source breakdown"
+              subtitle="Tracked channels from live Breezy applicant sources"
+              data={snapshot.sourceBreakdown}
+              valueLabel="applicants"
+              barClassName="bg-teal-500/80"
+            />
+          </div>
 
-      <TopCandidatesWidget rows={snapshot.topCandidates} onCandidateClick={drawer.openCandidate} />
+          <TopCandidatesWidget rows={snapshot.topCandidates} onCandidateClick={drawer.openCandidate} />
 
-      <RankedCandidatesTable
-        rows={snapshot.rankedCandidates}
-        filterOptions={snapshot.filterOptions}
-        onCandidateClick={drawer.openCandidate}
-        selectedCandidateId={drawer.selectedCandidateId}
-      />
+          <RankedCandidatesTable
+            rows={snapshot.rankedCandidates}
+            filterOptions={snapshot.filterOptions}
+            onCandidateClick={drawer.openCandidate}
+            selectedCandidateId={drawer.selectedCandidateId}
+          />
+        </div>
+      </DeferredSection>
 
       <CandidateDetailDrawer {...drawer.drawerProps} />
     </div>

@@ -1,4 +1,6 @@
 export type DashboardTabId =
+  | "executive-summary"
+  | "ai-command-center"
   | "command-center"
   | "overview"
   | "needs-attention"
@@ -41,6 +43,20 @@ export type RecruitingTabSourceMeta = {
 };
 
 export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSourceMeta> = {
+  "executive-summary": {
+    navLabel: "Executive Dashboard",
+    sourceTag: "Leadership view",
+    badgeLabel: "Executive summary",
+    kind: "executive",
+    bannerMessage: "At-a-glance KPIs, AI briefing, and priority alerts for leadership.",
+  },
+  "ai-command-center": {
+    navLabel: "AI Command Center",
+    sourceTag: "AI insights",
+    badgeLabel: "AI decision layer",
+    kind: "executive",
+    bannerMessage: "What needs attention, why it matters, and recommended actions.",
+  },
   "command-center": {
     navLabel: "Command Center",
     sourceTag: "Live · Breezy",
@@ -90,7 +106,7 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
       "Candidate rows sync from Breezy HR. Workflow buckets are stored locally and keyed by Breezy candidate ID.",
   },
   "recruiter-productivity": {
-    navLabel: "Recruiter Productivity",
+    navLabel: "Recruiters",
     sourceTag: "Live · Breezy",
     badgeLabel: "Recruiter operations",
     kind: "live-breezy",
@@ -98,7 +114,7 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
       "KPIs, scorecards, aging, and daily tasks from Breezy candidates plus local recruiter workflow overlays.",
   },
   "territory-intelligence": {
-    navLabel: "Territory Intelligence",
+    navLabel: "Territories",
     sourceTag: "Breezy + MEL",
     badgeLabel: "Territory intelligence",
     kind: "mixed",
@@ -138,7 +154,7 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
       "User management, audit trail, integration status, data quality, deployment readiness, and demo mode controls.",
   },
   "recruiting-intelligence": {
-    navLabel: "Recruiting Intelligence",
+    navLabel: "Analytics",
     sourceTag: "Mixed",
     badgeLabel: "Mixed sources",
     kind: "mixed",

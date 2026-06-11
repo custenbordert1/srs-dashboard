@@ -1,9 +1,9 @@
 import type { NotificationSeverity } from "@/lib/notification-engine";
 
 export const NOTIFICATION_SEVERITY_STYLES: Record<NotificationSeverity, string> = {
-  critical: "border-red-500/35 bg-red-500/10 text-red-100",
-  warning: "border-amber-500/35 bg-amber-500/10 text-amber-100",
-  info: "border-sky-500/35 bg-sky-500/10 text-sky-100",
+  critical: "border-l-2 border-l-red-400 border-zinc-800/80 bg-zinc-900/50 text-zinc-100",
+  warning: "border-l-2 border-l-amber-400 border-zinc-800/80 bg-zinc-900/50 text-zinc-100",
+  info: "border-l-2 border-l-sky-400 border-zinc-800/80 bg-zinc-900/50 text-zinc-100",
 };
 
 export const NOTIFICATION_SEVERITY_LABEL: Record<NotificationSeverity, string> = {
