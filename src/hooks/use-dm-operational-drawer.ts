@@ -13,8 +13,8 @@ import type {
 } from "@/lib/dm-dashboard/dm-operational-types";
 import { cityKey } from "@/lib/dm-dashboard/territory-shared";
 import { DM_ESCALATION_ACTION_LABELS } from "@/lib/dm-dashboard/dm-operational-types";
-import { appendDmEscalationLog, listDmEscalationLogs } from "@/lib/dm-escalation-store";
-import { buildSourceEscalationLogId } from "@/lib/operational-escalation/dm-escalation-response";
+import { listDmEscalationLogs } from "@/lib/dm-escalation-store";
+import { submitDmEscalation } from "@/lib/dm-portal/submit-dm-escalation";
 import { parseCityLabelToKey } from "@/lib/dm-dashboard/build-dm-operational-index";
 import { useCallback, useMemo, useState } from "react";
 import { useDmToast } from "@/hooks/use-dm-toast";
@@ -179,62 +179,38 @@ export function useDmOperationalDrawer(
     };
   }, [index, target]);
 
+  const syncEscalationLogs = useCallback(() => {
+    setEscalationLogs(listDmEscalationLogs({ dmUserId: user.id, limit: 30 }));
+  }, [user.id]);
+
+  const submitEscalationForJob = useCallback(
+    async (actionType: DmEscalationActionType, job: DmJobOperationalDetail, relatedAlert?: DmPrioritizedAlert | null) => {
+      const result = await submitDmEscalation({
+        actionType,
+        job,
+        user,
+        relatedAlert,
+      });
+      syncEscalationLogs();
+      if (!result.ok) {
+        showToast(result.error, "info");
+        return false;
+      }
+      showToast(`${DM_ESCALATION_ACTION_LABELS[actionType]} sent to recruiter queue for ${job.title}`);
+      return true;
+    },
+    [showToast, syncEscalationLogs, user],
+  );
+
   const logEscalation = useCallback(
     (actionType: DmEscalationActionType) => {
       if (!view?.primaryJob) {
         showToast("Select a job drilldown before logging an action.", "info");
         return;
       }
-      const job = view.primaryJob;
-      const entry: DmEscalationLogEntry = {
-        id: `dm-esc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        actionType,
-        label: DM_ESCALATION_ACTION_LABELS[actionType],
-        jobId: job.jobId,
-        jobTitle: job.title,
-        city: job.city,
-        state: job.state,
-        dmUserId: user.id,
-        dmUserName: user.name,
-        territoryStates: user.territoryStates,
-        createdAt: new Date().toISOString(),
-      };
-      const next = appendDmEscalationLog(entry);
-      setEscalationLogs(next.filter((row) => row.dmUserId === user.id).slice(0, 30));
-
-      const topAlert = view?.relatedAlerts?.[0];
-      const sourceEscalationLogId = buildSourceEscalationLogId(user.id, job.jobId, actionType);
-      void fetch("/api/dm/escalations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sourceEscalationLogId,
-          escalationType: actionType,
-          relatedJobId: job.jobId,
-          jobTitle: job.title,
-          city: job.city,
-          state: job.state,
-          priority: job.priority ?? topAlert?.priority ?? null,
-          priorityScore: job.priorityScore ?? topAlert?.priorityScore ?? null,
-          recommendedAction:
-            job.recommendedAction ?? topAlert?.recommendedAction ?? entry.label,
-          alertReason: topAlert?.title ?? entry.label,
-          jobAgeDays: job.jobAgeDays,
-        }),
-      })
-        .then(async (res) => {
-          const parsed = (await res.json()) as { ok?: boolean; error?: string };
-          if (!parsed.ok) {
-            showToast(parsed.error ?? "Could not send escalation to recruiting.", "info");
-            return;
-          }
-          showToast(`${entry.label} sent to recruiter queue for ${job.title}`);
-        })
-        .catch(() => {
-          showToast("Escalation saved locally but recruiter queue sync failed.", "info");
-        });
+      void submitEscalationForJob(actionType, view.primaryJob, view.relatedAlerts[0] ?? null);
     },
-    [showToast, user.id, user.name, user.territoryStates, view?.primaryJob, view?.relatedAlerts],
+    [showToast, submitEscalationForJob, view?.primaryJob, view?.relatedAlerts],
   );
 
   return {
@@ -248,6 +224,9 @@ export function useDmOperationalDrawer(
     close,
     escalationLogs,
     logEscalation,
+    submitEscalationForJob,
+    syncEscalationLogs,
+    showToast,
     toast,
     dismissToast,
   };

@@ -7,7 +7,11 @@ import {
 } from "@/lib/dm-dashboard/dm-operational-types";
 import type { DmAlertPriority } from "@/lib/dm-dashboard/dm-alert-priority";
 import { toDmEscalationPublic } from "@/lib/operational-escalation/dm-escalation-response";
-import { createRecruiterEscalation } from "@/lib/operational-escalation/operational-escalation-store";
+import {
+  createRecruiterEscalation,
+  listDmEscalationsForUser,
+} from "@/lib/operational-escalation/operational-escalation-store";
+import { RECRUITER_ESCALATION_STATUS_LABELS } from "@/lib/operational-escalation/operational-escalation-types";
 import type { OperationalEscalationType } from "@/lib/operational-escalation/operational-escalation-types";
 import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
@@ -33,6 +37,34 @@ type CreateBody = {
   alertReason?: string;
   jobAgeDays?: number | null;
 };
+
+export async function GET(request: Request) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["dm", "admin", "executive"],
+    requireTerritory: true,
+    auditAction: "dm_escalation_list",
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
+  auditTerritoryAccess(session, "/api/dm/escalations");
+
+  const dmUserId = session.userId;
+  const items = await listDmEscalationsForUser(dmUserId);
+
+  return NextResponse.json(
+    {
+      ok: true,
+      items: items.map(toDmEscalationPublic),
+      statusLabels: RECRUITER_ESCALATION_STATUS_LABELS,
+      refreshedAt: new Date().toISOString(),
+    },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
+      },
+    },
+  );
+}
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {

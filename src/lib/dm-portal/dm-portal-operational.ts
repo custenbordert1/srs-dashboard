@@ -35,6 +35,7 @@ export type DmPortalOperationalView = {
 
 export const DM_PORTAL_SECTION_IDS = {
   territorySummary: "dm-territory-summary",
+  actionCenter: "dm-action-center",
   territoryHealth: "dm-territory-health",
   recruitingPipeline: "dm-recruiting-pipeline",
   alertKpis: "dm-alert-kpis",
@@ -53,6 +54,12 @@ export const DM_PORTAL_NAV_LINKS = [
     label: "Territory summary",
     description: "Jobs, calls, health, and alerts",
     href: `#${DM_PORTAL_SECTION_IDS.territorySummary}`,
+  },
+  {
+    id: "actions",
+    label: "Action center",
+    description: "Request ads, recruiters, and track coverage",
+    href: `#${DM_PORTAL_SECTION_IDS.actionCenter}`,
   },
   {
     id: "recruiting",

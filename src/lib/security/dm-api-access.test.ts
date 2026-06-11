@@ -22,10 +22,11 @@ describe("dm api access policy", () => {
     }
   });
 
-  it("allows DM to create escalations", () => {
+  it("allows DM to list and create escalations", () => {
     const policy = apiRoutePolicy("/api/dm/escalations");
     assert.ok(policy.allowedRoles?.includes("dm"));
     assert.ok(policy.requiresTerritory);
+    assert.equal(canAccessRoute("dm", "/api/dm/escalations"), true);
   });
 
   it("blocks DM from job management and DD tools", () => {

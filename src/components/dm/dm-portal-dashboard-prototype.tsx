@@ -1,5 +1,6 @@
 "use client";
 
+import { DmActionCenter } from "@/components/dm/dm-action-center";
 import { DmAlertOperationsKpis } from "@/components/dm/dm-alert-operations-kpis";
 import { CandidatePipelineWidget } from "@/components/dm/candidate-pipeline-widget";
 import { DmAttentionPanel } from "@/components/dm/dm-attention-panel";
@@ -10,7 +11,6 @@ import { DmToast } from "@/components/dm/dm-toast";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { DmMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
-import { DeferredSection } from "@/components/ui/deferred-section";
 import { useDmOperationalDrawer } from "@/hooks/use-dm-operational-drawer";
 import type { UserPublic } from "@/lib/auth/types";
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
@@ -30,7 +30,7 @@ import { buildDataTrustState, type DataTrustInput, type DataTrustState } from "@
 import { resolveKpiTrustPresentation } from "@/lib/kpi-trust-gating";
 import type { DmViewVisibility } from "@/lib/dm-portal/dm-view-mode";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type DmPortalDashboardProps = {
   data: DmDashboardSnapshot;
@@ -203,6 +203,13 @@ export function DmPortalDashboard({
   const dataTrust = buildDataTrustState(trustInput);
   const ops = useDmOperationalDrawer(data, user);
   const [prioritySeed, setPrioritySeed] = useState<DmAlertPriorityFilter>("all");
+  const actionCenterJobs = useMemo(
+    () =>
+      Object.values(data.operationalIndex.jobsById)
+        .sort((a, b) => (b.priorityScore ?? 0) - (a.priorityScore ?? 0))
+        .slice(0, 20),
+    [data.operationalIndex.jobsById],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -302,6 +309,21 @@ export function DmPortalDashboard({
           </div>
         </SectionShell>
       ) : null}
+
+      <SectionShell
+        id={DM_PORTAL_SECTION_IDS.actionCenter}
+        title="DM action center"
+        description="Request recruiting support, assign recruiters, and track coverage requests."
+      >
+        <DmActionCenter
+          territory={territory}
+          jobs={actionCenterJobs}
+          user={user}
+          onOpenJob={ops.openJob}
+          onToast={(message, tone) => ops.showToast(message, tone)}
+          onEscalationSubmitted={ops.syncEscalationLogs}
+        />
+      </SectionShell>
 
       {visibility.showCoveragePercent ? (
         <section
@@ -507,13 +529,13 @@ export function DmPortalDashboard({
         </p>
       </SectionShell>
 
-      <DeferredSection
+      <SectionShell
+        id="dm-live-coverage-risk"
         title="Live coverage risk"
         description="MEL staffing gaps and nearby rep coverage in your territory."
-        summary={<p className="text-sm text-zinc-500">Expand to load live coverage intelligence.</p>}
       >
         <CoverageRiskSection variant="dm" />
-      </DeferredSection>
+      </SectionShell>
 
       <SectionShell
         id={DM_PORTAL_SECTION_IDS.candidateQueue}

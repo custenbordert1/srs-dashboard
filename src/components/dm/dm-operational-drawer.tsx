@@ -5,11 +5,13 @@ import type { DmEscalationActionType, DmEscalationLogEntry } from "@/lib/dm-dash
 import { DM_ESCALATION_ACTION_LABELS } from "@/lib/dm-dashboard/dm-operational-types";
 
 const ESCALATION_ACTIONS: DmEscalationActionType[] = [
+  "request-new-ad",
+  "request-recruiter-assignment",
+  "coverage-concern",
   "escalate-recruiting",
   "request-repost",
   "request-pay-review",
   "expand-radius",
-  "coverage-concern",
   "low-applicant-flow",
   "aging-job-review",
 ];

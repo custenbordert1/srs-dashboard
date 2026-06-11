@@ -64,6 +64,11 @@ export async function listRecruiterEscalations(): Promise<RecruiterEscalationQue
   );
 }
 
+export async function listDmEscalationsForUser(dmUserId: string): Promise<RecruiterEscalationQueueItem[]> {
+  const items = await listRecruiterEscalations();
+  return items.filter((item) => item.dmUserId === dmUserId);
+}
+
 export async function getRecruiterEscalation(id: string): Promise<RecruiterEscalationQueueItem | null> {
   return (await readStore()).items.find((item) => item.id === id) ?? null;
 }

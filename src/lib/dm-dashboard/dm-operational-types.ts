@@ -59,6 +59,8 @@ export type DmOperationalDrawerTarget =
 export type DmEscalationActionType =
   | "escalate-recruiting"
   | "request-repost"
+  | "request-new-ad"
+  | "request-recruiter-assignment"
   | "request-pay-review"
   | "expand-radius"
   | "coverage-concern"
@@ -68,6 +70,8 @@ export type DmEscalationActionType =
 export const DM_ESCALATION_ACTION_LABELS: Record<DmEscalationActionType, string> = {
   "escalate-recruiting": "Escalate recruiting priority",
   "request-repost": "Request repost",
+  "request-new-ad": "Request new ad",
+  "request-recruiter-assignment": "Request recruiter assignment",
   "request-pay-review": "Request pay review",
   "expand-radius": "Expand radius",
   "coverage-concern": "Coverage concern",

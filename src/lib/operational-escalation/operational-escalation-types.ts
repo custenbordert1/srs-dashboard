@@ -2,6 +2,8 @@ import type { DmAlertPriority } from "@/lib/dm-dashboard/dm-alert-priority";
 
 export type OperationalEscalationType =
   | "request-repost"
+  | "request-new-ad"
+  | "request-recruiter-assignment"
   | "expand-radius"
   | "request-pay-review"
   | "escalate-recruiting"
@@ -11,6 +13,8 @@ export type OperationalEscalationType =
 
 export const OPERATIONAL_ESCALATION_LABELS: Record<OperationalEscalationType, string> = {
   "request-repost": "Request repost",
+  "request-new-ad": "Request new ad",
+  "request-recruiter-assignment": "Request recruiter assignment",
   "expand-radius": "Expand radius",
   "request-pay-review": "Request pay review",
   "escalate-recruiting": "Escalate recruiting priority",
