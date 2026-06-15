@@ -28,6 +28,14 @@ export const LazyExecutiveOperationsCenter = dynamic(
   { loading: tabLoading("Loading operations center…"), ssr: false },
 );
 
+export const LazyExecutiveAlertCenter = dynamic(
+  () =>
+    import("@/components/executive/executive-alert-center").then((m) => ({
+      default: m.ExecutiveAlertCenter,
+    })),
+  { loading: tabLoading("Loading executive alerts…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({

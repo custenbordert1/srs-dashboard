@@ -8,6 +8,7 @@ import {
   DashboardTabPanel,
   LazyExecutiveSummaryDashboard,
   LazyExecutiveOperationsCenter,
+  LazyExecutiveAlertCenter,
   LazyAiCommandCenterHub,
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
@@ -79,7 +80,7 @@ export function RecruitingDashboardContent({
   userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>(() =>
-    userRole && isAdminRole(userRole) ? "executive-operations-center" : "executive-summary",
+    userRole && isAdminRole(userRole) ? "executive-alerts" : "executive-summary",
   );
 
   useEffect(() => {
@@ -119,6 +120,12 @@ export function RecruitingDashboardContent({
             : "max-w-7xl px-4 sm:px-6 lg:px-8"
         }`}
       >
+        <DashboardTabPanel tabId="executive-alerts" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-alerts" hideBanner>
+            <LazyExecutiveAlertCenter />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
         <DashboardTabPanel tabId="executive-operations-center" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-operations-center" hideBanner>
             <LazyExecutiveOperationsCenter />
