@@ -47,8 +47,11 @@ describe("candidates-export", () => {
       nextActionNeeded: "Load into MEL",
     };
     const csv = buildCandidatesExportCsv([enriched]);
-    const [headerLine, dataLine] = csv.split("\r\n");
-    assert.match(headerLine, /Candidate name,Email,Phone,Position/);
+    const lines = csv.split("\r\n");
+    const headerLine = lines.find((line) => line.startsWith("Candidate name"));
+    const dataLine = lines[lines.length - 1];
+    assert.ok(headerLine);
+    assert.match(headerLine!, /Candidate name,Email,Phone,Position/);
     assert.match(dataLine, /Alex Rivera,alex@example.com,555-0100,Merchandiser,Dallas,TX,Indeed/);
     assert.match(dataLine, /Taylor,Jordan,Ready for MEL/);
     assert.match(dataLine, /Load into MEL,Sent,Ready for MEL/);
@@ -61,7 +64,8 @@ describe("candidates-export", () => {
       totalRecords: 1,
       filtersApplied: "Focus: My work (Taylor)",
     });
-    assert.match(csv, /^Export Date,"May 28, 2026"/);
+    assert.match(csv, /^Export Date,/);
+    assert.match(csv, /Data As Of,"May 28, 2026"/);
     assert.match(csv, /Total Records,1/);
     assert.match(csv, /Filters Applied,Focus: My work \(Taylor\)/);
     assert.match(csv, /Candidate name,Email,Phone/);

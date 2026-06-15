@@ -1,7 +1,12 @@
 "use client";
 
+import { TabSkeleton } from "@/components/ui/tab-skeleton";
+import { WorkspaceErrorRecovery } from "@/components/ui/workspace-error-recovery";
 import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import type { ProductionReadinessSnapshot } from "@/lib/production-readiness";
+import type { ProductionScorecardRow } from "@/lib/production-readiness/build-production-scorecard";
+import type { PlatformPageDiagnostic } from "@/lib/platform-diagnostics/build-platform-diagnostics-report";
+import { UI_BADGE, UI_BUTTON, UI_LAYOUT, UI_RISK, UI_SPACE, UI_SURFACE, UI_TYPE } from "@/lib/ui-tokens";
 import { useEffect, useState } from "react";
 
 const STATUS_STYLES = {
@@ -10,6 +15,19 @@ const STATUS_STYLES = {
   offline: "text-red-300 bg-red-500/10 border-red-500/30",
   unknown: "text-zinc-400 bg-zinc-500/10 border-zinc-500/30",
 } as const;
+
+const SCORECARD_TIER_STYLES: Record<ProductionScorecardRow["tier"], string> = {
+  critical: UI_RISK.critical,
+  "at-risk": UI_RISK.atRisk,
+  stable: UI_RISK.stable,
+  healthy: UI_RISK.healthy,
+};
+
+const DIAGNOSTIC_STATUS_STYLES: Record<PlatformPageDiagnostic["status"], string> = {
+  "on-target": UI_BADGE.healthy,
+  "at-risk": UI_BADGE.high,
+  unknown: UI_BADGE.neutral,
+};
 
 export function SystemAdminCenter() {
   const [snapshot, setSnapshot] = useState<ProductionReadinessSnapshot | null>(null);
@@ -44,25 +62,29 @@ export function SystemAdminCenter() {
   }, [reloadToken]);
 
   if (loading && !snapshot) {
-    return <p className="text-sm text-zinc-500">Loading system administration center…</p>;
+    return <TabSkeleton message="Loading system administration center…" rows={6} cards={5} />;
   }
 
   if (error && !snapshot) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
-        {error}
-      </div>
+      <WorkspaceErrorRecovery
+        error={error}
+        onRetry={() => {
+          setLoading(true);
+          setReloadToken((token) => token + 1);
+        }}
+      />
     );
   }
 
   if (!snapshot) return null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className={UI_SPACE.page}>
+      <div className={UI_LAYOUT.pageHeader}>
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">System Administration Center</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className={UI_TYPE.pageTitle}>System Administration Center</h2>
+          <p className={UI_TYPE.pageSubtitle}>
             Enterprise readiness — users, audit, integrations, data quality, and deployment diagnostics
           </p>
         </div>
@@ -72,7 +94,7 @@ export function SystemAdminCenter() {
             setLoading(true);
             setReloadToken((token) => token + 1);
           }}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
+          className={UI_BUTTON.ghost}
         >
           Refresh
         </button>
@@ -83,6 +105,85 @@ export function SystemAdminCenter() {
           {snapshot.demoMode.label} is active — sample sections available for leadership demos.
         </div>
       ) : null}
+
+      <section className={`${UI_SURFACE.panel} ${SCORECARD_TIER_STYLES[snapshot.productionScorecard.overallTier]}`}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className={UI_TYPE.sectionTitle}>Production scorecard</h3>
+            <p className="mt-1 text-sm opacity-90">
+              Reliability, performance, coverage, data quality, and user readiness
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-4xl font-bold tabular-nums">{snapshot.productionScorecard.overallScore}</p>
+            <p className="text-sm capitalize opacity-90">
+              {snapshot.productionScorecard.overallTier.replace("-", " ")}
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {snapshot.productionScorecard.dimensions.map((row) => (
+            <div
+              key={row.id}
+              className={`rounded-xl border px-3 py-3 ${SCORECARD_TIER_STYLES[row.tier]}`}
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{row.label}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums">{row.score}</p>
+              <p className="mt-1 text-xs opacity-90">{row.summary}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={UI_SURFACE.panel}>
+        <h3 className={UI_TYPE.sectionTitle}>Platform diagnostics</h3>
+        <p className="mt-1 text-sm text-zinc-400">
+          Load targets: normal &lt;{snapshot.platformDiagnostics.apiTargets.normalMs}ms · heavy &lt;
+          {snapshot.platformDiagnostics.apiTargets.heavyMs}ms
+        </p>
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {snapshot.platformDiagnostics.pages.map((page) => (
+            <div key={page.id} className={`${UI_SURFACE.cardInset} p-3`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium text-zinc-100">{page.label}</p>
+                <span className={DIAGNOSTIC_STATUS_STYLES[page.status]}>
+                  {page.status.replace("-", " ")}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-zinc-500">
+                {page.category} · {page.loadClass} · lazy {page.lazyLoaded ? "yes" : "no"}
+              </p>
+              <p className="mt-2 text-xs text-zinc-400">{page.notes}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+            <p className={UI_TYPE.kpiLabel}>Cache hit rate</p>
+            <p className={UI_TYPE.kpiValue}>{snapshot.platformDiagnostics.serverSignals.cacheHitRate}%</p>
+          </div>
+          <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+            <p className={UI_TYPE.kpiLabel}>Lazy tabs</p>
+            <p className={UI_TYPE.kpiValue}>{snapshot.platformDiagnostics.serverSignals.lazyTabCount}</p>
+          </div>
+          <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+            <p className={UI_TYPE.kpiLabel}>Integrations healthy</p>
+            <p className={UI_TYPE.kpiValue}>
+              {snapshot.platformDiagnostics.serverSignals.integrationHealthy}/
+              {snapshot.platformDiagnostics.serverSignals.integrationTotal}
+            </p>
+          </div>
+          <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+            <p className={UI_TYPE.kpiLabel}>Sync failures</p>
+            <p className={UI_TYPE.kpiValue}>{snapshot.platformDiagnostics.serverSignals.syncFailures}</p>
+          </div>
+        </div>
+        <ul className="mt-4 list-disc space-y-1 pl-5 text-xs text-zinc-400">
+          {snapshot.platformDiagnostics.clientGuidance.map((tip) => (
+            <li key={tip}>{tip}</li>
+          ))}
+        </ul>
+      </section>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[

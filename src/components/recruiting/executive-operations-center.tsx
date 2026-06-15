@@ -1,11 +1,15 @@
 "use client";
 
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
+import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
+import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import {
   exportExecutiveActionBoardCsv,
   exportExecutiveProjectsCsv,
   exportExecutiveRecruitersCsv,
   exportExecutiveTerritoriesCsv,
+  filterProjectWarRoomRows,
+  projectWarRoomFilterOptions,
   type ExecutiveOperationsCenterSnapshot,
   type ExecutiveProjectWarRoomRow,
   type ExecutiveRecruiterWarRoomRow,
@@ -15,6 +19,16 @@ import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-tim
 import type { CompanyHealthTier, ProjectForecastOutcome } from "@/lib/executive-operations-center/types";
 import type { ActionRecommendationCard } from "@/lib/territory-action-engine";
 import type { ProjectRiskLevel } from "@/lib/territory-action-engine/types";
+import {
+  UI_BADGE,
+  UI_BUTTON,
+  UI_INPUT,
+  UI_LAYOUT,
+  UI_RISK,
+  UI_SPACE,
+  UI_SURFACE,
+  UI_TYPE,
+} from "@/lib/ui-tokens";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type OpsResponse = {
@@ -34,10 +48,10 @@ type DrillDown =
 type WarRoomTab = "projects" | "territories" | "recruiters";
 
 const HEALTH_TIER_STYLES: Record<CompanyHealthTier, string> = {
-  critical: "border-red-500/50 bg-red-500/15 text-red-100",
-  "at-risk": "border-amber-500/45 bg-amber-500/12 text-amber-100",
-  stable: "border-sky-500/40 bg-sky-500/10 text-sky-100",
-  healthy: "border-emerald-500/40 bg-emerald-500/12 text-emerald-100",
+  critical: UI_RISK.critical,
+  "at-risk": UI_RISK.atRisk,
+  stable: UI_RISK.stable,
+  healthy: UI_RISK.healthy,
 };
 
 const TERRITORY_TIER_ROW: Record<CompanyHealthTier, string> = {
@@ -48,10 +62,10 @@ const TERRITORY_TIER_ROW: Record<CompanyHealthTier, string> = {
 };
 
 const RISK_CHIP: Record<ProjectRiskLevel, string> = {
-  critical: "bg-red-500/20 text-red-100",
-  high: "bg-amber-500/20 text-amber-100",
-  moderate: "bg-sky-500/15 text-sky-100",
-  healthy: "bg-emerald-500/15 text-emerald-100",
+  critical: UI_BADGE.critical,
+  high: UI_BADGE.high,
+  moderate: UI_BADGE.moderate,
+  healthy: UI_BADGE.healthy,
 };
 
 const FORECAST_CHIP: Record<ProjectForecastOutcome, string> = {
@@ -152,69 +166,68 @@ function BoardroomMode({
   ];
 
   return (
-    <div className="fixed inset-0 z-[70] overflow-y-auto bg-zinc-950 px-6 py-8 text-zinc-50 sm:px-10">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="flex items-start justify-between gap-4">
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-zinc-950 px-6 py-8 text-zinc-50 sm:px-10 lg:px-14">
+      <div className={`mx-auto flex max-w-7xl flex-col gap-8 ${UI_SPACE.page}`}>
+        <div className={UI_LAYOUT.pageHeader}>
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-300">
               Boardroom Mode
             </p>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
-              Executive Operations Center
-            </h1>
+            <h1 className={`mt-2 ${UI_TYPE.boardroomTitle}`}>Executive Operations Center</h1>
+            <p className="mt-2 text-base text-zinc-400">
+              Leadership snapshot — risks, actions, and forecast at a glance.
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={onExit}
-            className="rounded-lg border border-zinc-600 px-4 py-2 text-sm font-medium hover:bg-zinc-900"
-          >
+          <button type="button" onClick={onExit} className={UI_BUTTON.boardroom}>
             Exit
           </button>
         </div>
 
-        <section className="rounded-2xl border border-zinc-700 bg-zinc-900/60 p-8">
-          <p className="text-sm uppercase tracking-wide text-zinc-400">Company Health</p>
-          <p className="mt-2 text-7xl font-bold tabular-nums">{center.companyHealth.score}</p>
-          <p className="mt-2 text-2xl capitalize text-zinc-200">
+        <section className={`${UI_SURFACE.panel} border-zinc-700 bg-zinc-900/60 p-8 ${HEALTH_TIER_STYLES[center.companyHealth.tier]}`}>
+          <p className="text-sm font-semibold uppercase tracking-wide opacity-80">Company Health</p>
+          <p className={`mt-2 ${UI_TYPE.boardroomKpi}`}>{center.companyHealth.score}</p>
+          <p className="mt-2 text-2xl capitalize sm:text-3xl">
             {center.companyHealth.tier.replace("-", " ")} · {trendLabel(center.companyHealth.trend)}
           </p>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-zinc-700 bg-zinc-900/60 p-6">
-            <h2 className="text-2xl font-semibold">Top Risks</h2>
+        <div className={UI_LAYOUT.boardroomGrid}>
+          <section className={`${UI_SURFACE.panel} border-zinc-700 bg-zinc-900/60 p-6`}>
+            <h2 className={UI_TYPE.boardroomSection}>Top Risks</h2>
             <ul className="mt-4 space-y-4">
               {topRisks.map((risk) => (
-                <li key={risk.id}>
-                  <p className="text-xl font-medium">{risk.label}</p>
-                  <p className="text-3xl font-bold tabular-nums text-amber-200">{risk.count}</p>
+                <li key={risk.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 px-4 py-3">
+                  <p className="text-xl font-medium sm:text-2xl">{risk.label}</p>
+                  <p className="text-3xl font-bold tabular-nums text-amber-200 sm:text-4xl">{risk.count}</p>
                   <p className="text-zinc-400">{risk.topIssue}</p>
                 </li>
               ))}
             </ul>
           </section>
-          <section className="rounded-2xl border border-zinc-700 bg-zinc-900/60 p-6">
-            <h2 className="text-2xl font-semibold">Top Actions</h2>
+          <section className={`${UI_SURFACE.panel} border-zinc-700 bg-zinc-900/60 p-6`}>
+            <h2 className={UI_TYPE.boardroomSection}>Top Actions</h2>
             <ul className="mt-4 space-y-3">
               {center.actionBoard.slice(0, 8).map((action) => (
                 <li key={action.id} className="border-b border-zinc-800 pb-3">
-                  <p className="text-lg font-medium">{action.issue}</p>
-                  <p className="text-zinc-400">{action.suggestedAction}</p>
+                  <p className="text-lg font-medium sm:text-xl">{action.issue}</p>
+                  <p className="text-teal-200/90">{action.suggestedAction}</p>
                 </li>
               ))}
             </ul>
           </section>
         </div>
 
-        <section className="rounded-2xl border border-zinc-700 bg-zinc-900/60 p-6">
-          <h2 className="text-2xl font-semibold">Project Forecast</h2>
+        <section className={`${UI_SURFACE.panel} border-zinc-700 bg-zinc-900/60 p-6`}>
+          <h2 className={UI_TYPE.boardroomSection}>Project Forecast</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {(["likely-to-miss", "at-risk", "likely-to-finish"] as const).map((outcome) => {
               const count = center.projectForecasts.filter((row) => row.outcome === outcome).length;
               return (
                 <div key={outcome} className={`rounded-xl border px-4 py-3 ${FORECAST_CHIP[outcome]}`}>
-                  <p className="text-sm uppercase tracking-wide opacity-80">{outcome.replace(/-/g, " ")}</p>
-                  <p className="text-4xl font-bold tabular-nums">{count}</p>
+                  <p className="text-sm font-semibold uppercase tracking-wide opacity-80">
+                    {outcome.replace(/-/g, " ")}
+                  </p>
+                  <p className="text-4xl font-bold tabular-nums sm:text-5xl">{count}</p>
                 </div>
               );
             })}
@@ -270,22 +283,18 @@ export function ExecutiveOperationsCenter() {
     return () => window.clearInterval(timer);
   }, [boardroom, load]);
 
-  const projectFilters = useMemo(() => {
-    if (!center) return { clients: [], dms: [], states: [] };
-    const clients = [...new Set(center.projectWarRoom.map((row) => row.client).filter(Boolean))].sort();
-    const dms = [...new Set(center.projectWarRoom.map((row) => row.dmName).filter(Boolean))].sort();
-    const states = [...new Set(center.projectWarRoom.map((row) => row.state).filter(Boolean))].sort();
-    return { clients, dms, states };
-  }, [center]);
+  const projectFilters = useMemo(
+    () => (center ? projectWarRoomFilterOptions(center.projectWarRoom) : { clients: [], dms: [], states: [] }),
+    [center],
+  );
 
   const filteredProjects = useMemo(() => {
     if (!center) return [];
-    return center.projectWarRoom.filter((row) => {
-      if (projectClientFilter !== "all" && row.client !== projectClientFilter) return false;
-      if (projectDmFilter !== "all" && row.dmName !== projectDmFilter) return false;
-      if (projectStateFilter !== "all" && row.state !== projectStateFilter) return false;
-      if (projectRiskFilter !== "all" && row.riskLevel !== projectRiskFilter) return false;
-      return true;
+    return filterProjectWarRoomRows(center.projectWarRoom, {
+      client: projectClientFilter,
+      dm: projectDmFilter,
+      state: projectStateFilter,
+      risk: projectRiskFilter,
     });
   }, [center, projectClientFilter, projectDmFilter, projectRiskFilter, projectStateFilter]);
 
@@ -295,55 +304,47 @@ export function ExecutiveOperationsCenter() {
     error,
   };
 
-  if (loading && !center) {
-    return <p className="text-sm text-zinc-500">Loading operations center…</p>;
-  }
-
-  if (error && !center) {
-    return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
-        {error}
-      </div>
-    );
-  }
-
-  if (!center) return null;
-
-  if (boardroom) {
+  if (boardroom && center) {
     return <BoardroomMode center={center} onExit={() => setBoardroom(false)} />;
   }
 
-  const riskCards = [
-    center.riskSummaries.criticalActions,
-    center.riskSummaries.projectRisk,
-    center.riskSummaries.territoryRisk,
-    center.riskSummaries.recruiterRisk,
-    center.riskSummaries.coverageRisk,
-  ];
+  const riskCards = center
+    ? [
+        center.riskSummaries.criticalActions,
+        center.riskSummaries.projectRisk,
+        center.riskSummaries.territoryRisk,
+        center.riskSummaries.recruiterRisk,
+        center.riskSummaries.coverageRisk,
+      ]
+    : [];
 
   return (
-    <div id="executive-operations-center" className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <WorkspacePageShell
+      loading={loading}
+      error={error}
+      hasData={Boolean(center)}
+      loadingMessage="Loading operations center…"
+      emptyTitle="No operations data yet"
+      emptyMessage="Executive operations will appear after the next successful sync."
+      emptyNextStep="Try refresh, or confirm Breezy and MEL integrations are healthy in Admin."
+      onRefresh={() => void load()}
+      partialDataAvailable={Boolean(center)}
+    >
+      {center ? (
+    <div id="executive-operations-center" className={UI_SPACE.page}>
+      <div className={UI_LAYOUT.pageHeader}>
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">Operations Center</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className={UI_TYPE.pageTitle}>Operations Center</h2>
+          <p className={UI_TYPE.pageSubtitle}>
             Action-first leadership view — what needs intervention now.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className={UI_LAYOUT.toolbar}>
           <DataTrustBadge trust={dataTrust} />
-          <button
-            type="button"
-            onClick={() => setBoardroom(true)}
-            className="rounded-lg border border-violet-500/40 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-100 hover:bg-violet-500/20"
-          >
+          <button type="button" onClick={() => setBoardroom(true)} className={UI_BUTTON.primary}>
             Boardroom Mode
           </button>
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="rounded-lg border border-zinc-600 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-800"
-          >
+          <button type="button" onClick={() => void load()} className={UI_BUTTON.ghost}>
             Refresh
           </button>
         </div>
@@ -402,20 +403,28 @@ export function ExecutiveOperationsCenter() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-base font-semibold text-zinc-50">Executive action board</h3>
-          <div className="flex flex-wrap gap-2">
+      <section className={UI_SPACE.section}>
+        <div className={UI_LAYOUT.pageHeader}>
+          <h3 className={UI_TYPE.sectionTitle}>Executive action board</h3>
+          <div className={UI_LAYOUT.toolbar}>
             <button
               type="button"
               onClick={() => exportExecutiveActionBoardCsv(center)}
-              className="rounded-md border border-zinc-600 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-800"
+              className={UI_BUTTON.ghost}
             >
               Export actions
             </button>
           </div>
         </div>
-        <ul className="space-y-2">
+        {center.actionBoard.length === 0 ? (
+          <WorkspaceEmptyState
+            title="No executive actions"
+            message="The action board is clear — no high-impact items need leadership attention."
+            nextStep="Check project and territory war rooms for emerging risks."
+            onRefresh={() => void load()}
+          />
+        ) : (
+        <ul className={UI_SPACE.stackSm}>
           {center.actionBoard.map((action) => (
             <li key={action.id}>
               <button
@@ -434,10 +443,11 @@ export function ExecutiveOperationsCenter() {
             </li>
           ))}
         </ul>
+        )}
       </section>
 
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      <section className={UI_SPACE.section}>
+        <div className={UI_LAYOUT.pageHeader}>
           <div className="inline-flex rounded-lg border border-zinc-700/80 bg-zinc-950/80 p-0.5">
             {(
               [
@@ -458,25 +468,25 @@ export function ExecutiveOperationsCenter() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className={UI_LAYOUT.toolbar}>
             <button
               type="button"
               onClick={() => exportExecutiveProjectsCsv(center)}
-              className="rounded-md border border-zinc-600 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-800"
+              className={UI_BUTTON.ghost}
             >
               Export projects
             </button>
             <button
               type="button"
               onClick={() => exportExecutiveTerritoriesCsv(center)}
-              className="rounded-md border border-zinc-600 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-800"
+              className={UI_BUTTON.ghost}
             >
               Export territories
             </button>
             <button
               type="button"
               onClick={() => exportExecutiveRecruitersCsv(center)}
-              className="rounded-md border border-zinc-600 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-800"
+              className={UI_BUTTON.ghost}
             >
               Export recruiters
             </button>
@@ -484,10 +494,10 @@ export function ExecutiveOperationsCenter() {
         </div>
 
         {warRoomTab === "projects" ? (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
+          <div className={UI_SPACE.section}>
+            <div className={UI_INPUT.filterBar}>
               <select
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+                className={UI_INPUT.select}
                 value={projectClientFilter}
                 onChange={(e) => setProjectClientFilter(e.target.value)}
               >
@@ -497,7 +507,7 @@ export function ExecutiveOperationsCenter() {
                 ))}
               </select>
               <select
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+                className={UI_INPUT.select}
                 value={projectDmFilter}
                 onChange={(e) => setProjectDmFilter(e.target.value)}
               >
@@ -507,7 +517,7 @@ export function ExecutiveOperationsCenter() {
                 ))}
               </select>
               <select
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+                className={UI_INPUT.select}
                 value={projectStateFilter}
                 onChange={(e) => setProjectStateFilter(e.target.value)}
               >
@@ -517,7 +527,7 @@ export function ExecutiveOperationsCenter() {
                 ))}
               </select>
               <select
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+                className={UI_INPUT.select}
                 value={projectRiskFilter}
                 onChange={(e) => setProjectRiskFilter(e.target.value)}
               >
@@ -528,9 +538,23 @@ export function ExecutiveOperationsCenter() {
                 <option value="healthy">Healthy</option>
               </select>
             </div>
-            <div className="overflow-x-auto rounded-xl border border-zinc-800/80">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-zinc-900/80 text-xs uppercase text-zinc-500">
+            {filteredProjects.length === 0 ? (
+              <WorkspaceEmptyState
+                title="No projects match filters"
+                message="Adjust client, DM, state, or risk filters to see project war room rows."
+                nextStep="Reset filters to All to view the full portfolio."
+                onRefresh={() => {
+                  setProjectClientFilter("all");
+                  setProjectDmFilter("all");
+                  setProjectStateFilter("all");
+                  setProjectRiskFilter("all");
+                }}
+                refreshLabel="Reset filters"
+              />
+            ) : (
+            <div className={UI_SURFACE.tableWrap}>
+              <table className={UI_LAYOUT.responsiveTable}>
+                <thead className={UI_TYPE.tableHead}>
                   <tr>
                     <th className="px-3 py-2">Project</th>
                     <th className="px-3 py-2">Open</th>
@@ -567,13 +591,14 @@ export function ExecutiveOperationsCenter() {
                 </tbody>
               </table>
             </div>
+            )}
           </div>
         ) : null}
 
         {warRoomTab === "territories" ? (
-          <div className="overflow-x-auto rounded-xl border border-zinc-800/80">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-zinc-900/80 text-xs uppercase text-zinc-500">
+          <div className={UI_SURFACE.tableWrap}>
+            <table className={UI_LAYOUT.responsiveTable}>
+              <thead className={UI_TYPE.tableHead}>
                 <tr>
                   <th className="px-3 py-2">DM</th>
                   <th className="px-3 py-2">States</th>
@@ -608,9 +633,9 @@ export function ExecutiveOperationsCenter() {
         ) : null}
 
         {warRoomTab === "recruiters" ? (
-          <div className="overflow-x-auto rounded-xl border border-zinc-800/80">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-zinc-900/80 text-xs uppercase text-zinc-500">
+          <div className={UI_SURFACE.tableWrap}>
+            <table className={UI_LAYOUT.responsiveTable}>
+              <thead className={UI_TYPE.tableHead}>
                 <tr>
                   <th className="px-3 py-2">Recruiter</th>
                   <th className="px-3 py-2">Assigned</th>
@@ -677,5 +702,7 @@ export function ExecutiveOperationsCenter() {
 
       <ExecutiveDrillDownPanel drillDown={drillDown} onClose={() => setDrillDown(null)} />
     </div>
+      ) : null}
+    </WorkspacePageShell>
   );
 }

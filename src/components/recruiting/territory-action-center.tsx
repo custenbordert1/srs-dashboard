@@ -2,6 +2,8 @@
 
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { PanelCard } from "@/components/ui/panel-card";
+import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
+import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import {
@@ -17,6 +19,14 @@ import type {
   TerritoryActionCenterSnapshot,
   TerritoryPlaybook,
 } from "@/lib/territory-action-engine";
+import {
+  UI_BUTTON,
+  UI_INPUT,
+  UI_LAYOUT,
+  UI_SPACE,
+  UI_SURFACE,
+  UI_TYPE,
+} from "@/lib/ui-tokens";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ActionCenterResponse = {
@@ -209,28 +219,33 @@ export function TerritoryActionCenter() {
     error: error,
   };
 
-  if (loading) {
-    return <p className="text-sm text-zinc-500">Loading action center…</p>;
-  }
-
-  if (error || !center) {
-    return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
-        {error ?? "Action center unavailable"}
-      </div>
-    );
-  }
-
   return (
-    <div id="territory-action-center" className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <WorkspacePageShell
+      loading={loading}
+      error={error}
+      hasData={Boolean(center)}
+      loadingMessage="Loading action center…"
+      emptyTitle="Action center unavailable"
+      emptyMessage="Territory recommendations will appear after data sync completes."
+      emptyNextStep="Confirm Breezy sync and territory intelligence data in Admin."
+      onRefresh={() => void load()}
+      partialDataAvailable={Boolean(center)}
+    >
+      {center ? (
+    <div id="territory-action-center" className={UI_SPACE.page}>
+      <div className={UI_LAYOUT.pageHeader}>
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">Action Center</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className={UI_TYPE.pageTitle}>Action Center</h2>
+          <p className={UI_TYPE.pageSubtitle}>
             Prioritized operational queue — recommendations only, no ATS or MEL write-back.
           </p>
         </div>
-        <DataTrustBadge trust={dataTrust} />
+        <div className={UI_LAYOUT.toolbar}>
+          <DataTrustBadge trust={dataTrust} />
+          <button type="button" onClick={() => void load()} className={UI_BUTTON.ghost}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -279,7 +294,12 @@ export function TerritoryActionCenter() {
           </div>
         </div>
         {openQueueItems.length === 0 ? (
-          <p className="text-sm text-zinc-500">No open actions in this queue.</p>
+          <WorkspaceEmptyState
+            title="No open actions in this queue"
+            message="Everything in this view is resolved or filtered out."
+            nextStep="Switch queue tabs or mark items open in another view."
+            onRefresh={() => void load()}
+          />
         ) : (
           <ul className="space-y-3">
             {openQueueItems.map((card) => (
@@ -297,7 +317,12 @@ export function TerritoryActionCenter() {
       <section className="space-y-3">
         <h3 className="text-base font-semibold text-zinc-50">Territory playbooks</h3>
         {center.territoryPlaybooks.length === 0 ? (
-          <p className="text-sm text-zinc-500">No territory playbooks required right now.</p>
+          <WorkspaceEmptyState
+            title="No territory playbooks"
+            message="No DM territories currently need a structured playbook."
+            nextStep="Check back after the next intelligence refresh."
+            onRefresh={() => void load()}
+          />
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
             {center.territoryPlaybooks.map((playbook) => (
@@ -420,5 +445,7 @@ export function TerritoryActionCenter() {
         </div>
       </section>
     </div>
+      ) : null}
+    </WorkspacePageShell>
   );
 }

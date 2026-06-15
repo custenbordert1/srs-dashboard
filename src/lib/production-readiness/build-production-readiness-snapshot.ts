@@ -8,6 +8,8 @@ import {
   buildUnifiedAuditActivity,
 } from "@/lib/production-readiness/audit-log-reader";
 import { buildDataQualitySnapshot } from "@/lib/production-readiness/build-data-quality-snapshot";
+import { buildProductionScorecard } from "@/lib/production-readiness/build-production-scorecard";
+import { buildPlatformDiagnosticsReport } from "@/lib/platform-diagnostics/build-platform-diagnostics-report";
 import { buildIntegrationStatusSnapshot } from "@/lib/production-readiness/build-system-status-snapshot";
 import { buildDeploymentChecklist, buildStartupDiagnostics } from "@/lib/production-readiness/deployment-readiness";
 import { buildDemoModeSnapshot } from "@/lib/production-readiness/demo-mode";
@@ -36,7 +38,7 @@ export async function buildProductionReadinessSnapshot(
 
   const cache = getServerCacheMetrics();
 
-  return {
+  const base = {
     fetchedAt: ctx.fetchedAt,
     permissionMatrix: PERMISSION_MATRIX,
     users,
@@ -49,7 +51,7 @@ export async function buildProductionReadinessSnapshot(
       serverCacheEntries: cache.entries,
       serverCacheHitRate: cache.hitRate,
       recommendedClientCacheTtlMs: 90_000,
-      lazyLoadedTabs: 18,
+      lazyLoadedTabs: 20,
       backgroundRefreshEnabled: true,
     },
     errorHealth: {
@@ -61,6 +63,17 @@ export async function buildProductionReadinessSnapshot(
     deploymentChecklist: buildDeploymentChecklist(),
     demoMode: buildDemoModeSnapshot(),
     startupDiagnostics: buildStartupDiagnostics(),
+  };
+
+  const productionScorecard = buildProductionScorecard(base as ProductionReadinessSnapshot);
+
+  return {
+    ...base,
+    productionScorecard,
+    platformDiagnostics: buildPlatformDiagnosticsReport({
+      snapshot: base as ProductionReadinessSnapshot,
+      syncFailureCount: ctx.syncFailures.length,
+    }),
   };
 }
 

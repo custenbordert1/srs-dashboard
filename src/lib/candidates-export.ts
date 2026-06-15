@@ -1,6 +1,7 @@
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
+import { buildExportCsv, downloadExportCsv } from "@/lib/export-center";
 import type { CandidateMatchLevel } from "@/lib/recruiting-intelligence";
 
 const MATCH_LEVEL_LABELS: Record<CandidateMatchLevel, string> = {
@@ -78,12 +79,6 @@ export type CandidatesExportMetadata = {
   filtersApplied: string;
 };
 
-function escapeCsvField(value: string): string {
-  if (/[",\n\r]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
 
 export function buildCandidatesExportRow(candidate: ScoredCandidateWorkflowRow): string[] {
   return [
@@ -110,22 +105,18 @@ export function buildCandidatesExportCsv(
   candidates: ScoredCandidateWorkflowRow[],
   metadata?: CandidatesExportMetadata,
 ): string {
-  const lines: string[] = [];
-  if (metadata) {
-    lines.push(
-      ["Export Date", escapeCsvField(metadata.exportDate)].join(","),
-      ["Total Records", escapeCsvField(String(metadata.totalRecords))].join(","),
-      ["Filters Applied", escapeCsvField(metadata.filtersApplied)].join(","),
-      "",
-    );
-  }
-  lines.push(
-    CANDIDATES_EXPORT_HEADERS.map(escapeCsvField).join(","),
-    ...candidates.map((candidate) =>
-      buildCandidatesExportRow(candidate).map((cell) => escapeCsvField(cell)).join(","),
-    ),
-  );
-  return lines.join("\r\n");
+  return buildExportCsv({
+    filename: candidatesExportFilename(),
+    headers: [...CANDIDATES_EXPORT_HEADERS],
+    rows: candidates.map((candidate) => buildCandidatesExportRow(candidate)),
+    metadata: metadata
+      ? [
+          { label: "Total Records", value: String(metadata.totalRecords) },
+          { label: "Filters Applied", value: metadata.filtersApplied },
+        ]
+      : undefined,
+    dataAsOf: metadata?.exportDate,
+  });
 }
 
 export function candidatesExportFilename(date = new Date()): string {
@@ -139,15 +130,16 @@ export function downloadCandidatesCsv(
   candidates: ScoredCandidateWorkflowRow[],
   metadata?: CandidatesExportMetadata,
 ): void {
-  const csv = buildCandidatesExportCsv(candidates, metadata);
-  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = candidatesExportFilename();
-  anchor.rel = "noopener";
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
+  downloadExportCsv({
+    filename: candidatesExportFilename(),
+    headers: [...CANDIDATES_EXPORT_HEADERS],
+    rows: candidates.map((candidate) => buildCandidatesExportRow(candidate)),
+    metadata: metadata
+      ? [
+          { label: "Total Records", value: String(metadata.totalRecords) },
+          { label: "Filters Applied", value: metadata.filtersApplied },
+        ]
+      : undefined,
+    dataAsOf: metadata?.exportDate,
+  });
 }

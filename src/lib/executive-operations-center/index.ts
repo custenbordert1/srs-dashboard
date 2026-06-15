@@ -6,6 +6,12 @@ export {
   exportExecutiveRecruitersCsv,
   exportExecutiveTerritoriesCsv,
 } from "@/lib/executive-operations-center/executive-operations-export";
+export {
+  filterProjectWarRoomRows,
+  projectWarRoomFilterOptions,
+  DEFAULT_PROJECT_WAR_ROOM_FILTERS,
+  type ProjectWarRoomFilters,
+} from "@/lib/executive-operations-center/filter-project-war-room";
 export type {
   CompanyHealthScore,
   CompanyHealthTier,

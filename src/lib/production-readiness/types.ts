@@ -1,3 +1,5 @@
+import type { PlatformDiagnosticsReport } from "@/lib/platform-diagnostics/build-platform-diagnostics-report";
+import type { ProductionScorecard } from "@/lib/production-readiness/build-production-scorecard";
 import type { UserRole } from "@/lib/auth/types";
 
 export type PermissionAction =
@@ -183,4 +185,6 @@ export type ProductionReadinessSnapshot = {
     demoMode: boolean;
     nodeEnv: string;
   };
+  productionScorecard: ProductionScorecard;
+  platformDiagnostics: PlatformDiagnosticsReport;
 };

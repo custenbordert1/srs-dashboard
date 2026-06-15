@@ -6,6 +6,8 @@ export {
 } from "@/lib/production-readiness/build-production-readiness-snapshot";
 export { buildIntegrationStatusSnapshot } from "@/lib/production-readiness/build-system-status-snapshot";
 export { buildDataQualitySnapshot } from "@/lib/production-readiness/build-data-quality-snapshot";
+export { buildProductionScorecard } from "@/lib/production-readiness/build-production-scorecard";
+export { buildPlatformDiagnosticsReport } from "@/lib/platform-diagnostics/build-platform-diagnostics-report";
 export {
   buildUnifiedAuditActivity,
   buildLoginHistory,
@@ -33,3 +35,13 @@ export type {
   DeploymentChecklistItem,
   DemoModeSnapshot,
 } from "@/lib/production-readiness/types";
+export type {
+  ProductionScorecard,
+  ProductionScorecardRow,
+  ProductionScorecardDimension,
+} from "@/lib/production-readiness/build-production-scorecard";
+export type {
+  PlatformDiagnosticsReport,
+  PlatformPageDiagnostic,
+  PlatformPageId,
+} from "@/lib/platform-diagnostics/build-platform-diagnostics-report";
