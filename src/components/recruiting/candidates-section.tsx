@@ -19,6 +19,7 @@ import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
+import { downloadCandidatesCsv } from "@/lib/candidates-export";
 import {
   completeCandidateFollowUp,
   persistRecruitingActionToggle,
@@ -2947,6 +2948,8 @@ export function CandidatesSection() {
               {filtered.length === 1 ? "" : "s"}. Use chips above the queue to change or clear.
             </p>
           ) : null}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1 space-y-2">
           <input
             className={inputClass}
             value={search}
@@ -2956,6 +2959,17 @@ export function CandidatesSection() {
           {search.trim() !== debouncedSearch.trim() ? (
             <p className="text-[10px] text-zinc-600">Filtering…</p>
           ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => downloadCandidatesCsv(filtered)}
+              disabled={filtered.length === 0}
+              className="shrink-0 rounded-lg border border-zinc-600/60 bg-zinc-800/60 px-3 py-2 text-xs font-medium text-zinc-100 hover:bg-zinc-700/60 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label={`Export ${filtered.length.toLocaleString()} filtered candidates to CSV`}
+            >
+              Export Excel
+            </button>
+          </div>
           {selectedIds.size > 0 ? (
             <p className="text-[11px] text-teal-200">
               {selectedIds.size} selected — use the bulk toolbar at bottom right.

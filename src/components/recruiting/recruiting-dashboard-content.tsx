@@ -107,7 +107,9 @@ export function RecruitingDashboardContent({
       <main
         id="dashboard-main"
         role="tabpanel"
-        className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+        className={`mx-auto space-y-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 ${
+          activeTab === "candidates" ? "max-w-none" : "max-w-7xl"
+        }`}
       >
         <DashboardTabPanel tabId="executive-summary" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-summary" hideBanner>
