@@ -32,7 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     id: "intelligence",
     label: "Intelligence",
-    primaryTabs: ["notifications", "recruiting-intelligence", "data-health"],
+    primaryTabs: ["notifications", "action-center", "recruiting-intelligence", "data-health"],
     secondaryTabs: [],
   },
   {

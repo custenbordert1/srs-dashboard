@@ -18,7 +18,8 @@ export type DashboardTabId =
   | "routing-intelligence"
   | "workforce"
   | "job-management"
-  | "workforce-intelligence";
+  | "workforce-intelligence"
+  | "action-center";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -199,6 +200,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     badgeLabel: "Executive analytics",
     kind: "executive",
     bannerMessage: "Executive workforce analytics — separate from daily Breezy recruiting operations.",
+  },
+  "action-center": {
+    navLabel: "Action Center",
+    sourceTag: "Breezy + MEL",
+    badgeLabel: "Operational actions",
+    kind: "mixed",
+    bannerMessage:
+      "Prioritized action queue with territory playbooks, project risk, and workload engines. Recommendations only — no ATS or MEL write-back.",
   },
 };
 

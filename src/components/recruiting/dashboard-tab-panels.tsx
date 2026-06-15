@@ -108,6 +108,14 @@ export const LazyTerritoryIntelligenceCenter = dynamic(
   { loading: tabLoading("Loading territory intelligence…"), ssr: false },
 );
 
+export const LazyTerritoryActionCenter = dynamic(
+  () =>
+    import("@/components/recruiting/territory-action-center").then((m) => ({
+      default: m.TerritoryActionCenter,
+    })),
+  { loading: tabLoading("Loading action center…"), ssr: false },
+);
+
 export const LazyNotificationCenter = dynamic(
   () =>
     import("@/components/notifications/notification-center").then((m) => ({
