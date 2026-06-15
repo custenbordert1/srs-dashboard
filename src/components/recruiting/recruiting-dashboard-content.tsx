@@ -7,6 +7,7 @@ import { ApplicantPipeline } from "./applicant-pipeline";
 import {
   DashboardTabPanel,
   LazyExecutiveSummaryDashboard,
+  LazyExecutiveOperationsCenter,
   LazyAiCommandCenterHub,
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
@@ -35,6 +36,7 @@ import {
   type DashboardTabId,
 } from "./dashboard-tabs";
 import type { UserRole } from "@/lib/auth/types";
+import { isAdminRole } from "@/lib/auth/roles";
 import {
   RECRUITING_NAVIGATE_EVENT,
   type RecruitingNavigateDetail,
@@ -75,7 +77,9 @@ export function RecruitingDashboardContent({
   dmLeaderboard,
   userRole,
 }: RecruitingDashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabId>("executive-summary");
+  const [activeTab, setActiveTab] = useState<DashboardTabId>(() =>
+    userRole && isAdminRole(userRole) ? "executive-operations-center" : "executive-summary",
+  );
 
   useEffect(() => {
     const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
@@ -114,6 +118,12 @@ export function RecruitingDashboardContent({
             : "max-w-7xl px-4 sm:px-6 lg:px-8"
         }`}
       >
+        <DashboardTabPanel tabId="executive-operations-center" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-operations-center" hideBanner>
+            <LazyExecutiveOperationsCenter />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
         <DashboardTabPanel tabId="executive-summary" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-summary" hideBanner>
             <LazyExecutiveSummaryDashboard />

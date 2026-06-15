@@ -19,7 +19,8 @@ export type DashboardTabId =
   | "workforce"
   | "job-management"
   | "workforce-intelligence"
-  | "action-center";
+  | "action-center"
+  | "executive-operations-center";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -50,6 +51,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     badgeLabel: "Executive summary",
     kind: "executive",
     bannerMessage: "At-a-glance KPIs, AI briefing, and priority alerts for leadership.",
+  },
+  "executive-operations-center": {
+    navLabel: "Operations Center",
+    sourceTag: "Leadership actions",
+    badgeLabel: "Executive operations",
+    kind: "executive",
+    bannerMessage:
+      "Action-first leadership command center — project, territory, and recruiter risk with prioritized interventions.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",

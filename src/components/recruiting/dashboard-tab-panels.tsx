@@ -20,6 +20,14 @@ export const LazyExecutiveSummaryDashboard = dynamic(
   { loading: tabLoading("Loading executive summary…") },
 );
 
+export const LazyExecutiveOperationsCenter = dynamic(
+  () =>
+    import("@/components/recruiting/executive-operations-center").then((m) => ({
+      default: m.ExecutiveOperationsCenter,
+    })),
+  { loading: tabLoading("Loading operations center…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({

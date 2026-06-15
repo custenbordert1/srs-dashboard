@@ -70,6 +70,7 @@ export function buildTerritoryActionCenterSnapshot(
     projectRisks,
     recruiterWorkloads,
     repCapacities,
+    actionBoard: merged.all.slice(0, 25),
     meta: {
       totalActions: merged.all.length,
       criticalCount,

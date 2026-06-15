@@ -119,6 +119,8 @@ export type TerritoryActionCenterSnapshot = {
   projectRisks: ProjectRiskRow[];
   recruiterWorkloads: RecruiterWorkloadRow[];
   repCapacities: RepCapacityRow[];
+  /** Company-wide actions sorted by impact (max 25). */
+  actionBoard: ActionRecommendationCard[];
   meta: {
     totalActions: number;
     criticalCount: number;
