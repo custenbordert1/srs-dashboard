@@ -6,6 +6,7 @@ import { fetchWithTimeout, DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with
 import type { ProductionReadinessSnapshot } from "@/lib/production-readiness";
 import type { ProductionScorecardRow } from "@/lib/production-readiness/build-production-scorecard";
 import type { PlatformPageDiagnostic } from "@/lib/platform-diagnostics/build-platform-diagnostics-report";
+import type { RecruitingIntelligenceCacheDiagnostics } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
 import { UI_BADGE, UI_BUTTON, UI_LAYOUT, UI_RISK, UI_SPACE, UI_SURFACE, UI_TYPE } from "@/lib/ui-tokens";
 import { useEffect, useState } from "react";
 
@@ -31,6 +32,8 @@ const DIAGNOSTIC_STATUS_STYLES: Record<PlatformPageDiagnostic["status"], string>
 
 export function SystemAdminCenter() {
   const [snapshot, setSnapshot] = useState<ProductionReadinessSnapshot | null>(null);
+  const [intelligenceCache, setIntelligenceCache] =
+    useState<RecruitingIntelligenceCacheDiagnostics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
@@ -39,10 +42,23 @@ export function SystemAdminCenter() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetchWithTimeout("/api/admin/production-readiness", {
-          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
-        });
-        const parsed = (await res.json()) as { ok?: boolean; snapshot?: ProductionReadinessSnapshot; error?: string };
+        const [readinessRes, cacheRes] = await Promise.all([
+          fetchWithTimeout("/api/admin/production-readiness", {
+            timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+          }),
+          fetchWithTimeout("/api/admin/recruiting-intelligence-cache", {
+            timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+          }),
+        ]);
+        const parsed = (await readinessRes.json()) as {
+          ok?: boolean;
+          snapshot?: ProductionReadinessSnapshot;
+          error?: string;
+        };
+        const cacheParsed = (await cacheRes.json()) as {
+          ok?: boolean;
+          diagnostics?: RecruitingIntelligenceCacheDiagnostics;
+        };
         if (cancelled) return;
         if (!parsed.ok || !parsed.snapshot) {
           setError(parsed.error ?? "Unable to load system administration center.");
@@ -50,6 +66,7 @@ export function SystemAdminCenter() {
         }
         setError(null);
         setSnapshot(parsed.snapshot);
+        setIntelligenceCache(cacheParsed.ok ? (cacheParsed.diagnostics ?? null) : null);
       } catch {
         if (!cancelled) setError("Unable to load system administration center.");
       } finally {
@@ -134,6 +151,53 @@ export function SystemAdminCenter() {
           ))}
         </div>
       </section>
+
+      {intelligenceCache ? (
+        <section className={UI_SURFACE.panel}>
+          <h3 className={UI_TYPE.sectionTitle}>Recruiting intelligence cache</h3>
+          <p className="mt-1 text-sm text-zinc-400">
+            Shared Breezy + MEL snapshot powering command center routes (5 minute TTL, stale-while-revalidate).
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+              <p className={UI_TYPE.kpiLabel}>Cache status</p>
+              <p className={UI_TYPE.kpiValue}>{intelligenceCache.cacheStatus}</p>
+            </div>
+            <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+              <p className={UI_TYPE.kpiLabel}>Snapshot age</p>
+              <p className={UI_TYPE.kpiValue}>{intelligenceCache.snapshotAgeLabel}</p>
+            </div>
+            <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+              <p className={UI_TYPE.kpiLabel}>Last refresh</p>
+              <p className="mt-1 text-sm text-zinc-200">{intelligenceCache.lastRefreshAt ?? "—"}</p>
+            </div>
+            <div className={UI_SURFACE.cardInset + " px-3 py-2"}>
+              <p className={UI_TYPE.kpiLabel}>Hit / miss / stale</p>
+              <p className={UI_TYPE.kpiValue}>
+                {intelligenceCache.hitCount}/{intelligenceCache.missCount}/{intelligenceCache.staleServeCount}
+              </p>
+            </div>
+          </div>
+          {intelligenceCache.recordCounts ? (
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {(
+                [
+                  ["Jobs", intelligenceCache.recordCounts.jobCount],
+                  ["Candidates", intelligenceCache.recordCounts.candidateCount],
+                  ["Workflows", intelligenceCache.recordCounts.workflowCount],
+                  ["MEL opportunities", intelligenceCache.recordCounts.opportunityCount],
+                  ["Active reps", intelligenceCache.recordCounts.activeRepCount],
+                ] as const
+              ).map(([label, value]) => (
+                <div key={label} className={UI_SURFACE.cardInset + " px-3 py-2"}>
+                  <p className={UI_TYPE.kpiLabel}>{label}</p>
+                  <p className={UI_TYPE.kpiValue}>{value}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className={UI_SURFACE.panel}>
         <h3 className={UI_TYPE.sectionTitle}>Platform diagnostics</h3>

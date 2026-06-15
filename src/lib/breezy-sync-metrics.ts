@@ -5,7 +5,8 @@ export type BreezySyncPhase =
   | "fast-tier"
   | "workflows"
   | "jobs"
-  | "hydration-continuation";
+  | "hydration-continuation"
+  | "intelligence";
 
 export const BREEZY_SYNC_WATCHDOG_WARNING_MS = 10_000;
 export const BREEZY_SYNC_WATCHDOG_DEGRADED_MS = 20_000;
@@ -89,6 +90,7 @@ const emptyPhases = (): Record<BreezySyncPhase, BreezySyncPhaseMetrics> => ({
   workflows: emptyPhase(),
   jobs: emptyPhase(),
   "hydration-continuation": emptyPhase(),
+  intelligence: emptyPhase(),
 });
 
 let activeRun: ActiveRun | null = null;

@@ -1,15 +1,8 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { filterStatesForSession } from "@/lib/auth/permissions";
-import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
-import { normalizeStateCode } from "@/lib/dm-territory-map";
-import { listActiveRosterReps } from "@/lib/active-rep-store";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
-import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
-import { buildCoverageRiskSnapshot } from "@/lib/coverage-risk-engine";
-import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
-import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
+import { loadRecruitingIntelligenceRouteBundle } from "@/lib/recruiting-intelligence/load-recruiting-intelligence-route-bundle";
 import { buildTerritoryActionCenterSnapshot } from "@/lib/territory-action-engine";
 import { buildWorkforceOpsCenterSnapshot } from "@/lib/workforce-ops-center";
 import { NextResponse } from "next/server";
@@ -36,61 +29,39 @@ export async function GET(request: Request) {
 
   const territoryStates = filterStatesForSession(session) ?? undefined;
   const actingRecruiter = session.name?.trim() || session.email?.split("@")[0] || "";
+  const forceRefresh = new URL(request.url).searchParams.get("forceRefresh") === "1";
 
-  const [jobsResult, candidatesResult, workflows, melResult, activeReps] = await Promise.all([
-    fetchBreezyJobs("published"),
-    fetchBreezyCandidates({ scanMode: "fast" }),
-    getCandidateWorkflowState(),
-    fetchMelProjectsSheet(),
-    listActiveRosterReps(),
-  ]);
-
-  if (!jobsResult.ok) {
-    const status = breezyFailureHttpStatus(jobsResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false });
-    return NextResponse.json(breezyFailureBody(jobsResult), { status });
-  }
-  if (!candidatesResult.ok) {
-    const status = breezyFailureHttpStatus(candidatesResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false });
-    return NextResponse.json(breezyFailureBody(candidatesResult), { status });
-  }
-
-  const jobs = applyTerritoryToJobs(session, jobsResult.jobs);
-  const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
-  const fetchedAt = candidatesResult.fetchedAt;
-  const opportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
-  const territoryReps =
-    territoryStates && territoryStates.length > 0
-      ? activeReps.filter((rep) => territoryStates.includes(normalizeStateCode(rep.state)))
-      : activeReps;
-
-  const coverage = buildCoverageRiskSnapshot({
-    opportunities,
-    reps: territoryReps,
-    candidates,
-    fetchedAt,
+  const loaded = await loadRecruitingIntelligenceRouteBundle(session, {
+    forceRefresh,
     territoryStates,
+    scopeRepsToTerritory: true,
   });
 
+  if (!loaded.ok) {
+    const status = breezyFailureHttpStatus(loaded.failure.failure.error);
+    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false });
+    return NextResponse.json(breezyFailureBody(loaded.failure.failure), { status });
+  }
+
+  const { bundle } = loaded;
   const workforce = buildWorkforceOpsCenterSnapshot({
-    jobs,
-    candidates,
-    workflows,
-    fetchedAt,
-    coverage,
-    opportunities,
-    activeReps: territoryReps,
+    jobs: bundle.jobs,
+    candidates: bundle.candidates,
+    workflows: bundle.workflows,
+    fetchedAt: bundle.fetchedAt,
+    coverage: bundle.coverage,
+    opportunities: bundle.opportunities,
+    activeReps: bundle.activeReps,
   });
 
   const center = buildTerritoryActionCenterSnapshot({
-    jobs,
-    candidates,
-    workflows,
-    fetchedAt,
-    coverage,
-    opportunities,
-    activeReps: territoryReps,
+    jobs: bundle.jobs,
+    candidates: bundle.candidates,
+    workflows: bundle.workflows,
+    fetchedAt: bundle.fetchedAt,
+    coverage: bundle.coverage,
+    opportunities: bundle.opportunities,
+    activeReps: bundle.activeReps,
     workforceQueue: workforce.operationsQueue,
     actingRecruiter,
   });
@@ -105,13 +76,14 @@ export async function GET(request: Request) {
     ok: true,
     center,
     meta: {
-      partialSync: candidatesResult.partial ?? false,
-      scanMode: candidatesResult.scanMode,
-      positionsScanned: candidatesResult.positionsScanned,
-      totalPositionsAvailable: candidatesResult.totalPositionsAvailable,
-      hasCoverageData: opportunities.length > 0,
-      refreshedAt: fetchedAt,
+      partialSync: bundle.candidatesResult.partial ?? false,
+      scanMode: bundle.candidatesResult.scanMode,
+      positionsScanned: bundle.candidatesResult.positionsScanned,
+      totalPositionsAvailable: bundle.candidatesResult.totalPositionsAvailable,
+      hasCoverageData: bundle.opportunities.length > 0,
+      refreshedAt: bundle.fetchedAt,
       manualOnly: true,
+      intelligenceCache: bundle.intelligenceCache,
     },
   });
 }

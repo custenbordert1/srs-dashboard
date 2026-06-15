@@ -17,6 +17,7 @@ import {
 } from "@/lib/executive-operations-center";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
+import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
 import type { CompanyHealthTier, ProjectForecastOutcome } from "@/lib/executive-operations-center/types";
 import type { ActionRecommendationCard } from "@/lib/territory-action-engine";
 import type { ProjectRiskLevel } from "@/lib/territory-action-engine/types";
@@ -35,7 +36,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 type OpsResponse = {
   ok?: boolean;
   center?: ExecutiveOperationsCenterSnapshot;
-  meta?: { partialSync?: boolean; refreshedAt?: string };
+  meta?: {
+    partialSync?: boolean;
+    refreshedAt?: string;
+    intelligenceCache?: RecruitingIntelligenceCacheMeta;
+  };
   error?: string;
 };
 
@@ -342,6 +347,11 @@ export function ExecutiveOperationsCenter() {
         </div>
         <div className={UI_LAYOUT.toolbar}>
           <DataTrustBadge trust={dataTrust} />
+          {meta?.intelligenceCache ? (
+            <span className="rounded-full border border-zinc-700/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+              Intel cache · {meta.intelligenceCache.cacheStatus} · {Math.round(meta.intelligenceCache.snapshotAgeMs / 1000)}s
+            </span>
+          ) : null}
           <button
             type="button"
             onClick={() => navigateRecruitingTab({ tab: "placement-command-center" })}

@@ -1,14 +1,12 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { normalizeStateCode } from "@/lib/dm-territory-map";
-import { listActiveRosterReps } from "@/lib/active-rep-store";
-import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import { listJobDrafts } from "@/lib/job-management/job-draft-store";
 import { listRecruiterEscalations } from "@/lib/operational-escalation/operational-escalation-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
-import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
+import { getCachedRecruitingIntelligenceSnapshot } from "@/lib/recruiting-intelligence/recruiting-intelligence-cache";
 import { buildBreezyAtsMetrics } from "@/lib/breezy-ats-metrics";
-import { fetchBreezyCandidates, fetchBreezyJobs, isPartialBreezyPositionSync } from "@/lib/breezy-api";
+import { isPartialBreezyPositionSync } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { NextResponse } from "next/server";
@@ -33,52 +31,48 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult, workflows, drafts, escalations, activeReps, melResult] =
-    await Promise.all([
-      fetchBreezyJobs("published"),
-      fetchBreezyCandidates(),
-      getCandidateWorkflowState(),
-      listJobDrafts(),
-      listRecruiterEscalations(),
-      listActiveRosterReps(),
-      fetchMelProjectsSheet(),
-    ]);
+  const forceRefresh = new URL(request.url).searchParams.get("forceRefresh") === "1";
+  const [{ snapshot, meta: intelligenceCache }, drafts, escalations] = await Promise.all([
+    getCachedRecruitingIntelligenceSnapshot({ forceRefresh }),
+    listJobDrafts(),
+    listRecruiterEscalations(),
+  ]);
 
   const partialErrors: string[] = [];
-  const breezyJobsOk = jobsResult.ok;
-  const breezyCandidatesOk = candidatesResult.ok;
+  const breezyJobsOk = snapshot.jobsResult.ok;
+  const breezyCandidatesOk = snapshot.candidatesResult.ok;
 
   if (!breezyJobsOk) {
-    partialErrors.push(`Published jobs unavailable: ${jobsResult.error}`);
+    partialErrors.push(`Published jobs unavailable: ${snapshot.jobsResult.error}`);
   }
   if (!breezyCandidatesOk) {
-    partialErrors.push(`Candidate sync unavailable: ${candidatesResult.error}`);
+    partialErrors.push(`Candidate sync unavailable: ${snapshot.candidatesResult.error}`);
   }
 
   if (!breezyJobsOk && !breezyCandidatesOk && drafts.length === 0 && escalations.length === 0) {
-    const status = breezyFailureHttpStatus(jobsResult.error ?? candidatesResult.error);
+    const status = breezyFailureHttpStatus(snapshot.jobsResult.error ?? snapshot.candidatesResult.error);
     logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "all" });
     return NextResponse.json(
-      breezyFailureBody(breezyJobsOk ? candidatesResult : jobsResult),
+      breezyFailureBody(breezyJobsOk ? snapshot.candidatesResult : snapshot.jobsResult),
       { status },
     );
   }
 
-  const jobs = breezyJobsOk ? applyTerritoryToJobs(session, jobsResult.jobs) : [];
+  const jobs = breezyJobsOk ? applyTerritoryToJobs(session, snapshot.jobsResult.jobs) : [];
   const candidates = breezyCandidatesOk
-    ? applyTerritoryToCandidates(session, candidatesResult.candidates)
+    ? applyTerritoryToCandidates(session, snapshot.candidatesResult.candidates)
     : [];
   const fetchedAt =
-    (breezyCandidatesOk ? candidatesResult.fetchedAt : null) ??
-    (breezyJobsOk ? jobsResult.fetchedAt : null) ??
+    (breezyCandidatesOk ? snapshot.candidatesResult.fetchedAt : null) ??
+    (breezyJobsOk ? snapshot.jobsResult.fetchedAt : null) ??
     new Date().toISOString();
 
   const territoryReps =
     session.territoryStates.length > 0
-      ? activeReps.filter((rep) =>
+      ? snapshot.activeReps.filter((rep) =>
           session.territoryStates.includes(normalizeStateCode(rep.state)),
         )
-      : activeReps;
+      : snapshot.activeReps;
 
   const activeRepsByState: Record<string, number> = {};
   for (const rep of territoryReps) {
@@ -87,14 +81,15 @@ export async function GET(request: Request) {
     activeRepsByState[state] = (activeRepsByState[state] ?? 0) + 1;
   }
 
-  const intelligence = buildRecruitingIntelligence(session, jobs, candidates, fetchedAt, workflows, {
+  const intelligence = buildRecruitingIntelligence(session, jobs, candidates, fetchedAt, snapshot.workflows, {
     drafts,
     escalations,
     activeReps: territoryReps,
   });
 
-  if (!melResult.ok) {
-    partialErrors.push(`MEL store routing data unavailable: ${melResult.error}`);
+  if (!snapshot.melOk) {
+    const melError = snapshot.melResult.ok ? "unknown" : snapshot.melResult.error;
+    partialErrors.push(`MEL store routing data unavailable: ${melError}`);
   }
 
   const ancillaryPartialErrors = partialErrors.filter(
@@ -105,7 +100,7 @@ export async function GET(request: Request) {
 
   const ats =
     breezyCandidatesOk
-      ? buildBreezyAtsMetrics(candidatesResult, breezyJobsOk ? jobsResult : null, {
+      ? buildBreezyAtsMetrics(snapshot.candidatesResult, breezyJobsOk ? snapshot.jobsResult : null, {
           candidatesLoadedOverride: candidates.length,
           publishedJobsOverride: jobs.length,
           scopeCandidates: candidates,
@@ -116,7 +111,7 @@ export async function GET(request: Request) {
   const partialSync =
     !breezyCandidatesOk ||
     !breezyJobsOk ||
-    (breezyCandidatesOk && isPartialBreezyPositionSync(candidatesResult)) ||
+    (breezyCandidatesOk && isPartialBreezyPositionSync(snapshot.candidatesResult)) ||
     ancillaryPartialErrors.length > 0;
 
   logBreezyRouteResult(ROUTE, 200, {
@@ -135,7 +130,7 @@ export async function GET(request: Request) {
         role: session.role,
         filteredJobs: jobs.length,
         filteredCandidates: candidates.length,
-        workflowCount: Object.keys(workflows).length,
+        workflowCount: Object.keys(snapshot.workflows).length,
         partialSync,
         partialErrors,
         breezyJobsOk,
@@ -148,6 +143,7 @@ export async function GET(request: Request) {
         totalPositionsAvailable: ats?.totalPositionsAvailable ?? 0,
         scanMode: ats?.scanMode ?? null,
         lastSuccessfulSync: ats?.lastSuccessfulSync ?? fetchedAt,
+        intelligenceCache,
       },
     },
     {
