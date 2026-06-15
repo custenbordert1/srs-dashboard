@@ -54,6 +54,19 @@ describe("candidates-export", () => {
     assert.match(dataLine, /Load into MEL,Sent,Ready for MEL/);
   });
 
+  it("prepends export metadata rows when provided", () => {
+    const row = buildScoredWorkflowRow(sampleCandidate());
+    const csv = buildCandidatesExportCsv([row], {
+      exportDate: "May 28, 2026",
+      totalRecords: 1,
+      filtersApplied: "Focus: My work (Taylor)",
+    });
+    assert.match(csv, /^Export Date,"May 28, 2026"/);
+    assert.match(csv, /Total Records,1/);
+    assert.match(csv, /Filters Applied,Focus: My work \(Taylor\)/);
+    assert.match(csv, /Candidate name,Email,Phone/);
+  });
+
   it("escapes commas and quotes in cell values", () => {
     const row = buildScoredWorkflowRow({
       ...sampleCandidate(),

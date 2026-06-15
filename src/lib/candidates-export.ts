@@ -72,6 +72,12 @@ export function formatMatchScoreForExport(candidate: ScoredCandidateWorkflowRow)
   return `${candidate.matchPercent}% (${levelLabel})`;
 }
 
+export type CandidatesExportMetadata = {
+  exportDate: string;
+  totalRecords: number;
+  filtersApplied: string;
+};
+
 function escapeCsvField(value: string): string {
   if (/[",\n\r]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -100,13 +106,25 @@ export function buildCandidatesExportRow(candidate: ScoredCandidateWorkflowRow):
   ];
 }
 
-export function buildCandidatesExportCsv(candidates: ScoredCandidateWorkflowRow[]): string {
-  const lines = [
+export function buildCandidatesExportCsv(
+  candidates: ScoredCandidateWorkflowRow[],
+  metadata?: CandidatesExportMetadata,
+): string {
+  const lines: string[] = [];
+  if (metadata) {
+    lines.push(
+      ["Export Date", escapeCsvField(metadata.exportDate)].join(","),
+      ["Total Records", escapeCsvField(String(metadata.totalRecords))].join(","),
+      ["Filters Applied", escapeCsvField(metadata.filtersApplied)].join(","),
+      "",
+    );
+  }
+  lines.push(
     CANDIDATES_EXPORT_HEADERS.map(escapeCsvField).join(","),
     ...candidates.map((candidate) =>
       buildCandidatesExportRow(candidate).map((cell) => escapeCsvField(cell)).join(","),
     ),
-  ];
+  );
   return lines.join("\r\n");
 }
 
@@ -117,8 +135,11 @@ export function candidatesExportFilename(date = new Date()): string {
   return `srs-candidates-export-${year}-${month}-${day}.csv`;
 }
 
-export function downloadCandidatesCsv(candidates: ScoredCandidateWorkflowRow[]): void {
-  const csv = buildCandidatesExportCsv(candidates);
+export function downloadCandidatesCsv(
+  candidates: ScoredCandidateWorkflowRow[],
+  metadata?: CandidatesExportMetadata,
+): void {
+  const csv = buildCandidatesExportCsv(candidates, metadata);
   const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

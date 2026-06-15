@@ -19,7 +19,16 @@ import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
-import { downloadCandidatesCsv } from "@/lib/candidates-export";
+import { downloadCandidatesCsv, type CandidatesExportMetadata } from "@/lib/candidates-export";
+import { matchesMyWorkFocus, summarizeCandidateTableFilters } from "@/lib/candidate-focus-mode";
+import {
+  persistFocusMode,
+  persistSectionExpanded,
+  readCandidatesWorkspacePreferences,
+  readSectionExpanded,
+  type CandidateFocusMode,
+  type CandidatesWorkspaceSectionId,
+} from "@/lib/candidates-workspace-preferences";
 import {
   completeCandidateFollowUp,
   persistRecruitingActionToggle,
@@ -122,6 +131,7 @@ import {
 import {
   buildCandidateSlaSnapshot,
   isFollowUpOverdue,
+  isMelReadyStatus,
   isPaperworkPendingStatus,
 } from "@/lib/candidate-action-sla";
 import {
@@ -455,23 +465,26 @@ function tableRowUrgencyClass(candidate: ScoredCandidateWorkflowRow): string {
     snoozedUntil: candidate.snoozedUntil,
   });
   if (sla.followUpOverdue || candidate.recruitingActions.needsFollowUp) {
-    return "border-l-2 border-l-red-500/70";
+    return "border-l-2 border-l-red-500/80";
   }
-  if (candidate.recruitingActions.priorityList) {
-    return "border-l-2 border-l-amber-500/70";
+  const bucket = computeRecruiterAgingBucket(candidate);
+  if (bucket === "3d" || bucket === "7d+") {
+    return "border-l-2 border-l-red-500/65";
   }
-  if (candidate.assignedRecruiter === "Unassigned") {
-    return "border-l-2 border-l-violet-500/60";
+  if (isMelReadyStatus(candidate.workflowStatus)) {
+    return "border-l-2 border-l-emerald-500/75";
   }
   if (
     isPaperworkPendingStatus(candidate.workflowStatus) &&
     candidate.paperworkStatus !== "signed"
   ) {
-    return "border-l-2 border-l-amber-500/60";
+    return "border-l-2 border-l-amber-500/75";
   }
-  const bucket = computeRecruiterAgingBucket(candidate);
-  if (bucket === "3d" || bucket === "7d+") {
-    return "border-l-2 border-l-amber-500/40";
+  if (candidate.recruitingActions.priorityList) {
+    return "border-l-2 border-l-amber-500/70";
+  }
+  if (candidate.assignedRecruiter === "Unassigned") {
+    return "border-l-2 border-l-sky-500/55";
   }
   return "border-l-2 border-l-transparent";
 }
@@ -499,17 +512,22 @@ function operationalWorkflowState(
 }
 
 function RecruiterCollapsibleSection({
+  sectionId,
   title,
   description,
   defaultOpen = false,
   children,
 }: {
+  sectionId: CandidatesWorkspaceSectionId;
   title: string;
   description?: string;
   defaultOpen?: boolean;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(() => readSectionExpanded(sectionId, defaultOpen));
+  useEffect(() => {
+    persistSectionExpanded(sectionId, open);
+  }, [sectionId, open]);
   return (
     <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
       <button
@@ -723,6 +741,9 @@ export function CandidatesSection() {
   const [queueActionBusy, setQueueActionBusy] = useState(false);
   const [inlineActionBusyId, setInlineActionBusyId] = useState<string | null>(null);
   const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
+  const [focusMode, setFocusMode] = useState<CandidateFocusMode>(() =>
+    typeof window === "undefined" ? "all" : readCandidatesWorkspacePreferences().focusMode,
+  );
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
   const [onboardingConfigError, setOnboardingConfigError] = useState<string | null>(null);
@@ -743,6 +764,51 @@ export function CandidatesSection() {
       setTableSortDirection("asc");
     },
     [tableSortKey],
+  );
+
+  const handleFocusModeChange = useCallback((mode: CandidateFocusMode) => {
+    setFocusMode(mode);
+    persistFocusMode(mode);
+  }, []);
+
+  const buildExportMetadata = useCallback(
+    (rows: ScoredCandidateWorkflowRow[]): CandidatesExportMetadata => ({
+      exportDate: new Intl.DateTimeFormat(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date()),
+      totalRecords: rows.length,
+      filtersApplied: summarizeCandidateTableFilters({
+        search: debouncedSearch,
+        sourceFilter,
+        stageFilter,
+        positionFilter,
+        cityFilter,
+        stateFilter,
+        workflowFilter,
+        matchFilter,
+        appliedFrom,
+        appliedTo,
+        recruiterQuickFilter,
+        focusMode,
+        actingRecruiter,
+      }),
+    }),
+    [
+      actingRecruiter,
+      appliedFrom,
+      appliedTo,
+      cityFilter,
+      debouncedSearch,
+      focusMode,
+      matchFilter,
+      positionFilter,
+      recruiterQuickFilter,
+      sourceFilter,
+      stageFilter,
+      stateFilter,
+      workflowFilter,
+    ],
   );
 
   const confirmBulkApply = useCallback(
@@ -1802,6 +1868,10 @@ export function CandidatesSection() {
         return false;
       }
 
+      if (focusMode === "my-work" && !matchesMyWorkFocus(candidate, actingRecruiter)) {
+        return false;
+      }
+
       return true;
     });
 
@@ -1838,6 +1908,7 @@ export function CandidatesSection() {
         appliedTo: appliedTo || null,
         debouncedSearch: debouncedSearch || null,
         recruiterQuickFilter,
+        focusMode,
       },
     });
     logCandidatesDebug("after_table_filter", sorted.length, {
@@ -1862,6 +1933,7 @@ export function CandidatesSection() {
     positionFilter,
     actingRecruiter,
     recruiterQuickFilter,
+    focusMode,
     searchIndex,
     sourceFilter,
     stageFilter,
@@ -2322,7 +2394,12 @@ export function CandidatesSection() {
   }, []);
 
   async function runBulkUpdate(
-    options: { workflowStatus?: CandidateWorkflowStatus; assignedRecruiter?: string; note?: string },
+    options: {
+      workflowStatus?: CandidateWorkflowStatus;
+      assignedRecruiter?: string;
+      assignedDM?: string;
+      note?: string;
+    },
   ) {
     const rows = candidates.filter((candidate) => selectedIds.has(candidate.candidateId));
     if (rows.length === 0) return;
@@ -2332,6 +2409,7 @@ export function CandidatesSection() {
         rows.map((candidate) =>
           persistWorkflow(candidate, options.workflowStatus ?? candidate.workflowStatus, {
             assignedRecruiter: options.assignedRecruiter,
+            assignedDM: options.assignedDM,
             note: options.note,
           }),
         ),
@@ -2341,7 +2419,9 @@ export function CandidatesSection() {
           ? workflowNoticeStatus(options.workflowStatus)
           : options.assignedRecruiter
             ? workflowNoticeAssigned(options.assignedRecruiter)
-            : undefined;
+            : options.assignedDM
+              ? `DM assigned: ${options.assignedDM}`
+              : undefined;
       for (const result of results) {
         if (result.rosters) setRosters(result.rosters);
         commitWorkflowToView(result.workflow, {
@@ -2361,6 +2441,42 @@ export function CandidatesSection() {
       }
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Bulk workflow update failed");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
+  async function runBulkSnooze() {
+    const rows = candidates.filter((candidate) => selectedIds.has(candidate.candidateId));
+    if (rows.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const results = await Promise.all(rows.map((candidate) => snoozeCandidate24h(candidate.candidateId)));
+      for (const workflow of results) {
+        commitWorkflowToView(workflow);
+      }
+      setWorkflowNotice(`Snoozed ${results.length} candidate${results.length === 1 ? "" : "s"} for 24 hours.`);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Bulk snooze failed");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
+  async function runBulkEscalate() {
+    const rows = candidates.filter((candidate) => selectedIds.has(candidate.candidateId));
+    if (rows.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const results = await Promise.all(
+        rows.map((candidate) => persistRecruitingActionToggle(candidate.candidateId, "priority-list", true)),
+      );
+      for (const workflow of results) {
+        commitWorkflowToView(workflow);
+      }
+      setWorkflowNotice(`Escalated ${results.length} candidate${results.length === 1 ? "" : "s"}.`);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Bulk escalate failed");
     } finally {
       setBulkBusy(false);
     }
@@ -2507,6 +2623,7 @@ export function CandidatesSection() {
                     </span>
                   ) : null}
                 </div>
+                <CandidateRowAttentionBadges candidate={candidate} />
               </div>
             </td>
             <td className={`${tdClass} !whitespace-normal`}>
@@ -2803,19 +2920,6 @@ export function CandidatesSection() {
         </div>
       </section>
 
-      <div className="grid auto-rows-fr items-stretch gap-3 sm:grid-cols-3">
-        <SummaryCard
-          label="Candidates shown"
-          value={filtered.length.toLocaleString()}
-          hint={`${candidates.length.toLocaleString()} currently available`}
-        />
-        <SummaryCard label="Newest applicant" value={newestApplicantDate} />
-        <SummaryCard
-          label="Top sources"
-          value={breakdown.length > 0 ? breakdown.map((row) => `${row.source}: ${row.count}`).join(" · ") : "—"}
-        />
-      </div>
-
       <CandidateMyQueuePanel
         candidates={candidates}
         rosters={rosters}
@@ -2830,118 +2934,53 @@ export function CandidatesSection() {
         onQuickFilterChange={setRecruiterQuickFilter}
       />
 
-      <RecruiterCollapsibleSection
-        title="Analytics & productivity"
-        description="AI prioritization and recruiter productivity — optional detail below the action queue."
-        defaultOpen={false}
-      >
-        <CandidateAutomationPanels
-          queues={prioritizationQueues}
-          productivity={recruiterProductivity}
-          onOpenCandidate={setSelectedCandidateId}
-        />
-      </RecruiterCollapsibleSection>
-
-      <RecruiterCollapsibleSection
-        title="Workflow buckets"
-        description="Grouped counts by lifecycle stage — expand when you need a secondary view."
-        defaultOpen={false}
-      >
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          {buckets.map((bucket) => (
-            <div key={bucket.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-zinc-200">{bucket.label}</p>
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">
-                  {bucket.rows.length}
-                </span>
-              </div>
-              <ul className="mt-3 space-y-1 text-xs text-zinc-500">
-                {bucket.rows.slice(0, 3).map((candidate) => (
-                  <li key={candidate.candidateId} className="truncate">
-                    {candidateName(candidate)} · {candidate.positionName}
-                  </li>
-                ))}
-                {bucket.rows.length === 0 ? <li>No candidates</li> : null}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </RecruiterCollapsibleSection>
-
-      <RecruiterCollapsibleSection
-        title="Recent DD backfill queue"
-        description="Signed in the last 72 hours without DD requested — manual send only."
-        defaultOpen
-      >
-        <RecentDdBackfillQueue
-          candidateNames={backfillCandidateNames}
-          onWorkflowUpdated={(workflows) =>
-            applyWorkflowsBundle(workflows as CandidateWorkflowState)
-          }
-          onOpenCandidate={(candidateId) => setSelectedCandidateId(candidateId)}
-        />
-      </RecruiterCollapsibleSection>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Operational workflow snapshot</h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Recruiter-first counts for active workflow movement and handoff readiness.
-        </p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {operationalSnapshotCards.map((row) => {
-            const interactive = row.id !== "unassigned";
-            const active =
-              (row.id === "escalated" && recruiterQuickFilter === "priority") ||
-              (row.id === "needs-review" && workflowFilter === "Needs Review") ||
-              (row.id === "awaiting-paperwork" && workflowFilter === "Paperwork Needed") ||
-              (row.id === "pending-onboarding" && workflowFilter === "Awaiting DD Verification") ||
-              (row.id === "ready-mel" && workflowFilter === "Ready for MEL");
-            return (
-              <button
-                key={row.id}
-                type="button"
-                disabled={!interactive}
-                onClick={() => {
-                  if (row.id === "escalated") {
-                    setRecruiterQuickFilter((current) =>
-                      current === "priority" ? "all" : "priority",
-                    );
-                    return;
-                  }
-                  const targetStatus =
-                    row.id === "needs-review"
-                      ? "Needs Review"
-                      : row.id === "awaiting-paperwork"
-                        ? "Paperwork Needed"
-                        : row.id === "pending-onboarding"
-                          ? "Awaiting DD Verification"
-                          : row.id === "ready-mel"
-                            ? "Ready for MEL"
-                            : null;
-                  if (!targetStatus) return;
-                  toggleWorkflowStatusFilter(targetStatus);
-                }}
-                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
-                  active
-                    ? "border-teal-500/50 bg-teal-500/10 ring-1 ring-teal-500/30"
-                    : row.tone === "warn"
-                      ? "border-amber-500/30 bg-amber-500/5 hover:border-amber-400/60 hover:bg-amber-500/10"
-                      : row.tone === "ok"
-                        ? "border-teal-500/30 bg-teal-500/5 hover:border-teal-400/60 hover:bg-teal-500/10"
-                        : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
-                } ${interactive ? "" : "cursor-default opacity-90"}`}
-              >
-                <p className="text-xs text-zinc-500">{row.label}</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
       <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-        <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-sm sm:px-4">
+        <div className="sticky top-0 z-30 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-md sm:px-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              className="inline-flex rounded-lg border border-zinc-700/80 bg-zinc-950/80 p-0.5"
+              role="group"
+              aria-label="Candidate focus mode"
+            >
+              <button
+                type="button"
+                onClick={() => handleFocusModeChange("all")}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  focusMode === "all"
+                    ? "bg-teal-600/25 text-teal-100"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                All candidates
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFocusModeChange("my-work")}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  focusMode === "my-work"
+                    ? "bg-teal-600/25 text-teal-100"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                My work
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => downloadCandidatesCsv(filtered, buildExportMetadata(filtered))}
+              disabled={filtered.length === 0}
+              className="shrink-0 rounded-lg border border-zinc-600/60 bg-zinc-800/60 px-3 py-2 text-xs font-medium text-zinc-100 hover:bg-zinc-700/60 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label={`Export ${filtered.length.toLocaleString()} filtered candidates to CSV`}
+            >
+              Export Excel
+            </button>
+          </div>
+          {focusMode === "my-work" ? (
+            <p className="text-[11px] text-teal-200/90">
+              My work — assigned to {actingRecruiter}, follow-up due, paperwork pending, or ready for MEL (
+              {filtered.length.toLocaleString()} shown).
+            </p>
+          ) : null}
           {recruiterQuickFilter !== "all" ? (
             <p className="text-[11px] text-teal-200/90">
               Table filtered by action queue — {filtered.length.toLocaleString()} candidate
@@ -2960,19 +2999,10 @@ export function CandidatesSection() {
             <p className="text-[10px] text-zinc-600">Filtering…</p>
           ) : null}
             </div>
-            <button
-              type="button"
-              onClick={() => downloadCandidatesCsv(filtered)}
-              disabled={filtered.length === 0}
-              className="shrink-0 rounded-lg border border-zinc-600/60 bg-zinc-800/60 px-3 py-2 text-xs font-medium text-zinc-100 hover:bg-zinc-700/60 disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label={`Export ${filtered.length.toLocaleString()} filtered candidates to CSV`}
-            >
-              Export Excel
-            </button>
           </div>
           {selectedIds.size > 0 ? (
             <p className="text-[11px] text-teal-200">
-              {selectedIds.size} selected — use the bulk toolbar at bottom right.
+              {selectedIds.size} selected — bulk actions appear below the table.
             </p>
           ) : null}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
@@ -3093,10 +3123,10 @@ export function CandidatesSection() {
       </section>
 
       {selectedIds.size > 0 ? (
-        <div className="fixed bottom-4 right-4 z-40 w-[min(92vw,38rem)] rounded-xl border border-teal-500/35 bg-zinc-950/95 p-3 shadow-2xl shadow-black/60 backdrop-blur">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-teal-100">
-              {selectedIds.size} selected
+        <div className="sticky bottom-0 z-40 border border-teal-500/35 bg-zinc-950/98 p-3 shadow-2xl shadow-black/60 backdrop-blur">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-teal-100">
+              {selectedIds.size.toLocaleString()} candidate{selectedIds.size === 1 ? "" : "s"} selected
             </p>
             <button
               type="button"
@@ -3107,33 +3137,12 @@ export function CandidatesSection() {
               Clear selection
             </button>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="flex flex-wrap items-center gap-2">
             <select
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-200"
               defaultValue=""
               disabled={bulkBusy}
-              onChange={(event) => {
-                const status = event.target.value as CandidateWorkflowStatus | "";
-                if (!status) return;
-                if (!confirmBulkApply(`Set status to ${status}`)) {
-                  event.target.value = "";
-                  return;
-                }
-                void runBulkUpdate({ workflowStatus: status });
-                event.target.value = "";
-              }}
-            >
-              <option value="">Bulk set workflow status…</option>
-              {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-            <select
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
-              defaultValue=""
-              disabled={bulkBusy}
+              aria-label="Assign recruiter to selected candidates"
               onChange={(event) => {
                 const recruiter = event.target.value;
                 if (!recruiter) return;
@@ -3145,10 +3154,33 @@ export function CandidatesSection() {
                 event.target.value = "";
               }}
             >
-              <option value="">Bulk assign recruiter…</option>
+              <option value="">Assign recruiter…</option>
               {rosters.recruiters.map((recruiter) => (
                 <option key={recruiter} value={recruiter}>
                   {recruiter}
+                </option>
+              ))}
+            </select>
+            <select
+              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-200"
+              defaultValue=""
+              disabled={bulkBusy}
+              aria-label="Assign DM to selected candidates"
+              onChange={(event) => {
+                const dm = event.target.value;
+                if (!dm) return;
+                if (!confirmBulkApply(`Assign DM ${dm}`)) {
+                  event.target.value = "";
+                  return;
+                }
+                void runBulkUpdate({ assignedDM: dm });
+                event.target.value = "";
+              }}
+            >
+              <option value="">Assign DM…</option>
+              {rosters.dms.map((dm) => (
+                <option key={dm} value={dm}>
+                  {dm}
                 </option>
               ))}
             </select>
@@ -3162,22 +3194,53 @@ export function CandidatesSection() {
                   note: "Bulk paperwork prep queued",
                 });
               }}
-              className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-100 hover:bg-amber-500/20"
+              className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1.5 text-xs font-medium text-amber-100 hover:bg-amber-500/20"
             >
-              Bulk paperwork prep
+              Move to Paperwork
             </button>
             <button
               type="button"
               disabled={bulkBusy}
               onClick={() => {
-                const note = window.prompt("Note to add for all selected candidates:");
-                if (!note?.trim()) return;
-                if (!confirmBulkApply("Add note")) return;
-                void runBulkUpdate({ note: note.trim() });
+                if (!confirmBulkApply("Mark Ready for MEL")) return;
+                void runBulkUpdate({ workflowStatus: "Ready for MEL" });
               }}
-              className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+              className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-100 hover:bg-emerald-500/20"
             >
-              Bulk add note
+              Ready for MEL
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => {
+                const rows = candidates.filter((candidate) => selectedIds.has(candidate.candidateId));
+                downloadCandidatesCsv(rows, buildExportMetadata(rows));
+              }}
+              className="rounded-md border border-zinc-600/60 bg-zinc-800/60 px-2.5 py-1.5 text-xs font-medium text-zinc-100 hover:bg-zinc-700/60"
+            >
+              Export Selected
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => {
+                if (!confirmBulkApply("Snooze for 24 hours")) return;
+                void runBulkSnooze();
+              }}
+              className="rounded-md border border-zinc-700 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              Snooze 24h
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => {
+                if (!confirmBulkApply("Escalate to priority list")) return;
+                void runBulkEscalate();
+              }}
+              className="rounded-md border border-red-500/40 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-100 hover:bg-red-500/20"
+            >
+              Escalate
             </button>
           </div>
         </div>
@@ -3255,6 +3318,133 @@ export function CandidatesSection() {
         }}
         melMatchesLoading={melLoading}
       />
+
+      <RecruiterCollapsibleSection
+        sectionId="analytics"
+        title="Analytics & productivity"
+        description="AI prioritization and recruiter productivity — expand when you need reporting detail."
+        defaultOpen={false}
+      >
+        <CandidateAutomationPanels
+          queues={prioritizationQueues}
+          productivity={recruiterProductivity}
+          onOpenCandidate={setSelectedCandidateId}
+        />
+      </RecruiterCollapsibleSection>
+
+      <RecruiterCollapsibleSection
+        sectionId="workflow-buckets"
+        title="Workflow buckets"
+        description="Grouped counts by lifecycle stage."
+        defaultOpen={false}
+      >
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {buckets.map((bucket) => (
+            <div key={bucket.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-zinc-200">{bucket.label}</p>
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">
+                  {bucket.rows.length}
+                </span>
+              </div>
+              <ul className="mt-3 space-y-1 text-xs text-zinc-500">
+                {bucket.rows.slice(0, 3).map((candidate) => (
+                  <li key={candidate.candidateId} className="truncate">
+                    {candidateName(candidate)} · {candidate.positionName}
+                  </li>
+                ))}
+                {bucket.rows.length === 0 ? <li>No candidates</li> : null}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </RecruiterCollapsibleSection>
+
+      <RecruiterCollapsibleSection
+        sectionId="dd-backfill"
+        title="Recent DD backfill queue"
+        description="Signed in the last 72 hours without DD requested — manual send only."
+        defaultOpen={false}
+      >
+        <RecentDdBackfillQueue
+          candidateNames={backfillCandidateNames}
+          onWorkflowUpdated={(workflows) =>
+            applyWorkflowsBundle(workflows as CandidateWorkflowState)
+          }
+          onOpenCandidate={(candidateId) => setSelectedCandidateId(candidateId)}
+        />
+      </RecruiterCollapsibleSection>
+
+      <RecruiterCollapsibleSection
+        sectionId="operational-snapshot"
+        title="Operational workflow snapshot"
+        description="Recruiter-first counts for active workflow movement and handoff readiness."
+        defaultOpen={false}
+      >
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {operationalSnapshotCards.map((row) => {
+            const interactive = row.id !== "unassigned";
+            const active =
+              (row.id === "escalated" && recruiterQuickFilter === "priority") ||
+              (row.id === "needs-review" && workflowFilter === "Needs Review") ||
+              (row.id === "awaiting-paperwork" && workflowFilter === "Paperwork Needed") ||
+              (row.id === "pending-onboarding" && workflowFilter === "Awaiting DD Verification") ||
+              (row.id === "ready-mel" && workflowFilter === "Ready for MEL");
+            return (
+              <button
+                key={row.id}
+                type="button"
+                disabled={!interactive}
+                onClick={() => {
+                  if (row.id === "escalated") {
+                    setRecruiterQuickFilter((current) =>
+                      current === "priority" ? "all" : "priority",
+                    );
+                    return;
+                  }
+                  const targetStatus =
+                    row.id === "needs-review"
+                      ? "Needs Review"
+                      : row.id === "awaiting-paperwork"
+                        ? "Paperwork Needed"
+                        : row.id === "pending-onboarding"
+                          ? "Awaiting DD Verification"
+                          : row.id === "ready-mel"
+                            ? "Ready for MEL"
+                            : null;
+                  if (!targetStatus) return;
+                  toggleWorkflowStatusFilter(targetStatus);
+                }}
+                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                  active
+                    ? "border-teal-500/50 bg-teal-500/10 ring-1 ring-teal-500/30"
+                    : row.tone === "warn"
+                      ? "border-amber-500/30 bg-amber-500/5 hover:border-amber-400/60 hover:bg-amber-500/10"
+                      : row.tone === "ok"
+                        ? "border-teal-500/30 bg-teal-500/5 hover:border-teal-400/60 hover:bg-teal-500/10"
+                        : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
+                } ${interactive ? "" : "cursor-default opacity-90"}`}
+              >
+                <p className="text-xs text-zinc-500">{row.label}</p>
+                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
+              </button>
+            );
+          })}
+        </div>
+      </RecruiterCollapsibleSection>
+
+      <div className="grid auto-rows-fr items-stretch gap-3 sm:grid-cols-3">
+        <SummaryCard
+          label="Candidates shown"
+          value={filtered.length.toLocaleString()}
+          hint={`${candidates.length.toLocaleString()} currently available`}
+        />
+        <SummaryCard label="Newest applicant" value={newestApplicantDate} />
+        <SummaryCard
+          label="Top sources"
+          value={breakdown.length > 0 ? breakdown.map((row) => `${row.source}: ${row.count}`).join(" · ") : "—"}
+        />
+      </div>
 
       <CandidatesSyncDiagnosticsPanel />
     </div>
