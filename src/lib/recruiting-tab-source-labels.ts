@@ -17,6 +17,7 @@ export type DashboardTabId =
   | "automation"
   | "routing-intelligence"
   | "workforce"
+  | "placement-command-center"
   | "job-management"
   | "workforce-intelligence"
   | "action-center"
@@ -194,6 +195,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "mixed",
     bannerMessage:
       "Workforce operations center connects recruiting pipeline to MEL opportunities, rep roster, and execution outcomes.",
+  },
+  "placement-command-center": {
+    navLabel: "Placement Center",
+    sourceTag: "Breezy + MEL",
+    badgeLabel: "Placement command center",
+    kind: "mixed",
+    bannerMessage:
+      "Placement funnel, store coverage, fill forecasts, and recruiter/DM scorecards from Breezy candidates, MEL opportunities, and workflow overlays.",
   },
   "job-management": {
     navLabel: "Job Management",

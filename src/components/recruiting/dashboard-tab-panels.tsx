@@ -180,6 +180,14 @@ export const LazyRoutingIntelligenceSection = dynamic(
   { loading: tabLoading("Loading routing intelligence…"), ssr: false },
 );
 
+export const LazyPlacementCommandCenter = dynamic(
+  () =>
+    import("@/components/placement/placement-command-center").then((m) => ({
+      default: m.PlacementCommandCenter,
+    })),
+  { loading: tabLoading("Loading placement command center…"), ssr: false },
+);
+
 export const LazyWorkforceOperationsSection = dynamic(
   () =>
     import("@/components/workforce-ops/workforce-ops-center").then((m) => ({

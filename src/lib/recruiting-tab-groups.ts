@@ -26,7 +26,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     id: "workforce",
     label: "Workforce",
-    primaryTabs: ["workforce", "mel-projects", "routing-intelligence"],
+    primaryTabs: ["placement-command-center", "workforce", "mel-projects", "routing-intelligence"],
     secondaryTabs: ["workforce-intelligence"],
   },
   {
