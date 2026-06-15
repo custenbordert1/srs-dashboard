@@ -1,8 +1,9 @@
 "use client";
 
-import { ExecutiveKpiCard, ExecutiveKpiGrid } from "@/components/ui/executive-kpi-card";
+import { HealthGroupCard } from "@/components/ui/health-group-card";
 import { DataUnavailableSection } from "@/components/ui/data-unavailable-section";
 import { STATUS_TONE_STYLES } from "@/lib/ui/status-tone";
+import { typography } from "@/lib/ui/typography";
 import { buildExecutiveSummaryDisplay } from "@/lib/executive-summary/build-executive-summary-display";
 import type { AiCommandCenterSnapshot } from "@/lib/ai-recruiting-command-center";
 import type { NotificationCenterSnapshot } from "@/lib/notification-engine";
@@ -93,8 +94,8 @@ export function ExecutiveSummaryDashboard() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-zinc-50 sm:text-2xl">Executive Summary</h1>
-          <p className="mt-0.5 text-sm text-zinc-500">
+          <h1 className={typography.pageTitle}>Executive Summary</h1>
+          <p className={`mt-1 ${typography.muted}`}>
             {display.dmNeedingHelp
               ? `${display.dmNeedingHelp} needs attention · ${display.opportunitiesAtRisk} opportunities at risk`
               : "Nationwide recruiting and workforce posture"}
@@ -109,18 +110,18 @@ export function ExecutiveSummaryDashboard() {
         </button>
       </header>
 
-      <ExecutiveKpiGrid columns={6}>
-        {display.kpis.map((kpi) => (
-          <ExecutiveKpiCard
-            key={kpi.id}
-            label={kpi.label}
-            value={kpi.value}
-            tone={kpi.tone}
-            trend={kpi.trend}
-            hint={kpi.hint}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {display.healthGroups.map((group) => (
+          <HealthGroupCard
+            key={group.id}
+            title={group.title}
+            primaryLabel={group.primaryLabel}
+            primaryValue={group.primaryValue}
+            tone={group.tone}
+            supporting={group.supporting}
           />
         ))}
-      </ExecutiveKpiGrid>
+      </section>
 
       <DataUnavailableSection title="AI Executive Briefing" hasData={Boolean(briefing)}>
         {briefing ? (

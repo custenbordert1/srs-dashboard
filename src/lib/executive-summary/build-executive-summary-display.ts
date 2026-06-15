@@ -14,8 +14,18 @@ export type ExecutiveSummaryKpi = {
   hint?: string;
 };
 
+export type ExecutiveHealthGroup = {
+  id: string;
+  title: string;
+  primaryLabel: string;
+  primaryValue: string;
+  tone: StatusTone;
+  supporting: Array<{ label: string; value: string }>;
+};
+
 export type ExecutiveSummaryDisplay = {
   kpis: ExecutiveSummaryKpi[];
+  healthGroups: ExecutiveHealthGroup[];
   briefing: AiCommandCenterSnapshot["briefing"] | null;
   priorityAlerts: {
     critical: string[];
@@ -76,8 +86,7 @@ export function buildExecutiveSummaryDisplay(input: {
 
   const activeAlerts = input.notifications?.notifications.filter((row) => row.status === "active") ?? [];
 
-  return {
-    kpis: [
+  const kpis: ExecutiveSummaryKpi[] = [
       {
         id: "open-calls",
         label: "Open Calls",
@@ -119,7 +128,68 @@ export function buildExecutiveSummaryDisplay(input: {
         tone: input.avgTimeToFillDays != null && input.avgTimeToFillDays > 21 ? "warning" : "info",
         hint: "Workforce ops rollup",
       },
-    ],
+    ];
+
+  const healthGroups: ExecutiveHealthGroup[] = [
+    {
+      id: "recruiting",
+      title: "Recruiting Health",
+      primaryLabel: "Active candidates in pipeline",
+      primaryValue: activeCandidates.toLocaleString(),
+      tone: activeCandidates > 0 ? "healthy" : "warning",
+      supporting: [
+        { label: "Hires (7d)", value: hires7d.toLocaleString() },
+        { label: "Zero-applicant jobs", value: zeroApplicantJobs.toLocaleString() },
+        { label: "Applicant trend", value: applicantTrend?.label ?? "—" },
+      ],
+    },
+    {
+      id: "coverage",
+      title: "Coverage Health",
+      primaryLabel: "Highest territory risk score",
+      primaryValue: String(coverageRisk),
+      tone: toneFromCoverageRisk(coverageRisk),
+      supporting: [
+        { label: "Open calls", value: openCalls.toLocaleString() },
+        { label: "DM needing help", value: dmNeedingHelp ?? "—" },
+        { label: "Opportunities at risk", value: opportunitiesAtRisk.toLocaleString() },
+      ],
+    },
+    {
+      id: "pipeline",
+      title: "Pipeline Health",
+      primaryLabel: "Avg time to fill",
+      primaryValue: avgFill,
+      tone: input.avgTimeToFillDays != null && input.avgTimeToFillDays > 21 ? "warning" : "info",
+      supporting: [
+        { label: "Hires (7d)", value: hires7d.toLocaleString() },
+        { label: "Active candidates", value: activeCandidates.toLocaleString() },
+      ],
+    },
+    {
+      id: "operations",
+      title: "Operations Health",
+      primaryLabel: "Active priority alerts",
+      primaryValue: String(
+        activeAlerts.filter((row) => row.severity === "critical" || row.severity === "warning").length,
+      ),
+      tone:
+        activeAlerts.some((row) => row.severity === "critical")
+          ? "critical"
+          : activeAlerts.some((row) => row.severity === "warning")
+            ? "warning"
+            : "healthy",
+      supporting: [
+        { label: "Critical", value: String(activeAlerts.filter((row) => row.severity === "critical").length) },
+        { label: "High", value: String(activeAlerts.filter((row) => row.severity === "warning").length) },
+        { label: "Medium", value: String(activeAlerts.filter((row) => row.severity === "info").length) },
+      ],
+    },
+  ];
+
+  return {
+    kpis,
+    healthGroups,
     briefing: input.ai?.briefing ?? null,
     priorityAlerts: {
       critical: activeAlerts.filter((row) => row.severity === "critical").slice(0, 5).map((row) => row.title),

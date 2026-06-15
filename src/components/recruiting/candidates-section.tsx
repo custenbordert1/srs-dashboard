@@ -161,9 +161,10 @@ import {
 import { CandidatesSyncDiagnosticsPanel } from "@/components/recruiting/candidates-sync-diagnostics";
 import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
-import { CandidateTableQuickActions } from "@/components/recruiting/candidate-table-quick-actions";
 import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
 import {
+  stickyActionCellClass,
+  stickyActionHeaderClass,
   stickyCheckboxCellClass,
   stickyCheckboxHeaderClass,
   stickyIdentityCellClass,
@@ -176,6 +177,7 @@ import {
   type SendPaperworkEligibilityInput,
 } from "@/lib/onboarding-send-eligibility";
 import {
+  Fragment,
   memo,
   useCallback,
   useEffect,
@@ -190,16 +192,16 @@ import { flushSync } from "react-dom";
 
 const ALL = "__all__";
 const selectClass =
-  "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
+  "w-full rounded-md border border-zinc-600/80 bg-zinc-950/80 px-2.5 py-1.5 text-sm text-zinc-100 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const inputClass =
-  "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
+  "w-full rounded-md border border-zinc-600/80 bg-zinc-950/80 px-2.5 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const thClass =
-  "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-sm";
-/** Keep in sync with `CANDIDATE_TABLE_ROW_HEIGHT_PX` (54). */
+  "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 backdrop-blur-sm";
+/** Keep in sync with `CANDIDATE_TABLE_ROW_HEIGHT_PX` in virtual-candidate-table (68). */
 const tdClass =
-  "max-h-[54px] align-middle overflow-hidden whitespace-nowrap px-1.5 py-0 text-xs text-zinc-300";
+  "max-h-[68px] align-middle overflow-hidden px-2 py-1 text-sm leading-snug text-zinc-200";
 const tdActionClass =
-  "max-h-[54px] align-middle overflow-visible whitespace-nowrap px-1.5 py-0 text-xs text-zinc-300";
+  "max-h-[68px] align-middle overflow-visible whitespace-nowrap px-2 py-1 text-sm text-zinc-200";
 const workflowPillClass =
   "inline-flex h-5 max-w-full items-center truncate rounded-full px-1.5 text-[10px] font-medium leading-none";
 const syncBannerClass =
@@ -714,6 +716,7 @@ export function CandidatesSection() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 200);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [expandedCandidateIds, setExpandedCandidateIds] = useState<Set<string>>(() => new Set());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
@@ -2435,211 +2438,205 @@ export function CandidatesSection() {
     [updateWorkflow],
   );
 
+  const toggleExpandCandidate = useCallback((candidateId: string) => {
+    setExpandedCandidateIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
+    });
+  }, []);
+
   const renderCandidateRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
       const rowSelected = selectedCandidateId === candidate.candidateId;
+      const expanded = expandedCandidateIds.has(candidate.candidateId);
       const paperworkUrgent =
         isPaperworkPendingStatus(candidate.workflowStatus) &&
         candidate.paperworkStatus !== "signed";
+      const locationLabel = [candidate.city, candidate.state].filter(Boolean).join(", ") || "—";
       return (
-        <tr
-          key={candidate.candidateId}
-          onClick={() => setSelectedCandidateId(candidate.candidateId)}
-          className={`group cursor-pointer ${tableRowUrgencyClass(candidate)} ${
-            rowSelected
-              ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
-              : "hover:bg-zinc-800/30"
-          }`}
-          style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
-          aria-selected={rowSelected}
-        >
-          <td
-            className={stickyCheckboxCellClass(tdClass, {
-              selected: rowSelected,
-              rowBg: "bg-zinc-950",
-            })}
-            onClick={(event) => event.stopPropagation()}
+        <Fragment key={candidate.candidateId}>
+          <tr
+            onClick={() => setSelectedCandidateId(candidate.candidateId)}
+            className={`group cursor-pointer ${tableRowUrgencyClass(candidate)} ${
+              rowSelected
+                ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
+                : "hover:bg-zinc-800/30"
+            }`}
+            style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
+            aria-selected={rowSelected}
           >
-            <input
-              type="checkbox"
-              aria-label={`Select ${candidateName(candidate)}`}
-              checked={selectedIds.has(candidate.candidateId)}
-              onChange={() => toggleSelectCandidate(candidate.candidateId)}
-            />
-          </td>
-          <td
-            className={`${stickyIdentityCellClass(tdClass, {
-              selected: rowSelected,
-              rowBg: "bg-zinc-950",
-            })} !whitespace-normal`}
-          >
-            <div className="flex min-w-0 flex-col justify-center gap-1 py-0.5">
-              <div className="truncate text-sm font-semibold leading-tight text-zinc-100">
-                {candidateName(candidate)}
-              </div>
-              <div className="flex min-w-0 flex-wrap items-center gap-1">
-                <span
-                  className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
-                  title={operationalWorkflowState(candidate)}
-                >
-                  {operationalWorkflowState(candidate)}
-                </span>
-                <span
-                  className={`inline-flex max-w-[8rem] truncate rounded border px-1.5 py-0.5 text-[9px] ${
-                    candidate.assignedRecruiter === "Unassigned"
-                      ? "border-violet-500/50 bg-violet-500/10 text-violet-200"
-                      : "border-zinc-700/80 bg-zinc-900/70 text-zinc-400"
-                  }`}
-                  title={`${candidate.assignedRecruiter} · ${candidate.assignedDM}`}
-                >
-                  {candidate.assignedRecruiter}
-                </span>
-                {candidate.recruitingActions.priorityList ? (
-                  <span className="inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-200">
-                    Escalated
-                  </span>
-                ) : null}
-              </div>
-              <p className="truncate text-[10px] text-zinc-500">
-                {candidate.assignedDM} · {candidate.positionName || "No position"}
-              </p>
-            </div>
-          </td>
-          <td className={`${tdClass} truncate`}>{candidate.email || "—"}</td>
-          <td className={`${tdClass} truncate`}>{candidate.phone || "—"}</td>
-          <td className={`${tdClass} truncate text-zinc-500`}>{candidate.source || "—"}</td>
-          <td className={`${tdClass} truncate text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
-          <td className={tdClass}>{candidate.city || "—"}</td>
-          <td className={tdClass}>{candidate.state || "—"}</td>
-          <td className={tdClass}>
-            <div className="flex min-w-0 flex-col justify-center overflow-hidden leading-tight">
-              <div
-                className="truncate text-sm font-semibold text-teal-100"
-                title={candidate.nextActionNeeded}
-              >
-                {candidate.nextActionNeeded}
-              </div>
-              <div className="truncate text-[10px] text-zinc-500">
-                Recruiter: {candidate.assignedRecruiter}
-              </div>
-            </div>
-          </td>
-          <td className={tdActionClass} onClick={(event) => event.stopPropagation()}>
-            <CandidateRowPrimaryActionBar
-              primary={resolveCandidateRowPrimaryAction({
-                candidate,
-                actingRecruiter,
-                sendBlockReason: getSendPaperworkBlockReason(
-                  buildSendEligibility(
-                    candidate,
-                    "onboarding_packet",
-                    paperworkSendingId === candidate.candidateId,
-                  ),
-                ),
-                sendBusy: paperworkSendingId === candidate.candidateId,
+            <td
+              className={stickyCheckboxCellClass(tdClass, {
+                selected: rowSelected,
+                rowBg: "bg-zinc-950",
               })}
-              onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
-              followUpDisabled={candidate.recruitingActions.needsFollowUp}
-              onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
-              onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
-              onSend={() => sendPaperwork(candidate, "onboarding_packet")}
-              onNote={() => addQuickNoteToRow(candidate)}
-              onAssignMe={() => assignActingRecruiterToRow(candidate)}
-              sendBusy={paperworkSendingId === candidate.candidateId}
-              sendDisabled={
-                getSendPaperworkBlockReason(
-                  buildSendEligibility(
+              onClick={(event) => event.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                aria-label={`Select ${candidateName(candidate)}`}
+                checked={selectedIds.has(candidate.candidateId)}
+                onChange={() => toggleSelectCandidate(candidate.candidateId)}
+              />
+            </td>
+            <td
+              className={`${stickyIdentityCellClass(tdClass, {
+                selected: rowSelected,
+                rowBg: "bg-zinc-950",
+              })} !whitespace-normal`}
+            >
+              <div className="flex min-w-0 flex-col justify-center gap-1.5 py-1">
+                <div className="truncate text-[15px] font-semibold leading-tight text-zinc-50">
+                  {candidateName(candidate)}
+                </div>
+                <p className="truncate text-sm text-zinc-300">{candidate.positionName || "No position"}</p>
+                <p className="truncate text-xs text-zinc-400">{locationLabel}</p>
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                  <span
+                    className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
+                    title={operationalWorkflowState(candidate)}
+                  >
+                    {operationalWorkflowState(candidate)}
+                  </span>
+                  {candidate.recruitingActions.priorityList ? (
+                    <span className="inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-200">
+                      Escalated
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </td>
+            <td className={`${tdClass} !whitespace-normal`}>
+              <div className="flex min-w-0 flex-col justify-center gap-1 py-1">
+                <p className="text-sm text-zinc-200">{formatDate(candidate.appliedDate)}</p>
+                <p className="truncate text-xs text-zinc-400">{candidate.source || "—"}</p>
+                <div className="flex items-center gap-2">
+                  <CandidateMatchBadge
+                    matchPercent={candidate.matchPercent}
+                    matchLevel={candidate.matchLevel}
+                    isTopMatch={candidate.isTopMatch}
+                    compact
+                  />
+                  <span
+                    className={`inline-flex h-6 min-w-[1.75rem] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold ${AI_GRADE_STYLES[candidate.aiGrade]}`}
+                  >
+                    {candidate.aiGrade}
+                  </span>
+                </div>
+                <p className="line-clamp-1 text-xs font-medium text-teal-200/90" title={candidate.nextActionNeeded}>
+                  {candidate.nextActionNeeded}
+                </p>
+              </div>
+            </td>
+            <td
+              className={stickyActionCellClass(tdActionClass, {
+                selected: rowSelected,
+                rowBg: "bg-zinc-950",
+              })}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-end gap-1">
+                <CandidateRowPrimaryActionBar
+                  primary={resolveCandidateRowPrimaryAction({
                     candidate,
-                    "onboarding_packet",
-                    paperworkSendingId === candidate.candidateId,
-                  ),
-                ) !== null
-              }
-              onOverflowAction={(action) => handleCandidateAction(candidate, action)}
-              rosters={rosters}
-              onRostersUpdated={applyRosters}
-              onboardingConfigured={onboardingConfigured}
-              onboardingConfigLoaded={onboardingConfigLoaded}
-              onboardingConfigError={onboardingConfigError}
-              templatesAvailable={onboardingTemplatesAvailable}
-              paperworkTemplates={paperworkTemplates}
-              hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
-            />
-            <CandidateTableQuickActions
-              candidateId={candidate.candidateId}
-              suggestedDM={candidate.suggestedDM}
-              dmNeedsAssignment={candidate.dmNeedsAssignment}
-              rosters={rosters}
-              busy={inlineActionBusyId === candidate.candidateId}
-              onAction={(id, payload) => handleQueueAction(id, payload, { source: "table" })}
-            />
-          </td>
-          <td
-            className={`${tdClass}${paperworkUrgent ? " bg-amber-500/5" : ""}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex h-7 flex-col justify-center overflow-hidden leading-tight">
-              <span
-                className={`truncate text-[10px] ${paperworkUrgent ? "font-medium text-amber-200" : "text-zinc-500"}`}
-                title={candidate.paperworkError ?? undefined}
-              >
-                {paperworkStatusLabel(candidate.paperworkStatus)}
-              </span>
-              {candidate.signatureRequestId ? (
+                    actingRecruiter,
+                    sendBlockReason: getSendPaperworkBlockReason(
+                      buildSendEligibility(
+                        candidate,
+                        "onboarding_packet",
+                        paperworkSendingId === candidate.candidateId,
+                      ),
+                    ),
+                    sendBusy: paperworkSendingId === candidate.candidateId,
+                  })}
+                  onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
+                  followUpDisabled={candidate.recruitingActions.needsFollowUp}
+                  onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
+                  onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
+                  onSend={() => sendPaperwork(candidate, "onboarding_packet")}
+                  onNote={() => addQuickNoteToRow(candidate)}
+                  onAssignMe={() => assignActingRecruiterToRow(candidate)}
+                  sendBusy={paperworkSendingId === candidate.candidateId}
+                  sendDisabled={
+                    getSendPaperworkBlockReason(
+                      buildSendEligibility(
+                        candidate,
+                        "onboarding_packet",
+                        paperworkSendingId === candidate.candidateId,
+                      ),
+                    ) !== null
+                  }
+                  onOverflowAction={(action) => handleCandidateAction(candidate, action)}
+                  rosters={rosters}
+                  onRostersUpdated={applyRosters}
+                  onboardingConfigured={onboardingConfigured}
+                  onboardingConfigLoaded={onboardingConfigLoaded}
+                  onboardingConfigError={onboardingConfigError}
+                  templatesAvailable={onboardingTemplatesAvailable}
+                  paperworkTemplates={paperworkTemplates}
+                  hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
+                />
                 <button
                   type="button"
-                  className="truncate text-left text-[10px] text-teal-400/90 hover:underline"
-                  onClick={() => refreshPaperworkStatus(candidate)}
+                  aria-expanded={expanded}
+                  aria-label={expanded ? "Hide row details" : "Show row details"}
+                  onClick={() => toggleExpandCandidate(candidate.candidateId)}
+                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-zinc-600/80 text-xs text-zinc-400 hover:bg-zinc-800"
                 >
-                  Refresh
+                  {expanded ? "−" : "+"}
                 </button>
-              ) : (
-                <span className="invisible text-[10px]" aria-hidden>
-                  —
-                </span>
-              )}
-            </div>
-          </td>
-          <td className={tdClass} title={candidate.intelligenceSummary}>
-            <CandidateMatchBadge
-              matchPercent={candidate.matchPercent}
-              matchLevel={candidate.matchLevel}
-              isTopMatch={candidate.isTopMatch}
-              compact
-            />
-          </td>
-          <td
-            className={`${tdClass} truncate text-[10px] text-zinc-600`}
-            title={candidate.intelligenceSummary || candidate.skillTags.join(", ")}
-          >
-            {buildRecruiterFitSignals(candidate, 2)
-              .map((s) => s.label)
-              .join(" · ") || (candidate.skillTags[0] ?? "—")}
-          </td>
-          <td className={tdClass}>
-            <span
-              className={`inline-flex h-5 min-w-[2rem] items-center justify-center rounded-full px-1.5 text-[10px] font-semibold leading-none ${AI_GRADE_STYLES[candidate.aiGrade]}`}
-            >
-              {candidate.aiGrade}
-            </span>
-          </td>
-          <td className={tdClass}>
-            <RecommendationPills items={candidate.aiRecommendations} />
-          </td>
-        </tr>
+              </div>
+            </td>
+          </tr>
+          {expanded ? (
+            <tr className="bg-zinc-900/50">
+              <td colSpan={4} className="px-4 py-3 text-sm text-zinc-300">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <DetailField label="Email" value={candidate.email || "—"} />
+                  <DetailField label="Phone" value={candidate.phone || "—"} />
+                  <DetailField label="Recruiter" value={candidate.assignedRecruiter} />
+                  <DetailField label="DM" value={candidate.assignedDM} />
+                  <DetailField
+                    label="Paperwork"
+                    value={paperworkStatusLabel(candidate.paperworkStatus)}
+                    urgent={paperworkUrgent}
+                  />
+                  <DetailField
+                    label="Skills"
+                    value={
+                      buildRecruiterFitSignals(candidate, 2)
+                        .map((s) => s.label)
+                        .join(" · ") || (candidate.skillTags[0] ?? "—")
+                    }
+                  />
+                  <div className="sm:col-span-2">
+                    <DetailField
+                      label="Recommendations"
+                      value={
+                        candidate.aiRecommendations.length > 0
+                          ? candidate.aiRecommendations.join(" · ")
+                          : "—"
+                      }
+                    />
+                  </div>
+                </div>
+              </td>
+            </tr>
+          ) : null}
+        </Fragment>
       );
     },
     [
+      expandedCandidateIds,
       handleCandidateAction,
-      handleQueueAction,
-      inlineActionBusyId,
       onboardingConfigured,
       onboardingConfigLoaded,
       onboardingConfigError,
       onboardingTemplatesAvailable,
       paperworkSendingId,
       paperworkTemplates,
-      refreshPaperworkStatus,
       rosters,
       actingRecruiter,
       selectedCandidateId,
@@ -2650,6 +2647,7 @@ export function CandidatesSection() {
       completeCandidateFollowUpRow,
       flagCandidateFollowUp,
       sendPaperwork,
+      toggleExpandCandidate,
       toggleSelectCandidate,
     ],
   );
@@ -3027,30 +3025,19 @@ export function CandidatesSection() {
         </div>
         <VirtualCandidateTable
             rows={filtered}
-            colSpan={15}
-            tableMinWidthClass="min-w-[1240px]"
+            colSpan={4}
+            tableMinWidthClass="min-w-0 w-full"
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
               <>
                 <colgroup>
                   <col className="w-[40px]" />
-                  <col className="w-[300px]" />
-                  <col className="w-[10%]" />
-                  <col className="w-[8%]" />
-                  <col className="w-[7%]" />
-                  <col className="w-[7%]" />
-                  <col className="w-[6%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[11%]" />
-                  <col className="w-[156px]" />
-                  <col className="w-[7%]" />
-                  <col className="w-[6%]" />
-                  <col className="w-[6%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[8%]" />
+                  <col className="w-[34%]" />
+                  <col />
+                  <col className="w-[196px]" />
                 </colgroup>
-                <thead className="border-b border-zinc-800/60">
+                <thead className="border-b border-zinc-700/50">
                 <tr>
                   <th className={stickyCheckboxHeaderClass(thClass)}>
                     <input
@@ -3070,90 +3057,13 @@ export function CandidatesSection() {
                     className={stickyIdentityHeaderClass(thClass)}
                   />
                   <CandidateTableSortHeader
-                    label="Email"
-                    sortKey="email"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Phone"
-                    sortKey="phone"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Source"
-                    sortKey="source"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Applied"
+                    label="Pipeline signals"
                     sortKey="applied"
                     activeKey={tableSortKey}
                     direction={tableSortDirection}
                     onSort={handleTableColumnSort}
                   />
-                  <CandidateTableSortHeader
-                    label="City"
-                    sortKey="city"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="State"
-                    sortKey="state"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Next Recruiter Action"
-                    sortKey="nextAction"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <th className={thClass}>Action</th>
-                  <CandidateTableSortHeader
-                    label="HelloSign"
-                    sortKey="paperwork"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Match"
-                    sortKey="match"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Skills"
-                    sortKey="skills"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="AI Grade"
-                    sortKey="aiGrade"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
-                  <CandidateTableSortHeader
-                    label="Recommendations"
-                    sortKey="recommendations"
-                    activeKey={tableSortKey}
-                    direction={tableSortDirection}
-                    onSort={handleTableColumnSort}
-                  />
+                  <th className={stickyActionHeaderClass(thClass)}>Actions</th>
                 </tr>
               </thead>
               </>
@@ -3333,6 +3243,23 @@ export function CandidatesSection() {
       />
 
       <CandidatesSyncDiagnosticsPanel />
+    </div>
+  );
+}
+
+function DetailField({
+  label,
+  value,
+  urgent = false,
+}: {
+  label: string;
+  value: string;
+  urgent?: boolean;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className={`mt-0.5 text-sm ${urgent ? "font-medium text-amber-200" : "text-zinc-200"}`}>{value}</p>
     </div>
   );
 }

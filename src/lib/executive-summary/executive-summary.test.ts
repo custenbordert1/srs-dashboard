@@ -42,7 +42,8 @@ describe("executive-summary display", () => {
     });
 
     assert.equal(display.kpis.length, 6);
-    assert.equal(display.kpis[0]!.label, "Open Calls");
+    assert.equal(display.healthGroups.length, 4);
+    assert.equal(display.healthGroups[0]!.title, "Recruiting Health");
     assert.equal(display.kpis[0]!.value, "5");
     assert.equal(display.kpis[1]!.value, "120");
   });

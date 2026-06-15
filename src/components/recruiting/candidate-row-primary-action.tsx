@@ -101,7 +101,7 @@ export function CandidateRowPrimaryActionBar({
 
   return (
     <div
-      className="flex h-7 min-w-[7.5rem] items-center justify-end gap-1.5"
+      className="flex h-8 min-w-[8rem] items-center justify-end gap-1.5"
       onClick={(event) => event.stopPropagation()}
     >
       <button
@@ -109,7 +109,7 @@ export function CandidateRowPrimaryActionBar({
         disabled={primary.disabled}
         title={primary.title ?? primary.label}
         onClick={runPrimary}
-        className={`inline-flex h-7 min-w-[4.5rem] max-w-[7.5rem] flex-1 items-center justify-center truncate rounded-md border px-2.5 text-[11px] font-semibold leading-none disabled:cursor-not-allowed disabled:opacity-40 ${primaryToneClass(primary.tone)}`}
+        className={`inline-flex h-8 min-w-[5rem] max-w-[8rem] flex-1 items-center justify-center truncate rounded-md border px-3 text-xs font-semibold leading-none disabled:cursor-not-allowed disabled:opacity-40 ${primaryToneClass(primary.tone)}`}
       >
         {primary.kind === "send-packet" && sendBusy ? "Sending…" : primary.label}
       </button>

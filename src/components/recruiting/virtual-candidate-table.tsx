@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useRef, useState, type ReactNode } from "react";
 
 /** Must match `CANDIDATE_TABLE_ROW_HEIGHT_PX` in candidates-section (virtual spacer math). */
-export const CANDIDATE_TABLE_ROW_HEIGHT_PX = 54;
+export const CANDIDATE_TABLE_ROW_HEIGHT_PX = 68;
 const OVERSCAN = 6;
 
 type VirtualCandidateTableProps<T> = {
