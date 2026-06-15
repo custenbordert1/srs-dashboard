@@ -11,6 +11,7 @@ type VirtualCandidateTableProps<T> = {
   colSpan: number;
   maxHeightClass?: string;
   tableMinWidthClass?: string;
+  rowHeightPx?: number;
   header: ReactNode;
   renderRow: (row: T, index: number) => ReactNode;
   getRowKey: (row: T) => string;
@@ -21,6 +22,7 @@ export function VirtualCandidateTable<T>({
   colSpan,
   maxHeightClass = "max-h-[min(70vh,960px)]",
   tableMinWidthClass = "min-w-[1620px]",
+  rowHeightPx = CANDIDATE_TABLE_ROW_HEIGHT_PX,
   header,
   renderRow,
   getRowKey,
@@ -36,11 +38,11 @@ export function VirtualCandidateTable<T>({
     setViewportHeight(node.clientHeight);
   }, []);
 
-  const startIndex = Math.max(0, Math.floor(scrollTop / CANDIDATE_TABLE_ROW_HEIGHT_PX) - OVERSCAN);
-  const visibleCount = Math.ceil(viewportHeight / CANDIDATE_TABLE_ROW_HEIGHT_PX) + OVERSCAN * 2;
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeightPx) - OVERSCAN);
+  const visibleCount = Math.ceil(viewportHeight / rowHeightPx) + OVERSCAN * 2;
   const endIndex = Math.min(rows.length, startIndex + visibleCount);
-  const topSpacer = startIndex * CANDIDATE_TABLE_ROW_HEIGHT_PX;
-  const bottomSpacer = Math.max(0, (rows.length - endIndex) * CANDIDATE_TABLE_ROW_HEIGHT_PX);
+  const topSpacer = startIndex * rowHeightPx;
+  const bottomSpacer = Math.max(0, (rows.length - endIndex) * rowHeightPx);
   const visibleRows = rows.slice(startIndex, endIndex);
 
   return (

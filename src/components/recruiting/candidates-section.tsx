@@ -20,13 +20,18 @@ import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { paperworkStatusLabel } from "@/lib/candidate-paperwork";
 import { downloadCandidatesCsv, type CandidatesExportMetadata } from "@/lib/candidates-export";
-import { matchesMyWorkFocus, summarizeCandidateTableFilters } from "@/lib/candidate-focus-mode";
+import { matchesMyWorkFocus, matchesCandidateSummaryStrip, summarizeCandidateTableFilters } from "@/lib/candidate-focus-mode";
 import {
+  CANDIDATE_TABLE_IDENTITY_COL_PERCENT,
+  CANDIDATE_TABLE_ROW_HEIGHT_PX,
   persistFocusMode,
   persistSectionExpanded,
+  persistTableDensity,
   readCandidatesWorkspacePreferences,
   readSectionExpanded,
   type CandidateFocusMode,
+  type CandidateSummaryStripFilterId,
+  type CandidateTableDensity,
   type CandidatesWorkspaceSectionId,
 } from "@/lib/candidates-workspace-preferences";
 import {
@@ -54,7 +59,6 @@ import {
   type RecruiterRosters,
 } from "@/lib/candidate-workflow-types";
 import {
-  CANDIDATE_TABLE_ROW_HEIGHT_PX,
   VirtualCandidateTable,
 } from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -172,8 +176,9 @@ import {
 import { CandidatesSyncDiagnosticsPanel } from "@/components/recruiting/candidates-sync-diagnostics";
 import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
-import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
 import {
+  CANDIDATE_TABLE_STICKY_ACTION_PX,
+  CANDIDATE_TABLE_STICKY_CHECKBOX_PX,
   stickyActionCellClass,
   stickyActionHeaderClass,
   stickyCheckboxCellClass,
@@ -188,7 +193,6 @@ import {
   type SendPaperworkEligibilityInput,
 } from "@/lib/onboarding-send-eligibility";
 import {
-  Fragment,
   memo,
   useCallback,
   useEffect,
@@ -208,11 +212,6 @@ const inputClass =
   "w-full rounded-md border border-zinc-600/80 bg-zinc-950/80 px-2.5 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const thClass =
   "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 backdrop-blur-sm";
-/** Keep in sync with `CANDIDATE_TABLE_ROW_HEIGHT_PX` in virtual-candidate-table (68). */
-const tdClass =
-  "max-h-[68px] align-middle overflow-hidden px-2 py-1 text-sm leading-snug text-zinc-200";
-const tdActionClass =
-  "max-h-[68px] align-middle overflow-visible whitespace-nowrap px-2 py-1 text-sm text-zinc-200";
 const workflowPillClass =
   "inline-flex h-5 max-w-full items-center truncate rounded-full px-1.5 text-[10px] font-medium leading-none";
 const syncBannerClass =
@@ -735,7 +734,6 @@ export function CandidatesSection() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 200);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
-  const [expandedCandidateIds, setExpandedCandidateIds] = useState<Set<string>>(() => new Set());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
@@ -744,6 +742,10 @@ export function CandidatesSection() {
   const [focusMode, setFocusMode] = useState<CandidateFocusMode>(() =>
     typeof window === "undefined" ? "all" : readCandidatesWorkspacePreferences().focusMode,
   );
+  const [tableDensity, setTableDensity] = useState<CandidateTableDensity>(() =>
+    typeof window === "undefined" ? "comfortable" : readCandidatesWorkspacePreferences().tableDensity,
+  );
+  const [summaryStripFilter, setSummaryStripFilter] = useState<CandidateSummaryStripFilterId>("all");
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
   const [onboardingConfigError, setOnboardingConfigError] = useState<string | null>(null);
@@ -771,6 +773,22 @@ export function CandidatesSection() {
     persistFocusMode(mode);
   }, []);
 
+  const handleTableDensityChange = useCallback((density: CandidateTableDensity) => {
+    setTableDensity(density);
+    persistTableDensity(density);
+  }, []);
+
+  const tableRowHeightPx = CANDIDATE_TABLE_ROW_HEIGHT_PX[tableDensity];
+  const identityColPercent = CANDIDATE_TABLE_IDENTITY_COL_PERCENT[tableDensity];
+  const tdClass =
+    tableDensity === "comfortable"
+      ? "align-middle overflow-hidden px-3 py-2 text-sm leading-snug text-zinc-200"
+      : "align-middle overflow-hidden px-2.5 py-1 text-sm leading-snug text-zinc-200";
+  const tdActionClass =
+    tableDensity === "comfortable"
+      ? "align-middle overflow-visible whitespace-nowrap px-2 py-2 text-sm text-zinc-200"
+      : "align-middle overflow-visible whitespace-nowrap px-2 py-1 text-sm text-zinc-200";
+
   const buildExportMetadata = useCallback(
     (rows: ScoredCandidateWorkflowRow[]): CandidatesExportMetadata => ({
       exportDate: new Intl.DateTimeFormat(undefined, {
@@ -792,6 +810,7 @@ export function CandidatesSection() {
         recruiterQuickFilter,
         focusMode,
         actingRecruiter,
+        summaryStripFilter,
       }),
     }),
     [
@@ -807,6 +826,7 @@ export function CandidatesSection() {
       sourceFilter,
       stageFilter,
       stateFilter,
+      summaryStripFilter,
       workflowFilter,
     ],
   );
@@ -1795,6 +1815,19 @@ export function CandidatesSection() {
       buildBaselineWorkflowRow(candidate, workflowState[candidate.candidateId]),
     );
   }, [authoritativeCandidates, enrichedCandidates, workflowState]);
+
+  const summaryStripCounts = useMemo(() => {
+    const count = (filter: CandidateSummaryStripFilterId) =>
+      candidates.filter((candidate) => matchesCandidateSummaryStrip(candidate, filter, actingRecruiter)).length;
+    return {
+      assigned: count("assigned"),
+      needsFollowUp: count("needs-follow-up"),
+      paperwork: count("paperwork"),
+      readyMel: count("ready-mel"),
+      unassigned: count("unassigned"),
+    };
+  }, [actingRecruiter, candidates]);
+
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
@@ -1872,6 +1905,13 @@ export function CandidatesSection() {
         return false;
       }
 
+      if (
+        summaryStripFilter !== "all" &&
+        !matchesCandidateSummaryStrip(candidate, summaryStripFilter, actingRecruiter)
+      ) {
+        return false;
+      }
+
       return true;
     });
 
@@ -1909,6 +1949,7 @@ export function CandidatesSection() {
         debouncedSearch: debouncedSearch || null,
         recruiterQuickFilter,
         focusMode,
+        summaryStripFilter,
       },
     });
     logCandidatesDebug("after_table_filter", sorted.length, {
@@ -1934,6 +1975,7 @@ export function CandidatesSection() {
     actingRecruiter,
     recruiterQuickFilter,
     focusMode,
+    summaryStripFilter,
     searchIndex,
     sourceFilter,
     stageFilter,
@@ -2555,35 +2597,25 @@ export function CandidatesSection() {
     [updateWorkflow],
   );
 
-  const toggleExpandCandidate = useCallback((candidateId: string) => {
-    setExpandedCandidateIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(candidateId)) next.delete(candidateId);
-      else next.add(candidateId);
-      return next;
-    });
-  }, []);
-
   const renderCandidateRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
       const rowSelected = selectedCandidateId === candidate.candidateId;
-      const expanded = expandedCandidateIds.has(candidate.candidateId);
-      const paperworkUrgent =
-        isPaperworkPendingStatus(candidate.workflowStatus) &&
-        candidate.paperworkStatus !== "signed";
+      const assignedToMe = candidate.assignedRecruiter.trim() === actingRecruiter.trim();
       const locationLabel = [candidate.city, candidate.state].filter(Boolean).join(", ") || "—";
+      const identityGapClass = tableDensity === "comfortable" ? "gap-1.5" : "gap-1";
+      const identityTextClass = tableDensity === "comfortable" ? "text-[15px]" : "text-sm";
       return (
-        <Fragment key={candidate.candidateId}>
-          <tr
-            onClick={() => setSelectedCandidateId(candidate.candidateId)}
-            className={`group cursor-pointer ${tableRowUrgencyClass(candidate)} ${
-              rowSelected
-                ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
-                : "hover:bg-zinc-800/30"
-            }`}
-            style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
-            aria-selected={rowSelected}
-          >
+        <tr
+          key={candidate.candidateId}
+          onClick={() => setSelectedCandidateId(candidate.candidateId)}
+          className={`group cursor-pointer ${tableRowUrgencyClass(candidate)} ${
+            rowSelected
+              ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
+              : "hover:bg-zinc-800/30"
+          }`}
+          style={{ height: tableRowHeightPx, maxHeight: tableRowHeightPx }}
+          aria-selected={rowSelected}
+        >
             <td
               className={stickyCheckboxCellClass(tdClass, {
                 selected: rowSelected,
@@ -2604,8 +2636,8 @@ export function CandidatesSection() {
                 rowBg: "bg-zinc-950",
               })} !whitespace-normal`}
             >
-              <div className="flex min-w-0 flex-col justify-center gap-1.5 py-1">
-                <div className="truncate text-[15px] font-semibold leading-tight text-zinc-50">
+              <div className={`flex min-w-0 flex-col justify-center py-0.5 ${identityGapClass}`}>
+                <div className={`truncate font-semibold leading-tight text-zinc-50 ${identityTextClass}`}>
                   {candidateName(candidate)}
                 </div>
                 <p className="truncate text-sm text-zinc-300">{candidate.positionName || "No position"}</p>
@@ -2655,99 +2687,47 @@ export function CandidatesSection() {
               })}
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="flex items-center justify-end gap-1">
-                <CandidateRowPrimaryActionBar
-                  primary={resolveCandidateRowPrimaryAction({
-                    candidate,
-                    actingRecruiter,
-                    sendBlockReason: getSendPaperworkBlockReason(
-                      buildSendEligibility(
-                        candidate,
-                        "onboarding_packet",
-                        paperworkSendingId === candidate.candidateId,
-                      ),
+              <CandidateRowPrimaryActionBar
+                assignedToMe={assignedToMe}
+                onAssignMe={() => assignActingRecruiterToRow(candidate)}
+                onReview={() => setSelectedCandidateId(candidate.candidateId)}
+                followUpDisabled={candidate.recruitingActions.needsFollowUp}
+                onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
+                onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
+                onSend={() => sendPaperwork(candidate, "onboarding_packet")}
+                onNote={() => addQuickNoteToRow(candidate)}
+                sendBusy={paperworkSendingId === candidate.candidateId}
+                sendDisabled={
+                  getSendPaperworkBlockReason(
+                    buildSendEligibility(
+                      candidate,
+                      "onboarding_packet",
+                      paperworkSendingId === candidate.candidateId,
                     ),
-                    sendBusy: paperworkSendingId === candidate.candidateId,
-                  })}
-                  onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
-                  followUpDisabled={candidate.recruitingActions.needsFollowUp}
-                  onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
-                  onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
-                  onSend={() => sendPaperwork(candidate, "onboarding_packet")}
-                  onNote={() => addQuickNoteToRow(candidate)}
-                  onAssignMe={() => assignActingRecruiterToRow(candidate)}
-                  sendBusy={paperworkSendingId === candidate.candidateId}
-                  sendDisabled={
-                    getSendPaperworkBlockReason(
-                      buildSendEligibility(
-                        candidate,
-                        "onboarding_packet",
-                        paperworkSendingId === candidate.candidateId,
-                      ),
-                    ) !== null
-                  }
-                  onOverflowAction={(action) => handleCandidateAction(candidate, action)}
-                  rosters={rosters}
-                  onRostersUpdated={applyRosters}
-                  onboardingConfigured={onboardingConfigured}
-                  onboardingConfigLoaded={onboardingConfigLoaded}
-                  onboardingConfigError={onboardingConfigError}
-                  templatesAvailable={onboardingTemplatesAvailable}
-                  paperworkTemplates={paperworkTemplates}
-                  hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
-                />
-                <button
-                  type="button"
-                  aria-expanded={expanded}
-                  aria-label={expanded ? "Hide row details" : "Show row details"}
-                  onClick={() => toggleExpandCandidate(candidate.candidateId)}
-                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-zinc-600/80 text-xs text-zinc-400 hover:bg-zinc-800"
-                >
-                  {expanded ? "−" : "+"}
-                </button>
-              </div>
+                  ) !== null
+                }
+                onOverflowAction={(action) => handleCandidateAction(candidate, action)}
+                rosters={rosters}
+                onRostersUpdated={applyRosters}
+                onboardingConfigured={onboardingConfigured}
+                onboardingConfigLoaded={onboardingConfigLoaded}
+                onboardingConfigError={onboardingConfigError}
+                templatesAvailable={onboardingTemplatesAvailable}
+                paperworkTemplates={paperworkTemplates}
+                hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
+              />
             </td>
           </tr>
-          {expanded ? (
-            <tr className="bg-zinc-900/50">
-              <td colSpan={4} className="px-4 py-3 text-sm text-zinc-300">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <DetailField label="Email" value={candidate.email || "—"} />
-                  <DetailField label="Phone" value={candidate.phone || "—"} />
-                  <DetailField label="Recruiter" value={candidate.assignedRecruiter} />
-                  <DetailField label="DM" value={candidate.assignedDM} />
-                  <DetailField
-                    label="Paperwork"
-                    value={paperworkStatusLabel(candidate.paperworkStatus)}
-                    urgent={paperworkUrgent}
-                  />
-                  <DetailField
-                    label="Skills"
-                    value={
-                      buildRecruiterFitSignals(candidate, 2)
-                        .map((s) => s.label)
-                        .join(" · ") || (candidate.skillTags[0] ?? "—")
-                    }
-                  />
-                  <div className="sm:col-span-2">
-                    <DetailField
-                      label="Recommendations"
-                      value={
-                        candidate.aiRecommendations.length > 0
-                          ? candidate.aiRecommendations.join(" · ")
-                          : "—"
-                      }
-                    />
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ) : null}
-        </Fragment>
       );
     },
     [
-      expandedCandidateIds,
+      actingRecruiter,
+      addQuickNoteToRow,
+      applyRosters,
+      assignActingRecruiterToRow,
+      buildSendEligibility,
+      completeCandidateFollowUpRow,
+      flagCandidateFollowUp,
       handleCandidateAction,
       onboardingConfigured,
       onboardingConfigLoaded,
@@ -2756,16 +2736,13 @@ export function CandidatesSection() {
       paperworkSendingId,
       paperworkTemplates,
       rosters,
-      actingRecruiter,
       selectedCandidateId,
       selectedIds,
-      addQuickNoteToRow,
-      assignActingRecruiterToRow,
-      buildSendEligibility,
-      completeCandidateFollowUpRow,
-      flagCandidateFollowUp,
       sendPaperwork,
-      toggleExpandCandidate,
+      tableDensity,
+      tableRowHeightPx,
+      tdActionClass,
+      tdClass,
       toggleSelectCandidate,
     ],
   );
@@ -2934,9 +2911,14 @@ export function CandidatesSection() {
         onQuickFilterChange={setRecruiterQuickFilter}
       />
 
-      <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
+      <section
+        className={`rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm ${
+          selectedIds.size > 0 ? "pb-28" : ""
+        }`}
+      >
         <div className="sticky top-0 z-30 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-md sm:px-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
             <div
               className="inline-flex rounded-lg border border-zinc-700/80 bg-zinc-950/80 p-0.5"
               role="group"
@@ -2965,6 +2947,35 @@ export function CandidatesSection() {
                 My work
               </button>
             </div>
+            <div
+              className="inline-flex rounded-lg border border-zinc-700/80 bg-zinc-950/80 p-0.5"
+              role="group"
+              aria-label="Table row density"
+            >
+              <button
+                type="button"
+                onClick={() => handleTableDensityChange("compact")}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  tableDensity === "compact"
+                    ? "bg-zinc-700/60 text-zinc-100"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Compact
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTableDensityChange("comfortable")}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                  tableDensity === "comfortable"
+                    ? "bg-zinc-700/60 text-zinc-100"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Comfortable
+              </button>
+            </div>
+            </div>
             <button
               type="button"
               onClick={() => downloadCandidatesCsv(filtered, buildExportMetadata(filtered))}
@@ -2987,6 +2998,12 @@ export function CandidatesSection() {
               {filtered.length === 1 ? "" : "s"}. Use chips above the queue to change or clear.
             </p>
           ) : null}
+          {summaryStripFilter !== "all" ? (
+            <p className="text-[11px] text-teal-200/90">
+              Summary filter active — {filtered.length.toLocaleString()} candidate
+              {filtered.length === 1 ? "" : "s"}. Click the chip again to clear.
+            </p>
+          ) : null}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1 space-y-2">
           <input
@@ -3002,7 +3019,7 @@ export function CandidatesSection() {
           </div>
           {selectedIds.size > 0 ? (
             <p className="text-[11px] text-teal-200">
-              {selectedIds.size} selected — bulk actions appear below the table.
+              {selectedIds.size} selected — bulk actions bar stays fixed at the bottom.
             </p>
           ) : null}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
@@ -3067,19 +3084,65 @@ export function CandidatesSection() {
               : "Refreshing Breezy candidates — table stays visible"}
           </p>
         </div>
+        <div
+          className="flex flex-wrap items-center gap-2 border-b border-zinc-800/70 bg-zinc-950/40 px-3 py-2 sm:px-4"
+          role="group"
+          aria-label="Candidate summary filters"
+        >
+          {(
+            [
+              { id: "assigned" as const, label: "Assigned", count: summaryStripCounts.assigned },
+              {
+                id: "needs-follow-up" as const,
+                label: "Needs Follow-Up",
+                count: summaryStripCounts.needsFollowUp,
+              },
+              { id: "paperwork" as const, label: "Paperwork", count: summaryStripCounts.paperwork },
+              { id: "ready-mel" as const, label: "Ready for MEL", count: summaryStripCounts.readyMel },
+              { id: "unassigned" as const, label: "Unassigned", count: summaryStripCounts.unassigned },
+            ] as const
+          ).map((chip) => {
+            const active = summaryStripFilter === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() =>
+                  setSummaryStripFilter((current) => (current === chip.id ? "all" : chip.id))
+                }
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-teal-500/50 bg-teal-500/15 text-teal-100"
+                    : "border-zinc-700/80 bg-zinc-900/60 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/80"
+                }`}
+              >
+                <span>{chip.label}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
+                    active ? "bg-teal-500/25 text-teal-50" : "bg-zinc-800 text-zinc-400"
+                  }`}
+                >
+                  {chip.count.toLocaleString()}
+                </span>
+              </button>
+            );
+          })}
+        </div>
         <VirtualCandidateTable
             rows={filtered}
             colSpan={4}
-            tableMinWidthClass="min-w-0 w-full"
+            rowHeightPx={tableRowHeightPx}
+            tableMinWidthClass="w-full min-w-full"
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
               <>
                 <colgroup>
-                  <col className="w-[40px]" />
-                  <col className="w-[34%]" />
+                  <col style={{ width: `${CANDIDATE_TABLE_STICKY_CHECKBOX_PX}px` }} />
+                  <col style={{ width: identityColPercent }} />
                   <col />
-                  <col className="w-[196px]" />
+                  <col style={{ width: `${CANDIDATE_TABLE_STICKY_ACTION_PX}px` }} />
                 </colgroup>
                 <thead className="border-b border-zinc-700/50">
                 <tr>
@@ -3123,7 +3186,8 @@ export function CandidatesSection() {
       </section>
 
       {selectedIds.size > 0 ? (
-        <div className="sticky bottom-0 z-40 border border-teal-500/35 bg-zinc-950/98 p-3 shadow-2xl shadow-black/60 backdrop-blur">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] px-2 sm:px-3 lg:px-4">
+          <div className="pointer-events-auto mx-auto max-w-none border border-teal-500/35 bg-zinc-950/98 p-3 shadow-2xl shadow-black/60 backdrop-blur">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-teal-100">
               {selectedIds.size.toLocaleString()} candidate{selectedIds.size === 1 ? "" : "s"} selected
@@ -3242,6 +3306,7 @@ export function CandidatesSection() {
             >
               Escalate
             </button>
+          </div>
           </div>
         </div>
       ) : null}
@@ -3447,23 +3512,6 @@ export function CandidatesSection() {
       </div>
 
       <CandidatesSyncDiagnosticsPanel />
-    </div>
-  );
-}
-
-function DetailField({
-  label,
-  value,
-  urgent = false,
-}: {
-  label: string;
-  value: string;
-  urgent?: boolean;
-}) {
-  return (
-    <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</p>
-      <p className={`mt-0.5 text-sm ${urgent ? "font-medium text-amber-200" : "text-zinc-200"}`}>{value}</p>
     </div>
   );
 }

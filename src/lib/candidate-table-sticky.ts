@@ -2,8 +2,8 @@
 export const CANDIDATE_TABLE_STICKY_CHECKBOX_PX = 40;
 /** Identity column width (name, workflow, ownership, signals). */
 export const CANDIDATE_TABLE_STICKY_IDENTITY_PX = 300;
-/** Sticky action column width on the right edge. */
-export const CANDIDATE_TABLE_STICKY_ACTION_PX = 196;
+/** Sticky action column width on the right edge (Assign Me + Review + overflow). */
+export const CANDIDATE_TABLE_STICKY_ACTION_PX = 228;
 
 const stickyBase =
   "sticky z-[3] backdrop-blur-sm transition-colors duration-150";
