@@ -127,6 +127,14 @@ import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
+import { GuidedRecruitingWorkflowPanel } from "@/components/recruiting/guided-recruiting-workflow-panel";
+import type { CandidateRowPrimaryActionKind } from "@/lib/candidate-row-primary-action";
+import {
+  readGuidedWorkflowPreferences,
+  writeGuidedWorkflowPreferences,
+  type GuidedWorkflowQuickActionId,
+  type RecruiterHomeMode,
+} from "@/lib/guided-recruiting-workflow";
 import {
   computeRecruiterAgingBucket,
   matchesRecruiterQuickFilter,
@@ -739,6 +747,9 @@ export function CandidatesSection() {
   const [queueActionBusy, setQueueActionBusy] = useState(false);
   const [inlineActionBusyId, setInlineActionBusyId] = useState<string | null>(null);
   const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
+  const [recruiterHomeMode, setRecruiterHomeMode] = useState<RecruiterHomeMode>(() =>
+    typeof window === "undefined" ? "dashboard" : readGuidedWorkflowPreferences().homeMode,
+  );
   const [focusMode, setFocusMode] = useState<CandidateFocusMode>(() =>
     typeof window === "undefined" ? "all" : readCandidatesWorkspacePreferences().focusMode,
   );
@@ -776,6 +787,15 @@ export function CandidatesSection() {
   const handleTableDensityChange = useCallback((density: CandidateTableDensity) => {
     setTableDensity(density);
     persistTableDensity(density);
+  }, []);
+
+  const handleRecruiterHomeModeChange = useCallback((mode: RecruiterHomeMode) => {
+    setRecruiterHomeMode(mode);
+    writeGuidedWorkflowPreferences({ homeMode: mode });
+    if (mode === "work") {
+      setFocusMode("my-work");
+      persistFocusMode("my-work");
+    }
   }, []);
 
   const tableRowHeightPx = CANDIDATE_TABLE_ROW_HEIGHT_PX[tableDensity];
@@ -2588,6 +2608,87 @@ export function CandidatesSection() {
     [actingRecruiter, commitWorkflowToView],
   );
 
+  const sendBlockReasonForCandidate = useCallback(
+    (candidate: ScoredCandidateWorkflowRow) =>
+      getSendPaperworkBlockReason(
+        buildSendEligibility(
+          candidate,
+          "onboarding_packet",
+          paperworkSendingId === candidate.candidateId,
+        ),
+      ),
+    [buildSendEligibility, paperworkSendingId],
+  );
+
+  const handleGuidedPrimaryAction = useCallback(
+    (candidate: ScoredCandidateWorkflowRow, kind: CandidateRowPrimaryActionKind) => {
+      switch (kind) {
+        case "send-packet":
+          sendPaperwork(candidate, "onboarding_packet");
+          break;
+        case "assign-me":
+          assignActingRecruiterToRow(candidate);
+          break;
+        case "follow-up-done":
+          completeCandidateFollowUpRow(candidate.candidateId);
+          break;
+        case "follow-up":
+          handleQueueAction(candidate.candidateId, { action: "mark-follow-up" });
+          break;
+        case "ready-for-mel":
+          handleQueueAction(candidate.candidateId, { action: "ready-mel" });
+          break;
+        case "review":
+        case "open-drawer":
+          setSelectedCandidateId(candidate.candidateId);
+          break;
+        default:
+          setSelectedCandidateId(candidate.candidateId);
+          break;
+      }
+    },
+    [
+      assignActingRecruiterToRow,
+      completeCandidateFollowUpRow,
+      handleQueueAction,
+      sendPaperwork,
+    ],
+  );
+
+  const handleGuidedQuickAction = useCallback(
+    (candidate: ScoredCandidateWorkflowRow, actionId: GuidedWorkflowQuickActionId) => {
+      switch (actionId) {
+        case "send-packet":
+          sendPaperwork(candidate, "onboarding_packet");
+          break;
+        case "assign-dm":
+          handleQueueAction(candidate.candidateId, { action: "apply-suggested-dm" });
+          break;
+        case "ready-for-mel":
+          handleQueueAction(candidate.candidateId, { action: "ready-mel" });
+          break;
+        case "follow-up-complete":
+          completeCandidateFollowUpRow(candidate.candidateId);
+          break;
+        case "escalate":
+          persistRecruitingAction(candidate.candidateId, "priority-list");
+          break;
+        case "assign-me":
+          assignActingRecruiterToRow(candidate);
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      assignActingRecruiterToRow,
+      completeCandidateFollowUpRow,
+      handleQueueAction,
+      persistRecruitingAction,
+      sendPaperwork,
+    ],
+  );
+
   const addQuickNoteToRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
       const note = window.prompt("Add local workflow note");
@@ -2897,6 +2998,21 @@ export function CandidatesSection() {
         </div>
       </section>
 
+      <GuidedRecruitingWorkflowPanel
+        candidates={candidates}
+        actingRecruiter={actingRecruiter}
+        recruiters={rosters.recruiters}
+        homeMode={recruiterHomeMode}
+        onHomeModeChange={handleRecruiterHomeModeChange}
+        sendBlockReasonFor={sendBlockReasonForCandidate}
+        onOpenCandidate={setSelectedCandidateId}
+        onExecutePrimaryAction={handleGuidedPrimaryAction}
+        onQuickAction={handleGuidedQuickAction}
+        actionBusy={queueActionBusy || paperworkSendingId !== null}
+      />
+
+      {recruiterHomeMode === "dashboard" ? (
+      <>
       <CandidateMyQueuePanel
         candidates={candidates}
         rosters={rosters}
@@ -3311,79 +3427,6 @@ export function CandidatesSection() {
         </div>
       ) : null}
 
-      <CandidateDetailDrawer
-        key={selectedDrawerRow?.candidateId ?? "closed"}
-        candidate={selectedDrawerRow}
-        open={selectedDrawerRow !== null}
-        onClose={() => setSelectedCandidateId(null)}
-        statusAgingDays={
-          selectedDrawerRow ? daysSince(selectedDrawerRow.lastActionAt ?? selectedDrawerRow.appliedDate) : null
-        }
-        appliedAgingDays={selectedDrawerRow ? daysSince(selectedDrawerRow.appliedDate) : null}
-        onStatusChange={(status) => {
-          if (!selectedCandidate) return;
-          updateWorkflow(selectedCandidate, status);
-        }}
-        onSaveAssignments={(assignedRecruiter, assignedDM) => {
-          if (!selectedCandidate) return;
-          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { assignedRecruiter, assignedDM });
-        }}
-        onAddNote={(note) => {
-          if (!selectedCandidate) return;
-          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
-        }}
-        rosters={rosters}
-        onRostersUpdated={applyRosters}
-        onRecruitingAction={(type: RecruitingActionType) => {
-          if (!selectedCandidate) return;
-          persistRecruitingAction(selectedCandidate.candidateId, type);
-        }}
-        onboardingConfigured={onboardingConfigured}
-        templatesAvailable={onboardingTemplatesAvailable}
-        paperworkTemplates={paperworkTemplates}
-        paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
-        onSendPaperwork={(templateKey) => {
-          if (!selectedCandidate) return;
-          sendPaperwork(selectedCandidate, templateKey);
-        }}
-        onRefreshPaperworkStatus={() => {
-          if (!selectedCandidate) return;
-          refreshPaperworkStatus(selectedCandidate);
-        }}
-        actingRecruiter={actingRecruiter}
-        sendBlockReason={
-          selectedCandidate
-            ? getSendPaperworkBlockReason(
-                buildSendEligibility(
-                  selectedCandidate,
-                  "onboarding_packet",
-                  paperworkSendingId === selectedCandidate.candidateId,
-                ),
-              )
-            : null
-        }
-        onFlagFollowUp={() => {
-          if (!selectedCandidate) return;
-          flagCandidateFollowUp(selectedCandidate.candidateId);
-        }}
-        onCompleteFollowUp={() => {
-          if (!selectedCandidate) return;
-          completeCandidateFollowUpRow(selectedCandidate.candidateId);
-        }}
-        onAssignActingRecruiter={() => {
-          if (!selectedCandidate) return;
-          assignActingRecruiterToRow(selectedCandidate);
-        }}
-        directDepositBusy={directDepositBusyId === selectedCandidate?.candidateId}
-        onDirectDepositAction={(action, payload) => {
-          if (!selectedCandidate) return;
-          void runDirectDepositAction(selectedCandidate, action, payload).catch((err) => {
-            window.alert(err instanceof Error ? err.message : "Direct deposit action failed");
-          });
-        }}
-        melMatchesLoading={melLoading}
-      />
-
       <RecruiterCollapsibleSection
         sectionId="analytics"
         title="Analytics & productivity"
@@ -3512,6 +3555,81 @@ export function CandidatesSection() {
       </div>
 
       <CandidatesSyncDiagnosticsPanel />
+      </>
+      ) : null}
+
+      <CandidateDetailDrawer
+        key={selectedDrawerRow?.candidateId ?? "closed"}
+        candidate={selectedDrawerRow}
+        open={selectedDrawerRow !== null}
+        onClose={() => setSelectedCandidateId(null)}
+        statusAgingDays={
+          selectedDrawerRow ? daysSince(selectedDrawerRow.lastActionAt ?? selectedDrawerRow.appliedDate) : null
+        }
+        appliedAgingDays={selectedDrawerRow ? daysSince(selectedDrawerRow.appliedDate) : null}
+        onStatusChange={(status) => {
+          if (!selectedCandidate) return;
+          updateWorkflow(selectedCandidate, status);
+        }}
+        onSaveAssignments={(assignedRecruiter, assignedDM) => {
+          if (!selectedCandidate) return;
+          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { assignedRecruiter, assignedDM });
+        }}
+        onAddNote={(note) => {
+          if (!selectedCandidate) return;
+          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
+        }}
+        rosters={rosters}
+        onRostersUpdated={applyRosters}
+        onRecruitingAction={(type: RecruitingActionType) => {
+          if (!selectedCandidate) return;
+          persistRecruitingAction(selectedCandidate.candidateId, type);
+        }}
+        onboardingConfigured={onboardingConfigured}
+        templatesAvailable={onboardingTemplatesAvailable}
+        paperworkTemplates={paperworkTemplates}
+        paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
+        onSendPaperwork={(templateKey) => {
+          if (!selectedCandidate) return;
+          sendPaperwork(selectedCandidate, templateKey);
+        }}
+        onRefreshPaperworkStatus={() => {
+          if (!selectedCandidate) return;
+          refreshPaperworkStatus(selectedCandidate);
+        }}
+        actingRecruiter={actingRecruiter}
+        sendBlockReason={
+          selectedCandidate
+            ? getSendPaperworkBlockReason(
+                buildSendEligibility(
+                  selectedCandidate,
+                  "onboarding_packet",
+                  paperworkSendingId === selectedCandidate.candidateId,
+                ),
+              )
+            : null
+        }
+        onFlagFollowUp={() => {
+          if (!selectedCandidate) return;
+          flagCandidateFollowUp(selectedCandidate.candidateId);
+        }}
+        onCompleteFollowUp={() => {
+          if (!selectedCandidate) return;
+          completeCandidateFollowUpRow(selectedCandidate.candidateId);
+        }}
+        onAssignActingRecruiter={() => {
+          if (!selectedCandidate) return;
+          assignActingRecruiterToRow(selectedCandidate);
+        }}
+        directDepositBusy={directDepositBusyId === selectedCandidate?.candidateId}
+        onDirectDepositAction={(action, payload) => {
+          if (!selectedCandidate) return;
+          void runDirectDepositAction(selectedCandidate, action, payload).catch((err) => {
+            window.alert(err instanceof Error ? err.message : "Direct deposit action failed");
+          });
+        }}
+        melMatchesLoading={melLoading}
+      />
     </div>
   );
 }
