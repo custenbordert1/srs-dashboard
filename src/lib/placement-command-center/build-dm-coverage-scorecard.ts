@@ -54,7 +54,7 @@ export function buildDmCoverageScorecard(input: {
     const repCount = activeRepsByDm.get(dmName) ?? metrics?.activeReps ?? 0;
     const repUtilizationPercent =
       repCount > 0 ? Math.min(100, Math.round((openCalls / Math.max(1, repCount)) * 25)) : 0;
-    const placementVelocity = metrics?.hired ?? filled;
+    const placementVelocity = metrics?.hiresLast7Days ?? filled;
     const openCallReduction = Math.max(0, 100 - openCalls * 4);
 
     const score = Math.round(

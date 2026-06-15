@@ -17,6 +17,7 @@ import {
   UI_SURFACE,
   UI_TYPE,
 } from "@/lib/ui-tokens";
+import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import { useMemo, useState } from "react";
 
 type GuidedRecruitingWorkflowPanelProps = {
@@ -162,6 +163,18 @@ export function GuidedRecruitingWorkflowPanel({
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() =>
+              navigateRecruitingTab({
+                tab: "placement-command-center",
+                elementId: "placement-recruiter-scorecard",
+              })
+            }
+            className={UI_BUTTON.ghost}
+          >
+            Placement scorecard
+          </button>
           <button type="button" onClick={handleWorkNext} className={UI_BUTTON.primary} disabled={!displayCandidate}>
             Work Next Candidate
           </button>

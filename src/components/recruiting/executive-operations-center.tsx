@@ -16,6 +16,7 @@ import {
   type ExecutiveTerritoryWarRoomRow,
 } from "@/lib/executive-operations-center";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
+import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import type { CompanyHealthTier, ProjectForecastOutcome } from "@/lib/executive-operations-center/types";
 import type { ActionRecommendationCard } from "@/lib/territory-action-engine";
 import type { ProjectRiskLevel } from "@/lib/territory-action-engine/types";
@@ -341,6 +342,13 @@ export function ExecutiveOperationsCenter() {
         </div>
         <div className={UI_LAYOUT.toolbar}>
           <DataTrustBadge trust={dataTrust} />
+          <button
+            type="button"
+            onClick={() => navigateRecruitingTab({ tab: "placement-command-center" })}
+            className={UI_BUTTON.ghost}
+          >
+            Placement Center
+          </button>
           <button type="button" onClick={() => setBoardroom(true)} className={UI_BUTTON.primary}>
             Boardroom Mode
           </button>

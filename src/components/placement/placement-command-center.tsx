@@ -16,12 +16,13 @@ import {
 } from "@/lib/placement-command-center";
 import {
   UI_BUTTON,
+  UI_INPUT,
   UI_LAYOUT,
   UI_SPACE,
   UI_SURFACE,
   UI_TYPE,
 } from "@/lib/ui-tokens";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type PlacementResponse = {
   ok?: boolean;
@@ -31,6 +32,16 @@ type PlacementResponse = {
 };
 
 type ConversionTab = "recruiter" | "dm" | "project" | "state";
+type ForecastFilter = "all" | "critical" | "at-risk" | "likely-to-fill";
+type CoverageRiskFilter = "all" | PlacementCoverageRisk;
+
+const TABLE_PREVIEW_LIMIT = 75;
+
+const FORECAST_SORT: Record<ProjectFillOutcome, number> = {
+  critical: 0,
+  "at-risk": 1,
+  "likely-to-fill": 2,
+};
 
 const COVERAGE_RISK_STYLES: Record<PlacementCoverageRisk, string> = {
   green: "border-emerald-500/40 bg-emerald-500/15 text-emerald-100",
@@ -60,6 +71,29 @@ function trendLabel(trend: "up" | "down" | "flat"): string {
   if (trend === "up") return "↑";
   if (trend === "down") return "↓";
   return "→";
+}
+
+function scrollToSection(elementId: string): void {
+  document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function TablePreviewFooter({
+  total,
+  shown,
+  onShowAll,
+}: {
+  total: number;
+  shown: number;
+  onShowAll: () => void;
+}) {
+  if (total <= shown) return null;
+  return (
+    <div className="border-t border-zinc-800/80 px-3 py-2 text-center">
+      <button type="button" onClick={onShowAll} className={UI_BUTTON.ghost}>
+        Show all {total} rows ({total - shown} hidden)
+      </button>
+    </div>
+  );
 }
 
 function formatPercent(value: number | null): string {
@@ -211,11 +245,22 @@ export function PlacementCommandCenter() {
   const [meta, setMeta] = useState<PlacementResponse["meta"]>();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [boardroom, setBoardroom] = useState(false);
   const [conversionTab, setConversionTab] = useState<ConversionTab>("recruiter");
+  const [forecastFilter, setForecastFilter] = useState<ForecastFilter>("all");
+  const [coverageRiskFilter, setCoverageRiskFilter] = useState<CoverageRiskFilter>("all");
+  const [zeroPipelineOnly, setZeroPipelineOnly] = useState(false);
+  const [storeCoverageExpanded, setStoreCoverageExpanded] = useState(false);
+  const [forecastsExpanded, setForecastsExpanded] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (hasLoadedRef.current) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
     try {
       const response = await fetchWithTimeout("/api/placement-command-center", {
@@ -227,10 +272,12 @@ export function PlacementCommandCenter() {
       }
       setCenter(payload.center);
       setMeta(payload.meta);
+      hasLoadedRef.current = true;
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -263,6 +310,82 @@ export function PlacementCommandCenter() {
             ? center.conversionByProject
             : center.conversionByState;
 
+  const filteredStoreCoverage = useMemo(() => {
+    if (!center) return [];
+    return center.storeCoverage.filter((row) => {
+      if (coverageRiskFilter !== "all" && row.risk !== coverageRiskFilter) return false;
+      if (zeroPipelineOnly && row.candidatesInPipeline > 0) return false;
+      return true;
+    });
+  }, [center, coverageRiskFilter, zeroPipelineOnly]);
+
+  const sortedForecasts = useMemo(() => {
+    if (!center) return [];
+    const rows = [...center.projectForecasts].sort(
+      (a, b) => FORECAST_SORT[a.outcome] - FORECAST_SORT[b.outcome],
+    );
+    if (forecastFilter === "all") return rows;
+    return rows.filter((row) => row.outcome === forecastFilter);
+  }, [center, forecastFilter]);
+
+  const visibleStoreCoverage = storeCoverageExpanded
+    ? filteredStoreCoverage
+    : filteredStoreCoverage.slice(0, TABLE_PREVIEW_LIMIT);
+  const visibleForecasts = forecastsExpanded
+    ? sortedForecasts
+    : sortedForecasts.slice(0, TABLE_PREVIEW_LIMIT);
+
+  const executiveAnswers = center
+    ? [
+        {
+          label: "Projects at risk",
+          value: center.projectForecasts.filter((row) => row.outcome === "critical").length,
+          tone: "critical" as const,
+          onClick: () => {
+            setForecastFilter("critical");
+            setForecastsExpanded(true);
+            scrollToSection("placement-project-forecasts");
+          },
+        },
+        {
+          label: "Stores with no pipeline",
+          value: center.storeCoverage.filter((row) => row.candidatesInPipeline === 0 && row.openCalls > 0)
+            .length,
+          tone: "warn" as const,
+          onClick: () => {
+            setZeroPipelineOnly(true);
+            setCoverageRiskFilter("all");
+            setStoreCoverageExpanded(true);
+            scrollToSection("placement-store-coverage");
+          },
+        },
+        {
+          label: "Top recruiter placements",
+          value: center.recruiterScorecard[0]?.placements ?? 0,
+          detail: center.recruiterScorecard[0]?.recruiterName,
+          tone: "ok" as const,
+          onClick: () => scrollToSection("placement-recruiter-scorecard"),
+        },
+        {
+          label: "DMs with coverage gaps",
+          value: center.dmScorecard.filter((row) => row.coveragePercent < 70).length,
+          tone: "warn" as const,
+          onClick: () => scrollToSection("placement-dm-scorecard"),
+        },
+        {
+          label: "Likely to miss",
+          value: center.projectForecasts.filter(
+            (row) => row.outcome === "critical" || row.outcome === "at-risk",
+          ).length,
+          tone: "critical" as const,
+          onClick: () => {
+            setForecastFilter("all");
+            scrollToSection("placement-project-forecasts");
+          },
+        },
+      ]
+    : [];
+
   if (boardroom && center) {
     return <BoardroomMode center={center} onExit={() => setBoardroom(false)} />;
   }
@@ -290,14 +413,48 @@ export function PlacementCommandCenter() {
             </div>
             <div className={UI_LAYOUT.toolbar}>
               <DataTrustBadge trust={dataTrust} />
+              {refreshing ? (
+                <span className="text-xs text-zinc-500">Refreshing…</span>
+              ) : null}
               <button type="button" onClick={() => setBoardroom(true)} className={UI_BUTTON.primary}>
                 Boardroom Mode
               </button>
-              <button type="button" onClick={() => void load()} className={UI_BUTTON.ghost}>
+              <button type="button" onClick={() => void load()} className={UI_BUTTON.ghost} disabled={refreshing}>
                 Refresh
               </button>
             </div>
           </div>
+
+          <section className={UI_SPACE.section} aria-label="Executive quick answers">
+            <h3 className={UI_TYPE.sectionTitle}>Leadership quick answers</h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              One click to the data behind each executive question.
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+              {executiveAnswers.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.onClick}
+                  className={`rounded-xl border px-3 py-3 text-left transition-colors hover:border-teal-500/35 ${
+                    item.tone === "critical"
+                      ? "border-red-500/35 bg-red-500/8"
+                      : item.tone === "warn"
+                        ? "border-amber-500/35 bg-amber-500/8"
+                        : "border-zinc-800/80 bg-zinc-950/50"
+                  }`}
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                    {item.label}
+                  </p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-zinc-50">{item.value}</p>
+                  {item.detail ? (
+                    <p className="mt-0.5 truncate text-xs text-zinc-400">{item.detail}</p>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </section>
 
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -366,14 +523,49 @@ export function PlacementCommandCenter() {
             )}
           </section>
 
-          <section className={UI_SPACE.section}>
-            <h3 className={UI_TYPE.sectionTitle}>Store coverage</h3>
+          <section className={UI_SPACE.section} id="placement-store-coverage">
+            <div className={UI_LAYOUT.pageHeader}>
+              <h3 className={UI_TYPE.sectionTitle}>Store coverage</h3>
+              <div className={`${UI_LAYOUT.toolbar} ${UI_INPUT.filterBar}`}>
+                <select
+                  value={coverageRiskFilter}
+                  onChange={(event) =>
+                    setCoverageRiskFilter(event.target.value as CoverageRiskFilter)
+                  }
+                  className={UI_INPUT.select}
+                  aria-label="Filter by coverage risk"
+                >
+                  <option value="all">All risks</option>
+                  <option value="red">Critical</option>
+                  <option value="yellow">At risk</option>
+                  <option value="green">Healthy</option>
+                </select>
+                <label className="inline-flex items-center gap-2 text-xs text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={zeroPipelineOnly}
+                    onChange={(event) => setZeroPipelineOnly(event.target.checked)}
+                    className="rounded border-zinc-600 bg-zinc-900"
+                  />
+                  Zero pipeline only
+                </label>
+              </div>
+            </div>
             {center.storeCoverage.length === 0 ? (
               <WorkspaceEmptyState
                 title="No store coverage rows"
                 message="MEL opportunities and candidate assignments drive store coverage metrics."
                 nextStep="Confirm MEL projects sheet is synced."
                 onRefresh={() => void load()}
+              />
+            ) : filteredStoreCoverage.length === 0 ? (
+              <WorkspaceEmptyState
+                title="No stores match filters"
+                message="Try clearing risk filters or the zero-pipeline toggle."
+                onRefresh={() => {
+                  setCoverageRiskFilter("all");
+                  setZeroPipelineOnly(false);
+                }}
               />
             ) : (
               <div className={UI_SURFACE.tableWrap}>
@@ -390,7 +582,7 @@ export function PlacementCommandCenter() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/80 text-zinc-200">
-                    {center.storeCoverage.map((row) => (
+                    {visibleStoreCoverage.map((row) => (
                       <tr key={row.opportunityId} className={COVERAGE_ROW_BG[row.risk]}>
                         <td className="px-3 py-2">
                           <p className="font-medium">{row.store}</p>
@@ -412,26 +604,50 @@ export function PlacementCommandCenter() {
                     ))}
                   </tbody>
                 </table>
+                <TablePreviewFooter
+                  total={filteredStoreCoverage.length}
+                  shown={visibleStoreCoverage.length}
+                  onShowAll={() => setStoreCoverageExpanded(true)}
+                />
               </div>
             )}
           </section>
 
-          <section className={UI_SPACE.section}>
+          <section className={UI_SPACE.section} id="placement-project-forecasts">
             <div className={UI_LAYOUT.pageHeader}>
               <h3 className={UI_TYPE.sectionTitle}>Project fill forecasts</h3>
-              <button
-                type="button"
-                onClick={() => exportProjectFillForecastCsv(center)}
-                className={UI_BUTTON.ghost}
-              >
-                Export forecasts
-              </button>
+              <div className={`${UI_LAYOUT.toolbar} ${UI_INPUT.filterBar}`}>
+                <select
+                  value={forecastFilter}
+                  onChange={(event) => setForecastFilter(event.target.value as ForecastFilter)}
+                  className={UI_INPUT.select}
+                  aria-label="Filter forecast outcome"
+                >
+                  <option value="all">All outcomes</option>
+                  <option value="critical">Critical</option>
+                  <option value="at-risk">At risk</option>
+                  <option value="likely-to-fill">Likely to fill</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => exportProjectFillForecastCsv(center)}
+                  className={UI_BUTTON.ghost}
+                >
+                  Export forecasts
+                </button>
+              </div>
             </div>
             {center.projectForecasts.length === 0 ? (
               <WorkspaceEmptyState
                 title="No fill forecasts"
                 message="Project fill projections require MEL opportunities and pipeline data."
                 onRefresh={() => void load()}
+              />
+            ) : sortedForecasts.length === 0 ? (
+              <WorkspaceEmptyState
+                title="No forecasts match filter"
+                message="Try selecting a different outcome filter."
+                onRefresh={() => setForecastFilter("all")}
               />
             ) : (
               <div className={UI_SURFACE.tableWrap}>
@@ -448,7 +664,7 @@ export function PlacementCommandCenter() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/80 text-zinc-200">
-                    {center.projectForecasts.map((row) => (
+                    {visibleForecasts.map((row) => (
                       <tr key={row.opportunityId}>
                         <td className="px-3 py-2">
                           <p className="font-medium">{row.projectName}</p>
@@ -470,12 +686,18 @@ export function PlacementCommandCenter() {
                     ))}
                   </tbody>
                 </table>
+                <TablePreviewFooter
+                  total={sortedForecasts.length}
+                  shown={visibleForecasts.length}
+                  onShowAll={() => setForecastsExpanded(true)}
+                />
               </div>
             )}
           </section>
 
-          <section className={UI_SPACE.section}>
+          <section className={UI_SPACE.section} id="placement-conversion-analytics">
             <div className={UI_LAYOUT.pageHeader}>
+              <h3 className={UI_TYPE.sectionTitle}>Conversion analytics</h3>
               <div className="inline-flex rounded-lg border border-zinc-700/80 bg-zinc-950/80 p-0.5">
                 {(
                   [
@@ -501,7 +723,7 @@ export function PlacementCommandCenter() {
             <ConversionTable rows={conversionRows} />
           </section>
 
-          <section className={UI_SPACE.section}>
+          <section className={UI_SPACE.section} id="placement-recruiter-scorecard">
             <div className={UI_LAYOUT.pageHeader}>
               <h3 className={UI_TYPE.sectionTitle}>Recruiter placement scorecard</h3>
               <button
@@ -552,7 +774,7 @@ export function PlacementCommandCenter() {
             )}
           </section>
 
-          <section className={UI_SPACE.section}>
+          <section className={UI_SPACE.section} id="placement-dm-scorecard">
             <div className={UI_LAYOUT.pageHeader}>
               <h3 className={UI_TYPE.sectionTitle}>DM coverage scorecard</h3>
               <button
@@ -638,7 +860,7 @@ export function PlacementCommandCenter() {
             )}
           </section>
 
-          <section className={UI_SPACE.section}>
+          <section className={UI_SPACE.section} id="placement-executive-board">
             <div className={UI_LAYOUT.pageHeader}>
               <h3 className={UI_TYPE.sectionTitle}>Executive placement board</h3>
               <button

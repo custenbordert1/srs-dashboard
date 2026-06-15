@@ -242,6 +242,18 @@ export function TerritoryActionCenter() {
         </div>
         <div className={UI_LAYOUT.toolbar}>
           <DataTrustBadge trust={dataTrust} />
+          <button
+            type="button"
+            onClick={() =>
+              navigateRecruitingTab({
+                tab: "placement-command-center",
+                elementId: "placement-store-coverage",
+              })
+            }
+            className={UI_BUTTON.ghost}
+          >
+            Placement Center
+          </button>
           <button type="button" onClick={() => void load()} className={UI_BUTTON.ghost}>
             Refresh
           </button>
