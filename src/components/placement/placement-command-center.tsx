@@ -5,6 +5,10 @@ import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import {
+  clearPlacementAlertContext,
+  readPlacementAlertContext,
+} from "@/lib/alerts/placement-alert-navigation";
+import {
   exportDmCoverageReportCsv,
   exportExecutivePlacementReportCsv,
   exportProjectFillForecastCsv,
@@ -254,6 +258,7 @@ export function PlacementCommandCenter() {
   const [storeCoverageExpanded, setStoreCoverageExpanded] = useState(false);
   const [forecastsExpanded, setForecastsExpanded] = useState(false);
   const hasLoadedRef = useRef(false);
+  const placementContextAppliedRef = useRef(false);
 
   const load = useCallback(async () => {
     if (hasLoadedRef.current) {
@@ -284,6 +289,30 @@ export function PlacementCommandCenter() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!center || placementContextAppliedRef.current) return;
+    const context = readPlacementAlertContext();
+    if (!context) return;
+    placementContextAppliedRef.current = true;
+
+    if (context.forecastFilter && context.forecastFilter !== "all") {
+      setForecastFilter(context.forecastFilter);
+    }
+    if (context.zeroPipelineOnly) {
+      setZeroPipelineOnly(true);
+    }
+    if (context.highlightSection === "forecasts") {
+      setForecastsExpanded(true);
+      window.setTimeout(() => scrollToSection("placement-project-forecasts"), 150);
+    } else if (context.highlightSection === "recovery") {
+      window.setTimeout(() => scrollToSection("placement-open-call-recovery"), 150);
+    } else {
+      setStoreCoverageExpanded(true);
+      window.setTimeout(() => scrollToSection("placement-store-coverage"), 150);
+    }
+    clearPlacementAlertContext();
+  }, [center]);
 
   useEffect(() => {
     if (!boardroom) return;
@@ -823,7 +852,7 @@ export function PlacementCommandCenter() {
             )}
           </section>
 
-          <section className={UI_SPACE.section}>
+          <section className={UI_SPACE.section} id="placement-open-call-recovery">
             <h3 className={UI_TYPE.sectionTitle}>Open call recovery</h3>
             {center.openCallRecovery.length === 0 ? (
               <WorkspaceEmptyState

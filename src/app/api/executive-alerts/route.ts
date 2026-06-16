@@ -1,5 +1,7 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { buildAlertSnapshot } from "@/lib/alerts/build-alert-snapshot";
+import { mergeAlertStatuses } from "@/lib/alerts/executive-alert-filters";
+import { listExecutiveAlertStatusOverlays } from "@/lib/alerts/executive-alert-status-store";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { loadRecruitingIntelligenceRouteBundle } from "@/lib/recruiting-intelligence/load-recruiting-intelligence-route-bundle";
@@ -38,6 +40,10 @@ export async function GET(request: Request) {
   }
 
   const snapshot = buildAlertSnapshot({ bundle: loaded.bundle });
+  const overlays = await listExecutiveAlertStatusOverlays(session.userId);
+  const alerts = mergeAlertStatuses(snapshot.alerts, overlays);
+  const withStatus = (rows: typeof snapshot.topCritical) =>
+    mergeAlertStatuses(rows, overlays);
 
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
@@ -48,13 +54,14 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    alerts: snapshot.alerts,
-    topActions: snapshot.topActions,
-    topCritical: snapshot.topCritical,
-    criticalAlerts: snapshot.criticalAlerts,
-    highAlerts: snapshot.highAlerts,
-    mediumAlerts: snapshot.mediumAlerts,
-    lowAlerts: snapshot.lowAlerts,
+    alerts,
+    topActions: withStatus(snapshot.topActions),
+    topCritical: withStatus(snapshot.topCritical),
+    criticalAlerts: withStatus(snapshot.criticalAlerts),
+    highAlerts: withStatus(snapshot.highAlerts),
+    mediumAlerts: withStatus(snapshot.mediumAlerts),
+    lowAlerts: withStatus(snapshot.lowAlerts),
+    statusOverlays: overlays,
     meta: snapshot.meta,
     generatedAt: snapshot.generatedAt,
     intelligenceCache: loaded.bundle.intelligenceCache,

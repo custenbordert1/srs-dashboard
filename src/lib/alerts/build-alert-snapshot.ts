@@ -1,4 +1,5 @@
 import { buildAlerts, type AlertBuildContext } from "@/lib/alerts/build-alerts";
+import { enrichExecutiveAlerts } from "@/lib/alerts/enrich-executive-alerts";
 import { buildPrioritizedAlertSnapshot } from "@/lib/alerts/alert-prioritizer";
 import type { AlertSnapshot } from "@/lib/alerts/alert-types";
 import { buildExecutiveOperationsCenterSnapshot } from "@/lib/executive-operations-center";
@@ -60,7 +61,11 @@ export function buildAlertSnapshot(input: BuildAlertSnapshotInput): AlertSnapsho
     actionCenter,
   };
 
-  const alerts = buildAlerts(alertContext);
+  const alerts = enrichExecutiveAlerts({
+    alerts: buildAlerts(alertContext),
+    bundle,
+    placement,
+  });
 
   return buildPrioritizedAlertSnapshot(alerts, bundle.fetchedAt, {
     intelligenceCacheStatus: bundle.intelligenceCache.cacheStatus,

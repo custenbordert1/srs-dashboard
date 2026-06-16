@@ -27,6 +27,39 @@ export type AlertDestination = {
   elementId?: string;
 };
 
+export type ExecutiveAlertLinkedCandidate = {
+  candidateId: string;
+  name: string;
+  workflowStatus: string;
+  assignedRecruiter: string;
+  positionName: string;
+};
+
+export type ExecutiveAlertLinkedRep = {
+  name: string;
+  state: string;
+  active: boolean;
+  distanceMiles: number | null;
+};
+
+export type ExecutiveAlertContext = {
+  opportunityId?: string;
+  storeName?: string;
+  projectName?: string;
+  client?: string;
+  city?: string;
+  state?: string;
+  dmName?: string;
+  territoryLabel?: string;
+  coveragePercent?: number;
+  openCalls?: number;
+  candidatesInPipeline?: number;
+  forecastOutcome?: "likely-to-fill" | "at-risk" | "critical";
+  linkedCandidates: ExecutiveAlertLinkedCandidate[];
+  linkedReps: ExecutiveAlertLinkedRep[];
+  dataSources: string[];
+};
+
 export type ExecutiveAlert = {
   id: string;
   title: string;
@@ -40,6 +73,7 @@ export type ExecutiveAlert = {
   manualOnly: true;
   createdAt: string;
   reason: string;
+  context?: ExecutiveAlertContext;
 };
 
 export type AlertImpactInputs = {
