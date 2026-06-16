@@ -2,6 +2,7 @@
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
 import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
+import { WorkforceCapacityForecastPanel } from "@/components/workforce-capacity-forecast/workforce-capacity-forecast-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
@@ -317,6 +318,10 @@ export function ExecutiveOperationsCenter() {
               ) : null}
             </section>
           ) : null}
+
+          <section className={`${UI_SURFACE.panel} border-indigo-500/20 bg-indigo-500/5 p-5`}>
+            <WorkforceCapacityForecastPanel compact variant="executive" />
+          </section>
 
           <section className={`${UI_SURFACE.panel} border-violet-500/20 bg-violet-500/5 p-5`}>
             <CoverageOptimizationSimulatorPanel compact />

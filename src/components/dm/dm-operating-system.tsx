@@ -2,6 +2,7 @@
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
 import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
+import { WorkforceCapacityForecastPanel } from "@/components/workforce-capacity-forecast/workforce-capacity-forecast-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import type { UserPublic } from "@/lib/auth/types";
@@ -395,6 +396,10 @@ export function DmOperatingSystem({ user }: DmOperatingSystemProps) {
               </div>
             </SectionCard>
           </div>
+
+          <SectionCard title="DM Capacity Forecast" subtitle="Territory bench, risk load, and staffing outlook">
+            <WorkforceCapacityForecastPanel compact variant="dm" />
+          </SectionCard>
 
           <SectionCard
             title="Coverage Optimization Simulator"
