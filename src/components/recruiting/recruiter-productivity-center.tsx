@@ -1,6 +1,7 @@
 "use client";
 
 import { NotificationCriticalAlertsPanel } from "@/components/notifications/notification-critical-alerts-panel";
+import { RecruiterOperatingSystem } from "@/components/recruiter/recruiter-operating-system";
 import { RecruiterOperationalKpiStrip } from "@/components/recruiting/recruiter-operational-kpi-strip";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { buildDataTrustState } from "@/lib/data-trust-state";
@@ -125,6 +126,8 @@ export function RecruiterProductivityCenter() {
 
   return (
     <div className="space-y-6">
+      <RecruiterOperatingSystem />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-zinc-50">Recruiter productivity center</h2>
