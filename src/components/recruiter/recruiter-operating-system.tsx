@@ -2,6 +2,7 @@
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
 import { CandidateReEngagementOutreachCenter } from "@/components/recruiter/candidate-re-engagement-outreach-center";
+import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import type { UserPublic } from "@/lib/auth/types";
@@ -273,6 +274,10 @@ export function RecruiterOperatingSystem({ user }: RecruiterOperatingSystemProps
 
             <SectionCard title="Re-Engagement Center" subtitle="Stalled, abandoned, and return-eligible candidates">
               <CandidateReEngagementOutreachCenter compact />
+            </SectionCard>
+
+            <SectionCard title="Coverage Simulator" subtitle="Test scenarios before taking action">
+              <CoverageOptimizationSimulatorPanel compact />
             </SectionCard>
           </div>
 

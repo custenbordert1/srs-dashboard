@@ -1,6 +1,7 @@
 "use client";
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
+import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
@@ -316,6 +317,10 @@ export function ExecutiveOperationsCenter() {
               ) : null}
             </section>
           ) : null}
+
+          <section className={`${UI_SURFACE.panel} border-violet-500/20 bg-violet-500/5 p-5`}>
+            <CoverageOptimizationSimulatorPanel compact />
+          </section>
 
           <section className={`${UI_SURFACE.panel} border-teal-500/20 bg-teal-500/5 p-5`}>
             <h3 className={UI_TYPE.sectionTitle}>Today&apos;s Executive Briefing</h3>

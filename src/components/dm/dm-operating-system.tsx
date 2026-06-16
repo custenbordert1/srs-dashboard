@@ -1,6 +1,7 @@
 "use client";
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
+import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import type { UserPublic } from "@/lib/auth/types";
@@ -394,6 +395,13 @@ export function DmOperatingSystem({ user }: DmOperatingSystemProps) {
               </div>
             </SectionCard>
           </div>
+
+          <SectionCard
+            title="Coverage Optimization Simulator"
+            subtitle="Test territory and recruiting decisions before acting"
+          >
+            <CoverageOptimizationSimulatorPanel compact />
+          </SectionCard>
 
           <p className="text-xs text-zinc-600">
             Snapshot {new Date(snapshot.generatedAt).toLocaleString()} · plan date {snapshot.planDate}
