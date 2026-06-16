@@ -1,4 +1,5 @@
-export const EXECUTIVE_ROUTE_DEADLINE_MS = 5000;
+export const EXECUTIVE_ROUTE_DEADLINE_MS = 8_000;
+export const EXECUTIVE_CLIENT_TIMEOUT_MS = 8_000;
 
 export type ExecutiveRoutePhaseTiming = {
   phase: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import { ExecutiveAlertDetailDrawer } from "@/components/executive/executive-alert-detail-drawer";
+import { ExecutiveDataWarningBanner } from "@/components/executive/executive-data-warning-banner";
 import {
   ExecutiveAlertFollowUpQueue,
 } from "@/components/executive/executive-alert-follow-up-queue";
@@ -39,6 +40,11 @@ import {
 import {
   buildPlacementContextFromAlert,
 } from "@/lib/alerts/placement-alert-navigation";
+import {
+  fetchExecutiveApiRoute,
+  scheduleExecutiveBackgroundRefresh,
+} from "@/lib/executive-routes/executive-intelligence-client";
+import type { ExecutiveIntelligenceRouteMeta } from "@/lib/executive-routes/executive-intelligence-route";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
@@ -75,6 +81,7 @@ type ExecutiveAlertsResponse = {
     intelligenceCacheStatus?: string;
   };
   intelligenceCache?: RecruitingIntelligenceCacheMeta;
+  routeMeta?: ExecutiveIntelligenceRouteMeta;
 };
 
 const SEVERITY_STYLES: Record<AlertSeverity, string> = {
@@ -183,6 +190,8 @@ function AlertSection({
 
 export function ExecutiveAlertCenter() {
   const [data, setData] = useState<ExecutiveAlertsResponse | null>(null);
+  const [routeMeta, setRouteMeta] = useState<ExecutiveIntelligenceRouteMeta | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -215,13 +224,11 @@ export function ExecutiveAlertCenter() {
     else setLoading(true);
     setError(null);
     try {
-      const params = force ? "?forceRefresh=1" : "";
-      const response = await fetchWithTimeout(`/api/executive-alerts${params}`, {
-        cache: "no-store",
-        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-      });
-      const parsed = (await response.json()) as ExecutiveAlertsResponse;
-      if (!response.ok || !parsed.ok) {
+      const { data: parsed, meta } = await fetchExecutiveApiRoute<ExecutiveAlertsResponse>(
+        "/api/executive-alerts",
+        { force },
+      );
+      if (!parsed.ok) {
         throw new Error(parsed.error ?? "Failed to load executive alerts");
       }
       const alertsWithStatus = applyStatusOverlays(parsed.alerts ?? [], parsed.statusOverlays);
@@ -229,14 +236,18 @@ export function ExecutiveAlertCenter() {
       setFollowUps(parsed.followUps ?? []);
       setNotesByAlertId(parsed.notesByAlertId ?? {});
       setAssigneeOptions(parsed.assigneeOptions ?? { dms: [], recruiters: [] });
+      setRouteMeta(meta ?? null);
       setData({
         ...parsed,
         alerts: alertsWithStatus,
         topCritical: mergeAlertStatuses(parsed.topCritical ?? [], parsed.statusOverlays ?? []),
         topActions: mergeAlertStatuses(parsed.topActions ?? [], parsed.statusOverlays ?? []),
       });
+      setLoaded(true);
+      if (!force) scheduleExecutiveBackgroundRefresh((nextForce) => void load(nextForce), meta);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load executive alerts");
+      setLoaded(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -455,18 +466,22 @@ export function ExecutiveAlertCenter() {
 
   return (
     <WorkspacePageShell
-      loading={loading}
+      loading={loading && !loaded}
       error={error}
-      hasData={Boolean(data?.alerts?.length)}
+      hasData={loaded}
       loadingMessage="Generating executive alerts…"
       emptyTitle="No alerts generated"
       emptyMessage="Executive alerts will appear when recruiting intelligence identifies actionable risks."
       emptyNextStep="Try refresh after the intelligence cache completes its next sync."
       onRefresh={() => void load(true)}
-      partialDataAvailable={Boolean(data?.alerts?.length)}
+      partialDataAvailable={loaded}
     >
       {data ? (
         <div id="executive-alert-center" className={UI_SPACE.page}>
+          <ExecutiveDataWarningBanner
+            meta={routeMeta}
+            onRefresh={() => void load(true)}
+          />
           <div className={UI_LAYOUT.pageHeader}>
             <div>
               <h2 className={UI_TYPE.pageTitle}>Executive Alerts</h2>

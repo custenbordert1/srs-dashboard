@@ -1,5 +1,6 @@
 "use client";
 
+import { ExecutiveDataWarningBanner } from "@/components/executive/executive-data-warning-banner";
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import { EXECUTIVE_ALERT_STATUS_LABELS, type ExecutiveAlertStatus } from "@/lib/alerts/executive-alert-status-types";
@@ -14,6 +15,7 @@ import {
   fetchExecutiveIntelligenceRoute,
   scheduleExecutiveBackgroundRefresh,
 } from "@/lib/executive-routes/executive-intelligence-client";
+import type { ExecutiveIntelligenceRouteMeta } from "@/lib/executive-routes/executive-intelligence-route";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
@@ -159,6 +161,8 @@ function ActionSection({
 
 export function ExecutiveDailyActionPlan() {
   const [data, setData] = useState<DailyActionPlanResponse | null>(null);
+  const [routeMeta, setRouteMeta] = useState<ExecutiveIntelligenceRouteMeta | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -174,12 +178,15 @@ export function ExecutiveDailyActionPlan() {
         { force },
       );
       setData({ ok: true, snapshot, meta });
+      setRouteMeta(meta);
       setStatusByAlertId(
         Object.fromEntries(snapshot.all.map((row) => [row.alertId, row.status])),
       );
+      setLoaded(true);
       if (!force) scheduleExecutiveBackgroundRefresh((nextForce) => void load(nextForce), meta);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");
+      setLoaded(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -241,17 +248,18 @@ export function ExecutiveDailyActionPlan() {
 
   return (
     <WorkspacePageShell
-      loading={loading}
+      loading={loading && !loaded}
       error={error}
-      hasData={Boolean(snapshot?.all.length)}
+      hasData={loaded}
       loadingMessage="Building daily action plan…"
       emptyTitle="No actions planned"
       emptyMessage="Daily actions appear when autopilot recommendations are available."
       onRefresh={() => void load(true)}
-      partialDataAvailable={Boolean(snapshot?.all.length)}
+      partialDataAvailable={loaded}
     >
       {snapshot ? (
         <div id="executive-daily-action-plan" className={UI_SPACE.page}>
+          <ExecutiveDataWarningBanner meta={routeMeta} onRefresh={() => void load(true)} />
           <div className={UI_LAYOUT.pageHeader}>
             <div>
               <h2 className={UI_TYPE.pageTitle}>Daily Action Plan</h2>

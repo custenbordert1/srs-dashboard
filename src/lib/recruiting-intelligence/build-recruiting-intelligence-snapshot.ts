@@ -55,7 +55,20 @@ function assembleRecruitingIntelligenceSnapshot(input: {
       : builtAt;
 
   const melOk = melResult.ok;
+  const parseStarted = Date.now();
   const opportunities = melOk ? parseMelOpportunities(melResult.rows) : [];
+  if (melOk) {
+    console.info("[recruiting-intelligence] mel_parse", {
+      rowCount: melResult.rows.length,
+      opportunityCount: opportunities.length,
+      parseMs: Date.now() - parseStarted,
+    });
+  } else if ("error" in melResult) {
+    console.warn("[recruiting-intelligence] mel_parse_skipped", {
+      error: melResult.error,
+      parseMs: Date.now() - parseStarted,
+    });
+  }
 
   const globalCoverage =
     jobsResult.ok && candidatesResult.ok
@@ -129,6 +142,7 @@ export async function buildRecruitingIntelligenceSnapshotFromWarmCaches(
 
 export async function buildRecruitingIntelligenceSnapshot(): Promise<RecruitingIntelligenceSnapshot> {
   const builtAt = new Date().toISOString();
+  const breezyStarted = Date.now();
 
   const [jobsResult, candidatesResult, workflows, melResult, activeReps] = await Promise.all([
     fetchBreezyJobs("published"),
@@ -138,7 +152,16 @@ export async function buildRecruitingIntelligenceSnapshot(): Promise<RecruitingI
     listActiveRosterReps(),
   ]);
 
-  return assembleRecruitingIntelligenceSnapshot({
+  console.info("[recruiting-intelligence] breezy_cache_load", {
+    jobsOk: jobsResult.ok,
+    jobCount: jobsResult.ok ? jobsResult.jobs.length : 0,
+    candidatesOk: candidatesResult.ok,
+    candidateCount: candidatesResult.ok ? candidatesResult.candidates.length : 0,
+    ms: Date.now() - breezyStarted,
+    melOk: melResult.ok,
+  });
+
+  const snapshot = assembleRecruitingIntelligenceSnapshot({
     builtAt,
     jobsResult,
     candidatesResult,
@@ -146,4 +169,12 @@ export async function buildRecruitingIntelligenceSnapshot(): Promise<RecruitingI
     melResult,
     activeReps,
   });
+
+  console.info("[recruiting-intelligence] snapshot_built", {
+    opportunityCount: snapshot.opportunities.length,
+    melRows: melResult.ok ? melResult.rows.length : 0,
+    totalMs: Date.now() - breezyStarted,
+  });
+
+  return snapshot;
 }
