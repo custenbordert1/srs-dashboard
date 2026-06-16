@@ -76,6 +76,14 @@ export const LazyAutomationControlCenter = dynamic(
   { loading: tabLoading("Loading automation control center…"), ssr: false },
 );
 
+export const LazyExecutiveMorningBrief = dynamic(
+  () =>
+    import("@/components/executive/executive-morning-brief").then((m) => ({
+      default: m.ExecutiveMorningBrief,
+    })),
+  { loading: tabLoading("Loading executive morning brief…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({

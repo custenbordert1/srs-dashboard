@@ -14,6 +14,7 @@ import {
   LazyExecutiveDailyActionPlan,
   LazyRecommendationIntelligenceDashboard,
   LazyAutomationControlCenter,
+  LazyExecutiveMorningBrief,
   LazyAiCommandCenterHub,
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
@@ -125,6 +126,12 @@ export function RecruitingDashboardContent({
             : "max-w-7xl px-4 sm:px-6 lg:px-8"
         }`}
       >
+        <DashboardTabPanel tabId="executive-morning-brief" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-morning-brief" hideBanner>
+            <LazyExecutiveMorningBrief />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
         <DashboardTabPanel tabId="executive-alerts" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-alerts" hideBanner>
             <LazyExecutiveAlertCenter />

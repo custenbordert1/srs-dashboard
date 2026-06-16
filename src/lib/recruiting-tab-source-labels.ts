@@ -27,7 +27,8 @@ export type DashboardTabId =
   | "autopilot-recommendations"
   | "daily-action-plan"
   | "recommendation-intelligence"
-  | "automation-control-center";
+  | "automation-control-center"
+  | "executive-morning-brief";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -114,6 +115,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Review, approve, and track recruiting automation drafts — job refreshes, new postings, and follow-up campaigns. Approval required by default; no live Breezy or email execution without sign-off.",
+  },
+  "executive-morning-brief": {
+    navLabel: "Executive Morning Brief",
+    sourceTag: "Daily leadership digest",
+    badgeLabel: "Morning brief",
+    kind: "executive",
+    bannerMessage:
+      "Single leadership briefing — recruiting health, territory risks, forecasts, automation opportunities, and top priorities for the day. Cache-first intelligence only.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",

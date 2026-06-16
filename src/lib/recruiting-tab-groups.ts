@@ -14,7 +14,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     id: "executive",
     label: "Executive",
-    primaryTabs: ["executive-alerts", "daily-action-plan", "recommendation-intelligence", "automation-control-center", "autopilot-recommendations", "predictive-territory-risk", "executive-operations-center", "executive-summary", "ai-command-center"],
+    primaryTabs: ["executive-morning-brief", "executive-alerts", "daily-action-plan", "recommendation-intelligence", "automation-control-center", "autopilot-recommendations", "predictive-territory-risk", "executive-operations-center", "executive-summary", "ai-command-center"],
     secondaryTabs: ["command-center", "overview", "needs-attention", "dm-scorecards"],
   },
   {
