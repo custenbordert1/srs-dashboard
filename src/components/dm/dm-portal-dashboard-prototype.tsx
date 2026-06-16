@@ -1,5 +1,6 @@
 "use client";
 
+import { DmOperatingSystem } from "@/components/dm/dm-operating-system";
 import { DmCommandCenter } from "@/components/dm/dm-command-center";
 import type { UserPublic } from "@/lib/auth/types";
 import type { DmDashboardSnapshot } from "@/lib/dm-dashboard";
@@ -42,12 +43,15 @@ export function DmPortalDashboard({
   };
 
   return (
-    <DmCommandCenter
-      data={data}
-      user={user}
-      trustInput={trustInput}
-      onCandidateClick={onCandidateClick}
-    />
+    <>
+      <DmOperatingSystem user={user} />
+      <DmCommandCenter
+        data={data}
+        user={user}
+        trustInput={trustInput}
+        onCandidateClick={onCandidateClick}
+      />
+    </>
   );
 }
 

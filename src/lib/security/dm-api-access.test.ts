@@ -62,6 +62,7 @@ describe("dm api access policy", () => {
   it("allows DM territory reads for dashboard", () => {
     for (const path of [
       "/api/dm/dashboard",
+      "/api/dm-operating-system",
       "/api/candidates/workflows",
       "/api/breezy/candidates",
       "/api/coverage-risk",
@@ -77,6 +78,7 @@ describe("dm api access policy", () => {
     assert.equal(canAccessRoute("dm", "/api/breezy/jobs"), false);
     assert.equal(canAccessRoute("dm", "/"), false);
     assert.equal(canAccessRoute("dm", "/dm"), true);
+    assert.equal(canAccessRoute("dm", "/api/dm-operating-system"), true);
     assert.equal(canAccessRoute("dm", "/api/breezy/candidates"), true);
   });
 
