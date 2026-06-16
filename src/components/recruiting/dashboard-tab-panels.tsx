@@ -36,6 +36,14 @@ export const LazyExecutiveAlertCenter = dynamic(
   { loading: tabLoading("Loading executive alerts…"), ssr: false },
 );
 
+export const LazyPredictiveTerritoryRiskDashboard = dynamic(
+  () =>
+    import("@/components/executive/predictive-territory-risk-dashboard").then((m) => ({
+      default: m.PredictiveTerritoryRiskDashboard,
+    })),
+  { loading: tabLoading("Loading predictive territory risk…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({

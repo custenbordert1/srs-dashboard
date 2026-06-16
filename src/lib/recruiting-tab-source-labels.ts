@@ -22,7 +22,8 @@ export type DashboardTabId =
   | "workforce-intelligence"
   | "action-center"
   | "executive-operations-center"
-  | "executive-alerts";
+  | "executive-alerts"
+  | "predictive-territory-risk";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -69,6 +70,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Prioritized company risks and recommended actions powered by the unified recruiting intelligence snapshot. Manual review only — no automation execution.",
+  },
+  "predictive-territory-risk": {
+    navLabel: "Territory Risk",
+    sourceTag: "Predictive forecast",
+    badgeLabel: "Predictive territory risk",
+    kind: "executive",
+    bannerMessage:
+      "Forecast recruiting and coverage failures before they happen — powered only by the unified recruiting intelligence cache.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",

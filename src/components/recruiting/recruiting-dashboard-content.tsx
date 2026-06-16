@@ -9,6 +9,7 @@ import {
   LazyExecutiveSummaryDashboard,
   LazyExecutiveOperationsCenter,
   LazyExecutiveAlertCenter,
+  LazyPredictiveTerritoryRiskDashboard,
   LazyAiCommandCenterHub,
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
@@ -123,6 +124,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="executive-alerts" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-alerts" hideBanner>
             <LazyExecutiveAlertCenter />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="predictive-territory-risk" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="predictive-territory-risk" hideBanner>
+            <LazyPredictiveTerritoryRiskDashboard />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
