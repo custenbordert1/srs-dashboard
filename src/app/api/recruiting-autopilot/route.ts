@@ -6,6 +6,11 @@ import { ExecutiveRouteTimer } from "@/lib/executive-routes/executive-route-prof
 import { respondExecutiveIntelligenceRoute } from "@/lib/executive-routes/executive-intelligence-route";
 import { buildRecruitingAutopilotSnapshot } from "@/lib/recruiting-autopilot";
 import type { RecruitingAutopilotSnapshot } from "@/lib/recruiting-autopilot/types";
+import {
+  applyLearnedConfidenceToRecommendations,
+  buildLearnedSuccessRates,
+  listRecommendationRecords,
+} from "@/lib/recommendation-intelligence";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -63,11 +68,25 @@ export async function GET(request: Request) {
       }
       const alertSnapshot = buildAlertSnapshot({ bundle });
       const followUps = await listExecutiveAlertFollowUps();
-      const snapshot = buildRecruitingAutopilotSnapshot({
+      const baseSnapshot = buildRecruitingAutopilotSnapshot({
         bundle,
         alerts: alertSnapshot.alerts,
         followUps,
       });
+      const learnedRates = buildLearnedSuccessRates(await listRecommendationRecords());
+      const applyConfidence = (rows: typeof baseSnapshot.all) =>
+        applyLearnedConfidenceToRecommendations(rows, learnedRates);
+      const snapshot: RecruitingAutopilotSnapshot = {
+        ...baseSnapshot,
+        executiveSummary: {
+          ...baseSnapshot.executiveSummary,
+          topActionsToday: applyConfidence(baseSnapshot.executiveSummary.topActionsToday),
+        },
+        highestImpact: applyConfidence(baseSnapshot.highestImpact),
+        quickWins: applyConfidence(baseSnapshot.quickWins),
+        longTerm: applyConfidence(baseSnapshot.longTerm),
+        all: applyConfidence(baseSnapshot.all),
+      };
       return {
         snapshot,
         logExtras: {

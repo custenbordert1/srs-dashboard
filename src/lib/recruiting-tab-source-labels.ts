@@ -25,7 +25,8 @@ export type DashboardTabId =
   | "executive-alerts"
   | "predictive-territory-risk"
   | "autopilot-recommendations"
-  | "daily-action-plan";
+  | "daily-action-plan"
+  | "recommendation-intelligence";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -96,6 +97,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Today's top actions from autopilot recommendations — grouped by urgency with one-click follow-up, review, snooze, and resolve.",
+  },
+  "recommendation-intelligence": {
+    navLabel: "Recommendation Intelligence",
+    sourceTag: "Validation & learning",
+    badgeLabel: "Recommendation validation",
+    kind: "executive",
+    bannerMessage:
+      "Measure recommendation outcomes, rank effectiveness by type and owner, and feed learned confidence back into autopilot forecasts.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",

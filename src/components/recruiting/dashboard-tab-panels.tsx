@@ -60,6 +60,14 @@ export const LazyExecutiveDailyActionPlan = dynamic(
   { loading: tabLoading("Loading daily action plan…"), ssr: false },
 );
 
+export const LazyRecommendationIntelligenceDashboard = dynamic(
+  () =>
+    import("@/components/executive/recommendation-intelligence-dashboard").then((m) => ({
+      default: m.RecommendationIntelligenceDashboard,
+    })),
+  { loading: tabLoading("Loading recommendation intelligence…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({
