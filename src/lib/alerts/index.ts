@@ -53,11 +53,32 @@ export {
 } from "@/lib/alerts/placement-alert-navigation";
 export {
   EXECUTIVE_ALERT_STATUS_LABELS,
+  FOLLOW_UP_PRIORITY_LABELS,
   DEFAULT_EXECUTIVE_ALERT_STATUS,
   type ExecutiveAlertStatus,
   type ExecutiveAlertStatusOverlay,
+  type ExecutiveAlertActionLogEntry,
+  type ExecutiveAlertFollowUp,
+  type ExecutiveAlertActionKind,
+  type FollowUpPriority,
+  type FollowUpOwnerKind,
 } from "@/lib/alerts/executive-alert-status-types";
 export {
   listExecutiveAlertStatusOverlays,
+  listExecutiveAlertActionLogs,
+  listExecutiveAlertFollowUps,
   upsertExecutiveAlertStatusOverlay,
+  saveExecutiveAlertNote,
+  upsertExecutiveAlertFollowUp,
+  appendExecutiveAlertActionLog,
 } from "@/lib/alerts/executive-alert-status-store";
+export { buildExecutiveAlertAssigneeOptions, type ExecutiveAlertAssigneeOptions } from "@/lib/alerts/build-executive-alert-assignees";
+export {
+  buildExecutiveAlertFollowUpQueue,
+  isFollowUpOverdue,
+  resolveFollowUpStoreLabel,
+  formatFollowUpDueLabel,
+  followUpOwnerLabel,
+  followUpPriorityLabel,
+  type ExecutiveAlertFollowUpQueueItem,
+} from "@/lib/alerts/executive-alert-follow-up-queue";

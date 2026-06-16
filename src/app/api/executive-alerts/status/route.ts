@@ -1,6 +1,11 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import type { ExecutiveAlertStatus } from "@/lib/alerts/executive-alert-status-types";
-import { upsertExecutiveAlertStatusOverlay } from "@/lib/alerts/executive-alert-status-store";
+import {
+  listExecutiveAlertActionLogs,
+  listExecutiveAlertFollowUps,
+  listExecutiveAlertStatusOverlays,
+  upsertExecutiveAlertStatusOverlay,
+} from "@/lib/alerts/executive-alert-status-store";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +30,7 @@ export async function PATCH(request: Request) {
     status?: ExecutiveAlertStatus;
     snoozedUntil?: string | null;
     note?: string;
+    previousStatus?: ExecutiveAlertStatus;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -44,7 +50,10 @@ export async function PATCH(request: Request) {
   const overlay = await upsertExecutiveAlertStatusOverlay(session, alertId, status, {
     snoozedUntil: body.snoozedUntil,
     note: body.note,
+    previousStatus: body.previousStatus,
   });
 
-  return NextResponse.json({ ok: true, overlay });
+  const actionLogs = await listExecutiveAlertActionLogs(alertId);
+
+  return NextResponse.json({ ok: true, overlay, actionLogs });
 }

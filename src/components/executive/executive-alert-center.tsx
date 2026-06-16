@@ -1,6 +1,9 @@
 "use client";
 
 import { ExecutiveAlertDetailDrawer } from "@/components/executive/executive-alert-detail-drawer";
+import {
+  ExecutiveAlertFollowUpQueue,
+} from "@/components/executive/executive-alert-follow-up-queue";
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import type {
@@ -9,6 +12,8 @@ import type {
   ExecutiveAlert,
 } from "@/lib/alerts/alert-types";
 import { ACTION_LABELS } from "@/lib/alerts/executive-alert-labels";
+import type { ExecutiveAlertAssigneeOptions } from "@/lib/alerts/build-executive-alert-assignees";
+import { buildExecutiveAlertFollowUpQueue } from "@/lib/alerts/executive-alert-follow-up-queue";
 import { resolveExecutiveAlertDrawer } from "@/lib/alerts/executive-alert-drawer";
 import {
   DEFAULT_EXECUTIVE_ALERT_FILTERS,
@@ -25,7 +30,11 @@ import {
 } from "@/lib/alerts/executive-alert-status-client";
 import {
   EXECUTIVE_ALERT_STATUS_LABELS,
+  type ExecutiveAlertActionLogEntry,
+  type ExecutiveAlertFollowUp,
   type ExecutiveAlertStatus,
+  type FollowUpOwnerKind,
+  type FollowUpPriority,
 } from "@/lib/alerts/executive-alert-status-types";
 import {
   buildPlacementContextFromAlert,
@@ -35,6 +44,8 @@ import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
 import { UI_BADGE, UI_BUTTON, UI_INPUT, UI_LAYOUT, UI_RISK, UI_SPACE, UI_SURFACE, UI_TYPE } from "@/lib/ui-tokens";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+type ExecutiveAlertView = "alerts" | "follow-up-queue";
 
 type ExecutiveAlertsResponse = {
   ok?: boolean;
@@ -51,7 +62,12 @@ type ExecutiveAlertsResponse = {
     status: ExecutiveAlertStatus;
     updatedAt: string;
     snoozedUntil?: string | null;
+    note?: string;
   }>;
+  actionLogs?: ExecutiveAlertActionLogEntry[];
+  followUps?: ExecutiveAlertFollowUp[];
+  assigneeOptions?: ExecutiveAlertAssigneeOptions;
+  notesByAlertId?: Record<string, string>;
   meta?: {
     totalCount: number;
     byCategory: Record<AlertCategory, number>;
@@ -170,9 +186,17 @@ export function ExecutiveAlertCenter() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<ExecutiveAlertView>("alerts");
   const [filters, setFilters] = useState<ExecutiveAlertFilterState>(DEFAULT_EXECUTIVE_ALERT_FILTERS);
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
   const [statusByAlertId, setStatusByAlertId] = useState<Record<string, ExecutiveAlertStatus>>({});
+  const [actionLogs, setActionLogs] = useState<ExecutiveAlertActionLogEntry[]>([]);
+  const [followUps, setFollowUps] = useState<ExecutiveAlertFollowUp[]>([]);
+  const [notesByAlertId, setNotesByAlertId] = useState<Record<string, string>>({});
+  const [assigneeOptions, setAssigneeOptions] = useState<ExecutiveAlertAssigneeOptions>({
+    dms: [],
+    recruiters: [],
+  });
 
   const applyStatusOverlays = useCallback(
     (alerts: ExecutiveAlert[], overlays: ExecutiveAlertsResponse["statusOverlays"] = []) => {
@@ -201,6 +225,10 @@ export function ExecutiveAlertCenter() {
         throw new Error(parsed.error ?? "Failed to load executive alerts");
       }
       const alertsWithStatus = applyStatusOverlays(parsed.alerts ?? [], parsed.statusOverlays);
+      setActionLogs(parsed.actionLogs ?? []);
+      setFollowUps(parsed.followUps ?? []);
+      setNotesByAlertId(parsed.notesByAlertId ?? {});
+      setAssigneeOptions(parsed.assigneeOptions ?? { dms: [], recruiters: [] });
       setData({
         ...parsed,
         alerts: alertsWithStatus,
@@ -249,6 +277,7 @@ export function ExecutiveAlertCenter() {
   const updateAlertStatus = useCallback(
     async (alertId: string, status: ExecutiveAlertStatus) => {
       const userId = data?.statusOverlays?.[0]?.userId ?? "local";
+      const previousStatus = statusByAlertId[alertId] ?? "new";
       const snoozedUntil = status === "snoozed" ? snoozeUntilIso() : null;
       const overlay = {
         alertId,
@@ -256,21 +285,91 @@ export function ExecutiveAlertCenter() {
         status,
         updatedAt: new Date().toISOString(),
         snoozedUntil,
+        note: notesByAlertId[alertId],
       };
       writeLocalExecutiveAlertStatus(overlay);
       setStatusByAlertId((current) => ({ ...current, [alertId]: status }));
       try {
-        await fetchWithTimeout("/api/executive-alerts/status", {
+        const response = await fetchWithTimeout("/api/executive-alerts/status", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ alertId, status, snoozedUntil }),
+          body: JSON.stringify({ alertId, status, snoozedUntil, previousStatus }),
           timeoutMs: FETCH_T4_INTELLIGENCE_MS,
         });
+        const parsed = (await response.json()) as {
+          actionLogs?: ExecutiveAlertActionLogEntry[];
+        };
+        if (parsed.actionLogs) {
+          setActionLogs((current) => {
+            const others = current.filter((row) => row.alertId !== alertId);
+            return [...others, ...parsed.actionLogs!].sort(
+              (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp),
+            );
+          });
+        }
       } catch {
         // Local overlay remains for refresh resilience.
       }
     },
-    [data?.statusOverlays],
+    [data?.statusOverlays, notesByAlertId, statusByAlertId],
+  );
+
+  const saveAlertNote = useCallback(async (alertId: string, note: string) => {
+    setNotesByAlertId((current) => ({ ...current, [alertId]: note }));
+    try {
+      const response = await fetchWithTimeout("/api/executive-alerts/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ alertId, note }),
+        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
+      });
+      const parsed = (await response.json()) as {
+        logEntry?: ExecutiveAlertActionLogEntry;
+      };
+      if (parsed.logEntry) {
+        setActionLogs((current) => [parsed.logEntry!, ...current]);
+      }
+    } catch {
+      // Note remains in local state until refresh.
+    }
+  }, []);
+
+  const assignFollowUp = useCallback(
+    async (
+      alertId: string,
+      input: {
+        ownerKind: FollowUpOwnerKind;
+        ownerName: string;
+        dueDate: string;
+        priority: FollowUpPriority;
+        notes?: string;
+      },
+    ) => {
+      try {
+        const response = await fetchWithTimeout("/api/executive-alerts/follow-ups", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ alertId, ...input }),
+          timeoutMs: FETCH_T4_INTELLIGENCE_MS,
+        });
+        const parsed = (await response.json()) as {
+          followUp?: ExecutiveAlertFollowUp;
+          logEntry?: ExecutiveAlertActionLogEntry;
+        };
+        if (parsed.followUp) {
+          setFollowUps((current) => [
+            ...current.filter((row) => row.alertId !== alertId),
+            parsed.followUp!,
+          ]);
+        }
+        if (parsed.logEntry) {
+          setActionLogs((current) => [parsed.logEntry!, ...current]);
+        }
+      } catch {
+        // Ignore — user can retry.
+      }
+    },
+    [],
   );
 
   const handleOpenDrawer = useCallback((alert: ExecutiveAlertWithStatus) => {
@@ -327,6 +426,29 @@ export function ExecutiveAlertCenter() {
     [data?.topActions, filters, statusByAlertId],
   );
 
+  const followUpQueue = useMemo(
+    () =>
+      buildExecutiveAlertFollowUpQueue(
+        alertsWithStatus,
+        followUps,
+        statusByAlertId,
+      ),
+    [alertsWithStatus, followUps, statusByAlertId],
+  );
+
+  const drawerActionLogs = useMemo(
+    () =>
+      actionLogs
+        .filter((row) => row.alertId === selectedAlertId)
+        .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp)),
+    [actionLogs, selectedAlertId],
+  );
+
+  const drawerFollowUp = useMemo(
+    () => followUps.find((row) => row.alertId === selectedAlertId) ?? null,
+    [followUps, selectedAlertId],
+  );
+
   const cacheLabel = data?.intelligenceCache
     ? `${data.intelligenceCache.cacheStatus} · ${Math.round(data.intelligenceCache.snapshotAgeMs / 1000)}s`
     : null;
@@ -353,6 +475,27 @@ export function ExecutiveAlertCenter() {
               </p>
             </div>
             <div className={`${UI_LAYOUT.toolbar} items-center`}>
+              <div className="flex rounded-lg border border-zinc-700/80 p-0.5">
+                <button
+                  type="button"
+                  className={view === "alerts" ? UI_BUTTON.primary : UI_BUTTON.ghost}
+                  onClick={() => setView("alerts")}
+                >
+                  Alerts
+                </button>
+                <button
+                  type="button"
+                  className={view === "follow-up-queue" ? UI_BUTTON.primary : UI_BUTTON.ghost}
+                  onClick={() => setView("follow-up-queue")}
+                >
+                  Follow-Up Queue
+                  {followUpQueue.filter((row) => row.isOverdue).length > 0 ? (
+                    <span className="ml-1 rounded-full bg-red-500/20 px-1.5 text-[10px] text-red-200">
+                      {followUpQueue.filter((row) => row.isOverdue).length}
+                    </span>
+                  ) : null}
+                </button>
+              </div>
               {cacheLabel ? (
                 <span className="rounded border border-zinc-700/80 px-2 py-1 text-[10px] text-zinc-400">
                   Intel cache · {cacheLabel}
@@ -457,17 +600,35 @@ export function ExecutiveAlertCenter() {
               <p className={UI_TYPE.kpiValue}>{data.meta?.bySeverity.high ?? 0}</p>
             </div>
             <div>
-              <p className={UI_TYPE.kpiLabel}>Top actions</p>
-              <p className={UI_TYPE.kpiValue}>{data.topActions?.length ?? 0}</p>
+              <p className={UI_TYPE.kpiLabel}>Follow-ups</p>
+              <p className={UI_TYPE.kpiValue}>{followUpQueue.length}</p>
             </div>
             <div>
-              <p className={UI_TYPE.kpiLabel}>Generated</p>
-              <p className="text-sm text-zinc-300">
-                {data.generatedAt ? new Date(data.generatedAt).toLocaleString() : "—"}
+              <p className={UI_TYPE.kpiLabel}>Overdue</p>
+              <p className={`${UI_TYPE.kpiValue} text-red-200`}>
+                {followUpQueue.filter((row) => row.isOverdue).length}
               </p>
             </div>
           </div>
 
+          {view === "follow-up-queue" ? (
+            <section className={UI_SPACE.section}>
+              <div>
+                <h2 className={UI_TYPE.sectionTitle}>Follow-Up Queue</h2>
+                <p className={UI_TYPE.sectionSubtitle}>
+                  Assigned DM and recruiter follow-ups with due dates and current alert status.
+                </p>
+              </div>
+              <ExecutiveAlertFollowUpQueue
+                queue={followUpQueue}
+                onOpenAlert={(alertId) => {
+                  setView("alerts");
+                  setSelectedAlertId(alertId);
+                }}
+              />
+            </section>
+          ) : (
+            <>
           <AlertSection
             title="Critical Alerts"
             subtitle="Top 10 critical items requiring immediate leadership attention."
@@ -521,15 +682,29 @@ export function ExecutiveAlertCenter() {
             onOpenDrawer={handleOpenDrawer}
             onNavigate={handleNavigate}
           />
+            </>
+          )}
 
           <ExecutiveAlertDetailDrawer
             open={Boolean(selectedAlertId)}
             alert={drawerAlert}
             status={drawerStatus}
+            note={selectedAlertId ? notesByAlertId[selectedAlertId] ?? "" : ""}
+            actionLogs={drawerActionLogs}
+            followUp={drawerFollowUp}
+            assigneeOptions={assigneeOptions}
             onClose={() => setSelectedAlertId(null)}
             onStatusChange={(status) => {
               if (!drawerAlert) return;
               void updateAlertStatus(drawerAlert.id, status);
+            }}
+            onSaveNote={(note) => {
+              if (!drawerAlert) return;
+              void saveAlertNote(drawerAlert.id, note);
+            }}
+            onAssignFollowUp={(input) => {
+              if (!drawerAlert) return;
+              void assignFollowUp(drawerAlert.id, input);
             }}
             onNavigate={(alert) => {
               setSelectedAlertId(null);

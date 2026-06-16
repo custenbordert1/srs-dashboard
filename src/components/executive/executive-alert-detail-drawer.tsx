@@ -1,12 +1,19 @@
 "use client";
 
 import type { ExecutiveAlert } from "@/lib/alerts/alert-types";
+import type { ExecutiveAlertAssigneeOptions } from "@/lib/alerts/build-executive-alert-assignees";
+import { ACTION_LABELS } from "@/lib/alerts/executive-alert-labels";
 import {
   EXECUTIVE_ALERT_STATUS_LABELS,
+  FOLLOW_UP_PRIORITY_LABELS,
+  type ExecutiveAlertActionLogEntry,
+  type ExecutiveAlertFollowUp,
   type ExecutiveAlertStatus,
+  type FollowUpOwnerKind,
+  type FollowUpPriority,
 } from "@/lib/alerts/executive-alert-status-types";
-import { ACTION_LABELS } from "@/lib/alerts/executive-alert-labels";
-import { UI_BADGE, UI_BUTTON, UI_TYPE } from "@/lib/ui-tokens";
+import { UI_BADGE, UI_BUTTON, UI_INPUT, UI_TYPE } from "@/lib/ui-tokens";
+import { useEffect, useState } from "react";
 
 const STATUS_STYLES: Record<ExecutiveAlertStatus, string> = {
   new: "border-sky-500/30 bg-sky-500/10 text-sky-100",
@@ -15,12 +22,31 @@ const STATUS_STYLES: Record<ExecutiveAlertStatus, string> = {
   resolved: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
 };
 
+const ACTION_KIND_LABELS: Record<ExecutiveAlertActionLogEntry["kind"], string> = {
+  "status-change": "Status change",
+  note: "Note saved",
+  "follow-up-assigned": "Follow-up assigned",
+  reviewed: "Reviewed",
+};
+
 type ExecutiveAlertDetailDrawerProps = {
   open: boolean;
   alert: ExecutiveAlert | null;
   status: ExecutiveAlertStatus;
+  note: string;
+  actionLogs: ExecutiveAlertActionLogEntry[];
+  followUp: ExecutiveAlertFollowUp | null;
+  assigneeOptions: ExecutiveAlertAssigneeOptions;
   onClose: () => void;
   onStatusChange: (status: ExecutiveAlertStatus) => void;
+  onSaveNote: (note: string) => void;
+  onAssignFollowUp: (input: {
+    ownerKind: FollowUpOwnerKind;
+    ownerName: string;
+    dueDate: string;
+    priority: FollowUpPriority;
+    notes?: string;
+  }) => void;
   onNavigate: (alert: ExecutiveAlert) => void;
 };
 
@@ -33,17 +59,61 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function defaultDueDate(): string {
+  const date = new Date();
+  date.setDate(date.getDate() + 3);
+  return date.toISOString().slice(0, 10);
+}
+
 export function ExecutiveAlertDetailDrawer({
   open,
   alert,
   status,
+  note,
+  actionLogs,
+  followUp,
+  assigneeOptions,
   onClose,
   onStatusChange,
+  onSaveNote,
+  onAssignFollowUp,
   onNavigate,
 }: ExecutiveAlertDetailDrawerProps) {
+  const [noteDraft, setNoteDraft] = useState(note);
+  const [ownerKind, setOwnerKind] = useState<FollowUpOwnerKind>("dm");
+  const [ownerName, setOwnerName] = useState("");
+  const [dueDate, setDueDate] = useState(defaultDueDate());
+  const [priority, setPriority] = useState<FollowUpPriority>("high");
+  const [followUpNotes, setFollowUpNotes] = useState("");
+
+  useEffect(() => {
+    setNoteDraft(note);
+  }, [note, alert?.id]);
+
+  useEffect(() => {
+    if (!followUp) return;
+    setOwnerKind(followUp.ownerKind);
+    setOwnerName(followUp.ownerName);
+    setDueDate(followUp.dueDate.slice(0, 10));
+    setPriority(followUp.priority);
+    setFollowUpNotes(followUp.notes ?? "");
+  }, [followUp]);
+
+  useEffect(() => {
+    if (!alert || followUp || ownerName) return;
+    const suggested =
+      ownerKind === "dm"
+        ? alert.context?.dmName ?? assigneeOptions.dms[0] ?? ""
+        : alert.context?.linkedCandidates?.[0]?.assignedRecruiter ??
+          assigneeOptions.recruiters[0] ??
+          "";
+    setOwnerName(suggested);
+  }, [alert, assigneeOptions, followUp, ownerKind, ownerName]);
+
   if (!open || !alert) return null;
 
   const context = alert.context;
+  const ownerOptions = ownerKind === "dm" ? assigneeOptions.dms : assigneeOptions.recruiters;
 
   return (
     <>
@@ -84,15 +154,18 @@ export function ExecutiveAlertDetailDrawer({
 
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Store / project</h3>
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-2">
+            <div className="space-y-2 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
               <DetailRow label="Store" value={context?.storeName ?? "—"} />
               <DetailRow label="Project" value={context?.projectName ?? alert.title} />
               <DetailRow label="Client" value={context?.client ?? "—"} />
-              <DetailRow label="Location" value={
-                context?.city && context?.state
-                  ? `${context.city}, ${context.state}`
-                  : context?.state ?? "—"
-              } />
+              <DetailRow
+                label="Location"
+                value={
+                  context?.city && context?.state
+                    ? `${context.city}, ${context.state}`
+                    : context?.state ?? "—"
+                }
+              />
               <DetailRow label="DM / Territory" value={context?.dmName ?? context?.territoryLabel ?? "—"} />
               {context?.coveragePercent != null ? (
                 <DetailRow label="Coverage" value={`${context.coveragePercent}%`} />
@@ -109,9 +182,130 @@ export function ExecutiveAlertDetailDrawer({
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Recommended action</h3>
             <p className="text-sm font-medium text-teal-100">{ACTION_LABELS[alert.recommendedAction]}</p>
-            <p className="text-xs text-zinc-500">
-              Automation ready · {alert.automationKind} · manual only
-            </p>
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Notes</h3>
+            <textarea
+              className="min-h-24 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+              value={noteDraft}
+              onChange={(event) => setNoteDraft(event.target.value)}
+              placeholder="Add operational notes for this alert…"
+            />
+            <button type="button" className={UI_BUTTON.secondary} onClick={() => onSaveNote(noteDraft)}>
+              Save note
+            </button>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Assign follow-up</h3>
+            <div className="space-y-3 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
+              <div className="flex flex-wrap gap-2">
+                {(["dm", "recruiter"] as const).map((kind) => (
+                  <button
+                    key={kind}
+                    type="button"
+                    className={ownerKind === kind ? UI_BUTTON.primary : UI_BUTTON.secondary}
+                    onClick={() => {
+                      setOwnerKind(kind);
+                      setOwnerName("");
+                    }}
+                  >
+                    {kind === "dm" ? "DM" : "Recruiter"}
+                  </button>
+                ))}
+              </div>
+              <select
+                className={`${UI_INPUT.select} w-full`}
+                value={ownerName}
+                onChange={(event) => setOwnerName(event.target.value)}
+              >
+                <option value="">Select {ownerKind === "dm" ? "DM" : "recruiter"}</option>
+                {ownerOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="space-y-1 text-xs text-zinc-500">
+                  Due date
+                  <input
+                    type="date"
+                    className={`${UI_INPUT.select} w-full`}
+                    value={dueDate}
+                    onChange={(event) => setDueDate(event.target.value)}
+                  />
+                </label>
+                <label className="space-y-1 text-xs text-zinc-500">
+                  Priority
+                  <select
+                    className={`${UI_INPUT.select} w-full`}
+                    value={priority}
+                    onChange={(event) => setPriority(event.target.value as FollowUpPriority)}
+                  >
+                    {(Object.keys(FOLLOW_UP_PRIORITY_LABELS) as FollowUpPriority[]).map((value) => (
+                      <option key={value} value={value}>
+                        {FOLLOW_UP_PRIORITY_LABELS[value]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <textarea
+                className="min-h-16 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100"
+                value={followUpNotes}
+                onChange={(event) => setFollowUpNotes(event.target.value)}
+                placeholder="Follow-up instructions (optional)"
+              />
+              <button
+                type="button"
+                className={UI_BUTTON.primary}
+                disabled={!ownerName || !dueDate}
+                onClick={() =>
+                  onAssignFollowUp({
+                    ownerKind,
+                    ownerName,
+                    dueDate,
+                    priority,
+                    notes: followUpNotes,
+                  })
+                }
+              >
+                {followUp ? "Update follow-up" : "Assign follow-up"}
+              </button>
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Action log</h3>
+            {actionLogs.length === 0 ? (
+              <p className="text-sm text-zinc-500">No actions recorded yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {actionLogs.map((entry) => (
+                  <li
+                    key={entry.id}
+                    className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2 text-sm"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-medium text-zinc-100">{ACTION_KIND_LABELS[entry.kind]}</span>
+                      <span className="text-[10px] text-zinc-500">
+                        {new Date(entry.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-400">Reviewed by {entry.reviewedBy}</p>
+                    {entry.status ? (
+                      <p className="text-xs text-zinc-500">
+                        Status · {entry.previousStatus ? `${entry.previousStatus} → ` : ""}
+                        {entry.status}
+                      </p>
+                    ) : null}
+                    {entry.note ? <p className="mt-1 text-xs text-zinc-300">{entry.note}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
 
           {context?.linkedCandidates && context.linkedCandidates.length > 0 ? (
@@ -127,26 +321,6 @@ export function ExecutiveAlertDetailDrawer({
                     <p className="text-xs text-zinc-500">{candidate.positionName}</p>
                     <p className="text-xs text-zinc-400">
                       {candidate.workflowStatus} · {candidate.assignedRecruiter}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          {context?.linkedReps && context.linkedReps.length > 0 ? (
-            <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Linked reps</h3>
-              <ul className="space-y-2">
-                {context.linkedReps.map((rep) => (
-                  <li
-                    key={`${rep.name}-${rep.state}`}
-                    className="rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2 text-sm"
-                  >
-                    <p className="font-medium text-zinc-100">{rep.name}</p>
-                    <p className="text-xs text-zinc-400">
-                      {rep.state || "—"} · {rep.active ? "Active" : "Inactive"}
-                      {rep.distanceMiles != null ? ` · ${rep.distanceMiles} mi` : ""}
                     </p>
                   </li>
                 ))}
