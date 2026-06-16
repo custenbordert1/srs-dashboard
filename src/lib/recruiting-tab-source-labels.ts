@@ -58,12 +58,12 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     bannerMessage: "At-a-glance KPIs, AI briefing, and priority alerts for leadership.",
   },
   "executive-operations-center": {
-    navLabel: "Operations Center",
-    sourceTag: "Leadership actions",
-    badgeLabel: "Executive operations",
+    navLabel: "Command Center",
+    sourceTag: "Unified operations",
+    badgeLabel: "Recruiting command center",
     kind: "executive",
     bannerMessage:
-      "Action-first leadership command center — project, territory, and recruiter risk with prioritized interventions.",
+      "Unified recruiting command center — alerts, risk, recommendations, follow-ups, and daily actions in one leadership view.",
   },
   "executive-alerts": {
     navLabel: "Executive Alerts",
