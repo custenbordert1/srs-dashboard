@@ -20,8 +20,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     id: "operations",
     label: "Operations",
-    primaryTabs: ["candidates", "recruiter-productivity", "territory-intelligence"],
-    secondaryTabs: ["live-sheet", "job-management", "automation"],
+    primaryTabs: ["candidates", "recruiter-productivity", "job-management", "territory-intelligence"],
+    secondaryTabs: ["live-sheet", "automation"],
   },
   {
     id: "workforce",

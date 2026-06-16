@@ -60,17 +60,20 @@ function TabButton({
   activeTab,
   onTabChange,
   href,
+  className,
 }: {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;
   onTabChange: (tab: DashboardTabId) => void;
   href?: string;
+  className?: string;
 }) {
   const isActive = activeTab === tabId;
   const label = tabLabel(tabId);
+  const classes = [tabButtonClass(isActive), className].filter(Boolean).join(" ");
   if (href) {
     return (
-      <Link href={href} className={tabButtonClass(false)}>
+      <Link href={href} className={classes} aria-current={isActive ? "page" : undefined}>
         {label}
       </Link>
     );
@@ -81,7 +84,7 @@ function TabButton({
       role="tab"
       aria-selected={isActive}
       onClick={() => onTabChange(tabId)}
-      className={tabButtonClass(isActive)}
+      className={classes}
     >
       {label}
     </button>
@@ -161,6 +164,7 @@ export function DashboardTabNav({ activeTab, onTabChange, userRole }: DashboardT
                           setSecondaryOpen(false);
                         }}
                         href={tabId === "workforce-intelligence" ? EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB.href : undefined}
+                        className="w-full text-left"
                       />
                     </div>
                   ))}
