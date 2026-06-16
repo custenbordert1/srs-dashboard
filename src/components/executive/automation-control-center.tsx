@@ -339,23 +339,55 @@ export function AutomationControlCenter() {
           </div>
 
           <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-sm text-amber-100">
-            Safety mode: <strong>{snapshot.safetyMode}</strong> — no Breezy writes or email sends without approval.
-            Live adapters return manual execution required.
+            Safety mode: <strong>{snapshot.safetyMode}</strong> — simulated execution only; no live Breezy
+            writes or email sends.
           </p>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <SummaryCard label="Draft" value={summary.draft} />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            <SummaryCard label="Drafts" value={summary.draft} />
             <SummaryCard label="Pending approval" value={summary.pendingApproval} />
             <SummaryCard label="Approved" value={summary.approved} />
-            <SummaryCard label="Executed this week" value={summary.executedThisWeek} />
+            <SummaryCard label="Executing" value={summary.executing} />
+            <SummaryCard label="Completed" value={summary.completed} />
             <SummaryCard label="Failed" value={summary.failed} />
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <article className={`${UI_SURFACE.panel} p-4`}>
+              <p className="text-xs uppercase tracking-wide text-zinc-500">Execution success rate</p>
+              <p className="mt-1 text-3xl font-semibold tabular-nums text-zinc-50">
+                {summary.executionSuccessRate}%
+              </p>
+            </article>
+            <SummaryCard label="Applicants gained" value={summary.roiGenerated.applicantsGained} />
+            <SummaryCard label="Coverage gained" value={summary.roiGenerated.coverageGained} />
+            <SummaryCard
+              label="Placements influenced"
+              value={summary.roiGenerated.placementsInfluenced}
+            />
+          </div>
+
+          <section className={`${UI_SURFACE.panel} ${UI_SPACE.stackSm}`}>
+            <h3 className={UI_TYPE.sectionTitle}>Queue aging</h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {snapshot.queueAging.map((bucket) => (
+                <article key={bucket.id} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                  <p className="text-xs uppercase tracking-wide text-zinc-500">{bucket.label}</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{bucket.count}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
           <div className="space-y-6">
             <AutomationTable title="Recommended drafts" rows={snapshot.recommended} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Pending approval" rows={snapshot.pendingApproval} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Approved" rows={snapshot.approved} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
             <AutomationTable title="Job refresh drafts" rows={snapshot.jobRefreshDrafts} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
             <AutomationTable title="Posting drafts" rows={snapshot.postingDrafts} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
             <AutomationTable title="Follow-up campaigns" rows={snapshot.followUpCampaigns} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Completed" rows={snapshot.executed} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Failed" rows={snapshot.failed} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
           </div>
 
           {selected ? (

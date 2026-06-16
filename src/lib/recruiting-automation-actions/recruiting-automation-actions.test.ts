@@ -10,18 +10,20 @@ import { DISTRICT_MANAGERS } from "@/lib/dm-territory-map";
 import {
   approveAutomation,
   buildAutomationControlCenterSnapshot,
+  buildAutomationDuplicateKey,
   buildAutomationRecord,
   buildCampaignDraftFromOpportunity,
   buildJobRefreshDraftFromRecommendation,
   buildPostingDraftFromTerritory,
+  buildQueueAgingBuckets,
   canExecuteAutomation,
   executeAutomation,
   executeBreezyJobRefreshAdapter,
   generateDraftsFromIntelligence,
   getMessageTemplate,
   listAutomationRecords,
-  listRecommendationRecords,
   markAutomationCompleted,
+  mergeDuplicateAutomations,
   previewAutomation,
   readAutomationStore,
   renderMessageTemplate,
@@ -29,6 +31,7 @@ import {
   upsertAutomationRecord,
   writeAutomationStore,
 } from "@/lib/recruiting-automation-actions";
+import { listRecommendationRecords } from "@/lib/recommendation-intelligence/store";
 
 const SAMPLE_DM = DISTRICT_MANAGERS[0]!;
 
@@ -106,10 +109,24 @@ function minimalBundle(): RecruitingIntelligenceRouteBundle {
     opportunities: [],
     activeReps: [],
     coverage: {
-      generatedAt: "2026-06-15T12:00:00.000Z",
-      territories: [],
-      projects: [],
-      summary: { totalOpenCalls: 10, averageCoveragePercent: 55, atRiskTerritories: 2 },
+      fetchedAt: "2026-06-15T12:00:00.000Z",
+      territoryStates: null,
+      opportunities: [],
+      executiveSummary: {
+        totalOpenOpportunities: 0,
+        highRiskProjectCount: 0,
+        yellowRiskProjectCount: 0,
+        zeroNearbyRepProjects: 0,
+        averageCoverageScore: 55,
+        lowDensityStates: [],
+        highOpportunityLowRepMarkets: [],
+      },
+      dmAlerts: {
+        highRiskProjects: [],
+        noNearbyReps: [],
+        recruitingUrgency: [],
+        bestAvailableReps: [],
+      },
     },
     fetchedAt: "2026-06-15T12:00:00.000Z",
     candidatesResult: {
@@ -194,6 +211,40 @@ describe("recruiting-automation-actions", () => {
     assert.equal(approved.record?.approvalStatus, "Approved");
     assert.ok(approved.record?.approvedBy);
     assert.ok(approved.record?.approvedAt);
+    assert.ok(approved.record!.auditLog.some((row) => row.action === "approved"));
+  });
+
+  it("updates P38 recommendation status on approve", async () => {
+    const recId = "automation-approve-p38";
+    const draft = buildAutomationRecord({
+      actionType: "job-refresh",
+      owner: SAMPLE_DM,
+      reason: "Approve P38 test",
+      expectedImpact: "+5 applicants",
+      payload: {
+        title: "Test Job",
+        location: "Austin, TX",
+        project: null,
+        reason: "Test",
+        expectedApplicantGain: 5,
+        priority: "high",
+        timing: "Today",
+      },
+      sourceRecommendation: {
+        recommendationId: recId,
+        recommendationType: "refresh-job-posting",
+        source: "autopilot",
+        label: "Refresh",
+      },
+    });
+    await upsertAutomationRecord(draft);
+    await submitAutomationForApproval(session, draft.id);
+    await approveAutomation(session, draft.id);
+
+    const records = await listRecommendationRecords();
+    const tracked = records.find((row) => row.recommendationId === recId);
+    assert.ok(tracked);
+    assert.equal(tracked?.status, "In Progress");
   });
 
   it("blocks unapproved execution via safety rules", async () => {
@@ -209,17 +260,19 @@ describe("recruiting-automation-actions", () => {
     assert.ok(result.error?.includes("Approval required"));
   });
 
-  it("adapter returns manual execution required for Breezy refresh", async () => {
+  it("adapter simulates Breezy refresh without live calls", async () => {
     const draft = buildJobRefreshDraftFromRecommendation(sampleRecommendation());
     const adapter = await executeBreezyJobRefreshAdapter(draft);
-    assert.equal(adapter.manualExecutionRequired, true);
-    assert.ok(adapter.message.includes("Manual execution required"));
+    assert.equal(adapter.ok, true);
+    assert.equal(adapter.manualExecutionRequired, false);
+    assert.ok(adapter.message.includes("Simulated execution"));
 
     const preview = await executeBreezyJobRefreshAdapter(draft, { previewOnly: true });
+    assert.equal(preview.ok, false);
     assert.ok(preview.message.includes("Preview"));
   });
 
-  it("logs audit entries on preview and execution attempt", async () => {
+  it("logs audit entries on preview and simulated execution", async () => {
     const draft = buildJobRefreshDraftFromRecommendation(sampleRecommendation());
     await upsertAutomationRecord(draft);
     await submitAutomationForApproval(session, draft.id);
@@ -230,9 +283,11 @@ describe("recruiting-automation-actions", () => {
     assert.ok(preview.record!.auditLog.some((row) => row.action === "preview"));
 
     const executed = await executeAutomation(session, draft.id);
-    assert.equal(executed.ok, false);
-    assert.ok(executed.adapterMessage?.includes("Manual execution required"));
-    assert.ok(executed.record!.auditLog.some((row) => row.action === "failed" || row.action === "executed"));
+    assert.equal(executed.ok, true);
+    assert.ok(executed.adapterMessage?.includes("Simulated execution"));
+    assert.equal(executed.record?.approvalStatus, "Completed");
+    assert.ok(executed.record!.auditLog.some((row) => row.action === "executed"));
+    assert.ok(executed.record!.auditLog.some((row) => row.action === "completed"));
   });
 
   it("integrates with P38 on manual completion", async () => {
@@ -272,7 +327,45 @@ describe("recruiting-automation-actions", () => {
     assert.equal(tracked?.status, "Executed");
   });
 
-  it("builds control center snapshot with summary counts", async () => {
+  it("starts P38 ROI tracking when execution completes", async () => {
+    const recId = "automation-execute-p38";
+    const draft = buildAutomationRecord({
+      actionType: "job-refresh",
+      owner: SAMPLE_DM,
+      reason: "Execute P38 test",
+      expectedImpact: "+8 applicants",
+      payload: {
+        title: "Execute Job",
+        location: "Dallas, TX",
+        project: null,
+        reason: "Test",
+        expectedApplicantGain: 8,
+        priority: "high",
+        timing: "Today",
+        jobId: "job-execute",
+      },
+      sourceRecommendation: {
+        recommendationId: recId,
+        recommendationType: "refresh-job-posting",
+        source: "autopilot",
+        label: "Refresh",
+      },
+    });
+    await upsertAutomationRecord(draft);
+    await submitAutomationForApproval(session, draft.id);
+    await approveAutomation(session, draft.id);
+
+    const executed = await executeAutomation(session, draft.id);
+    assert.equal(executed.ok, true);
+
+    const records = await listRecommendationRecords();
+    const tracked = records.find((row) => row.recommendationId === recId);
+    assert.ok(tracked);
+    assert.equal(tracked?.status, "Executed");
+    assert.ok(tracked?.executionDate);
+  });
+
+  it("builds control center snapshot with funnel counts and ROI", async () => {
     const draft = buildJobRefreshDraftFromRecommendation(sampleRecommendation());
     const posting = buildPostingDraftFromTerritory({
       territory: "Texas",
@@ -282,8 +375,16 @@ describe("recruiting-automation-actions", () => {
       activeJobs: 0,
       coveragePercent: 40,
     });
+    const approved = { ...draft, id: "approved-1", approvalStatus: "Approved" as const, executionStatus: "Approved" as const };
+    const completed = {
+      ...draft,
+      id: "completed-1",
+      approvalStatus: "Completed" as const,
+      executionStatus: "Completed" as const,
+      executedAt: new Date().toISOString(),
+    };
     await writeAutomationStore({
-      automations: [draft, posting],
+      automations: [draft, posting, approved, completed],
       safetyMode: "requires-approval",
       updatedAt: new Date().toISOString(),
     });
@@ -294,9 +395,47 @@ describe("recruiting-automation-actions", () => {
       generatedAt: new Date().toISOString(),
     });
     assert.equal(snapshot.summary.draft, 2);
-    assert.equal(snapshot.jobRefreshDrafts.length, 1);
+    assert.equal(snapshot.summary.approved, 1);
+    assert.equal(snapshot.summary.completed, 1);
+    assert.equal(snapshot.summary.executedCount, 1);
+    assert.equal(snapshot.summary.executionSuccessRate, 100);
+    assert.ok(snapshot.summary.roiGenerated.applicantsGained > 0);
+    assert.equal(snapshot.jobRefreshDrafts.length, 3);
     assert.equal(snapshot.postingDrafts.length, 1);
+    assert.equal(snapshot.queueAging.length, 4);
     assert.equal(snapshot.safetyMode, "requires-approval");
+  });
+
+  it("sorts automations by highest projected ROI first", () => {
+    const low = buildJobRefreshDraftFromRecommendation(
+      sampleRecommendation({ opportunity: { ...sampleRecommendation().opportunity, estimatedCandidateGain: 2 } }),
+    );
+    const high = buildJobRefreshDraftFromRecommendation(
+      sampleRecommendation({ opportunity: { ...sampleRecommendation().opportunity, estimatedCandidateGain: 20 } }),
+    );
+    const snapshot = buildAutomationControlCenterSnapshot({
+      records: [low, high],
+      safetyMode: "requires-approval",
+      generatedAt: new Date().toISOString(),
+    });
+    assert.equal(snapshot.jobRefreshDrafts[0]?.id, high.id);
+  });
+
+  it("merges duplicate drafts with same job territory action owner", () => {
+    const a = buildJobRefreshDraftFromRecommendation(sampleRecommendation());
+    const b = buildJobRefreshDraftFromRecommendation(sampleRecommendation({ reasoning: "Updated reason" }));
+    b.id = "duplicate-id";
+    const merged = mergeDuplicateAutomations([a, b]);
+    assert.equal(merged.length, 1);
+    assert.equal(buildAutomationDuplicateKey(merged[0]!), buildAutomationDuplicateKey(a));
+  });
+
+  it("builds queue aging buckets for open queue items", () => {
+    const now = Date.parse("2026-06-15T12:00:00.000Z");
+    const draft = buildJobRefreshDraftFromRecommendation(sampleRecommendation());
+    draft.createdAt = new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString();
+    const buckets = buildQueueAgingBuckets([draft], now);
+    assert.equal(buckets.find((b) => b.id === "4-7")?.count, 1);
   });
 
   it("generates drafts from intelligence bundle without duplicate source ids", async () => {

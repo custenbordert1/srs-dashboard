@@ -13,7 +13,11 @@ import {
   resolveAutomationSafetyMode,
 } from "@/lib/recruiting-automation-actions/safety-rules";
 import { executeAutomationAdapter } from "@/lib/recruiting-automation-actions/adapters";
-import { onAutomationCompleted } from "@/lib/recruiting-automation-actions/p38-integration";
+import {
+  onAutomationApproved,
+  onAutomationCompleted,
+  onAutomationExecutionStarted,
+} from "@/lib/recruiting-automation-actions/p38-integration";
 
 async function loadRecord(id: string): Promise<RecruitingAutomationRecord | null> {
   return getAutomationRecord(id);
@@ -76,6 +80,7 @@ export async function approveAutomation(
   });
   const final = { ...next, auditLog: withAudit.auditLog, updatedAt: withAudit.updatedAt };
   await upsertAutomationRecord(final);
+  await onAutomationApproved(session, final);
   return { ok: true, record: final };
 }
 
@@ -130,24 +135,24 @@ export async function executeAutomation(
     executedAt: now,
     updatedAt: now,
   };
-  await upsertAutomationRecord(
-    appendAuditEntry(record, session, {
-      action: "executed",
-      before: { approvalStatus: record.approvalStatus },
-      after: { approvalStatus: "Executing", executedBy: executor, executedAt: now },
-      note: "Execution started",
-    }),
-  );
+  const executingWithAudit = appendAuditEntry(executing, session, {
+    action: "executed",
+    before: { approvalStatus: record.approvalStatus },
+    after: { approvalStatus: "Executing", executedBy: executor, executedAt: now },
+    note: "Execution started",
+  });
+  await upsertAutomationRecord(executingWithAudit);
+  await onAutomationExecutionStarted(session, executingWithAudit);
 
-  const adapterResult = await executeAutomationAdapter(executing);
+  const adapterResult = await executeAutomationAdapter(executingWithAudit);
   const completed: RecruitingAutomationRecord = {
-    ...executing,
+    ...executingWithAudit,
     approvalStatus: adapterResult.ok ? "Completed" : "Failed",
     executionStatus: adapterResult.ok ? "Completed" : "Failed",
     failureReason: adapterResult.ok ? null : adapterResult.message,
     updatedAt: new Date().toISOString(),
   };
-  const withAudit = appendAuditEntry(executing, session, {
+  const withAudit = appendAuditEntry(executingWithAudit, session, {
     action: adapterResult.ok ? "completed" : "failed",
     before: { approvalStatus: "Executing" },
     after: {

@@ -6,6 +6,7 @@ export type {
   AutomationControlCenterSummary,
   AutomationDraftPayload,
   AutomationPriority,
+  AutomationRoiGeneratedSummary,
   AutomationSafetyMode,
   CampaignCandidateEntry,
   FollowUpCampaignDraftPayload,
@@ -62,7 +63,18 @@ export {
   executeEmailCampaignAdapter,
   executeManualTaskAdapter,
 } from "@/lib/recruiting-automation-actions/adapters";
-export { onAutomationCompleted } from "@/lib/recruiting-automation-actions/p38-integration";
+export { onAutomationApproved, onAutomationCompleted, onAutomationExecutionStarted } from "@/lib/recruiting-automation-actions/p38-integration";
+export {
+  buildAutomationDuplicateKey,
+  mergeDuplicateAutomations,
+} from "@/lib/recruiting-automation-actions/duplicate-key";
+export {
+  buildQueueAgingBuckets,
+  computeQueueAgeDays,
+  computeQueueAgingBucketId,
+  type AutomationQueueAgingBucket,
+  type AutomationQueueAgingBucketId,
+} from "@/lib/recruiting-automation-actions/queue-aging";
 export {
   buildCampaignDraftFromOpportunity,
   buildJobRefreshDraftFromRecommendation,

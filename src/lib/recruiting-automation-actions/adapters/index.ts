@@ -6,16 +6,29 @@ export type AdapterResult = {
   manualExecutionRequired: boolean;
 };
 
+function simulatedExecutionMessage(
+  record: RecruitingAutomationRecord,
+  preview: boolean,
+  detail: string,
+): string {
+  return preview
+    ? `Preview: ${detail}`
+    : `Simulated execution complete — ${detail} (no live Breezy/MEL calls).`;
+}
+
 export async function executeBreezyJobRefreshAdapter(
   record: RecruitingAutomationRecord,
   options?: { previewOnly?: boolean },
 ): Promise<AdapterResult> {
   const payload = record.payload;
   const title = "title" in payload ? payload.title : record.reason;
-  const message = options?.previewOnly
-    ? `Preview: would refresh Breezy job posting "${title}" in ${"location" in payload ? payload.location : "territory"}.`
-    : `Manual execution required — Breezy job refresh for "${title}" is not validated for live API writes.`;
-  return { ok: false, message, manualExecutionRequired: true };
+  const location = "location" in payload ? payload.location : "territory";
+  const detail = `refreshed Breezy job posting "${title}" in ${location}`;
+  return {
+    ok: !options?.previewOnly,
+    message: simulatedExecutionMessage(record, Boolean(options?.previewOnly), `would ${detail}`),
+    manualExecutionRequired: false,
+  };
 }
 
 export async function executeBreezyJobCreationAdapter(
@@ -26,10 +39,12 @@ export async function executeBreezyJobCreationAdapter(
   const title = "title" in payload ? payload.title : record.reason;
   const location =
     "city" in payload && "state" in payload ? `${payload.city}, ${payload.state}` : record.territory;
-  const message = options?.previewOnly
-    ? `Preview: would create Breezy job posting "${title}" in ${location}.`
-    : `Manual execution required — Breezy job creation for "${title}" is not validated for live API writes.`;
-  return { ok: false, message, manualExecutionRequired: true };
+  const detail = `created Breezy job posting "${title}" in ${location}`;
+  return {
+    ok: !options?.previewOnly,
+    message: simulatedExecutionMessage(record, Boolean(options?.previewOnly), `would ${detail}`),
+    manualExecutionRequired: false,
+  };
 }
 
 export async function executeEmailCampaignAdapter(
@@ -38,10 +53,12 @@ export async function executeEmailCampaignAdapter(
 ): Promise<AdapterResult> {
   const payload = record.payload;
   const count = "candidates" in payload ? payload.candidates.length : 0;
-  const message = options?.previewOnly
-    ? `Preview: draft campaign to ${count} candidate(s) — no emails will be sent.`
-    : `Manual execution required — email campaign to ${count} candidate(s) is not validated for live sends.`;
-  return { ok: false, message, manualExecutionRequired: true };
+  const detail = `draft campaign to ${count} candidate(s)`;
+  return {
+    ok: !options?.previewOnly,
+    message: simulatedExecutionMessage(record, Boolean(options?.previewOnly), detail),
+    manualExecutionRequired: false,
+  };
 }
 
 export async function executeManualTaskAdapter(
@@ -50,10 +67,12 @@ export async function executeManualTaskAdapter(
 ): Promise<AdapterResult> {
   const payload = record.payload;
   const title = "title" in payload ? payload.title : record.reason;
-  const message = options?.previewOnly
-    ? `Preview: manual task "${title}" assigned to ${record.owner}.`
-    : `Manual execution required — task "${title}" must be completed outside the automation system.`;
-  return { ok: false, message, manualExecutionRequired: true };
+  const detail = `manual task "${title}" assigned to ${record.owner}`;
+  return {
+    ok: !options?.previewOnly,
+    message: simulatedExecutionMessage(record, Boolean(options?.previewOnly), detail),
+    manualExecutionRequired: false,
+  };
 }
 
 export async function executeAutomationAdapter(

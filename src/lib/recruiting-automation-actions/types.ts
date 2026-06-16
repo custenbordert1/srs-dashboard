@@ -1,5 +1,6 @@
 import type { AutopilotRecommendationKind } from "@/lib/recruiting-autopilot/types";
 import type { AutomationRoiView } from "@/lib/executive-trust-roi/types";
+import type { AutomationQueueAgingBucket } from "@/lib/recruiting-automation-actions/queue-aging";
 
 /** Safety modes — only draft-only and requires-approval are enabled initially. */
 export type AutomationSafetyMode = "draft-only" | "requires-approval" | "auto-execute-allowed";
@@ -137,14 +138,25 @@ export type RecruitingAutomationRecord = {
   auditLog: AutomationAuditLogEntry[];
 };
 
+export type AutomationRoiGeneratedSummary = {
+  applicantsGained: number;
+  coverageGained: number;
+  placementsInfluenced: number;
+};
+
 export type AutomationControlCenterSummary = {
   draft: number;
   pendingApproval: number;
   approved: number;
-  executedThisWeek: number;
+  executing: number;
+  completed: number;
   failed: number;
   cancelled: number;
   recommended: number;
+  /** Completed + Failed — terminal execution outcomes. */
+  executedCount: number;
+  executionSuccessRate: number;
+  roiGenerated: AutomationRoiGeneratedSummary;
 };
 
 export type AutomationControlCenterSnapshot = {
@@ -162,6 +174,7 @@ export type AutomationControlCenterSnapshot = {
   cancelled: RecruitingAutomationRecord[];
   all: RecruitingAutomationRecord[];
   automationRoiById: Record<string, AutomationRoiView>;
+  queueAging: AutomationQueueAgingBucket[];
 };
 
 export const DEFAULT_AUTOMATION_SAFETY_MODE: AutomationSafetyMode = "requires-approval";

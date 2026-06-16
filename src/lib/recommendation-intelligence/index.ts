@@ -37,6 +37,7 @@ export {
   buildRecommendationRecord,
   executeRecommendationRecord,
   listRecommendationRecords,
+  markRecommendationApproved,
   markRecommendationExecuted,
   upsertRecommendationRecords,
 } from "@/lib/recommendation-intelligence/store";

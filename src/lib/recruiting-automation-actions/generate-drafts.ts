@@ -11,6 +11,10 @@ import {
   appendAuditEntry,
   buildAutomationRecord,
 } from "@/lib/recruiting-automation-actions/store";
+import {
+  buildAutomationDuplicateKey,
+  mergeDuplicateAutomations,
+} from "@/lib/recruiting-automation-actions/duplicate-key";
 import type {
   FollowUpCampaignType,
   JobRefreshDraftPayload,
@@ -182,6 +186,11 @@ export function generateDraftsFromIntelligence(input: {
       .map((row) => row.sourceRecommendation?.recommendationId)
       .filter((id): id is string => Boolean(id)),
   );
+  const existingDraftKeys = new Set(
+    existing
+      .filter((row) => row.approvalStatus === "Draft")
+      .map((row) => buildAutomationDuplicateKey(row)),
+  );
 
   const alerts = buildAlertSnapshot({ bundle }).alerts;
   const autopilot = buildRecruitingAutopilotSnapshot({ bundle, alerts });
@@ -191,6 +200,7 @@ export function generateDraftsFromIntelligence(input: {
     if (rec.kind !== "refresh-job-posting") continue;
     if (existingSourceIds.has(rec.id)) continue;
     const draft = buildJobRefreshDraftFromRecommendation(rec);
+    if (existingDraftKeys.has(buildAutomationDuplicateKey(draft))) continue;
     drafts.push(
       appendAuditEntry(draft, session, {
         action: "created",
@@ -200,6 +210,7 @@ export function generateDraftsFromIntelligence(input: {
         sourceRecommendationId: rec.id,
       }),
     );
+    existingDraftKeys.add(buildAutomationDuplicateKey(draft));
   }
 
   for (const rec of autopilot.all) {
@@ -220,6 +231,7 @@ export function generateDraftsFromIntelligence(input: {
       project: rec.entityType === "project" ? rec.entityLabel : null,
       recommendationId: rec.id,
     });
+    if (existingDraftKeys.has(buildAutomationDuplicateKey(postingDraft))) continue;
     drafts.push(
       appendAuditEntry(postingDraft, session, {
         action: "created",
@@ -229,6 +241,7 @@ export function generateDraftsFromIntelligence(input: {
         sourceRecommendationId: rec.id,
       }),
     );
+    existingDraftKeys.add(buildAutomationDuplicateKey(postingDraft));
   }
 
   const reEngagement = buildCandidateReEngagementIntelligenceSnapshot({
@@ -250,6 +263,7 @@ export function generateDraftsFromIntelligence(input: {
       expectedCoverageGain: Math.round(opp.territoryImpact / 10),
       recommendationId: recId,
     });
+    if (existingDraftKeys.has(buildAutomationDuplicateKey(campaign))) continue;
     drafts.push(
       appendAuditEntry(campaign, session, {
         action: "created",
@@ -259,6 +273,7 @@ export function generateDraftsFromIntelligence(input: {
         sourceRecommendationId: recId,
       }),
     );
+    existingDraftKeys.add(buildAutomationDuplicateKey(campaign));
   }
 
   return drafts;
@@ -274,5 +289,5 @@ export function syncAutomationDrafts(input: {
   for (const row of generated) {
     byId.set(row.id, row);
   }
-  return [...byId.values()];
+  return mergeDuplicateAutomations([...byId.values()]);
 }

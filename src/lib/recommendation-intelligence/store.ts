@@ -162,6 +162,53 @@ export async function executeRecommendationRecord(
   return next;
 }
 
+export async function markRecommendationApproved(
+  session: AuthSession,
+  input: {
+    recommendationId: string;
+    owner: string;
+    ownerKind?: "dm" | "recruiter" | "operations";
+  },
+): Promise<RecommendationRecord | null> {
+  const store = await readRecommendationStore();
+  const existing = store.records.find((row) => row.recommendationId === input.recommendationId);
+  const now = new Date().toISOString();
+  const ownerName = input.owner.trim() || session.name || session.email;
+
+  const record: RecommendationRecord =
+    existing ??
+    buildRecommendationRecord({
+      recommendationId: input.recommendationId,
+      recommendationType: "refresh-job-posting",
+      source: "autopilot",
+      createdDate: now,
+      owner: ownerName,
+      expectedOutcome: "Approved for automation execution",
+      expectedImpactScore: 50,
+      expectedApplicantGain: 5,
+      scope: {
+        territory: null,
+        recruiter: input.ownerKind === "recruiter" ? ownerName : null,
+        project: null,
+        dmName: input.ownerKind === "dm" ? ownerName : null,
+        entityId: null,
+        entityType: null,
+      },
+      status: "In Progress",
+    });
+
+  const next: RecommendationRecord = {
+    ...record,
+    owner: ownerName,
+    status: "In Progress",
+  };
+
+  const records = store.records.filter((row) => row.recommendationId !== input.recommendationId);
+  records.push(next);
+  await writeRecommendationStore({ records, updatedAt: now });
+  return next;
+}
+
 export async function markRecommendationExecuted(
   recommendationId: string,
 ): Promise<RecommendationRecord | null> {
