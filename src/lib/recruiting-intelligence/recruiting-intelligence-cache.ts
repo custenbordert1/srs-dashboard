@@ -1,4 +1,7 @@
-import { buildRecruitingIntelligenceSnapshot } from "@/lib/recruiting-intelligence/build-recruiting-intelligence-snapshot";
+import {
+  buildRecruitingIntelligenceSnapshot,
+  buildRecruitingIntelligenceSnapshotFromWarmCaches,
+} from "@/lib/recruiting-intelligence/build-recruiting-intelligence-snapshot";
 import type {
   CachedRecruitingIntelligenceResponse,
   GetCachedRecruitingIntelligenceOptions,
@@ -17,9 +20,11 @@ type CacheEntry = {
 };
 
 let cacheEntry: CacheEntry | null = null;
+let globalRefreshPromise: Promise<RecruitingIntelligenceSnapshot> | null = null;
 let hitCount = 0;
 let missCount = 0;
 let staleServeCount = 0;
+let warmServeCount = 0;
 
 function formatAgeLabel(ageMs: number | null): string {
   if (ageMs == null) return "—";
@@ -37,7 +42,7 @@ function buildCacheMeta(
   return {
     cacheStatus: status,
     snapshotAgeMs,
-    isStale: status === "stale-serving" || status === "refreshing",
+    isStale: status === "stale-serving" || status === "refreshing" || status === "warm-serving",
     backgroundRefresh,
     lastRefreshAt: snapshot.fetchedAt,
     recordCounts: {
@@ -59,16 +64,38 @@ async function refreshCacheEntry(): Promise<RecruitingIntelligenceSnapshot> {
   return snapshot;
 }
 
-function startBackgroundRefresh(): void {
-  if (!cacheEntry || cacheEntry.refreshPromise) return;
-  cacheEntry.refreshPromise = refreshCacheEntry()
+function startFullRefresh(): Promise<RecruitingIntelligenceSnapshot> {
+  if (globalRefreshPromise) return globalRefreshPromise;
+  const promise = refreshCacheEntry()
     .catch((error) => {
-      console.error("[recruiting-intelligence-cache] background refresh failed", error);
-      return cacheEntry!.snapshot;
+      console.error("[recruiting-intelligence-cache] refresh failed", error);
+      if (cacheEntry) return cacheEntry.snapshot;
+      return buildRecruitingIntelligenceSnapshotFromWarmCaches();
     })
     .finally(() => {
+      globalRefreshPromise = null;
       if (cacheEntry) cacheEntry.refreshPromise = null;
     });
+  globalRefreshPromise = promise;
+  if (cacheEntry) cacheEntry.refreshPromise = promise;
+  return promise;
+}
+
+function startBackgroundRefresh(): void {
+  if (globalRefreshPromise) return;
+  void startFullRefresh();
+}
+
+async function serveWarmCacheSnapshot(): Promise<RecruitingIntelligenceSnapshot> {
+  const warm = await buildRecruitingIntelligenceSnapshotFromWarmCaches(cacheEntry?.snapshot ?? null);
+  warmServeCount += 1;
+  cacheEntry = {
+    snapshot: warm,
+    expiresAt: Date.now(),
+    refreshPromise: null,
+  };
+  startBackgroundRefresh();
+  return warm;
 }
 
 export async function getCachedRecruitingIntelligenceSnapshot(
@@ -78,7 +105,7 @@ export async function getCachedRecruitingIntelligenceSnapshot(
 
   if (options.forceRefresh) {
     missCount += 1;
-    const snapshot = await refreshCacheEntry();
+    const snapshot = await startFullRefresh();
     return {
       snapshot,
       meta: buildCacheMeta(snapshot, "fresh", false),
@@ -86,11 +113,19 @@ export async function getCachedRecruitingIntelligenceSnapshot(
   }
 
   if (!cacheEntry) {
+    if (options.preferCache) {
+      const warm = await serveWarmCacheSnapshot();
+      return {
+        snapshot: warm,
+        meta: buildCacheMeta(warm, "warm-serving", true),
+      };
+    }
+
     missCount += 1;
-    const snapshot = await refreshCacheEntry();
+    const snapshot = await startFullRefresh();
     return {
       snapshot,
-      meta: buildCacheMeta(snapshot, "miss", false),
+      meta: buildCacheMeta(snapshot, options.preferCache ? "refreshing" : "miss", Boolean(options.preferCache)),
     };
   }
 
@@ -100,7 +135,11 @@ export async function getCachedRecruitingIntelligenceSnapshot(
     hitCount += 1;
     return {
       snapshot: cacheEntry.snapshot,
-      meta: buildCacheMeta(cacheEntry.snapshot, "fresh", Boolean(cacheEntry.refreshPromise)),
+      meta: buildCacheMeta(
+        cacheEntry.snapshot,
+        "fresh",
+        Boolean(cacheEntry.refreshPromise || globalRefreshPromise),
+      ),
     };
   }
 
@@ -110,7 +149,7 @@ export async function getCachedRecruitingIntelligenceSnapshot(
     snapshot: cacheEntry.snapshot,
     meta: buildCacheMeta(
       cacheEntry.snapshot,
-      cacheEntry.refreshPromise ? "refreshing" : "stale-serving",
+      cacheEntry.refreshPromise || globalRefreshPromise ? "refreshing" : "stale-serving",
       true,
     ),
   };
@@ -123,8 +162,9 @@ export function getRecruitingIntelligenceCacheDiagnostics(): RecruitingIntellige
   const isStale = cacheEntry ? cacheEntry.expiresAt <= now : false;
 
   let cacheStatus: RecruitingIntelligenceCacheStatus = "empty";
-  if (snapshot && isStale && cacheEntry?.refreshPromise) cacheStatus = "refreshing";
-  else if (snapshot && isStale) cacheStatus = "stale-serving";
+  if (snapshot && isStale && (cacheEntry?.refreshPromise || globalRefreshPromise)) {
+    cacheStatus = "refreshing";
+  } else if (snapshot && isStale) cacheStatus = "stale-serving";
   else if (snapshot) cacheStatus = "fresh";
 
   return {
@@ -135,7 +175,7 @@ export function getRecruitingIntelligenceCacheDiagnostics(): RecruitingIntellige
     lastBuiltAt: snapshot?.builtAt ?? null,
     ttlMs: RECRUITING_INTELLIGENCE_CACHE_TTL_MS,
     isStale,
-    backgroundRefreshInFlight: Boolean(cacheEntry?.refreshPromise),
+    backgroundRefreshInFlight: Boolean(cacheEntry?.refreshPromise || globalRefreshPromise),
     hitCount,
     missCount,
     staleServeCount,
@@ -145,13 +185,16 @@ export function getRecruitingIntelligenceCacheDiagnostics(): RecruitingIntellige
 
 export function clearRecruitingIntelligenceCache(): void {
   cacheEntry = null;
+  globalRefreshPromise = null;
 }
 
 export function __resetRecruitingIntelligenceCacheForTests(): void {
   cacheEntry = null;
+  globalRefreshPromise = null;
   hitCount = 0;
   missCount = 0;
   staleServeCount = 0;
+  warmServeCount = 0;
 }
 
 export function __setRecruitingIntelligenceCacheForTests(
@@ -163,4 +206,8 @@ export function __setRecruitingIntelligenceCacheForTests(
     expiresAt: Date.now() + (options?.expired ? -1 : RECRUITING_INTELLIGENCE_CACHE_TTL_MS),
     refreshPromise: null,
   };
+}
+
+export function __getWarmServeCountForTests(): number {
+  return warmServeCount;
 }

@@ -1164,6 +1164,15 @@ export async function fetchBreezyJobs(state = "published"): Promise<BreezyJobsRe
   return cached(jobsCache, cacheKey, () => fetchBreezyJobsUncached(state));
 }
 
+/** Returns last cached jobs response without starting a new Breezy fetch. */
+export function peekBreezyJobsCache(state = "published"): BreezyJobsResult | null {
+  const cacheKey = `jobs:${state}`;
+  const entry = jobsCache.get(cacheKey);
+  if (!entry || entry.expiresAt <= Date.now()) return null;
+  if (entry.resolved) return entry.resolved;
+  return null;
+}
+
 async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsResult> {
   ensureBreezyConfigLoaded();
   const apiKey = getBreezyApiKeySync();

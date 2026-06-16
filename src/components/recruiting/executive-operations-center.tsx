@@ -13,6 +13,10 @@ import {
   FOLLOW_UP_PRIORITY_LABELS,
   type ExecutiveAlertStatus,
 } from "@/lib/alerts/executive-alert-status-types";
+import {
+  fetchExecutiveIntelligenceRoute,
+  scheduleExecutiveBackgroundRefresh,
+} from "@/lib/executive-routes/executive-intelligence-client";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import type { CandidateReEngagementIntelligenceSnapshot } from "@/lib/candidate-re-engagement-intelligence";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
@@ -138,33 +142,25 @@ export function ExecutiveOperationsCenter() {
   const [selectedQueueId, setSelectedQueueId] = useState<string | null>(null);
   const [drawerContext, setDrawerContext] = useState<CommandCenterDrawerContext | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     setLoading(true);
     setError(null);
     try {
-      const [commandResponse, reEngagementResponse] = await Promise.all([
-        fetchWithTimeout("/api/unified-recruiting-command-center", {
-          timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-        }),
-        fetchWithTimeout("/api/candidate-re-engagement-intelligence", {
-          timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-        }),
-      ]);
-      const payload = (await commandResponse.json()) as CommandCenterResponse;
-      if (!commandResponse.ok || !payload.ok || !payload.snapshot) {
-        throw new Error(payload.error ?? "Failed to load unified recruiting command center");
-      }
-      setSnapshot(payload.snapshot);
-      setMeta(payload.meta);
+      const command = await fetchExecutiveIntelligenceRoute<UnifiedRecruitingCommandCenterSnapshot>(
+        "/api/unified-recruiting-command-center",
+        { force },
+      );
+      setSnapshot(command.snapshot);
+      setMeta(command.meta);
 
-      const reEngagementPayload = (await reEngagementResponse.json()) as {
-        ok?: boolean;
-        snapshot?: CandidateReEngagementIntelligenceSnapshot;
-      };
-      if (reEngagementResponse.ok && reEngagementPayload.ok && reEngagementPayload.snapshot) {
-        setReEngagementSnapshot(reEngagementPayload.snapshot);
-      } else {
-        setReEngagementSnapshot(null);
+      const reEngagement = await fetchExecutiveIntelligenceRoute<CandidateReEngagementIntelligenceSnapshot>(
+        "/api/candidate-re-engagement-intelligence",
+        { force },
+      );
+      setReEngagementSnapshot(reEngagement.snapshot);
+
+      if (!force) {
+        scheduleExecutiveBackgroundRefresh((nextForce) => void load(nextForce), command.meta);
       }
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");

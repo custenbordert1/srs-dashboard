@@ -5,14 +5,12 @@ import {
   listExecutiveAlertFollowUps,
   listExecutiveAlertStatusOverlays,
 } from "@/lib/alerts/executive-alert-status-store";
-import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
-import {
-  assertBreezyConfigured,
-  logBreezyRouteResult,
-  logBreezyRouteStart,
-} from "@/lib/breezy-route-log";
+import { assertBreezyConfigured } from "@/lib/breezy-route-log";
+import { ExecutiveRouteTimer } from "@/lib/executive-routes/executive-route-profiling";
+import { respondExecutiveIntelligenceRoute } from "@/lib/executive-routes/executive-intelligence-route";
 import { buildWorkforceCapacityForecastSnapshot } from "@/lib/workforce-capacity-forecast";
-import { loadRecruitingIntelligenceRouteBundle } from "@/lib/recruiting-intelligence/load-recruiting-intelligence-route-bundle";
+import { resolveWorkforceCapacityForecastScope } from "@/lib/workforce-capacity-forecast/permissions";
+import type { WorkforceCapacityForecastSnapshot } from "@/lib/workforce-capacity-forecast/types";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -20,43 +18,41 @@ export const maxDuration = 120;
 
 const ROUTE = "/api/workforce-capacity-forecast";
 
-async function loadSnapshotContext(
+function emptyWorkforceSnapshot(
   session: ReturnType<typeof refreshSessionTerritories>,
-  request: Request,
-) {
-  const url = new URL(request.url);
-  const forceRefresh = url.searchParams.get("forceRefresh") === "1";
-  const requestedRecruiter = url.searchParams.get("recruiter")?.trim() || null;
-
-  const unscopedForAdmin = session.role === "admin" || session.role === "executive";
-
-  const loaded = await loadRecruitingIntelligenceRouteBundle(session, {
-    forceRefresh,
-    unscopedForAdmin,
-    scopeRepsToTerritory: !unscopedForAdmin,
-  });
-
-  if (!loaded.ok) {
-    return { ok: false as const, failure: loaded.failure };
-  }
-
-  const followUps = await listExecutiveAlertFollowUps();
-  const statusOverlays = await listExecutiveAlertStatusOverlays(session.userId);
-  const actionLogs = await listExecutiveAlertActionLogs();
-  const snapshot = buildWorkforceCapacityForecastSnapshot({
-    session,
-    bundle: loaded.bundle,
-    followUps,
-    statusOverlays,
-    actionLogs,
-    requestedRecruiter,
-  });
-
+  fetchedAt: string,
+  requestedRecruiter: string | null,
+): WorkforceCapacityForecastSnapshot {
+  const scope = resolveWorkforceCapacityForecastScope(session, requestedRecruiter);
   return {
-    ok: true as const,
-    bundle: loaded.bundle,
-    snapshot,
-    requestedRecruiter,
+    generatedAt: fetchedAt,
+    planDate: fetchedAt.slice(0, 10),
+    scope,
+    recruiterCapacity: [],
+    dmCapacity: [],
+    hiringForecast: [],
+    coverageForecasts: [],
+    staffingRisks: [],
+    capacityPlanning: {
+      recruitersNeedingHelp: [],
+      recruitersWithSpareCapacity: [],
+      dmsAtRisk: [],
+      projectsRequiringStaffingSupport: [],
+    },
+    resourceBalancing: [],
+    executiveOutlook: {
+      headline: "Serving cached intelligence — workforce forecast refreshes in background.",
+      hiringForecast: [],
+      capacitySummary: {
+        overloadedRecruiters: 0,
+        underutilizedRecruiters: 0,
+        dmsAtRisk: 0,
+        averageRecruiterCapacity: 0,
+        averageDmCapacityScore: 0,
+      },
+      topRisks: [],
+      recommendedActions: [],
+    },
   };
 }
 
@@ -70,38 +66,59 @@ export async function GET(request: Request) {
   const session = refreshSessionTerritories(guard.session);
   auditTerritoryAccess(session, ROUTE);
 
-  await logBreezyRouteStart(ROUTE, session);
   const breezyCheck = await assertBreezyConfigured(ROUTE);
   if (!breezyCheck.ok) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const result = await loadSnapshotContext(session, request);
-  if (!result.ok) {
-    const status = breezyFailureHttpStatus(result.failure.failure.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false });
-    return NextResponse.json(breezyFailureBody(result.failure.failure), { status });
-  }
+  const url = new URL(request.url);
+  const requestedRecruiter = url.searchParams.get("recruiter")?.trim() || null;
+  const unscopedForAdmin = session.role === "admin" || session.role === "executive";
+  const timer = new ExecutiveRouteTimer(ROUTE);
 
-  logBreezyRouteResult(ROUTE, 200, {
-    role: session.role,
-    breezyOk: true,
-    recruiterCount: result.snapshot.recruiterCapacity.length,
-    dmCount: result.snapshot.dmCapacity.length,
-    riskCount: result.snapshot.staffingRisks.length,
-    scopedToTerritory: result.snapshot.scope.scopedToTerritory,
-  });
-
-  return NextResponse.json({
-    ok: true,
-    snapshot: result.snapshot,
-    meta: {
-      partialSync: result.bundle.candidatesResult.partial ?? false,
-      refreshedAt: result.bundle.fetchedAt,
-      intelligenceCache: result.bundle.intelligenceCache,
-      scopedToTerritory: result.snapshot.scope.scopedToTerritory,
-      scopedToRecruiter: result.snapshot.scope.scopedToRecruiter,
-      requestedRecruiter: result.requestedRecruiter,
+  const response = await respondExecutiveIntelligenceRoute({
+    route: ROUTE,
+    session,
+    request,
+    timer,
+    bundleOptions: {
+      unscopedForAdmin,
+      scopeRepsToTerritory: !unscopedForAdmin,
+    },
+    build: async ({ bundle, deferExpensive }) => {
+      if (deferExpensive) {
+        return {
+          snapshot: emptyWorkforceSnapshot(session, bundle.fetchedAt, requestedRecruiter),
+          logExtras: { deferred: true, phase: "workforce_forecast" },
+        };
+      }
+      const followUps = await listExecutiveAlertFollowUps();
+      const statusOverlays = await listExecutiveAlertStatusOverlays(session.userId);
+      const actionLogs = await listExecutiveAlertActionLogs();
+      const snapshot = buildWorkforceCapacityForecastSnapshot({
+        session,
+        bundle,
+        followUps,
+        statusOverlays,
+        actionLogs,
+        requestedRecruiter,
+      });
+      return {
+        snapshot,
+        logExtras: {
+          recruiterCount: snapshot.recruiterCapacity.length,
+          dmCount: snapshot.dmCapacity.length,
+          riskCount: snapshot.staffingRisks.length,
+          phase: "workforce_forecast",
+        },
+        responseExtras: {
+          scopedToTerritory: snapshot.scope.scopedToTerritory,
+          scopedToRecruiter: snapshot.scope.scopedToRecruiter,
+          requestedRecruiter,
+        },
+      };
     },
   });
+
+  return response;
 }

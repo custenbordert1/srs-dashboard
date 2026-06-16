@@ -8,6 +8,23 @@ export function countOpenCalls(bundle: RecruitingIntelligenceRouteBundle): numbe
   return bundle.opportunities.filter((row) => row.openStatus && !row.isStaffed).length;
 }
 
+export function buildCommandCenterKpisFromBundle(
+  bundle: RecruitingIntelligenceRouteBundle,
+): CommandCenterKpis {
+  return {
+    openCalls: countOpenCalls(bundle),
+    criticalTerritories: bundle.coverage.executiveSummary.highRiskProjectCount,
+    zeroPipelineStores: bundle.coverage.executiveSummary.zeroNearbyRepProjects,
+    coveragePercent: Math.round(bundle.coverage.executiveSummary.averageCoverageScore),
+    hiringVelocity: countHiresLast7Days(bundle.candidates, bundle.fetchedAt),
+    predictedCoverageGap: Math.max(
+      0,
+      100 - Math.round(bundle.coverage.executiveSummary.averageCoverageScore),
+    ),
+    actionsDueToday: 0,
+  };
+}
+
 export function buildCommandCenterKpis(input: {
   bundle: RecruitingIntelligenceRouteBundle;
   riskSnapshot: PredictiveTerritoryRiskSnapshot;

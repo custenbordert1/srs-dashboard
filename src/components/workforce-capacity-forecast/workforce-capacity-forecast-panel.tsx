@@ -2,6 +2,10 @@
 
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
+import {
+  fetchExecutiveIntelligenceRoute,
+  scheduleExecutiveBackgroundRefresh,
+} from "@/lib/executive-routes/executive-intelligence-client";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
 import {
@@ -84,19 +88,18 @@ export function WorkforceCapacityForecastPanel({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchWithTimeout("/api/workforce-capacity-forecast", {
-        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-      });
-      const payload = (await response.json()) as ForecastResponse;
-      if (!response.ok || !payload.ok || !payload.snapshot) {
-        throw new Error(payload.error ?? "Failed to load workforce capacity forecast");
-      }
-      setSnapshot(payload.snapshot);
-      setMeta(payload.meta);
+      const { snapshot: nextSnapshot, meta: nextMeta } =
+        await fetchExecutiveIntelligenceRoute<WorkforceCapacityForecastSnapshot>(
+          "/api/workforce-capacity-forecast",
+          { force },
+        );
+      setSnapshot(nextSnapshot);
+      setMeta(nextMeta);
+      if (!force) scheduleExecutiveBackgroundRefresh((nextForce) => void load(nextForce), nextMeta);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");
     } finally {

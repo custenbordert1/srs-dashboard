@@ -10,6 +10,10 @@ import {
   type DailyActionPlanSnapshot,
   writeDailyActionExecutionContext,
 } from "@/lib/executive-daily-action-plan";
+import {
+  fetchExecutiveIntelligenceRoute,
+  scheduleExecutiveBackgroundRefresh,
+} from "@/lib/executive-routes/executive-intelligence-client";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
@@ -165,19 +169,15 @@ export function ExecutiveDailyActionPlan() {
     else setLoading(true);
     setError(null);
     try {
-      const params = force ? "?forceRefresh=1" : "";
-      const response = await fetchWithTimeout(`/api/executive-daily-action-plan${params}`, {
-        cache: "no-store",
-        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-      });
-      const parsed = (await response.json()) as DailyActionPlanResponse;
-      if (!response.ok || !parsed.ok || !parsed.snapshot) {
-        throw new Error(parsed.error ?? "Failed to load daily action plan");
-      }
-      setData(parsed);
-      setStatusByAlertId(
-        Object.fromEntries(parsed.snapshot.all.map((row) => [row.alertId, row.status])),
+      const { snapshot, meta } = await fetchExecutiveIntelligenceRoute<DailyActionPlanSnapshot>(
+        "/api/executive-daily-action-plan",
+        { force },
       );
+      setData({ ok: true, snapshot, meta });
+      setStatusByAlertId(
+        Object.fromEntries(snapshot.all.map((row) => [row.alertId, row.status])),
+      );
+      if (!force) scheduleExecutiveBackgroundRefresh((nextForce) => void load(nextForce), meta);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");
     } finally {

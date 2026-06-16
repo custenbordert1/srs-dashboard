@@ -47,6 +47,7 @@ export type BuildWorkforceCapacityForecastInput = {
   actionLogs?: ExecutiveAlertActionLogEntry[];
   requestedRecruiter?: string | null;
   referenceMs?: number;
+  deferExpensive?: boolean;
 };
 
 function buildImpactContext(input: {

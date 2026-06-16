@@ -2,6 +2,10 @@
 
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
+import {
+  fetchExecutiveIntelligenceRoute,
+  scheduleExecutiveBackgroundRefresh,
+} from "@/lib/executive-routes/executive-intelligence-client";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
 import {
   PREDICTIVE_RISK_LEVEL_LABELS,
@@ -178,16 +182,12 @@ export function PredictiveTerritoryRiskDashboard() {
     else setLoading(true);
     setError(null);
     try {
-      const params = force ? "?forceRefresh=1" : "";
-      const response = await fetchWithTimeout(`/api/predictive-territory-risk${params}`, {
-        cache: "no-store",
-        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-      });
-      const parsed = (await response.json()) as PredictiveRiskResponse;
-      if (!response.ok || !parsed.ok || !parsed.snapshot) {
-        throw new Error(parsed.error ?? "Failed to load predictive territory risk");
-      }
-      setData(parsed);
+      const { snapshot, meta } = await fetchExecutiveIntelligenceRoute<PredictiveTerritoryRiskSnapshot>(
+        "/api/predictive-territory-risk",
+        { force },
+      );
+      setData({ ok: true, snapshot, meta });
+      if (!force) scheduleExecutiveBackgroundRefresh((nextForce) => void load(nextForce), meta);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");
     } finally {

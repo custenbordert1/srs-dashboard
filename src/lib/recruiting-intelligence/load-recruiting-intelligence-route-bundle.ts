@@ -28,6 +28,7 @@ export type RecruitingIntelligenceRouteBundle = {
 
 export type LoadRecruitingIntelligenceRouteBundleOptions = {
   forceRefresh?: boolean;
+  preferCache?: boolean;
   unscopedForAdmin?: boolean;
   territoryStates?: string[] | null;
   scopeRepsToTerritory?: boolean;
@@ -46,6 +47,7 @@ export async function loadRecruitingIntelligenceRouteBundle(
 > {
   const { snapshot, meta: intelligenceCache } = await getCachedRecruitingIntelligenceSnapshot({
     forceRefresh: options.forceRefresh,
+    preferCache: options.preferCache,
   });
 
   if (!snapshot.jobsResult.ok) {

@@ -11,7 +11,7 @@ import { buildRecruitingAutopilotSnapshot } from "@/lib/recruiting-autopilot";
 import type { RecruitingIntelligenceRouteBundle } from "@/lib/recruiting-intelligence/load-recruiting-intelligence-route-bundle";
 import { buildCommandCenterExecutiveBriefing } from "@/lib/unified-recruiting-command-center/build-executive-briefing";
 import { buildDrawerContextsByQueueId } from "@/lib/unified-recruiting-command-center/build-drawer-context";
-import { buildCommandCenterKpis } from "@/lib/unified-recruiting-command-center/build-kpis";
+import { buildCommandCenterKpis, buildCommandCenterKpisFromBundle } from "@/lib/unified-recruiting-command-center/build-kpis";
 import { buildCommandCenterProductivityMetrics } from "@/lib/unified-recruiting-command-center/build-productivity-metrics";
 import { buildUnifiedWorkQueue } from "@/lib/unified-recruiting-command-center/build-work-queue";
 import type { UnifiedRecruitingCommandCenterSnapshot } from "@/lib/unified-recruiting-command-center/types";
@@ -22,6 +22,7 @@ export type BuildUnifiedRecruitingCommandCenterInput = {
   statusOverlays?: ExecutiveAlertStatusOverlay[];
   actionLogs?: ExecutiveAlertActionLogEntry[];
   referenceMs?: number;
+  deferExpensive?: boolean;
 };
 
 function isOverdueFollowUp(followUp: ExecutiveAlertFollowUp, referenceMs: number): boolean {
@@ -41,6 +42,68 @@ export function buildUnifiedRecruitingCommandCenterSnapshot(
 
   const alertSnapshot = buildAlertSnapshot({ bundle });
   const alerts = mergeAlertStatuses(alertSnapshot.alerts, statusOverlays);
+
+  if (input.deferExpensive) {
+    const kpis = buildCommandCenterKpisFromBundle(bundle);
+    const criticalAlerts = mergeAlertStatuses(alertSnapshot.topCritical, statusOverlays).slice(0, 8);
+    const overdueFollowUps = followUps.filter((followUp) =>
+      isOverdueFollowUp(followUp, referenceMs),
+    );
+    const workQueue = buildUnifiedWorkQueue({
+      alerts: criticalAlerts,
+      recommendations: [],
+      followUps,
+      dailyActions: [],
+      statusOverlays,
+      referenceMs,
+    });
+    const productivityMetrics = buildCommandCenterProductivityMetrics({
+      statusOverlays,
+      followUps,
+      resolvedDailyActions: [],
+      referenceMs,
+    });
+  return {
+    generatedAt: bundle.fetchedAt,
+    planDate: new Date(referenceMs).toISOString().slice(0, 10),
+    kpis,
+    leftColumn: {
+      criticalAlerts,
+      todaysActions: [],
+      overdueFollowUps,
+    },
+    centerColumn: {
+      territoryRiskDashboard: [],
+      coverageForecasts: [],
+      hiringForecasts: [],
+    },
+    rightColumn: {
+      topRecommendations: [],
+      dmPerformanceWatchlist: [],
+      projectsAtRisk: [],
+    },
+    workQueue,
+    briefing: {
+      headline: "Serving cached intelligence — full briefing refreshes in background.",
+      topRisks: [],
+      topOpportunities: [],
+      territoriesNeedingAttention: [],
+      recommendedActions: [],
+      expectedOutcomes: [],
+    },
+    productivityMetrics,
+    drawerContextsByQueueId: buildDrawerContextsByQueueId({
+      workQueue,
+      alerts,
+      recommendations: [],
+      dailyActions: [],
+      followUps,
+      actionLogs,
+      territoryRows: [],
+    }),
+  };
+  }
+
   const riskSnapshot = buildPredictiveTerritoryRiskSnapshot({
     bundle,
     alerts,

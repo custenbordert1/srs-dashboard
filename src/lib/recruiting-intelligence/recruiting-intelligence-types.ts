@@ -11,6 +11,7 @@ import type { MelProjectsDataResult } from "@/lib/mel-projects-sheet";
 export type RecruitingIntelligenceCacheStatus =
   | "fresh"
   | "stale-serving"
+  | "warm-serving"
   | "refreshing"
   | "miss"
   | "empty";
@@ -71,6 +72,8 @@ export type RecruitingIntelligenceCacheMeta = {
 
 export type GetCachedRecruitingIntelligenceOptions = {
   forceRefresh?: boolean;
+  /** Serve warmed Breezy/MEL caches immediately; refresh full snapshot in background. */
+  preferCache?: boolean;
 };
 
 export type CachedRecruitingIntelligenceResponse = {
