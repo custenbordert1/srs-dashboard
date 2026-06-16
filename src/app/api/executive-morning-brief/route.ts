@@ -55,6 +55,19 @@ function emptyMorningBriefSnapshot(fetchedAt: string): ExecutiveMorningBriefSnap
       },
       bodyText: "",
     },
+    ceoHome: {
+      narrative: "Serving cached intelligence — executive home refreshes in background.",
+      onTrack: "yellow",
+      recruitingHealth: { score: 0, light: "yellow", label: "at-risk" },
+      coverage: { score: 0, light: "yellow", trendLabel: "—" },
+      hiringForecast: { summary: "Forecast loading…", light: "yellow", horizon14Coverage: null },
+      criticalTerritories: [],
+      topPriorities: [],
+      topRisks: [],
+      topOpportunities: [],
+      automationQueue: { pendingApprovals: 0, draftCount: 0, summary: "No automations queued", light: "green" },
+      recommendedActions: [],
+    },
   };
 }
 

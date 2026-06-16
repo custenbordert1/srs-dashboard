@@ -117,12 +117,12 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
       "Review, approve, and track recruiting automation drafts — job refreshes, new postings, and follow-up campaigns. Approval required by default; no live Breezy or email execution without sign-off.",
   },
   "executive-morning-brief": {
-    navLabel: "Executive Morning Brief",
-    sourceTag: "Daily leadership digest",
-    badgeLabel: "Morning brief",
+    navLabel: "Executive Home",
+    sourceTag: "CEO Mode",
+    badgeLabel: "Executive home",
     kind: "executive",
     bannerMessage:
-      "Single leadership briefing — recruiting health, territory risks, forecasts, automation opportunities, and top priorities for the day. Cache-first intelligence only.",
+      "Default leadership landing page — recruiting health, risks, priorities, opportunities, and recommended actions in under 30 seconds. Cache-first intelligence only.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",

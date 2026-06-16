@@ -22,6 +22,9 @@ export function buildMorningBriefPriorities(input: {
     sourceType: "daily-action" as const,
     sourceId: item.alertId,
     territory: item.recommendation.entityLabel ?? null,
+    dueDate: item.dueDate,
+    navigationTabId: item.navigation.tabId,
+    navigationElementId: item.navigation.elementId,
   }));
 
   const fromAutopilot = autopilot.all.slice(0, 6).map((rec, index) => ({
@@ -34,6 +37,9 @@ export function buildMorningBriefPriorities(input: {
     sourceType: "autopilot" as const,
     sourceId: rec.id,
     territory: rec.entityLabel ?? null,
+    dueDate: null,
+    navigationTabId: rec.navigation.tabId,
+    navigationElementId: rec.navigation.elementId,
   }));
 
   const combined = [...fromDaily, ...fromAutopilot]

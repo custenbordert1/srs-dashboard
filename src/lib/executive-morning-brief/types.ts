@@ -1,6 +1,9 @@
 import type { EffectivenessRating } from "@/lib/recommendation-intelligence/types";
 import type { PredictiveRiskLevel, PredictiveRiskTrend } from "@/lib/predictive-territory-risk/types";
 import type { HiringForecastHorizon } from "@/lib/workforce-capacity-forecast/types";
+import type { DashboardTabId } from "@/lib/recruiting-tab-source-labels";
+
+export type TrafficLight = "green" | "yellow" | "red";
 
 export type TrendDirection = "up" | "down" | "flat";
 
@@ -32,6 +35,9 @@ export type MorningBriefPriority = {
   sourceType: "daily-action" | "autopilot" | "alert" | "automation";
   sourceId: string;
   territory: string | null;
+  dueDate: string | null;
+  navigationTabId: DashboardTabId;
+  navigationElementId?: string;
 };
 
 export type TerritoryRiskSummaryRow = {
@@ -104,9 +110,47 @@ export type EmailDigestDraft = {
   bodyText: string;
 };
 
+export type CeoRiskItem = {
+  title: string;
+  detail: string;
+  territory: string | null;
+  light: TrafficLight;
+};
+
+export type CeoRecommendedAction = {
+  id: string;
+  title: string;
+  expectedImpact: string;
+  owner: string | null;
+  dueDate: string | null;
+  impactScore: number;
+  navigationTabId: DashboardTabId;
+  navigationElementId?: string;
+};
+
+export type CeoHomeSnapshot = {
+  narrative: string;
+  onTrack: TrafficLight;
+  recruitingHealth: { score: number; light: TrafficLight; label: ExecutiveMorningBriefSnapshot["recruitingHealth"]["tier"] };
+  coverage: { score: number; light: TrafficLight; trendLabel: string };
+  hiringForecast: { summary: string; light: TrafficLight; horizon14Coverage: number | null };
+  criticalTerritories: TerritoryRiskSummaryRow[];
+  topPriorities: MorningBriefPriority[];
+  topRisks: CeoRiskItem[];
+  topOpportunities: RecommendationTypeSummary[];
+  automationQueue: {
+    pendingApprovals: number;
+    draftCount: number;
+    summary: string;
+    light: TrafficLight;
+  };
+  recommendedActions: CeoRecommendedAction[];
+};
+
 export type ExecutiveMorningBriefSnapshot = {
   generatedAt: string;
   planDate: string;
+  ceoHome: CeoHomeSnapshot;
   scorecard: ScorecardMetric[];
   recruitingHealth: {
     score: number;

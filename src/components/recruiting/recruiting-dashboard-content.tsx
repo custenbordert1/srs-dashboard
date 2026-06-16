@@ -86,7 +86,7 @@ export function RecruitingDashboardContent({
   userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>(() =>
-    userRole && isAdminRole(userRole) ? "executive-alerts" : "executive-summary",
+    userRole && isAdminRole(userRole) ? "executive-morning-brief" : "executive-summary",
   );
 
   useEffect(() => {

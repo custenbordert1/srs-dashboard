@@ -9,6 +9,7 @@ import {
   buildMorningBriefExportCsv,
   buildMorningBriefPrintHtml,
   buildMorningBriefPriorities,
+  buildCeoHomeSnapshot,
 } from "@/lib/executive-morning-brief";
 import type { RecruitingIntelligenceRouteBundle } from "@/lib/recruiting-intelligence/load-recruiting-intelligence-route-bundle";
 
@@ -229,5 +230,21 @@ describe("executive morning brief", () => {
     });
     assert.equal(snapshot.dailyPriorities.length, 0);
     assert.match(snapshot.narratives.today, /cached intelligence/i);
+    assert.equal(snapshot.ceoHome.onTrack, "yellow");
+  });
+
+  it("builds CEO home snapshot with traffic lights and narrative", async () => {
+    const snapshot = await buildExecutiveMorningBriefSnapshot({
+      bundle: minimalBundle(),
+      persistRecommendations: false,
+    });
+    assert.ok(snapshot.ceoHome.narrative.length > 20);
+    assert.ok(["green", "yellow", "red"].includes(snapshot.ceoHome.onTrack));
+    assert.ok(snapshot.ceoHome.topPriorities.length <= 5);
+    assert.ok(snapshot.ceoHome.topRisks.length <= 5);
+    assert.ok(snapshot.ceoHome.topOpportunities.length <= 5);
+
+    const rebuilt = buildCeoHomeSnapshot(snapshot);
+    assert.equal(rebuilt.narrative, snapshot.ceoHome.narrative);
   });
 });

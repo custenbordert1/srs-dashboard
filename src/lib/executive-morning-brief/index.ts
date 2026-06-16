@@ -1,5 +1,10 @@
+export { buildCeoHomeSnapshot } from "@/lib/executive-morning-brief/build-ceo-home";
+
 export type {
   AutomationOpportunitySummary,
+  CeoHomeSnapshot,
+  CeoRecommendedAction,
+  CeoRiskItem,
   CoverageForecastHorizonSummary,
   EmailDigestDraft,
   ExecutiveMorningBriefSnapshot,
@@ -10,6 +15,7 @@ export type {
   RecommendationTypeSummary,
   ScorecardMetric,
   TerritoryRiskSummaryRow,
+  TrafficLight,
   TrendDirection,
 } from "@/lib/executive-morning-brief/types";
 
