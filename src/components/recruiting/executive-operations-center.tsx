@@ -1,6 +1,7 @@
 "use client";
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
+import { AutonomousRecruitingPlannerPanel } from "@/components/autonomous-recruiting-planner/autonomous-recruiting-planner-panel";
 import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
 import { WorkforceCapacityForecastPanel } from "@/components/workforce-capacity-forecast/workforce-capacity-forecast-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
@@ -325,6 +326,10 @@ export function ExecutiveOperationsCenter() {
 
           <section className={`${UI_SURFACE.panel} border-violet-500/20 bg-violet-500/5 p-5`}>
             <CoverageOptimizationSimulatorPanel compact />
+          </section>
+
+          <section className={`${UI_SURFACE.panel} border-rose-500/20 bg-rose-500/5 p-5`}>
+            <AutonomousRecruitingPlannerPanel compact variant="executive" />
           </section>
 
           <section className={`${UI_SURFACE.panel} border-teal-500/20 bg-teal-500/5 p-5`}>

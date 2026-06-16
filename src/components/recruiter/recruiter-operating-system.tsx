@@ -2,6 +2,7 @@
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
 import { CandidateReEngagementOutreachCenter } from "@/components/recruiter/candidate-re-engagement-outreach-center";
+import { AutonomousRecruitingPlannerPanel } from "@/components/autonomous-recruiting-planner/autonomous-recruiting-planner-panel";
 import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
 import { WorkforceCapacityForecastPanel } from "@/components/workforce-capacity-forecast/workforce-capacity-forecast-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
@@ -283,6 +284,10 @@ export function RecruiterOperatingSystem({ user }: RecruiterOperatingSystemProps
 
             <SectionCard title="Coverage Simulator" subtitle="Test scenarios before taking action">
               <CoverageOptimizationSimulatorPanel compact />
+            </SectionCard>
+
+            <SectionCard title="Recruiting Planner" subtitle="Weekly work plan and priorities">
+              <AutonomousRecruitingPlannerPanel compact variant="recruiter" />
             </SectionCard>
           </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
+import { AutonomousRecruitingPlannerPanel } from "@/components/autonomous-recruiting-planner/autonomous-recruiting-planner-panel";
 import { CoverageOptimizationSimulatorPanel } from "@/components/coverage-optimization-simulator/coverage-optimization-simulator-panel";
 import { WorkforceCapacityForecastPanel } from "@/components/workforce-capacity-forecast/workforce-capacity-forecast-panel";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
@@ -406,6 +407,13 @@ export function DmOperatingSystem({ user }: DmOperatingSystemProps) {
             subtitle="Test territory and recruiting decisions before acting"
           >
             <CoverageOptimizationSimulatorPanel compact />
+          </SectionCard>
+
+          <SectionCard
+            title="Autonomous Recruiting Planner"
+            subtitle="7, 14, and 30-day territory action plans"
+          >
+            <AutonomousRecruitingPlannerPanel compact variant="dm" />
           </SectionCard>
 
           <p className="text-xs text-zinc-600">
