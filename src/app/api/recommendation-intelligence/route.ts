@@ -4,6 +4,7 @@ import { assertBreezyConfigured } from "@/lib/breezy-route-log";
 import { ExecutiveRouteTimer } from "@/lib/executive-routes/executive-route-profiling";
 import { respondExecutiveIntelligenceRoute } from "@/lib/executive-routes/executive-intelligence-route";
 import { buildRecommendationIntelligenceSnapshot } from "@/lib/recommendation-intelligence";
+import { buildExecutiveTrustRoiSnapshot } from "@/lib/executive-trust-roi";
 import type { RecommendationIntelligenceSnapshot } from "@/lib/recommendation-intelligence/types";
 import { NextResponse } from "next/server";
 
@@ -37,6 +38,7 @@ function emptyRecommendationIntelligenceSnapshot(
     effectivenessTrends: [],
     recentRecords: [],
     learnedConfidenceAdjustments: {},
+    trustRoi: buildExecutiveTrustRoiSnapshot({ records: [], generatedAt: fetchedAt }),
   };
 }
 

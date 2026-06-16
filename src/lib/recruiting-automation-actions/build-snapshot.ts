@@ -3,6 +3,8 @@ import type {
   AutomationControlCenterSummary,
   RecruitingAutomationRecord,
 } from "@/lib/recruiting-automation-actions/types";
+import { enrichAutomationWithRoi } from "@/lib/executive-trust-roi/enrich-automation";
+import type { RecommendationRecord } from "@/lib/recommendation-intelligence/types";
 import { resolveAutomationSafetyMode } from "@/lib/recruiting-automation-actions/safety-rules";
 import type { AutomationSafetyMode } from "@/lib/recruiting-automation-actions/types";
 
@@ -36,12 +38,17 @@ export function buildAutomationControlCenterSnapshot(input: {
   records: RecruitingAutomationRecord[];
   safetyMode: AutomationSafetyMode;
   generatedAt: string;
+  recommendationRecords?: RecommendationRecord[];
 }): AutomationControlCenterSnapshot {
   const referenceMs = Date.parse(input.generatedAt);
   const mode = resolveAutomationSafetyMode(input.safetyMode);
   const records = [...input.records].sort(
     (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt),
   );
+  const automationRoiById = enrichAutomationWithRoi({
+    automations: records,
+    records: input.recommendationRecords ?? [],
+  });
 
   return {
     generatedAt: input.generatedAt,
@@ -57,5 +64,6 @@ export function buildAutomationControlCenterSnapshot(input: {
     failed: records.filter((r) => r.approvalStatus === "Failed"),
     cancelled: records.filter((r) => r.approvalStatus === "Cancelled"),
     all: records,
+    automationRoiById,
   };
 }

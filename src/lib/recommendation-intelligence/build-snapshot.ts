@@ -1,5 +1,6 @@
 import { buildAlertSnapshot } from "@/lib/alerts/build-alert-snapshot";
 import type { ExecutiveAlertFollowUp } from "@/lib/alerts/executive-alert-status-types";
+import { buildExecutiveTrustRoiSnapshot } from "@/lib/executive-trust-roi";
 import { buildDailyActionPlanSnapshot } from "@/lib/executive-daily-action-plan";
 import { buildRecruitingAutopilotSnapshot } from "@/lib/recruiting-autopilot";
 import { summarizeLearnedAdjustments } from "@/lib/recommendation-intelligence/confidence-adjustment";
@@ -126,5 +127,9 @@ export async function buildRecommendationIntelligenceSnapshot(
       .sort((a, b) => Date.parse(b.createdDate) - Date.parse(a.createdDate))
       .slice(0, 20),
     learnedConfidenceAdjustments: learnedRates,
+    trustRoi: buildExecutiveTrustRoiSnapshot({
+      records: processed,
+      generatedAt: bundle.fetchedAt,
+    }),
   };
 }

@@ -12,6 +12,10 @@ import {
 } from "@/lib/executive-daily-action-plan/group-daily-actions";
 import type { DailyActionPlanSnapshot } from "@/lib/executive-daily-action-plan/types";
 import { buildRecruitingAutopilotSnapshot } from "@/lib/recruiting-autopilot";
+import {
+  applyLearnedConfidenceToRecommendations,
+} from "@/lib/recommendation-intelligence/confidence-adjustment";
+import type { TrustFlag } from "@/lib/executive-trust-roi/types";
 import type { RecruitingIntelligenceRouteBundle } from "@/lib/recruiting-intelligence/load-recruiting-intelligence-route-bundle";
 
 export type BuildDailyActionPlanInput = {
@@ -20,6 +24,8 @@ export type BuildDailyActionPlanInput = {
   followUps?: ExecutiveAlertFollowUp[];
   statusOverlays?: ExecutiveAlertStatusOverlay[];
   referenceMs?: number;
+  learnedRates?: Record<string, number>;
+  trustByType?: Record<string, TrustFlag>;
 };
 
 function statusMapFromOverlays(
@@ -47,11 +53,19 @@ export function buildDailyActionPlanSnapshot(
     followUps,
   });
 
+  const learnedRates = input.learnedRates ?? {};
+  const applyConfidence = (rows: typeof autopilot.all) =>
+    Object.keys(learnedRates).length > 0
+      ? applyLearnedConfidenceToRecommendations(rows, learnedRates)
+      : rows;
+
   const statusByAlertId = statusMapFromOverlays(overlays);
 
-  const sourceRecommendations = autopilot.executiveSummary.topActionsToday.length
-    ? autopilot.executiveSummary.topActionsToday
-    : autopilot.all.slice(0, 15);
+  const sourceRecommendations = applyConfidence(
+    autopilot.executiveSummary.topActionsToday.length
+      ? autopilot.executiveSummary.topActionsToday
+      : autopilot.all.slice(0, 15),
+  );
 
   const all = sourceRecommendations
     .map((recommendation) =>
@@ -75,5 +89,6 @@ export function buildDailyActionPlanSnapshot(
     topActionsToday,
     ...grouped,
     all,
+    trustByType: input.trustByType ?? {},
   };
 }

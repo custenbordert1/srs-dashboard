@@ -1,6 +1,7 @@
 "use client";
 
 import { ExecutiveDataWarningBanner } from "@/components/executive/executive-data-warning-banner";
+import { RoiCategoryBadge, TrustFlagBadge } from "@/components/executive/trust-flag-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import {
   fetchExecutiveIntelligenceRoute,
@@ -11,6 +12,7 @@ import type {
   AutomationControlCenterSnapshot,
   RecruitingAutomationRecord,
 } from "@/lib/recruiting-automation-actions";
+import type { AutomationRoiView } from "@/lib/executive-trust-roi/types";
 import {
   UI_BADGE,
   UI_BUTTON,
@@ -43,10 +45,12 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
 function AutomationTable({
   title,
   rows,
+  automationRoiById,
   onSelect,
 }: {
   title: string;
   rows: RecruitingAutomationRecord[];
+  automationRoiById: Record<string, AutomationRoiView>;
   onSelect: (row: RecruitingAutomationRecord) => void;
 }) {
   if (rows.length === 0) {
@@ -68,17 +72,23 @@ function AutomationTable({
               <th className="pb-2 pr-3">Owner</th>
               <th className="pb-2 pr-3">Reason</th>
               <th className="pb-2 pr-3">Impact</th>
+              <th className="pb-2 pr-3">Trust</th>
               <th className="pb-2 pr-3">Approval</th>
               <th className="pb-2">Action</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {rows.map((row) => {
+              const roi = automationRoiById[row.id];
+              return (
               <tr key={row.id} className="border-b border-zinc-800/60">
                 <td className="py-2 pr-3 font-medium text-zinc-200">{row.actionType.replace(/-/g, " ")}</td>
                 <td className="py-2 pr-3 text-zinc-400">{row.owner}</td>
                 <td className="max-w-[200px] truncate py-2 pr-3 text-zinc-400">{row.reason}</td>
                 <td className="py-2 pr-3 text-zinc-400">{row.expectedImpact}</td>
+                <td className="py-2 pr-3">
+                  {roi ? <TrustFlagBadge flag={roi.trustFlag} /> : <span className="text-zinc-500">—</span>}
+                </td>
                 <td className="py-2 pr-3">
                   <span
                     className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${STATUS_BADGE[row.approvalStatus] ?? UI_BADGE.moderate}`}
@@ -92,7 +102,8 @@ function AutomationTable({
                   </button>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>
@@ -102,11 +113,13 @@ function AutomationTable({
 
 function AutomationDrawer({
   record,
+  roi,
   onClose,
   onAction,
   busy,
 }: {
   record: RecruitingAutomationRecord;
+  roi: AutomationRoiView | null;
   onClose: () => void;
   onAction: (action: string) => void;
   busy: boolean;
@@ -134,6 +147,29 @@ function AutomationDrawer({
           <p>
             <span className="text-zinc-500">Expected impact ·</span> {record.expectedImpact}
           </p>
+          {roi ? (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 space-y-2">
+              <p className="text-xs uppercase text-zinc-500">ROI & trust</p>
+              <div className="flex flex-wrap gap-2">
+                <TrustFlagBadge flag={roi.trustFlag} />
+                <RoiCategoryBadge category={roi.expectedRoi} />
+              </div>
+              <p className="text-xs text-zinc-400">Confidence {roi.confidenceScore}%</p>
+              <p className="text-xs text-zinc-400">
+                Projected +{roi.projectedApplicantGain} applicants · +{roi.projectedCoverageGain}% coverage
+              </p>
+              <p className="text-xs text-zinc-400">Historical success {roi.historicalSuccessRate}%</p>
+              {roi.actualResult ? <p className="text-xs text-emerald-200">{roi.actualResult}</p> : null}
+              {roi.recommendationAccuracy ? (
+                <p className="text-xs text-zinc-500">{roi.recommendationAccuracy}</p>
+              ) : null}
+              {roi.roiCategory ? (
+                <p className="text-xs text-zinc-400">
+                  Actual ROI: <RoiCategoryBadge category={roi.roiCategory} />
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <p>
             <span className="text-zinc-500">Approval ·</span> {record.approvalStatus}
           </p>
@@ -316,15 +352,16 @@ export function AutomationControlCenter() {
           </div>
 
           <div className="space-y-6">
-            <AutomationTable title="Recommended drafts" rows={snapshot.recommended} onSelect={setSelected} />
-            <AutomationTable title="Job refresh drafts" rows={snapshot.jobRefreshDrafts} onSelect={setSelected} />
-            <AutomationTable title="Posting drafts" rows={snapshot.postingDrafts} onSelect={setSelected} />
-            <AutomationTable title="Follow-up campaigns" rows={snapshot.followUpCampaigns} onSelect={setSelected} />
+            <AutomationTable title="Recommended drafts" rows={snapshot.recommended} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Job refresh drafts" rows={snapshot.jobRefreshDrafts} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Posting drafts" rows={snapshot.postingDrafts} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
+            <AutomationTable title="Follow-up campaigns" rows={snapshot.followUpCampaigns} automationRoiById={snapshot.automationRoiById} onSelect={setSelected} />
           </div>
 
           {selected ? (
             <AutomationDrawer
               record={selected}
+              roi={snapshot.automationRoiById[selected.id] ?? null}
               onClose={() => setSelected(null)}
               onAction={runAction}
               busy={busy}

@@ -1,6 +1,7 @@
 import type { ExecutiveAlertStatus } from "@/lib/alerts/executive-alert-status-types";
 import type { AutopilotRecommendation } from "@/lib/recruiting-autopilot/types";
 import type { DashboardTabId } from "@/lib/recruiting-tab-source-labels";
+import type { TrustFlag } from "@/lib/executive-trust-roi/types";
 
 export type DailyActionBucket = "must-do-today" | "should-do-this-week" | "monitor-only";
 
@@ -56,4 +57,5 @@ export type DailyActionPlanSnapshot = {
   shouldDoThisWeek: DailyActionPlanItem[];
   monitorOnly: DailyActionPlanItem[];
   all: DailyActionPlanItem[];
+  trustByType: Record<string, TrustFlag>;
 };

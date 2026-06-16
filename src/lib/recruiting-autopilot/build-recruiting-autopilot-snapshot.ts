@@ -103,5 +103,6 @@ export function buildRecruitingAutopilotSnapshot(
       (row) => row.dmName!,
     ),
     all,
+    trustByType: {},
   };
 }

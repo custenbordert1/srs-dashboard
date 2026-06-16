@@ -35,6 +35,18 @@ function emptyMorningBriefSnapshot(fetchedAt: string): ExecutiveMorningBriefSnap
       worstPerforming: [],
       overallSuccessRate: 0,
       roiHighlights: [],
+      roiSummary: {
+        bestActionWorking: null,
+        worstAction: null,
+        estimatedHiresInfluenced: 0,
+        coverageGained: 0,
+        automationRoi: {
+          completedCount: 0,
+          successRate: 0,
+          summary: "Automation ROI tracking begins after completed executions",
+        },
+      },
+      trustByType: {},
     },
     executiveRecommendations: [],
     narratives: {
@@ -67,6 +79,17 @@ function emptyMorningBriefSnapshot(fetchedAt: string): ExecutiveMorningBriefSnap
       topOpportunities: [],
       automationQueue: { pendingApprovals: 0, draftCount: 0, summary: "No automations queued", light: "green" },
       recommendedActions: [],
+      roiSummary: {
+        bestActionWorking: null,
+        worstAction: null,
+        estimatedHiresInfluenced: 0,
+        coverageGained: 0,
+        automationRoi: {
+          completedCount: 0,
+          successRate: 0,
+          summary: "Automation ROI tracking begins after completed executions",
+        },
+      },
     },
   };
 }

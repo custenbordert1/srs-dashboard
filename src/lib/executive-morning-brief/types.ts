@@ -1,3 +1,5 @@
+import type { CeoRoiSummary } from "@/lib/executive-trust-roi/types";
+import type { TrustFlag } from "@/lib/executive-trust-roi/types";
 import type { EffectivenessRating } from "@/lib/recommendation-intelligence/types";
 import type { PredictiveRiskLevel, PredictiveRiskTrend } from "@/lib/predictive-territory-risk/types";
 import type { HiringForecastHorizon } from "@/lib/workforce-capacity-forecast/types";
@@ -145,6 +147,7 @@ export type CeoHomeSnapshot = {
     light: TrafficLight;
   };
   recommendedActions: CeoRecommendedAction[];
+  roiSummary: CeoRoiSummary;
 };
 
 export type ExecutiveMorningBriefSnapshot = {
@@ -182,6 +185,8 @@ export type ExecutiveMorningBriefSnapshot = {
       effectiveness: EffectivenessRating | null;
       roiScore: number;
     }>;
+    roiSummary: CeoRoiSummary;
+    trustByType: Record<string, TrustFlag>;
   };
   executiveRecommendations: Array<{
     id: string;

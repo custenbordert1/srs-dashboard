@@ -6,6 +6,11 @@ import { ExecutiveRouteTimer } from "@/lib/executive-routes/executive-route-prof
 import { respondExecutiveIntelligenceRoute } from "@/lib/executive-routes/executive-intelligence-route";
 import { buildDailyActionPlanSnapshot } from "@/lib/executive-daily-action-plan";
 import type { DailyActionPlanSnapshot } from "@/lib/executive-daily-action-plan/types";
+import { buildExecutiveTrustRoiSnapshot } from "@/lib/executive-trust-roi";
+import {
+  buildLearnedSuccessRates,
+  listRecommendationRecords,
+} from "@/lib/recommendation-intelligence";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +38,7 @@ function emptyDailyActionPlanSnapshot(fetchedAt: string): DailyActionPlanSnapsho
     shouldDoThisWeek: [],
     monitorOnly: [],
     all: [],
+    trustByType: {},
   };
 }
 
@@ -66,11 +72,19 @@ export async function GET(request: Request) {
         };
       }
       const alertSnapshot = buildAlertSnapshot({ bundle });
+      const recommendationRecords = await listRecommendationRecords();
+      const learnedRates = buildLearnedSuccessRates(recommendationRecords);
+      const trustByType = buildExecutiveTrustRoiSnapshot({
+        records: recommendationRecords,
+        generatedAt: bundle.fetchedAt,
+      }).trustByType;
       const snapshot = buildDailyActionPlanSnapshot({
         bundle,
         alerts: alertSnapshot.alerts,
         followUps,
         statusOverlays,
+        learnedRates,
+        trustByType,
       });
       return {
         snapshot,

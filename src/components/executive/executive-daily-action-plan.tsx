@@ -1,6 +1,7 @@
 "use client";
 
 import { ExecutiveDataWarningBanner } from "@/components/executive/executive-data-warning-banner";
+import { TrustFlagBadge } from "@/components/executive/trust-flag-badge";
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import { EXECUTIVE_ALERT_STATUS_LABELS, type ExecutiveAlertStatus } from "@/lib/alerts/executive-alert-status-types";
@@ -59,11 +60,13 @@ function snoozeUntilIso(): string {
 
 function ActionPlanCard({
   item,
+  trustFlag,
   onStatusChange,
   onCreateFollowUp,
   onExecute,
 }: {
   item: DailyActionPlanItem;
+  trustFlag?: import("@/lib/executive-trust-roi/types").TrustFlag;
   onStatusChange: (alertId: string, status: ExecutiveAlertStatus) => void;
   onCreateFollowUp: (item: DailyActionPlanItem) => void;
   onExecute: (item: DailyActionPlanItem) => void;
@@ -80,6 +83,7 @@ function ActionPlanCard({
               {EXECUTIVE_ALERT_STATUS_LABELS[item.status]}
             </span>
             <span className="text-[10px] text-zinc-500">Impact {item.expectedImpact}</span>
+            {trustFlag ? <TrustFlagBadge flag={trustFlag} /> : null}
           </div>
           <h3 className="text-sm font-semibold text-zinc-50">{item.title}</h3>
           <p className="text-sm text-zinc-300">{item.links.recommendationTitle}</p>
@@ -122,6 +126,7 @@ function ActionSection({
   subtitle,
   items,
   emptyMessage,
+  trustByType,
   onStatusChange,
   onCreateFollowUp,
   onExecute,
@@ -130,6 +135,7 @@ function ActionSection({
   subtitle: string;
   items: DailyActionPlanItem[];
   emptyMessage: string;
+  trustByType: Record<string, import("@/lib/executive-trust-roi/types").TrustFlag>;
   onStatusChange: (alertId: string, status: ExecutiveAlertStatus) => void;
   onCreateFollowUp: (item: DailyActionPlanItem) => void;
   onExecute: (item: DailyActionPlanItem) => void;
@@ -148,6 +154,7 @@ function ActionSection({
             <ActionPlanCard
               key={item.id}
               item={item}
+              trustFlag={trustByType[item.links.recommendationKind]}
               onStatusChange={onStatusChange}
               onCreateFollowUp={onCreateFollowUp}
               onExecute={onExecute}
@@ -310,6 +317,7 @@ export function ExecutiveDailyActionPlan() {
             subtitle="Top 10 autopilot recommendations for executive focus this morning."
             items={withStatus(snapshot.topActionsToday)}
             emptyMessage="No top actions for today."
+            trustByType={snapshot.trustByType}
             onStatusChange={updateStatus}
             onCreateFollowUp={createFollowUp}
             onExecute={executeAction}
@@ -320,6 +328,7 @@ export function ExecutiveDailyActionPlan() {
             subtitle="Highest urgency actions with immediate deadline pressure."
             items={withStatus(snapshot.mustDoToday)}
             emptyMessage="No must-do actions today."
+            trustByType={snapshot.trustByType}
             onStatusChange={updateStatus}
             onCreateFollowUp={createFollowUp}
             onExecute={executeAction}
@@ -330,6 +339,7 @@ export function ExecutiveDailyActionPlan() {
             subtitle="Important improvements to schedule before the week closes."
             items={withStatus(snapshot.shouldDoThisWeek)}
             emptyMessage="No weekly actions queued."
+            trustByType={snapshot.trustByType}
             onStatusChange={updateStatus}
             onCreateFollowUp={createFollowUp}
             onExecute={executeAction}
@@ -340,6 +350,7 @@ export function ExecutiveDailyActionPlan() {
             subtitle="Lower urgency signals to watch without immediate intervention."
             items={withStatus(snapshot.monitorOnly)}
             emptyMessage="Nothing to monitor."
+            trustByType={snapshot.trustByType}
             onStatusChange={updateStatus}
             onCreateFollowUp={createFollowUp}
             onExecute={executeAction}

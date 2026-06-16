@@ -1,4 +1,5 @@
 import type { AutopilotRecommendationKind } from "@/lib/recruiting-autopilot/types";
+import type { AutomationRoiView } from "@/lib/executive-trust-roi/types";
 
 /** Safety modes — only draft-only and requires-approval are enabled initially. */
 export type AutomationSafetyMode = "draft-only" | "requires-approval" | "auto-execute-allowed";
@@ -160,6 +161,7 @@ export type AutomationControlCenterSnapshot = {
   failed: RecruitingAutomationRecord[];
   cancelled: RecruitingAutomationRecord[];
   all: RecruitingAutomationRecord[];
+  automationRoiById: Record<string, AutomationRoiView>;
 };
 
 export const DEFAULT_AUTOMATION_SAFETY_MODE: AutomationSafetyMode = "requires-approval";

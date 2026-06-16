@@ -1,4 +1,5 @@
 import type { DashboardTabId } from "@/lib/recruiting-tab-source-labels";
+import type { TrustFlag } from "@/lib/executive-trust-roi/types";
 
 export type AutopilotEntityType =
   | "territory"
@@ -79,4 +80,5 @@ export type RecruitingAutopilotSnapshot = {
   byProject: Record<string, AutopilotRecommendation[]>;
   byDm: Record<string, AutopilotRecommendation[]>;
   all: AutopilotRecommendation[];
+  trustByType: Record<string, TrustFlag>;
 };

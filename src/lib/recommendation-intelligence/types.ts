@@ -1,4 +1,5 @@
 import type { AutopilotRecommendationKind } from "@/lib/recruiting-autopilot/types";
+import type { ExecutiveTrustRoiSnapshot } from "@/lib/executive-trust-roi/types";
 
 export type RecommendationTrackingStatus =
   | "Executed"
@@ -131,6 +132,7 @@ export type RecommendationIntelligenceSnapshot = {
   effectivenessTrends: EffectivenessTrendPoint[];
   recentRecords: RecommendationRecord[];
   learnedConfidenceAdjustments: Record<string, number>;
+  trustRoi: ExecutiveTrustRoiSnapshot;
 };
 
 export type RecommendationLeaderboardSnapshot = {

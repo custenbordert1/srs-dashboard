@@ -1,8 +1,10 @@
 "use client";
 
 import { ExecutiveDataWarningBanner } from "@/components/executive/executive-data-warning-banner";
+import { RoiCategoryBadge, TrustFlagBadge } from "@/components/executive/trust-flag-badge";
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
+import type { ActionPerformanceRow, ActualVsExpectedRow } from "@/lib/executive-trust-roi/types";
 import {
   fetchExecutiveIntelligenceRoute,
   scheduleExecutiveBackgroundRefresh,
@@ -11,6 +13,7 @@ import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-tim
 import type {
   EffectivenessRating,
   RecommendationIntelligenceSnapshot,
+  RecommendationOwnerPerformance,
   RecommendationRecord,
   RecommendationRoiLeaderboardEntry,
   RecommendationTypePerformance,
@@ -36,9 +39,11 @@ const EFFECTIVENESS_BADGE: Record<EffectivenessRating, string> = {
 function TypePerformanceTable({
   title,
   rows,
+  trustRows,
 }: {
   title: string;
   rows: RecommendationTypePerformance[];
+  trustRows?: ActionPerformanceRow[];
 }) {
   if (rows.length === 0) {
     return (
@@ -48,32 +53,119 @@ function TypePerformanceTable({
       </section>
     );
   }
+  const trustByType = new Map((trustRows ?? []).map((row) => [row.recommendationType, row]));
   return (
     <section className={`${UI_SURFACE.panel} ${UI_SPACE.stackSm}`}>
       <h3 className={UI_TYPE.sectionTitle}>{title}</h3>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[420px] text-left text-sm">
+        <table className="w-full min-w-[520px] text-left text-sm">
           <thead>
             <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
               <th className="pb-2 pr-3">Type</th>
               <th className="pb-2 pr-3">Success</th>
+              <th className="pb-2 pr-3">ROI</th>
+              <th className="pb-2 pr-3">Trust</th>
               <th className="pb-2 pr-3">Tracked</th>
               <th className="pb-2">Avg gain</th>
             </tr>
           </thead>
           <tbody>
+            {rows.map((row) => {
+              const trust = trustByType.get(row.recommendationType);
+              return (
+                <tr key={row.recommendationType} className="border-b border-zinc-800/60">
+                  <td className="py-2 pr-3 font-medium text-zinc-200">{row.label}</td>
+                  <td className="py-2 pr-3 tabular-nums text-zinc-300">{row.successRate}%</td>
+                  <td className="py-2 pr-3">
+                    {trust ? <RoiCategoryBadge category={trust.roiCategory} /> : <span className="text-zinc-500">—</span>}
+                  </td>
+                  <td className="py-2 pr-3">
+                    {trust ? <TrustFlagBadge flag={trust.trustFlag} /> : <span className="text-zinc-500">—</span>}
+                  </td>
+                  <td className="py-2 pr-3 text-zinc-400">{row.totalTracked}</td>
+                  <td className="py-2 text-zinc-400">+{trust?.averageApplicantGain ?? row.averageApplicantGain}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function OwnerPerformanceTable({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: RecommendationOwnerPerformance[];
+}) {
+  if (rows.length === 0) return null;
+  return (
+    <section className={`${UI_SURFACE.panel} ${UI_SPACE.stackSm}`}>
+      <h3 className={UI_TYPE.sectionTitle}>{title}</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[360px] text-left text-sm">
+          <thead>
+            <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
+              <th className="pb-2 pr-3">Owner</th>
+              <th className="pb-2 pr-3">Success</th>
+              <th className="pb-2 pr-3">Tracked</th>
+              <th className="pb-2">Completed</th>
+            </tr>
+          </thead>
+          <tbody>
             {rows.map((row) => (
-              <tr key={row.recommendationType} className="border-b border-zinc-800/60">
-                <td className="py-2 pr-3 font-medium text-zinc-200">{row.label}</td>
+              <tr key={`${row.ownerKind}:${row.owner}`} className="border-b border-zinc-800/60">
+                <td className="py-2 pr-3 font-medium text-zinc-200">{row.owner}</td>
                 <td className="py-2 pr-3 tabular-nums text-zinc-300">{row.successRate}%</td>
-                <td className="py-2 pr-3 text-zinc-400">{row.totalTracked}</td>
-                <td className="py-2 text-zinc-400">+{row.averageApplicantGain}</td>
+                <td className="py-2 pr-3 text-zinc-400">{row.trackedCount}</td>
+                <td className="py-2 text-zinc-400">{row.completedCount}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
     </section>
+  );
+}
+
+function ActualVsExpectedTable({ rows }: { rows: ActualVsExpectedRow[] }) {
+  if (rows.length === 0) {
+    return <WorkspaceEmptyState title="No outcome comparisons" message="Execute recommendations to compare expected vs actual." />;
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[720px] text-left text-sm">
+        <thead>
+          <tr className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
+            <th className="pb-2 pr-3">Action</th>
+            <th className="pb-2 pr-3">Expected</th>
+            <th className="pb-2 pr-3">Actual</th>
+            <th className="pb-2 pr-3">Effectiveness</th>
+            <th className="pb-2 pr-3">ROI</th>
+            <th className="pb-2">Trust</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.recommendationId} className="border-b border-zinc-800/60">
+              <td className="py-2 pr-3 font-medium text-zinc-200">{row.label}</td>
+              <td className="py-2 pr-3 text-zinc-400">+{row.expectedApplicantGain} applicants</td>
+              <td className="py-2 pr-3 text-zinc-300">+{row.actualApplicantGain}</td>
+              <td className="py-2 pr-3 text-zinc-400">{row.effectiveness ?? "Pending"}</td>
+              <td className="py-2 pr-3">
+                <RoiCategoryBadge category={row.roiCategory} />
+              </td>
+              <td className="py-2">
+                <TrustFlagBadge flag={row.trustFlag} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -116,16 +208,21 @@ function RoiLeaderboard({ rows }: { rows: RecommendationRoiLeaderboardEntry[] })
 
 function RecentRecordCard({
   record,
+  trustFlag,
   onExecute,
 }: {
   record: RecommendationRecord;
+  trustFlag?: import("@/lib/executive-trust-roi/types").TrustFlag;
   onExecute: (id: string) => void;
 }) {
   return (
     <article className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-sm font-semibold text-zinc-50">{record.expectedOutcome}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold text-zinc-50">{record.expectedOutcome}</p>
+            {trustFlag ? <TrustFlagBadge flag={trustFlag} /> : null}
+          </div>
           <p className="text-xs text-zinc-500">{record.recommendationType.replace(/-/g, " ")}</p>
           <div className="flex flex-wrap gap-3 text-xs text-zinc-400">
             <span>Status · {record.status}</span>
@@ -197,6 +294,7 @@ export function RecommendationIntelligenceDashboard() {
   );
 
   const summary = snapshot?.executiveSummary;
+  const trustRoi = snapshot?.trustRoi;
   const cacheLabel = meta?.intelligenceCache
     ? `${meta.intelligenceCache.cacheStatus} · ${Math.round(meta.intelligenceCache.snapshotAgeMs / 1000)}s`
     : null;
@@ -254,9 +352,72 @@ export function RecommendationIntelligenceDashboard() {
             </div>
           </div>
 
+          {trustRoi ? (
+            <section className={`${UI_SURFACE.panel} ${UI_SPACE.stackSm}`}>
+              <h3 className={UI_TYPE.sectionTitle}>Executive impact</h3>
+              <div className={`${UI_SPACE.gridKpi} mt-2`}>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Applicants</p>
+                  <p className={UI_TYPE.kpiValue}>+{trustRoi.executiveImpact.applicantsGenerated}</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Interviews</p>
+                  <p className={UI_TYPE.kpiValue}>+{trustRoi.executiveImpact.interviewsGenerated}</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Hires</p>
+                  <p className={UI_TYPE.kpiValue}>+{trustRoi.executiveImpact.hiresGenerated}</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Coverage</p>
+                  <p className={UI_TYPE.kpiValue}>+{trustRoi.executiveImpact.coverageGained}%</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Open calls reduced</p>
+                  <p className={UI_TYPE.kpiValue}>{trustRoi.executiveImpact.openCallsReduced}</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Projects improved</p>
+                  <p className={UI_TYPE.kpiValue}>{trustRoi.executiveImpact.projectsImproved}</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Risks reduced</p>
+                  <p className={UI_TYPE.kpiValue}>{trustRoi.executiveImpact.risksReduced}</p>
+                </div>
+                <div>
+                  <p className={UI_TYPE.kpiLabel}>Scored actions</p>
+                  <p className={UI_TYPE.kpiValue}>
+                    {trustRoi.executiveImpact.scoredActions}/{trustRoi.executiveImpact.trackedActions}
+                  </p>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-2">
-            <TypePerformanceTable title="Top performing types" rows={snapshot.topPerformingTypes} />
-            <TypePerformanceTable title="Worst performing types" rows={snapshot.worstPerformingTypes} />
+            <TypePerformanceTable
+              title="Top performing actions"
+              rows={snapshot.topPerformingTypes}
+              trustRows={trustRoi?.topPerformingActions}
+            />
+            <TypePerformanceTable
+              title="Worst performing actions"
+              rows={snapshot.worstPerformingTypes}
+              trustRows={trustRoi?.worstPerformingActions}
+            />
+          </div>
+
+          {trustRoi ? (
+            <section className={`${UI_SURFACE.panel} ${UI_SPACE.stackSm}`}>
+              <h3 className={UI_TYPE.sectionTitle}>Actual vs expected outcomes</h3>
+              <ActualVsExpectedTable rows={trustRoi.actualVsExpected} />
+            </section>
+          ) : null}
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <OwnerPerformanceTable title="Success by DM" rows={snapshot.successRateByDm} />
+            <OwnerPerformanceTable title="Success by recruiter" rows={snapshot.successRateByRecruiter} />
+            <OwnerPerformanceTable title="Success by project" rows={snapshot.successRateByProject} />
           </div>
 
           <section className={UI_SPACE.section}>
@@ -299,7 +460,12 @@ export function RecommendationIntelligenceDashboard() {
                 <WorkspaceEmptyState title="No recommendations" message="Sync from autopilot and daily actions." />
               ) : (
                 snapshot.recentRecords.map((row) => (
-                  <RecentRecordCard key={row.recommendationId} record={row} onExecute={executeRecommendation} />
+                  <RecentRecordCard
+                    key={row.recommendationId}
+                    record={row}
+                    trustFlag={trustRoi?.trustByType[row.recommendationType]}
+                    onExecute={executeRecommendation}
+                  />
                 ))
               )}
             </div>

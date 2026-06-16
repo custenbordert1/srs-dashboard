@@ -17,6 +17,7 @@ import {
   upsertAutomationRecords,
 } from "@/lib/recruiting-automation-actions";
 import type { AutomationControlCenterSnapshot } from "@/lib/recruiting-automation-actions";
+import { listRecommendationRecords } from "@/lib/recommendation-intelligence/store";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -67,10 +68,12 @@ export async function GET(request: Request) {
       const synced = syncAutomationDrafts({ bundle, existing, session });
       await upsertAutomationRecords(synced);
       const safetyMode = await getAutomationSafetyMode();
+      const recommendationRecords = await listRecommendationRecords();
       const snapshot = buildAutomationControlCenterSnapshot({
         records: synced,
         safetyMode,
         generatedAt: bundle.fetchedAt,
+        recommendationRecords,
       });
       return {
         snapshot,

@@ -1,6 +1,7 @@
 "use client";
 
 import { WorkspaceEmptyState } from "@/components/ui/workspace-empty-state";
+import { TrustFlagBadge } from "@/components/executive/trust-flag-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import {
   fetchExecutiveIntelligenceRoute,
@@ -44,7 +45,13 @@ function navigateRecommendation(rec: AutopilotRecommendation) {
   });
 }
 
-function RecommendationCard({ recommendation }: { recommendation: AutopilotRecommendation }) {
+function RecommendationCard({
+  recommendation,
+  trustFlag,
+}: {
+  recommendation: AutopilotRecommendation;
+  trustFlag?: import("@/lib/executive-trust-roi/types").TrustFlag;
+}) {
   return (
     <article className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -62,6 +69,7 @@ function RecommendationCard({ recommendation }: { recommendation: AutopilotRecom
             <span className="rounded bg-zinc-900 px-2 py-0.5 text-[10px] uppercase text-zinc-400">
               {recommendation.horizon === "quick-win" ? "Quick win" : "Long-term"}
             </span>
+            {trustFlag ? <TrustFlagBadge flag={trustFlag} /> : null}
           </div>
           <h3 className="text-sm font-semibold text-zinc-50">
             {AUTOPILOT_RECOMMENDATION_LABELS[recommendation.kind]}
@@ -95,9 +103,11 @@ function RecommendationCard({ recommendation }: { recommendation: AutopilotRecom
 function RecommendationList({
   recommendations,
   emptyMessage,
+  trustByType,
 }: {
   recommendations: AutopilotRecommendation[];
   emptyMessage: string;
+  trustByType: Record<string, import("@/lib/executive-trust-roi/types").TrustFlag>;
 }) {
   if (recommendations.length === 0) {
     return <WorkspaceEmptyState title={emptyMessage} message="No recommendations in this view." />;
@@ -105,7 +115,7 @@ function RecommendationList({
   return (
     <div className="grid gap-3">
       {recommendations.map((row) => (
-        <RecommendationCard key={row.id} recommendation={row} />
+        <RecommendationCard key={row.id} recommendation={row} trustFlag={trustByType[row.kind]} />
       ))}
     </div>
   );
@@ -229,6 +239,7 @@ export function RecruitingAutopilotCenter() {
             <RecommendationList
               recommendations={snapshot.executiveSummary.topActionsToday}
               emptyMessage="No actions recommended today."
+              trustByType={snapshot.trustByType}
             />
           </section>
 
@@ -257,7 +268,11 @@ export function RecruitingAutopilotCenter() {
           </div>
 
           <section className={UI_SPACE.section}>
-            <RecommendationList recommendations={viewRecommendations} emptyMessage="No recommendations in this view." />
+            <RecommendationList
+              recommendations={viewRecommendations}
+              emptyMessage="No recommendations in this view."
+              trustByType={snapshot.trustByType}
+            />
           </section>
         </div>
       ) : null}

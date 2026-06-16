@@ -1,3 +1,4 @@
+import { buildExecutiveTrustRoiSnapshot } from "@/lib/executive-trust-roi";
 import { buildAlertSnapshot } from "@/lib/alerts/build-alert-snapshot";
 import { buildDailyActionPlanSnapshot } from "@/lib/executive-daily-action-plan";
 import { buildRecruitingAutopilotSnapshot } from "@/lib/recruiting-autopilot";
@@ -44,6 +45,7 @@ export async function buildRecommendationIntelligenceSection(
   const typePerformance = buildTypePerformance(records);
   const sorted = [...typePerformance].sort((a, b) => b.successRate - a.successRate);
   const roi = buildRoiLeaderboard(records).slice(0, 5);
+  const trustRoi = buildExecutiveTrustRoiSnapshot({ records, generatedAt: bundle.fetchedAt });
 
   return {
     topPerforming: mapTypePerformance(sorted.slice(0, 5)),
@@ -55,5 +57,7 @@ export async function buildRecommendationIntelligenceSection(
       effectiveness: row.effectiveness,
       roiScore: row.roiScore,
     })),
+    roiSummary: trustRoi.ceoRoiSummary,
+    trustByType: trustRoi.trustByType,
   };
 }

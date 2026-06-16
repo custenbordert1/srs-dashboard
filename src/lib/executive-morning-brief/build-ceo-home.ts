@@ -141,5 +141,6 @@ export function buildCeoHomeSnapshot(snapshot: ExecutiveMorningBriefSnapshot): C
       light: automationLight,
     },
     recommendedActions,
+    roiSummary: snapshot.recommendationIntelligence.roiSummary,
   };
 }

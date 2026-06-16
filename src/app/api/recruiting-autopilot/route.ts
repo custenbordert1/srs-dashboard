@@ -11,6 +11,7 @@ import {
   buildLearnedSuccessRates,
   listRecommendationRecords,
 } from "@/lib/recommendation-intelligence";
+import { buildExecutiveTrustRoiSnapshot } from "@/lib/executive-trust-roi";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,7 @@ function emptyAutopilotSnapshot(fetchedAt: string): RecruitingAutopilotSnapshot 
     byProject: {},
     byDm: {},
     all: [],
+    trustByType: {},
   };
 }
 
@@ -73,7 +75,12 @@ export async function GET(request: Request) {
         alerts: alertSnapshot.alerts,
         followUps,
       });
-      const learnedRates = buildLearnedSuccessRates(await listRecommendationRecords());
+      const recommendationRecords = await listRecommendationRecords();
+      const learnedRates = buildLearnedSuccessRates(recommendationRecords);
+      const trustByType = buildExecutiveTrustRoiSnapshot({
+        records: recommendationRecords,
+        generatedAt: bundle.fetchedAt,
+      }).trustByType;
       const applyConfidence = (rows: typeof baseSnapshot.all) =>
         applyLearnedConfidenceToRecommendations(rows, learnedRates);
       const snapshot: RecruitingAutopilotSnapshot = {
@@ -86,6 +93,7 @@ export async function GET(request: Request) {
         quickWins: applyConfidence(baseSnapshot.quickWins),
         longTerm: applyConfidence(baseSnapshot.longTerm),
         all: applyConfidence(baseSnapshot.all),
+        trustByType,
       };
       return {
         snapshot,

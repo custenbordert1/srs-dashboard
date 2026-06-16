@@ -1,6 +1,7 @@
 "use client";
 
 import { ExecutiveDataWarningBanner } from "@/components/executive/executive-data-warning-banner";
+import { TrustFlagBadge } from "@/components/executive/trust-flag-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import type { CeoHomeSnapshot, TrafficLight } from "@/lib/executive-morning-brief/types";
 import type { ExecutiveMorningBriefSnapshot } from "@/lib/executive-morning-brief/types";
@@ -127,6 +128,52 @@ function CeoHomeDashboard({
         />
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <article className={`${UI_SURFACE.panel} flex flex-col gap-2 p-4`}>
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Best action working</p>
+          {ceo.roiSummary.bestActionWorking ? (
+            <>
+              <p className="text-sm font-semibold text-emerald-100">{ceo.roiSummary.bestActionWorking.label}</p>
+              <p className="text-xs text-zinc-400">{ceo.roiSummary.bestActionWorking.successRate}% success</p>
+              <TrustFlagBadge flag={ceo.roiSummary.bestActionWorking.trustFlag} />
+            </>
+          ) : (
+            <p className="text-sm text-zinc-500">Building baseline</p>
+          )}
+        </article>
+        <article className={`${UI_SURFACE.panel} flex flex-col gap-2 p-4`}>
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Worst action</p>
+          {ceo.roiSummary.worstAction ? (
+            <>
+              <p className="text-sm font-semibold text-zinc-100">{ceo.roiSummary.worstAction.label}</p>
+              <p className="text-xs text-zinc-400">{ceo.roiSummary.worstAction.successRate}% success</p>
+              <TrustFlagBadge flag={ceo.roiSummary.worstAction.trustFlag} />
+            </>
+          ) : (
+            <p className="text-sm text-zinc-500">Not enough data</p>
+          )}
+        </article>
+        <KpiCard
+          title="Hires influenced"
+          value={String(ceo.roiSummary.estimatedHiresInfluenced)}
+          subtitle="From tracked recommendation outcomes"
+          light={ceo.roiSummary.estimatedHiresInfluenced > 0 ? "green" : "yellow"}
+        />
+        <KpiCard
+          title="Coverage gained"
+          value={`${ceo.roiSummary.coverageGained}%`}
+          subtitle="Aggregate from scored actions"
+          light={ceo.roiSummary.coverageGained >= 5 ? "green" : "yellow"}
+        />
+        <article className={`${UI_SURFACE.panel} flex flex-col gap-2 p-4`}>
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Automation ROI</p>
+          <p className="text-2xl font-semibold tabular-nums text-zinc-50">
+            {ceo.roiSummary.automationRoi.successRate}%
+          </p>
+          <p className="text-xs text-zinc-500">{ceo.roiSummary.automationRoi.summary}</p>
+        </article>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={`${UI_SURFACE.panel} ${UI_SPACE.stackSm} lg:col-span-1`}>
           <h3 className={UI_TYPE.sectionTitle}>Critical Territories</h3>
@@ -166,7 +213,9 @@ function CeoHomeDashboard({
           <ul className="space-y-2">
             {ceo.topOpportunities.map((row) => (
               <li key={row.recommendationType} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2">
-                <p className="text-sm font-medium text-emerald-100/90">{row.label}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-medium text-emerald-100/90">{row.label}</p>
+                </div>
                 <p className="text-xs text-zinc-500">{row.successRate}% success · {row.trackedCount} tracked</p>
               </li>
             ))}

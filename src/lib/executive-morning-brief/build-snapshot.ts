@@ -35,6 +35,17 @@ function emptyCeoHome(): CeoHomeSnapshot {
     topOpportunities: [],
     automationQueue: { pendingApprovals: 0, draftCount: 0, summary: "No automations queued", light: "green" },
     recommendedActions: [],
+    roiSummary: {
+      bestActionWorking: null,
+      worstAction: null,
+      estimatedHiresInfluenced: 0,
+      coverageGained: 0,
+      automationRoi: {
+        completedCount: 0,
+        successRate: 0,
+        summary: "Automation ROI tracking begins after completed executions",
+      },
+    },
   };
 }
 
@@ -66,6 +77,8 @@ function emptyMorningBriefSnapshot(fetchedAt: string): ExecutiveMorningBriefSnap
       worstPerforming: [],
       overallSuccessRate: 0,
       roiHighlights: [],
+      roiSummary: emptyCeoHome().roiSummary,
+      trustByType: {},
     },
     executiveRecommendations: [],
     narratives: emptyNarratives,
