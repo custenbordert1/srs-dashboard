@@ -23,7 +23,8 @@ export type DashboardTabId =
   | "action-center"
   | "executive-operations-center"
   | "executive-alerts"
-  | "predictive-territory-risk";
+  | "predictive-territory-risk"
+  | "autopilot-recommendations";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -78,6 +79,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Forecast recruiting and coverage failures before they happen — powered only by the unified recruiting intelligence cache.",
+  },
+  "autopilot-recommendations": {
+    navLabel: "Autopilot Recommendations",
+    sourceTag: "Action engine",
+    badgeLabel: "Recruiting autopilot",
+    kind: "executive",
+    bannerMessage:
+      "Prioritized operational recommendations with impact, confidence, and ROI — powered by intelligence cache, alerts, follow-ups, and predictive risk.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",
