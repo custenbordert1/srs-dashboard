@@ -1,6 +1,7 @@
 "use client";
 
 import { CommandCenterDetailDrawer } from "@/components/recruiting/command-center-detail-drawer";
+import { CandidateReEngagementOutreachCenter } from "@/components/recruiter/candidate-re-engagement-outreach-center";
 import { DataTrustBadge } from "@/components/ui/data-trust-badge";
 import { WorkspacePageShell } from "@/components/ui/workspace-page-shell";
 import type { UserPublic } from "@/lib/auth/types";
@@ -271,27 +272,7 @@ export function RecruiterOperatingSystem({ user }: RecruiterOperatingSystemProps
             </SectionCard>
 
             <SectionCard title="Re-Engagement Center" subtitle="Stalled, abandoned, and return-eligible candidates">
-              <div className="space-y-2">
-                {snapshot.reEngagementCenter.length === 0 ? (
-                  <p className="text-sm text-zinc-500">No re-engagement opportunities.</p>
-                ) : (
-                  snapshot.reEngagementCenter.slice(0, 12).map((row) => (
-                    <div
-                      key={row.candidateId}
-                      className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2"
-                    >
-                      <p className="text-sm font-medium text-zinc-50">{row.candidateName}</p>
-                      <p className="mt-0.5 text-xs text-zinc-400">
-                        {row.segment.replace(/-/g, " ")} · {row.city}, {row.state}
-                      </p>
-                      <p className="mt-1 text-xs text-amber-200/90">
-                        Opportunity {row.opportunityScore} · placement {row.placementLikelihood}% · territory {row.territoryImpact}
-                      </p>
-                      <p className="mt-1 text-xs text-zinc-500">{row.recommendedAction}</p>
-                    </div>
-                  ))
-                )}
-              </div>
+              <CandidateReEngagementOutreachCenter compact />
             </SectionCard>
           </div>
 

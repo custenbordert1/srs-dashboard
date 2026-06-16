@@ -1,5 +1,7 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { isRecruiterRole } from "@/lib/auth/roles";
 import type { ExecutiveAlertStatus } from "@/lib/alerts/executive-alert-status-types";
+import { isReEngagementAlertId } from "@/lib/candidate-re-engagement-intelligence/re-engagement-alert-id";
 import {
   listExecutiveAlertActionLogs,
   listExecutiveAlertFollowUps,
@@ -18,13 +20,6 @@ const VALID_STATUSES = new Set<ExecutiveAlertStatus>([
 ]);
 
 export async function PATCH(request: Request) {
-  const guard = guardApiRoute(request, {
-    allowedRoles: ["admin", "executive"],
-    auditAction: "executive_alerts_status_update",
-  });
-  if (isGuardFailure(guard)) return guard;
-  const { session } = guard;
-
   let body: {
     alertId?: string;
     status?: ExecutiveAlertStatus;
@@ -38,7 +33,22 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const alertId = body.alertId?.trim();
+  const alertId = body.alertId?.trim() ?? "";
+  const recruiterReEngagementOnly = isReEngagementAlertId(alertId);
+  const guard = guardApiRoute(request, {
+    allowedRoles: recruiterReEngagementOnly
+      ? ["admin", "executive", "recruiter"]
+      : ["admin", "executive"],
+    requireTerritory: recruiterReEngagementOnly,
+    auditAction: "executive_alerts_status_update",
+  });
+  if (isGuardFailure(guard)) return guard;
+  const { session } = guard;
+
+  if (isRecruiterRole(session.role) && !recruiterReEngagementOnly) {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
+
   const status = body.status;
   if (!alertId || !status || !VALID_STATUSES.has(status)) {
     return NextResponse.json(

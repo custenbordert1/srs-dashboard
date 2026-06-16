@@ -11,6 +11,7 @@ import {
   type ExecutiveAlertStatus,
 } from "@/lib/alerts/executive-alert-status-types";
 import { fetchWithTimeout, FETCH_T4_INTELLIGENCE_MS } from "@/lib/fetch-with-timeout";
+import type { CandidateReEngagementIntelligenceSnapshot } from "@/lib/candidate-re-engagement-intelligence";
 import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
 import type { RecruitingIntelligenceCacheMeta } from "@/lib/recruiting-intelligence/recruiting-intelligence-types";
 import type {
@@ -126,6 +127,8 @@ function ListButton({
 
 export function ExecutiveOperationsCenter() {
   const [snapshot, setSnapshot] = useState<UnifiedRecruitingCommandCenterSnapshot | null>(null);
+  const [reEngagementSnapshot, setReEngagementSnapshot] =
+    useState<CandidateReEngagementIntelligenceSnapshot | null>(null);
   const [meta, setMeta] = useState<CommandCenterResponse["meta"]>();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -136,15 +139,30 @@ export function ExecutiveOperationsCenter() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchWithTimeout("/api/unified-recruiting-command-center", {
-        timeoutMs: FETCH_T4_INTELLIGENCE_MS,
-      });
-      const payload = (await response.json()) as CommandCenterResponse;
-      if (!response.ok || !payload.ok || !payload.snapshot) {
+      const [commandResponse, reEngagementResponse] = await Promise.all([
+        fetchWithTimeout("/api/unified-recruiting-command-center", {
+          timeoutMs: FETCH_T4_INTELLIGENCE_MS,
+        }),
+        fetchWithTimeout("/api/candidate-re-engagement-intelligence", {
+          timeoutMs: FETCH_T4_INTELLIGENCE_MS,
+        }),
+      ]);
+      const payload = (await commandResponse.json()) as CommandCenterResponse;
+      if (!commandResponse.ok || !payload.ok || !payload.snapshot) {
         throw new Error(payload.error ?? "Failed to load unified recruiting command center");
       }
       setSnapshot(payload.snapshot);
       setMeta(payload.meta);
+
+      const reEngagementPayload = (await reEngagementResponse.json()) as {
+        ok?: boolean;
+        snapshot?: CandidateReEngagementIntelligenceSnapshot;
+      };
+      if (reEngagementResponse.ok && reEngagementPayload.ok && reEngagementPayload.snapshot) {
+        setReEngagementSnapshot(reEngagementPayload.snapshot);
+      } else {
+        setReEngagementSnapshot(null);
+      }
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Load failed");
     } finally {
@@ -246,6 +264,58 @@ export function ExecutiveOperationsCenter() {
             <KpiCard label="Predicted Coverage Gap" value={snapshot.kpis.predictedCoverageGap} suffix="%" />
             <KpiCard label="Actions Due Today" value={snapshot.kpis.actionsDueToday} />
           </section>
+
+          {reEngagementSnapshot ? (
+            <section className={`${UI_SURFACE.panel} border-amber-500/20 bg-amber-500/5 p-5`}>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className={UI_TYPE.sectionTitle}>Candidate Recovery Intelligence</h3>
+                  <p className={UI_TYPE.sectionSubtitle}>
+                    Highest-value re-engagement opportunities and territory recovery forecast
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigateRecruitingTab({ tab: "recruiter-productivity" })}
+                  className={UI_BUTTON.ghost}
+                >
+                  Recruiter Outreach
+                </button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <KpiCard
+                  label="Recoverable Candidates"
+                  value={reEngagementSnapshot.executiveSummary.recoverableCandidates}
+                />
+                <KpiCard
+                  label="Potential Placements"
+                  value={reEngagementSnapshot.executiveSummary.potentialPlacements}
+                />
+                <KpiCard
+                  label="Est. Coverage Gain"
+                  value={reEngagementSnapshot.executiveSummary.estimatedCoverageGainPercent}
+                  suffix="%"
+                />
+                <KpiCard
+                  label="Top Recovery Territories"
+                  value={reEngagementSnapshot.executiveSummary.topRecoveryTerritories.length}
+                />
+              </div>
+              {reEngagementSnapshot.executiveSummary.topRecoveryTerritories.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {reEngagementSnapshot.executiveSummary.topRecoveryTerritories.map((territory) => (
+                    <span
+                      key={territory.state}
+                      className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-100"
+                    >
+                      {territory.label}: {territory.recoverableCandidates} recoverable · score{" "}
+                      {territory.recoveryOpportunityScore}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
 
           <section className={`${UI_SURFACE.panel} border-teal-500/20 bg-teal-500/5 p-5`}>
             <h3 className={UI_TYPE.sectionTitle}>Today&apos;s Executive Briefing</h3>

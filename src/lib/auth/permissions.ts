@@ -24,6 +24,9 @@ const ROLE_ROUTE_PREFIXES: Record<UserRole, string[]> = {
     "/api/mel-projects",
     "/api/rep-intelligence",
     "/api/recruiter-operating-system",
+    "/api/candidate-re-engagement-intelligence",
+    "/api/executive-alerts/status",
+    "/api/executive-alerts/follow-ups",
   ],
   dm: [
     "/dm",
