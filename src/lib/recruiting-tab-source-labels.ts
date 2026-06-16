@@ -26,7 +26,8 @@ export type DashboardTabId =
   | "predictive-territory-risk"
   | "autopilot-recommendations"
   | "daily-action-plan"
-  | "recommendation-intelligence";
+  | "recommendation-intelligence"
+  | "automation-control-center";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -105,6 +106,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Measure recommendation outcomes, rank effectiveness by type and owner, and feed learned confidence back into autopilot forecasts.",
+  },
+  "automation-control-center": {
+    navLabel: "Automation Control Center",
+    sourceTag: "Approval workflow",
+    badgeLabel: "Recruiting automations",
+    kind: "executive",
+    bannerMessage:
+      "Review, approve, and track recruiting automation drafts — job refreshes, new postings, and follow-up campaigns. Approval required by default; no live Breezy or email execution without sign-off.",
   },
   "ai-command-center": {
     navLabel: "AI Command Center",

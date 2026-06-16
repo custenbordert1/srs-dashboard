@@ -68,6 +68,14 @@ export const LazyRecommendationIntelligenceDashboard = dynamic(
   { loading: tabLoading("Loading recommendation intelligence…"), ssr: false },
 );
 
+export const LazyAutomationControlCenter = dynamic(
+  () =>
+    import("@/components/executive/automation-control-center").then((m) => ({
+      default: m.AutomationControlCenter,
+    })),
+  { loading: tabLoading("Loading automation control center…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({

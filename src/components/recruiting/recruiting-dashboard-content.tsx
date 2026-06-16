@@ -13,6 +13,7 @@ import {
   LazyRecruitingAutopilotCenter,
   LazyExecutiveDailyActionPlan,
   LazyRecommendationIntelligenceDashboard,
+  LazyAutomationControlCenter,
   LazyAiCommandCenterHub,
   LazyBreezyDashboardSummary,
   LazyBreezyOverviewJobsTable,
@@ -139,6 +140,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="recommendation-intelligence" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="recommendation-intelligence" hideBanner>
             <LazyRecommendationIntelligenceDashboard />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="automation-control-center" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="automation-control-center" hideBanner>
+            <LazyAutomationControlCenter />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
