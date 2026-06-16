@@ -10,7 +10,7 @@ import type {
   RecruiterDailyTask,
   RecruiterProductivitySnapshot,
 } from "@/lib/recruiter-productivity-center";
-import { navigateRecruitingTab } from "@/lib/recruiting-tab-navigation";
+import { navigateRecruiterActionCenter } from "@/lib/recruiting-tab-navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ProductivityResponse = {
@@ -35,15 +35,11 @@ const TASK_TONE: Record<RecruiterDailyTask["type"], string> = {
 };
 
 function openCandidatesTab(candidateId?: string) {
-  navigateRecruitingTab({
-    tab: "candidates",
-    elementId: candidateId ? undefined : "recruiter-action-queue",
-  });
-  if (candidateId && typeof window !== "undefined") {
-    const url = new URL(window.location.href);
-    url.searchParams.set("candidateId", candidateId);
-    window.history.replaceState(null, "", url.toString());
+  if (candidateId) {
+    navigateRecruiterActionCenter({ kind: "candidate", candidateId });
+    return;
   }
+  navigateRecruiterActionCenter({ kind: "queue", queue: "work-now" });
 }
 
 export function RecruiterProductivityCenter() {

@@ -120,10 +120,14 @@ import {
 } from "@/lib/fetch-with-timeout";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
 import { pickActingRecruiter } from "@/lib/recruiter-roster";
+import { RecruiterActionCenterPanel } from "@/components/recruiting/recruiter-action-center-panel";
+import type { SmartFilterId } from "@/lib/recruiter-action-center";
+import type { RecruiterOneClickActionId } from "@/lib/recruiter-action-center/types";
 import {
-  CandidateMyQueuePanel,
-} from "@/components/recruiting/candidate-my-queue-panel";
-import { GuidedRecruitingWorkflowPanel } from "@/components/recruiting/guided-recruiting-workflow-panel";
+  RECRUITING_NAVIGATE_EVENT,
+  type RecruiterActionCenterDeepLink,
+  type RecruitingNavigateDetail,
+} from "@/lib/recruiting-tab-navigation";
 import type { CandidateRowPrimaryActionKind } from "@/lib/candidate-row-primary-action";
 import {
   readGuidedWorkflowPreferences,
@@ -744,6 +748,12 @@ export function CandidatesSection() {
   const [recruiterHomeMode, setRecruiterHomeMode] = useState<RecruiterHomeMode>(() =>
     typeof window === "undefined" ? "dashboard" : readGuidedWorkflowPreferences().homeMode,
   );
+  const [actionCenterFilter, setActionCenterFilter] = useState<SmartFilterId | null>(() => {
+    if (typeof window === "undefined") return null;
+    const param = new URLSearchParams(window.location.search).get("actionCenterFilter");
+    return (param as SmartFilterId | null) ?? null;
+  });
+  const [actionCenterDeepLink, setActionCenterDeepLink] = useState<RecruiterActionCenterDeepLink | null>(null);
   const [focusMode, setFocusMode] = useState<CandidateFocusMode>(() =>
     typeof window === "undefined" ? "all" : readCandidatesWorkspacePreferences().focusMode,
   );
@@ -790,6 +800,27 @@ export function CandidatesSection() {
       setFocusMode("my-work");
       persistFocusMode("my-work");
     }
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<RecruitingNavigateDetail>).detail;
+      if (!detail || detail.tab !== "candidates") return;
+      if (detail.actionCenterFilter) setActionCenterFilter(detail.actionCenterFilter);
+      if (detail.actionCenterDeepLink) setActionCenterDeepLink(detail.actionCenterDeepLink);
+      if (detail.candidateId) setSelectedCandidateId(detail.candidateId);
+      if (detail.actionCenterDeepLink?.kind === "queue" && detail.actionCenterDeepLink.queue === "work-mode") {
+        handleRecruiterHomeModeChange("work");
+      }
+    };
+    window.addEventListener(RECRUITING_NAVIGATE_EVENT, handler);
+    return () => window.removeEventListener(RECRUITING_NAVIGATE_EVENT, handler);
+  }, [handleRecruiterHomeModeChange]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const candidateId = new URLSearchParams(window.location.search).get("candidateId");
+    if (candidateId) setSelectedCandidateId(candidateId);
   }, []);
 
   const tableRowHeightPx = CANDIDATE_TABLE_ROW_HEIGHT_PX[tableDensity];
@@ -2405,6 +2436,47 @@ export function CandidatesSection() {
     ],
   );
 
+  const handleActionCenterOneClick = useCallback(
+    (candidate: ScoredCandidateWorkflowRow, actionId: RecruiterOneClickActionId) => {
+      switch (actionId) {
+        case "assign-me":
+          assignActingRecruiterToRow(candidate);
+          break;
+        case "contacted":
+          handleQueueAction(candidate.candidateId, { action: "mark-follow-up" });
+          break;
+        case "send-paperwork":
+          sendPaperwork(candidate, "onboarding_packet");
+          break;
+        case "follow-up-complete":
+          completeCandidateFollowUpRow(candidate.candidateId);
+          break;
+        case "ready-for-mel":
+          handleQueueAction(candidate.candidateId, { action: "ready-mel" });
+          break;
+        case "schedule-follow-up":
+          handleQueueAction(candidate.candidateId, { action: "mark-follow-up" });
+          break;
+        case "close-candidate":
+          updateWorkflow(candidate, "Not Qualified", { note: "Closed from recruiter action center" });
+          break;
+        case "escalate":
+          persistRecruitingAction(candidate.candidateId, "priority-list");
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      assignActingRecruiterToRow,
+      completeCandidateFollowUpRow,
+      handleQueueAction,
+      persistRecruitingAction,
+      sendPaperwork,
+      updateWorkflow,
+    ],
+  );
+
   const addQuickNoteToRow = useCallback(
     (candidate: ScoredCandidateWorkflowRow) => {
       const note = window.prompt("Add local workflow note");
@@ -2714,35 +2786,48 @@ export function CandidatesSection() {
         </div>
       </section>
 
-      <GuidedRecruitingWorkflowPanel
+      <RecruiterActionCenterPanel
         candidates={candidates}
+        opportunities={melOpportunities}
         actingRecruiter={actingRecruiter}
         recruiters={rosters.recruiters}
+        showTeamLeaderView={rosters.recruiters.length > 1}
         homeMode={recruiterHomeMode}
         onHomeModeChange={handleRecruiterHomeModeChange}
-        sendBlockReasonFor={sendBlockReasonForCandidate}
+        onActingRecruiterChange={setActingRecruiter}
         onOpenCandidate={setSelectedCandidateId}
-        onExecutePrimaryAction={handleGuidedPrimaryAction}
-        onQuickAction={handleGuidedQuickAction}
+        onQueueAction={handleQueueAction}
+        onWorkflowStatus={(candidateId, status) => {
+          const row = candidates.find((c) => c.candidateId === candidateId);
+          if (!row) return;
+          updateWorkflow(row, status as CandidateWorkflowStatus);
+        }}
+        onAssignRecruiter={(candidateId, recruiter) => {
+          const row = candidates.find((c) => c.candidateId === candidateId);
+          if (!row) return;
+          updateWorkflow(row, row.workflowStatus, { assignedRecruiter: recruiter });
+        }}
+        onRecruitingAction={(candidateId, type, enabled) => {
+          void persistRecruitingActionToggle(candidateId, type, enabled ?? true)
+            .then((workflow) => commitWorkflowToView(workflow))
+            .catch((err) => {
+              window.alert(err instanceof Error ? err.message : "Action failed");
+            });
+        }}
+        onAddNote={(candidateId, note) => {
+          const row = candidates.find((c) => c.candidateId === candidateId);
+          if (!row) return;
+          updateWorkflow(row, row.workflowStatus, { note });
+        }}
         actionBusy={queueActionBusy || paperworkSendingId !== null}
+        initialFilter={actionCenterFilter}
+        deepLink={actionCenterDeepLink}
+        syncPartial={Boolean(displaySnapshot?.partial)}
+        syncStale={Boolean(displaySnapshot?.stale)}
       />
 
       {recruiterHomeMode === "dashboard" ? (
       <>
-      <CandidateMyQueuePanel
-        candidates={candidates}
-        rosters={rosters}
-        actingRecruiter={actingRecruiter}
-        onActingRecruiterChange={setActingRecruiter}
-        onOpenCandidate={setSelectedCandidateId}
-        onQueueAction={handleQueueAction}
-        queueActionBusy={queueActionBusy}
-        syncPartial={Boolean(displaySnapshot?.partial)}
-        syncStale={Boolean(displaySnapshot?.stale)}
-        quickFilter={recruiterQuickFilter}
-        onQuickFilterChange={setRecruiterQuickFilter}
-      />
-
       <section
         className={`rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm ${
           selectedIds.size > 0 ? "pb-28" : ""
