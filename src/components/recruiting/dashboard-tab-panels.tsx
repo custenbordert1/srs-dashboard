@@ -52,6 +52,14 @@ export const LazyRecruitingAutopilotCenter = dynamic(
   { loading: tabLoading("Loading autopilot recommendations…"), ssr: false },
 );
 
+export const LazyExecutiveDailyActionPlan = dynamic(
+  () =>
+    import("@/components/executive/executive-daily-action-plan").then((m) => ({
+      default: m.ExecutiveDailyActionPlan,
+    })),
+  { loading: tabLoading("Loading daily action plan…"), ssr: false },
+);
+
 export const LazyAiCommandCenterHub = dynamic(
   () =>
     import("@/components/recruiting/ai-command-center/ai-command-center-hub").then((m) => ({
