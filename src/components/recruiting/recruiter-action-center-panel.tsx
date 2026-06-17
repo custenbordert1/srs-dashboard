@@ -103,23 +103,29 @@ export function RecruiterActionCenterPanel({
   const [activeFilter, setActiveFilter] = useState<SmartFilterId | null>(initialFilter);
   const [skippedIds, setSkippedIds] = useState<string[]>([]);
   const [expandedQueue, setExpandedQueue] = useState<string | null>("work-now");
+  const [prevInitialFilter, setPrevInitialFilter] = useState(initialFilter);
+  const [prevDeepLinkSig, setPrevDeepLinkSig] = useState<string | null>(null);
 
-  useEffect(() => {
+  if (initialFilter !== prevInitialFilter) {
+    setPrevInitialFilter(initialFilter);
     if (initialFilter) setActiveFilter(initialFilter);
-  }, [initialFilter]);
+  }
 
-  useEffect(() => {
-    if (!deepLink) return;
-    if (deepLink.kind === "queue") {
-      if (deepLink.queue === "work-mode") onHomeModeChange("work");
+  const deepLinkSig = deepLink ? JSON.stringify(deepLink) : null;
+  if (deepLinkSig !== prevDeepLinkSig) {
+    setPrevDeepLinkSig(deepLinkSig);
+    if (deepLink?.kind === "queue") {
       if (deepLink.queue === "work-now") setExpandedQueue("work-now");
       if (deepLink.queue === "paperwork") setActiveFilter("paperwork");
       if (deepLink.queue === "ready-for-mel") setActiveFilter("ready-for-mel");
       if (deepLink.queue === "follow-up") setActiveFilter("overdue");
     }
-    if (deepLink.kind === "candidate") {
-      onOpenCandidate(deepLink.candidateId);
-    }
+  }
+
+  useEffect(() => {
+    if (!deepLink) return;
+    if (deepLink.kind === "queue" && deepLink.queue === "work-mode") onHomeModeChange("work");
+    if (deepLink.kind === "candidate") onOpenCandidate(deepLink.candidateId);
   }, [deepLink, onHomeModeChange, onOpenCandidate]);
 
   const snapshot = useMemo(
