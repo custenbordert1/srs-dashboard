@@ -21,11 +21,13 @@ import {
   LazyWorkforceOperationsSection,
   LazyJobManagementSection,
   LazyExecutiveRecruitingForecastPanel,
+  LazyExecutiveAccountabilityPanel,
 } from "./dashboard-tab-panels";
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
   EXECUTIVE_RECRUITING_FORECAST_TAB,
+  EXECUTIVE_ACCOUNTABILITY_TAB,
   EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
   type DashboardTabId,
 } from "./dashboard-tabs";
@@ -67,7 +69,7 @@ export function RecruitingDashboardContent({
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
   const executiveTabs =
     userRole === "executive"
-      ? [EXECUTIVE_RECRUITING_FORECAST_TAB, EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB]
+      ? [EXECUTIVE_RECRUITING_FORECAST_TAB, EXECUTIVE_ACCOUNTABILITY_TAB, EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB]
       : [];
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export function RecruitingDashboardContent({
       "workforce",
       "job-management",
       "executive-forecasting",
+      "executive-accountability",
       "workforce-intelligence",
     ]);
     if (allowed.has(tab as DashboardTabId)) {
@@ -208,6 +211,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="executive-forecasting" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-forecasting">
             <LazyExecutiveRecruitingForecastPanel />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="executive-accountability" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-accountability">
+            <LazyExecutiveAccountabilityPanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
       </main>

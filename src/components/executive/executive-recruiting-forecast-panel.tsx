@@ -146,14 +146,22 @@ export function ExecutiveRecruitingForecastPanel() {
             Action-oriented staffing outlook — {formatForecastFreshness(snapshot.generatedAt)}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => refresh()}
-          disabled={loading}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-60"
-        >
-          Refresh forecast
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/?tab=executive-accountability"
+            className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-500/20"
+          >
+            Open Accountability Board
+          </Link>
+          <button
+            type="button"
+            onClick={() => refresh()}
+            disabled={loading}
+            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-60"
+          >
+            Refresh forecast
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-zinc-700/80 bg-zinc-900/60 px-4 py-4">
