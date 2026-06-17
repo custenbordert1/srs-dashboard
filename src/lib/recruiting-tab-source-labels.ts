@@ -12,7 +12,8 @@ export type DashboardTabId =
   | "workforce"
   | "job-management"
   | "workforce-intelligence"
-  | "executive-forecasting";
+  | "executive-forecasting"
+  | "executive-accountability";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -147,6 +148,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "30/60/90-day hiring forecast, recruiter/DM capacity, and territory shortage outlook from cached Breezy + MEL intelligence.",
+  },
+  "executive-accountability": {
+    navLabel: "Executive Accountability",
+    sourceTag: "Executive",
+    badgeLabel: "Operating rhythm",
+    kind: "executive",
+    bannerMessage:
+      "Monday executive packet, overdue escalation, audit center, and durable P44 recommendation tracking.",
   },
 };
 

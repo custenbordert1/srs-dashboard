@@ -10,6 +10,7 @@ import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-
 import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
 import { ExecutiveRecruitingForecastPanel } from "@/components/executive/executive-recruiting-forecast-panel";
+import { ExecutiveAccountabilityPanel } from "@/components/executive/executive-accountability-panel";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
 import { DeferredSection } from "@/components/ui/deferred-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
@@ -88,6 +89,12 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-200 hover:bg-teal-500/20"
           >
             Workforce Intelligence
+          </Link>
+          <Link
+            href="/?tab=executive-accountability"
+            className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-500/20"
+          >
+            Open Executive Accountability
           </Link>
           <Link
             href="/?tab=executive-forecasting"
@@ -194,6 +201,18 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             metrics={data.melMatching}
             onCandidateClick={drawer.openCandidate}
           />
+
+          <DeferredSection
+            title="Executive accountability"
+            description="Track forecast recommendations, overdue actions, and early forecast backtest."
+            summary={
+              <p className="text-sm text-zinc-500">
+                Expand to load the executive decision and accountability board.
+              </p>
+            }
+          >
+            <ExecutiveAccountabilityPanel />
+          </DeferredSection>
 
           <DeferredSection
             title="Executive recruiting forecast"
