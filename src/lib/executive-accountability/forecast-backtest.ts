@@ -34,6 +34,8 @@ export function captureForecastHistoryEntry(input: {
     projectedHires60: input.forecast.kpis.projectedHires60,
     projectedHires90: input.forecast.kpis.projectedHires90,
     territoriesAtRisk: input.forecast.kpis.territoriesAtRisk,
+    overloadedRecruiters: input.forecast.kpis.overloadedRecruiters,
+    overloadedDms: input.forecast.kpis.overloadedDms,
     activeRepCount: input.activeRepCount,
     dataTrust: input.forecast.dataTrust,
     forecastConfidence: input.forecast.forecastConfidence,

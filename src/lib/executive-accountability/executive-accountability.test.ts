@@ -50,8 +50,9 @@ function trackedAction(overrides: Partial<ExecutiveTrackedAction> = {}): Executi
     recommendationId: "action-1",
     sourcePhase: "P44",
     sourceModule: "executive-recruiting-forecast",
-    sourceForecastKey: "p44-rec-1",
+    sourceForecastKey: "p44:territory-escalation:dm-one:tx",
     recommendationKind: "escalate-dm-territory",
+    territoryLabel: "TX",
     title: "Escalate DM One territory risk",
     priority: "critical",
     owner: "DM One",
@@ -114,7 +115,7 @@ describe("executive accountability", () => {
     const action = convertForecastRecommendationToAction(forecastRec(), now);
     assert.equal(action.sourcePhase, "P44");
     assert.equal(action.sourceModule, "executive-recruiting-forecast");
-    assert.equal(action.sourceForecastKey, "p44-rec-1");
+    assert.equal(action.sourceForecastKey, "p44:territory-escalation:dm-one:tx");
     assert.equal(action.status, "open");
     assert.equal(action.owner, "DM One");
     assert.equal(action.priority, "critical");
@@ -314,6 +315,8 @@ describe("executive accountability", () => {
     assert.equal(snapshot.weeklyNarrative.topActionRequired, "Escalate DM One territory risk (critical priority)");
     assert.equal(snapshot.forecastBacktest.status, "not_enough_history");
     assert.ok(snapshot.weeklySummary);
+    assert.ok(snapshot.operatingRhythm.weeklyPacket);
+    assert.ok(snapshot.operatingRhythm.emailMarkdown.includes("Executive Summary"));
   });
 
   it("records audit trail entries when action fields change", async () => {

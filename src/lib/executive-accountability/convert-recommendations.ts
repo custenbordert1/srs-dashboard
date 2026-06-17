@@ -1,5 +1,9 @@
 import type { ExecutiveForecastRecommendation, RecommendationPriority } from "@/lib/executive-recruiting-forecast";
 import { createActionId } from "@/lib/executive-accountability/recommendation-store";
+import {
+  buildStableRecommendationKeyFromRecommendation,
+  resolveActionForecastKey,
+} from "@/lib/executive-accountability/stable-recommendation-key";
 import type { ExecutiveTrackedAction } from "@/lib/executive-accountability/types";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -24,8 +28,9 @@ export function convertForecastRecommendationToAction(
     recommendationId: createActionId(),
     sourcePhase: P44_SOURCE_PHASE,
     sourceModule: P44_SOURCE_MODULE,
-    sourceForecastKey: rec.id,
+    sourceForecastKey: buildStableRecommendationKeyFromRecommendation(rec),
     recommendationKind: rec.kind,
+    territoryLabel: rec.territoryLabel,
     title: rec.title,
     priority: rec.priority,
     owner: rec.owner,
@@ -71,7 +76,9 @@ export function mergeForecastIntoExistingAction(
   const referenceMs = new Date(referenceIso).getTime();
   return {
     ...existing,
+    sourceForecastKey: buildStableRecommendationKeyFromRecommendation(rec),
     recommendationKind: rec.kind,
+    territoryLabel: rec.territoryLabel ?? existing.territoryLabel,
     title: rec.title,
     priority: rec.priority,
     owner: existing.ownerManuallyAssigned ? existing.owner : (rec.owner ?? existing.owner),
@@ -97,19 +104,21 @@ export function syncActionsFromForecastRecommendations(input: {
   for (const row of input.existingActions) {
     if (row.sourceModule !== P44_SOURCE_MODULE) continue;
     if (row.status === "archived") continue;
-    const prior = byForecastKey.get(row.sourceForecastKey);
+    const stableKey = resolveActionForecastKey(row);
+    const prior = byForecastKey.get(stableKey);
     if (!prior || new Date(row.updatedAt).getTime() > new Date(prior.updatedAt).getTime()) {
-      byForecastKey.set(row.sourceForecastKey, row);
+      byForecastKey.set(stableKey, row);
     }
   }
 
-  const seenKeys = new Set<string>();
+  const seenStableKeys = new Set<string>();
   const synced: ExecutiveTrackedAction[] = [];
   const retainedIds = new Set<string>();
 
   for (const rec of input.recommendations) {
-    seenKeys.add(rec.id);
-    const existing = byForecastKey.get(rec.id);
+    const stableKey = buildStableRecommendationKeyFromRecommendation(rec);
+    seenStableKeys.add(stableKey);
+    const existing = byForecastKey.get(stableKey);
     if (existing && isMergeableStatus(existing.status)) {
       const merged = mergeForecastIntoExistingAction(existing, rec, input.referenceIso);
       synced.push(merged);
@@ -130,20 +139,30 @@ export function syncActionsFromForecastRecommendations(input: {
       continue;
     }
 
-    if (seenKeys.has(action.sourceForecastKey)) {
+    const actionStableKey = resolveActionForecastKey(action);
+    if (seenStableKeys.has(actionStableKey)) {
       synced.push(action);
       retainedIds.add(action.recommendationId);
       continue;
     }
 
     if (action.status === "open" || action.status === "in_progress") {
-      const archived = archiveChurnedAction(action, input.referenceIso);
+      const archived = archiveChurnedAction(
+        {
+          ...action,
+          sourceForecastKey: actionStableKey,
+        },
+        input.referenceIso,
+      );
       synced.push(archived);
       retainedIds.add(archived.recommendationId);
       continue;
     }
 
-    synced.push(action);
+    synced.push({
+      ...action,
+      sourceForecastKey: actionStableKey,
+    });
     retainedIds.add(action.recommendationId);
   }
 

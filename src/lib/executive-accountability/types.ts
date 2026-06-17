@@ -1,3 +1,4 @@
+import type { ExecutiveOperatingRhythm } from "@/lib/executive-accountability/operating-rhythm-types";
 import type {
   DataTrustLevel,
   ExecutiveRecruitingForecastSnapshot,
@@ -43,6 +44,7 @@ export type ExecutiveTrackedAction = {
   sourceModule: string;
   sourceForecastKey: string;
   recommendationKind: string | null;
+  territoryLabel: string | null;
   title: string;
   priority: RecommendationPriority;
   owner: string | null;
@@ -70,6 +72,8 @@ export type ForecastHistoryEntry = {
   projectedHires60: number;
   projectedHires90: number;
   territoriesAtRisk: number;
+  overloadedRecruiters: number;
+  overloadedDms: number;
   activeRepCount: number;
   dataTrust: DataTrustLevel;
   forecastConfidence: ForecastConfidenceLevel;
@@ -148,4 +152,5 @@ export type ExecutiveAccountabilitySnapshot = {
   weeklySummary: ExecutiveWeeklySummary;
   forecastBacktest: ForecastBacktestSummary;
   auditByActionId: Record<string, ExecutiveActionAuditEntry[]>;
+  operatingRhythm: ExecutiveOperatingRhythm;
 };

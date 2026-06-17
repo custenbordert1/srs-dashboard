@@ -104,6 +104,7 @@ export function normalizeExecutiveTrackedAction(
     sourceModule: raw.sourceModule ?? "executive-recruiting-forecast",
     sourceForecastKey: raw.sourceForecastKey ?? raw.recommendationId,
     recommendationKind: raw.recommendationKind ?? null,
+    territoryLabel: raw.territoryLabel ?? null,
     title: raw.title ?? "Executive action",
     priority: raw.priority ?? "medium",
     owner: raw.owner ?? null,

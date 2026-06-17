@@ -17,6 +17,10 @@ import {
 } from "@/lib/executive-accountability/forecast-backtest";
 import type { ExecutiveAccountabilityStoreFile } from "@/lib/executive-accountability/recommendation-store";
 import type { ExecutiveAccountabilitySnapshot } from "@/lib/executive-accountability/types";
+import { buildAuditCenterRows } from "@/lib/executive-accountability/audit-center";
+import { formatExecutiveEmailMarkdown } from "@/lib/executive-accountability/executive-email-export";
+import { buildOverdueEscalationDashboard } from "@/lib/executive-accountability/overdue-escalation";
+import { buildExecutiveWeeklyPacket } from "@/lib/executive-accountability/weekly-executive-packet";
 import { buildWeeklyExecutiveNarrative } from "@/lib/executive-accountability/weekly-narrative";
 import { buildExecutiveWeeklySummary } from "@/lib/executive-accountability/weekly-summary";
 
@@ -97,6 +101,31 @@ export function buildExecutiveAccountabilitySnapshot(input: {
     referenceMs,
   });
 
+  const priorForPacket =
+    forecastHistory.length > 1
+      ? forecastHistory[forecastHistory.length - 2]!
+      : null;
+
+  const weeklyPacket = buildExecutiveWeeklyPacket({
+    forecast: input.forecast,
+    actions: syncedActions,
+    overdueActions,
+    previousHistory: priorForPacket,
+    generatedAt,
+  });
+
+  const overdueEscalation = buildOverdueEscalationDashboard({
+    overdueActions,
+    referenceMs,
+  });
+
+  const auditCenter = buildAuditCenterRows({
+    auditLog,
+    actions: syncedActions,
+  });
+
+  const emailMarkdown = formatExecutiveEmailMarkdown(weeklyPacket);
+
   const updatedStore: ExecutiveAccountabilityStoreFile = {
     actions: syncedActions,
     forecastHistory,
@@ -118,6 +147,12 @@ export function buildExecutiveAccountabilitySnapshot(input: {
       weeklySummary,
       forecastBacktest,
       auditByActionId: auditEntriesByActionId(auditLog),
+      operatingRhythm: {
+        weeklyPacket,
+        overdueEscalation,
+        auditCenter,
+        emailMarkdown,
+      },
     },
     store: updatedStore,
   };
