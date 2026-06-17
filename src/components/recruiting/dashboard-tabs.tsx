@@ -48,6 +48,11 @@ export const EXECUTIVE_RECRUITING_FORECAST_TAB: DashboardTab = {
   label: getRecruitingTabSource("executive-forecasting").navLabel,
 };
 
+export const EXECUTIVE_ACCOUNTABILITY_TAB: DashboardTab = {
+  id: "executive-accountability",
+  label: getRecruitingTabSource("executive-accountability").navLabel,
+};
+
 type DashboardTabNavProps = {
   activeTab: DashboardTabId;
   onTabChange: (tab: DashboardTabId) => void;

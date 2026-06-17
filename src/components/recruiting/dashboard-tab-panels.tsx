@@ -132,6 +132,14 @@ export const LazyExecutiveRecruitingForecastPanel = dynamic(
   { loading: tabLoading("Loading executive forecast…"), ssr: false },
 );
 
+export const LazyExecutiveAccountabilityPanel = dynamic(
+  () =>
+    import("@/components/executive/executive-accountability-panel").then((m) => ({
+      default: m.ExecutiveAccountabilityPanel,
+    })),
+  { loading: tabLoading("Loading executive accountability…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;
