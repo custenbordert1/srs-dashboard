@@ -9,6 +9,7 @@ import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
 import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
 import { ExecutiveMelMatchingPanel } from "@/components/recruiting/mel-matching-metrics-panel";
 import { CoverageRiskSection } from "@/components/recruiting/coverage-risk-section";
+import { ExecutiveRecruitingForecastPanel } from "@/components/executive/executive-recruiting-forecast-panel";
 import { WorkforceOperationsSection } from "@/components/recruiting/workforce-operations-section";
 import { DeferredSection } from "@/components/ui/deferred-section";
 import { useCandidateDrawer } from "@/hooks/use-candidate-drawer";
@@ -87,6 +88,12 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-200 hover:bg-teal-500/20"
           >
             Workforce Intelligence
+          </Link>
+          <Link
+            href="/?tab=executive-forecasting"
+            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+          >
+            Executive Forecast
           </Link>
           <button
             type="button"
@@ -187,6 +194,18 @@ export function ExecutiveDashboard({ user }: ExecutiveDashboardProps) {
             metrics={data.melMatching}
             onCandidateClick={drawer.openCandidate}
           />
+
+          <DeferredSection
+            title="Executive recruiting forecast"
+            description="30/60/90-day hiring outlook, capacity pressure, and territory shortage risk."
+            summary={
+              <p className="text-sm text-zinc-500">
+                Expand to load deterministic forecast and capacity planning from cached intelligence.
+              </p>
+            }
+          >
+            <ExecutiveRecruitingForecastPanel />
+          </DeferredSection>
 
           <DeferredSection
             title="Coverage risk intelligence"

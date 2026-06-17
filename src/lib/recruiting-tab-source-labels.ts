@@ -11,7 +11,8 @@ export type DashboardTabId =
   | "automation"
   | "workforce"
   | "job-management"
-  | "workforce-intelligence";
+  | "workforce-intelligence"
+  | "executive-forecasting";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -138,6 +139,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     badgeLabel: "Executive analytics",
     kind: "executive",
     bannerMessage: "Executive workforce analytics — separate from daily Breezy recruiting operations.",
+  },
+  "executive-forecasting": {
+    navLabel: "Executive Forecast",
+    sourceTag: "Executive",
+    badgeLabel: "Forecasting & capacity",
+    kind: "executive",
+    bannerMessage:
+      "30/60/90-day hiring forecast, recruiter/DM capacity, and territory shortage outlook from cached Breezy + MEL intelligence.",
   },
 };
 
