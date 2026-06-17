@@ -4,6 +4,13 @@ export type CapacityStatus = "overloaded" | "stable" | "underused";
 
 export type DataTrustLevel = "high" | "partial" | "degraded";
 
+/** Model confidence in forecast inputs — not backtested statistical accuracy. */
+export type ForecastConfidenceLevel = "low" | "moderate" | "high";
+
+export type RecommendationPriority = "critical" | "high" | "medium" | "low";
+
+export type ProjectRiskLevel = "critical" | "high" | "medium" | "low";
+
 export type HiringForecastHorizon = {
   horizonDays: ForecastHorizonDays;
   /** Projected hires across the horizon using trailing velocity + pipeline conversion. */
@@ -59,10 +66,12 @@ export type ProjectCompletionRiskRow = {
   dmName: string;
   territoryLabel: string;
   riskScore: number;
+  riskLevel: ProjectRiskLevel;
   openOpportunities: number;
   pipelineCandidates: number;
   nearestDeadlineDays: number | null;
   reasons: string[];
+  suggestedAction: string;
 };
 
 export type ExecutiveForecastRecommendation = {
@@ -77,9 +86,19 @@ export type ExecutiveForecastRecommendation = {
   title: string;
   rationale: string;
   expectedImpact: string;
-  priority: "high" | "medium" | "low";
+  priority: RecommendationPriority;
   territoryLabel: string | null;
   owner: string | null;
+};
+
+export type ExecutiveForecastSummary = {
+  territoriesAtRisk: number;
+  overloadedRecruiters: number;
+  overloadedDms: number;
+  topRiskTerritory: { dmName: string; territoryLabel: string } | null;
+  topRecommendation: ExecutiveForecastRecommendation | null;
+  forecastConfidence: ForecastConfidenceLevel;
+  narrative: string;
 };
 
 export type ExecutiveRecruitingForecastKpis = {
@@ -96,6 +115,8 @@ export type ExecutiveRecruitingForecastKpis = {
 export type ExecutiveRecruitingForecastSnapshot = {
   generatedAt: string;
   dataTrust: DataTrustLevel;
+  forecastConfidence: ForecastConfidenceLevel;
+  executiveSummary: ExecutiveForecastSummary;
   assumptions: string[];
   partialSync: boolean;
   kpis: ExecutiveRecruitingForecastKpis;

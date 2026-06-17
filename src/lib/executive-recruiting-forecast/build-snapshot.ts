@@ -3,9 +3,12 @@ import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-automation/build-recruiting-intelligence";
 import { buildDmCapacityRows, buildRecruiterCapacityRows } from "@/lib/executive-recruiting-forecast/capacity-planning";
+import { buildExecutiveForecastSummary } from "@/lib/executive-recruiting-forecast/executive-summary";
+import { resolveForecastConfidence } from "@/lib/executive-recruiting-forecast/forecast-confidence";
 import {
   buildHiringForecastHorizons,
   buildWeeklyHireForecast,
+  countRecentHires,
 } from "@/lib/executive-recruiting-forecast/hiring-forecast";
 import { buildProjectCompletionRisks } from "@/lib/executive-recruiting-forecast/project-risk";
 import { buildExecutiveForecastRecommendations } from "@/lib/executive-recruiting-forecast/recommendations";
@@ -21,7 +24,7 @@ const FORECAST_ASSUMPTIONS = [
   "Applicant flow extrapolates trailing 30-day applications scaled by published job count.",
   "Territory shortage compares open MEL opportunities to active reps plus 35% of pipeline depth.",
   "Capacity scores penalize recruiter backlog, open job pressure, and overdue follow-ups.",
-  "Forecasts are deterministic — they do not call external AI services.",
+  "Forecasts are deterministic — model confidence is not statistical backtest accuracy.",
 ];
 
 function resolveDataTrust(partialSync: boolean, breezyOk: boolean): DataTrustLevel {
@@ -42,6 +45,9 @@ export function buildExecutiveRecruitingForecastSnapshot(input: {
 }): ExecutiveRecruitingForecastSnapshot {
   const partialSync = input.partialSync ?? false;
   const breezyOk = input.breezyOk ?? true;
+  const dataTrust = resolveDataTrust(partialSync, breezyOk);
+  const recentHireCount = countRecentHires(input.workflows, input.fetchedAt);
+
   const hiringForecasts = buildHiringForecastHorizons({
     candidates: input.candidates,
     workflows: input.workflows,
@@ -74,7 +80,7 @@ export function buildExecutiveRecruitingForecastSnapshot(input: {
   const pipelineByProject = new Map<string, number>();
   for (const opp of input.opportunities) {
     const key = opp.projectNo || opp.projectName;
-    pipelineByProject.set(key, (pipelineByProject.get(key) ?? 0));
+    pipelineByProject.set(key, pipelineByProject.get(key) ?? 0);
   }
   for (const candidate of input.candidates) {
     const record = input.workflows[candidate.candidateId];
@@ -103,10 +109,29 @@ export function buildExecutiveRecruitingForecastSnapshot(input: {
 
   const forecast30 = hiringForecasts.find((row) => row.horizonDays === 30)!;
   const forecast60 = hiringForecasts.find((row) => row.horizonDays === 60)!;
+  const territoriesAtRisk = territoryShortages.filter((row) => row.likelyMissCoverage).length;
+  const overloadedRecruiters = recruiterCapacity.filter((row) => row.status === "overloaded").length;
+  const overloadedDms = dmCapacity.filter((row) => row.status === "overloaded").length;
+  const forecastConfidence = resolveForecastConfidence({
+    dataTrust,
+    recentHireCount,
+    candidateCount: input.candidates.length,
+    territoriesAtRisk,
+  });
+  const executiveSummary = buildExecutiveForecastSummary({
+    territoriesAtRisk,
+    overloadedRecruiters,
+    overloadedDms,
+    territoryShortages,
+    topRecommendation: recommendations[0] ?? null,
+    forecastConfidence,
+  });
 
   return {
     generatedAt: input.fetchedAt,
-    dataTrust: resolveDataTrust(partialSync, breezyOk),
+    dataTrust,
+    forecastConfidence,
+    executiveSummary,
     assumptions: FORECAST_ASSUMPTIONS,
     partialSync,
     kpis: {
@@ -114,9 +139,9 @@ export function buildExecutiveRecruitingForecastSnapshot(input: {
       projectedHires60: forecast60.projectedHires,
       projectedHires90: forecast90.projectedHires,
       projectedApplicants90: forecast90.projectedApplicants,
-      overloadedRecruiters: recruiterCapacity.filter((row) => row.status === "overloaded").length,
-      overloadedDms: dmCapacity.filter((row) => row.status === "overloaded").length,
-      territoriesAtRisk: territoryShortages.filter((row) => row.likelyMissCoverage).length,
+      overloadedRecruiters,
+      overloadedDms,
+      territoriesAtRisk,
       projectsAtRisk: projectCompletionRisks.length,
     },
     hiringForecasts,

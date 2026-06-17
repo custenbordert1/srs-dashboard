@@ -22,7 +22,7 @@ const PIPELINE_WEIGHTS = {
   readyForMel: 0.45,
 } as const;
 
-function countRecentHires(workflows: CandidateWorkflowState, referenceIso: string): number {
+export function countRecentHires(workflows: CandidateWorkflowState, referenceIso: string): number {
   const reference = new Date(referenceIso).getTime();
   const since = reference - TRAILING_VELOCITY_DAYS * MS_PER_DAY;
   let hires = 0;

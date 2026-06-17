@@ -1,4 +1,5 @@
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
+import { enrichProjectCompletionRisk } from "@/lib/executive-recruiting-forecast/project-risk-display";
 import type { ProjectCompletionRiskRow } from "@/lib/executive-recruiting-forecast/types";
 
 /**
@@ -42,17 +43,19 @@ export function buildProjectCompletionRisks(input: {
         reasons.push("No pipeline candidates linked to project");
       }
       if (row.openOpportunities >= 5) reasons.push("High open call volume");
-      return {
+      return enrichProjectCompletionRisk({
         projectNo,
         projectName: row.projectName,
         dmName: row.dmName,
         territoryLabel: row.territoryLabel,
         riskScore,
+        riskLevel: "medium",
         openOpportunities: row.openOpportunities,
         pipelineCandidates,
         nearestDeadlineDays: null,
         reasons: reasons.length > 0 ? reasons : ["Monitor project staffing pace"],
-      };
+        suggestedAction: "",
+      });
     })
     .filter((row) => row.riskScore >= 35)
     .sort((a, b) => b.riskScore - a.riskScore)

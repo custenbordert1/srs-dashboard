@@ -237,6 +237,7 @@ describe("executive-recruiting-forecast", () => {
     });
     assert.ok(recs.some((row) => row.kind === "escalate-dm-territory"));
     assert.ok(recs.some((row) => row.kind === "move-recruiter-focus"));
+    assert.ok(recs[0]!.priority === "critical" || recs[0]!.priority === "high");
   });
 
   it("builds full executive snapshot with KPIs", () => {
@@ -252,6 +253,9 @@ describe("executive-recruiting-forecast", () => {
     assert.ok(snapshot.kpis.projectedHires30 >= 0);
     assert.equal(snapshot.hiringForecasts.length, 3);
     assert.ok(snapshot.assumptions.length >= 3);
+    assert.ok(snapshot.executiveSummary.narrative.length > 0);
+    assert.ok(["low", "moderate", "high"].includes(snapshot.forecastConfidence));
+    assert.ok(snapshot.projectCompletionRisks.every((row) => row.suggestedAction.length > 0));
   });
 
   it("flags DM capacity pressure from open opportunities", () => {

@@ -4,6 +4,10 @@ import type {
   RecruiterCapacityRow,
   TerritoryShortageForecastRow,
 } from "@/lib/executive-recruiting-forecast/types";
+import {
+  classifyRecommendationPriority,
+  sortRecommendationsByPriority,
+} from "@/lib/executive-recruiting-forecast/recommendation-priority";
 
 export function buildExecutiveForecastRecommendations(input: {
   territoryShortages: TerritoryShortageForecastRow[];
@@ -22,7 +26,7 @@ export function buildExecutiveForecastRecommendations(input: {
       title: `Escalate ${territory.dmName} territory risk`,
       rationale: territory.reasons.join(" · "),
       expectedImpact: `Reduce projected shortage of ${territory.projectedShortage} placements`,
-      priority: territory.shortageScore >= 75 ? "high" : "medium",
+      priority: classifyRecommendationPriority({ kind: "escalate-dm-territory", territory }),
       territoryLabel: territory.territoryLabel,
       owner: territory.dmName,
     });
@@ -33,7 +37,7 @@ export function buildExecutiveForecastRecommendations(input: {
         title: `Refresh job ads in ${territory.territoryLabel}`,
         rationale: "Applicant pool is thinner than open opportunity demand",
         expectedImpact: "Increase applicant flow over next 30 days",
-        priority: "high",
+        priority: classifyRecommendationPriority({ kind: "refresh-job-ads", territory }),
         territoryLabel: territory.territoryLabel,
         owner: territory.dmName,
       });
@@ -47,7 +51,7 @@ export function buildExecutiveForecastRecommendations(input: {
       title: "Review pay bands in high-shortage markets",
       rationale: "Projected applicant flow trails staffing demand",
       expectedImpact: "Improve applicant velocity in constrained territories",
-      priority: "medium",
+      priority: classifyRecommendationPriority({ kind: "increase-pay" }),
       territoryLabel: null,
       owner: null,
     });
@@ -62,7 +66,11 @@ export function buildExecutiveForecastRecommendations(input: {
       title: `Rebalance workload from ${target.recruiter}`,
       rationale: `${target.assignedCandidates} assigned candidates with ${target.overdueFollowUps} overdue follow-ups`,
       expectedImpact: "Stabilize recruiter capacity and follow-up SLA",
-      priority: "high",
+      priority: classifyRecommendationPriority({
+        kind: "move-recruiter-focus",
+        overdueFollowUps: target.overdueFollowUps,
+        assignedCandidates: target.assignedCandidates,
+      }),
       territoryLabel: null,
       owner: target.recruiter,
     });
@@ -76,7 +84,7 @@ export function buildExecutiveForecastRecommendations(input: {
       title: `Shift candidates to ${underused[0]!.recruiter}`,
       rationale: "Recruiter has spare capacity while peers are overloaded",
       expectedImpact: "Improve throughput without adding headcount",
-      priority: "medium",
+      priority: classifyRecommendationPriority({ kind: "prioritize-candidates" }),
       territoryLabel: null,
       owner: underused[0]!.recruiter,
     });
@@ -89,14 +97,11 @@ export function buildExecutiveForecastRecommendations(input: {
       title: `Enable follow-up automation for ${dm.dmName}`,
       rationale: `${dm.openOpportunities} open opportunities with coverage pressure ${dm.territoryCoveragePressure}%`,
       expectedImpact: "Reduce manual follow-up load on recruiters",
-      priority: "low",
+      priority: classifyRecommendationPriority({ kind: "automation" }),
       territoryLabel: null,
       owner: dm.dmName,
     });
   }
 
-  return recommendations.sort((a, b) => {
-    const rank = { high: 0, medium: 1, low: 2 };
-    return rank[a.priority] - rank[b.priority];
-  });
+  return sortRecommendationsByPriority(recommendations);
 }
