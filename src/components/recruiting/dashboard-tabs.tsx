@@ -43,6 +43,11 @@ export const EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB: DashboardTab = {
   href: "/executive/workforce-intelligence",
 };
 
+export const EXECUTIVE_RECRUITING_FORECAST_TAB: DashboardTab = {
+  id: "executive-forecasting",
+  label: getRecruitingTabSource("executive-forecasting").navLabel,
+};
+
 type DashboardTabNavProps = {
   activeTab: DashboardTabId;
   onTabChange: (tab: DashboardTabId) => void;

@@ -20,10 +20,12 @@ import {
   LazyRecruitingIntelligenceSection,
   LazyWorkforceOperationsSection,
   LazyJobManagementSection,
+  LazyExecutiveRecruitingForecastPanel,
 } from "./dashboard-tab-panels";
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
+  EXECUTIVE_RECRUITING_FORECAST_TAB,
   EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
   type DashboardTabId,
 } from "./dashboard-tabs";
@@ -63,7 +65,35 @@ export function RecruitingDashboardContent({
   userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
-  const executiveTabs = userRole === "executive" ? [EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB] : [];
+  const executiveTabs =
+    userRole === "executive"
+      ? [EXECUTIVE_RECRUITING_FORECAST_TAB, EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB]
+      : [];
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (!tab) return;
+    const allowed = new Set<DashboardTabId>([
+      "command-center",
+      "overview",
+      "needs-attention",
+      "dm-scorecards",
+      "live-sheet",
+      "candidates",
+      "mel-projects",
+      "data-health",
+      "recruiting-intelligence",
+      "automation",
+      "workforce",
+      "job-management",
+      "executive-forecasting",
+      "workforce-intelligence",
+    ]);
+    if (allowed.has(tab as DashboardTabId)) {
+      setActiveTab(tab as DashboardTabId);
+    }
+  }, []);
 
   useEffect(() => {
     const id = window.setTimeout(() => warmBreezyCandidatesCache(), 0);
@@ -172,6 +202,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="job-management" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="job-management">
             <LazyJobManagementSection />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="executive-forecasting" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-forecasting">
+            <LazyExecutiveRecruitingForecastPanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
       </main>

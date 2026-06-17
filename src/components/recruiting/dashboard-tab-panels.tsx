@@ -124,6 +124,14 @@ export const LazyJobManagementSection = dynamic(
   { loading: tabLoading("Loading job management…"), ssr: false },
 );
 
+export const LazyExecutiveRecruitingForecastPanel = dynamic(
+  () =>
+    import("@/components/executive/executive-recruiting-forecast-panel").then((m) => ({
+      default: m.ExecutiveRecruitingForecastPanel,
+    })),
+  { loading: tabLoading("Loading executive forecast…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;
