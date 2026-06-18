@@ -26,11 +26,9 @@ import {
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
-  EXECUTIVE_RECRUITING_FORECAST_TAB,
-  EXECUTIVE_ACCOUNTABILITY_TAB,
-  EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB,
   type DashboardTabId,
 } from "./dashboard-tabs";
+import { getExecutiveNavTabs } from "@/lib/recruiting-tab-groups";
 import type { UserRole } from "@/lib/auth/types";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
@@ -67,10 +65,7 @@ export function RecruitingDashboardContent({
   userRole,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
-  const executiveTabs =
-    userRole === "executive"
-      ? [EXECUTIVE_RECRUITING_FORECAST_TAB, EXECUTIVE_ACCOUNTABILITY_TAB, EXECUTIVE_WORKFORCE_INTELLIGENCE_TAB]
-      : [];
+  const executiveTabs = userRole === "executive" ? getExecutiveNavTabs() : [];
 
   useEffect(() => {
     if (typeof window === "undefined") return;

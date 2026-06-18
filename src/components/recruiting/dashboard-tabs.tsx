@@ -68,7 +68,7 @@ const tabButtonClass = (isActive: boolean) =>
   ].join(" ");
 
 export function DashboardTabNav({ activeTab, onTabChange, extraTabs = [] }: DashboardTabNavProps) {
-  const tabs = [...DASHBOARD_TABS, ...extraTabs];
+  const tabs = extraTabs.length > 0 ? [...extraTabs, ...DASHBOARD_TABS] : DASHBOARD_TABS;
   return (
     <nav
       aria-label="Dashboard sections"
