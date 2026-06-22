@@ -33,6 +33,11 @@ import {
   type CandidateWorkflowStatus,
   type PaperworkStatus,
 } from "@/lib/candidate-workflow-types";
+import {
+  baselineCandidateFunnelAutomation,
+  evaluateCandidateFunnelAutomation,
+} from "@/lib/hiring-funnel-automation";
+import type { CandidateFunnelAutomation } from "@/lib/hiring-funnel-automation/types";
 
 export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   workflowStatus: CandidateWorkflowStatus;
@@ -87,6 +92,7 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   resumeIntelligence: CandidateResumeIntelligence;
   questionnaireIntelligence: CandidateQuestionnaireIntelligence;
   candidateGrade: CandidateReadinessScore;
+  funnelAutomation: CandidateFunnelAutomation;
 };
 
 function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
@@ -154,7 +160,7 @@ export function buildBaselineWorkflowRow(
   });
   const intelligenceBundle = buildCandidateIntelligenceBundle(candidate);
 
-  const baseline: ScoredCandidateWorkflowRow = {
+  const baseline = {
     ...candidate,
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
@@ -209,9 +215,19 @@ export function buildBaselineWorkflowRow(
     questionnaireIntelligence: intelligenceBundle.questionnaire,
     candidateGrade: baselineCandidateReadinessScore(),
   };
-  return {
+  const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...baseline,
-    nextActionNeeded: resolveRecruiterNextAction(baseline, workflowStatus, local?.nextActionNeeded),
+    nextActionNeeded: resolveRecruiterNextAction(
+      { ...baseline, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+      workflowStatus,
+      local?.nextActionNeeded,
+    ),
+  };
+  return {
+    ...withNextAction,
+    funnelAutomation: evaluateCandidateFunnelAutomation(
+      { ...withNextAction, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+    ),
   };
 }
 
@@ -236,7 +252,7 @@ export function buildScoredWorkflowRow(
   const assignedDM = local?.assignedDM ?? "Unassigned";
   const intelligenceBundle = buildCandidateIntelligenceBundle(candidate);
 
-  const scored: ScoredCandidateWorkflowRow = {
+  const scored = {
     ...candidate,
     workflowStatus,
     lastActionAt: local?.lastActionAt ?? null,
@@ -291,8 +307,29 @@ export function buildScoredWorkflowRow(
     questionnaireIntelligence: intelligenceBundle.questionnaire,
     candidateGrade: intelligenceBundle.grade,
   };
-  return {
+  const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...scored,
-    nextActionNeeded: resolveRecruiterNextAction(scored, workflowStatus, local?.nextActionNeeded),
+    nextActionNeeded: resolveRecruiterNextAction(
+      { ...scored, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+      workflowStatus,
+      local?.nextActionNeeded,
+    ),
   };
+  return {
+    ...withNextAction,
+    funnelAutomation: evaluateCandidateFunnelAutomation(
+      { ...withNextAction, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+    ),
+  };
+}
+
+export function attachFunnelAutomation(row: ScoredCandidateWorkflowRow): ScoredCandidateWorkflowRow {
+  return {
+    ...row,
+    funnelAutomation: row.funnelAutomation ?? evaluateCandidateFunnelAutomation(row),
+  };
+}
+
+export function baselineFunnelAutomationForCandidate(candidateId: string): CandidateFunnelAutomation {
+  return baselineCandidateFunnelAutomation(candidateId);
 }

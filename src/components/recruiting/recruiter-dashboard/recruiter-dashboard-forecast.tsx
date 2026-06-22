@@ -11,7 +11,7 @@ export function RecruiterDashboardForecast({ forecast }: RecruiterDashboardForec
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
       <h2 className="text-lg font-semibold text-zinc-50">Hiring forecast</h2>
       <p className="mt-1 text-sm text-zinc-500">{forecast.assumptions}</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-teal-200/80">
             Expected Ready for MEL (7 days)
@@ -28,7 +28,25 @@ export function RecruiterDashboardForecast({ forecast }: RecruiterDashboardForec
             {forecast.readyForMel30d}
           </p>
         </div>
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 px-4 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Expected hires (30 days)</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-50">{forecast.expectedHires30d}</p>
+        </div>
       </div>
+      {(forecast.paperworkBottleneckCount > 0 || forecast.interviewBottleneckCount > 0) && (
+        <div className="mt-4 flex flex-wrap gap-3 text-sm text-amber-100/90">
+          {forecast.paperworkBottleneckCount > 0 ? (
+            <span className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
+              {forecast.paperworkBottleneckCount} paperwork bottleneck{forecast.paperworkBottleneckCount === 1 ? "" : "s"}
+            </span>
+          ) : null}
+          {forecast.interviewBottleneckCount > 0 ? (
+            <span className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
+              {forecast.interviewBottleneckCount} interview bottleneck{forecast.interviewBottleneckCount === 1 ? "" : "s"}
+            </span>
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }

@@ -175,6 +175,7 @@ export function ExecutiveHomePanel() {
     accountability: accountability.snapshot,
     pipeline: pipeline.data,
     alerts: recruiting.data?.recruitingAlerts,
+    automationRollups: recruiting.data?.executiveAutomationRollups,
     candidatesUnavailable,
   });
 

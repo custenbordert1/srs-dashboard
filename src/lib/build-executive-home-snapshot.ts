@@ -3,6 +3,7 @@ import type { ExecutiveInsightsKpis } from "@/lib/executive-insights-engine";
 import type { ExecutiveAccountabilitySnapshot } from "@/lib/executive-accountability/types";
 import type { PipelineIntelligenceSnapshot } from "@/lib/pipeline-intelligence/client";
 import type { RecruitingAlert } from "@/lib/recruiting-alert-engine";
+import type { ExecutiveAutomationRollups } from "@/lib/hiring-funnel-automation/types";
 
 export type ExecutiveSnapshotLine = {
   text: string;
@@ -33,9 +34,10 @@ export function buildExecutiveSnapshotContent(input: {
   accountability?: ExecutiveAccountabilitySnapshot | null;
   pipeline?: PipelineIntelligenceSnapshot | null;
   alerts?: RecruitingAlert[];
+  automationRollups?: ExecutiveAutomationRollups | null;
   candidatesUnavailable?: boolean;
 }): ExecutiveSnapshotContent {
-  const { insights, data, accountability, pipeline, alerts, candidatesUnavailable } = input;
+  const { insights, data, accountability, pipeline, alerts, automationRollups, candidatesUnavailable } = input;
 
   const risks: ExecutiveSnapshotLine[] = [];
   const priorities: ExecutiveSnapshotLine[] = [];
@@ -79,6 +81,18 @@ export function buildExecutiveSnapshotContent(input: {
 
   for (const alert of alerts?.filter((a) => a.severity === "critical").slice(0, 2) ?? []) {
     risks.push({ text: alert.title, href: "/?tab=needs-attention" });
+  }
+
+  if (automationRollups?.recruiterCapacityRisk) {
+    risks.push({ text: automationRollups.recruiterCapacityRisk, href: "/?tab=recruiter-dashboard" });
+  }
+
+  for (const blocker of automationRollups?.pipelineBlockers ?? []) {
+    priorities.push({ text: blocker, href: "/?tab=recruiter-inbox" });
+  }
+
+  for (const opportunity of automationRollups?.automationOpportunities ?? []) {
+    opportunities.push({ text: opportunity, href: "/?tab=candidates" });
   }
 
   const overdue = accountability?.statusSummary.overdue ?? 0;

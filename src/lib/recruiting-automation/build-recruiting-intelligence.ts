@@ -12,6 +12,9 @@ import {
   buildRecruitingRecommendations,
   type RecruitingRecommendation,
 } from "@/lib/recruiting-recommendation-engine";
+import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
+import { buildExecutiveAutomationRollups } from "@/lib/hiring-funnel-automation/build-executive-rollups";
+import type { ExecutiveAutomationRollups } from "@/lib/hiring-funnel-automation/types";
 import { AUTOMATION_HOOKS } from "@/lib/recruiting-automation/automation-hooks";
 import { buildDailyExecutiveSnapshot, type DailyExecutiveSnapshot } from "@/lib/recruiting-automation/daily-executive-snapshot";
 import {
@@ -50,6 +53,7 @@ export type RecruitingIntelligenceSnapshot = {
   trends: RecruitingTrendCharts;
   dailySnapshot: DailyExecutiveSnapshot;
   automationHooks: typeof AUTOMATION_HOOKS;
+  executiveAutomationRollups: ExecutiveAutomationRollups;
 };
 
 export function buildRecruitingIntelligence(
@@ -63,6 +67,10 @@ export function buildRecruitingIntelligence(
     session.role === "dm" ? session.territoryStates : getAssignedStatesForDm(session.dmName ?? session.name);
   const territoryLabel =
     territoryStates.length > 0 ? territoryStates.join(", ") : "Nationwide";
+
+  const scoredCandidates = candidates.map((candidate) =>
+    buildScoredWorkflowRow(candidate, workflows[candidate.candidateId]),
+  );
 
   return {
     territoryLabel,
@@ -83,5 +91,6 @@ export function buildRecruitingIntelligence(
     trends: buildRecruitingTrendCharts(jobs, candidates, fetchedAt),
     dailySnapshot: buildDailyExecutiveSnapshot(jobs, candidates, fetchedAt),
     automationHooks: AUTOMATION_HOOKS,
+    executiveAutomationRollups: buildExecutiveAutomationRollups(scoredCandidates, Date.parse(fetchedAt)),
   };
 }

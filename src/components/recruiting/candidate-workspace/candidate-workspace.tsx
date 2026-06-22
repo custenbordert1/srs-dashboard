@@ -1,6 +1,8 @@
 "use client";
 
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
+import { CandidateAutomationStatusPanel } from "@/components/recruiting/candidate-workspace/candidate-automation-status-panel";
+import { CandidateCopilotPanel } from "@/components/recruiting/candidate-workspace/candidate-copilot-panel";
 import { CandidateCommunicationLog } from "@/components/recruiting/candidate-workspace/candidate-communication-log";
 import { CandidateGradePanel } from "@/components/recruiting/candidate-workspace/candidate-grade-panel";
 import { CandidateMelReadinessPanel } from "@/components/recruiting/candidate-workspace/candidate-mel-readiness-panel";
@@ -177,6 +179,8 @@ export function CandidateWorkspace({
           <CandidateSummary candidate={activeCandidate} matchScore={matchScore} />
 
           <CandidateGradePanel grade={activeCandidate.candidateGrade} />
+          <CandidateCopilotPanel copilot={activeCandidate.funnelAutomation.copilot} />
+          <CandidateAutomationStatusPanel automation={activeCandidate.funnelAutomation} />
           <CandidateResumeIntelligencePanel intelligence={activeCandidate.resumeIntelligence} />
           <CandidateQuestionnaireIntelligencePanel intelligence={activeCandidate.questionnaireIntelligence} />
 

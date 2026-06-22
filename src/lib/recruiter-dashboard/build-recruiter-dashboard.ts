@@ -14,6 +14,12 @@ import {
   sortByRecruiterInboxPriority,
 } from "@/lib/recruiter-action-queue-filters";
 import { resolveWorkspaceAction } from "@/lib/candidate-workspace/resolve-workspace-action";
+import { buildEnhancedHiringForecast } from "@/lib/hiring-funnel-automation/build-hiring-forecast";
+import { buildRecruiterTasks } from "@/lib/hiring-funnel-automation/build-recruiter-tasks";
+import {
+  buildWorkloadBalanceRecommendations,
+  summarizePipelineRisks,
+} from "@/lib/hiring-funnel-automation/build-workload-balance";
 import type {
   RecruiterDailyPlanAction,
   RecruiterDashboardSnapshot,
@@ -345,25 +351,15 @@ function buildProductivity(
   };
 }
 
-function buildForecast(owned: ScoredCandidateWorkflowRow[]): RecruiterHiringForecast {
-  const readyNow = owned.filter((row) => isMelReadyStatus(row.workflowStatus)).length;
-  const signed = owned.filter((row) => row.workflowStatus === "Signed").length;
-  const paperworkSent = owned.filter((row) => row.workflowStatus === "Paperwork Sent").length;
-  const interview = owned.filter(
-    (row) => row.recruitingActions.recommendInterview || row.workflowStatus === "Qualified",
-  ).length;
-  const early = owned.filter(
-    (row) => row.workflowStatus === "Applied" || row.workflowStatus === "Needs Review",
-  ).length;
-
-  const readyForMel7d = readyNow + Math.round(signed * 0.85 + paperworkSent * 0.35);
-  const readyForMel30d =
-    readyForMel7d + Math.round(interview * 0.4 + early * 0.08 + paperworkSent * 0.25);
-
+function buildForecast(owned: ScoredCandidateWorkflowRow[], referenceMs: number): RecruiterHiringForecast {
+  const enhanced = buildEnhancedHiringForecast(owned, referenceMs);
   return {
-    readyForMel7d,
-    readyForMel30d,
-    assumptions: "Based on owned pipeline counts and simple stage conversion estimates.",
+    readyForMel7d: enhanced.readyForMel7d,
+    readyForMel30d: enhanced.readyForMel30d,
+    expectedHires30d: enhanced.expectedHires30d,
+    paperworkBottleneckCount: enhanced.paperworkBottleneckCount,
+    interviewBottleneckCount: enhanced.interviewBottleneckCount,
+    assumptions: enhanced.assumptions,
   };
 }
 
@@ -451,7 +447,7 @@ export function buildRecruiterDashboardSnapshot(input: {
     today: buildTodayItems(owned, referenceMs),
     pipeline: buildPipelineCards(owned, referenceMs),
     productivity,
-    forecast: buildForecast(owned),
+    forecast: buildForecast(owned, referenceMs),
     scorecard: buildScorecard(owned, input.actingRecruiter, productivity, referenceMs),
     dailyPlan: [
       ...buildDailyPlan(owned, input.actingRecruiter, referenceMs),
@@ -459,6 +455,11 @@ export function buildRecruiterDashboardSnapshot(input: {
         ? [buildDailyPlanBatchAction(owned, input.actingRecruiter, referenceMs)!]
         : []),
     ].slice(0, 5),
+    autoTasks: buildRecruiterTasks(owned, { actingRecruiter: input.actingRecruiter, referenceMs }),
+    workloadRecommendations: buildWorkloadBalanceRecommendations(input.candidates, referenceMs).filter(
+      (row) => row.recruiter === input.actingRecruiter || row.recruiter === "Unassigned",
+    ),
+    funnelRiskSummary: summarizePipelineRisks(owned, referenceMs),
   };
 }
 

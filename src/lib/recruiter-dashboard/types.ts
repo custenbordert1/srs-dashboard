@@ -74,6 +74,9 @@ export type RecruiterDailyPlanAction = {
 export type RecruiterHiringForecast = {
   readyForMel7d: number;
   readyForMel30d: number;
+  expectedHires30d: number;
+  paperworkBottleneckCount: number;
+  interviewBottleneckCount: number;
   assumptions: string;
 };
 
@@ -86,4 +89,7 @@ export type RecruiterDashboardSnapshot = {
   forecast: RecruiterHiringForecast;
   scorecard: RecruiterScorecard;
   dailyPlan: RecruiterDailyPlanAction[];
+  autoTasks: import("@/lib/hiring-funnel-automation/types").RecruiterTask[];
+  workloadRecommendations: import("@/lib/hiring-funnel-automation/types").WorkloadBalanceRecommendation[];
+  funnelRiskSummary: { critical: number; warning: number; healthy: number };
 };

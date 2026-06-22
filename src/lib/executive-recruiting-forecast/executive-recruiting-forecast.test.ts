@@ -133,6 +133,11 @@ function intelligenceStub(): RecruitingIntelligenceSnapshot {
       summaryBullets: [],
     },
     automationHooks: [],
+    executiveAutomationRollups: {
+      recruiterCapacityRisk: null,
+      pipelineBlockers: [],
+      automationOpportunities: [],
+    },
   };
 }
 

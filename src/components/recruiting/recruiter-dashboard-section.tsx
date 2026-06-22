@@ -13,6 +13,7 @@ import { RecruiterDashboardForecast } from "@/components/recruiting/recruiter-da
 import { RecruiterDashboardPipeline } from "@/components/recruiting/recruiter-dashboard/recruiter-dashboard-pipeline";
 import { RecruiterDashboardProductivity } from "@/components/recruiting/recruiter-dashboard/recruiter-dashboard-productivity";
 import { RecruiterDashboardScorecard } from "@/components/recruiting/recruiter-dashboard/recruiter-dashboard-scorecard";
+import { RecruiterAutoTasksPanel } from "@/components/recruiting/recruiter-dashboard/recruiter-dashboard-tasks";
 import { RecruiterDashboardToday } from "@/components/recruiting/recruiter-dashboard/recruiter-dashboard-today";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
@@ -168,6 +169,7 @@ export function RecruiterDashboardSection() {
       </header>
 
       <RecruiterDashboardDailyPlan actions={snapshot.dailyPlan} />
+      <RecruiterAutoTasksPanel tasks={snapshot.autoTasks} />
       <RecruiterDashboardToday items={snapshot.today} />
       <RecruiterDashboardPipeline cards={snapshot.pipeline} />
       <RecruiterDashboardProductivity productivity={snapshot.productivity} />

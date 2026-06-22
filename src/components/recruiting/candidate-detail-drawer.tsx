@@ -36,6 +36,7 @@ import type {
   CandidateReadinessScore,
   CandidateResumeIntelligence,
 } from "@/lib/candidate-readiness/types";
+import type { CandidateFunnelAutomation } from "@/lib/hiring-funnel-automation/types";
 import { useEffect, useState } from "react";
 
 export type CandidateDrawerRow = {
@@ -100,6 +101,7 @@ export type CandidateDrawerRow = {
   resumeIntelligence: CandidateResumeIntelligence;
   questionnaireIntelligence: CandidateQuestionnaireIntelligence;
   candidateGrade: CandidateReadinessScore;
+  funnelAutomation: CandidateFunnelAutomation;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";

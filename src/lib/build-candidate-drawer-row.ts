@@ -100,5 +100,6 @@ export function buildCandidateDrawerRowFromScored(
     resumeIntelligence: scored.resumeIntelligence,
     questionnaireIntelligence: scored.questionnaireIntelligence,
     candidateGrade: scored.candidateGrade,
+    funnelAutomation: scored.funnelAutomation,
   };
 }

@@ -10,6 +10,8 @@ import {
   sortRecruiterInboxSectionRows,
   type RecruiterInboxSectionId,
 } from "@/lib/recruiter-action-queue-filters";
+import { buildRecruiterTasks } from "@/lib/hiring-funnel-automation/build-recruiter-tasks";
+import { RecruiterAutoTasksPanel } from "@/components/recruiting/recruiter-dashboard/recruiter-dashboard-tasks";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 
 type RecruiterInboxProps = {
@@ -121,6 +123,11 @@ export function RecruiterInbox({
 }: RecruiterInboxProps) {
   const databaseRef = useRef<HTMLElement>(null);
 
+  const autoTasks = useMemo(
+    () => buildRecruiterTasks(candidates, { actingRecruiter }),
+    [actingRecruiter, candidates],
+  );
+
   const sections = useMemo(
     () => buildRecruiterInboxSections(candidates, actingRecruiter),
     [actingRecruiter, candidates],
@@ -155,6 +162,8 @@ export function RecruiterInbox({
 
   return (
     <div className="space-y-8">
+      <RecruiterAutoTasksPanel tasks={autoTasks} />
+
       <div className="space-y-4">
         <div className="border-b border-zinc-800/80 pb-2">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-300/90">Today</p>
