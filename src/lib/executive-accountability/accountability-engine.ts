@@ -38,7 +38,10 @@ export function detectStaleActions(
   });
 }
 
-export function groupActionsByOwner(actions: ExecutiveTrackedAction[]): OwnerActionGroup[] {
+export function groupActionsByOwner(
+  actions: ExecutiveTrackedAction[],
+  referenceMs = Date.now(),
+): OwnerActionGroup[] {
   const active = getActiveActions(actions);
   const groups = new Map<string, OwnerActionGroup>();
 
@@ -58,7 +61,9 @@ export function groupActionsByOwner(actions: ExecutiveTrackedAction[]): OwnerAct
     groups.set(owner, entry);
   }
 
-  const overdueIds = new Set(detectOverdueActions(actions).map((row) => row.recommendationId));
+  const overdueIds = new Set(
+    detectOverdueActions(actions, referenceMs).map((row) => row.recommendationId),
+  );
   for (const group of groups.values()) {
     group.overdue = group.actions.filter((row) => overdueIds.has(row.recommendationId)).length;
     group.actions.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());

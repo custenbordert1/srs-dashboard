@@ -200,15 +200,18 @@ describe("executive accountability", () => {
   });
 
   it("groups recommendations by owner", () => {
-    const groups = groupActionsByOwner([
-      trackedAction({ owner: "DM One" }),
-      trackedAction({ recommendationId: "a2", owner: "Alex", status: "in_progress" }),
-      trackedAction({
-        recommendationId: "a3",
-        owner: "DM One",
-        dueDate: "2026-06-01T12:00:00.000Z",
-      }),
-    ]);
+    const groups = groupActionsByOwner(
+      [
+        trackedAction({ owner: "DM One" }),
+        trackedAction({ recommendationId: "a2", owner: "Alex", status: "in_progress" }),
+        trackedAction({
+          recommendationId: "a3",
+          owner: "DM One",
+          dueDate: "2026-06-01T12:00:00.000Z",
+        }),
+      ],
+      referenceMs,
+    );
     assert.equal(groups.length, 2);
     const dmOne = groups.find((row) => row.owner === "DM One");
     assert.ok(dmOne);
