@@ -14,7 +14,7 @@ import {
 } from "@/lib/candidate-workflow-types";
 import { CandidateAutomationPanels } from "@/components/recruiting/candidate-automation-panels";
 import type { CandidateRowAction } from "@/components/recruiting/candidate-actions-menu";
-import { CandidateDetailDrawer } from "@/components/recruiting/candidate-detail-drawer";
+import { CandidateWorkspace } from "@/components/recruiting/candidate-workspace";
 import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
@@ -97,7 +97,6 @@ import {
 } from "@/components/recruiting/candidate-my-queue-panel";
 import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
-import { CandidateRowExpandedDetails } from "@/components/recruiting/candidate-row-expanded-details";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
 import {
   buildRecruiterInboxSections,
@@ -126,7 +125,6 @@ import {
 } from "@/lib/recruiter-sync-status-copy";
 import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
-import { resolveCandidateRowPrimaryAction } from "@/lib/candidate-row-primary-action";
 import {
   stickyCheckboxCellClass,
   stickyCheckboxHeaderClass,
@@ -463,7 +461,7 @@ export function CandidatesSection() {
   const [scrollToInboxSection, setScrollToInboxSection] = useState<RecruiterInboxSectionId | null>(
     null,
   );
-  const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(() => new Set());
+  const [workspaceBusy, setWorkspaceBusy] = useState(false);
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
   const [onboardingConfigError, setOnboardingConfigError] = useState<string | null>(null);
@@ -1297,18 +1295,52 @@ export function CandidatesSection() {
   );
 
   const recruiterProductivity = useMemo(() => buildRecruiterProductivity(workflowState), [workflowState]);
-  const toggleExpandedRow = useCallback((candidateId: string) => {
-    setExpandedRowIds((current) => {
-      const next = new Set(current);
-      if (next.has(candidateId)) next.delete(candidateId);
-      else next.add(candidateId);
-      return next;
-    });
-  }, []);
 
   const handleScrollToInboxSection = useCallback((section: RecruiterInboxSectionId) => {
     setScrollToInboxSection(section);
   }, []);
+
+  const handleWorkspaceAdvance = useCallback(
+    async (input: {
+      statusChange?: CandidateWorkflowStatus;
+      completeFollowUp?: boolean;
+      note?: string;
+      recruitingAction?: { type: RecruitingActionType; enabled: boolean };
+    }) => {
+      const row = selectedCandidate;
+      if (!row) return;
+      setWorkspaceBusy(true);
+      try {
+        if (input.completeFollowUp) {
+          const workflow = await completeCandidateFollowUp(row.candidateId);
+          commitWorkflowToView(workflow, { notice: "Follow-up completed." });
+        }
+        if (input.recruitingAction) {
+          const workflow = await persistRecruitingActionToggle(
+            row.candidateId,
+            input.recruitingAction.type,
+            input.recruitingAction.enabled,
+          );
+          commitWorkflowToView(workflow);
+        }
+        if (input.statusChange) {
+          const result = await persistWorkflow(row, input.statusChange, { note: input.note });
+          if (result.rosters) setRosters(result.rosters);
+          commitWorkflowToView(result.workflow, {
+            notice: workflowNoticeStatus(input.statusChange),
+            workflows: result.workflows,
+          });
+        } else if (input.note && !input.statusChange && !input.completeFollowUp && !input.recruitingAction) {
+          updateWorkflow(row, row.workflowStatus, { note: input.note });
+        }
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : "Workspace action failed");
+      } finally {
+        setWorkspaceBusy(false);
+      }
+    },
+    [commitWorkflowToView, selectedCandidate],
+  );
 
   function toggleWorkflowStatusFilter(status: CandidateWorkflowStatus) {
     setWorkflowFilter((current) => (current === status ? ALL : status));
@@ -1737,47 +1769,34 @@ export function CandidatesSection() {
     (candidate: ScoredCandidateWorkflowRow) => {
       const appliedDays = daysSince(candidate.appliedDate);
       const rowSelected = selectedCandidateId === candidate.candidateId;
-      const expanded = expandedRowIds.has(candidate.candidateId);
       const location = [candidate.city, candidate.state].filter(Boolean).join(", ") || "—";
       const urgencyClass = tableRowUrgencyClass(candidate);
       return (
-        <>
-          <tr
-            key={candidate.candidateId}
-            onClick={() => setSelectedCandidateId(candidate.candidateId)}
-            className={`group cursor-pointer ${urgencyClass} ${
-              rowSelected
-                ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
-                : "hover:bg-zinc-800/30"
-            }`}
-            style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
-            aria-selected={rowSelected}
+        <tr
+          key={candidate.candidateId}
+          onClick={() => setSelectedCandidateId(candidate.candidateId)}
+          className={`group cursor-pointer ${urgencyClass} ${
+            rowSelected
+              ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
+              : "hover:bg-zinc-800/30"
+          }`}
+          style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
+          aria-selected={rowSelected}
+        >
+          <td
+            className={stickyCheckboxCellClass(tdClass, {
+              selected: rowSelected,
+              rowBg: "bg-zinc-950",
+            })}
+            onClick={(event) => event.stopPropagation()}
           >
-            <td
-              className={stickyCheckboxCellClass(tdClass, {
-                selected: rowSelected,
-                rowBg: "bg-zinc-950",
-              })}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  aria-label={`Select ${candidateName(candidate)}`}
-                  checked={selectedIds.has(candidate.candidateId)}
-                  onChange={() => toggleSelectCandidate(candidate.candidateId)}
-                />
-                <button
-                  type="button"
-                  aria-label={expanded ? "Collapse row details" : "Expand row details"}
-                  aria-expanded={expanded}
-                  onClick={() => toggleExpandedRow(candidate.candidateId)}
-                  className="rounded px-1 text-xs text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
-                >
-                  {expanded ? "▾" : "▸"}
-                </button>
-              </div>
-            </td>
+            <input
+              type="checkbox"
+              aria-label={`Select ${candidateName(candidate)}`}
+              checked={selectedIds.has(candidate.candidateId)}
+              onChange={() => toggleSelectCandidate(candidate.candidateId)}
+            />
+          </td>
             <td
               className={`${stickyIdentityCellClass(tdClass, {
                 selected: rowSelected,
@@ -1806,18 +1825,12 @@ export function CandidatesSection() {
             </td>
             <td className={tdClass} onClick={(event) => event.stopPropagation()}>
               <CandidateRowPrimaryActionBar
-                primary={resolveCandidateRowPrimaryAction({
-                  candidate,
-                  actingRecruiter,
-                  sendBlockReason: getSendPaperworkBlockReason(
-                    buildSendEligibility(
-                      candidate,
-                      "onboarding_packet",
-                      paperworkSendingId === candidate.candidateId,
-                    ),
-                  ),
-                  sendBusy: paperworkSendingId === candidate.candidateId,
-                })}
+                primary={{
+                  kind: "open-drawer",
+                  label: "Open",
+                  tone: "neutral",
+                  title: "Open candidate workspace",
+                }}
                 onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
                 followUpDisabled={candidate.recruitingActions.needsFollowUp}
                 onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
@@ -1847,14 +1860,6 @@ export function CandidatesSection() {
               />
             </td>
           </tr>
-          {expanded ? (
-            <tr key={`${candidate.candidateId}-details`}>
-              <td colSpan={7} className="p-0">
-                <CandidateRowExpandedDetails candidate={candidate} />
-              </td>
-            </tr>
-          ) : null}
-        </>
       );
     },
     [
@@ -1869,7 +1874,6 @@ export function CandidatesSection() {
       actingRecruiter,
       selectedCandidateId,
       selectedIds,
-      expandedRowIds,
       addQuickNoteToRow,
       assignActingRecruiterToRow,
       buildSendEligibility,
@@ -1877,7 +1881,6 @@ export function CandidatesSection() {
       flagCandidateFollowUp,
       sendPaperwork,
       toggleSelectCandidate,
-      toggleExpandedRow,
     ],
   );
 
@@ -2227,45 +2230,12 @@ export function CandidatesSection() {
         onRefresh={() => void loadBundle(true)}
       />
 
-      <CandidateDetailDrawer
+      <CandidateWorkspace
         key={selectedDrawerRow?.candidateId ?? "closed"}
         candidate={selectedDrawerRow}
         open={selectedDrawerRow !== null}
         onClose={() => setSelectedCandidateId(null)}
-        statusAgingDays={
-          selectedDrawerRow ? daysSince(selectedDrawerRow.lastActionAt ?? selectedDrawerRow.appliedDate) : null
-        }
-        appliedAgingDays={selectedDrawerRow ? daysSince(selectedDrawerRow.appliedDate) : null}
-        onStatusChange={(status) => {
-          if (!selectedCandidate) return;
-          updateWorkflow(selectedCandidate, status);
-        }}
-        onSaveAssignments={(assignedRecruiter, assignedDM) => {
-          if (!selectedCandidate) return;
-          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { assignedRecruiter, assignedDM });
-        }}
-        onAddNote={(note) => {
-          if (!selectedCandidate) return;
-          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
-        }}
-        rosters={rosters}
-        onRostersUpdated={applyRosters}
-        onRecruitingAction={(type: RecruitingActionType) => {
-          if (!selectedCandidate) return;
-          persistRecruitingAction(selectedCandidate.candidateId, type);
-        }}
-        onboardingConfigured={onboardingConfigured}
-        templatesAvailable={onboardingTemplatesAvailable}
-        paperworkTemplates={paperworkTemplates}
-        paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
-        onSendPaperwork={(templateKey) => {
-          if (!selectedCandidate) return;
-          sendPaperwork(selectedCandidate, templateKey);
-        }}
-        onRefreshPaperworkStatus={() => {
-          if (!selectedCandidate) return;
-          refreshPaperworkStatus(selectedCandidate);
-        }}
+        matchScore={selectedCandidate?.matchPercent ?? null}
         actingRecruiter={actingRecruiter}
         sendBlockReason={
           selectedCandidate
@@ -2278,26 +2248,27 @@ export function CandidatesSection() {
               )
             : null
         }
-        onFlagFollowUp={() => {
+        paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
+        workspaceBusy={workspaceBusy}
+        onAddNote={(note) => {
           if (!selectedCandidate) return;
-          flagCandidateFollowUp(selectedCandidate.candidateId);
+          updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
         }}
-        onCompleteFollowUp={() => {
+        onSendPaperwork={(templateKey) => {
           if (!selectedCandidate) return;
-          completeCandidateFollowUpRow(selectedCandidate.candidateId);
+          sendPaperwork(selectedCandidate, templateKey);
+        }}
+        onRefreshPaperworkStatus={() => {
+          if (!selectedCandidate) return;
+          refreshPaperworkStatus(selectedCandidate);
         }}
         onAssignActingRecruiter={() => {
           if (!selectedCandidate) return;
           assignActingRecruiterToRow(selectedCandidate);
         }}
-        directDepositBusy={directDepositBusyId === selectedCandidate?.candidateId}
-        onDirectDepositAction={(action, payload) => {
-          if (!selectedCandidate) return;
-          void runDirectDepositAction(selectedCandidate, action, payload).catch((err) => {
-            window.alert(err instanceof Error ? err.message : "Direct deposit action failed");
-          });
+        onAdvanceWorkflow={(input) => {
+          void handleWorkspaceAdvance(input);
         }}
-        melMatchesLoading={melLoading}
       />
     </div>
   );
