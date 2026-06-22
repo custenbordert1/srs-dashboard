@@ -30,7 +30,10 @@ import {
   DashboardTabNav,
   type DashboardTabId,
 } from "./dashboard-tabs";
-import { getExecutiveNavTabs } from "@/lib/recruiting-tab-groups";
+import {
+  getDefaultDashboardTab,
+  isDashboardTabId,
+} from "@/lib/recruiting-tab-groups";
 import type { UserRole } from "@/lib/auth/types";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
@@ -66,37 +69,23 @@ export function RecruitingDashboardContent({
   dmLeaderboard,
   userRole,
 }: RecruitingDashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabId>(
-    userRole === "executive" ? "executive-home" : "command-center",
+  const [activeTab, setActiveTab] = useState<DashboardTabId>(() =>
+    getDefaultDashboardTab(userRole),
   );
-  const executiveTabs = userRole === "executive" ? getExecutiveNavTabs() : [];
+
+  const handleTabChange = (tab: DashboardTabId) => {
+    setActiveTab(tab);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.replaceState(null, "", url);
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const tab = new URLSearchParams(window.location.search).get("tab");
-    if (!tab) return;
-    const allowed = new Set<DashboardTabId>([
-      "command-center",
-      "overview",
-      "needs-attention",
-      "dm-scorecards",
-      "live-sheet",
-      "candidates",
-      "mel-projects",
-      "data-health",
-      "recruiting-intelligence",
-      "automation",
-      "workforce",
-      "job-management",
-      "executive-home",
-      "executive-forecasting",
-      "executive-accountability",
-      "pipeline-intelligence",
-      "workforce-intelligence",
-    ]);
-    if (allowed.has(tab as DashboardTabId)) {
-      setActiveTab(tab as DashboardTabId);
-    }
+    if (!tab || !isDashboardTabId(tab)) return;
+    setActiveTab(tab);
   }, []);
 
   useEffect(() => {
@@ -108,8 +97,8 @@ export function RecruitingDashboardContent({
     <>
       <DashboardTabNav
         activeTab={activeTab}
-        onTabChange={setActiveTab}
-        extraTabs={executiveTabs}
+        onTabChange={handleTabChange}
+        userRole={userRole}
       />
 
       <main

@@ -1,29 +1,125 @@
+import type { UserRole } from "@/lib/auth/types";
 import type { DashboardTabId } from "@/lib/recruiting-tab-source-labels";
 import { getRecruitingTabSource } from "@/lib/recruiting-tab-source-labels";
 
-export type ExecutiveNavTab = {
+export type DashboardNavGroupId = "executive" | "operations" | "territory-field" | "admin-data";
+
+export type DashboardNavTab = {
   id: DashboardTabId;
   label: string;
   href?: string;
 };
 
-/** Leadership tabs shown first in primary nav for executive users. */
-export const EXECUTIVE_PRIMARY_TAB_IDS: DashboardTabId[] = [
+export type DashboardNavGroup = {
+  id: DashboardNavGroupId;
+  label: string;
+  tabIds: DashboardTabId[];
+};
+
+export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
+  {
+    id: "executive",
+    label: "Executive",
+    tabIds: [
+      "executive-home",
+      "executive-accountability",
+      "executive-forecasting",
+      "pipeline-intelligence",
+      "workforce-intelligence",
+    ],
+  },
+  {
+    id: "operations",
+    label: "Operations",
+    tabIds: ["command-center", "overview", "needs-attention", "candidates", "job-management"],
+  },
+  {
+    id: "territory-field",
+    label: "Territory / Field",
+    tabIds: ["dm-scorecards", "mel-projects", "workforce"],
+  },
+  {
+    id: "admin-data",
+    label: "Admin / Data",
+    tabIds: ["live-sheet", "data-health", "recruiting-intelligence", "automation"],
+  },
+];
+
+export const ALL_DASHBOARD_TAB_IDS: DashboardTabId[] = DASHBOARD_NAV_GROUPS.flatMap(
+  (group) => group.tabIds,
+);
+
+const WORKFORCE_INTELLIGENCE_HREF = "/executive/workforce-intelligence";
+
+const EXECUTIVE_ONLY_TAB_IDS = new Set<DashboardTabId>([
   "executive-home",
   "executive-accountability",
   "executive-forecasting",
-];
+  "workforce-intelligence",
+]);
 
-export function getExecutiveNavTabs(): ExecutiveNavTab[] {
-  return [
-    ...EXECUTIVE_PRIMARY_TAB_IDS.map((id) => ({
-      id,
-      label: getRecruitingTabSource(id).navLabel,
-    })),
-    {
-      id: "workforce-intelligence",
-      label: getRecruitingTabSource("workforce-intelligence").navLabel,
-      href: "/executive/workforce-intelligence",
-    },
-  ];
+export function isDashboardTabId(value: string): value is DashboardTabId {
+  return ALL_DASHBOARD_TAB_IDS.includes(value as DashboardTabId);
+}
+
+export function getDefaultDashboardTab(userRole?: UserRole): DashboardTabId {
+  return userRole === "executive" ? "executive-home" : "command-center";
+}
+
+export function getDefaultNavGroupId(userRole?: UserRole): DashboardNavGroupId {
+  return userRole === "executive" ? "executive" : "operations";
+}
+
+export function findNavGroupForTab(tabId: DashboardTabId): DashboardNavGroupId | null {
+  for (const group of DASHBOARD_NAV_GROUPS) {
+    if (group.tabIds.includes(tabId)) return group.id;
+  }
+  return null;
+}
+
+/** Tabs visible inside a group for the current role. */
+export function getVisibleTabIdsForGroup(
+  groupId: DashboardNavGroupId,
+  userRole?: UserRole,
+): DashboardTabId[] {
+  const group = DASHBOARD_NAV_GROUPS.find((entry) => entry.id === groupId);
+  if (!group) return [];
+
+  if (groupId === "executive" && userRole !== "executive") {
+    return group.tabIds.filter((tabId) => !EXECUTIVE_ONLY_TAB_IDS.has(tabId));
+  }
+
+  return group.tabIds;
+}
+
+/** Nav groups that contain at least one visible tab for the role. */
+export function getDashboardNavGroups(userRole?: UserRole): DashboardNavGroup[] {
+  return DASHBOARD_NAV_GROUPS.filter(
+    (group) => getVisibleTabIdsForGroup(group.id, userRole).length > 0,
+  );
+}
+
+export function getNavTabsForGroup(
+  groupId: DashboardNavGroupId,
+  userRole?: UserRole,
+): DashboardNavTab[] {
+  return getVisibleTabIdsForGroup(groupId, userRole).map((id) => {
+    const meta = getRecruitingTabSource(id);
+    if (id === "workforce-intelligence") {
+      return {
+        id,
+        label: meta.navLabel,
+        href: WORKFORCE_INTELLIGENCE_HREF,
+      };
+    }
+    return { id, label: meta.navLabel };
+  });
+}
+
+export function getFirstVisibleTabInGroup(
+  groupId: DashboardNavGroupId,
+  userRole?: UserRole,
+): DashboardTabId {
+  const tabs = getVisibleTabIdsForGroup(groupId, userRole);
+  return tabs[0] ?? getDefaultDashboardTab(userRole);
 }
