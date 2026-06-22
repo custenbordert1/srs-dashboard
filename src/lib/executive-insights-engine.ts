@@ -1,6 +1,7 @@
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import { buildTerritoryHealthScore } from "@/lib/dm-dashboard/territory-health-score";
 import { buildTerritoryFillRiskAlerts } from "@/lib/dm-dashboard/fill-risk-alerts";
+import { DISTRICT_MANAGERS, getAssignedStatesForDm, normalizeStateCode } from "@/lib/dm-territory-map";
 import { buildRecruiterProductivityLive } from "@/lib/recruiting-automation/recruiter-productivity-live";
 import { parseDate, MS_PER_DAY } from "@/lib/dm-dashboard/territory-shared";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
@@ -18,6 +19,8 @@ export type ExecutiveInsightsKpis = {
   hiringMomentumTrend: ChartBar[];
   activeJobs: number;
   totalCandidates: number;
+  activeRecruiters: number;
+  criticalTerritories: number;
   candidatesLast7Days: number;
   interviewsActive: number;
   hiresYtd: number;
@@ -80,6 +83,25 @@ function recruiterProductivityScore(
   return Math.min(100, Math.round(avgConversion * 0.6 + Math.min(40, avgReviewed) * 0.4));
 }
 
+function countCriticalTerritories(
+  jobs: BreezyJob[],
+  candidates: BreezyCandidate[],
+  fetchedAt: string,
+): number {
+  let count = 0;
+  for (const dmName of DISTRICT_MANAGERS) {
+    const states = getAssignedStatesForDm(dmName);
+    const stateSet = new Set(states);
+    const dmJobs = jobs.filter((job) => stateSet.has(normalizeStateCode(job.state)));
+    const dmCandidates = candidates.filter((candidate) =>
+      stateSet.has(normalizeStateCode(candidate.state)),
+    );
+    const health = buildTerritoryHealthScore(dmJobs, dmCandidates, fetchedAt);
+    if (health.score < 55) count += 1;
+  }
+  return count;
+}
+
 export function buildExecutiveInsightsKpis(
   jobs: BreezyJob[],
   candidates: BreezyCandidate[],
@@ -91,6 +113,8 @@ export function buildExecutiveInsightsKpis(
   const criticalRisks = fillRisks.filter((r) => r.severity === "critical").length;
   const fillRiskScore = Math.max(0, Math.min(100, 100 - criticalRisks * 12 - fillRisks.length * 3));
   const productivityRows = buildRecruiterProductivityLive(candidates, workflows, fetchedAt);
+  const activeRecruiters = productivityRows.filter((row) => row.recruiter.trim() !== "Unassigned").length;
+  const criticalTerritories = countCriticalTerritories(jobs, candidates, fetchedAt);
 
   const since7d = new Date(new Date(fetchedAt).getTime() - 7 * MS_PER_DAY);
   const candidatesLast7Days = candidates.filter((c) => {
@@ -122,6 +146,8 @@ export function buildExecutiveInsightsKpis(
     hiringMomentumTrend: hiringMomentumTrend(candidates, fetchedAt),
     activeJobs: jobs.length,
     totalCandidates: candidates.length,
+    activeRecruiters,
+    criticalTerritories,
     candidatesLast7Days,
     interviewsActive,
     hiresYtd,

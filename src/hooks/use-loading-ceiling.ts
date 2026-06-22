@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 /** After this many ms of loading, UI should show sync/timeout messaging instead of bare skeletons. */
 export const DASHBOARD_LOADING_CEILING_MS = 10_000;
+export const EXECUTIVE_PANEL_LOADING_CEILING_MS = 5_000;
 
 export function useLoadingCeiling(isLoading: boolean, ceilingMs = DASHBOARD_LOADING_CEILING_MS): boolean {
   const [exceeded, setExceeded] = useState(false);

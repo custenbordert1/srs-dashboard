@@ -45,12 +45,12 @@ export function AtsHealthCard({ compact = false }: { compact?: boolean }) {
 
   if (!snapshot) {
     return (
-      <section className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 sm:p-5">
-        <p className="text-sm text-red-100">{error ?? "ATS health unavailable"}</p>
+      <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5">
+        <p className="text-sm text-amber-100">{error ?? "ATS health unavailable"}</p>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="mt-2 rounded border border-red-500/40 px-2 py-1 text-xs text-red-100"
+          className="mt-2 rounded border border-amber-500/40 px-2 py-1 text-xs text-amber-100"
         >
           Retry
         </button>

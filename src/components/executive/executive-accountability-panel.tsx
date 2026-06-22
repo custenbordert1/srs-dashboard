@@ -25,6 +25,7 @@ import { ExecutiveAuditCenterView } from "@/components/executive/executive-audit
 import { ExecutiveOverdueEscalationView } from "@/components/executive/executive-overdue-escalation-view";
 import { ExecutiveWeeklyPacketView } from "@/components/executive/executive-weekly-packet-view";
 import { TabSkeleton } from "@/components/ui/tab-skeleton";
+import { useLoadingCeiling, EXECUTIVE_PANEL_LOADING_CEILING_MS } from "@/hooks/use-loading-ceiling";
 
 type AccountabilityView = "packet" | "board" | "audit" | "overdue";
 
@@ -344,8 +345,17 @@ function ActionRow({
 
 export function ExecutiveAccountabilityPanel() {
   const [view, setView] = useState<AccountabilityView>("packet");
-  const { snapshot, loading, error, timedOut, refresh, updateAction, updatingId } =
-    useExecutiveAccountability();
+  const {
+    snapshot,
+    loading,
+    error,
+    timedOut,
+    showingCachedSnapshot,
+    refresh,
+    updateAction,
+    updatingId,
+  } = useExecutiveAccountability();
+  const loadingCeilingHit = useLoadingCeiling(loading && !snapshot, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -363,19 +373,33 @@ export function ExecutiveAccountabilityPanel() {
   }
 
   if (loading && !snapshot) {
+    if (loadingCeilingHit) {
+      return (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-6 text-sm text-amber-100">
+          <p>Accountability data is taking longer than expected.</p>
+          <button
+            type="button"
+            onClick={() => refresh()}
+            className="mt-3 rounded-lg border border-amber-400/40 px-3 py-1.5 text-xs font-medium hover:bg-amber-500/20"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
     return <TabSkeleton message="Loading executive accountability…" cards={4} rows={5} />;
   }
 
   if (error && !snapshot) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-6 text-sm text-red-100">
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-6 text-sm text-amber-100">
         <p>{error}</p>
         <button
           type="button"
           onClick={() => refresh()}
-          className="mt-3 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs font-medium hover:bg-red-500/20"
+          className="mt-3 rounded-lg border border-amber-400/40 px-3 py-1.5 text-xs font-medium hover:bg-amber-500/20"
         >
-          {timedOut ? "Retry" : "Refresh"}
+          Retry
         </button>
       </div>
     );
@@ -401,6 +425,21 @@ export function ExecutiveAccountabilityPanel() {
 
   return (
     <div className="space-y-6">
+      {showingCachedSnapshot && error ? (
+        <div
+          role="status"
+          className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+        >
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => refresh()}
+            className="mt-2 rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-medium hover:bg-amber-500/20"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div>
           <h2 className="text-lg font-semibold text-zinc-50">Executive Accountability</h2>

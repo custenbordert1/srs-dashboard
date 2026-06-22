@@ -1,6 +1,6 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { fetchBreezyCandidates, fetchBreezyJobs, peekBreezyCandidatesCache } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
@@ -27,11 +27,21 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const [jobsResult, candidatesResult, melResult] = await Promise.all([
+  const peekedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
+  const [jobsResult, candidatesLive, melResult] = await Promise.all([
     fetchBreezyJobs("published"),
-    fetchBreezyCandidates(),
+    peekedCandidates?.ok
+      ? Promise.resolve(peekedCandidates)
+      : fetchBreezyCandidates({ scanMode: "preview" }),
     fetchMelProjectsSheet(),
   ]);
+
+  let candidatesResult = candidatesLive;
+  let candidatesFromCache = Boolean(peekedCandidates?.ok);
+  if (!candidatesResult.ok && peekedCandidates?.ok) {
+    candidatesResult = peekedCandidates;
+    candidatesFromCache = true;
+  }
 
   if (!jobsResult.ok) {
     const status = breezyFailureHttpStatus(jobsResult.error);
@@ -39,9 +49,21 @@ export async function GET(request: Request) {
     return NextResponse.json(breezyFailureBody(jobsResult), { status });
   }
   if (!candidatesResult.ok) {
-    const status = breezyFailureHttpStatus(candidatesResult.error);
-    logBreezyRouteResult(ROUTE, status, { role: session.role, breezyOk: false, phase: "candidates" });
-    return NextResponse.json(breezyFailureBody(candidatesResult), { status });
+    const candidateError = candidatesResult.error;
+    logBreezyRouteResult(ROUTE, 200, {
+      role: session.role,
+      breezyOk: false,
+      phase: "candidates-fallback-empty",
+    });
+    candidatesResult = {
+      ok: true,
+      candidates: [],
+      fetchedAt: new Date().toISOString(),
+      companyId: jobsResult.companyId,
+      truncated: true,
+      warnings: [candidateError],
+    };
+    candidatesFromCache = false;
   }
 
   const melOpportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
@@ -65,9 +87,10 @@ export async function GET(request: Request) {
       dashboard,
       meta: {
         partialSync: candidatesResult.truncated ?? false,
+        candidatesFromCache,
         totalJobs: jobsResult.jobs.length,
         totalCandidates: candidatesResult.candidates.length,
-        refreshedAt: new Date().toISOString(),
+        refreshedAt: candidatesResult.fetchedAt ?? new Date().toISOString(),
       },
     },
     {

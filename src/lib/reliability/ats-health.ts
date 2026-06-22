@@ -79,6 +79,8 @@ function resolveDataFreshness(cacheAgeMs: number | null, hasCache: boolean): {
 function resolveSeverity(input: {
   tokenMissing: boolean;
   hasCache: boolean;
+  candidatesCached: number;
+  jobsCached: number;
   cacheAgeMs: number | null;
   liveFailed: boolean;
   partialSync: boolean;
@@ -88,6 +90,15 @@ function resolveSeverity(input: {
   }
   if (!input.hasCache && input.liveFailed) {
     return { severity: "offline", statusLabel: "ATS Offline — no cached data" };
+  }
+  if (input.candidatesCached === 0) {
+    if (input.jobsCached > 0) {
+      return {
+        severity: input.liveFailed ? "degraded" : "warning",
+        statusLabel: "ATS Warning — candidate cache empty",
+      };
+    }
+    return { severity: "offline", statusLabel: "ATS Offline — no candidate cache" };
   }
   if (input.hasCache && input.liveFailed) {
     return { severity: "degraded", statusLabel: "ATS Degraded — serving cached data" };
@@ -130,6 +141,8 @@ export async function buildAtsHealthSnapshot(): Promise<AtsHealthSnapshot> {
     const { severity, statusLabel } = resolveSeverity({
       tokenMissing: sync.tokenStatus === "missing",
       hasCache,
+      candidatesCached,
+      jobsCached,
       cacheAgeMs,
       liveFailed,
       partialSync,
@@ -161,7 +174,7 @@ export async function buildAtsHealthSnapshot(): Promise<AtsHealthSnapshot> {
       dataFreshnessLabel,
       notes,
     };
-  } catch (err) {
+    } catch (err) {
     const message = err instanceof Error ? err.message : "ATS health check failed";
     recordAtsSyncFailure(message);
     return {
@@ -171,7 +184,7 @@ export async function buildAtsHealthSnapshot(): Promise<AtsHealthSnapshot> {
       statusLabel: "ATS health check failed",
       lastSuccessfulSync,
       lastFailedSync,
-      lastFailureMessage: message,
+      lastFailureMessage: "ATS health check temporarily unavailable",
       jobsCached: 0,
       candidatesCached: 0,
       syncDurationMs: Date.now() - started,
@@ -179,7 +192,7 @@ export async function buildAtsHealthSnapshot(): Promise<AtsHealthSnapshot> {
       cacheAgeMs: null,
       dataFreshness: "unknown",
       dataFreshnessLabel: "Unknown",
-      notes: [message],
+      notes: ["ATS health check temporarily unavailable"],
     };
   }
 }
