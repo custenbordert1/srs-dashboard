@@ -39,6 +39,8 @@ export function RecruiterProductivityCenter({
     "needs-review": actionCounts.needsReview,
     "needs-follow-up": actionCounts.needsFollowUp,
     "no-response": actionCounts.noResponse,
+    overdue: 0,
+    unassigned: 0,
     "paperwork-pending": actionCounts.paperworkPending,
     "interview-needed": actionCounts.interviewNeeded,
     "ready-mel": actionCounts.readyForMel,

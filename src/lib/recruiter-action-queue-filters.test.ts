@@ -110,4 +110,24 @@ describe("recruiter-action-queue-filters", () => {
     assert.equal(matchesRecruiterQuickFilter(interview, "interview-needed", "Taylor", REF), true);
     assert.equal(matchesRecruiterQuickFilter(paperwork, "ready-mel", "Taylor", REF), false);
   });
+
+  it("matches overdue and unassigned queue tabs", () => {
+    const overdue = buildScoredWorkflowRow(
+      sample("od"),
+      wf("od", {
+        followUpDueAt: "2026-05-19T00:00:00.000Z",
+        recruitingActions: {
+          ...emptyRecruitingActions(),
+          needsFollowUp: true,
+          updatedAt: new Date(REF).toISOString(),
+        },
+      }),
+    );
+    const unassigned = buildScoredWorkflowRow(
+      sample("ua"),
+      wf("ua", { assignedRecruiter: "Unassigned" }),
+    );
+    assert.equal(matchesRecruiterQuickFilter(overdue, "overdue", "Taylor", REF), true);
+    assert.equal(matchesRecruiterQuickFilter(unassigned, "unassigned", "Taylor", REF), true);
+  });
 });

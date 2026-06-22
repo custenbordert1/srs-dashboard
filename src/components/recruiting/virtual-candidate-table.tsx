@@ -47,7 +47,7 @@ export function VirtualCandidateTable<T>({
       onScroll={onScroll}
       className={`overflow-auto ${maxHeightClass}`}
     >
-      <table className="min-w-[1580px] w-full table-fixed text-left">
+      <table className="min-w-[960px] w-full table-fixed text-left">
         {header}
         <tbody className="divide-y divide-zinc-800/40">
           {topSpacer > 0 ? (

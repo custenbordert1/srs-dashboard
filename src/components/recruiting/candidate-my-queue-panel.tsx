@@ -33,6 +33,8 @@ type CandidateMyQueuePanelProps = {
   syncStale?: boolean;
   quickFilter: RecruiterQuickFilterId;
   onQuickFilterChange: (filter: RecruiterQuickFilterId) => void;
+  /** When false, only lane board renders (metrics/filters live on main Candidates tab). */
+  showMetrics?: boolean;
 };
 
 export function CandidateMyQueuePanel({
@@ -47,6 +49,7 @@ export function CandidateMyQueuePanel({
   syncStale,
   quickFilter,
   onQuickFilterChange,
+  showMetrics = true,
 }: CandidateMyQueuePanelProps) {
   const [activeLane, setActiveLane] = useState<CandidateQueueLaneId>("my-open");
 
@@ -123,13 +126,17 @@ export function CandidateMyQueuePanel({
         </label>
       </div>
 
-      <RecruiterActionQueueFiltersBar
-        className="mt-4"
-        activeFilter={quickFilter}
-        onFilterChange={onQuickFilterChange}
-        counts={filterCounts}
-      />
+      {showMetrics ? (
+        <RecruiterActionQueueFiltersBar
+          className="mt-4"
+          activeFilter={quickFilter}
+          onFilterChange={onQuickFilterChange}
+          counts={filterCounts}
+        />
+      ) : null}
 
+      {showMetrics ? (
+        <>
       <div className="mt-4 grid auto-rows-fr items-stretch gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Overdue follow-ups" value={metrics.overdueFollowUps} tone="warn" />
         <MetricCard label="Paperwork pending" value={metrics.paperworkPending} />
@@ -153,8 +160,10 @@ export function CandidateMyQueuePanel({
         <MetricCard label="Pending 24h+" value={paperworkOps.pendingOver24h} tone="warn" />
         <MetricCard label="Resend watchlist" value={paperworkOps.resendCandidates} tone="warn" />
       </div>
+        </>
+      ) : null}
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className={`${showMetrics ? "mt-4" : "mt-2"} flex flex-wrap gap-2`}>
         {CANDIDATE_QUEUE_LANE_ORDER.map((lane) => {
           const count = board.lanes[lane].totalInLane;
           const active = activeLane === lane;

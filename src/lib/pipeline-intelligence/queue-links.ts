@@ -58,6 +58,8 @@ export function parsePipelineQueueParam(value: string | null): RecruiterQuickFil
     "my-owned",
     "needs-follow-up",
     "no-response",
+    "overdue",
+    "unassigned",
     "paperwork-pending",
     "interview-needed",
     "ready-mel",

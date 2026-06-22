@@ -20,10 +20,22 @@ export type RecruiterQuickFilterId =
   | "needs-review"
   | "needs-follow-up"
   | "no-response"
+  | "overdue"
+  | "unassigned"
   | "paperwork-pending"
   | "interview-needed"
   | "ready-mel"
   | "priority";
+
+/** Primary queue tabs on the Candidates tab — filters the candidate table. */
+export const CANDIDATE_QUEUE_TABS: Array<{ id: RecruiterQuickFilterId; label: string }> = [
+  { id: "all", label: "All" },
+  { id: "overdue", label: "Overdue" },
+  { id: "unassigned", label: "Unassigned" },
+  { id: "paperwork-pending", label: "Paperwork" },
+  { id: "interview-needed", label: "Interview" },
+  { id: "ready-mel", label: "Ready For MEL" },
+];
 
 export const RECRUITER_QUICK_FILTERS: Array<{ id: RecruiterQuickFilterId; label: string }> = [
   { id: "all", label: "All" },
@@ -109,6 +121,14 @@ export function matchesRecruiterQuickFilter(
       );
     case "no-response":
       return isNoResponseCandidate(row, referenceMs);
+    case "overdue":
+      return isFollowUpOverdue({
+        recruitingActions: row.recruitingActions,
+        followUpDueAt: row.followUpDueAt,
+        referenceMs,
+      });
+    case "unassigned":
+      return isUnassignedRecruiter(row.assignedRecruiter);
     case "paperwork-pending":
       return isPaperworkPendingStatus(row.workflowStatus);
     case "interview-needed":
@@ -137,6 +157,32 @@ export type RecruiterActionQueueCounts = {
   aging3d: number;
   aging7dPlus: number;
 };
+
+export function buildCandidateQueueTabCounts(
+  candidates: ScoredCandidateWorkflowRow[],
+  referenceMs = Date.now(),
+): Record<RecruiterQuickFilterId, number> {
+  const actionCounts = buildRecruiterActionQueueCounts(candidates, referenceMs);
+  let overdue = 0;
+  let unassigned = 0;
+  for (const row of candidates) {
+    if (matchesRecruiterQuickFilter(row, "overdue", "", referenceMs)) overdue += 1;
+    if (matchesRecruiterQuickFilter(row, "unassigned", "", referenceMs)) unassigned += 1;
+  }
+  return {
+    all: candidates.length,
+    "my-owned": 0,
+    "needs-review": actionCounts.needsReview,
+    "needs-follow-up": actionCounts.needsFollowUp,
+    "no-response": actionCounts.noResponse,
+    overdue,
+    unassigned,
+    "paperwork-pending": actionCounts.paperworkPending,
+    "interview-needed": actionCounts.interviewNeeded,
+    "ready-mel": actionCounts.readyForMel,
+    priority: actionCounts.priority,
+  };
+}
 
 export function buildRecruiterActionQueueCounts(
   candidates: ScoredCandidateWorkflowRow[],

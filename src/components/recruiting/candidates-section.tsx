@@ -96,10 +96,14 @@ import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
-import { RecruiterProductivityCenter } from "@/components/recruiting/recruiter-productivity-center";
+import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
+import { CandidateQueueTabs } from "@/components/recruiting/candidate-queue-tabs";
+import { CandidateRowExpandedDetails } from "@/components/recruiting/candidate-row-expanded-details";
+import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
 import {
   computeRecruiterAgingBucket,
   matchesRecruiterQuickFilter,
+  buildCandidateQueueTabCounts,
   RECRUITER_AGING_BUCKET_LABELS,
   type RecruiterAgingBucket,
   type RecruiterQuickFilterId,
@@ -459,6 +463,7 @@ export function CandidatesSection() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
   const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
+  const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(() => new Set());
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
   const [onboardingConfigError, setOnboardingConfigError] = useState<string | null>(null);
@@ -1301,6 +1306,25 @@ export function CandidatesSection() {
   );
 
   const recruiterProductivity = useMemo(() => buildRecruiterProductivity(workflowState), [workflowState]);
+  const queueTabCounts = useMemo(() => buildCandidateQueueTabCounts(candidates), [candidates]);
+
+  const toggleExpandedRow = useCallback((candidateId: string) => {
+    setExpandedRowIds((current) => {
+      const next = new Set(current);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
+    });
+  }, []);
+
+  const handleQueueFilterChange = useCallback((filter: RecruiterQuickFilterId) => {
+    setRecruiterQuickFilter(filter);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (filter === "all") url.searchParams.delete("queue");
+    else url.searchParams.set("queue", filter);
+    window.history.replaceState(null, "", url);
+  }, []);
 
   function toggleWorkflowStatusFilter(status: CandidateWorkflowStatus) {
     setWorkflowFilter((current) => (current === status ? ALL : status));
@@ -1729,187 +1753,115 @@ export function CandidatesSection() {
     (candidate: ScoredCandidateWorkflowRow) => {
       const appliedDays = daysSince(candidate.appliedDate);
       const rowSelected = selectedCandidateId === candidate.candidateId;
-      const paperworkUrgent =
-        isPaperworkPendingStatus(candidate.workflowStatus) &&
-        candidate.paperworkStatus !== "signed";
+      const expanded = expandedRowIds.has(candidate.candidateId);
+      const location = [candidate.city, candidate.state].filter(Boolean).join(", ") || "—";
+      const urgencyClass = tableRowUrgencyClass(candidate);
       return (
-        <tr
-          key={candidate.candidateId}
-          onClick={() => setSelectedCandidateId(candidate.candidateId)}
-          className={`group cursor-pointer ${tableRowUrgencyClass(candidate)} ${
-            rowSelected
-              ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
-              : "hover:bg-zinc-800/30"
-          }`}
-          style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
-          aria-selected={rowSelected}
-        >
-          <td
-            className={stickyCheckboxCellClass(tdClass, {
-              selected: rowSelected,
-              rowBg: "bg-zinc-950",
-            })}
-            onClick={(event) => event.stopPropagation()}
+        <>
+          <tr
+            key={candidate.candidateId}
+            onClick={() => setSelectedCandidateId(candidate.candidateId)}
+            className={`group cursor-pointer ${urgencyClass} ${
+              rowSelected
+                ? "bg-teal-500/8 hover:bg-teal-500/12 ring-1 ring-inset ring-teal-500/25"
+                : "hover:bg-zinc-800/30"
+            }`}
+            style={{ height: CANDIDATE_TABLE_ROW_HEIGHT_PX, maxHeight: CANDIDATE_TABLE_ROW_HEIGHT_PX }}
+            aria-selected={rowSelected}
           >
-            <input
-              type="checkbox"
-              aria-label={`Select ${candidateName(candidate)}`}
-              checked={selectedIds.has(candidate.candidateId)}
-              onChange={() => toggleSelectCandidate(candidate.candidateId)}
-            />
-          </td>
-          <td
-            className={`${stickyIdentityCellClass(tdClass, {
-              selected: rowSelected,
-              rowBg: "bg-zinc-950",
-            })} !whitespace-normal`}
-          >
-            <div className="flex min-w-0 flex-col justify-center gap-0.5 py-0.5">
-              <div className="truncate font-medium leading-tight text-zinc-100">{candidateName(candidate)}</div>
-              <div className="flex min-w-0 flex-wrap items-center gap-1">
-                <span
-                  className={`${workflowPillClass} ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
-                  title={candidate.workflowStatus}
-                >
-                  {candidate.workflowStatus}
-                </span>
-                <span
-                  className="inline-flex max-w-[7rem] truncate rounded border border-zinc-700/80 bg-zinc-900/70 px-1 text-[9px] text-zinc-400"
-                  title={`${candidate.assignedRecruiter} · ${candidate.assignedDM}`}
-                >
-                  {candidate.assignedRecruiter}
-                </span>
-              </div>
-              <CandidateRowAttentionBadges candidate={candidate} />
-              <CandidateRowFitSignals candidate={candidate} />
-            </div>
-          </td>
-          <td className={`${tdClass} truncate`}>{candidate.email || "—"}</td>
-          <td className={`${tdClass} truncate`}>{candidate.phone || "—"}</td>
-          <td className={`${tdClass} truncate text-zinc-400`}>{candidate.source || "—"}</td>
-          <td className={`${tdClass} truncate`}>{candidate.stage || "—"}</td>
-          <td className={`${tdClass} truncate text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
-          <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
-          <td className={tdClass}>{candidate.city || "—"}</td>
-          <td className={tdClass}>{candidate.state || "—"}</td>
-          <td className={`${tdClass} truncate text-[10px] leading-tight`}>
-            <span className="text-zinc-500">
-              Applied {formatDays(appliedDays)}
-              <span className="text-zinc-600"> · </span>
-              <StatusTouchAging candidate={candidate} />
-            </span>
-          </td>
-          <td className={tdClass}>
-            <div className="flex min-w-0 flex-col justify-center overflow-hidden leading-tight">
-              <div
-                className="truncate text-sm font-semibold text-teal-50/95"
-                title={candidate.nextActionNeeded}
-              >
-                {candidate.nextActionNeeded}
-              </div>
-              <div className="truncate text-[10px] text-zinc-600">
-                {candidate.assignedRecruiter} · {candidate.assignedDM}
-              </div>
-            </div>
-          </td>
-          <td className={tdClass} onClick={(event) => event.stopPropagation()}>
-            <CandidateRowPrimaryActionBar
-              primary={resolveCandidateRowPrimaryAction({
-                candidate,
-                actingRecruiter,
-                sendBlockReason: getSendPaperworkBlockReason(
-                  buildSendEligibility(
-                    candidate,
-                    "onboarding_packet",
-                    paperworkSendingId === candidate.candidateId,
-                  ),
-                ),
-                sendBusy: paperworkSendingId === candidate.candidateId,
+            <td
+              className={stickyCheckboxCellClass(tdClass, {
+                selected: rowSelected,
+                rowBg: "bg-zinc-950",
               })}
-              onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
-              followUpDisabled={candidate.recruitingActions.needsFollowUp}
-              onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
-              onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
-              onSend={() => sendPaperwork(candidate, "onboarding_packet")}
-              onNote={() => addQuickNoteToRow(candidate)}
-              onAssignMe={() => assignActingRecruiterToRow(candidate)}
-              sendBusy={paperworkSendingId === candidate.candidateId}
-              sendDisabled={
-                getSendPaperworkBlockReason(
-                  buildSendEligibility(
-                    candidate,
-                    "onboarding_packet",
-                    paperworkSendingId === candidate.candidateId,
-                  ),
-                ) !== null
-              }
-              onOverflowAction={(action) => handleCandidateAction(candidate, action)}
-              rosters={rosters}
-              onRostersUpdated={applyRosters}
-              onboardingConfigured={onboardingConfigured}
-              onboardingConfigLoaded={onboardingConfigLoaded}
-              onboardingConfigError={onboardingConfigError}
-              templatesAvailable={onboardingTemplatesAvailable}
-              paperworkTemplates={paperworkTemplates}
-              hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
-            />
-          </td>
-          <td className={`${tdClass} text-zinc-500 underline-offset-2 hover:underline`} title="Open candidate drawer">
-            Notes: {candidate.notes.length}
-          </td>
-          <td
-            className={`${tdClass}${paperworkUrgent ? " bg-amber-500/5" : ""}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex h-7 flex-col justify-center overflow-hidden leading-tight">
-              <span
-                className={`truncate text-[10px] ${paperworkUrgent ? "font-medium text-amber-200" : "text-zinc-500"}`}
-                title={candidate.paperworkError ?? undefined}
-              >
-                {paperworkStatusLabel(candidate.paperworkStatus)}
-              </span>
-              {candidate.signatureRequestId ? (
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  aria-label={`Select ${candidateName(candidate)}`}
+                  checked={selectedIds.has(candidate.candidateId)}
+                  onChange={() => toggleSelectCandidate(candidate.candidateId)}
+                />
                 <button
                   type="button"
-                  className="truncate text-left text-[10px] text-teal-400/90 hover:underline"
-                  onClick={() => refreshPaperworkStatus(candidate)}
+                  aria-label={expanded ? "Collapse row details" : "Expand row details"}
+                  aria-expanded={expanded}
+                  onClick={() => toggleExpandedRow(candidate.candidateId)}
+                  className="rounded px-1 text-xs text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200"
                 >
-                  Refresh
+                  {expanded ? "▾" : "▸"}
                 </button>
-              ) : (
-                <span className="invisible text-[10px]" aria-hidden>
-                  —
-                </span>
-              )}
-            </div>
-          </td>
-          <td className={tdClass} title={candidate.intelligenceSummary}>
-            <CandidateMatchBadge
-              matchPercent={candidate.matchPercent}
-              matchLevel={candidate.matchLevel}
-              isTopMatch={candidate.isTopMatch}
-              compact
-            />
-          </td>
-          <td
-            className={`${tdClass} truncate text-[10px] text-zinc-500`}
-            title={candidate.intelligenceSummary || candidate.skillTags.join(", ")}
-          >
-            {buildRecruiterFitSignals(candidate, 2)
-              .map((s) => s.label)
-              .join(" · ") || (candidate.skillTags[0] ?? "—")}
-          </td>
-          <td className={tdClass}>
-            <span
-              className={`inline-flex h-5 min-w-[2rem] items-center justify-center rounded-full px-1.5 text-[10px] font-semibold leading-none ${AI_GRADE_STYLES[candidate.aiGrade]}`}
+              </div>
+            </td>
+            <td
+              className={`${stickyIdentityCellClass(tdClass, {
+                selected: rowSelected,
+                rowBg: "bg-zinc-950",
+              })} !whitespace-normal`}
             >
-              {candidate.aiGrade}
-            </span>
-          </td>
-          <td className={tdClass}>
-            <RecommendationPills items={candidate.aiRecommendations} />
-          </td>
-        </tr>
+              <div className="truncate font-medium text-zinc-100">{candidateName(candidate)}</div>
+            </td>
+            <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
+            <td className={`${tdClass} truncate text-zinc-400`}>{location}</td>
+            <td className={`${tdClass} truncate`}>{candidate.stage || "—"}</td>
+            <td className={`${tdClass} tabular-nums text-zinc-400`}>{formatDays(appliedDays)}</td>
+            <td className={tdClass}>
+              <div className="truncate text-sm font-medium text-teal-50/95" title={candidate.nextActionNeeded}>
+                {candidate.nextActionNeeded}
+              </div>
+            </td>
+            <td className={tdClass} onClick={(event) => event.stopPropagation()}>
+              <CandidateRowPrimaryActionBar
+                primary={resolveCandidateRowPrimaryAction({
+                  candidate,
+                  actingRecruiter,
+                  sendBlockReason: getSendPaperworkBlockReason(
+                    buildSendEligibility(
+                      candidate,
+                      "onboarding_packet",
+                      paperworkSendingId === candidate.candidateId,
+                    ),
+                  ),
+                  sendBusy: paperworkSendingId === candidate.candidateId,
+                })}
+                onPrimary={() => setSelectedCandidateId(candidate.candidateId)}
+                followUpDisabled={candidate.recruitingActions.needsFollowUp}
+                onFollowUp={() => flagCandidateFollowUp(candidate.candidateId)}
+                onFollowUpDone={() => completeCandidateFollowUpRow(candidate.candidateId)}
+                onSend={() => sendPaperwork(candidate, "onboarding_packet")}
+                onNote={() => addQuickNoteToRow(candidate)}
+                onAssignMe={() => assignActingRecruiterToRow(candidate)}
+                sendBusy={paperworkSendingId === candidate.candidateId}
+                sendDisabled={
+                  getSendPaperworkBlockReason(
+                    buildSendEligibility(
+                      candidate,
+                      "onboarding_packet",
+                      paperworkSendingId === candidate.candidateId,
+                    ),
+                  ) !== null
+                }
+                onOverflowAction={(action) => handleCandidateAction(candidate, action)}
+                rosters={rosters}
+                onRostersUpdated={applyRosters}
+                onboardingConfigured={onboardingConfigured}
+                onboardingConfigLoaded={onboardingConfigLoaded}
+                onboardingConfigError={onboardingConfigError}
+                templatesAvailable={onboardingTemplatesAvailable}
+                paperworkTemplates={paperworkTemplates}
+                hasCandidateEmail={hasCandidatePrimaryEmail(candidate)}
+              />
+            </td>
+          </tr>
+          {expanded ? (
+            <tr key={`${candidate.candidateId}-details`}>
+              <td colSpan={8} className="p-0">
+                <CandidateRowExpandedDetails candidate={candidate} />
+              </td>
+            </tr>
+          ) : null}
+        </>
       );
     },
     [
@@ -1920,11 +1872,11 @@ export function CandidatesSection() {
       onboardingTemplatesAvailable,
       paperworkSendingId,
       paperworkTemplates,
-      refreshPaperworkStatus,
       rosters,
       actingRecruiter,
       selectedCandidateId,
       selectedIds,
+      expandedRowIds,
       addQuickNoteToRow,
       assignActingRecruiterToRow,
       buildSendEligibility,
@@ -1932,6 +1884,7 @@ export function CandidatesSection() {
       flagCandidateFollowUp,
       sendPaperwork,
       toggleSelectCandidate,
+      toggleExpandedRow,
     ],
   );
 
@@ -1999,230 +1952,38 @@ export function CandidatesSection() {
       })
     : null;
 
+  const paperworkTemplateWarning =
+    onboardingConfigLoaded &&
+    onboardingConfigured &&
+    !paperworkTemplates.some((t) => t.key === "onboarding_packet" && t.configured);
+
   return (
-    <div className="space-y-5">
-      <div className="space-y-2" aria-live="polite">
-        <div className={syncBannerSlotClass}>
-          {showSyncAlert ? (
-            <p
-              role="alert"
-              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-amber-500/30 bg-amber-500/10 py-2 text-amber-100`}
-            >
-              <span className="line-clamp-2">{formatRecruiterSyncAlert(syncAlert!)}</span>
-            </p>
-          ) : null}
-        </div>
-        <div className="min-h-[2.25rem]">
-          {showBackgroundSyncLine ? (
-            <p
-              className={`${syncBannerClass} flex min-h-[2.25rem] items-center border-teal-500/25 bg-teal-500/10 py-1.5 text-xs text-teal-100`}
-            >
-              <span className="line-clamp-1 tabular-nums">
-                {formatRecruiterBackgroundSyncLine(committedCandidates.length)}
-              </span>
-            </p>
-          ) : null}
-        </div>
-        <div className={syncBannerSlotClass}>
-          {enrichmentWarnings.length > 0 ? (
-            <p
-              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-sky-500/30 bg-sky-500/10 py-2 text-sky-100`}
-            >
-              <span className="line-clamp-2">{enrichmentWarnings.join(" ")}</span>
-            </p>
-          ) : null}
-        </div>
-        <div className={syncBannerSlotClass}>
-          {workflowNotice ? (
-            <p
-              role="status"
-              className={`${syncBannerClass} flex min-h-[2.75rem] items-center border-teal-500/30 bg-teal-500/10 py-2 text-teal-100`}
-            >
-              <span className="line-clamp-2">{workflowNotice}</span>
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Candidates</h1>
-            <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-              Live Breezy candidates with merchandising resume intelligence, travel-radius scoring, and match filters. Breezy sync stays read-only.
-            </p>
-            <p className="mt-2 text-xs text-zinc-600">
-              Source: <span className="text-zinc-500">{BREEZY_CANDIDATES_SOURCE.label}</span>
-              <span className="text-zinc-700"> · {BREEZY_CANDIDATES_SOURCE.apiPath}</span>
-            </p>
-            <p
-              className="mt-1 min-h-[2.5rem] text-xs leading-snug text-zinc-500"
-              title={syncHeaderLine ?? undefined}
-            >
-              {syncHeaderLine ? (
-                <span className="line-clamp-2 tabular-nums">{syncHeaderLine}</span>
-              ) : (
-                <span className="invisible" aria-hidden>
-                  Candidate list not loaded yet
-                </span>
-              )}
-            </p>
-            {onboardingConfigLoaded && onboardingConfigError ? (
-              <p className="mt-1 text-xs text-amber-200/90" role="status">
-                Dropbox Sign unavailable: {onboardingConfigError}
-              </p>
-            ) : onboardingConfigLoaded &&
-              !onboardingConfigured &&
-              !onboardingConfigError ? (
-              <p className="mt-1 text-xs text-amber-200/90" role="status">
-                Send disabled: set DROPBOX_SIGN_API_KEY in .env.local and restart the dev server.
-              </p>
-            ) : onboardingConfigLoaded &&
-              onboardingConfigured &&
-              !paperworkTemplates.some((t) => t.key === "onboarding_packet" && t.configured) ? (
-              <p className="mt-1 text-xs text-amber-200/90" role="status">
-                Send disabled: set DROPBOX_SIGN_TEMPLATE_ONBOARDING_PACKET in .env.local.
-              </p>
-            ) : null}
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <button
-              type="button"
-              disabled={refreshingCandidates}
-              onClick={() => void loadBundle(true)}
-              className="rounded-lg border border-teal-600/40 bg-teal-600/10 px-3 py-1.5 text-xs font-medium text-teal-100 hover:bg-teal-600/20 disabled:opacity-50"
-            >
-              {refreshingCandidates ? "Syncing…" : "Refresh / Sync"}
-            </button>
-            {syncData ? (
-              <p className="text-xs text-zinc-500">Fetched {formatDate(syncData.fetchedAt)}</p>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      <div className="grid auto-rows-fr items-stretch gap-3 sm:grid-cols-3">
-        <SummaryCard
-          label="Candidates shown"
-          value={filtered.length.toLocaleString()}
-          hint={`${candidates.length.toLocaleString()} currently available`}
-        />
-        <SummaryCard label="Newest applicant" value={newestApplicantDate} />
-        <SummaryCard
-          label="Top sources"
-          value={breakdown.length > 0 ? breakdown.map((row) => `${row.source}: ${row.count}`).join(" · ") : "—"}
-        />
-      </div>
-
-      <RecruiterProductivityCenter
-        candidates={candidates}
-        actingRecruiter={actingRecruiter}
-        quickFilter={recruiterQuickFilter}
-        onQuickFilterChange={setRecruiterQuickFilter}
-      />
-
-      <CandidateMyQueuePanel
-        candidates={candidates}
-        rosters={rosters}
-        actingRecruiter={actingRecruiter}
-        onActingRecruiterChange={setActingRecruiter}
-        onOpenCandidate={setSelectedCandidateId}
-        onQueueAction={handleQueueAction}
-        queueActionBusy={queueActionBusy}
-        syncPartial={Boolean(syncData?.partial)}
-        syncStale={Boolean(syncData?.stale)}
-        quickFilter={recruiterQuickFilter}
-        onQuickFilterChange={setRecruiterQuickFilter}
-      />
-
-      <RecruiterCollapsibleSection
-        title="Analytics & productivity"
-        description="AI prioritization and recruiter productivity — optional detail below the action queue."
-        defaultOpen={false}
-      >
-        <CandidateAutomationPanels
-          queues={prioritizationQueues}
-          productivity={recruiterProductivity}
-          onOpenCandidate={setSelectedCandidateId}
-        />
-      </RecruiterCollapsibleSection>
-
-      <RecruiterCollapsibleSection
-        title="Workflow buckets"
-        description="Grouped counts by lifecycle stage — expand when you need a secondary view."
-        defaultOpen={false}
-      >
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          {buckets.map((bucket) => (
-            <div key={bucket.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-zinc-200">{bucket.label}</p>
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">
-                  {bucket.rows.length}
-                </span>
-              </div>
-              <ul className="mt-3 space-y-1 text-xs text-zinc-500">
-                {bucket.rows.slice(0, 3).map((candidate) => (
-                  <li key={candidate.candidateId} className="truncate">
-                    {candidateName(candidate)} · {candidate.positionName}
-                  </li>
-                ))}
-                {bucket.rows.length === 0 ? <li>No candidates</li> : null}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </RecruiterCollapsibleSection>
-
-      <RecruiterCollapsibleSection
-        title="Recent DD backfill queue"
-        description="Signed in the last 72 hours without DD requested — manual send only."
-        defaultOpen
-      >
-        <RecentDdBackfillQueue
-          candidateNames={backfillCandidateNames}
-          onWorkflowUpdated={(workflows) =>
-            applyWorkflowsBundle(workflows as CandidateWorkflowState)
-          }
-          onOpenCandidate={(candidateId) => setSelectedCandidateId(candidateId)}
-        />
-      </RecruiterCollapsibleSection>
-
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-sm shadow-black/20 backdrop-blur-sm sm:p-5">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">Workflow Status Counts</h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Local lifecycle statuses for candidate workflow triage. These do not write back to Breezy, HelloSign, or MEL.
+    <div className="space-y-6">
+      {workflowNotice ? (
+        <p
+          role="status"
+          className="rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-2 text-sm text-teal-100"
+        >
+          {workflowNotice}
         </p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-          {statusCounts.map((row) => {
-            const active = workflowFilter === row.status;
-            return (
-              <button
-                key={row.status}
-                type="button"
-                onClick={() => toggleWorkflowStatusFilter(row.status)}
-                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
-                  active
-                    ? "border-teal-500/50 bg-teal-500/10 ring-1 ring-teal-500/30"
-                    : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
-                }`}
-              >
-                <p className="text-xs text-zinc-500">{row.status}</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      ) : null}
+
+      <RecruiterActionCenterHero
+        candidates={candidates}
+        actingRecruiter={actingRecruiter}
+        rosters={rosters}
+        onActingRecruiterChange={setActingRecruiter}
+        onQuickFilterChange={handleQueueFilterChange}
+      />
+
+      <CandidateQueueTabs
+        activeFilter={recruiterQuickFilter}
+        counts={queueTabCounts}
+        onFilterChange={handleQueueFilterChange}
+      />
 
       <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-        <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-2 backdrop-blur-sm sm:px-4">
-          {recruiterQuickFilter !== "all" ? (
-            <p className="text-[11px] text-teal-200/90">
-              Table filtered by action queue — {filtered.length.toLocaleString()} candidate
-              {filtered.length === 1 ? "" : "s"}. Use chips above the queue to change or clear.
-            </p>
-          ) : null}
+        <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-3 backdrop-blur-sm sm:px-4">
           <input
             className={inputClass}
             value={search}
@@ -2274,31 +2035,6 @@ export function CandidatesSection() {
               <button
                 type="button"
                 disabled={bulkBusy}
-                onClick={() =>
-                  void runBulkUpdate({
-                    workflowStatus: "Paperwork Needed",
-                    note: "Bulk paperwork prep queued",
-                  })
-                }
-                className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-100 hover:bg-amber-500/20"
-              >
-                Bulk paperwork prep
-              </button>
-              <button
-                type="button"
-                disabled={bulkBusy}
-                onClick={() => {
-                  const note = window.prompt("Note to add for all selected candidates:");
-                  if (!note?.trim()) return;
-                  void runBulkUpdate({ note: note.trim() });
-                }}
-                className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
-              >
-                Bulk add note
-              </button>
-              <button
-                type="button"
-                disabled={bulkBusy}
                 onClick={() => setSelectedIds(new Set())}
                 className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
               >
@@ -2306,50 +2042,46 @@ export function CandidatesSection() {
               </button>
             </div>
           ) : null}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-9">
-          <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
-            <option value={ALL}>All sources</option>
-            {sourceOptions.map((source) => <option key={source} value={source}>{source}</option>)}
-          </select>
-          <select className={selectClass} value={stageFilter} onChange={(event) => setStageFilter(event.target.value)}>
-            <option value={ALL}>All stages</option>
-            {stageOptions.map((stage) => <option key={stage} value={stage}>{stage}</option>)}
-          </select>
-          <select className={selectClass} value={positionFilter} onChange={(event) => setPositionFilter(event.target.value)}>
-            <option value={ALL}>All positions</option>
-            {positionOptions.map((position) => <option key={position} value={position}>{position}</option>)}
-          </select>
-          <select className={selectClass} value={cityFilter} onChange={(event) => setCityFilter(event.target.value)}>
-            <option value={ALL}>All cities</option>
-            {cityOptions.map((city) => <option key={city} value={city}>{city}</option>)}
-          </select>
-          <select className={selectClass} value={stateFilter} onChange={(event) => setStateFilter(event.target.value)}>
-            <option value={ALL}>All states</option>
-            {stateOptions.map((state) => <option key={state} value={state}>{state}</option>)}
-          </select>
-          <input className={inputClass} type="date" value={appliedFrom} onChange={(event) => setAppliedFrom(event.target.value)} aria-label="Applied from date" />
-          <input className={inputClass} type="date" value={appliedTo} onChange={(event) => setAppliedTo(event.target.value)} aria-label="Applied to date" />
-            <select className={selectClass} value={workflowFilter} onChange={(event) => setWorkflowFilter(event.target.value)}>
-              <option value={ALL}>All workflow statuses</option>
-              {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-            <select
-              className={selectClass}
-              value={matchFilter}
-              onChange={(event) => setMatchFilter(event.target.value)}
-              aria-label="Filter by match level"
-            >
-              <option value={ALL}>All match levels</option>
-              <option value="high">High match</option>
-              <option value="medium">Medium match</option>
-              <option value="low">Low match</option>
-              <option value="no_resume">No resume</option>
-            </select>
-          </div>
+          <details className="text-xs text-zinc-500">
+            <summary className="cursor-pointer text-zinc-400 hover:text-zinc-200">Advanced filters</summary>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
+              <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
+                <option value={ALL}>All sources</option>
+                {sourceOptions.map((source) => (
+                  <option key={source} value={source}>
+                    {source}
+                  </option>
+                ))}
+              </select>
+              <select className={selectClass} value={stageFilter} onChange={(event) => setStageFilter(event.target.value)}>
+                <option value={ALL}>All stages</option>
+                {stageOptions.map((stage) => (
+                  <option key={stage} value={stage}>
+                    {stage}
+                  </option>
+                ))}
+              </select>
+              <select
+                className={selectClass}
+                value={positionFilter}
+                onChange={(event) => setPositionFilter(event.target.value)}
+              >
+                <option value={ALL}>All positions</option>
+                {positionOptions.map((position) => (
+                  <option key={position} value={position}>
+                    {position}
+                  </option>
+                ))}
+              </select>
+              <select className={selectClass} value={matchFilter} onChange={(event) => setMatchFilter(event.target.value)}>
+                <option value={ALL}>All match levels</option>
+                <option value="high">High match</option>
+                <option value="medium">Medium match</option>
+                <option value="low">Low match</option>
+                <option value="no_resume">No resume</option>
+              </select>
+            </div>
+          </details>
         </div>
 
         <div
@@ -2373,68 +2105,146 @@ export function CandidatesSection() {
         ) : (
           <VirtualCandidateTable
             rows={filtered}
-            colSpan={19}
+            colSpan={8}
+            maxHeightClass="max-h-[min(65vh,720px)]"
             getRowKey={(candidate) => candidate.candidateId}
             renderRow={(candidate) => renderCandidateRow(candidate)}
             header={
               <>
                 <colgroup>
-                  <col className="w-[40px]" />
-                  <col className="w-[272px]" />
-                  <col className="w-[9%]" />
-                  <col className="w-[6%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[7%]" />
-                  <col className="w-[4%]" />
-                  <col className="w-[3%]" />
-                  <col className="w-[6%]" />
+                  <col className="w-[56px]" />
+                  <col className="w-[18%]" />
+                  <col className="w-[18%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[10%]" />
                   <col className="w-[8%]" />
-                  <col className="w-[7%]" />
-                  <col className="w-[4%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[4%]" />
-                  <col className="w-[5%]" />
-                  <col className="w-[4%]" />
-                  <col className="w-[6%]" />
+                  <col className="w-[22%]" />
+                  <col className="w-[12%]" />
                 </colgroup>
                 <thead className="border-b border-zinc-800/60">
-                <tr>
-                  <th className={stickyCheckboxHeaderClass(thClass)}>
-                    <input
-                      type="checkbox"
-                      aria-label="Select all filtered candidates"
-                      checked={allFilteredSelected}
-                      onChange={toggleSelectAllFiltered}
-                      onClick={(event) => event.stopPropagation()}
-                    />
-                  </th>
-                  <th className={stickyIdentityHeaderClass(thClass)}>Candidate</th>
-                  <th className={thClass}>Email</th>
-                  <th className={thClass}>Phone</th>
-                  <th className={thClass}>Source</th>
-                  <th className={thClass}>Stage</th>
-                  <th className={thClass}>Applied</th>
-                  <th className={thClass}>Position</th>
-                  <th className={thClass}>City</th>
-                  <th className={thClass}>State</th>
-                  <th className={thClass}>Aging</th>
-                  <th className={thClass}>Next Action</th>
-                  <th className={thClass}>Action</th>
-                  <th className={thClass}>Notes</th>
-                  <th className={thClass}>HelloSign</th>
-                  <th className={thClass}>Match</th>
-                  <th className={thClass}>Skills</th>
-                  <th className={thClass}>AI Grade</th>
-                  <th className={thClass}>Recommendations</th>
-                </tr>
-              </thead>
+                  <tr>
+                    <th className={stickyCheckboxHeaderClass(thClass)}>
+                      <input
+                        type="checkbox"
+                        aria-label="Select all filtered candidates"
+                        checked={allFilteredSelected}
+                        onChange={toggleSelectAllFiltered}
+                        onClick={(event) => event.stopPropagation()}
+                      />
+                    </th>
+                    <th className={stickyIdentityHeaderClass(thClass)}>Name</th>
+                    <th className={thClass}>Position</th>
+                    <th className={thClass}>Location</th>
+                    <th className={thClass}>Stage</th>
+                    <th className={thClass}>Age</th>
+                    <th className={thClass}>Next action</th>
+                    <th className={thClass}>Action</th>
+                  </tr>
+                </thead>
               </>
             }
           />
         )}
       </section>
+
+      <RecruiterCollapsibleSection
+        title="Analytics"
+        description="Workflow funnel, productivity metrics, status counts, and DD backfill — expand when needed."
+        defaultOpen={false}
+      >
+        <div className="space-y-4">
+          <RecruiterCollapsibleSection title="Workflow funnel" defaultOpen={false}>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+              {buckets.map((bucket) => (
+                <div key={bucket.id} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium text-zinc-200">{bucket.label}</p>
+                    <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">
+                      {bucket.rows.length}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </RecruiterCollapsibleSection>
+
+          <RecruiterCollapsibleSection title="Productivity metrics" defaultOpen={false}>
+            <CandidateAutomationPanels
+              queues={prioritizationQueues}
+              productivity={recruiterProductivity}
+              onOpenCandidate={setSelectedCandidateId}
+            />
+          </RecruiterCollapsibleSection>
+
+          <RecruiterCollapsibleSection title="Workflow status counts" defaultOpen={false}>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+              {statusCounts.map((row) => {
+                const active = workflowFilter === row.status;
+                return (
+                  <button
+                    key={row.status}
+                    type="button"
+                    onClick={() => toggleWorkflowStatusFilter(row.status)}
+                    className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                      active
+                        ? "border-teal-500/50 bg-teal-500/10 ring-1 ring-teal-500/30"
+                        : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-600 hover:bg-zinc-900/60"
+                    }`}
+                  >
+                    <p className="text-xs text-zinc-500">{row.status}</p>
+                    <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">{row.count}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </RecruiterCollapsibleSection>
+
+          <RecruiterCollapsibleSection title="DD backfill queue" defaultOpen={false}>
+            <RecentDdBackfillQueue
+              candidateNames={backfillCandidateNames}
+              onWorkflowUpdated={(workflows) => applyWorkflowsBundle(workflows as CandidateWorkflowState)}
+              onOpenCandidate={(candidateId) => setSelectedCandidateId(candidateId)}
+            />
+          </RecruiterCollapsibleSection>
+
+          <RecruiterCollapsibleSection title="Queue lanes" defaultOpen={false}>
+            <CandidateMyQueuePanel
+              candidates={candidates}
+              rosters={rosters}
+              actingRecruiter={actingRecruiter}
+              onActingRecruiterChange={setActingRecruiter}
+              onOpenCandidate={setSelectedCandidateId}
+              onQueueAction={handleQueueAction}
+              queueActionBusy={queueActionBusy}
+              syncPartial={Boolean(syncData?.partial)}
+              syncStale={Boolean(syncData?.stale)}
+              quickFilter={recruiterQuickFilter}
+              onQuickFilterChange={handleQueueFilterChange}
+              showMetrics={false}
+            />
+          </RecruiterCollapsibleSection>
+        </div>
+      </RecruiterCollapsibleSection>
+
+      <CandidatesAdminDiagnostics
+        syncData={syncData ?? null}
+        syncHeaderLine={syncHeaderLine}
+        syncAlert={syncAlert}
+        enrichmentWarnings={enrichmentWarnings}
+        showSyncAlert={showSyncAlert}
+        showBackgroundSyncLine={Boolean(showBackgroundSyncLine)}
+        backgroundSyncLine={
+          showBackgroundSyncLine
+            ? formatRecruiterBackgroundSyncLine(committedCandidates.length)
+            : null
+        }
+        onboardingConfigLoaded={onboardingConfigLoaded}
+        onboardingConfigured={onboardingConfigured}
+        onboardingConfigError={onboardingConfigError}
+        paperworkTemplateWarning={Boolean(paperworkTemplateWarning)}
+        refreshing={refreshingCandidates}
+        onRefresh={() => void loadBundle(true)}
+      />
 
       <CandidateDetailDrawer
         key={selectedDrawerRow?.candidateId ?? "closed"}
