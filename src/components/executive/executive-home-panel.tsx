@@ -1,14 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { AtsHealthCard } from "@/components/executive/ats-health-card";
+import { ExecutiveAccountabilitySummary } from "@/components/executive/executive-accountability-summary";
+import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-strip";
+import { ExecutiveSnapshotHero } from "@/components/executive/executive-snapshot-hero";
 import { PipelineHealthPanel } from "@/components/executive/pipeline-health-panel";
-import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
-import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
+import type { ExecutiveDashboardSnapshot, TerritoryRollupRow } from "@/lib/dm-dashboard";
+import { buildExecutiveSnapshotContent } from "@/lib/build-executive-home-snapshot";
 import { sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
 import { useAtsHealth } from "@/hooks/use-ats-health";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 import { useExecutiveAccountability } from "@/hooks/use-executive-accountability";
+import { usePipelineIntelligence } from "@/hooks/use-pipeline-intelligence";
+import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 
 function formatTimestamp(iso: string | null | undefined): string {
@@ -39,9 +43,7 @@ function KpiCard({
   status?: KpiStatus;
 }) {
   const valueClass =
-    status === "unavailable" || status === "pending"
-      ? "text-amber-200"
-      : "text-zinc-50";
+    status === "unavailable" || status === "pending" ? "text-amber-200" : "text-zinc-50";
 
   return (
     <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
@@ -62,26 +64,39 @@ function KpiCard({
   );
 }
 
+function sortTerritories(rows: TerritoryRollupRow[], direction: "asc" | "desc", limit: number): TerritoryRollupRow[] {
+  const sorted = [...rows].sort((a, b) =>
+    direction === "asc" ? a.healthScore - b.healthScore : b.healthScore - a.healthScore,
+  );
+  return sorted.slice(0, limit);
+}
+
 function TerritoryTable({
   title,
   rows,
   loading,
+  loadingCeilingHit,
 }: {
   title: string;
-  rows: ExecutiveDashboardSnapshot["worstTerritories"];
+  rows: TerritoryRollupRow[];
   loading?: boolean;
+  loadingCeilingHit?: boolean;
 }) {
+  const showLoading = loading && !loadingCeilingHit;
+
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
       <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
-      {loading ? (
+      {showLoading ? (
         <div className="mt-3 space-y-2">
           {Array.from({ length: 4 }, (_, index) => (
             <div key={index} className="h-8 animate-pulse rounded bg-zinc-800/80" />
           ))}
         </div>
       ) : rows.length === 0 ? (
-        <p className="mt-3 text-sm text-zinc-500">No territory data.</p>
+        <p className="mt-3 rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2 text-sm text-zinc-500">
+          Territory rollups will appear once dashboard data loads.
+        </p>
       ) : (
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[420px] text-left text-sm">
@@ -121,6 +136,8 @@ export function ExecutiveHomePanel() {
     });
   const accountability = useExecutiveAccountability();
   const atsHealth = useAtsHealth();
+  const pipeline = usePipelineIntelligence();
+  const recruiting = useRecruitingIntelligence({ pollIntervalMs: 0 });
   const loadingCeilingHit = useLoadingCeiling(loading && !data, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   const insights = data?.executiveInsights;
@@ -133,7 +150,7 @@ export function ExecutiveHomePanel() {
     meta?.candidatesUnavailable === true ||
     ((atsFallback?.candidatesCached ?? 0) === 0 && (insights?.totalCandidates ?? 0) === 0 && jobsAvailable);
   const candidatesSyncPending = candidatesUnavailable && (loading || atsHealth.loading) && !insights;
-  const kpiLoading = loading && !data && !atsFallback;
+  const kpiLoading = loading && !data && !atsFallback && !loadingCeilingHit;
 
   const openJobs = insights?.activeJobs ?? (jobsAvailable ? atsFallback?.jobsCached ?? 0 : 0);
   const candidatesValue = candidatesSyncPending
@@ -148,45 +165,49 @@ export function ExecutiveHomePanel() {
       : "normal";
 
   const lastUpdated = meta?.refreshedAt ?? data?.fetchedAt ?? atsFallback?.lastSuccessfulSync;
-  const dataFreshness =
-    candidatesUnavailable && jobsAvailable
-      ? "Job data current, candidate data unavailable"
-      : (atsFallback?.dataFreshnessLabel ??
-        (meta?.partialSync ? "Partial sync" : data ? "Current" : "Unknown"));
-
-  const overdueCount = accountability.snapshot?.statusSummary.overdue ?? 0;
-  const openActions = accountability.snapshot?.statusSummary.open ?? 0;
   const friendlyRollupError = error
     ? sanitizeFriendlyFetchMessage(error, "dashboard", { timedOut }) ?? error
     : null;
 
+  const snapshot = buildExecutiveSnapshotContent({
+    insights,
+    data,
+    accountability: accountability.snapshot,
+    pipeline: pipeline.data,
+    alerts: recruiting.data?.recruitingAlerts,
+    candidatesUnavailable,
+  });
+
+  const riskTerritories = sortTerritories(data?.territoryRollups ?? [], "asc", 10);
+  const healthyTerritories = sortTerritories(data?.territoryRollups ?? [], "desc", 10);
+
+  const needsAttentionCount =
+    recruiting.data?.recruitingAlerts.filter((alert) => alert.severity === "critical" || alert.severity === "warning")
+      .length ?? 0;
+  const pipelineBottleneckCount =
+    pipeline.data?.executive.topBottleneckTerritories.length ??
+    pipeline.data?.executive.topBottlenecks.length ??
+    0;
+  const overdueCount = accountability.snapshot?.statusSummary.overdue ?? 0;
+  const openActions = accountability.snapshot?.statusSummary.open ?? 0;
+  const accountabilityHeadline =
+    accountability.snapshot?.weeklyNarrative?.topActionRequired ??
+    accountability.snapshot?.weeklyNarrative?.topRiskThisWeek ??
+    null;
+
+  const showCoverageKpis = Boolean(insights) || kpiLoading;
+  const showOpenJobsKpi = jobsAvailable || openJobs > 0 || kpiLoading;
+
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Executive Home</h1>
-          <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-            Company-wide recruiting health, ATS reliability, territory risk, and accountability in one screen.
-          </p>
-        </div>
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 text-xs text-zinc-400">
-          <p>
-            <span className="text-zinc-500">Last updated: </span>
-            {kpiLoading ? "Loading…" : formatTimestamp(lastUpdated)}
-          </p>
-          <p className="mt-1">
-            <span className="text-zinc-500">Data freshness: </span>
-            {atsHealth.loading && !atsFallback ? "Checking…" : dataFreshness}
-          </p>
-        </div>
-      </header>
+      <ExecutiveSnapshotHero snapshot={snapshot} lastUpdated={formatTimestamp(lastUpdated)} />
 
       {candidatesUnavailable && jobsAvailable ? (
         <div
           role="status"
           className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
         >
-          Job data current, candidate data unavailable. Candidate sync is pending or cached data has not warmed yet.
+          Job data is current; candidate cache is still warming. Pipeline metrics may be partial until sync completes.
         </div>
       ) : null}
 
@@ -206,91 +227,71 @@ export function ExecutiveHomePanel() {
         </div>
       ) : null}
 
-      {loadingCeilingHit && !data ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          Executive rollup is taking longer than expected. KPIs below use ATS cache where available.
+      <section>
+        <h2 className="text-lg font-semibold text-zinc-50">Executive KPIs</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {showOpenJobsKpi ? (
+            <KpiCard label="Open jobs" value={openJobs.toLocaleString()} loading={kpiLoading && !jobsAvailable} />
+          ) : null}
+          <KpiCard
+            label="Candidates"
+            value={candidatesValue}
+            loading={kpiLoading && candidatesStatus === "normal"}
+            status={candidatesStatus}
+            hint={candidatesUnavailable ? "Candidate cache not ready" : undefined}
+          />
+          {showCoverageKpis ? (
+            <>
+              <KpiCard
+                label="Coverage risk"
+                value={insights ? `${insights.fillRiskScore}/100` : "…"}
+                hint={insights?.fillRiskLabel}
+                loading={kpiLoading && !insights}
+              />
+              <KpiCard
+                label="Critical territories"
+                value={insights ? insights.criticalTerritories.toLocaleString() : "…"}
+                hint="DM territories below health threshold"
+                loading={kpiLoading && !insights}
+              />
+            </>
+          ) : null}
         </div>
-      ) : null}
+      </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <KpiCard label="Open jobs" value={openJobs.toLocaleString()} loading={kpiLoading && !jobsAvailable} />
-        <KpiCard
-          label="Candidates"
-          value={candidatesValue}
-          loading={kpiLoading && candidatesStatus === "normal"}
-          status={candidatesStatus}
-          hint={
-            candidatesUnavailable
-              ? "Candidate cache not ready"
-              : undefined
-          }
-        />
-        <KpiCard
-          label="Active recruiters"
-          value={insights ? insights.activeRecruiters.toLocaleString() : "—"}
-          loading={kpiLoading && !insights}
-          hint="Assigned recruiters with pipeline activity"
-        />
-        <KpiCard
-          label="Coverage risk"
-          value={insights ? `${insights.fillRiskScore}/100` : "—"}
-          hint={insights?.fillRiskLabel ?? (insights ? undefined : "Requires full rollup")}
-          loading={kpiLoading && !insights}
-        />
-        <KpiCard
-          label="Critical territories"
-          value={insights ? insights.criticalTerritories.toLocaleString() : "—"}
-          loading={kpiLoading && !insights}
-          hint="DM territories below health threshold"
-        />
-      </div>
+      <ExecutiveActionsStrip
+        overdueAccountability={overdueCount}
+        needsAttention={needsAttentionCount}
+        pipelineBottlenecks={pipelineBottleneckCount}
+      />
 
-      <AtsHealthCard compact />
+      <AtsHealthCard collapsible />
 
       <PipelineHealthPanel />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <TerritoryTable
           title="Top 10 risk territories"
-          rows={data?.worstTerritories ?? []}
-          loading={kpiLoading && !data}
+          rows={riskTerritories}
+          loading={loading && !data}
+          loadingCeilingHit={loadingCeilingHit}
         />
         <TerritoryTable
           title="Top 10 healthy territories"
-          rows={data?.bestTerritories ?? []}
-          loading={kpiLoading && !data}
+          rows={healthyTerritories}
+          loading={loading && !data}
+          loadingCeilingHit={loadingCeilingHit}
         />
       </div>
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-50">Executive alerts & accountability</h2>
-            <p className="mt-1 text-sm text-zinc-500">
-              {accountability.loading && !accountability.snapshot
-                ? "Loading accountability summary…"
-                : `${openActions} open actions · ${overdueCount} overdue`}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/?tab=executive-accountability&view=overdue"
-              className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs text-red-100"
-            >
-              Overdue escalation
-            </Link>
-            <Link
-              href="/?tab=executive-accountability"
-              className="rounded-lg border border-teal-500/40 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-100"
-            >
-              Accountability board
-            </Link>
-          </div>
-        </div>
-        <div className="mt-4">
-          <RecruitingAlertsSection limit={6} />
-        </div>
-      </section>
+      <ExecutiveAccountabilitySummary
+        openActions={openActions}
+        overdueActions={overdueCount}
+        headline={accountabilityHeadline}
+        loading={accountability.loading && !accountability.snapshot}
+        error={accountability.error}
+        onRetry={() => accountability.refresh()}
+      />
     </div>
   );
 }
