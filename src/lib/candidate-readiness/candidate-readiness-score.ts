@@ -6,6 +6,11 @@ import type {
   CandidateReadinessScore,
   CandidateResumeIntelligence,
 } from "@/lib/candidate-readiness/types";
+import {
+  buildGradeContributors,
+  buildReadinessConfidence,
+  hasNoMerchandisingAnswer,
+} from "@/lib/candidate-readiness/build-grade-explainability";
 
 const NEUTRAL_SCORE = 60;
 
@@ -33,7 +38,8 @@ function scoreRetailMerchandising(
   if (resume.signalBadges.some((badge) => badge.id === "merchandising" && badge.detected)) score += 8;
   if (questionnaire.merchandisingExperience) {
     const answer = questionnaire.merchandisingExperience.toLowerCase();
-    if (/\b(3|4|5|6|7|8|9|10|\d{2,})\b/.test(answer) || answer.includes("year")) score += 15;
+    if (hasNoMerchandisingAnswer(questionnaire.merchandisingExperience)) score -= 12;
+    else if (/\b(3|4|5|6|7|8|9|10|\d{2,})\b/.test(answer) || answer.includes("year")) score += 15;
     else if (answer.includes("month") || answer.includes("1")) score += 6;
     else score += 10;
   }
@@ -137,6 +143,9 @@ function buildConcerns(
       (questionnaire.merchandisingExperience && /\b(0|1)\b/.test(questionnaire.merchandisingExperience))) {
     concerns.push("Less than 1 year merchandising experience");
   }
+  if (hasNoMerchandisingAnswer(questionnaire.merchandisingExperience)) {
+    concerns.push("No merchandising experience reported");
+  }
   if (questionnaire.printerLaptopAccess === false) concerns.push("No computer/printer access");
   if (questionnaire.internetAccess === false) concerns.push("No reliable internet access");
   if (questionnaire.smartphoneAccess === false) concerns.push("No smartphone access");
@@ -225,6 +234,8 @@ export function buildCandidateReadinessScore(input: {
   const grade = gradeFromScore(overallScore);
   const strengths = buildStrengths(resume, questionnaire);
   const concerns = buildConcerns(resume, questionnaire);
+  const { confidence, confidenceLabel } = buildReadinessConfidence(resume, questionnaire);
+  const gradeContributors = buildGradeContributors({ candidate, resume, questionnaire });
 
   return {
     overallScore,
@@ -241,6 +252,9 @@ export function buildCandidateReadinessScore(input: {
     }),
     paperworkReady: categoryScores.paperworkReadiness >= 70,
     techReady: questionnaire.techReady,
+    confidence,
+    confidenceLabel,
+    gradeContributors,
   };
 }
 
@@ -262,5 +276,8 @@ export function baselineCandidateReadinessScore(): CandidateReadinessScore {
     recommendedNextAction: "Open workspace after scores finish loading.",
     paperworkReady: false,
     techReady: null,
+    confidence: "low",
+    confidenceLabel: "Low confidence",
+    gradeContributors: [],
   };
 }

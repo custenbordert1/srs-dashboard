@@ -9,46 +9,52 @@ const GRADE_STYLES: Record<CandidateReadinessScore["grade"], string> = {
   D: "border-rose-500/40 bg-rose-500/15 text-rose-100",
 };
 
+const CONFIDENCE_STYLES: Record<CandidateReadinessScore["confidence"], string> = {
+  high: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
+  medium: "border-amber-500/30 bg-amber-500/10 text-amber-100",
+  low: "border-zinc-600 bg-zinc-900 text-zinc-400",
+};
+
 type CandidateGradePanelProps = {
   grade: CandidateReadinessScore;
 };
 
 export function CandidateGradePanel({ grade }: CandidateGradePanelProps) {
   const enriching = grade.overallScore === 0 && grade.concerns.some((c) => c.includes("Enriching"));
+  const positives = grade.gradeContributors.filter((item) => item.kind === "positive");
+  const negatives = grade.gradeContributors.filter((item) => item.kind === "negative");
 
   return (
     <section className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
       <h3 className="text-sm font-semibold text-zinc-100">Candidate grade</h3>
 
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <div className="text-2xl font-semibold text-zinc-50">
-          {enriching ? "…" : `${grade.overallScore}`}
-          <span className="text-sm font-normal text-zinc-500"> / 100</span>
+          {enriching ? "…" : `Grade ${grade.grade}`}
+          {!enriching ? <span className="text-base font-normal text-zinc-400"> ({grade.overallScore})</span> : null}
         </div>
-        <span
-          className={`rounded-md border px-2.5 py-1 text-sm font-semibold ${GRADE_STYLES[grade.grade]}`}
-        >
-          Grade {grade.grade}
-        </span>
+        {!enriching ? (
+          <span
+            className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${CONFIDENCE_STYLES[grade.confidence]}`}
+          >
+            {grade.confidenceLabel}
+          </span>
+        ) : null}
       </div>
 
-      {grade.strengths.length > 0 ? (
+      {!enriching && grade.gradeContributors.length > 0 ? (
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Strengths</p>
-          <ul className="mt-1 list-inside list-disc space-y-1 text-sm text-teal-100/90">
-            {grade.strengths.map((item) => (
-              <li key={item}>{item}</li>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Why this grade</p>
+          <ul className="mt-2 space-y-1 text-sm">
+            {positives.map((item) => (
+              <li key={item.label} className="text-teal-100/90">
+                + {item.label}
+              </li>
             ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {grade.concerns.length > 0 ? (
-        <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Concerns</p>
-          <ul className="mt-1 list-inside list-disc space-y-1 text-sm text-amber-100/90">
-            {grade.concerns.map((item) => (
-              <li key={item}>{item}</li>
+            {negatives.map((item) => (
+              <li key={item.label} className="text-amber-100/90">
+                − {item.label}
+              </li>
             ))}
           </ul>
         </div>

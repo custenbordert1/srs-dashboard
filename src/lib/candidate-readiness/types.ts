@@ -1,5 +1,21 @@
 export type CandidateReadinessGrade = "A" | "B" | "C" | "D";
 
+export type CandidateReadinessConfidence = "high" | "medium" | "low";
+
+export type GradeContributor = {
+  kind: "positive" | "negative";
+  label: string;
+};
+
+export type ResumeQualityIndicators = {
+  employmentHistoryCount: number | null;
+  longestTenureMonths: number | null;
+  longestTenureLabel: string | null;
+  employmentGapsDetected: number;
+  completeness: "complete" | "partial" | "minimal" | "unavailable";
+  completenessLabel: string;
+};
+
 export type CandidateQuestionnaireAnswer = {
   question: string;
   answer: string;
@@ -40,6 +56,7 @@ export type CandidateResumeIntelligence = {
   merchandisingRetailExperience: boolean | null;
   employmentGaps: string[];
   experienceFlags: string[];
+  quality: ResumeQualityIndicators;
 };
 
 export type CandidateReadinessCategoryScores = {
@@ -61,6 +78,9 @@ export type CandidateReadinessScore = {
   recommendedNextAction: string;
   paperworkReady: boolean;
   techReady: boolean | null;
+  confidence: CandidateReadinessConfidence;
+  confidenceLabel: string;
+  gradeContributors: GradeContributor[];
 };
 
 export type CandidateIntelligenceBundle = {

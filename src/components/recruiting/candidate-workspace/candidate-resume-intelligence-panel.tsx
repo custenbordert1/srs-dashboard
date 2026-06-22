@@ -67,6 +67,28 @@ export function CandidateResumeIntelligencePanel({ intelligence }: CandidateResu
             </div>
           ) : null}
 
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Resume quality</p>
+            <ul className="mt-1 space-y-1 text-zinc-300">
+              <li>
+                Employment history:{" "}
+                {intelligence.quality.employmentHistoryCount === null
+                  ? "—"
+                  : `${intelligence.quality.employmentHistoryCount} role${intelligence.quality.employmentHistoryCount === 1 ? "" : "s"}`}
+              </li>
+              <li>
+                Longest tenure: {intelligence.quality.longestTenureLabel ?? "Not detected"}
+              </li>
+              <li>
+                Employment gaps:{" "}
+                {intelligence.quality.employmentGapsDetected > 0
+                  ? `${intelligence.quality.employmentGapsDetected} detected`
+                  : "None detected"}
+              </li>
+              <li>Completeness: {intelligence.quality.completenessLabel}</li>
+            </ul>
+          </div>
+
           {intelligence.employmentGaps.length > 0 ? (
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Employment gaps</p>

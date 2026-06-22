@@ -2,6 +2,7 @@ import type { BreezyCandidate } from "@/lib/breezy-api";
 import { extractSkillTagsFromText } from "@/lib/recruiting-intelligence/skill-tags";
 import { extractCandidateResumeText } from "@/lib/recruiting-intelligence/resume-parser";
 import type { CandidateResumeIntelligence, ResumeSignalBadge } from "@/lib/candidate-readiness/types";
+import { buildResumeQualityIndicators } from "@/lib/candidate-readiness/build-resume-quality";
 
 const NOT_AVAILABLE = "Not available from Breezy yet.";
 
@@ -106,6 +107,14 @@ function unavailableResume(): CandidateResumeIntelligence {
     merchandisingRetailExperience: null,
     employmentGaps: [],
     experienceFlags: [NOT_AVAILABLE],
+    quality: {
+      employmentHistoryCount: null,
+      longestTenureMonths: null,
+      longestTenureLabel: null,
+      employmentGapsDetected: 0,
+      completeness: "unavailable",
+      completenessLabel: NOT_AVAILABLE,
+    },
   };
 }
 
@@ -120,16 +129,25 @@ export function buildResumeIntelligence(candidate: BreezyCandidate): CandidateRe
 
   const phoneCustomerService = hasAnyTerm(text, CUSTOMER_SERVICE_TERMS) ? true : null;
   const merchandisingRetail = hasAnyTerm(text, MERCH_RETAIL_TERMS) ? true : null;
+  const workHistoryHighlights = extractWorkHistoryHighlights(candidate, resumeText);
 
   return {
     available: true,
     summary: buildSummary(candidate, resumeText),
-    workHistoryHighlights: extractWorkHistoryHighlights(candidate, resumeText),
+    workHistoryHighlights,
     relevantSkills: skillTags,
     signalBadges,
     phoneCustomerServiceExperience: phoneCustomerService,
     merchandisingRetailExperience: merchandisingRetail,
     employmentGaps: gaps,
     experienceFlags: buildExperienceFlags(signalBadges, gaps),
+    quality: buildResumeQualityIndicators({
+      candidate,
+      resumeText,
+      workHistoryHighlights,
+      skillCount: skillTags.length,
+      employmentGaps: gaps,
+      available: true,
+    }),
   };
 }

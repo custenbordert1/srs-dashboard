@@ -161,5 +161,15 @@ describe("candidate-readiness", () => {
     assert.equal(bundle.resume.available, true);
     assert.equal(bundle.questionnaire.available, true);
     assert.ok(bundle.grade.overallScore > 0);
+    assert.equal(bundle.grade.confidence, "high");
+    assert.ok(bundle.grade.gradeContributors.some((item) => item.kind === "positive"));
+    assert.ok(bundle.resume.quality.employmentHistoryCount !== null);
+  });
+
+  it("exposes confidence and grade contributors", () => {
+    const candidate = sampleCandidate({ questionnaireAnswers: undefined, hasQuestionnaire: false });
+    const bundle = buildCandidateIntelligenceBundle(candidate);
+    assert.equal(bundle.grade.confidence, "medium");
+    assert.ok(bundle.grade.gradeContributors.some((item) => item.label.includes("Retail")));
   });
 });
