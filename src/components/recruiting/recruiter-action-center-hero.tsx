@@ -4,7 +4,7 @@ import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-
 import { buildQueueCompactMetrics } from "@/lib/candidate-queue-metrics";
 import {
   buildRecruiterActionQueueCounts,
-  type RecruiterQuickFilterId,
+  type RecruiterInboxSectionId,
 } from "@/lib/recruiter-action-queue-filters";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 
@@ -13,14 +13,14 @@ type RecruiterActionCenterHeroProps = {
   actingRecruiter: string;
   rosters: RecruiterRosters;
   onActingRecruiterChange: (name: string) => void;
-  onQuickFilterChange: (filter: RecruiterQuickFilterId) => void;
+  onScrollToSection: (section: RecruiterInboxSectionId) => void;
 };
 
-const QUICK_ACTIONS: Array<{ filter: RecruiterQuickFilterId; label: string }> = [
-  { filter: "needs-follow-up", label: "Contact Today" },
-  { filter: "needs-review", label: "Review Candidates" },
-  { filter: "paperwork-pending", label: "Paperwork Queue" },
-  { filter: "ready-mel", label: "Ready For MEL" },
+const QUICK_ACTIONS: Array<{ section: RecruiterInboxSectionId; label: string }> = [
+  { section: "overdue-follow-ups", label: "Overdue follow-ups" },
+  { section: "paperwork-pending", label: "Paperwork queue" },
+  { section: "interview-needed", label: "Interview needed" },
+  { section: "ready-for-mel", label: "Ready for MEL" },
 ];
 
 function MustDoMetric({ label, value, tone }: { label: string; value: number; tone?: "warn" | "ok" }) {
@@ -43,7 +43,7 @@ export function RecruiterActionCenterHero({
   actingRecruiter,
   rosters,
   onActingRecruiterChange,
-  onQuickFilterChange,
+  onScrollToSection,
 }: RecruiterActionCenterHeroProps) {
   const metrics = buildQueueCompactMetrics(candidates);
   const actionCounts = buildRecruiterActionQueueCounts(candidates);
@@ -53,7 +53,7 @@ export function RecruiterActionCenterHero({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-teal-300/90">
-            Recruiter Action Center
+            Recruiter Inbox
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">Candidates</h1>
           <p className="mt-1 text-sm text-zinc-400">
@@ -81,25 +81,25 @@ export function RecruiterActionCenterHero({
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <MustDoMetric label="Overdue follow-ups" value={metrics.overdueFollowUps} tone="warn" />
           <MustDoMetric label="Paperwork pending" value={metrics.paperworkPending} />
-          <MustDoMetric label="Unassigned candidates" value={metrics.unassigned} tone="warn" />
+          <MustDoMetric label="Interview needed" value={actionCounts.interviewNeeded} tone="warn" />
           <MustDoMetric label="Ready for MEL" value={metrics.readyForMel} tone="ok" />
         </div>
         {actionCounts.needsReview > 0 ? (
           <p className="mt-3 text-xs text-amber-200/90">
             {actionCounts.needsReview} candidate{actionCounts.needsReview === 1 ? "" : "s"} still need
-            first review.
+            first review — check Newly applied below.
           </p>
         ) : null}
       </div>
 
       <div className="mt-6">
-        <h2 className="text-sm font-semibold text-zinc-200">Quick actions</h2>
+        <h2 className="text-sm font-semibold text-zinc-200">Jump to queue</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           {QUICK_ACTIONS.map((action) => (
             <button
-              key={action.filter}
+              key={action.section}
               type="button"
-              onClick={() => onQuickFilterChange(action.filter)}
+              onClick={() => onScrollToSection(action.section)}
               className="rounded-lg border border-teal-500/40 bg-teal-500/15 px-4 py-2 text-sm font-medium text-teal-100 transition-colors hover:bg-teal-500/25"
             >
               {action.label}

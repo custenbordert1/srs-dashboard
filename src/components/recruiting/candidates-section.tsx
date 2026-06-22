@@ -45,7 +45,6 @@ import {
 } from "@/lib/candidate-workflow-types";
 import {
   CANDIDATE_TABLE_ROW_HEIGHT_PX,
-  VirtualCandidateTable,
 } from "@/components/recruiting/virtual-candidate-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useMelOpportunities } from "@/hooks/use-mel-opportunities";
@@ -97,16 +96,16 @@ import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
 import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
-import { CandidateQueueTabs } from "@/components/recruiting/candidate-queue-tabs";
+import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
 import { CandidateRowExpandedDetails } from "@/components/recruiting/candidate-row-expanded-details";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
 import {
+  buildRecruiterInboxSections,
   computeRecruiterAgingBucket,
-  matchesRecruiterQuickFilter,
-  buildCandidateQueueTabCounts,
+  queueParamToInboxSection,
   RECRUITER_AGING_BUCKET_LABELS,
   type RecruiterAgingBucket,
-  type RecruiterQuickFilterId,
+  type RecruiterInboxSectionId,
 } from "@/lib/recruiter-action-queue-filters";
 import { parsePipelineQueueParam } from "@/lib/pipeline-intelligence/client";
 import {
@@ -157,8 +156,6 @@ import { flushSync } from "react-dom";
 const ALL = "__all__";
 const selectClass =
   "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
-const inputClass =
-  "w-full rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20";
 const thClass =
   "sticky top-0 z-10 whitespace-nowrap bg-zinc-900/95 px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-sm";
 /** Keep in sync with `CANDIDATE_TABLE_ROW_HEIGHT_PX` (54). */
@@ -462,7 +459,9 @@ export function CandidatesSection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [queueActionBusy, setQueueActionBusy] = useState(false);
-  const [recruiterQuickFilter, setRecruiterQuickFilter] = useState<RecruiterQuickFilterId>("all");
+  const [scrollToInboxSection, setScrollToInboxSection] = useState<RecruiterInboxSectionId | null>(
+    null,
+  );
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(() => new Set());
   const [onboardingConfigured, setOnboardingConfigured] = useState(false);
   const [onboardingConfigLoaded, setOnboardingConfigLoaded] = useState(false);
@@ -910,7 +909,10 @@ export function CandidatesSection() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const queue = parsePipelineQueueParam(new URLSearchParams(window.location.search).get("queue"));
-    if (queue) setRecruiterQuickFilter(queue);
+    if (queue) {
+      const section = queueParamToInboxSection(queue);
+      if (section) setScrollToInboxSection(section);
+    }
   }, []);
 
   useEffect(() => {
@@ -1117,18 +1119,24 @@ export function CandidatesSection() {
     return index;
   }, [candidates]);
 
-  const filtered = useMemo(() => {
+  const inboxSections = useMemo(
+    () => buildRecruiterInboxSections(candidates, actingRecruiter),
+    [actingRecruiter, candidates],
+  );
+
+  const databaseFiltered = useMemo(() => {
     logCandidatesDebug("before_table_filter", candidates.length);
     logRecruiterTerritoryFilters({
       actingRecruiter,
       sourceFilter,
       workflowFilter,
       stageFilter,
-      territoryNote: "Main table filters are client-side only (not recruiter assignment).",
+      territoryNote: "Database search filters are client-side only (not recruiter assignment).",
     });
     const q = debouncedSearch.trim().toLowerCase();
+    const pool = q ? candidates : inboxSections["everything-else"];
 
-    const rows = candidates.filter((candidate) => {
+    const rows = pool.filter((candidate) => {
       if (sourceFilter !== ALL && candidate.source !== sourceFilter) return false;
       if (stageFilter !== ALL && candidate.stage !== stageFilter) return false;
       if (positionFilter !== ALL && candidate.positionName !== positionFilter) return false;
@@ -1153,13 +1161,6 @@ export function CandidatesSection() {
       if (q) {
         const haystack = searchIndex.get(candidate.candidateId);
         if (!haystack?.includes(q)) return false;
-      }
-
-      if (
-        recruiterQuickFilter !== "all" &&
-        !matchesRecruiterQuickFilter(candidate, recruiterQuickFilter, actingRecruiter)
-      ) {
-        return false;
       }
 
       return true;
@@ -1187,7 +1188,6 @@ export function CandidatesSection() {
         appliedFrom: appliedFrom || null,
         appliedTo: appliedTo || null,
         debouncedSearch: debouncedSearch || null,
-        recruiterQuickFilter,
       },
     });
     logCandidatesDebug("after_table_filter", sorted.length, {
@@ -1207,10 +1207,9 @@ export function CandidatesSection() {
     candidates,
     cityFilter,
     debouncedSearch,
+    inboxSections,
     matchFilter,
     positionFilter,
-    actingRecruiter,
-    recruiterQuickFilter,
     searchIndex,
     sourceFilter,
     stageFilter,
@@ -1218,27 +1217,23 @@ export function CandidatesSection() {
     workflowFilter,
   ]);
 
-  const filteredIds = useMemo(() => filtered.map((candidate) => candidate.candidateId), [filtered]);
-  const allFilteredSelected =
-    filteredIds.length > 0 && filteredIds.every((candidateId) => selectedIds.has(candidateId));
+  const databaseFilteredIds = useMemo(
+    () => databaseFiltered.map((candidate) => candidate.candidateId),
+    [databaseFiltered],
+  );
+  const allDatabaseFilteredSelected =
+    databaseFilteredIds.length > 0 &&
+    databaseFilteredIds.every((candidateId) => selectedIds.has(candidateId));
 
-  const newestApplicantDate = useMemo(() => {
-    const newest = filtered
-      .map((candidate) => parseDate(candidate.appliedDate))
-      .filter((date): date is Date => Boolean(date))
-      .sort((a, b) => b.getTime() - a.getTime())[0];
-    return newest ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(newest) : "—";
-  }, [filtered]);
-
-  const breakdown = useMemo(() => sourceBreakdown(filtered), [filtered]);
-  const buckets = useMemo(() => workflowBuckets(filtered), [filtered]);
+  const breakdown = useMemo(() => sourceBreakdown(candidates), [candidates]);
+  const buckets = useMemo(() => workflowBuckets(candidates), [candidates]);
   const statusCounts = useMemo(
     () =>
       CANDIDATE_WORKFLOW_STATUSES.map((status) => ({
         status,
-        count: filtered.filter((candidate) => candidate.workflowStatus === status).length,
+        count: candidates.filter((candidate) => candidate.workflowStatus === status).length,
       })),
-    [filtered],
+    [candidates],
   );
 
   const selectedCandidate = useMemo(
@@ -1306,8 +1301,6 @@ export function CandidatesSection() {
   );
 
   const recruiterProductivity = useMemo(() => buildRecruiterProductivity(workflowState), [workflowState]);
-  const queueTabCounts = useMemo(() => buildCandidateQueueTabCounts(candidates), [candidates]);
-
   const toggleExpandedRow = useCallback((candidateId: string) => {
     setExpandedRowIds((current) => {
       const next = new Set(current);
@@ -1317,13 +1310,8 @@ export function CandidatesSection() {
     });
   }, []);
 
-  const handleQueueFilterChange = useCallback((filter: RecruiterQuickFilterId) => {
-    setRecruiterQuickFilter(filter);
-    if (typeof window === "undefined") return;
-    const url = new URL(window.location.href);
-    if (filter === "all") url.searchParams.delete("queue");
-    else url.searchParams.set("queue", filter);
-    window.history.replaceState(null, "", url);
+  const handleScrollToInboxSection = useCallback((section: RecruiterInboxSectionId) => {
+    setScrollToInboxSection(section);
   }, []);
 
   function toggleWorkflowStatusFilter(status: CandidateWorkflowStatus) {
@@ -1610,13 +1598,13 @@ export function CandidatesSection() {
       });
   }
 
-  function toggleSelectAllFiltered() {
+  function toggleSelectAllDatabaseFiltered() {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (allFilteredSelected) {
-        for (const id of filteredIds) next.delete(id);
+      if (allDatabaseFilteredSelected) {
+        for (const id of databaseFilteredIds) next.delete(id);
       } else {
-        for (const id of filteredIds) next.add(id);
+        for (const id of databaseFilteredIds) next.add(id);
       }
       return next;
     });
@@ -1957,6 +1945,135 @@ export function CandidatesSection() {
     onboardingConfigured &&
     !paperworkTemplates.some((t) => t.key === "onboarding_packet" && t.configured);
 
+  const candidateTableHeader = (
+    <>
+      <colgroup>
+        <col className="w-[56px]" />
+        <col className="w-[18%]" />
+        <col className="w-[18%]" />
+        <col className="w-[12%]" />
+        <col className="w-[10%]" />
+        <col className="w-[8%]" />
+        <col className="w-[22%]" />
+        <col className="w-[12%]" />
+      </colgroup>
+      <thead className="border-b border-zinc-800/60">
+        <tr>
+          <th className={stickyCheckboxHeaderClass(thClass)}>
+            <input
+              type="checkbox"
+              aria-label="Select all database candidates"
+              checked={allDatabaseFilteredSelected}
+              onChange={toggleSelectAllDatabaseFiltered}
+              onClick={(event) => event.stopPropagation()}
+            />
+          </th>
+          <th className={stickyIdentityHeaderClass(thClass)}>Name</th>
+          <th className={thClass}>Position</th>
+          <th className={thClass}>Location</th>
+          <th className={thClass}>Stage</th>
+          <th className={thClass}>Age</th>
+          <th className={thClass}>Next action</th>
+          <th className={thClass}>Action</th>
+        </tr>
+      </thead>
+    </>
+  );
+
+  const databaseToolbar = (
+    <>
+      {selectedIds.size > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-teal-500/30 bg-teal-500/5 px-2 py-1.5">
+          <span className="text-[11px] font-medium text-teal-200">{selectedIds.size} selected</span>
+          <select
+            className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
+            defaultValue=""
+            disabled={bulkBusy}
+            onChange={(event) => {
+              const status = event.target.value as CandidateWorkflowStatus | "";
+              if (!status) return;
+              void runBulkUpdate({ workflowStatus: status });
+              event.target.value = "";
+            }}
+          >
+            <option value="">Bulk set status…</option>
+            {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+          <select
+            className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
+            defaultValue=""
+            disabled={bulkBusy}
+            onChange={(event) => {
+              const recruiter = event.target.value;
+              if (!recruiter) return;
+              void runBulkUpdate({ assignedRecruiter: recruiter });
+              event.target.value = "";
+            }}
+          >
+            <option value="">Bulk assign recruiter…</option>
+            {rosters.recruiters.map((recruiter) => (
+              <option key={recruiter} value={recruiter}>
+                {recruiter}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={bulkBusy}
+            onClick={() => setSelectedIds(new Set())}
+            className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
+      <details className="text-xs text-zinc-500">
+        <summary className="cursor-pointer text-zinc-400 hover:text-zinc-200">Advanced filters</summary>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
+          <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
+            <option value={ALL}>All sources</option>
+            {sourceOptions.map((source) => (
+              <option key={source} value={source}>
+                {source}
+              </option>
+            ))}
+          </select>
+          <select className={selectClass} value={stageFilter} onChange={(event) => setStageFilter(event.target.value)}>
+            <option value={ALL}>All stages</option>
+            {stageOptions.map((stage) => (
+              <option key={stage} value={stage}>
+                {stage}
+              </option>
+            ))}
+          </select>
+          <select
+            className={selectClass}
+            value={positionFilter}
+            onChange={(event) => setPositionFilter(event.target.value)}
+          >
+            <option value={ALL}>All positions</option>
+            {positionOptions.map((position) => (
+              <option key={position} value={position}>
+                {position}
+              </option>
+            ))}
+          </select>
+          <select className={selectClass} value={matchFilter} onChange={(event) => setMatchFilter(event.target.value)}>
+            <option value={ALL}>All match levels</option>
+            <option value="high">High match</option>
+            <option value="medium">Medium match</option>
+            <option value="low">Low match</option>
+            <option value="no_resume">No resume</option>
+          </select>
+        </div>
+      </details>
+    </>
+  );
+
   return (
     <div className="space-y-6">
       {workflowNotice ? (
@@ -1973,179 +2090,42 @@ export function CandidatesSection() {
         actingRecruiter={actingRecruiter}
         rosters={rosters}
         onActingRecruiterChange={setActingRecruiter}
-        onQuickFilterChange={handleQueueFilterChange}
+        onScrollToSection={handleScrollToInboxSection}
       />
 
-      <CandidateQueueTabs
-        activeFilter={recruiterQuickFilter}
-        counts={queueTabCounts}
-        onFilterChange={handleQueueFilterChange}
-      />
-
-      <section className="rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-sm shadow-black/20 backdrop-blur-sm">
-        <div className="sticky top-0 z-20 space-y-2 border-b border-zinc-800/80 bg-zinc-900/95 px-3 py-3 backdrop-blur-sm sm:px-4">
-          <input
-            className={inputClass}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search name, email, phone, position, or source"
-          />
-          {search.trim() !== debouncedSearch.trim() ? (
-            <p className="text-[10px] text-zinc-600">Filtering…</p>
-          ) : null}
-          {selectedIds.size > 0 ? (
-            <div className="flex flex-wrap items-center gap-2 rounded-md border border-teal-500/30 bg-teal-500/5 px-2 py-1.5">
-              <span className="text-[11px] font-medium text-teal-200">{selectedIds.size} selected</span>
-              <select
-                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
-                defaultValue=""
-                disabled={bulkBusy}
-                onChange={(event) => {
-                  const status = event.target.value as CandidateWorkflowStatus | "";
-                  if (!status) return;
-                  void runBulkUpdate({ workflowStatus: status });
-                  event.target.value = "";
-                }}
-              >
-                <option value="">Bulk set status…</option>
-                {CANDIDATE_WORKFLOW_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="rounded-md border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-200"
-                defaultValue=""
-                disabled={bulkBusy}
-                onChange={(event) => {
-                  const recruiter = event.target.value;
-                  if (!recruiter) return;
-                  void runBulkUpdate({ assignedRecruiter: recruiter });
-                  event.target.value = "";
-                }}
-              >
-                <option value="">Bulk assign recruiter…</option>
-                {rosters.recruiters.map((recruiter) => (
-                  <option key={recruiter} value={recruiter}>
-                    {recruiter}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                disabled={bulkBusy}
-                onClick={() => setSelectedIds(new Set())}
-                className="rounded-md border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800"
-              >
-                Clear
-              </button>
-            </div>
-          ) : null}
-          <details className="text-xs text-zinc-500">
-            <summary className="cursor-pointer text-zinc-400 hover:text-zinc-200">Advanced filters</summary>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
-              <select className={selectClass} value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
-                <option value={ALL}>All sources</option>
-                {sourceOptions.map((source) => (
-                  <option key={source} value={source}>
-                    {source}
-                  </option>
-                ))}
-              </select>
-              <select className={selectClass} value={stageFilter} onChange={(event) => setStageFilter(event.target.value)}>
-                <option value={ALL}>All stages</option>
-                {stageOptions.map((stage) => (
-                  <option key={stage} value={stage}>
-                    {stage}
-                  </option>
-                ))}
-              </select>
-              <select
-                className={selectClass}
-                value={positionFilter}
-                onChange={(event) => setPositionFilter(event.target.value)}
-              >
-                <option value={ALL}>All positions</option>
-                {positionOptions.map((position) => (
-                  <option key={position} value={position}>
-                    {position}
-                  </option>
-                ))}
-              </select>
-              <select className={selectClass} value={matchFilter} onChange={(event) => setMatchFilter(event.target.value)}>
-                <option value={ALL}>All match levels</option>
-                <option value="high">High match</option>
-                <option value="medium">Medium match</option>
-                <option value="low">Low match</option>
-                <option value="no_resume">No resume</option>
-              </select>
-            </div>
-          </details>
-        </div>
-
-        <div
-          className={`flex min-h-[1.75rem] items-center justify-center border-b border-teal-500/15 bg-teal-950/15 px-3 sm:px-4 ${
-            refreshingCandidates || workflowEnrichmentPending ? "" : "border-b-transparent bg-transparent"
+      <div
+        className={`flex min-h-[1.75rem] items-center justify-center rounded-lg border px-3 ${
+          refreshingCandidates || workflowEnrichmentPending
+            ? "border-teal-500/15 bg-teal-950/15"
+            : "border-transparent bg-transparent"
+        }`}
+        aria-live="polite"
+      >
+        <p
+          className={`text-center text-[11px] leading-tight text-teal-200/80 ${
+            refreshingCandidates || workflowEnrichmentPending ? "" : "invisible"
           }`}
-          aria-live="polite"
         >
-          <p
-            className={`text-center text-[11px] leading-tight text-teal-200/80 ${
-              refreshingCandidates || workflowEnrichmentPending ? "" : "invisible"
-            }`}
-          >
-            {workflowEnrichmentPending && !refreshingCandidates
-              ? "Enriching candidate scores — table shows loaded rows"
-              : "Refreshing Breezy candidates — table stays visible"}
-          </p>
-        </div>
-        {filtered.length === 0 ? (
-          <p className="px-3 py-8 text-xs text-zinc-500 sm:px-4">No candidates match the selected filters.</p>
-        ) : (
-          <VirtualCandidateTable
-            rows={filtered}
-            colSpan={8}
-            maxHeightClass="max-h-[min(65vh,720px)]"
-            getRowKey={(candidate) => candidate.candidateId}
-            renderRow={(candidate) => renderCandidateRow(candidate)}
-            header={
-              <>
-                <colgroup>
-                  <col className="w-[56px]" />
-                  <col className="w-[18%]" />
-                  <col className="w-[18%]" />
-                  <col className="w-[12%]" />
-                  <col className="w-[10%]" />
-                  <col className="w-[8%]" />
-                  <col className="w-[22%]" />
-                  <col className="w-[12%]" />
-                </colgroup>
-                <thead className="border-b border-zinc-800/60">
-                  <tr>
-                    <th className={stickyCheckboxHeaderClass(thClass)}>
-                      <input
-                        type="checkbox"
-                        aria-label="Select all filtered candidates"
-                        checked={allFilteredSelected}
-                        onChange={toggleSelectAllFiltered}
-                        onClick={(event) => event.stopPropagation()}
-                      />
-                    </th>
-                    <th className={stickyIdentityHeaderClass(thClass)}>Name</th>
-                    <th className={thClass}>Position</th>
-                    <th className={thClass}>Location</th>
-                    <th className={thClass}>Stage</th>
-                    <th className={thClass}>Age</th>
-                    <th className={thClass}>Next action</th>
-                    <th className={thClass}>Action</th>
-                  </tr>
-                </thead>
-              </>
-            }
-          />
-        )}
-      </section>
+          {workflowEnrichmentPending && !refreshingCandidates
+            ? "Enriching candidate scores — inbox shows loaded rows"
+            : "Refreshing Breezy candidates — inbox stays visible"}
+        </p>
+      </div>
+
+      <RecruiterInbox
+        candidates={candidates}
+        actingRecruiter={actingRecruiter}
+        scrollToSection={scrollToInboxSection}
+        onScrollToSectionHandled={() => setScrollToInboxSection(null)}
+        renderRow={renderCandidateRow}
+        tableHeader={candidateTableHeader}
+        colSpan={8}
+        databaseRows={databaseFiltered}
+        search={search}
+        onSearchChange={setSearch}
+        searchPending={search.trim() !== debouncedSearch.trim()}
+        databaseToolbar={databaseToolbar}
+      />
 
       <RecruiterCollapsibleSection
         title="Analytics"
@@ -2218,8 +2198,8 @@ export function CandidatesSection() {
               queueActionBusy={queueActionBusy}
               syncPartial={Boolean(syncData?.partial)}
               syncStale={Boolean(syncData?.stale)}
-              quickFilter={recruiterQuickFilter}
-              onQuickFilterChange={handleQueueFilterChange}
+              quickFilter="all"
+              onQuickFilterChange={() => {}}
               showMetrics={false}
             />
           </RecruiterCollapsibleSection>

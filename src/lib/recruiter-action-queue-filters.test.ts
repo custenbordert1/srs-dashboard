@@ -5,9 +5,12 @@ import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { emptyRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import {
+  buildRecruiterInboxSections,
   computeRecruiterAgingBucket,
+  isNewlyAppliedCandidate,
   isNoResponseCandidate,
   matchesRecruiterQuickFilter,
+  queueParamToInboxSection,
 } from "@/lib/recruiter-action-queue-filters";
 
 const REF = Date.parse("2026-05-21T12:00:00.000Z");
@@ -129,5 +132,46 @@ describe("recruiter-action-queue-filters", () => {
     );
     assert.equal(matchesRecruiterQuickFilter(overdue, "overdue", "Taylor", REF), true);
     assert.equal(matchesRecruiterQuickFilter(unassigned, "unassigned", "Taylor", REF), true);
+  });
+
+  it("partitions candidates into exclusive inbox sections", () => {
+    const overdue = buildScoredWorkflowRow(
+      sample("od"),
+      wf("od", {
+        followUpDueAt: "2026-05-19T00:00:00.000Z",
+        recruitingActions: {
+          ...emptyRecruitingActions(),
+          needsFollowUp: true,
+          updatedAt: new Date(REF).toISOString(),
+        },
+      }),
+    );
+    const fresh = buildScoredWorkflowRow(
+      { ...sample("new"), appliedDate: "2026-05-20" },
+      wf("new", { workflowStatus: "Applied" }),
+    );
+    const sections = buildRecruiterInboxSections([overdue, fresh], "Taylor", REF);
+    assert.equal(sections["overdue-follow-ups"].length, 1);
+    assert.equal(sections["newly-applied"].length, 1);
+    assert.equal(sections["everything-else"].length, 0);
+  });
+
+  it("flags newly applied within seven days in early funnel", () => {
+    const fresh = buildScoredWorkflowRow(
+      { ...sample("new"), appliedDate: "2026-05-18" },
+      wf("new", { workflowStatus: "Needs Review" }),
+    );
+    const stale = buildScoredWorkflowRow(
+      { ...sample("old"), appliedDate: "2026-05-01" },
+      wf("old", { workflowStatus: "Applied" }),
+    );
+    assert.equal(isNewlyAppliedCandidate(fresh, REF), true);
+    assert.equal(isNewlyAppliedCandidate(stale, REF), false);
+  });
+
+  it("maps pipeline queue params to inbox sections", () => {
+    assert.equal(queueParamToInboxSection("paperwork-pending"), "paperwork-pending");
+    assert.equal(queueParamToInboxSection("needs-review"), "newly-applied");
+    assert.equal(queueParamToInboxSection("all"), null);
   });
 });
