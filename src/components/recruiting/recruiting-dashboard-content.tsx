@@ -16,6 +16,7 @@ import {
   LazyNeedsAttentionSection,
   LazyRecruitingAutomationSection,
   LazyRecruitingCommandCenter,
+  LazyRecruiterDashboardSection,
   LazyRecruitingDataSourcesPanel,
   LazyRecruitingIntelligenceSection,
   LazyWorkforceOperationsSection,
@@ -110,6 +111,12 @@ export function RecruitingDashboardContent({
           <TabPanelWithSourceBanner tabId="command-center">
             <LazyRecruitingCommandCenter />
             <LazyRecruitingDataSourcesPanel />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="recruiter-dashboard" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="recruiter-dashboard">
+            <LazyRecruiterDashboardSection />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

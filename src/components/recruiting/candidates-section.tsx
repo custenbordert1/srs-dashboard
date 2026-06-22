@@ -907,11 +907,14 @@ export function CandidatesSection() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const queue = parsePipelineQueueParam(new URLSearchParams(window.location.search).get("queue"));
+    const params = new URLSearchParams(window.location.search);
+    const queue = parsePipelineQueueParam(params.get("queue"));
     if (queue) {
       const section = queueParamToInboxSection(queue);
       if (section) setScrollToInboxSection(section);
     }
+    const candidateId = params.get("candidateId");
+    if (candidateId) setSelectedCandidateId(candidateId);
   }, []);
 
   useEffect(() => {

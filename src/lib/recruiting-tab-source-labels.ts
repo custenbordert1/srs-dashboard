@@ -1,5 +1,6 @@
 export type DashboardTabId =
   | "command-center"
+  | "recruiter-dashboard"
   | "overview"
   | "needs-attention"
   | "dm-scorecards"
@@ -47,6 +48,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "live-breezy",
     bannerMessage:
       "KPIs and rankings come from Breezy HR (published jobs and candidates). Use Data sources below for cache diagnostics.",
+  },
+  "recruiter-dashboard": {
+    navLabel: "Recruiter Dashboard",
+    sourceTag: "Live · Breezy",
+    badgeLabel: "Daily operating view",
+    kind: "live-breezy",
+    bannerMessage:
+      "Daily priorities, owned pipeline, productivity metrics, and hiring forecast — built from Breezy candidates and local workflow overlay.",
   },
   overview: {
     navLabel: "Overview",

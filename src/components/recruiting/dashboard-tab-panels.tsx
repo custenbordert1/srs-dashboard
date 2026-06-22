@@ -12,6 +12,14 @@ function tabLoading(message: string) {
   return TabLoadingFallback;
 }
 
+export const LazyRecruiterDashboardSection = dynamic(
+  () =>
+    import("@/components/recruiting/recruiter-dashboard-section").then((m) => ({
+      default: m.RecruiterDashboardSection,
+    })),
+  { loading: tabLoading("Loading recruiter dashboard…"), ssr: false },
+);
+
 export const LazyRecruitingCommandCenter = dynamic(
   () =>
     import("@/components/recruiting/recruiting-command-center").then((m) => ({

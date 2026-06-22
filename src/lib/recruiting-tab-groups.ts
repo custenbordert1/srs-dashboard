@@ -31,7 +31,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
   {
     id: "operations",
     label: "Operations",
-    tabIds: ["command-center", "overview", "needs-attention", "candidates", "job-management"],
+    tabIds: ["command-center", "recruiter-dashboard", "overview", "needs-attention", "candidates", "job-management"],
   },
   {
     id: "territory-field",
