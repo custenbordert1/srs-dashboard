@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { BreezyCandidate } from "@/lib/breezy-api";
+import { formatCandidateDisplayName } from "@/lib/candidate-display-name";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import {
   buildCandidateIntelligenceBundle,
@@ -31,7 +32,7 @@ function sampleCandidate(patch: Partial<BreezyCandidate> = {}): BreezyCandidate 
     state: "TX",
     zipCode: "75001",
     resumeText:
-      "Retail merchandiser with Walmart reset experience. Customer service and phone support background. 2019-2021 Walmart. 2023-2025 Target merchandising.",
+      "Retail merchandiser with Walmart reset experience. Customer service and phone support background. Cash handling and POS. Team lead experience. Willing to travel 50 miles. 2019-2021 Walmart. 2023-2025 Target merchandising.",
     hasResume: true,
     resumeFields: {
       summary: "Experienced retail merchandiser.",
@@ -50,7 +51,18 @@ function sampleCandidate(patch: Partial<BreezyCandidate> = {}): BreezyCandidate 
   };
 }
 
-describe("candidate-intelligence", () => {
+describe("candidate-readiness", () => {
+  it("prefers first and last name over email for display", () => {
+    assert.equal(
+      formatCandidateDisplayName({ firstName: "Alex", lastName: "Rivera", email: "alex@example.com" }),
+      "Alex Rivera",
+    );
+    assert.equal(
+      formatCandidateDisplayName({ firstName: "", lastName: "", email: "alex@example.com" }),
+      "alex@example.com",
+    );
+  });
+
   it("extracts questionnaire answers from Breezy custom attributes", () => {
     const answers = extractQuestionnaireAnswersFromRaw({
       custom_attributes: [
@@ -62,11 +74,13 @@ describe("candidate-intelligence", () => {
     assert.equal(answers[0]?.question, "Smartphone access");
   });
 
-  it("builds resume intelligence from Breezy resume fields", () => {
+  it("builds resume intelligence with quick-read signal badges", () => {
     const resume = buildResumeIntelligence(sampleCandidate());
     assert.equal(resume.available, true);
     assert.equal(resume.merchandisingRetailExperience, true);
     assert.equal(resume.phoneCustomerServiceExperience, true);
+    assert.ok(resume.signalBadges.some((badge) => badge.id === "retail" && badge.detected));
+    assert.ok(resume.signalBadges.some((badge) => badge.id === "cash_handling" && badge.detected));
     assert.ok(resume.workHistoryHighlights.length > 0);
   });
 
@@ -86,7 +100,25 @@ describe("candidate-intelligence", () => {
     assert.equal(questionnaire.printerLaptopAccess, false);
   });
 
-  it("scores candidate with grade, strengths, and concerns", () => {
+  it("treats missing questionnaire as neutral in scoring", () => {
+    const candidate = sampleCandidate({ questionnaireAnswers: undefined, hasQuestionnaire: false });
+    const resume = buildResumeIntelligence(candidate);
+    const questionnaire = buildQuestionnaireIntelligence(candidate);
+    const grade = buildCandidateReadinessScore({
+      candidate,
+      resume,
+      questionnaire,
+      resumeHaystack: candidate.resumeText.toLowerCase(),
+    });
+
+    assert.ok(grade.overallScore >= 58);
+    assert.ok(["A", "B", "C"].includes(grade.grade));
+    assert.equal(questionnaire.techReady, null);
+    assert.ok(!grade.concerns.some((item) => item.includes("Breezy")));
+    assert.ok(!grade.recommendedNextAction.toLowerCase().includes("breezy"));
+  });
+
+  it("scores strong retail candidate with actionable recommendation", () => {
     const candidate = sampleCandidate();
     const resume = buildResumeIntelligence(candidate);
     const questionnaire = buildQuestionnaireIntelligence(candidate);
@@ -97,11 +129,23 @@ describe("candidate-intelligence", () => {
       resumeHaystack: candidate.resumeText.toLowerCase(),
     });
 
-    assert.ok(grade.overallScore >= 55);
+    assert.ok(grade.overallScore >= 58);
     assert.ok(["A", "B", "C"].includes(grade.grade));
-    assert.ok(grade.strengths.some((s) => s.includes("smartphone")));
-    assert.ok(grade.concerns.some((c) => c.includes("printer") || c.includes("computer")));
-    assert.ok(grade.recommendedNextAction.length > 0);
+    assert.ok(grade.strengths.some((s) => s.toLowerCase().includes("retail")));
+    assert.ok(grade.recommendedNextAction.includes("555-0100") || grade.recommendedNextAction.includes("Call"));
+  });
+
+  it("uses custom attribute text when structured questionnaire answers are absent", () => {
+    const questionnaire = buildQuestionnaireIntelligence(
+      sampleCandidate({
+        questionnaireAnswers: undefined,
+        resumeFields: {
+          customAttributesText: "Smartphone access Yes Internet access Yes Merchandising experience 2 years",
+        },
+      }),
+    );
+    assert.equal(questionnaire.available, true);
+    assert.ok(questionnaire.answers.length > 0);
   });
 
   it("matches intelligence filters on scored workflow rows", () => {

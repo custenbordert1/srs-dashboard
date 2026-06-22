@@ -13,6 +13,7 @@ import {
   type CandidateWorkflowState,
 } from "@/lib/candidate-workflow-types";
 import { CandidateAutomationPanels } from "@/components/recruiting/candidate-automation-panels";
+import { formatCandidateDisplayName } from "@/lib/candidate-display-name";
 import type { CandidateRowAction } from "@/components/recruiting/candidate-actions-menu";
 import { CandidateWorkspace } from "@/components/recruiting/candidate-workspace";
 import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
@@ -203,7 +204,12 @@ function formatDate(raw: string): string {
 }
 
 function candidateName(candidate: BreezyCandidate): string {
-  return `${candidate.firstName} ${candidate.lastName}`.trim() || candidate.email || "Unknown candidate";
+  return formatCandidateDisplayName({
+    firstName: candidate.firstName,
+    lastName: candidate.lastName,
+    email: candidate.email,
+    fallback: "Unknown candidate",
+  });
 }
 
 function sourceBreakdown(candidates: ScoredCandidateWorkflowRow[]): Array<{ source: string; count: number }> {

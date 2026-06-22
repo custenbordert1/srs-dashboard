@@ -1,13 +1,22 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import { extractSkillTagsFromText } from "@/lib/recruiting-intelligence/skill-tags";
 import { extractCandidateResumeText } from "@/lib/recruiting-intelligence/resume-parser";
-import type { CandidateResumeIntelligence } from "@/lib/candidate-readiness/types";
+import type { CandidateResumeIntelligence, ResumeSignalBadge } from "@/lib/candidate-readiness/types";
 
 const NOT_AVAILABLE = "Not available from Breezy yet.";
 
-const CUSTOMER_SERVICE_TERMS = ["customer service", "call center", "phone support", "client service", "guest service"];
+const SIGNAL_DEFINITIONS: Array<{ id: string; label: string; terms: string[] }> = [
+  { id: "retail", label: "Retail experience", terms: ["retail", "store associate", "sales floor", "big box", "sales associate"] },
+  { id: "customer_service", label: "Customer service", terms: ["customer service", "call center", "phone support", "client service", "guest service", "help desk"] },
+  { id: "cash_handling", label: "Cash handling", terms: ["cash handling", "cash register", "pos", "checkout", "tender", "cashier"] },
+  { id: "merchandising", label: "Merchandising", terms: ["merchandis", "reset", "planogram", "fixture", "display", "osa", "shelf set"] },
+  { id: "travel", label: "Travel willingness", terms: ["travel", "mile", "radius", "multi-store", "route", "regional", "overnight"] },
+  { id: "leadership", label: "Leadership", terms: ["supervisor", "team lead", "manager", "leadership", "coached", "shift lead", "trained new"] },
+  { id: "scheduling", label: "Scheduling / appointments", terms: ["appointment", "scheduling", "calendar", "shift schedule", "booking", "set appointments"] },
+];
+
 const MERCH_RETAIL_TERMS = ["merchandis", "reset", "planogram", "retail", "walmart", "target", "grocery", "fixture", "display"];
-const PHONE_TERMS = ["phone", "call center", "telephone", "inbound", "outbound"];
+const CUSTOMER_SERVICE_TERMS = ["customer service", "call center", "phone support", "client service", "guest service"];
 
 function haystack(candidate: BreezyCandidate, resumeText: string): string {
   return `${resumeText} ${candidate.positionName} ${candidate.source}`.toLowerCase();
@@ -15,6 +24,14 @@ function haystack(candidate: BreezyCandidate, resumeText: string): string {
 
 function hasAnyTerm(text: string, terms: string[]): boolean {
   return terms.some((term) => text.includes(term));
+}
+
+function buildSignalBadges(text: string): ResumeSignalBadge[] {
+  return SIGNAL_DEFINITIONS.map(({ id, label, terms }) => ({
+    id,
+    label,
+    detected: hasAnyTerm(text, terms),
+  }));
 }
 
 function buildSummary(candidate: BreezyCandidate, resumeText: string): string | null {
@@ -67,19 +84,12 @@ function detectEmploymentGaps(text: string): string[] {
 }
 
 function buildExperienceFlags(
-  text: string,
-  phoneCustomerService: boolean | null,
-  merchandisingRetail: boolean | null,
+  badges: ResumeSignalBadge[],
   gaps: string[],
 ): string[] {
   const flags: string[] = [];
-  if (phoneCustomerService) flags.push("Phone/customer service experience detected");
-  if (merchandisingRetail) flags.push("Merchandising/retail experience detected");
-  if (phoneCustomerService === false && hasAnyTerm(text, PHONE_TERMS)) {
-    flags.push("Phone experience mentioned — verify comfort level");
-  }
-  if (merchandisingRetail === false && hasAnyTerm(text, MERCH_RETAIL_TERMS)) {
-    flags.push("Retail keywords present — confirm merchandising depth");
+  for (const badge of badges.filter((entry) => entry.detected)) {
+    flags.push(`${badge.label} detected`);
   }
   for (const gap of gaps) flags.push(gap);
   return flags;
@@ -91,6 +101,7 @@ function unavailableResume(): CandidateResumeIntelligence {
     summary: null,
     workHistoryHighlights: [],
     relevantSkills: [],
+    signalBadges: SIGNAL_DEFINITIONS.map(({ id, label }) => ({ id, label, detected: false })),
     phoneCustomerServiceExperience: null,
     merchandisingRetailExperience: null,
     employmentGaps: [],
@@ -105,10 +116,9 @@ export function buildResumeIntelligence(candidate: BreezyCandidate): CandidateRe
   const text = haystack(candidate, resumeText);
   const skillTags = extractSkillTagsFromText(text);
   const gaps = detectEmploymentGaps(text);
+  const signalBadges = buildSignalBadges(text);
 
-  const phoneCustomerService = hasAnyTerm(text, CUSTOMER_SERVICE_TERMS) || hasAnyTerm(text, PHONE_TERMS)
-    ? true
-    : null;
+  const phoneCustomerService = hasAnyTerm(text, CUSTOMER_SERVICE_TERMS) ? true : null;
   const merchandisingRetail = hasAnyTerm(text, MERCH_RETAIL_TERMS) ? true : null;
 
   return {
@@ -116,9 +126,10 @@ export function buildResumeIntelligence(candidate: BreezyCandidate): CandidateRe
     summary: buildSummary(candidate, resumeText),
     workHistoryHighlights: extractWorkHistoryHighlights(candidate, resumeText),
     relevantSkills: skillTags,
+    signalBadges,
     phoneCustomerServiceExperience: phoneCustomerService,
     merchandisingRetailExperience: merchandisingRetail,
     employmentGaps: gaps,
-    experienceFlags: buildExperienceFlags(text, phoneCustomerService, merchandisingRetail, gaps),
+    experienceFlags: buildExperienceFlags(signalBadges, gaps),
   };
 }

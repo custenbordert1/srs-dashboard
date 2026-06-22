@@ -95,14 +95,35 @@ export function extractQuestionnaireAnswersFromRaw(
   return answers;
 }
 
+function resolveQuestionnaireAnswers(candidate: BreezyCandidate): CandidateQuestionnaireAnswer[] {
+  if (candidate.questionnaireAnswers?.length) return candidate.questionnaireAnswers;
+
+  const customText = candidate.resumeFields?.customAttributesText?.trim();
+  if (!customText) return [];
+
+  // Flattened custom attribute text often includes Q&A fragments — surface as raw answers.
+  return [{ question: "Application responses", answer: customText, normalizedKey: "application responses" }];
+}
+
 function findAnswerForKey(
   answers: CandidateQuestionnaireAnswer[],
   patterns: string[],
 ): CandidateQuestionnaireAnswer | undefined {
   return answers.find((entry) => {
-    const haystack = `${entry.question} ${entry.normalizedKey ?? ""}`;
+    const haystack = `${entry.question} ${entry.normalizedKey ?? ""} ${entry.answer}`;
     return matchesAny(haystack, patterns);
   });
+}
+
+function resolveTechReady(
+  smartphone: boolean | null,
+  internet: boolean | null,
+  apps: boolean | null,
+): boolean | null {
+  const checks = [smartphone, internet, apps];
+  if (checks.some((value) => value === false)) return false;
+  if (checks.every((value) => value === true)) return true;
+  return null;
 }
 
 function unavailableQuestionnaire(): CandidateQuestionnaireIntelligence {
@@ -118,7 +139,7 @@ function unavailableQuestionnaire(): CandidateQuestionnaireIntelligence {
     photoUploadComfort: null,
     scheduleUnderstanding: null,
     availabilityNotes: null,
-    techReady: false,
+    techReady: null,
     missingAnswers: [NOT_AVAILABLE],
     readinessChecks: [
       { label: "Smartphone access", passed: null },
@@ -134,7 +155,7 @@ function unavailableQuestionnaire(): CandidateQuestionnaireIntelligence {
 export function buildQuestionnaireIntelligence(
   candidate: BreezyCandidate,
 ): CandidateQuestionnaireIntelligence {
-  const answers = candidate.questionnaireAnswers ?? [];
+  const answers = resolveQuestionnaireAnswers(candidate);
   if (answers.length === 0) return unavailableQuestionnaire();
 
   const fields: Partial<CandidateQuestionnaireIntelligence> = {
@@ -153,18 +174,17 @@ export function buildQuestionnaireIntelligence(
     }
   }
 
-  const techChecks = [
-    fields.smartphoneAccess,
-    fields.internetAccess,
-    fields.comfortableWithApps,
-  ];
-  const techReady = techChecks.every((value) => value === true);
+  const techReady = resolveTechReady(
+    fields.smartphoneAccess ?? null,
+    fields.internetAccess ?? null,
+    fields.comfortableWithApps ?? null,
+  );
 
   const missingAnswers: string[] = [];
   for (const mapping of QUESTION_KEY_MAP) {
     const match = findAnswerForKey(answers, mapping.patterns);
     if (!match?.answer?.trim()) {
-      missingAnswers.push(mapping.patterns[0] ?? mapping.key);
+      missingAnswers.push(mapping.patterns[0] ?? String(mapping.key));
     }
   }
 

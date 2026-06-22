@@ -18,9 +18,16 @@ export type CandidateQuestionnaireIntelligence = {
   photoUploadComfort: boolean | null;
   scheduleUnderstanding: boolean | null;
   availabilityNotes: string | null;
-  techReady: boolean;
+  /** True/false when confirmed from answers; null when unknown or questionnaire missing. */
+  techReady: boolean | null;
   missingAnswers: string[];
   readinessChecks: Array<{ label: string; passed: boolean | null }>;
+};
+
+export type ResumeSignalBadge = {
+  id: string;
+  label: string;
+  detected: boolean;
 };
 
 export type CandidateResumeIntelligence = {
@@ -28,6 +35,7 @@ export type CandidateResumeIntelligence = {
   summary: string | null;
   workHistoryHighlights: string[];
   relevantSkills: string[];
+  signalBadges: ResumeSignalBadge[];
   phoneCustomerServiceExperience: boolean | null;
   merchandisingRetailExperience: boolean | null;
   employmentGaps: string[];
@@ -52,7 +60,7 @@ export type CandidateReadinessScore = {
   concerns: string[];
   recommendedNextAction: string;
   paperworkReady: boolean;
-  techReady: boolean;
+  techReady: boolean | null;
 };
 
 export type CandidateIntelligenceBundle = {

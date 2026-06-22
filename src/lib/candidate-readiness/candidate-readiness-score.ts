@@ -7,14 +7,16 @@ import type {
   CandidateResumeIntelligence,
 } from "@/lib/candidate-readiness/types";
 
+const NEUTRAL_SCORE = 60;
+
 function clamp(value: number): number {
   return Math.min(100, Math.max(0, Math.round(value)));
 }
 
 function gradeFromScore(score: number): CandidateReadinessGrade {
-  if (score >= 85) return "A";
+  if (score >= 82) return "A";
   if (score >= 70) return "B";
-  if (score >= 55) return "C";
+  if (score >= 58) return "C";
   return "D";
 }
 
@@ -23,16 +25,20 @@ function scoreRetailMerchandising(
   questionnaire: CandidateQuestionnaireIntelligence,
   haystack: string,
 ): number {
-  let score = 40;
-  if (resume.merchandisingRetailExperience) score += 25;
+  let score = 50;
+  if (resume.merchandisingRetailExperience) score += 22;
+  if (resume.phoneCustomerServiceExperience) score += 12;
+  if (resume.signalBadges.some((badge) => badge.id === "retail" && badge.detected)) score += 10;
+  if (resume.signalBadges.some((badge) => badge.id === "customer_service" && badge.detected)) score += 8;
+  if (resume.signalBadges.some((badge) => badge.id === "merchandising" && badge.detected)) score += 8;
   if (questionnaire.merchandisingExperience) {
     const answer = questionnaire.merchandisingExperience.toLowerCase();
-    if (/\b(3|4|5|6|7|8|9|10|\d{2,})\b/.test(answer) || answer.includes("year")) score += 20;
-    else if (answer.includes("month") || answer.includes("1")) score += 8;
-    else score += 12;
+    if (/\b(3|4|5|6|7|8|9|10|\d{2,})\b/.test(answer) || answer.includes("year")) score += 15;
+    else if (answer.includes("month") || answer.includes("1")) score += 6;
+    else score += 10;
   }
-  if (haystack.includes("reset") || haystack.includes("planogram")) score += 10;
-  if (haystack.includes("walmart") || haystack.includes("target")) score += 8;
+  if (haystack.includes("reset") || haystack.includes("planogram")) score += 8;
+  if (haystack.includes("walmart") || haystack.includes("target")) score += 6;
   return clamp(score);
 }
 
@@ -40,51 +46,56 @@ function scoreReliability(
   resume: CandidateResumeIntelligence,
   questionnaire: CandidateQuestionnaireIntelligence,
 ): number {
-  let score = 55;
-  if (questionnaire.scheduleUnderstanding === true) score += 15;
-  if (questionnaire.availabilityNotes?.trim()) score += 10;
-  if (resume.employmentGaps.length === 0 && resume.available) score += 10;
-  if (resume.employmentGaps.length > 0) score -= resume.employmentGaps.length * 8;
+  let score = NEUTRAL_SCORE;
+  if (questionnaire.scheduleUnderstanding === true) score += 12;
+  if (questionnaire.availabilityNotes?.trim()) score += 8;
+  if (resume.employmentGaps.length === 0 && resume.available) score += 8;
+  if (resume.employmentGaps.length > 0) score -= resume.employmentGaps.length * 5;
   return clamp(score);
 }
 
 function scoreTechnology(questionnaire: CandidateQuestionnaireIntelligence): number {
-  if (!questionnaire.available) return 35;
-  let score = 30;
-  if (questionnaire.smartphoneAccess === true) score += 18;
-  if (questionnaire.internetAccess === true) score += 18;
-  if (questionnaire.comfortableWithApps === true) score += 18;
-  if (questionnaire.printerLaptopAccess === true) score += 8;
-  if (questionnaire.photoUploadComfort === true) score += 8;
-  if (questionnaire.smartphoneAccess === false) score -= 15;
-  if (questionnaire.internetAccess === false) score -= 15;
-  if (questionnaire.comfortableWithApps === false) score -= 10;
+  if (!questionnaire.available) return NEUTRAL_SCORE;
+
+  let score = NEUTRAL_SCORE;
+  if (questionnaire.smartphoneAccess === true) score += 10;
+  if (questionnaire.internetAccess === true) score += 10;
+  if (questionnaire.comfortableWithApps === true) score += 10;
+  if (questionnaire.printerLaptopAccess === true) score += 5;
+  if (questionnaire.photoUploadComfort === true) score += 5;
+  if (questionnaire.smartphoneAccess === false) score -= 12;
+  if (questionnaire.internetAccess === false) score -= 12;
+  if (questionnaire.comfortableWithApps === false) score -= 8;
   return clamp(score);
 }
 
 function scoreCommunication(resume: CandidateResumeIntelligence, candidate: BreezyCandidate): number {
-  let score = 50;
-  if (candidate.phone?.trim()) score += 15;
-  if (candidate.email?.trim()) score += 10;
-  if (resume.phoneCustomerServiceExperience) score += 20;
-  if (resume.summary && resume.summary.length > 40) score += 10;
+  let score = NEUTRAL_SCORE;
+  if (candidate.phone?.trim()) score += 10;
+  if (candidate.email?.trim()) score += 5;
+  if (resume.phoneCustomerServiceExperience) score += 15;
+  if (resume.signalBadges.some((badge) => badge.id === "customer_service" && badge.detected)) score += 10;
+  if (resume.summary && resume.summary.length > 40) score += 5;
   return clamp(score);
 }
 
 function scoreProjectFit(resume: CandidateResumeIntelligence, haystack: string): number {
-  let score = 45;
-  if (resume.relevantSkills.length >= 3) score += 20;
-  else if (resume.relevantSkills.length >= 1) score += 10;
-  if (haystack.includes("travel") || haystack.includes("mile")) score += 10;
-  if (resume.workHistoryHighlights.length >= 2) score += 10;
+  let score = NEUTRAL_SCORE;
+  if (resume.relevantSkills.length >= 3) score += 15;
+  else if (resume.relevantSkills.length >= 1) score += 8;
+  if (resume.signalBadges.some((badge) => badge.id === "travel" && badge.detected)) score += 10;
+  else if (haystack.includes("travel") || haystack.includes("mile")) score += 8;
+  if (resume.workHistoryHighlights.length >= 2) score += 8;
+  if (resume.signalBadges.some((badge) => badge.id === "leadership" && badge.detected)) score += 6;
   return clamp(score);
 }
 
 function scorePaperwork(questionnaire: CandidateQuestionnaireIntelligence): number {
-  let score = 60;
-  if (questionnaire.printerLaptopAccess === true) score += 20;
-  if (questionnaire.photoUploadComfort === true) score += 10;
-  if (questionnaire.printerLaptopAccess === false) score -= 20;
+  if (!questionnaire.available) return NEUTRAL_SCORE;
+  let score = NEUTRAL_SCORE;
+  if (questionnaire.printerLaptopAccess === true) score += 15;
+  if (questionnaire.photoUploadComfort === true) score += 8;
+  if (questionnaire.printerLaptopAccess === false) score -= 12;
   return clamp(score);
 }
 
@@ -93,40 +104,35 @@ function scoreRiskFlags(
   questionnaire: CandidateQuestionnaireIntelligence,
 ): number {
   let penalty = 0;
-  if (!resume.available) penalty += 8;
-  if (!questionnaire.available) penalty += 8;
-  if (questionnaire.techReady === false) penalty += 12;
-  if (resume.employmentGaps.length > 0) penalty += 6;
-  if (!questionnaire.merchandisingExperience && resume.merchandisingRetailExperience !== true) penalty += 6;
+  if (questionnaire.techReady === false) penalty += 10;
+  if (questionnaire.internetAccess === false) penalty += 6;
+  if (questionnaire.smartphoneAccess === false) penalty += 6;
+  if (resume.employmentGaps.length > 0) penalty += 4;
   return penalty;
 }
 
 function buildStrengths(
   resume: CandidateResumeIntelligence,
   questionnaire: CandidateQuestionnaireIntelligence,
-  categories: CandidateReadinessCategoryScores,
 ): string[] {
   const strengths: string[] = [];
+  for (const badge of resume.signalBadges.filter((entry) => entry.detected)) {
+    strengths.push(badge.label);
+  }
   if (questionnaire.smartphoneAccess && questionnaire.internetAccess) {
     strengths.push("Has smartphone and internet");
   }
   if (questionnaire.comfortableWithApps) strengths.push("Comfortable with apps");
-  if (resume.phoneCustomerServiceExperience) strengths.push("Customer service experience");
-  if (resume.merchandisingRetailExperience) strengths.push("Merchandising/retail experience on resume");
   if (questionnaire.priorVendorExperience) strengths.push("Prior vendor/company experience reported");
-  if (categories.projectFit >= 70) strengths.push("Strong project fit signals");
-  if (categories.paperworkReadiness >= 75) strengths.push("Paperwork readiness indicators present");
-  return strengths.slice(0, 5);
+  if (questionnaire.merchandisingExperience) strengths.push("Merchandising experience reported");
+  return [...new Set(strengths)].slice(0, 6);
 }
 
 function buildConcerns(
   resume: CandidateResumeIntelligence,
   questionnaire: CandidateQuestionnaireIntelligence,
-  categories: CandidateReadinessCategoryScores,
 ): string[] {
   const concerns: string[] = [];
-  if (!resume.available) concerns.push("Resume not available from Breezy yet");
-  if (!questionnaire.available) concerns.push("Questionnaire not available from Breezy yet");
   if (questionnaire.merchandisingExperience?.toLowerCase().includes("month") ||
       (questionnaire.merchandisingExperience && /\b(0|1)\b/.test(questionnaire.merchandisingExperience))) {
     concerns.push("Less than 1 year merchandising experience");
@@ -134,32 +140,58 @@ function buildConcerns(
   if (questionnaire.printerLaptopAccess === false) concerns.push("No computer/printer access");
   if (questionnaire.internetAccess === false) concerns.push("No reliable internet access");
   if (questionnaire.smartphoneAccess === false) concerns.push("No smartphone access");
+  if (questionnaire.comfortableWithApps === false) concerns.push("Not comfortable with apps/tools");
   if (resume.employmentGaps.length > 0) concerns.push("Employment gaps detected on resume");
-  if (categories.technologyReadiness < 55) concerns.push("Technology readiness needs confirmation");
   return concerns.slice(0, 5);
 }
 
-function buildRecommendedAction(
-  grade: CandidateReadinessGrade,
-  concerns: string[],
-  questionnaire: CandidateQuestionnaireIntelligence,
-): string {
-  if (!questionnaire.available) {
-    return "Review Breezy profile for questionnaire answers before outreach.";
+function buildRecommendedAction(input: {
+  grade: CandidateReadinessGrade;
+  concerns: string[];
+  questionnaire: CandidateQuestionnaireIntelligence;
+  resume: CandidateResumeIntelligence;
+  candidate: BreezyCandidate;
+}): string {
+  const { grade, concerns, questionnaire, resume, candidate } = input;
+  const phone = candidate.phone?.trim();
+  const email = candidate.email?.trim();
+
+  if (questionnaire.techReady === false) {
+    if (phone) return `Call ${phone} to confirm smartphone, internet, and app access before advancing.`;
+    if (email) return `Email ${email} to confirm tech setup (phone, internet, apps) before advancing.`;
+    return "Contact candidate to confirm smartphone, internet, and app access.";
   }
+
   if (grade === "A") {
-    return "Proceed with recruiter review. Prioritize for interview scheduling.";
+    if (phone) return `Call ${phone} to schedule an interview — strong retail and merchandising fit.`;
+    if (email) return `Email ${email} to schedule an interview — strong retail and merchandising fit.`;
+    return "Schedule interview — strong retail and merchandising fit.";
   }
+
   if (grade === "B") {
-    return "Proceed with recruiter review. Confirm availability and transportation.";
+    if (phone) return `Call ${phone} to confirm availability, transportation, and start date.`;
+    if (email) return `Email ${email} to confirm availability, transportation, and start date.`;
+    return "Confirm availability, transportation, and start date before advancing.";
   }
-  if (concerns.some((c) => c.includes("Technology"))) {
-    return "Confirm tech readiness (phone, internet, apps) before advancing.";
+
+  if (concerns.some((item) => item.includes("printer") || item.includes("internet") || item.includes("smartphone"))) {
+    if (phone) return `Call ${phone} to confirm tech setup and paperwork readiness.`;
+    return "Contact candidate to confirm tech setup and paperwork readiness.";
   }
+
+  if (!resume.available && phone) {
+    return `Call ${phone} to discuss experience and confirm merchandising background.`;
+  }
+
   if (grade === "C") {
-    return "Schedule screening call to validate experience and tech setup.";
+    if (phone) return `Call ${phone} for a 10-minute screening on retail experience and schedule fit.`;
+    if (email) return `Email ${email} to schedule a brief screening on retail experience and schedule fit.`;
+    return "Schedule a brief screening on retail experience and schedule fit.";
   }
-  return "Hold for manual review — significant gaps in resume or questionnaire.";
+
+  if (phone) return `Review concerns, then call ${phone} before advancing.`;
+  if (email) return `Review concerns, then email ${email} before advancing.`;
+  return "Review profile and decide whether to contact this candidate.";
 }
 
 export function buildCandidateReadinessScore(input: {
@@ -181,18 +213,18 @@ export function buildCandidateReadinessScore(input: {
   };
 
   const weighted =
-    categoryScores.retailMerchandisingExperience * 0.25 +
-    categoryScores.reliabilityReadiness * 0.15 +
-    categoryScores.technologyReadiness * 0.2 +
-    categoryScores.communicationReadiness * 0.1 +
+    categoryScores.retailMerchandisingExperience * 0.28 +
+    categoryScores.reliabilityReadiness * 0.14 +
+    categoryScores.technologyReadiness * 0.16 +
+    categoryScores.communicationReadiness * 0.12 +
     categoryScores.projectFit * 0.15 +
-    categoryScores.paperworkReadiness * 0.1 -
-    categoryScores.riskFlags * 0.05;
+    categoryScores.paperworkReadiness * 0.08 -
+    categoryScores.riskFlags * 0.04;
 
   const overallScore = clamp(weighted);
   const grade = gradeFromScore(overallScore);
-  const strengths = buildStrengths(resume, questionnaire, categoryScores);
-  const concerns = buildConcerns(resume, questionnaire, categoryScores);
+  const strengths = buildStrengths(resume, questionnaire);
+  const concerns = buildConcerns(resume, questionnaire);
 
   return {
     overallScore,
@@ -200,7 +232,13 @@ export function buildCandidateReadinessScore(input: {
     categoryScores,
     strengths,
     concerns,
-    recommendedNextAction: buildRecommendedAction(grade, concerns, questionnaire),
+    recommendedNextAction: buildRecommendedAction({
+      grade,
+      concerns,
+      questionnaire,
+      resume,
+      candidate,
+    }),
     paperworkReady: categoryScores.paperworkReadiness >= 70,
     techReady: questionnaire.techReady,
   };
@@ -223,6 +261,6 @@ export function baselineCandidateReadinessScore(): CandidateReadinessScore {
     concerns: ["Enriching candidate intelligence…"],
     recommendedNextAction: "Open workspace after scores finish loading.",
     paperworkReady: false,
-    techReady: false,
+    techReady: null,
   };
 }

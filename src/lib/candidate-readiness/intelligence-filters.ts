@@ -15,7 +15,7 @@ export function matchesCandidateIntelligenceFilter(
     case "grade-b":
       return grade.grade === "B";
     case "tech-ready":
-      return questionnaire.techReady === true || grade.techReady === true;
+      return questionnaire.techReady === true;
     case "needs-phone-confirmation":
       return !row.phone?.trim() || questionnaire.smartphoneAccess === null;
     case "retail-experience":

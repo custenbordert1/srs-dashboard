@@ -20,10 +20,15 @@ import {
   buildMelReadinessChecklist,
   resolveWorkspaceAction,
 } from "@/lib/candidate-workspace";
+import { formatCandidateDisplayName } from "@/lib/candidate-display-name";
 import { useEffect } from "react";
 
 function candidateDisplayName(candidate: CandidateDrawerRow): string {
-  return `${candidate.firstName} ${candidate.lastName}`.trim() || candidate.email || "Candidate";
+  return formatCandidateDisplayName({
+    firstName: candidate.firstName,
+    lastName: candidate.lastName,
+    email: candidate.email,
+  });
 }
 
 export type CandidateWorkspaceProps = {

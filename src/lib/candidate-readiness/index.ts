@@ -20,5 +20,6 @@ export type {
   CandidateReadinessGrade,
   CandidateReadinessScore,
   CandidateResumeIntelligence,
+  ResumeSignalBadge,
 } from "@/lib/candidate-readiness/types";
 export { CANDIDATE_INTELLIGENCE_FILTERS } from "@/lib/candidate-readiness/types";

@@ -16,6 +16,12 @@ type CandidateQuestionnaireIntelligencePanelProps = {
 export function CandidateQuestionnaireIntelligencePanel({
   intelligence,
 }: CandidateQuestionnaireIntelligencePanelProps) {
+  const hasStructuredAnswers =
+    intelligence.merchandisingExperience ||
+    intelligence.priorVendorExperience ||
+    intelligence.availabilityNotes ||
+    intelligence.readinessChecks.some((check) => check.passed !== null);
+
   return (
     <section className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
       <h3 className="text-sm font-semibold text-zinc-100">Questionnaire intelligence</h3>
@@ -24,20 +30,36 @@ export function CandidateQuestionnaireIntelligencePanel({
         <p className="mt-3 text-sm text-zinc-500">{NOT_AVAILABLE}</p>
       ) : (
         <div className="mt-3 space-y-3 text-sm">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Key answers</p>
-            <ul className="mt-1 space-y-1 text-zinc-300">
-              <li>Merchandising experience: {intelligence.merchandisingExperience ?? "Not answered"}</li>
-              <li>Prior vendor/company: {intelligence.priorVendorExperience ?? "Not answered"}</li>
-              <li>Smartphone access: {formatBool(intelligence.smartphoneAccess)}</li>
-              <li>Internet access: {formatBool(intelligence.internetAccess)}</li>
-              <li>Comfort with apps/tools: {formatBool(intelligence.comfortableWithApps)}</li>
-              <li>Printer/laptop access: {formatBool(intelligence.printerLaptopAccess)}</li>
-              <li>Photo/upload comfort: {formatBool(intelligence.photoUploadComfort)}</li>
-              <li>Schedule/deadline understanding: {formatBool(intelligence.scheduleUnderstanding)}</li>
-              <li>Availability notes: {intelligence.availabilityNotes ?? "Not answered"}</li>
-            </ul>
-          </div>
+          {hasStructuredAnswers ? (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Key answers</p>
+              <ul className="mt-1 space-y-1 text-zinc-300">
+                <li>Merchandising experience: {intelligence.merchandisingExperience ?? "Not answered"}</li>
+                <li>Prior vendor/company: {intelligence.priorVendorExperience ?? "Not answered"}</li>
+                <li>Smartphone access: {formatBool(intelligence.smartphoneAccess)}</li>
+                <li>Internet access: {formatBool(intelligence.internetAccess)}</li>
+                <li>Comfort with apps/tools: {formatBool(intelligence.comfortableWithApps)}</li>
+                <li>Printer/laptop access: {formatBool(intelligence.printerLaptopAccess)}</li>
+                <li>Photo/upload comfort: {formatBool(intelligence.photoUploadComfort)}</li>
+                <li>Schedule/deadline understanding: {formatBool(intelligence.scheduleUnderstanding)}</li>
+                <li>Availability notes: {intelligence.availabilityNotes ?? "Not answered"}</li>
+              </ul>
+            </div>
+          ) : null}
+
+          {intelligence.answers.length > 0 ? (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Application responses</p>
+              <ul className="mt-1 space-y-2 text-zinc-300">
+                {intelligence.answers.map((entry, index) => (
+                  <li key={`${entry.question}-${index}`}>
+                    <span className="text-zinc-400">{entry.question}: </span>
+                    {entry.answer || "Not answered"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Readiness checks</p>
@@ -62,7 +84,8 @@ export function CandidateQuestionnaireIntelligencePanel({
             </ul>
           </div>
 
-          {intelligence.missingAnswers.length > 0 ? (
+          {intelligence.missingAnswers.length > 0 &&
+          !intelligence.missingAnswers.every((item) => item.includes("Not available")) ? (
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Missing answers</p>
               <ul className="mt-1 list-inside list-disc space-y-1 text-zinc-500">
