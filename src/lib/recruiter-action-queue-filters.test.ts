@@ -11,6 +11,8 @@ import {
   isNoResponseCandidate,
   matchesRecruiterQuickFilter,
   queueParamToInboxSection,
+  recruiterInboxPriorityScore,
+  sortByRecruiterInboxPriority,
 } from "@/lib/recruiter-action-queue-filters";
 
 const REF = Date.parse("2026-05-21T12:00:00.000Z");
@@ -173,5 +175,26 @@ describe("recruiter-action-queue-filters", () => {
     assert.equal(queueParamToInboxSection("paperwork-pending"), "paperwork-pending");
     assert.equal(queueParamToInboxSection("needs-review"), "newly-applied");
     assert.equal(queueParamToInboxSection("all"), null);
+  });
+
+  it("ranks inbox priority with overdue above newly applied", () => {
+    const overdue = buildScoredWorkflowRow(
+      sample("od"),
+      wf("od", {
+        followUpDueAt: "2026-05-19T00:00:00.000Z",
+        recruitingActions: {
+          ...emptyRecruitingActions(),
+          needsFollowUp: true,
+          updatedAt: new Date(REF).toISOString(),
+        },
+      }),
+    );
+    const fresh = buildScoredWorkflowRow(
+      { ...sample("new"), appliedDate: "2026-05-20" },
+      wf("new", { workflowStatus: "Applied" }),
+    );
+    assert.ok(recruiterInboxPriorityScore(overdue, "Taylor", REF) > recruiterInboxPriorityScore(fresh, "Taylor", REF));
+    const sorted = sortByRecruiterInboxPriority([fresh, overdue], "Taylor", REF);
+    assert.equal(sorted[0]?.candidateId, "od");
   });
 });

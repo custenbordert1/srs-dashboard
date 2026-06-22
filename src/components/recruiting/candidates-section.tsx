@@ -104,6 +104,7 @@ import {
   computeRecruiterAgingBucket,
   queueParamToInboxSection,
   RECRUITER_AGING_BUCKET_LABELS,
+  sortByRecruiterInboxPriority,
   type RecruiterAgingBucket,
   type RecruiterInboxSectionId,
 } from "@/lib/recruiter-action-queue-filters";
@@ -1166,12 +1167,7 @@ export function CandidatesSection() {
       return true;
     });
 
-    const sorted = [...rows].sort(
-      (a, b) =>
-        b.matchPercent - a.matchPercent ||
-        b.ai.numericScore - a.ai.numericScore ||
-        candidateName(a).localeCompare(candidateName(b)),
-    );
+    const sorted = sortByRecruiterInboxPriority(rows, actingRecruiter);
     logCandidatesClientTrace("table_render_state", {
       tableRowsCommittedToState: sorted.length,
       hasRenderableCandidateRows,
@@ -1788,16 +1784,25 @@ export function CandidatesSection() {
                 rowBg: "bg-zinc-950",
               })} !whitespace-normal`}
             >
-              <div className="truncate font-medium text-zinc-100">{candidateName(candidate)}</div>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="truncate font-medium text-zinc-100">{candidateName(candidate)}</span>
+                <span
+                  className={`${workflowPillClass} shrink-0 ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
+                  title={candidate.workflowStatus}
+                >
+                  {candidate.workflowStatus}
+                </span>
+              </div>
             </td>
-            <td className={`${tdClass} truncate`}>{candidate.positionName || "—"}</td>
             <td className={`${tdClass} truncate text-zinc-400`}>{location}</td>
-            <td className={`${tdClass} truncate`}>{candidate.stage || "—"}</td>
             <td className={`${tdClass} tabular-nums text-zinc-400`}>{formatDays(appliedDays)}</td>
             <td className={tdClass}>
               <div className="truncate text-sm font-medium text-teal-50/95" title={candidate.nextActionNeeded}>
                 {candidate.nextActionNeeded}
               </div>
+            </td>
+            <td className={`${tdClass} truncate text-zinc-400`}>
+              {candidate.assignedRecruiter?.trim() || "Unassigned"}
             </td>
             <td className={tdClass} onClick={(event) => event.stopPropagation()}>
               <CandidateRowPrimaryActionBar
@@ -1844,7 +1849,7 @@ export function CandidatesSection() {
           </tr>
           {expanded ? (
             <tr key={`${candidate.candidateId}-details`}>
-              <td colSpan={8} className="p-0">
+              <td colSpan={7} className="p-0">
                 <CandidateRowExpandedDetails candidate={candidate} />
               </td>
             </tr>
@@ -1949,13 +1954,12 @@ export function CandidatesSection() {
     <>
       <colgroup>
         <col className="w-[56px]" />
-        <col className="w-[18%]" />
-        <col className="w-[18%]" />
-        <col className="w-[12%]" />
-        <col className="w-[10%]" />
-        <col className="w-[8%]" />
         <col className="w-[22%]" />
+        <col className="w-[14%]" />
+        <col className="w-[8%]" />
+        <col className="w-[24%]" />
         <col className="w-[12%]" />
+        <col className="w-[14%]" />
       </colgroup>
       <thead className="border-b border-zinc-800/60">
         <tr>
@@ -1969,11 +1973,10 @@ export function CandidatesSection() {
             />
           </th>
           <th className={stickyIdentityHeaderClass(thClass)}>Name</th>
-          <th className={thClass}>Position</th>
           <th className={thClass}>Location</th>
-          <th className={thClass}>Stage</th>
           <th className={thClass}>Age</th>
           <th className={thClass}>Next action</th>
+          <th className={thClass}>Owner</th>
           <th className={thClass}>Action</th>
         </tr>
       </thead>
@@ -2086,11 +2089,9 @@ export function CandidatesSection() {
       ) : null}
 
       <RecruiterActionCenterHero
-        candidates={candidates}
         actingRecruiter={actingRecruiter}
         rosters={rosters}
         onActingRecruiterChange={setActingRecruiter}
-        onScrollToSection={handleScrollToInboxSection}
       />
 
       <div
@@ -2119,7 +2120,7 @@ export function CandidatesSection() {
         onScrollToSectionHandled={() => setScrollToInboxSection(null)}
         renderRow={renderCandidateRow}
         tableHeader={candidateTableHeader}
-        colSpan={8}
+        colSpan={7}
         databaseRows={databaseFiltered}
         search={search}
         onSearchChange={setSearch}

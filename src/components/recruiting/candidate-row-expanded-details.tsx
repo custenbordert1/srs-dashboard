@@ -17,8 +17,15 @@ function DetailField({ label, value }: { label: string; value: string }) {
 }
 
 export function CandidateRowExpandedDetails({ candidate }: CandidateRowExpandedDetailsProps) {
+  const appliedLabel = candidate.appliedDate
+    ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(candidate.appliedDate))
+    : "—";
+
   return (
     <div className="grid gap-4 border-t border-zinc-800/60 bg-zinc-950/60 px-4 py-4 sm:grid-cols-2 lg:grid-cols-4">
+      <DetailField label="Position" value={candidate.positionName ?? ""} />
+      <DetailField label="Breezy stage" value={candidate.stage ?? ""} />
+      <DetailField label="Applied" value={appliedLabel} />
       <DetailField label="Email" value={candidate.email ?? ""} />
       <DetailField label="Phone" value={candidate.phone ?? ""} />
       <DetailField label="Assigned recruiter" value={candidate.assignedRecruiter} />

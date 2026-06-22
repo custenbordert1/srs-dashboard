@@ -298,6 +298,97 @@ export function buildRecruiterInboxSectionCounts(
   ) as Record<RecruiterInboxSectionId, number>;
 }
 
+const INBOX_PRIORITY_SCORE: Record<RecruiterInboxSectionId, number> = {
+  "overdue-follow-ups": 6,
+  "paperwork-pending": 5,
+  "interview-needed": 4,
+  "ready-for-mel": 3,
+  "newly-applied": 2,
+  "everything-else": 1,
+};
+
+export function recruiterInboxPriorityScore(
+  row: ScoredCandidateWorkflowRow,
+  actingRecruiter: string,
+  referenceMs = Date.now(),
+): number {
+  const section = assignRecruiterInboxSection(row, actingRecruiter, referenceMs);
+  return INBOX_PRIORITY_SCORE[section];
+}
+
+function candidateSortName(row: ScoredCandidateWorkflowRow): string {
+  return `${row.firstName} ${row.lastName}`.trim().toLowerCase();
+}
+
+function touchSortMs(row: ScoredCandidateWorkflowRow): number {
+  const iso = row.lastActionAt ?? row.appliedDate;
+  if (!iso) return 0;
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? 0 : ms;
+}
+
+function followUpDueSortMs(row: ScoredCandidateWorkflowRow): number {
+  if (!row.followUpDueAt) return Number.MAX_SAFE_INTEGER;
+  const ms = Date.parse(row.followUpDueAt);
+  return Number.isNaN(ms) ? Number.MAX_SAFE_INTEGER : ms;
+}
+
+export function sortRecruiterInboxSectionRows(
+  section: RecruiterInboxSectionId,
+  rows: ScoredCandidateWorkflowRow[],
+  referenceMs = Date.now(),
+): ScoredCandidateWorkflowRow[] {
+  const sorted = [...rows];
+  sorted.sort((a, b) => {
+    switch (section) {
+      case "overdue-follow-ups":
+        return (
+          followUpDueSortMs(a) - followUpDueSortMs(b) ||
+          touchSortMs(a) - touchSortMs(b) ||
+          candidateSortName(a).localeCompare(candidateSortName(b))
+        );
+      case "paperwork-pending":
+      case "interview-needed":
+        return (
+          touchSortMs(a) - touchSortMs(b) ||
+          (calendarDaysSince(b.appliedDate, referenceMs) ?? 0) -
+            (calendarDaysSince(a.appliedDate, referenceMs) ?? 0) ||
+          candidateSortName(a).localeCompare(candidateSortName(b))
+        );
+      case "ready-for-mel":
+        return (
+          touchSortMs(a) - touchSortMs(b) ||
+          candidateSortName(a).localeCompare(candidateSortName(b))
+        );
+      case "newly-applied":
+        return (
+          touchSortMs(b) - touchSortMs(a) ||
+          candidateSortName(a).localeCompare(candidateSortName(b))
+        );
+      default:
+        return candidateSortName(a).localeCompare(candidateSortName(b));
+    }
+  });
+  return sorted;
+}
+
+export function sortByRecruiterInboxPriority(
+  rows: ScoredCandidateWorkflowRow[],
+  actingRecruiter: string,
+  referenceMs = Date.now(),
+): ScoredCandidateWorkflowRow[] {
+  return [...rows].sort((a, b) => {
+    const scoreDiff =
+      recruiterInboxPriorityScore(b, actingRecruiter, referenceMs) -
+      recruiterInboxPriorityScore(a, actingRecruiter, referenceMs);
+    if (scoreDiff !== 0) return scoreDiff;
+
+    const section = assignRecruiterInboxSection(a, actingRecruiter, referenceMs);
+    const sectionSorted = sortRecruiterInboxSectionRows(section, [a, b], referenceMs);
+    return sectionSorted.indexOf(a) - sectionSorted.indexOf(b);
+  });
+}
+
 export function queueParamToInboxSection(queue: RecruiterQuickFilterId): RecruiterInboxSectionId | null {
   switch (queue) {
     case "overdue":
