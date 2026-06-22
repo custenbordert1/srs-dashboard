@@ -12,6 +12,7 @@ import {
   notifyDmPaperworkSignedHook,
 } from "@/lib/hr-paperwork-notices";
 import { publishWorkflowRealtime } from "@/lib/workflow-realtime-push";
+import { recordPaperworkSignedAutomations } from "@/lib/hiring-automation-engine/record-paperwork-signed-automation";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 
 export type DropboxSignWebhookHandleResult = {
@@ -99,6 +100,10 @@ export async function handleDropboxSignWebhookEvent(
       signatureRequestId,
     });
     notifyDmPaperworkSignedHook(workflow);
+    await recordPaperworkSignedAutomations({
+      candidateId,
+      signatureRequestId,
+    }).catch(() => undefined);
     publishWorkflowRealtime({
       candidateId,
       workflow,

@@ -1,5 +1,6 @@
 "use client";
 
+import { HiringAutomationControlCenter } from "@/components/recruiting/hiring-automation-control-center";
 import { CandidateIntelligenceSection } from "@/components/recruiting/candidate-intelligence-section";
 import { IntelligenceBarChart } from "@/components/recruiting/intelligence-bar-chart";
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
@@ -309,6 +310,8 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           barClassName="bg-teal-500/80"
         />
       </div>
+
+      <HiringAutomationControlCenter />
 
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
         <h3 className="text-base font-semibold text-zinc-50">Automation hooks (integration prep)</h3>
