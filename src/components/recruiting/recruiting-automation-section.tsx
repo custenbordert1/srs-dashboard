@@ -134,29 +134,28 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
     territoryStates: data?.territoryStates,
   });
 
-  if ((loading && !data) || (error && !data) || !data) {
-    return (
-      <DashboardSectionFallback
-        title="AI recruiting automation"
-        loadingMessage="Loading AI recommendations and automation insights…"
-        isLoading={loading && !data}
-        loadingCeilingHit={loadingCeilingHit}
-        error={error && !data ? error : !data ? "Automation insights unavailable." : null}
-        timedOut={timedOut || Boolean(error?.toLowerCase().includes("timed out"))}
-        onRetry={refresh}
-        retrying={refreshing}
-        skeletonRows={compact ? 2 : 4}
-        skeletonCards={2}
-      />
-    );
-  }
-
+  const intelligenceUnavailable = (loading && !data) || (error && !data) || !data;
   const alertLimit = compact ? 8 : 15;
   const actionLimit = compact ? 8 : 15;
   const jobLimit = compact ? 6 : 12;
 
   return (
     <div className="space-y-6">
+      {intelligenceUnavailable ? (
+        <DashboardSectionFallback
+          title="AI recruiting automation"
+          loadingMessage="Loading AI recommendations and automation insights…"
+          isLoading={loading && !data}
+          loadingCeilingHit={loadingCeilingHit}
+          error={error && !data ? error : !data ? "Automation insights unavailable." : null}
+          timedOut={timedOut || Boolean(error?.toLowerCase().includes("timed out"))}
+          onRetry={refresh}
+          retrying={refreshing}
+          skeletonRows={compact ? 2 : 4}
+          skeletonCards={2}
+        />
+      ) : (
+        <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-zinc-50">AI recruiting automation</h2>
@@ -310,30 +309,36 @@ export function RecruitingAutomationSection({ compact = false }: RecruitingAutom
           barClassName="bg-teal-500/80"
         />
       </div>
+        </>
+      )}
 
       <HiringAutomationControlCenter />
 
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h3 className="text-base font-semibold text-zinc-50">Automation hooks (integration prep)</h3>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {data.automationHooks.map((hook) => (
-            <div
-              key={hook.id}
-              className={`rounded-lg border px-3 py-2 text-xs ${
-                hook.status === "ready"
-                  ? "border-teal-500/30 bg-teal-500/5 text-teal-200"
-                  : "border-zinc-700 bg-zinc-950/40 text-zinc-400"
-              }`}
-            >
-              <p className="font-medium">{hook.label}</p>
-              <p className="mt-0.5 text-zinc-500">{hook.description}</p>
-              <p className="mt-1 uppercase tracking-wide text-[10px] text-zinc-600">{hook.status}</p>
+      {!intelligenceUnavailable && data ? (
+        <>
+          <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+            <h3 className="text-base font-semibold text-zinc-50">Automation hooks (integration prep)</h3>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {data.automationHooks.map((hook) => (
+                <div
+                  key={hook.id}
+                  className={`rounded-lg border px-3 py-2 text-xs ${
+                    hook.status === "ready"
+                      ? "border-teal-500/30 bg-teal-500/5 text-teal-200"
+                      : "border-zinc-700 bg-zinc-950/40 text-zinc-400"
+                  }`}
+                >
+                  <p className="font-medium">{hook.label}</p>
+                  <p className="mt-0.5 text-zinc-500">{hook.description}</p>
+                  <p className="mt-1 uppercase tracking-wide text-[10px] text-zinc-600">{hook.status}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
 
-      <CandidateDetailDrawer {...drawer.drawerProps} />
+          <CandidateDetailDrawer {...drawer.drawerProps} />
+        </>
+      ) : null}
     </div>
   );
 }
