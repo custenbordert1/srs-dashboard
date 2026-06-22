@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePipelineIntelligence } from "@/hooks/use-pipeline-intelligence";
-import { pipelineQueueHref } from "@/lib/pipeline-intelligence";
-import type { BottleneckSeverity, FunnelConversionTrend } from "@/lib/pipeline-intelligence";
+import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { pipelineQueueHref } from "@/lib/pipeline-intelligence/client";
+import type { BottleneckSeverity, FunnelConversionTrend } from "@/lib/pipeline-intelligence/client";
+import type { ReactNode } from "react";
 
 const SEVERITY_STYLES: Record<BottleneckSeverity, string> = {
   normal: "text-zinc-400",
@@ -34,7 +36,7 @@ function RankingList({
 }: {
   title: string;
   empty: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3">
@@ -49,9 +51,12 @@ type PipelineIntelligencePanelProps = {
 };
 
 export function PipelineIntelligencePanel({ compact = false }: PipelineIntelligencePanelProps) {
-  const { data, loading, error, refresh } = usePipelineIntelligence();
+  const { data, loading, error, refresh, showingCachedSnapshot, meta, refreshing } =
+    usePipelineIntelligence();
+  const loadingCeilingHit = useLoadingCeiling(loading && !data, EXECUTIVE_PANEL_LOADING_CEILING_MS);
+  const showLoading = loading && !data && !loadingCeilingHit;
 
-  if (loading && !data) {
+  if (showLoading) {
     return (
       <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
         <div className="h-8 w-48 animate-pulse rounded bg-zinc-800/80" />
@@ -64,10 +69,10 @@ export function PipelineIntelligencePanel({ compact = false }: PipelineIntellige
     );
   }
 
-  if (error && !data) {
+  if ((error || loadingCeilingHit) && !data) {
     return (
       <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-        <p>{error}</p>
+        <p>{error ?? "Pipeline intelligence is still loading. Retry shortly."}</p>
         <button
           type="button"
           onClick={() => refresh()}
@@ -79,10 +84,32 @@ export function PipelineIntelligencePanel({ compact = false }: PipelineIntellige
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+        <p>Pipeline intelligence is still loading. Retry shortly.</p>
+        <button
+          type="button"
+          onClick={() => refresh()}
+          className="mt-2 rounded-lg border border-amber-400/40 px-3 py-1 text-xs"
+        >
+          Retry
+        </button>
+      </section>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {(showingCachedSnapshot || meta?.partialSync || refreshing) && (
+        <p className="text-xs text-amber-200/90">
+          {showingCachedSnapshot
+            ? "Showing last loaded pipeline snapshot."
+            : meta?.partialSync
+              ? "Partial sync — funnel metrics update as Breezy cache fills."
+              : "Refreshing pipeline intelligence…"}
+        </p>
+      )}
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Pipeline Intelligence</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-500">

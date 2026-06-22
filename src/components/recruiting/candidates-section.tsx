@@ -104,7 +104,7 @@ import {
   type RecruiterAgingBucket,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
-import { parsePipelineQueueParam } from "@/lib/pipeline-intelligence";
+import { parsePipelineQueueParam } from "@/lib/pipeline-intelligence/client";
 import {
   buildCandidateSlaSnapshot,
   isFollowUpOverdue,

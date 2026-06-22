@@ -7,7 +7,7 @@ import {
   buildRecruiterActionQueueCounts,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
-import { PIPELINE_QUEUE_LINKS } from "@/lib/pipeline-intelligence";
+import { PIPELINE_QUEUE_LINKS } from "@/lib/pipeline-intelligence/client";
 
 type RecruiterProductivityCenterProps = {
   candidates: ScoredCandidateWorkflowRow[];

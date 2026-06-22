@@ -9,6 +9,7 @@ import {
 test("isIgnorableFetchError treats abort messages as ignorable", () => {
   assert.equal(isIgnorableFetchError(new Error("signal is aborted without reason")), true);
   assert.equal(isIgnorableFetchError(new Error("Request cancelled")), true);
+  assert.equal(isIgnorableFetchError(new Error("The user aborted a request")), true);
 });
 
 test("sanitizeFriendlyFetchMessage replaces technical errors", () => {

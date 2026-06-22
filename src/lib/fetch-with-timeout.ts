@@ -44,7 +44,7 @@ export function isAbortError(err: unknown): boolean {
   if (err instanceof DOMException && err.name === "AbortError") return true;
   if (err instanceof DOMException && err.name === "TimeoutError") return true;
   if (err instanceof Error && err.name === "AbortError") return true;
-  if (err instanceof Error && /abort/i.test(err.message)) return true;
+  if (err instanceof Error && /abort|cancel/i.test(err.message)) return true;
   return false;
 }
 

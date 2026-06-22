@@ -1,3 +1,4 @@
+/** Server and test entrypoint — client components must import from ./client instead. */
 export { buildPipelineIntelligenceSnapshot } from "@/lib/pipeline-intelligence/build-pipeline-intelligence-snapshot";
 export { buildPipelineBottleneckRecommendations } from "@/lib/pipeline-intelligence/accountability-recommendations";
 export { PIPELINE_QUEUE_LINKS, pipelineQueueHref, parsePipelineQueueParam } from "@/lib/pipeline-intelligence/queue-links";

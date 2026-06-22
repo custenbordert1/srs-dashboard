@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePipelineIntelligence } from "@/hooks/use-pipeline-intelligence";
-import { pipelineQueueHref } from "@/lib/pipeline-intelligence";
-import type { BottleneckSeverity } from "@/lib/pipeline-intelligence";
+import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { pipelineQueueHref } from "@/lib/pipeline-intelligence/client";
+import type { BottleneckSeverity } from "@/lib/pipeline-intelligence/client";
 
 const SEVERITY_STYLES: Record<BottleneckSeverity, string> = {
   normal: "border-zinc-700 text-zinc-400",
@@ -13,7 +14,9 @@ const SEVERITY_STYLES: Record<BottleneckSeverity, string> = {
 };
 
 export function PipelineHealthPanel() {
-  const { data, loading, error } = usePipelineIntelligence();
+  const { data, loading, error, showingCachedSnapshot, meta, refresh } = usePipelineIntelligence();
+  const loadingCeilingHit = useLoadingCeiling(loading && !data, EXECUTIVE_PANEL_LOADING_CEILING_MS);
+  const showLoading = loading && !data && !loadingCeilingHit;
 
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
@@ -32,7 +35,7 @@ export function PipelineHealthPanel() {
         </Link>
       </div>
 
-      {loading && !data ? (
+      {showLoading ? (
         <div className="mt-4 space-y-2">
           {Array.from({ length: 3 }, (_, index) => (
             <div key={index} className="h-10 animate-pulse rounded bg-zinc-800/80" />
@@ -40,7 +43,26 @@ export function PipelineHealthPanel() {
         </div>
       ) : null}
 
-      {error && !data ? <p className="mt-3 text-sm text-amber-200">{error}</p> : null}
+      {(error || loadingCeilingHit) && !data ? (
+        <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          <p>{error ?? "Pipeline intelligence is still loading. Retry shortly."}</p>
+          <button
+            type="button"
+            onClick={() => refresh()}
+            className="mt-2 rounded border border-amber-400/40 px-2 py-0.5 text-xs"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
+
+      {showingCachedSnapshot || meta?.partialSync ? (
+        <p className="mt-2 text-xs text-amber-200/90">
+          {showingCachedSnapshot
+            ? "Showing last loaded pipeline snapshot."
+            : "Partial sync — metrics may update as Breezy cache fills."}
+        </p>
+      ) : null}
 
       {data ? (
         <div className="mt-4 space-y-6">

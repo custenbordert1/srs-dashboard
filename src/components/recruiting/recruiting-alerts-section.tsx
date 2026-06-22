@@ -1,5 +1,6 @@
 "use client";
 
+import { friendlyFetchMessageFromError, isIgnorableFetchError } from "@/lib/friendly-fetch-errors";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
 import type { RecruitingAlert, RecruitingAlertSeverity } from "@/lib/recruiting-alert-engine";
 
@@ -79,9 +80,15 @@ export function RecruitingAlertsSection({ compact = false, limit }: RecruitingAl
   }
 
   if (error && !data) {
+    const friendly =
+      friendlyFetchMessageFromError(error, "dashboard") ??
+      (isIgnorableFetchError(new Error(error)) ? null : error);
+    if (!friendly) {
+      return <p className="text-sm text-zinc-500">Recruiting alerts sync pending…</p>;
+    }
     return (
-      <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-        {error}
+      <p role="alert" className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+        {friendly}
       </p>
     );
   }

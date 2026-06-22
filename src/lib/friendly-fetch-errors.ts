@@ -7,6 +7,7 @@ export type FriendlyFetchContext =
   | "forecast"
   | "accountability"
   | "ats-health"
+  | "pipeline"
   | "generic";
 
 const FRIENDLY_BY_CONTEXT: Record<FriendlyFetchContext, { pending: string; unavailable: string; timeout: string }> = {
@@ -39,6 +40,11 @@ const FRIENDLY_BY_CONTEXT: Record<FriendlyFetchContext, { pending: string; unava
     pending: "ATS health check in progress.",
     unavailable: "ATS health temporarily unavailable. Retry shortly.",
     timeout: "ATS health check timed out. Retry shortly.",
+  },
+  pipeline: {
+    pending: "Pipeline intelligence sync is still running. Retry shortly.",
+    unavailable: "Pipeline intelligence temporarily unavailable. Retry shortly.",
+    timeout: "Pipeline intelligence is taking longer than expected. Retry in a moment.",
   },
   generic: {
     pending: "Sync pending. Retry shortly.",
