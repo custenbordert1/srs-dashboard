@@ -3,15 +3,15 @@
 import { DashboardFetchAlert } from "@/components/ui/dashboard-fetch-alert";
 import { breezyJobsToOverviewRows, countApplicantsByPosition } from "@/lib/recruiting-breezy-adapters";
 import { fetchRecruitingLiveSnapshot } from "@/lib/cached-recruiting-live-client";
-import { breezyDisconnectedDetail, breezyDisconnectedTitle, classifyBreezyError } from "@/lib/breezy-error-ui";
-import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { friendlyFetchMessageFromError, sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
+import { useLoadingCeiling, EXECUTIVE_PANEL_LOADING_CEILING_MS } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useState } from "react";
 
 export function BreezyOverviewJobsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReturnType<typeof breezyJobsToOverviewRows>>([]);
-  const loadingCeilingHit = useLoadingCeiling(loading);
+  const loadingCeilingHit = useLoadingCeiling(loading, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -19,14 +19,20 @@ export function BreezyOverviewJobsTable() {
     try {
       const snap = await fetchRecruitingLiveSnapshot(false);
       if (!snap.ok || !snap.jobs?.ok || !snap.candidates?.ok) {
-        setError(snap.ok ? "Breezy snapshot incomplete" : snap.error);
+        setError(
+          sanitizeFriendlyFetchMessage(snap.ok ? "Breezy snapshot incomplete" : snap.error, "overview") ??
+            "Overview data temporarily unavailable. Retry shortly.",
+        );
         setRows([]);
         return;
       }
       const counts = countApplicantsByPosition(snap.candidates.candidates);
       setRows(breezyJobsToOverviewRows(snap.jobs.jobs, counts));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load Breezy jobs");
+      setError(
+        friendlyFetchMessageFromError(err, "overview") ??
+          "Overview data temporarily unavailable. Retry shortly.",
+      );
       setRows([]);
     } finally {
       setLoading(false);
@@ -61,10 +67,10 @@ export function BreezyOverviewJobsTable() {
       {error ? (
         <div className="px-4 py-6 sm:px-5">
           <DashboardFetchAlert
-            variant={classifyBreezyError(error) === "missing_config" ? "warning" : "error"}
-            title={breezyDisconnectedTitle(classifyBreezyError(error))}
-            message={breezyDisconnectedDetail(error, classifyBreezyError(error))}
-            partial={error.includes("incomplete")}
+            variant="warning"
+            title="Overview sync in progress"
+            message={error}
+            partial={error.includes("incomplete") || error.includes("cache")}
             onRetry={() => void load()}
           />
         </div>

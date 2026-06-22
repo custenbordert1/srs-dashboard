@@ -1,5 +1,6 @@
 "use client";
 
+import { friendlyFetchMessageFromError } from "@/lib/friendly-fetch-errors";
 import type { AtsHealthSnapshot } from "@/lib/reliability/ats-health";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -27,7 +28,8 @@ export function useAtsHealth() {
       setSnapshot(data);
       backoffStep.current = 0;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "ATS health unavailable";
+      const message =
+        friendlyFetchMessageFromError(err, "ats-health") ?? "ATS health temporarily unavailable. Retry shortly.";
       setError(message);
       backoffStep.current = Math.min(backoffStep.current + 1, MAX_BACKOFF_STEPS);
     } finally {

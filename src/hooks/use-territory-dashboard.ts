@@ -3,6 +3,7 @@
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { friendlyFetchMessageFromError, sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const DEFAULT_POLL_MS = 90_000;
@@ -12,6 +13,11 @@ type DashboardMeta = {
   filteredJobs?: number;
   filteredCandidates?: number;
   refreshedAt?: string;
+  candidatesFromCache?: boolean;
+  candidatesUnavailable?: boolean;
+  jobsAvailable?: boolean;
+  totalJobs?: number;
+  totalCandidates?: number;
 };
 
 type UseTerritoryDashboardOptions = {
@@ -83,9 +89,15 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
           if (mode === "background" && initialLoadDone.current) return;
           if (result.timedOut) {
             setTimedOut(true);
-            setError(result.error);
+            setError(
+              sanitizeFriendlyFetchMessage(result.error, "dashboard", { timedOut: true }) ??
+                "Dashboard sync is taking longer than expected. Retry shortly.",
+            );
           } else {
-            setError(result.error);
+            setError(
+              sanitizeFriendlyFetchMessage(result.error, "dashboard") ??
+                "Dashboard data temporarily unavailable. Retry shortly.",
+            );
             if (mode === "initial") setData(null);
           }
           return;
@@ -93,7 +105,10 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
 
         const parsed = result.data;
         if (!parsed.ok || !parsed.dashboard) {
-          setError(parsed.error ?? "Failed to load dashboard");
+          setError(
+            sanitizeFriendlyFetchMessage(parsed.error, "dashboard") ??
+              "Dashboard data temporarily unavailable. Retry shortly.",
+          );
           if (mode === "initial") setData(null);
           return;
         }

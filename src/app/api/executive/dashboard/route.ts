@@ -91,6 +91,9 @@ export async function GET(request: Request) {
         totalJobs: jobsResult.jobs.length,
         totalCandidates: candidatesResult.candidates.length,
         refreshedAt: candidatesResult.fetchedAt ?? new Date().toISOString(),
+        candidatesUnavailable:
+          !candidatesFromCache && candidatesResult.candidates.length === 0,
+        jobsAvailable: jobsResult.jobs.length > 0,
       },
     },
     {

@@ -61,7 +61,6 @@ import { isAppliedDateInRange } from "@/lib/breezy-api";
 import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
   CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
-  CANDIDATES_TAB_LOADING_CEILING_MS,
   fetchAndMergeFastCandidates,
   fetchAndMergeFullCandidates,
   fetchCandidatesForTab,
@@ -136,7 +135,8 @@ import {
   type SendPaperworkEligibilityInput,
 } from "@/lib/onboarding-send-eligibility";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
-import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { useLoadingCeiling, EXECUTIVE_PANEL_LOADING_CEILING_MS } from "@/hooks/use-loading-ceiling";
+import { friendlyFetchMessageFromError, sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
 import {
   memo,
   useCallback,
@@ -432,7 +432,7 @@ export function CandidatesSection() {
   const [retrying, setRetrying] = useState(false);
   const loadingCeilingHit = useLoadingCeiling(
     loadingBundle && committedCandidates.length === 0,
-    CANDIDATES_TAB_LOADING_CEILING_MS,
+    EXECUTIVE_PANEL_LOADING_CEILING_MS,
   );
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [enrichmentWarnings, setEnrichmentWarnings] = useState<string[]>([]);
@@ -476,12 +476,16 @@ export function CandidatesSection() {
   );
 
   const setNonBlockingSyncAlert = useCallback((message: string) => {
+    const friendly =
+      sanitizeFriendlyFetchMessage(message, "candidates") ??
+      friendlyFetchMessageFromError(new Error(message), "candidates");
+    if (!friendly) return;
     const hasRows = (breezySnapshotRef.current?.candidates.length ?? 0) > 0;
-    if (hasRows && message.toLowerCase().includes("timed out")) {
+    if (hasRows && friendly.toLowerCase().includes("longer than expected")) {
       setSyncAlert("Background sync in progress — table shows last loaded candidates.");
       return;
     }
-    setSyncAlert(message);
+    setSyncAlert(friendly);
   }, []);
 
   const commitCandidatesSuccess = useCallback(
@@ -1935,6 +1939,7 @@ export function CandidatesSection() {
         retrying={retrying}
         skeletonRows={3}
         skeletonCards={3}
+        friendlyContext="candidates"
       />
     );
   }
@@ -1944,9 +1949,13 @@ export function CandidatesSection() {
       <DashboardSectionFallback
         title="Candidates"
         error={data.error}
-        timedOut={data.error.toLowerCase().includes("timed out")}
+        timedOut={
+          data.error.toLowerCase().includes("timed out") ||
+          data.error.toLowerCase().includes("longer than expected")
+        }
         onRetry={retry}
         retrying={retrying}
+        friendlyContext="candidates"
       />
     );
   }

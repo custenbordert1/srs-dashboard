@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AtsHealthCard } from "@/components/executive/ats-health-card";
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
 import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
+import { sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
 import { useAtsHealth } from "@/hooks/use-ats-health";
 import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 import { useExecutiveAccountability } from "@/hooks/use-executive-accountability";
@@ -21,26 +22,41 @@ function formatTimestamp(iso: string | null | undefined): string {
   }
 }
 
+type KpiStatus = "normal" | "unavailable" | "pending";
+
 function KpiCard({
   label,
   value,
   hint,
   loading,
+  status = "normal",
 }: {
   label: string;
   value: string | number;
   hint?: string;
   loading?: boolean;
+  status?: KpiStatus;
 }) {
+  const valueClass =
+    status === "unavailable" || status === "pending"
+      ? "text-amber-200"
+      : "text-zinc-50";
+
   return (
     <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
       {loading ? (
         <div className="mt-2 h-8 w-16 animate-pulse rounded bg-zinc-800/80" />
       ) : (
-        <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{value}</p>
+        <p className={`mt-1 text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
       )}
       {hint && !loading ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
+      {status === "pending" && !loading ? (
+        <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-300/90">Sync pending</p>
+      ) : null}
+      {status === "unavailable" && !loading ? (
+        <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-300/90">Unavailable</p>
+      ) : null}
     </div>
   );
 }
@@ -107,20 +123,41 @@ export function ExecutiveHomePanel() {
   const loadingCeilingHit = useLoadingCeiling(loading && !data, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   const insights = data?.executiveInsights;
-  const kpiLoading = loading && !data && !atsHealth.snapshot;
   const atsFallback = atsHealth.snapshot;
-  const openJobs = insights?.activeJobs ?? atsFallback?.jobsCached ?? 0;
-  const totalCandidates = insights?.totalCandidates ?? atsFallback?.candidatesCached ?? 0;
-  const activeRecruiters = insights?.activeRecruiters ?? 0;
-  const fillRiskScore = insights?.fillRiskScore;
-  const criticalTerritories = insights?.criticalTerritories ?? 0;
-  const lastUpdated = meta?.refreshedAt ?? data?.fetchedAt ?? atsHealth.snapshot?.lastSuccessfulSync;
+  const jobsAvailable =
+    (meta?.jobsAvailable ?? false) ||
+    (insights?.activeJobs ?? 0) > 0 ||
+    (atsFallback?.jobsCached ?? 0) > 0;
+  const candidatesUnavailable =
+    meta?.candidatesUnavailable === true ||
+    ((atsFallback?.candidatesCached ?? 0) === 0 && (insights?.totalCandidates ?? 0) === 0 && jobsAvailable);
+  const candidatesSyncPending = candidatesUnavailable && (loading || atsHealth.loading) && !insights;
+  const kpiLoading = loading && !data && !atsFallback;
+
+  const openJobs = insights?.activeJobs ?? (jobsAvailable ? atsFallback?.jobsCached ?? 0 : 0);
+  const candidatesValue = candidatesSyncPending
+    ? "Sync pending"
+    : candidatesUnavailable
+      ? "Unavailable"
+      : (insights?.totalCandidates ?? atsFallback?.candidatesCached ?? 0).toLocaleString();
+  const candidatesStatus: KpiStatus = candidatesSyncPending
+    ? "pending"
+    : candidatesUnavailable
+      ? "unavailable"
+      : "normal";
+
+  const lastUpdated = meta?.refreshedAt ?? data?.fetchedAt ?? atsFallback?.lastSuccessfulSync;
   const dataFreshness =
-    atsHealth.snapshot?.dataFreshnessLabel ??
-    (meta?.partialSync ? "Partial sync" : data ? "Current" : "Unknown");
+    candidatesUnavailable && jobsAvailable
+      ? "Job data current, candidate data unavailable"
+      : (atsFallback?.dataFreshnessLabel ??
+        (meta?.partialSync ? "Partial sync" : data ? "Current" : "Unknown"));
 
   const overdueCount = accountability.snapshot?.statusSummary.overdue ?? 0;
   const openActions = accountability.snapshot?.statusSummary.open ?? 0;
+  const friendlyRollupError = error
+    ? sanitizeFriendlyFetchMessage(error, "dashboard", { timedOut }) ?? error
+    : null;
 
   return (
     <div className="space-y-6">
@@ -138,21 +175,26 @@ export function ExecutiveHomePanel() {
           </p>
           <p className="mt-1">
             <span className="text-zinc-500">Data freshness: </span>
-            {atsHealth.loading && !atsHealth.snapshot ? "Checking…" : dataFreshness}
+            {atsHealth.loading && !atsFallback ? "Checking…" : dataFreshness}
           </p>
         </div>
       </header>
 
-      {error && !data ? (
+      {candidatesUnavailable && jobsAvailable ? (
         <div
           role="status"
           className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
         >
-          <p>
-            {timedOut
-              ? "Executive rollup is taking longer than expected. Retry or continue with ATS cache metrics below."
-              : "Executive rollup is temporarily unavailable. Retry shortly."}
-          </p>
+          Job data current, candidate data unavailable. Candidate sync is pending or cached data has not warmed yet.
+        </div>
+      ) : null}
+
+      {friendlyRollupError && !data ? (
+        <div
+          role="status"
+          className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+        >
+          <p>{friendlyRollupError}</p>
           <button
             type="button"
             onClick={() => refresh()}
@@ -165,36 +207,38 @@ export function ExecutiveHomePanel() {
 
       {loadingCeilingHit && !data ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          Still loading executive rollup… KPIs will populate as soon as Breezy cache is ready.
+          Executive rollup is taking longer than expected. KPIs below use ATS cache where available.
         </div>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <KpiCard
-          label="Open jobs"
-          value={openJobs.toLocaleString()}
-          loading={kpiLoading}
-        />
+        <KpiCard label="Open jobs" value={openJobs.toLocaleString()} loading={kpiLoading && !jobsAvailable} />
         <KpiCard
           label="Candidates"
-          value={totalCandidates.toLocaleString()}
-          loading={kpiLoading}
+          value={candidatesValue}
+          loading={kpiLoading && candidatesStatus === "normal"}
+          status={candidatesStatus}
+          hint={
+            candidatesUnavailable
+              ? "Candidate cache not ready"
+              : undefined
+          }
         />
         <KpiCard
           label="Active recruiters"
-          value={activeRecruiters.toLocaleString()}
+          value={insights ? insights.activeRecruiters.toLocaleString() : "—"}
           loading={kpiLoading && !insights}
           hint="Assigned recruiters with pipeline activity"
         />
         <KpiCard
           label="Coverage risk"
-          value={fillRiskScore !== undefined ? `${fillRiskScore}/100` : "—"}
-          hint={insights?.fillRiskLabel ?? (data ? undefined : "Requires full rollup")}
+          value={insights ? `${insights.fillRiskScore}/100` : "—"}
+          hint={insights?.fillRiskLabel ?? (insights ? undefined : "Requires full rollup")}
           loading={kpiLoading && !insights}
         />
         <KpiCard
           label="Critical territories"
-          value={criticalTerritories.toLocaleString()}
+          value={insights ? insights.criticalTerritories.toLocaleString() : "—"}
           loading={kpiLoading && !insights}
           hint="DM territories below health threshold"
         />
@@ -206,12 +250,12 @@ export function ExecutiveHomePanel() {
         <TerritoryTable
           title="Top 10 risk territories"
           rows={data?.worstTerritories ?? []}
-          loading={kpiLoading}
+          loading={kpiLoading && !data}
         />
         <TerritoryTable
           title="Top 10 healthy territories"
           rows={data?.bestTerritories ?? []}
-          loading={kpiLoading}
+          loading={kpiLoading && !data}
         />
       </div>
 

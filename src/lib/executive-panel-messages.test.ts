@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { executivePanelErrorMessage, isIgnorableFetchError } from "@/lib/executive-panel-messages";
+import { executivePanelErrorMessage } from "@/lib/executive-panel-messages";
+import { isIgnorableFetchError } from "@/lib/friendly-fetch-errors";
 
 test("isIgnorableFetchError treats abort messages as ignorable", () => {
   assert.equal(isIgnorableFetchError(new Error("signal is aborted without reason")), true);

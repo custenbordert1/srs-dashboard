@@ -1,12 +1,13 @@
 import { isAbortError, isTimeoutError } from "@/lib/fetch-with-timeout";
+import {
+  friendlyFetchMessageFromError,
+  isIgnorableFetchError,
+  sanitizeFriendlyFetchMessage,
+} from "@/lib/friendly-fetch-errors";
 
 export type ExecutivePanelKind = "forecast" | "accountability";
 
-export function isIgnorableFetchError(err: unknown): boolean {
-  if (isAbortError(err)) return true;
-  if (err instanceof Error && /abort/i.test(err.message)) return true;
-  return false;
-}
+export { isIgnorableFetchError, sanitizeFriendlyFetchMessage };
 
 export function executivePanelErrorMessage(
   kind: ExecutivePanelKind,
@@ -29,20 +30,15 @@ export function executivePanelErrorMessage(
   }
 
   const timedOut = isTimeoutError(err);
-  if (kind === "forecast") {
-    return {
-      message: timedOut
-        ? "Forecast data temporarily unavailable. Showing most recent cached snapshot."
-        : "Unable to generate forecast. Retry.",
-      timedOut,
-      canRetry: true,
-    };
-  }
+  const context = kind === "forecast" ? "forecast" : "accountability";
+
+  const friendly =
+    friendlyFetchMessageFromError(err, context) ??
+    sanitizeFriendlyFetchMessage(null, context, { timedOut }) ??
+    (kind === "forecast" ? "Unable to generate forecast. Retry." : "Unable to load accountability data. Retry.");
 
   return {
-    message: timedOut
-      ? "Accountability data is taking longer than expected. Retry or wait for cache."
-      : "Unable to load accountability data. Retry.",
+    message: friendly,
     timedOut,
     canRetry: true,
   };

@@ -2,6 +2,11 @@
 
 import { DashboardFetchAlert } from "@/components/ui/dashboard-fetch-alert";
 import { TabSkeleton } from "@/components/ui/tab-skeleton";
+import {
+  friendlyFetchMessageFromError,
+  sanitizeFriendlyFetchMessage,
+  type FriendlyFetchContext,
+} from "@/lib/friendly-fetch-errors";
 
 type DashboardSectionFallbackProps = {
   title: string;
@@ -18,6 +23,7 @@ type DashboardSectionFallbackProps = {
   skeletonRows?: number;
   skeletonCards?: number;
   children?: React.ReactNode;
+  friendlyContext?: FriendlyFetchContext;
 };
 
 export function DashboardSectionFallback({
@@ -34,15 +40,22 @@ export function DashboardSectionFallback({
   skeletonRows = 3,
   skeletonCards = 3,
   children,
+  friendlyContext = "generic",
 }: DashboardSectionFallbackProps) {
-  if (error && !children) {
+  const friendlyError =
+    error === null || error === undefined
+      ? null
+      : sanitizeFriendlyFetchMessage(error, friendlyContext, { timedOut }) ??
+        friendlyFetchMessageFromError(new Error(error), friendlyContext);
+
+  if (friendlyError && !children) {
     return (
       <section className="space-y-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-50">{title}</h2>
         <DashboardFetchAlert
-          variant={timedOut ? "warning" : "error"}
-          title={timedOut ? "Sync in progress" : "Data unavailable"}
-          message={error}
+          variant="warning"
+          title={timedOut ? "Sync in progress" : "Data temporarily unavailable"}
+          message={friendlyError}
           timedOut={timedOut}
           onRetry={onRetry}
           retryLabel={retrying ? "Retrying…" : "Retry"}

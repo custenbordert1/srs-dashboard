@@ -4,7 +4,8 @@ import type { BreezyCandidatesResult } from "@/lib/breezy-api";
 import { buildBreezyCandidateSummary } from "@/lib/breezy-candidate-summary";
 import { fetchCachedBreezyCandidates } from "@/lib/cached-breezy-client";
 import { DashboardSectionFallback } from "@/components/ui/dashboard-section-fallback";
-import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import { useLoadingCeiling, EXECUTIVE_PANEL_LOADING_CEILING_MS } from "@/hooks/use-loading-ceiling";
+import { friendlyFetchMessageFromError } from "@/lib/friendly-fetch-errors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { KpiCards } from "./kpi-cards";
 
@@ -57,7 +58,7 @@ export function BreezyDashboardSummary() {
   const [data, setData] = useState<BreezyCandidatesResult | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState(false);
-  const loadingCeilingHit = useLoadingCeiling(loading);
+  const loadingCeilingHit = useLoadingCeiling(loading, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -65,9 +66,11 @@ export function BreezyDashboardSummary() {
       const parsed = await fetchCachedBreezyCandidates();
       setData(parsed);
     } catch (err) {
+      const friendly =
+        friendlyFetchMessageFromError(err, "overview") ?? "Overview data temporarily unavailable. Retry shortly.";
       setData({
         ok: false,
-        error: err instanceof Error ? err.message : "Failed to load Breezy candidates",
+        error: friendly,
         fetchedAt: new Date().toISOString(),
       });
     } finally {
@@ -101,6 +104,7 @@ export function BreezyDashboardSummary() {
         retrying={retrying}
         skeletonRows={2}
         skeletonCards={4}
+        friendlyContext="overview"
       />
     );
   }
@@ -110,9 +114,10 @@ export function BreezyDashboardSummary() {
       <DashboardSectionFallback
         title="Breezy recruiting summary"
         error={data.error}
-        timedOut={data.error.toLowerCase().includes("timed out")}
+        timedOut={data.error.toLowerCase().includes("timed out") || data.error.toLowerCase().includes("longer than expected")}
         onRetry={retry}
         retrying={retrying}
+        friendlyContext="overview"
       />
     );
   }
