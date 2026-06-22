@@ -95,6 +95,11 @@ import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
+import {
+  CANDIDATE_INTELLIGENCE_FILTERS,
+  matchesCandidateIntelligenceFilter,
+  type CandidateIntelligenceFilterId,
+} from "@/lib/candidate-readiness";
 import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
@@ -450,6 +455,7 @@ export function CandidatesSection() {
   const [stateFilter, setStateFilter] = useState(ALL);
   const [workflowFilter, setWorkflowFilter] = useState(ALL);
   const [matchFilter, setMatchFilter] = useState(ALL);
+  const [intelligenceFilter, setIntelligenceFilter] = useState(ALL);
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
@@ -1146,6 +1152,12 @@ export function CandidatesSection() {
       if (stateFilter !== ALL && candidate.state !== stateFilter) return false;
       if (workflowFilter !== ALL && candidate.workflowStatus !== workflowFilter) return false;
       if (matchFilter !== ALL && candidate.matchLevel !== matchFilter) return false;
+      if (
+        intelligenceFilter !== ALL &&
+        !matchesCandidateIntelligenceFilter(candidate, intelligenceFilter as CandidateIntelligenceFilterId)
+      ) {
+        return false;
+      }
 
       if (appliedFrom && appliedTo) {
         if (!isAppliedDateInRange(candidate.appliedDate, appliedFrom, appliedTo)) return false;
@@ -1182,6 +1194,7 @@ export function CandidatesSection() {
         stateFilter,
         workflowFilter,
         matchFilter,
+        intelligenceFilter,
         appliedFrom: appliedFrom || null,
         appliedTo: appliedTo || null,
         debouncedSearch: debouncedSearch || null,
@@ -1205,6 +1218,7 @@ export function CandidatesSection() {
     cityFilter,
     debouncedSearch,
     inboxSections,
+    intelligenceFilter,
     matchFilter,
     positionFilter,
     searchIndex,
@@ -2077,6 +2091,18 @@ export function CandidatesSection() {
             <option value="medium">Medium match</option>
             <option value="low">Low match</option>
             <option value="no_resume">No resume</option>
+          </select>
+          <select
+            className={selectClass}
+            value={intelligenceFilter}
+            onChange={(event) => setIntelligenceFilter(event.target.value)}
+          >
+            <option value={ALL}>All intelligence filters</option>
+            {CANDIDATE_INTELLIGENCE_FILTERS.map((filter) => (
+              <option key={filter.id} value={filter.id}>
+                {filter.label}
+              </option>
+            ))}
           </select>
         </div>
       </details>

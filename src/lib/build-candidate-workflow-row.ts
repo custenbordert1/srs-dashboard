@@ -12,6 +12,15 @@ import {
   type CandidateMatchLevel,
 } from "@/lib/recruiting-intelligence";
 import {
+  baselineCandidateReadinessScore,
+  buildCandidateIntelligenceBundle,
+} from "@/lib/candidate-readiness";
+import type {
+  CandidateQuestionnaireIntelligence,
+  CandidateReadinessScore,
+  CandidateResumeIntelligence,
+} from "@/lib/candidate-readiness/types";
+import {
   dmAssignmentNeedsAttention,
   suggestDmForCandidate,
 } from "@/lib/candidate-dm-suggest";
@@ -75,6 +84,9 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   distanceMiles: number | null;
   intelligenceSummary: string;
   intelligence: CandidateIntelligenceScore;
+  resumeIntelligence: CandidateResumeIntelligence;
+  questionnaireIntelligence: CandidateQuestionnaireIntelligence;
+  candidateGrade: CandidateReadinessScore;
 };
 
 function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
@@ -140,6 +152,7 @@ export function buildBaselineWorkflowRow(
     jobState: candidate.state,
     assignedDM: local?.assignedDM,
   });
+  const intelligenceBundle = buildCandidateIntelligenceBundle(candidate);
 
   const baseline: ScoredCandidateWorkflowRow = {
     ...candidate,
@@ -192,6 +205,9 @@ export function buildBaselineWorkflowRow(
     distanceMiles: null,
     intelligenceSummary: BASELINE_INTELLIGENCE.summary,
     intelligence: BASELINE_INTELLIGENCE,
+    resumeIntelligence: intelligenceBundle.resume,
+    questionnaireIntelligence: intelligenceBundle.questionnaire,
+    candidateGrade: baselineCandidateReadinessScore(),
   };
   return {
     ...baseline,
@@ -218,6 +234,7 @@ export function buildScoredWorkflowRow(
     assignedDM: local?.assignedDM,
   });
   const assignedDM = local?.assignedDM ?? "Unassigned";
+  const intelligenceBundle = buildCandidateIntelligenceBundle(candidate);
 
   const scored: ScoredCandidateWorkflowRow = {
     ...candidate,
@@ -270,6 +287,9 @@ export function buildScoredWorkflowRow(
     distanceMiles: intelligence.distanceMiles,
     intelligenceSummary: intelligence.summary,
     intelligence,
+    resumeIntelligence: intelligenceBundle.resume,
+    questionnaireIntelligence: intelligenceBundle.questionnaire,
+    candidateGrade: intelligenceBundle.grade,
   };
   return {
     ...scored,

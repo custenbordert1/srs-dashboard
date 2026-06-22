@@ -119,6 +119,14 @@ function buildTodayItems(
       queue: "needs-review",
     },
     {
+      id: "strong-applicants",
+      bucket: "should-do",
+      label: "Strong applicants (Grade A/B)",
+      count: 0,
+      candidateIds: [],
+      queue: "needs-review",
+    },
+    {
       id: "unassigned",
       bucket: "should-do",
       label: "Unassigned candidates",
@@ -168,6 +176,12 @@ function buildTodayItems(
     }
     if (isNewlyAppliedCandidate(row, referenceMs)) {
       pushItem(items, "new-applicants", row.candidateId);
+    }
+    if (
+      (row.candidateGrade?.grade === "A" || row.candidateGrade?.grade === "B") &&
+      isNewlyAppliedCandidate(row, referenceMs)
+    ) {
+      pushItem(items, "strong-applicants", row.candidateId);
     }
     if (isUnassignedRecruiter(row.assignedRecruiter)) {
       pushItem(items, "unassigned", row.candidateId);

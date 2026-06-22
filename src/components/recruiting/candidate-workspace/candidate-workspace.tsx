@@ -2,10 +2,13 @@
 
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
 import { CandidateCommunicationLog } from "@/components/recruiting/candidate-workspace/candidate-communication-log";
+import { CandidateGradePanel } from "@/components/recruiting/candidate-workspace/candidate-grade-panel";
 import { CandidateMelReadinessPanel } from "@/components/recruiting/candidate-workspace/candidate-mel-readiness-panel";
 import { CandidateNextActionCard } from "@/components/recruiting/candidate-workspace/candidate-next-action-card";
 import { CandidateNotesPanel } from "@/components/recruiting/candidate-workspace/candidate-notes-panel";
 import { CandidatePaperworkPanel } from "@/components/recruiting/candidate-workspace/candidate-paperwork-panel";
+import { CandidateQuestionnaireIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-questionnaire-intelligence-panel";
+import { CandidateResumeIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-resume-intelligence-panel";
 import { CandidateSummary } from "@/components/recruiting/candidate-workspace/candidate-summary";
 import { CandidateTimeline } from "@/components/recruiting/candidate-workspace/candidate-timeline";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
@@ -167,6 +170,10 @@ export function CandidateWorkspace({
 
         <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
           <CandidateSummary candidate={activeCandidate} matchScore={matchScore} />
+
+          <CandidateGradePanel grade={activeCandidate.candidateGrade} />
+          <CandidateResumeIntelligencePanel intelligence={activeCandidate.resumeIntelligence} />
+          <CandidateQuestionnaireIntelligencePanel intelligence={activeCandidate.questionnaireIntelligence} />
 
           <CandidateNextActionCard
             action={workspaceAction}

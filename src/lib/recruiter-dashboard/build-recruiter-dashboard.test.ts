@@ -18,11 +18,17 @@ function sample(id: string): BreezyCandidate {
     source: "Indeed",
     stage: "Applied",
     appliedDate: "2026-05-20",
+    createdDate: "2026-05-20",
+    addedDate: "2026-05-20",
+    updatedDate: "2026-05-20",
+    addedDateSource: "creation_date",
     positionId: "p1",
     positionName: "Merchandiser",
     city: "Austin",
     state: "TX",
+    zipCode: "78701",
     resumeText: "",
+    hasResume: false,
   };
 }
 

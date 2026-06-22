@@ -97,5 +97,8 @@ export function buildCandidateDrawerRowFromScored(
     matchedOpportunities: [],
     melMatchingSummary: "",
     opportunityRepMatches: [],
+    resumeIntelligence: scored.resumeIntelligence,
+    questionnaireIntelligence: scored.questionnaireIntelligence,
+    candidateGrade: scored.candidateGrade,
   };
 }

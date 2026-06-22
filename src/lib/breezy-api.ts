@@ -20,10 +20,12 @@ import {
   logFirstCandidateKeys,
 } from "@/lib/candidates-debug";
 import { logBreezyCandidatesExtract } from "@/lib/breezy-candidates-ops-log";
+import { extractQuestionnaireAnswersFromRaw } from "@/lib/candidate-readiness/questionnaire-parser";
 import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
 } from "@/lib/recruiting-intelligence/resume-parser";
+import type { CandidateQuestionnaireAnswer } from "@/lib/candidate-readiness/types";
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
@@ -139,6 +141,10 @@ export type BreezyCandidate = {
   hasResume: boolean;
   /** Raw resume field fragments retained for scoring diagnostics. */
   resumeFields?: BreezyCandidateResumeFields;
+  /** Normalized questionnaire answers from Breezy custom attributes / screening questions. */
+  questionnaireAnswers?: CandidateQuestionnaireAnswer[];
+  /** True when at least one questionnaire answer was extracted from Breezy. */
+  hasQuestionnaire?: boolean;
   score?: number;
   /** Breezy position pipeline state when fetched (published, closed, archived, …). */
   positionPipelineStatus?: string;
@@ -578,6 +584,7 @@ function sanitizeCandidate(
   const fallbackName = splitName(stringField(record, ["name", "full_name"]));
   const dates = extractBreezyAddedDate(record);
   const resumeFields = extractResumeFieldsFromRaw(record);
+  const questionnaireAnswers = extractQuestionnaireAnswersFromRaw(record);
   const zipCode = extractZipFromRaw(record);
   const resumeParts = [
     resumeFields?.headline,
@@ -631,6 +638,8 @@ function sanitizeCandidate(
     resumeText,
     hasResume,
     resumeFields,
+    questionnaireAnswers: questionnaireAnswers.length > 0 ? questionnaireAnswers : undefined,
+    hasQuestionnaire: questionnaireAnswers.length > 0,
     score: numberField(record, ["score", "rating"]),
     positionPipelineStatus: position?.status || "",
   };

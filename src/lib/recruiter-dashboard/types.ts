@@ -9,7 +9,8 @@ export type RecruiterTodayItemId =
   | "unassigned"
   | "follow-ups-tomorrow"
   | "aging-candidates"
-  | "stalled-stages";
+  | "stalled-stages"
+  | "strong-applicants";
 
 export type RecruiterTodayItem = {
   id: RecruiterTodayItemId;

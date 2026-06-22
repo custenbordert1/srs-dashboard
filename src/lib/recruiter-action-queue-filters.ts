@@ -313,7 +313,11 @@ export function recruiterInboxPriorityScore(
   referenceMs = Date.now(),
 ): number {
   const section = assignRecruiterInboxSection(row, actingRecruiter, referenceMs);
-  return INBOX_PRIORITY_SCORE[section];
+  const base = INBOX_PRIORITY_SCORE[section] * 100;
+  const gradeBoost = row.candidateGrade?.overallScore ?? 0;
+  const techPenalty = row.questionnaireIntelligence?.techReady === false ? 12 : 0;
+  const paperworkBoost = row.candidateGrade?.paperworkReady ? 8 : 0;
+  return base + gradeBoost * 0.15 + paperworkBoost - techPenalty;
 }
 
 function candidateSortName(row: ScoredCandidateWorkflowRow): string {

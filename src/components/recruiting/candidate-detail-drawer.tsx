@@ -31,6 +31,11 @@ import {
   type CandidateRowPrimaryAction,
 } from "@/lib/candidate-row-primary-action";
 import type { SendPaperworkBlockReason } from "@/lib/onboarding-send-eligibility";
+import type {
+  CandidateQuestionnaireIntelligence,
+  CandidateReadinessScore,
+  CandidateResumeIntelligence,
+} from "@/lib/candidate-readiness/types";
 import { useEffect, useState } from "react";
 
 export type CandidateDrawerRow = {
@@ -92,6 +97,9 @@ export type CandidateDrawerRow = {
   matchedOpportunities: CandidateOpportunityMatch[];
   melMatchingSummary: string;
   opportunityRepMatches: OpportunityBestRepMatches[];
+  resumeIntelligence: CandidateResumeIntelligence;
+  questionnaireIntelligence: CandidateQuestionnaireIntelligence;
+  candidateGrade: CandidateReadinessScore;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";
