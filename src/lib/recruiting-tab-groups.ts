@@ -9,6 +9,7 @@ export type ExecutiveNavTab = {
 
 /** Leadership tabs shown first in primary nav for executive users. */
 export const EXECUTIVE_PRIMARY_TAB_IDS: DashboardTabId[] = [
+  "executive-home",
   "executive-accountability",
   "executive-forecasting",
 ];

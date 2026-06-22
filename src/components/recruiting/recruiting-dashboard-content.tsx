@@ -20,6 +20,7 @@ import {
   LazyRecruitingIntelligenceSection,
   LazyWorkforceOperationsSection,
   LazyJobManagementSection,
+  LazyExecutiveHomePanel,
   LazyExecutiveRecruitingForecastPanel,
   LazyExecutiveAccountabilityPanel,
 } from "./dashboard-tab-panels";
@@ -64,7 +65,9 @@ export function RecruitingDashboardContent({
   dmLeaderboard,
   userRole,
 }: RecruitingDashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<DashboardTabId>("command-center");
+  const [activeTab, setActiveTab] = useState<DashboardTabId>(
+    userRole === "executive" ? "executive-home" : "command-center",
+  );
   const executiveTabs = userRole === "executive" ? getExecutiveNavTabs() : [];
 
   useEffect(() => {
@@ -84,6 +87,7 @@ export function RecruitingDashboardContent({
       "automation",
       "workforce",
       "job-management",
+      "executive-home",
       "executive-forecasting",
       "executive-accountability",
       "workforce-intelligence",
@@ -200,6 +204,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="job-management" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="job-management">
             <LazyJobManagementSection />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="executive-home" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="executive-home">
+            <LazyExecutiveHomePanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

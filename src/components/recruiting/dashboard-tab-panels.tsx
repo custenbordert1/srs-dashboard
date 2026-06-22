@@ -124,6 +124,14 @@ export const LazyJobManagementSection = dynamic(
   { loading: tabLoading("Loading job management…"), ssr: false },
 );
 
+export const LazyExecutiveHomePanel = dynamic(
+  () =>
+    import("@/components/executive/executive-home-panel").then((m) => ({
+      default: m.ExecutiveHomePanel,
+    })),
+  { loading: tabLoading("Loading executive home…"), ssr: false },
+);
+
 export const LazyExecutiveRecruitingForecastPanel = dynamic(
   () =>
     import("@/components/executive/executive-recruiting-forecast-panel").then((m) => ({

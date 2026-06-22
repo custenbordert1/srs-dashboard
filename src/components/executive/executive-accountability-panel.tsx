@@ -16,6 +16,9 @@ import {
   evidenceKindForRecommendationKind,
   OPERATIONAL_EVIDENCE_LABELS,
 } from "@/lib/executive-accountability/action-audit";
+import {
+  accountabilityExecutionLinksForKind,
+} from "@/lib/executive-accountability/execution-links";
 import type { RecommendationPriority } from "@/lib/executive-recruiting-forecast";
 import { forecastConfidenceLabel } from "@/lib/executive-recruiting-forecast";
 import { ExecutiveAuditCenterView } from "@/components/executive/executive-audit-center-view";
@@ -185,6 +188,18 @@ function ActionRow({
           ))}
         </div>
       ) : null}
+
+      <div className="mt-2 flex flex-wrap gap-1">
+        {accountabilityExecutionLinksForKind(action.recommendationKind ?? undefined).map((link) => (
+          <Link
+            key={link.label}
+            href={link.href}
+            className="rounded-full border border-zinc-700 bg-zinc-900/60 px-2 py-0.5 text-[10px] text-zinc-300 hover:border-teal-500/40 hover:text-teal-100"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
 
       {action.outcomeNotes ? (
         <p className="mt-2 text-xs text-zinc-300">

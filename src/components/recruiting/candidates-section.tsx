@@ -97,6 +97,7 @@ import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
 } from "@/components/recruiting/candidate-my-queue-panel";
+import { RecruiterProductivityCenter } from "@/components/recruiting/recruiter-productivity-center";
 import {
   computeRecruiterAgingBucket,
   matchesRecruiterQuickFilter,
@@ -2096,6 +2097,13 @@ export function CandidatesSection() {
           value={breakdown.length > 0 ? breakdown.map((row) => `${row.source}: ${row.count}`).join(" · ") : "—"}
         />
       </div>
+
+      <RecruiterProductivityCenter
+        candidates={candidates}
+        actingRecruiter={actingRecruiter}
+        quickFilter={recruiterQuickFilter}
+        onQuickFilterChange={setRecruiterQuickFilter}
+      />
 
       <CandidateMyQueuePanel
         candidates={candidates}

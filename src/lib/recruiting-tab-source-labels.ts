@@ -12,6 +12,7 @@ export type DashboardTabId =
   | "workforce"
   | "job-management"
   | "workforce-intelligence"
+  | "executive-home"
   | "executive-forecasting"
   | "executive-accountability";
 
@@ -140,6 +141,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     badgeLabel: "Executive analytics",
     kind: "executive",
     bannerMessage: "Executive workforce analytics — separate from daily Breezy recruiting operations.",
+  },
+  "executive-home": {
+    navLabel: "Executive Home",
+    sourceTag: "Executive",
+    badgeLabel: "Company overview",
+    kind: "executive",
+    bannerMessage:
+      "Nationwide KPIs, ATS health, territory risk, recruiting alerts, and accountability — your primary executive landing.",
   },
   "executive-forecasting": {
     navLabel: "Executive Forecast",

@@ -1,7 +1,7 @@
 "use client";
 
 import type { BreezyCandidatesResult, BreezyJobsResult } from "@/lib/breezy-api";
-import { fetchCachedBreezyCandidates, fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
+import { fetchCommandCenterBreezyData } from "@/lib/reliability/command-center-breezy";
 import {
   breezyDisconnectedDetail,
   breezyDisconnectedTitle,
@@ -27,7 +27,13 @@ import { KpiCards } from "./kpi-cards";
 type CommandCenterLoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; candidates: BreezyCandidatesResult; jobs: BreezyJobsResult };
+  | {
+      status: "ready";
+      candidates: BreezyCandidatesResult;
+      jobs: BreezyJobsResult;
+      staleWarning: string | null;
+      servingFromCache: boolean;
+    };
 
 function CommandCenterSkeleton() {
   return (
@@ -57,13 +63,37 @@ function SyncStatusBanner({
   partialPositionSync,
   errorMessage,
   failureKind,
+  servingFromCache,
+  staleWarning,
 }: {
   connected: boolean;
   lastSyncLabel: string;
   partialPositionSync: boolean;
   errorMessage?: string;
   failureKind?: BreezyFailureKind;
+  servingFromCache?: boolean;
+  staleWarning?: string | null;
 }) {
+  if (servingFromCache && connected) {
+    return (
+      <div
+        role="status"
+        className="flex flex-col gap-2 rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p className="text-sm font-semibold text-amber-100">ATS Status: Healthy (cached)</p>
+          <p className="mt-0.5 text-sm text-amber-200/80">
+            Last successful sync: {lastSyncLabel}
+            {staleWarning ? ` · ${staleWarning}` : " · Live refresh pending"}
+          </p>
+        </div>
+        <p className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-100">
+          Serving last successful cache while Breezy retries in the background.
+        </p>
+      </div>
+    );
+  }
+
   if (!connected) {
     const kind = failureKind ?? classifyBreezyError(errorMessage ?? "");
     const title = breezyDisconnectedTitle(kind);
@@ -95,7 +125,7 @@ function SyncStatusBanner({
       className="flex flex-col gap-2 rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div>
-        <p className="text-sm font-semibold text-teal-100">Breezy connected</p>
+        <p className="text-sm font-semibold text-teal-100">ATS Status: Healthy</p>
         <p className="mt-0.5 text-sm text-teal-200/80">Last successful sync: {lastSyncLabel}</p>
       </div>
       {partialPositionSync ? (
@@ -157,11 +187,15 @@ export function RecruitingCommandCenter() {
   const load = useCallback(async () => {
     setLoadState({ status: "loading" });
     try {
-      const [candidates, jobs] = await Promise.all([
-        fetchCachedBreezyCandidates(),
-        fetchCachedBreezyJobs(),
-      ]);
-      setLoadState({ status: "ready", candidates, jobs });
+      const { candidates, jobs, staleWarning, servingFromCache } =
+        await fetchCommandCenterBreezyData();
+      setLoadState({
+        status: "ready",
+        candidates,
+        jobs,
+        staleWarning,
+        servingFromCache,
+      });
     } catch (err) {
       setLoadState({
         status: "error",
@@ -174,6 +208,24 @@ export function RecruitingCommandCenter() {
     const id = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(id);
   }, [load]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void fetchCommandCenterBreezyData(true).then((result) => {
+        setLoadState((prev) => {
+          if (prev.status !== "ready") return prev;
+          return {
+            status: "ready",
+            candidates: result.candidates,
+            jobs: result.jobs,
+            staleWarning: result.staleWarning,
+            servingFromCache: result.servingFromCache,
+          };
+        });
+      });
+    }, 5 * 60 * 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const retry = useCallback(() => {
     setRetrying(true);
@@ -222,17 +274,21 @@ export function RecruitingCommandCenter() {
         ? "Breezy jobs request failed"
         : loadState.jobs.error;
     const failureKind = classifyBreezyError(errorMessage);
-    return (
-      <SyncStatusBanner
-        connected={false}
-        lastSyncLabel={formatCommandCenterSyncTime(
-          !loadState.candidates.ok ? loadState.candidates.fetchedAt : loadState.jobs.fetchedAt,
-        )}
-        partialPositionSync={false}
-        errorMessage={errorMessage}
-        failureKind={failureKind}
-      />
-    );
+    const hasPartialCache =
+      loadState.candidates.ok || loadState.jobs.ok || loadState.servingFromCache;
+    if (!hasPartialCache) {
+      return (
+        <SyncStatusBanner
+          connected={false}
+          lastSyncLabel={formatCommandCenterSyncTime(
+            !loadState.candidates.ok ? loadState.candidates.fetchedAt : loadState.jobs.fetchedAt,
+          )}
+          partialPositionSync={false}
+          errorMessage={errorMessage}
+          failureKind={failureKind}
+        />
+      );
+    }
   }
 
   if (!snapshot) {
@@ -259,9 +315,11 @@ export function RecruitingCommandCenter() {
       </header>
 
       <SyncStatusBanner
-        connected={snapshot.connected}
+        connected={snapshot.connected || loadState.servingFromCache}
         lastSyncLabel={snapshot.lastSyncLabel}
         partialPositionSync={snapshot.partialPositionSync}
+        servingFromCache={loadState.servingFromCache}
+        staleWarning={loadState.staleWarning}
       />
 
       <KpiCards items={snapshot.kpis} gridClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" />

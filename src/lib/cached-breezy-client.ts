@@ -66,7 +66,7 @@ export async function fetchCachedBreezyCandidates(
       );
       return parsed;
     },
-    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-candidates" },
+    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-candidates", staleOnError: true },
   );
 }
 
@@ -76,6 +76,6 @@ export async function fetchCachedBreezyJobs(force = false): Promise<BreezyJobsRe
     async () => {
       return fetchBreezyJson<BreezyJobsResult>("/api/breezy/jobs", "Breezy jobs");
     },
-    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-jobs" },
+    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "breezy-jobs", staleOnError: true },
   );
 }

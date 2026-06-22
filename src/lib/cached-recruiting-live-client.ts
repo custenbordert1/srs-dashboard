@@ -58,6 +58,6 @@ export async function fetchRecruitingLiveSnapshot(force = false): Promise<Recrui
         throw err;
       }
     },
-    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "recruiting-live-snapshot" },
+    { ttlMs: LONG_CLIENT_CACHE_TTL_MS, force, label: "recruiting-live-snapshot", staleOnError: true },
   );
 }
