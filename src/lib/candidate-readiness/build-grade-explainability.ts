@@ -19,10 +19,16 @@ export function buildReadinessConfidence(
   if (resume.available && questionnaire.available) {
     return { confidence: "high", confidenceLabel: "High confidence" };
   }
-  if (resume.available || questionnaire.available) {
+  if (!resume.available && !questionnaire.available) {
+    return { confidence: "low", confidenceLabel: "Low confidence" };
+  }
+  if (resume.available && !questionnaire.available) {
+    if (resume.quality.completeness === "minimal") {
+      return { confidence: "low", confidenceLabel: "Low confidence" };
+    }
     return { confidence: "medium", confidenceLabel: "Medium confidence" };
   }
-  return { confidence: "low", confidenceLabel: "Low confidence" };
+  return { confidence: "medium", confidenceLabel: "Medium confidence" };
 }
 
 export function buildGradeContributors(input: {
@@ -66,12 +72,24 @@ export function buildGradeContributors(input: {
   if (hasNoMerchandisingAnswer(questionnaire.merchandisingExperience)) {
     negative.push({ kind: "negative", label: "No merchandising experience reported" });
   } else if (resume.available && !hasMerchSignal) {
-    negative.push({ kind: "negative", label: "No merchandising experience found" });
+    negative.push({ kind: "negative", label: "No merchandising experience detected" });
   }
 
   const travelConfirmed = badge("travel") || Boolean(questionnaire.availabilityNotes?.trim());
   if ((resume.available || questionnaire.available) && !travelConfirmed) {
     negative.push({ kind: "negative", label: "Transportation not confirmed" });
+  }
+
+  if (questionnaire.available) {
+    if (questionnaire.printerLaptopAccess === null) {
+      negative.push({ kind: "negative", label: "Printer/laptop access unknown" });
+    }
+    if (questionnaire.smartphoneAccess === null) {
+      negative.push({ kind: "negative", label: "Smartphone access unknown" });
+    }
+    if (questionnaire.internetAccess === null) {
+      negative.push({ kind: "negative", label: "Internet access unknown" });
+    }
   }
 
   if (questionnaire.smartphoneAccess === false) negative.push({ kind: "negative", label: "No smartphone access" });
@@ -92,8 +110,8 @@ export function buildGradeContributors(input: {
     negative.push({ kind: "negative", label: "Phone number missing" });
   }
 
-  const dedupedPositive = dedupeContributors(positive).slice(0, 4);
-  const dedupedNegative = dedupeContributors(negative).slice(0, 4);
+  const dedupedPositive = dedupeContributors(positive).slice(0, 5);
+  const dedupedNegative = dedupeContributors(negative).slice(0, 5);
 
   return [...dedupedPositive, ...dedupedNegative];
 }

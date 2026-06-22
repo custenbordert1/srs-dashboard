@@ -2,13 +2,6 @@
 
 import type { CandidateReadinessScore } from "@/lib/candidate-readiness/types";
 
-const GRADE_STYLES: Record<CandidateReadinessScore["grade"], string> = {
-  A: "border-emerald-500/40 bg-emerald-500/15 text-emerald-100",
-  B: "border-teal-500/40 bg-teal-500/15 text-teal-100",
-  C: "border-amber-500/40 bg-amber-500/15 text-amber-100",
-  D: "border-rose-500/40 bg-rose-500/15 text-rose-100",
-};
-
 const CONFIDENCE_STYLES: Record<CandidateReadinessScore["confidence"], string> = {
   high: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
   medium: "border-amber-500/30 bg-amber-500/10 text-amber-100",
@@ -42,15 +35,23 @@ export function CandidateGradePanel({ grade }: CandidateGradePanelProps) {
         ) : null}
       </div>
 
-      {!enriching && grade.gradeContributors.length > 0 ? (
+      {!enriching && positives.length > 0 ? (
         <div className="mt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Why this grade</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Positive contributors</p>
           <ul className="mt-2 space-y-1 text-sm">
             {positives.map((item) => (
               <li key={item.label} className="text-teal-100/90">
                 + {item.label}
               </li>
             ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {!enriching && negatives.length > 0 ? (
+        <div className="mt-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Negative contributors</p>
+          <ul className="mt-2 space-y-1 text-sm">
             {negatives.map((item) => (
               <li key={item.label} className="text-amber-100/90">
                 − {item.label}

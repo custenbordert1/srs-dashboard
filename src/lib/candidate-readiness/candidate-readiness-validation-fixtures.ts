@@ -209,9 +209,9 @@ export const CANDIDATE_READINESS_VALIDATION_FIXTURES: ValidationFixture[] = [
   },
   {
     id: "minimal-resume",
-    label: "Minimal resume text",
+    label: "Minimal resume text without questionnaire",
     expectedGrade: ["C", "D", "B"],
-    expectedConfidence: "medium",
+    expectedConfidence: "low",
     maxScore: 72,
     candidate: base("minimal-resume", {
       firstName: "Jamie",
