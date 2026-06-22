@@ -23,6 +23,7 @@ import {
   LazyExecutiveHomePanel,
   LazyExecutiveRecruitingForecastPanel,
   LazyExecutiveAccountabilityPanel,
+  LazyPipelineIntelligencePanel,
 } from "./dashboard-tab-panels";
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
@@ -90,6 +91,7 @@ export function RecruitingDashboardContent({
       "executive-home",
       "executive-forecasting",
       "executive-accountability",
+      "pipeline-intelligence",
       "workforce-intelligence",
     ]);
     if (allowed.has(tab as DashboardTabId)) {
@@ -204,6 +206,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="job-management" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="job-management">
             <LazyJobManagementSection />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="pipeline-intelligence" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="pipeline-intelligence">
+            <LazyPipelineIntelligencePanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

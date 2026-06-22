@@ -17,6 +17,7 @@ export type RecruiterAgingBucket = "fresh" | "24h" | "3d" | "7d+";
 export type RecruiterQuickFilterId =
   | "all"
   | "my-owned"
+  | "needs-review"
   | "needs-follow-up"
   | "no-response"
   | "paperwork-pending"
@@ -27,6 +28,7 @@ export type RecruiterQuickFilterId =
 export const RECRUITER_QUICK_FILTERS: Array<{ id: RecruiterQuickFilterId; label: string }> = [
   { id: "all", label: "All" },
   { id: "my-owned", label: "My owned" },
+  { id: "needs-review", label: "Needs review" },
   { id: "needs-follow-up", label: "Needs follow-up" },
   { id: "no-response", label: "No response" },
   { id: "paperwork-pending", label: "Paperwork pending" },
@@ -93,6 +95,8 @@ export function matchesRecruiterQuickFilter(
   switch (filter) {
     case "my-owned":
       return recruiter === acting && !isUnassignedRecruiter(recruiter);
+    case "needs-review":
+      return row.workflowStatus === "Needs Review" && !row.lastActionAt;
     case "needs-follow-up":
       return (
         row.recruitingActions.needsFollowUp ||
@@ -122,6 +126,7 @@ export function matchesRecruiterQuickFilter(
 }
 
 export type RecruiterActionQueueCounts = {
+  needsReview: number;
   needsFollowUp: number;
   noResponse: number;
   paperworkPending: number;
@@ -137,6 +142,7 @@ export function buildRecruiterActionQueueCounts(
   candidates: ScoredCandidateWorkflowRow[],
   referenceMs = Date.now(),
 ): RecruiterActionQueueCounts {
+  let needsReview = 0;
   let needsFollowUp = 0;
   let noResponse = 0;
   let paperworkPending = 0;
@@ -148,6 +154,7 @@ export function buildRecruiterActionQueueCounts(
   let aging7dPlus = 0;
 
   for (const row of candidates) {
+    if (matchesRecruiterQuickFilter(row, "needs-review", "", referenceMs)) needsReview += 1;
     if (matchesRecruiterQuickFilter(row, "needs-follow-up", "", referenceMs)) needsFollowUp += 1;
     if (isNoResponseCandidate(row, referenceMs)) noResponse += 1;
     if (isPaperworkPendingStatus(row.workflowStatus)) paperworkPending += 1;
@@ -167,6 +174,7 @@ export function buildRecruiterActionQueueCounts(
   }
 
   return {
+    needsReview,
     needsFollowUp,
     noResponse,
     paperworkPending,

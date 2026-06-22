@@ -14,7 +14,8 @@ export type DashboardTabId =
   | "workforce-intelligence"
   | "executive-home"
   | "executive-forecasting"
-  | "executive-accountability";
+  | "executive-accountability"
+  | "pipeline-intelligence";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -165,6 +166,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Monday executive packet, overdue escalation, audit center, and durable P44 recommendation tracking.",
+  },
+  "pipeline-intelligence": {
+    navLabel: "Pipeline Intelligence",
+    sourceTag: "Live · Breezy",
+    badgeLabel: "Pipeline analytics",
+    kind: "live-breezy",
+    bannerMessage:
+      "Stage conversion, territory funnels, recruiter performance, and bottleneck detection from Breezy candidates and local workflow overlay.",
   },
 };
 

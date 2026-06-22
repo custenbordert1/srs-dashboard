@@ -8,7 +8,11 @@ import {
   groupActionsByOwner,
   summarizeActionStatus,
 } from "@/lib/executive-accountability/accountability-engine";
-import { syncActionsFromForecastRecommendations } from "@/lib/executive-accountability/convert-recommendations";
+import {
+  syncActionsFromForecastRecommendations,
+  syncActionsFromPipelineRecommendations,
+} from "@/lib/executive-accountability/convert-recommendations";
+import type { PipelineBottleneckRecommendation } from "@/lib/pipeline-intelligence/types";
 import {
   appendForecastHistory,
   buildForecastBacktestSummary,
@@ -28,15 +32,21 @@ export function buildExecutiveAccountabilitySnapshot(input: {
   forecast: ExecutiveRecruitingForecastSnapshot;
   workflows: CandidateWorkflowState;
   store: ExecutiveAccountabilityStoreFile;
+  pipelineRecommendations?: PipelineBottleneckRecommendation[];
   generatedAt?: string;
 }): { snapshot: ExecutiveAccountabilitySnapshot; store: ExecutiveAccountabilityStoreFile } {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const referenceMs = new Date(generatedAt).getTime();
   const activeRepCount = countActiveReps(input.workflows);
 
-  const syncedActions = syncActionsFromForecastRecommendations({
+  const forecastSynced = syncActionsFromForecastRecommendations({
     existingActions: input.store.actions,
     recommendations: input.forecast.recommendations,
+    referenceIso: generatedAt,
+  });
+  const syncedActions = syncActionsFromPipelineRecommendations({
+    existingActions: forecastSynced,
+    recommendations: input.pipelineRecommendations ?? [],
     referenceIso: generatedAt,
   });
 

@@ -20,7 +20,7 @@ export function accountabilityExecutionLinksForKind(
     if (kind === "refresh-job-ads" || kind === "increase-pay") {
       return link.label.includes("Job Management");
     }
-    if (kind === "prioritize-candidates" || kind === "move-recruiter-focus") {
+    if (kind === "prioritize-candidates" || kind === "move-recruiter-focus" || kind === "pipeline-bottleneck") {
       return link.label.includes("Candidate") || link.label.includes("Recruiter");
     }
     if (kind === "escalate-dm-territory") {

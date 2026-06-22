@@ -43,6 +43,8 @@ export function buildStableRecommendationKey(input: StableRecommendationKeyInput
       return `p44:candidate-shift:${owner}:underused`;
     case "automation":
       return `p44:dm-automation:${owner}`;
+    case "pipeline-bottleneck":
+      return `p51:pipeline-bottleneck:${territory}:${titleSlug}`;
     default:
       return `p44:generic:${slugPart(input.kind)}:${owner}:${titleSlug}`;
   }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AtsHealthCard } from "@/components/executive/ats-health-card";
+import { PipelineHealthPanel } from "@/components/executive/pipeline-health-panel";
 import { RecruitingAlertsSection } from "@/components/recruiting/recruiting-alerts-section";
 import type { ExecutiveDashboardSnapshot } from "@/lib/dm-dashboard";
 import { sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
@@ -245,6 +246,8 @@ export function ExecutiveHomePanel() {
       </div>
 
       <AtsHealthCard compact />
+
+      <PipelineHealthPanel />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <TerritoryTable

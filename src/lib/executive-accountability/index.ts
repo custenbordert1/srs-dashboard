@@ -39,9 +39,14 @@ export {
   dueDateForPriority,
   mergeForecastIntoExistingAction,
   syncActionsFromForecastRecommendations,
+  syncActionsFromPipelineRecommendations,
+  convertPipelineRecommendationToAction,
   ARCHIVE_REASON_FORECAST_CHURN,
+  ARCHIVE_REASON_PIPELINE_CHURN,
   P44_SOURCE_MODULE,
   P44_SOURCE_PHASE,
+  P51_SOURCE_MODULE,
+  P51_SOURCE_PHASE,
 } from "@/lib/executive-accountability/convert-recommendations";
 export {
   appendForecastHistory,

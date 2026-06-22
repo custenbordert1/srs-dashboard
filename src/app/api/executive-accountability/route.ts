@@ -7,6 +7,7 @@ import {
 } from "@/lib/executive-accountability";
 import type { ExecutiveActionStatus, OperationalEvidenceKind } from "@/lib/executive-accountability";
 import { loadExecutiveRecruitingForecastForSession } from "@/lib/executive-recruiting-forecast/load-forecast-context";
+import { loadPipelineIntelligenceForSession } from "@/lib/pipeline-intelligence/load-pipeline-intelligence-context";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,10 @@ export async function GET(request: Request) {
   const { session } = guard;
   auditTerritoryAccess(session, ROUTE);
 
-  const forecastResult = await loadExecutiveRecruitingForecastForSession(session);
+  const [forecastResult, pipelineResult] = await Promise.all([
+    loadExecutiveRecruitingForecastForSession(session),
+    loadPipelineIntelligenceForSession(session),
+  ]);
   if (!forecastResult.ok) {
     return NextResponse.json(
       {
@@ -43,6 +47,7 @@ export async function GET(request: Request) {
   const { snapshot, store: updatedStore } = buildExecutiveAccountabilitySnapshot({
     forecast: forecastResult.forecast,
     workflows: forecastResult.workflows,
+    pipelineRecommendations: pipelineResult.ok ? pipelineResult.snapshot.recommendations : [],
     store,
   });
   await saveExecutiveAccountabilityStore(updatedStore);

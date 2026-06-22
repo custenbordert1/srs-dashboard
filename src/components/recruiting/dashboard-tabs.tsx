@@ -31,6 +31,7 @@ export const DASHBOARD_TABS: DashboardTab[] = (
     "automation",
     "workforce",
     "job-management",
+    "pipeline-intelligence",
   ] as const
 ).map((id) => {
   const meta = getRecruitingTabSource(id);

@@ -104,6 +104,7 @@ import {
   type RecruiterAgingBucket,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
+import { parsePipelineQueueParam } from "@/lib/pipeline-intelligence";
 import {
   buildCandidateSlaSnapshot,
   isFollowUpOverdue,
@@ -900,6 +901,12 @@ export function CandidatesSection() {
     const id = window.setTimeout(() => void loadBundle(), 0);
     return () => window.clearTimeout(id);
   }, [loadBundle]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const queue = parsePipelineQueueParam(new URLSearchParams(window.location.search).get("queue"));
+    if (queue) setRecruiterQuickFilter(queue);
+  }, []);
 
   useEffect(() => {
     logCandidatesClientTrace("candidates_state_after_render", {

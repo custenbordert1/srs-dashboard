@@ -2,11 +2,12 @@
 
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { buildQueueCompactMetrics } from "@/lib/candidate-queue-metrics";
+import Link from "next/link";
 import {
   buildRecruiterActionQueueCounts,
-  RECRUITER_QUICK_FILTERS,
   type RecruiterQuickFilterId,
 } from "@/lib/recruiter-action-queue-filters";
+import { PIPELINE_QUEUE_LINKS } from "@/lib/pipeline-intelligence";
 
 type RecruiterProductivityCenterProps = {
   candidates: ScoredCandidateWorkflowRow[];
@@ -32,6 +33,17 @@ export function RecruiterProductivityCenter({
 }: RecruiterProductivityCenterProps) {
   const queueMetrics = buildQueueCompactMetrics(candidates);
   const actionCounts = buildRecruiterActionQueueCounts(candidates);
+  const queueCountByFilter: Record<RecruiterQuickFilterId, number> = {
+    all: candidates.length,
+    "my-owned": 0,
+    "needs-review": actionCounts.needsReview,
+    "needs-follow-up": actionCounts.needsFollowUp,
+    "no-response": actionCounts.noResponse,
+    "paperwork-pending": actionCounts.paperworkPending,
+    "interview-needed": actionCounts.interviewNeeded,
+    "ready-mel": actionCounts.readyForMel,
+    priority: actionCounts.priority,
+  };
   const touchesToday = candidates.filter((row) => {
     if (!row.lastActionAt) return false;
     const touched = new Date(row.lastActionAt);
@@ -62,20 +74,26 @@ export function RecruiterProductivityCenter({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {RECRUITER_QUICK_FILTERS.filter((filter) => filter.id !== "all").map((filter) => (
-          <button
-            key={filter.id}
-            type="button"
-            onClick={() => onQuickFilterChange(filter.id)}
+        {PIPELINE_QUEUE_LINKS.map((link) => (
+          <Link
+            key={link.id}
+            href={link.href}
+            onClick={(event) => {
+              event.preventDefault();
+              onQuickFilterChange(link.filter);
+            }}
             className={[
               "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              quickFilter === filter.id
+              quickFilter === link.filter
                 ? "border-teal-500/50 bg-teal-500/15 text-teal-100"
                 : "border-zinc-700 text-zinc-400 hover:bg-zinc-800",
             ].join(" ")}
           >
-            {filter.label}
-          </button>
+            {link.label}
+            <span className="ml-1.5 tabular-nums text-zinc-500">
+              {queueCountByFilter[link.filter]}
+            </span>
+          </Link>
         ))}
       </div>
     </section>

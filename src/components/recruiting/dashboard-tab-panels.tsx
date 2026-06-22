@@ -148,6 +148,14 @@ export const LazyExecutiveAccountabilityPanel = dynamic(
   { loading: tabLoading("Loading executive accountability…"), ssr: false },
 );
 
+export const LazyPipelineIntelligencePanel = dynamic(
+  () =>
+    import("@/components/recruiting/pipeline-intelligence-panel").then((m) => ({
+      default: m.PipelineIntelligencePanel,
+    })),
+  { loading: tabLoading("Loading pipeline intelligence…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;
