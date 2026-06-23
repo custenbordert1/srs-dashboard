@@ -137,7 +137,7 @@ export function ExecutiveHomePanel() {
   const accountability = useExecutiveAccountability();
   const atsHealth = useAtsHealth();
   const pipeline = usePipelineIntelligence();
-  const recruiting = useRecruitingIntelligence({ pollIntervalMs: 0 });
+  const recruiting = useRecruitingIntelligence({ pollIntervalMs: 90_000 });
   const loadingCeilingHit = useLoadingCeiling(loading && !data, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   const insights = data?.executiveInsights;
@@ -199,6 +199,12 @@ export function ExecutiveHomePanel() {
   const showCoverageKpis = Boolean(insights) || kpiLoading;
   const showOpenJobsKpi = jobsAvailable || openJobs > 0 || kpiLoading;
   const assignmentRollups = recruiting.data?.executiveAutomationRollups;
+  const assignmentRollupsLoading = recruiting.loading && !assignmentRollups;
+  const assignmentRollupsError =
+    !assignmentRollups && !recruiting.loading
+      ? sanitizeFriendlyFetchMessage(recruiting.error ?? "", "dashboard", { timedOut: recruiting.timedOut }) ??
+        recruiting.error
+      : null;
 
   return (
     <div className="space-y-6">
@@ -279,9 +285,55 @@ export function ExecutiveHomePanel() {
                 }
                 hint="Average auto-assignment confidence"
               />
+              <KpiCard
+                label="Overdue recruiter actions"
+                value={assignmentRollups.overdueRecruiterActions.toLocaleString()}
+                hint="Assigned candidates past action due date"
+              />
+              <KpiCard
+                label="Actions due today"
+                value={assignmentRollups.actionsDueToday.toLocaleString()}
+                hint="Recruiter actions due today"
+              />
+              <KpiCard
+                label="Average action age"
+                value={
+                  assignmentRollups.averageActionAgeDays > 0
+                    ? `${assignmentRollups.averageActionAgeDays}d`
+                    : "—"
+                }
+                hint="Days since last generated action"
+              />
+              <KpiCard
+                label="Recruiter SLA compliance"
+                value={`${assignmentRollups.recruiterSlaCompliance}%`}
+                hint="Actions completed on or before due date"
+              />
+            </>
+          ) : assignmentRollupsLoading ? (
+            <>
+              <KpiCard label="Overdue recruiter actions" value="…" loading />
+              <KpiCard label="Actions due today" value="…" loading />
+              <KpiCard label="Average action age" value="…" loading />
+              <KpiCard label="Recruiter SLA compliance" value="…" loading />
             </>
           ) : null}
         </div>
+        {assignmentRollupsError ? (
+          <div
+            role="status"
+            className="mt-3 rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+          >
+            <p>{assignmentRollupsError}</p>
+            <button
+              type="button"
+              onClick={() => recruiting.refresh()}
+              className="mt-2 rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-medium hover:bg-amber-500/20"
+            >
+              Retry recruiting metrics
+            </button>
+          </div>
+        ) : null}
       </section>
 
       <ExecutiveActionsStrip

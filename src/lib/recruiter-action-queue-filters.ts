@@ -8,6 +8,7 @@ import {
 } from "@/lib/candidate-action-sla";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
+import { compareRecruiterActionPriority } from "@/lib/recruiter-action-engine/action-sort";
 
 /** Hours since last recruiter touch (falls back to applied date). */
 export const AGING_BUCKET_24H = 24;
@@ -382,6 +383,9 @@ export function sortByRecruiterInboxPriority(
   referenceMs = Date.now(),
 ): ScoredCandidateWorkflowRow[] {
   return [...rows].sort((a, b) => {
+    const actionDiff = compareRecruiterActionPriority(a, b, referenceMs);
+    if (actionDiff !== 0) return actionDiff;
+
     const scoreDiff =
       recruiterInboxPriorityScore(b, actingRecruiter, referenceMs) -
       recruiterInboxPriorityScore(a, actingRecruiter, referenceMs);

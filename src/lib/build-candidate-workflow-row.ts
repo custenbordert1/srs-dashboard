@@ -33,12 +33,15 @@ import {
   type CandidateWorkflowStatus,
   type PaperworkStatus,
   type RecruiterAssignmentSource,
+  type RecruiterActionPriority,
+  type RecruiterActionType,
 } from "@/lib/candidate-workflow-types";
 import {
   baselineCandidateFunnelAutomation,
   evaluateCandidateFunnelAutomation,
 } from "@/lib/hiring-funnel-automation";
 import type { CandidateFunnelAutomation } from "@/lib/hiring-funnel-automation/types";
+import { buildRecruiterActionDecision } from "@/lib/recruiter-action-engine/build-action-decision";
 
 export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   workflowStatus: CandidateWorkflowStatus;
@@ -98,7 +101,28 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
   recruiterAssignedAt?: string | null;
+  requiredAction?: string | null;
+  actionType?: RecruiterActionType | null;
+  actionPriority?: RecruiterActionPriority | null;
+  actionReason?: string | null;
+  actionDueDate?: string | null;
+  actionConfidence?: number | null;
+  actionGeneratedAt?: string | null;
 };
+
+function resolveDisplayedNextAction(
+  row: Omit<ScoredCandidateWorkflowRow, "funnelAutomation">,
+  workflowStatus: CandidateWorkflowStatus,
+  persistedNextAction?: string | null,
+  engineRequiredAction?: string | null,
+): string {
+  if (engineRequiredAction?.trim()) return engineRequiredAction.trim();
+  return resolveRecruiterNextAction(
+    { ...row, funnelAutomation: baselineCandidateFunnelAutomation(row.candidateId) },
+    workflowStatus,
+    persistedNextAction,
+  );
+}
 
 function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
   const stage = candidate.stage.toLowerCase();
@@ -223,13 +247,21 @@ export function buildBaselineWorkflowRow(
     recruiterAssignmentReason: local?.recruiterAssignmentReason ?? null,
     recruiterAssignmentConfidence: local?.recruiterAssignmentConfidence ?? null,
     recruiterAssignedAt: local?.recruiterAssignedAt ?? null,
+    requiredAction: local?.requiredAction ?? null,
+    actionType: local?.actionType ?? null,
+    actionPriority: local?.actionPriority ?? null,
+    actionReason: local?.actionReason ?? null,
+    actionDueDate: local?.actionDueDate ?? null,
+    actionConfidence: local?.actionConfidence ?? null,
+    actionGeneratedAt: local?.actionGeneratedAt ?? null,
   };
   const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...baseline,
-    nextActionNeeded: resolveRecruiterNextAction(
-      { ...baseline, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+    nextActionNeeded: resolveDisplayedNextAction(
+      baseline,
       workflowStatus,
       local?.nextActionNeeded,
+      local?.requiredAction,
     ),
   };
   return {
@@ -319,20 +351,52 @@ export function buildScoredWorkflowRow(
     recruiterAssignmentReason: local?.recruiterAssignmentReason ?? null,
     recruiterAssignmentConfidence: local?.recruiterAssignmentConfidence ?? null,
     recruiterAssignedAt: local?.recruiterAssignedAt ?? null,
+    requiredAction: local?.requiredAction ?? null,
+    actionType: local?.actionType ?? null,
+    actionPriority: local?.actionPriority ?? null,
+    actionReason: local?.actionReason ?? null,
+    actionDueDate: local?.actionDueDate ?? null,
+    actionConfidence: local?.actionConfidence ?? null,
+    actionGeneratedAt: local?.actionGeneratedAt ?? null,
   };
   const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...scored,
-    nextActionNeeded: resolveRecruiterNextAction(
-      { ...scored, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+    nextActionNeeded: resolveDisplayedNextAction(
+      scored,
       workflowStatus,
       local?.nextActionNeeded,
+      local?.requiredAction,
     ),
   };
+  return enrichRowWithRecruiterAction(
+    {
+      ...withNextAction,
+      funnelAutomation: evaluateCandidateFunnelAutomation(
+        { ...withNextAction, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+      ),
+    },
+    local,
+  );
+}
+
+function enrichRowWithRecruiterAction(
+  row: ScoredCandidateWorkflowRow,
+  local?: CandidateWorkflowRecord,
+): ScoredCandidateWorkflowRow {
+  if (local?.requiredAction?.trim()) return row;
+
+  const decision = buildRecruiterActionDecision(row);
+  if (!decision.shouldPersist) return row;
+
   return {
-    ...withNextAction,
-    funnelAutomation: evaluateCandidateFunnelAutomation(
-      { ...withNextAction, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
-    ),
+    ...row,
+    requiredAction: decision.requiredAction,
+    actionType: decision.actionType,
+    actionPriority: decision.actionPriority,
+    actionReason: decision.actionReason,
+    actionDueDate: decision.actionDueDate,
+    actionConfidence: decision.actionConfidence,
+    nextActionNeeded: decision.requiredAction,
   };
 }
 

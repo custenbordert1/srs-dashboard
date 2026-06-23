@@ -3,6 +3,7 @@
 import type { QueueCandidateRow } from "@/lib/candidate-action-queue";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import { CandidateAssignmentBadge } from "@/components/recruiting/candidate-assignment-badge";
+import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { slaToneClass } from "@/lib/candidate-action-sla";
 import {
@@ -219,10 +220,19 @@ export function CandidateQueueRow({
         </div>
 
         <div
-          className="col-span-2 row-start-2 flex min-h-[2rem] min-w-0 items-center rounded-md border border-teal-500/20 bg-teal-950/25 px-2 py-0.5 sm:col-span-1 sm:row-start-1 sm:min-h-[2.25rem] sm:py-1"
-          title={row.nextActionNeeded}
+          className="col-span-2 row-start-2 flex min-h-[2rem] min-w-0 flex-col justify-center gap-1 rounded-md border border-teal-500/20 bg-teal-950/25 px-2 py-0.5 sm:col-span-1 sm:row-start-1 sm:min-h-[2.25rem] sm:py-1"
+          title={row.actionReason ?? row.nextActionNeeded}
         >
-          <p className="line-clamp-2 text-sm font-semibold leading-snug text-teal-50">{row.nextActionNeeded}</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="line-clamp-2 text-sm font-semibold leading-snug text-teal-50">{row.nextActionNeeded}</p>
+            {row.actionPriority ? (
+              <span
+                className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${ACTION_PRIORITY_STYLES[row.actionPriority]}`}
+              >
+                {row.actionPriority}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         <div

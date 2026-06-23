@@ -60,6 +60,8 @@ export const HEAVY_REQUEST_TIMEOUT_MS = 30_000;
 export const BREEZY_CLIENT_REQUEST_TIMEOUT_MS = DASHBOARD_REQUEST_TIMEOUT_MS;
 /** Breezy preview-tier candidate sync — server budget ~18s + jobs list. */
 export const BREEZY_CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS = HEAVY_REQUEST_TIMEOUT_MS;
+/** Recruiting intelligence — Breezy jobs + candidates + scoring; server maxDuration 120s. */
+export const RECRUITING_INTELLIGENCE_CLIENT_TIMEOUT_MS = 120_000;
 
 export function timeoutErrorMessage(label: string, timeoutMs: number): string {
   const seconds = Math.round(timeoutMs / 1000);

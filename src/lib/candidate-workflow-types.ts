@@ -7,6 +7,23 @@ import {
 
 export type RecruiterAssignmentSource = "auto" | "manual";
 
+export type RecruiterActionType =
+  | "assign-recruiter"
+  | "screen-candidate"
+  | "needs-review"
+  | "schedule-interview"
+  | "send-paperwork"
+  | "await-signature"
+  | "follow-up"
+  | "verify-paperwork"
+  | "await-dd"
+  | "load-mel"
+  | "training"
+  | "monitor"
+  | "none";
+
+export type RecruiterActionPriority = "high" | "medium" | "low";
+
 export type CandidateWorkflowStatus =
   | "Applied"
   | "Needs Review"
@@ -70,6 +87,13 @@ export type CandidateWorkflowRecord = {
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
   recruiterAssignedAt?: string | null;
+  requiredAction?: string | null;
+  actionType?: RecruiterActionType | null;
+  actionPriority?: RecruiterActionPriority | null;
+  actionReason?: string | null;
+  actionDueDate?: string | null;
+  actionConfidence?: number | null;
+  actionGeneratedAt?: string | null;
   updatedAt: string;
 };
 
@@ -180,8 +204,50 @@ export function normalizeWorkflowRecord(
         ? Math.max(0, Math.min(100, Math.round(raw.recruiterAssignmentConfidence)))
         : null,
     recruiterAssignedAt: typeof raw.recruiterAssignedAt === "string" ? raw.recruiterAssignedAt : null,
+    requiredAction: typeof raw.requiredAction === "string" ? raw.requiredAction : null,
+    actionType: normalizeRecruiterActionType(raw.actionType),
+    actionPriority: normalizeRecruiterActionPriority(raw.actionPriority),
+    actionReason: typeof raw.actionReason === "string" ? raw.actionReason : null,
+    actionDueDate: typeof raw.actionDueDate === "string" ? raw.actionDueDate : null,
+    actionConfidence:
+      typeof raw.actionConfidence === "number" && Number.isFinite(raw.actionConfidence)
+        ? Math.max(0, Math.min(100, Math.round(raw.actionConfidence)))
+        : null,
+    actionGeneratedAt: typeof raw.actionGeneratedAt === "string" ? raw.actionGeneratedAt : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };
+}
+
+const RECRUITER_ACTION_TYPES: RecruiterActionType[] = [
+  "assign-recruiter",
+  "screen-candidate",
+  "needs-review",
+  "schedule-interview",
+  "send-paperwork",
+  "await-signature",
+  "follow-up",
+  "verify-paperwork",
+  "await-dd",
+  "load-mel",
+  "training",
+  "monitor",
+  "none",
+];
+
+const RECRUITER_ACTION_PRIORITIES: RecruiterActionPriority[] = ["high", "medium", "low"];
+
+export function normalizeRecruiterActionType(value: unknown): RecruiterActionType | null {
+  if (typeof value === "string" && RECRUITER_ACTION_TYPES.includes(value as RecruiterActionType)) {
+    return value as RecruiterActionType;
+  }
+  return null;
+}
+
+export function normalizeRecruiterActionPriority(value: unknown): RecruiterActionPriority | null {
+  if (typeof value === "string" && RECRUITER_ACTION_PRIORITIES.includes(value as RecruiterActionPriority)) {
+    return value as RecruiterActionPriority;
+  }
+  return null;
 }
 
 const PAPERWORK_STATUSES: PaperworkStatus[] = [

@@ -26,6 +26,7 @@ import {
   persistRecruitingActionToggle,
   persistWorkflowUpdate,
   runAutoRecruiterAssignment,
+  runAutoRecruiterAction,
   snoozeCandidate24h,
 } from "@/lib/candidate-workflow-client";
 import {
@@ -111,6 +112,7 @@ import {
 import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
+import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
 import {
   buildRecruiterInboxSections,
   computeRecruiterAgingBucket,
@@ -1322,6 +1324,25 @@ export function CandidatesSection() {
     };
   }, [applyWorkflowsBundle, committedCandidates.length, loadingBundle]);
 
+  useEffect(() => {
+    if (loadingBundle || committedCandidates.length === 0) return;
+    let cancelled = false;
+    void runAutoRecruiterAction()
+      .then((parsed) => {
+        if (cancelled || !parsed.workflows) return;
+        applyWorkflowsBundle(parsed.workflows);
+        if (parsed.rosters) {
+          setRosters(parsed.rosters);
+        }
+      })
+      .catch(() => {
+        // Auto-action generation is best-effort; derived actions still render on read path.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyWorkflowsBundle, committedCandidates.length, loadingBundle]);
+
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
     const row = buildCandidateDrawerRowFromScored(selectedCandidate);
@@ -1899,8 +1920,20 @@ export function CandidatesSection() {
             <td className={`${tdClass} truncate text-zinc-400`}>{location}</td>
             <td className={`${tdClass} tabular-nums text-zinc-400`}>{formatDays(appliedDays)}</td>
             <td className={tdClass}>
-              <div className="truncate text-sm font-medium text-teal-50/95" title={candidate.nextActionNeeded}>
-                {candidate.nextActionNeeded}
+              <div className="flex min-w-0 items-center gap-1.5">
+                <div
+                  className="truncate text-sm font-medium text-teal-50/95"
+                  title={candidate.actionReason ?? candidate.nextActionNeeded}
+                >
+                  {candidate.nextActionNeeded}
+                </div>
+                {candidate.actionPriority ? (
+                  <span
+                    className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${ACTION_PRIORITY_STYLES[candidate.actionPriority]}`}
+                  >
+                    {candidate.actionPriority}
+                  </span>
+                ) : null}
               </div>
             </td>
             <td className={`${tdClass} truncate text-zinc-400`}>

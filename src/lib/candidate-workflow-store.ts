@@ -23,6 +23,8 @@ import {
   type CandidateWorkflowStoreFile,
   type PaperworkStatus,
   type RecruiterAssignmentSource,
+  type RecruiterActionPriority,
+  type RecruiterActionType,
   type RecruiterRosters,
 } from "@/lib/candidate-workflow-types";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
@@ -221,6 +223,13 @@ export async function upsertCandidateWorkflow(input: {
   recruiterAssignmentSource?: RecruiterAssignmentSource | null;
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
+  requiredAction?: string | null;
+  actionType?: RecruiterActionType | null;
+  actionPriority?: RecruiterActionPriority | null;
+  actionReason?: string | null;
+  actionDueDate?: string | null;
+  actionConfidence?: number | null;
+  actionGeneratedAt?: string | null;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
@@ -323,6 +332,21 @@ export async function upsertCandidateWorkflow(input: {
         ? now
         : (existing?.recruiterAssignedAt ?? null);
 
+  const requiredAction =
+    input.requiredAction !== undefined ? input.requiredAction : (existing?.requiredAction ?? null);
+  const actionType =
+    input.actionType !== undefined ? input.actionType : (existing?.actionType ?? null);
+  const actionPriority =
+    input.actionPriority !== undefined ? input.actionPriority : (existing?.actionPriority ?? null);
+  const actionReason =
+    input.actionReason !== undefined ? input.actionReason : (existing?.actionReason ?? null);
+  const actionDueDate =
+    input.actionDueDate !== undefined ? input.actionDueDate : (existing?.actionDueDate ?? null);
+  const actionConfidence =
+    input.actionConfidence !== undefined ? input.actionConfidence : (existing?.actionConfidence ?? null);
+  const actionGeneratedAt =
+    input.actionGeneratedAt !== undefined ? input.actionGeneratedAt : (existing?.actionGeneratedAt ?? null);
+
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
   }
@@ -367,6 +391,18 @@ export async function upsertCandidateWorkflow(input: {
   if (input.paperworkHistoryMessage?.trim()) {
     history.unshift(event("paperwork", input.paperworkHistoryMessage.trim(), now));
   }
+  if (
+    input.requiredAction?.trim() &&
+    existing?.requiredAction !== input.requiredAction.trim()
+  ) {
+    history.unshift(
+      event(
+        "note",
+        `Recruiter action: ${input.requiredAction.trim()} (${input.actionPriority ?? "medium"} priority).`,
+        now,
+      ),
+    );
+  }
 
   const record: CandidateWorkflowRecord = {
     candidateId: input.candidateId,
@@ -375,7 +411,10 @@ export async function upsertCandidateWorkflow(input: {
     assignedRecruiter,
     assignedDM,
     lastActionAt: now,
-    nextActionNeeded: nextActionForWorkflowStatus(workflowStatus),
+    nextActionNeeded:
+      requiredAction?.trim() ||
+      existing?.requiredAction?.trim() ||
+      nextActionForWorkflowStatus(workflowStatus),
     history: history.slice(0, 100),
     recruitingActions,
     followUpDueAt,
@@ -401,6 +440,13 @@ export async function upsertCandidateWorkflow(input: {
     recruiterAssignmentReason,
     recruiterAssignmentConfidence,
     recruiterAssignedAt,
+    requiredAction,
+    actionType,
+    actionPriority,
+    actionReason,
+    actionDueDate,
+    actionConfidence,
+    actionGeneratedAt,
     updatedAt: now,
   };
 

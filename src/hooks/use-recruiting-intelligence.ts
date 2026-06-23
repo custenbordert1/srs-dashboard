@@ -4,7 +4,7 @@ import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-automation
 import { fetchJsonWithRetry } from "@/hooks/use-fetch-with-retry";
 import { cacheKey, invalidateCached, LONG_CLIENT_CACHE_TTL_MS } from "@/lib/client-api-cache";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
-import { DASHBOARD_REQUEST_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
+import { RECRUITING_INTELLIGENCE_CLIENT_TIMEOUT_MS } from "@/lib/fetch-with-timeout";
 import { friendlyFetchMessageFromError } from "@/lib/friendly-fetch-errors";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -27,6 +27,8 @@ type IntelligenceResponse = {
 type UseRecruitingIntelligenceOptions = {
   pollIntervalMs?: number;
   enabled?: boolean;
+  /** Defaults to RECRUITING_INTELLIGENCE_CLIENT_TIMEOUT_MS (120s) — Breezy sync can exceed 10s. */
+  timeoutMs?: number;
 };
 
 type FetchMode = "initial" | "background" | "manual";
@@ -34,6 +36,7 @@ type FetchMode = "initial" | "background" | "manual";
 export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOptions = {}) {
   const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_MS;
   const enabled = options.enabled ?? true;
+  const timeoutMs = options.timeoutMs ?? RECRUITING_INTELLIGENCE_CLIENT_TIMEOUT_MS;
 
   const [data, setData] = useState<RecruitingIntelligenceSnapshot | null>(null);
   const [meta, setMeta] = useState<IntelligenceMeta>();
@@ -75,7 +78,7 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
           cacheKey: cacheKey(["recruiting", "intelligence"]),
           cacheTtlMs: forceRefresh ? 0 : LONG_CLIENT_CACHE_TTL_MS,
           force: forceRefresh,
-          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+          timeoutMs,
           maxAttempts: 1,
           signal: controller.signal,
         });
@@ -134,7 +137,7 @@ export function useRecruitingIntelligence(options: UseRecruitingIntelligenceOpti
         setRefreshing(false);
       }
     },
-    [enabled],
+    [enabled, timeoutMs],
   );
 
   const refresh = useCallback(() => {

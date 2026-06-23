@@ -7,6 +7,8 @@ import {
   summarizePipelineRisks,
 } from "@/lib/hiring-funnel-automation/build-workload-balance";
 import type { ExecutiveAutomationRollups } from "@/lib/hiring-funnel-automation/types";
+import { buildRecruiterActionMetrics } from "@/lib/recruiter-action-engine/build-action-metrics";
+import { buildRecruiterActionDecisions } from "@/lib/recruiter-action-engine/build-action-decision";
 
 export function buildExecutiveAutomationRollups(
   candidates: ScoredCandidateWorkflowRow[],
@@ -59,6 +61,14 @@ export function buildExecutiveAutomationRollups(
     .map((row) => row.recruiterAssignmentConfidence ?? 0)
     .filter((value) => value > 0);
 
+  const actionDecisions = buildRecruiterActionDecisions(candidates, referenceMs);
+  const actionMetrics = buildRecruiterActionMetrics({
+    candidates,
+    decisions: actionDecisions,
+    generated: candidates.filter((row) => row.requiredAction && row.actionType !== "none").length,
+    referenceMs,
+  });
+
   return {
     recruiterCapacityRisk,
     pipelineBlockers: pipelineBlockers.slice(0, 3),
@@ -69,5 +79,9 @@ export function buildExecutiveAutomationRollups(
       confidenceValues.length > 0
         ? Math.round(confidenceValues.reduce((sum, value) => sum + value, 0) / confidenceValues.length)
         : 0,
+    overdueRecruiterActions: actionMetrics.overdueRecruiterActions,
+    actionsDueToday: actionMetrics.actionsDueToday,
+    averageActionAgeDays: actionMetrics.averageActionAgeDays,
+    recruiterSlaCompliance: actionMetrics.recruiterSlaCompliance,
   };
 }

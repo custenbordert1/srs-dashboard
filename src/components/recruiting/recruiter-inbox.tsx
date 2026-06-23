@@ -7,7 +7,6 @@ import {
   RECRUITER_INBOX_THIS_WEEK_SECTIONS,
   RECRUITER_INBOX_TODAY_SECTIONS,
   sortByRecruiterInboxPriority,
-  sortRecruiterInboxSectionRows,
   type RecruiterInboxSectionId,
 } from "@/lib/recruiter-action-queue-filters";
 import { buildRecruiterTasks } from "@/lib/hiring-funnel-automation/build-recruiter-tasks";
@@ -136,10 +135,10 @@ export function RecruiterInbox({
   const sortedSections = useMemo(() => {
     const result = {} as Record<RecruiterInboxSectionId, ScoredCandidateWorkflowRow[]>;
     for (const id of Object.keys(sections) as RecruiterInboxSectionId[]) {
-      result[id] = sortRecruiterInboxSectionRows(id, sections[id]);
+      result[id] = sortByRecruiterInboxPriority(sections[id], actingRecruiter);
     }
     return result;
-  }, [sections]);
+  }, [actingRecruiter, sections]);
 
   const sortedDatabaseRows = useMemo(
     () => sortByRecruiterInboxPriority(databaseRows, actingRecruiter),

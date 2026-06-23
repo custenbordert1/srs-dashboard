@@ -69,6 +69,10 @@ export type ExecutiveAutomationRollups = {
   autoAssignmentRate: number;
   manualAssignmentRequired: number;
   assignmentConfidence: number;
+  overdueRecruiterActions: number;
+  actionsDueToday: number;
+  averageActionAgeDays: number;
+  recruiterSlaCompliance: number;
 };
 
 export const RECRUITER_TASK_LABELS: Record<RecruiterTaskType, string> = {

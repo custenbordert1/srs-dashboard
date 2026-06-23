@@ -106,6 +106,13 @@ export type CandidateDrawerRow = {
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
   recruiterAssignedAt?: string | null;
+  requiredAction?: string | null;
+  actionType?: import("@/lib/candidate-workflow-types").RecruiterActionType | null;
+  actionPriority?: import("@/lib/candidate-workflow-types").RecruiterActionPriority | null;
+  actionReason?: string | null;
+  actionDueDate?: string | null;
+  actionConfidence?: number | null;
+  actionGeneratedAt?: string | null;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";

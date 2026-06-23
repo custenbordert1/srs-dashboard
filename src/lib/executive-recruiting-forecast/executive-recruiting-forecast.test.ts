@@ -140,6 +140,10 @@ function intelligenceStub(): RecruitingIntelligenceSnapshot {
       autoAssignmentRate: 0,
       manualAssignmentRequired: 0,
       assignmentConfidence: 0,
+      overdueRecruiterActions: 0,
+      actionsDueToday: 0,
+      averageActionAgeDays: 0,
+      recruiterSlaCompliance: 100,
     },
   };
 }

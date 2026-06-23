@@ -11,6 +11,7 @@ import { CandidateNextActionCard } from "@/components/recruiting/candidate-works
 import { CandidateNotesPanel } from "@/components/recruiting/candidate-workspace/candidate-notes-panel";
 import { CandidatePaperworkPanel } from "@/components/recruiting/candidate-workspace/candidate-paperwork-panel";
 import { CandidateQuestionnaireIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-questionnaire-intelligence-panel";
+import { CandidateRecruiterActionPanel } from "@/components/recruiting/candidate-workspace/candidate-recruiter-action-panel";
 import { CandidateResumeIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-resume-intelligence-panel";
 import { CandidateSummary } from "@/components/recruiting/candidate-workspace/candidate-summary";
 import { CandidateTimeline } from "@/components/recruiting/candidate-workspace/candidate-timeline";
@@ -194,6 +195,14 @@ export function CandidateWorkspace({
             busy={assignmentBusy}
             onAssignToMe={onAssignActingRecruiter}
             onAssignRecruiter={onAssignRecruiter}
+          />
+
+          <CandidateRecruiterActionPanel
+            requiredAction={activeCandidate.requiredAction}
+            actionPriority={activeCandidate.actionPriority}
+            actionReason={activeCandidate.actionReason}
+            actionDueDate={activeCandidate.actionDueDate}
+            actionConfidence={activeCandidate.actionConfidence}
           />
 
           <CandidateGradePanel grade={activeCandidate.candidateGrade} />

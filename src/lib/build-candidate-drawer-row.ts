@@ -105,5 +105,12 @@ export function buildCandidateDrawerRowFromScored(
     recruiterAssignmentReason: scored.recruiterAssignmentReason ?? null,
     recruiterAssignmentConfidence: scored.recruiterAssignmentConfidence ?? null,
     recruiterAssignedAt: scored.recruiterAssignedAt ?? null,
+    requiredAction: scored.requiredAction ?? null,
+    actionType: scored.actionType ?? null,
+    actionPriority: scored.actionPriority ?? null,
+    actionReason: scored.actionReason ?? null,
+    actionDueDate: scored.actionDueDate ?? null,
+    actionConfidence: scored.actionConfidence ?? null,
+    actionGeneratedAt: scored.actionGeneratedAt ?? null,
   };
 }

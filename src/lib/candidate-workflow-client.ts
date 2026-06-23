@@ -31,6 +31,17 @@ export type AutoAssignApiResponse = WorkflowApiResponse & {
   };
 };
 
+export type AutoActionApiResponse = WorkflowApiResponse & {
+  generated?: number;
+  skipped?: number;
+  metrics?: {
+    overdueRecruiterActions: number;
+    actionsDueToday: number;
+    averageActionAgeDays: number;
+    recruiterSlaCompliance: number;
+  };
+};
+
 export async function runAutoRecruiterAssignment(): Promise<AutoAssignApiResponse> {
   const res = await fetch("/api/candidates/workflows/auto-assign", {
     method: "POST",
@@ -39,6 +50,18 @@ export async function runAutoRecruiterAssignment(): Promise<AutoAssignApiRespons
   const parsed = (await res.json()) as AutoAssignApiResponse;
   if (!res.ok || !parsed.ok) {
     throw new Error(parsed.error ?? `Auto-assign request failed (${res.status})`);
+  }
+  return parsed;
+}
+
+export async function runAutoRecruiterAction(): Promise<AutoActionApiResponse> {
+  const res = await fetch("/api/candidates/workflows/auto-action", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  const parsed = (await res.json()) as AutoActionApiResponse;
+  if (!res.ok || !parsed.ok) {
+    throw new Error(parsed.error ?? `Auto-action request failed (${res.status})`);
   }
   return parsed;
 }
