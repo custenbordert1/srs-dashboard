@@ -10,6 +10,7 @@ import {
 test("maps tabs to the four navigation groups", () => {
   assert.equal(findNavGroupForTab("executive-home"), "executive");
   assert.equal(findNavGroupForTab("pipeline-intelligence"), "executive");
+  assert.equal(findNavGroupForTab("recruiting-autopilot"), "executive");
   assert.equal(findNavGroupForTab("command-center"), "operations");
   assert.equal(findNavGroupForTab("candidates"), "operations");
   assert.equal(findNavGroupForTab("dm-scorecards"), "territory-field");

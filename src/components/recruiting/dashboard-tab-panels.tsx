@@ -164,6 +164,14 @@ export const LazyPipelineIntelligencePanel = dynamic(
   { loading: tabLoading("Loading pipeline intelligence…"), ssr: false },
 );
 
+export const LazyRecruitingAutopilotPanel = dynamic(
+  () =>
+    import("@/components/recruiting/recruiting-autopilot-panel").then((m) => ({
+      default: m.RecruitingAutopilotPanel,
+    })),
+  { loading: tabLoading("Loading recruiting autopilot…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;

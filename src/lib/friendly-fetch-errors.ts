@@ -8,6 +8,7 @@ export type FriendlyFetchContext =
   | "accountability"
   | "ats-health"
   | "pipeline"
+  | "autopilot"
   | "generic";
 
 const FRIENDLY_BY_CONTEXT: Record<FriendlyFetchContext, { pending: string; unavailable: string; timeout: string }> = {
@@ -45,6 +46,11 @@ const FRIENDLY_BY_CONTEXT: Record<FriendlyFetchContext, { pending: string; unava
     pending: "Pipeline intelligence sync is still running. Retry shortly.",
     unavailable: "Pipeline intelligence temporarily unavailable. Retry shortly.",
     timeout: "Pipeline intelligence is taking longer than expected. Retry in a moment.",
+  },
+  autopilot: {
+    pending: "Recruiting autopilot sync is still running. Retry shortly.",
+    unavailable: "Recruiting autopilot temporarily unavailable. Showing last loaded snapshot when available.",
+    timeout: "Recruiting autopilot is taking longer than expected. Retry in a moment.",
   },
   generic: {
     pending: "Sync pending. Retry shortly.",

@@ -16,7 +16,8 @@ export type DashboardTabId =
   | "executive-home"
   | "executive-forecasting"
   | "executive-accountability"
-  | "pipeline-intelligence";
+  | "pipeline-intelligence"
+  | "recruiting-autopilot";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -183,6 +184,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "live-breezy",
     bannerMessage:
       "Stage conversion, territory funnels, recruiter performance, and bottleneck detection from Breezy candidates and local workflow overlay.",
+  },
+  "recruiting-autopilot": {
+    navLabel: "Recruiting Autopilot",
+    sourceTag: "Executive",
+    badgeLabel: "Autonomous recruiting",
+    kind: "executive",
+    bannerMessage:
+      "Coverage-driven posting and hiring recommendations with approval rules — built from Breezy, MEL, and workflow intelligence. Recruiter oversight required for all actions.",
   },
 };
 
