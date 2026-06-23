@@ -26,6 +26,8 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
       "executive-forecasting",
       "pipeline-intelligence",
       "workforce-intelligence",
+      "recruiting-autopilot",
+      "recruiting-execution",
     ],
   },
   {
@@ -56,6 +58,8 @@ const EXECUTIVE_ONLY_TAB_IDS = new Set<DashboardTabId>([
   "executive-accountability",
   "executive-forecasting",
   "workforce-intelligence",
+  "recruiting-autopilot",
+  "recruiting-execution",
 ]);
 
 export function isDashboardTabId(value: string): value is DashboardTabId {
