@@ -9,6 +9,7 @@ import {
   LONG_CLIENT_CACHE_TTL_MS,
 } from "@/lib/client-api-cache";
 import type { AutonomousRecruitingSnapshot, ApprovalRule } from "@/lib/autonomous-recruiting-engine";
+import type { RecruitingExecutionSnapshot } from "@/lib/autonomous-recruiting-execution";
 import { friendlyFetchMessageFromError, isIgnorableFetchError } from "@/lib/friendly-fetch-errors";
 import {
   fetchWithTimeout,
@@ -24,14 +25,22 @@ type AutonomousRecruitingResponse = {
   ok: boolean;
   error?: string;
   snapshot?: AutonomousRecruitingSnapshot;
+  executionSnapshot?: RecruitingExecutionSnapshot;
   rules?: ApprovalRule[];
 };
 
-function readAutopilotCache(): AutonomousRecruitingSnapshot | null {
-  return getCachedAllowExpired<AutonomousRecruitingSnapshot>(AUTOPILOT_CACHE_KEY);
+type CachedAutopilotPayload = {
+  snapshot: AutonomousRecruitingSnapshot;
+  executionSnapshot: RecruitingExecutionSnapshot | null;
+};
+
+function readAutopilotCache(): CachedAutopilotPayload | null {
+  const cached = getCachedAllowExpired<CachedAutopilotPayload>(AUTOPILOT_CACHE_KEY);
+  if (!cached?.snapshot) return null;
+  return cached;
 }
 
-async function fetchAutonomousRecruiting(signal?: AbortSignal): Promise<AutonomousRecruitingSnapshot> {
+async function fetchAutonomousRecruiting(signal?: AbortSignal): Promise<CachedAutopilotPayload> {
   const res = await fetchWithTimeout("/api/autonomous-recruiting", {
     cache: "no-store",
     timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
@@ -41,23 +50,37 @@ async function fetchAutonomousRecruiting(signal?: AbortSignal): Promise<Autonomo
   if (!parsed.ok || !parsed.snapshot) {
     throw new Error(parsed.error ?? "Unable to load recruiting autopilot");
   }
-  return parsed.snapshot;
+  return {
+    snapshot: parsed.snapshot,
+    executionSnapshot: parsed.executionSnapshot ?? null,
+  };
 }
 
 export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
   const enabled = options.enabled ?? true;
   const initialCache = typeof window !== "undefined" ? readAutopilotCache() : null;
-  const [snapshot, setSnapshot] = useState<AutonomousRecruitingSnapshot | null>(initialCache);
+  const [snapshot, setSnapshot] = useState<AutonomousRecruitingSnapshot | null>(
+    initialCache?.snapshot ?? null,
+  );
+  const [executionSnapshot, setExecutionSnapshot] = useState<RecruitingExecutionSnapshot | null>(
+    initialCache?.executionSnapshot ?? null,
+  );
   const [loading, setLoading] = useState(enabled && !initialCache);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
   const [showingCachedSnapshot, setShowingCachedSnapshot] = useState(false);
   const [savingRules, setSavingRules] = useState(false);
+  const [actionBusy, setActionBusy] = useState(false);
 
   const fetchGeneration = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
+
+  const applyPayload = useCallback((payload: CachedAutopilotPayload) => {
+    setSnapshot(payload.snapshot);
+    setExecutionSnapshot(payload.executionSnapshot);
+  }, []);
 
   const load = useCallback(
     async (manual = false) => {
@@ -76,7 +99,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
 
       if (manual) {
         setRefreshing(true);
-      } else if (!getCached<AutonomousRecruitingSnapshot>(AUTOPILOT_CACHE_KEY)) {
+      } else if (!getCached<CachedAutopilotPayload>(AUTOPILOT_CACHE_KEY)) {
         setLoading(true);
       }
       setError(null);
@@ -91,18 +114,18 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
             force: manual,
             label: "autonomous-recruiting",
             staleOnError: true,
-            shouldCache: (payload) => Boolean(payload.fetchedAt),
+            shouldCache: (payload) => Boolean(payload.snapshot.fetchedAt),
           },
         );
         if (!mountedRef.current || generation !== fetchGeneration.current) return;
-        setSnapshot(data);
+        applyPayload(data);
         setShowingCachedSnapshot(false);
       } catch (err) {
         if (!mountedRef.current || generation !== fetchGeneration.current) return;
 
         const stale = readAutopilotCache();
         if (stale) {
-          setSnapshot(stale);
+          applyPayload(stale);
           setShowingCachedSnapshot(true);
           if (!isIgnorableFetchError(err) && !isAbortError(err)) {
             setError(
@@ -133,13 +156,70 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
         setRefreshing(false);
       }
     },
-    [enabled],
+    [applyPayload, enabled],
   );
 
   const refresh = useCallback(() => {
     invalidateCached(AUTOPILOT_CACHE_KEY);
     void load(true);
   }, [load]);
+
+  const postAction = useCallback(
+    async (action: string, payload: Record<string, string> = {}) => {
+      setActionBusy(true);
+      setError(null);
+      try {
+        const res = await fetchWithTimeout("/api/autonomous-recruiting", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, ...payload }),
+          timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+        });
+        const parsed = (await res.json()) as AutonomousRecruitingResponse;
+        if (!parsed.ok || !parsed.snapshot) {
+          throw new Error(parsed.error ?? `Failed: ${action}`);
+        }
+        invalidateCached(AUTOPILOT_CACHE_KEY);
+        applyPayload({
+          snapshot: parsed.snapshot,
+          executionSnapshot: parsed.executionSnapshot ?? null,
+        });
+        setShowingCachedSnapshot(false);
+      } catch (err) {
+        if (!isIgnorableFetchError(err) && !isAbortError(err)) {
+          setError(err instanceof Error ? err.message : `Failed: ${action}`);
+        }
+      } finally {
+        setActionBusy(false);
+      }
+    },
+    [applyPayload],
+  );
+
+  const approveExecution = useCallback(
+    (executionId: string) => postAction("approve-execution", { executionId }),
+    [postAction],
+  );
+
+  const executeExecution = useCallback(
+    (executionId: string) => postAction("execute-execution", { executionId }),
+    [postAction],
+  );
+
+  const completeTask = useCallback(
+    (taskId: string) => postAction("complete-task", { taskId }),
+    [postAction],
+  );
+
+  const reassignTask = useCallback(
+    (taskId: string, owner: string) => postAction("reassign-task", { taskId, owner }),
+    [postAction],
+  );
+
+  const escalateTask = useCallback(
+    (taskId: string) => postAction("escalate-task", { taskId }),
+    [postAction],
+  );
 
   const saveRules = useCallback(
     async (rules: ApprovalRule[]) => {
@@ -181,7 +261,10 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
         throw new Error(parsed.error ?? "Failed to evaluate approval rules");
       }
       invalidateCached(AUTOPILOT_CACHE_KEY);
-      setSnapshot(parsed.snapshot);
+      applyPayload({
+        snapshot: parsed.snapshot,
+        executionSnapshot: parsed.executionSnapshot ?? executionSnapshot,
+      });
       setShowingCachedSnapshot(false);
     } catch (err) {
       if (!isIgnorableFetchError(err) && !isAbortError(err)) {
@@ -190,7 +273,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
     } finally {
       setSavingRules(false);
     }
-  }, []);
+  }, [applyPayload, executionSnapshot]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -216,6 +299,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
 
   return {
     snapshot,
+    executionSnapshot,
     loading,
     refreshing,
     error,
@@ -225,5 +309,11 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
     saveRules,
     evaluateRules,
     savingRules,
+    actionBusy,
+    approveExecution,
+    executeExecution,
+    completeTask,
+    reassignTask,
+    escalateTask,
   };
 }

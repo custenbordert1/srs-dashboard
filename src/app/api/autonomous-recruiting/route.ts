@@ -13,6 +13,15 @@ import {
   saveApprovalRules,
 } from "@/lib/autonomous-recruiting-engine";
 import type { ApprovalRule } from "@/lib/autonomous-recruiting-engine/types";
+import {
+  approveExecution,
+  buildExecutionSnapshot,
+  completeTask,
+  escalateTask,
+  executePostingRecommendation,
+  planExecutionsFromSnapshot,
+  reassignTask,
+} from "@/lib/autonomous-recruiting-execution";
 import { buildControlCenterSnapshot, listAutomationRuns } from "@/lib/hiring-automation-engine";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
@@ -86,12 +95,19 @@ export async function GET(request: Request) {
     automationRuns: ctx.automationRuns,
   });
 
+  const executionSnapshot = await buildExecutionSnapshot({
+    autopilotSnapshot: snapshot,
+    jobs: ctx.jobs,
+    scoredRows: ctx.scoredRows,
+  });
+
   const buildMs = Date.now() - startedAt;
 
   return NextResponse.json(
     {
       ok: true,
       snapshot,
+      executionSnapshot,
       meta: {
         buildMs,
         candidateCount: ctx.candidates.length,
@@ -120,18 +136,114 @@ export async function POST(request: Request) {
   });
   if (isGuardFailure(guard)) return guard;
 
+  const { session } = guard;
+
   const body = (await request.json().catch(() => ({}))) as {
     action?: string;
     rules?: ApprovalRule[];
+    executionId?: string;
+    taskId?: string;
+    owner?: string;
   };
+
+  const actor = session.userId;
 
   if (body.action === "refresh-rules" && Array.isArray(body.rules)) {
     const saved = await saveApprovalRules(body.rules);
     return NextResponse.json({ ok: true, rules: saved });
   }
 
+  async function respondWithExecutionSnapshot() {
+    const ctx = await loadSnapshotContext(session);
+    if ("error" in ctx) {
+      return NextResponse.json({ ok: false, error: ctx.error }, { status: 502 });
+    }
+
+    const snapshot = buildAutopilotSnapshot({
+      jobs: ctx.jobs,
+      candidates: ctx.candidates,
+      workflows: ctx.workflows,
+      opportunities: ctx.opportunities,
+      scoredRows: ctx.scoredRows,
+      fetchedAt: ctx.fetchedAt,
+      territoryStates: ctx.territoryStates,
+      approvalRules: ctx.approvalRules,
+      automationRuns: ctx.automationRuns,
+    });
+
+    const executionSnapshot = await buildExecutionSnapshot({
+      autopilotSnapshot: snapshot,
+      jobs: ctx.jobs,
+      scoredRows: ctx.scoredRows,
+    });
+
+    return NextResponse.json({ ok: true, snapshot, executionSnapshot });
+  }
+
+  if (body.action === "plan-executions") {
+    const ctx = await loadSnapshotContext(session);
+    if ("error" in ctx) {
+      return NextResponse.json({ ok: false, error: ctx.error }, { status: 502 });
+    }
+
+    const snapshot = buildAutopilotSnapshot({
+      jobs: ctx.jobs,
+      candidates: ctx.candidates,
+      workflows: ctx.workflows,
+      opportunities: ctx.opportunities,
+      scoredRows: ctx.scoredRows,
+      fetchedAt: ctx.fetchedAt,
+      territoryStates: ctx.territoryStates,
+      approvalRules: ctx.approvalRules,
+      automationRuns: ctx.automationRuns,
+    });
+
+    await planExecutionsFromSnapshot(snapshot);
+    return respondWithExecutionSnapshot();
+  }
+
+  if (body.action === "approve-execution" && body.executionId) {
+    const approved = await approveExecution(body.executionId, actor);
+    if (!approved) {
+      return NextResponse.json({ ok: false, error: "Execution cannot be approved." }, { status: 400 });
+    }
+    return respondWithExecutionSnapshot();
+  }
+
+  if (body.action === "execute-execution" && body.executionId) {
+    const result = await executePostingRecommendation(body.executionId, actor);
+    if (!result.ok) {
+      return NextResponse.json({ ok: false, error: result.error, execution: result.execution }, { status: 400 });
+    }
+    return respondWithExecutionSnapshot();
+  }
+
+  if (body.action === "complete-task" && body.taskId) {
+    const task = await completeTask(body.taskId);
+    if (!task) {
+      return NextResponse.json({ ok: false, error: "Task not found or already completed." }, { status: 400 });
+    }
+    return respondWithExecutionSnapshot();
+  }
+
+  if (body.action === "reassign-task" && body.taskId && body.owner) {
+    const task = await reassignTask(body.taskId, body.owner);
+    if (!task) {
+      return NextResponse.json({ ok: false, error: "Task not found." }, { status: 400 });
+    }
+    return respondWithExecutionSnapshot();
+  }
+
+  if (body.action === "escalate-task" && body.taskId) {
+    const task = await escalateTask(body.taskId);
+    if (!task) {
+      return NextResponse.json({ ok: false, error: "Task not found." }, { status: 400 });
+    }
+    return respondWithExecutionSnapshot();
+  }
+
   if (body.action === "evaluate-rules") {
-    const ctx = await loadSnapshotContext(guard.session);
+    const ctx = await loadSnapshotContext(session);
     if ("error" in ctx) {
       return NextResponse.json({ ok: false, error: ctx.error }, { status: 502 });
     }

@@ -172,6 +172,14 @@ export const LazyRecruitingAutopilotPanel = dynamic(
   { loading: tabLoading("Loading recruiting autopilot…"), ssr: false },
 );
 
+export const LazyRecruitingExecutionCenter = dynamic(
+  () =>
+    import("@/components/recruiting/recruiting-execution-center").then((m) => ({
+      default: m.RecruitingExecutionCenter,
+    })),
+  { loading: tabLoading("Loading execution center…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;

@@ -17,7 +17,8 @@ export type DashboardTabId =
   | "executive-forecasting"
   | "executive-accountability"
   | "pipeline-intelligence"
-  | "recruiting-autopilot";
+  | "recruiting-autopilot"
+  | "recruiting-execution";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -192,6 +193,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Coverage-driven posting and hiring recommendations with approval rules — built from Breezy, MEL, and workflow intelligence. Recruiter oversight required for all actions.",
+  },
+  "recruiting-execution": {
+    navLabel: "Execution Center",
+    sourceTag: "Executive",
+    badgeLabel: "Autopilot execution",
+    kind: "executive",
+    bannerMessage:
+      "Orchestrates approved autopilot recommendations — posting automation, recruiter tasks, applicant monitoring, and computed outcomes.",
   },
 };
 

@@ -26,6 +26,7 @@ import {
   LazyExecutiveAccountabilityPanel,
   LazyPipelineIntelligencePanel,
   LazyRecruitingAutopilotPanel,
+  LazyRecruitingExecutionCenter,
 } from "./dashboard-tab-panels";
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
@@ -233,6 +234,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="recruiting-autopilot" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="recruiting-autopilot">
             <LazyRecruitingAutopilotPanel />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="recruiting-execution" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="recruiting-execution">
+            <LazyRecruitingExecutionCenter />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
       </main>

@@ -101,13 +101,27 @@ function CoverageNeedsTable({ rows }: { rows: TerritoryCoverageNeed[] }) {
   );
 }
 
-function PostingRecommendationsList({ rows }: { rows: RecommendedAd[] }) {
+function PostingRecommendationsList({
+  rows,
+  executionByRecommendation,
+  onApprove,
+  onExecute,
+  busy,
+}: {
+  rows: RecommendedAd[];
+  executionByRecommendation: Map<string, { id: string; status: string }>;
+  onApprove: (executionId: string) => void;
+  onExecute: (executionId: string) => void;
+  busy: boolean;
+}) {
   if (rows.length === 0) {
     return <p className="text-sm text-zinc-500">No posting recommendations right now.</p>;
   }
   return (
     <ul className="space-y-2">
-      {rows.slice(0, 10).map((row) => (
+      {rows.slice(0, 10).map((row) => {
+        const execution = executionByRecommendation.get(row.id);
+        return (
         <li key={row.id} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 p-3 text-sm">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
@@ -132,8 +146,34 @@ function PostingRecommendationsList({ rows }: { rows: RecommendedAd[] }) {
             Expected applicants: {row.expectedApplicants.min}–{row.expectedApplicants.max}
             {row.coverageNeedScore !== undefined ? ` · Coverage need ${row.coverageNeedScore}` : ""}
           </p>
+          {execution ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="text-[10px] uppercase text-zinc-500">Execution: {execution.status}</span>
+              {["detected", "recommended"].includes(execution.status) ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onApprove(execution.id)}
+                  className="rounded-md border border-teal-500/40 px-2 py-0.5 text-[10px] text-teal-100 hover:bg-teal-500/15 disabled:opacity-50"
+                >
+                  Approve
+                </button>
+              ) : null}
+              {execution.status === "approved" ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onExecute(execution.id)}
+                  className="rounded-md border border-emerald-500/40 px-2 py-0.5 text-[10px] text-emerald-100 hover:bg-emerald-500/15 disabled:opacity-50"
+                >
+                  Execute
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }
@@ -245,6 +285,7 @@ function RulesTable({
 export function RecruitingAutopilotPanel() {
   const {
     snapshot,
+    executionSnapshot,
     loading,
     error,
     timedOut,
@@ -253,6 +294,9 @@ export function RecruitingAutopilotPanel() {
     saveRules,
     evaluateRules,
     savingRules,
+    actionBusy,
+    approveExecution,
+    executeExecution,
   } = useAutonomousRecruiting();
   const loadingCeilingHit = useLoadingCeiling(loading && !snapshot, EXECUTIVE_PANEL_LOADING_CEILING_MS);
   const showLoading = loading && !snapshot && !loadingCeilingHit;
@@ -289,6 +333,9 @@ export function RecruitingAutopilotPanel() {
   if (!snapshot) return null;
 
   const rules = rulesDraft ?? snapshot.approvalRules;
+  const executionByRecommendation = new Map(
+    (executionSnapshot?.executionQueue ?? []).map((row) => [row.recommendationId, { id: row.id, status: row.status }]),
+  );
 
   const toggleRule = (rule: ApprovalRule) => {
     const next = rules.map((entry) =>
@@ -365,7 +412,13 @@ export function RecruitingAutopilotPanel() {
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Posting recommendations</h3>
           <div className="mt-3">
-            <PostingRecommendationsList rows={snapshot.postingRecommendations} />
+            <PostingRecommendationsList
+              rows={snapshot.postingRecommendations}
+              executionByRecommendation={executionByRecommendation}
+              onApprove={(id) => void approveExecution(id)}
+              onExecute={(id) => void executeExecution(id)}
+              busy={actionBusy}
+            />
           </div>
         </div>
       </div>
