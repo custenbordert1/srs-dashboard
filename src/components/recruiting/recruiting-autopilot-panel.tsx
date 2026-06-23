@@ -10,6 +10,7 @@ import type {
   RecommendedAd,
   TerritoryCoverageNeed,
 } from "@/lib/autonomous-recruiting-engine";
+import type { ExecutionCorrelation } from "@/lib/autonomous-recruiting-execution";
 import { useState } from "react";
 
 const COVERAGE_STATUS_STYLES: Record<CoverageStatus, string> = {
@@ -333,8 +334,11 @@ export function RecruitingAutopilotPanel() {
   if (!snapshot) return null;
 
   const rules = rulesDraft ?? snapshot.approvalRules;
-  const executionByRecommendation = new Map(
-    (executionSnapshot?.executionQueue ?? []).map((row) => [row.recommendationId, { id: row.id, status: row.status }]),
+  const executionByRecommendation = new Map<string, { id: string; status: string }>(
+    (executionSnapshot?.executionQueue ?? []).map((row: ExecutionCorrelation) => [
+      row.recommendationId,
+      { id: row.id, status: row.status },
+    ]),
   );
 
   const toggleRule = (rule: ApprovalRule) => {

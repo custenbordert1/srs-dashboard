@@ -3,9 +3,11 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { AutonomousRecruitingSnapshot } from "@/lib/autonomous-recruiting-engine/types";
 import type { ExecutionStatus, RecommendationType } from "@/lib/autonomous-recruiting-execution/types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const CORRELATION_PATH = path.join(STORE_DIR, "autopilot-execution-correlation.json");
+function correlationPath(): string {
+  return path.join(recruitingDataDir(), "autopilot-execution-correlation.json");
+}
 
 export type ExecutionCorrelation = {
   id: string;
@@ -39,7 +41,7 @@ type CorrelationStoreFile = {
 
 async function readCorrelationFile(): Promise<CorrelationStoreFile> {
   try {
-    const raw = await readFile(CORRELATION_PATH, "utf8");
+    const raw = await readFile(correlationPath(), "utf8");
     const parsed = JSON.parse(raw) as CorrelationStoreFile;
     return {
       correlations: Array.isArray(parsed.correlations) ? parsed.correlations : [],
@@ -51,8 +53,8 @@ async function readCorrelationFile(): Promise<CorrelationStoreFile> {
 }
 
 async function writeCorrelationFile(file: CorrelationStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(CORRELATION_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(correlationPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 function initialStatus(

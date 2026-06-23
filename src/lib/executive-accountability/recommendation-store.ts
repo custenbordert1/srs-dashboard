@@ -14,9 +14,11 @@ import type {
   OperationalEvidenceKind,
 } from "@/lib/executive-accountability/types";
 import { createOperationalEvidence } from "@/lib/executive-accountability/action-audit";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const STORE_PATH = path.join(STORE_DIR, "executive-accountability.json");
+function storePath(): string {
+  return path.join(recruitingDataDir(), "executive-accountability.json");
+}
 
 export type ExecutiveAccountabilityStoreFile = {
   actions: ExecutiveTrackedAction[];
@@ -44,7 +46,7 @@ function normalizeStore(raw: Partial<ExecutiveAccountabilityStoreFile>): Executi
 
 async function readStore(): Promise<ExecutiveAccountabilityStoreFile> {
   try {
-    const raw = await readFile(STORE_PATH, "utf8");
+    const raw = await readFile(storePath(), "utf8");
     return normalizeStore(JSON.parse(raw) as Partial<ExecutiveAccountabilityStoreFile>);
   } catch {
     return emptyStore(new Date().toISOString());
@@ -52,8 +54,8 @@ async function readStore(): Promise<ExecutiveAccountabilityStoreFile> {
 }
 
 async function writeStore(file: ExecutiveAccountabilityStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(STORE_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(storePath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function loadExecutiveAccountabilityStore(): Promise<ExecutiveAccountabilityStoreFile> {

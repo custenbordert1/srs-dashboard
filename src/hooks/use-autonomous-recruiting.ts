@@ -9,6 +9,7 @@ import {
   LONG_CLIENT_CACHE_TTL_MS,
 } from "@/lib/client-api-cache";
 import type { AutonomousRecruitingSnapshot, ApprovalRule } from "@/lib/autonomous-recruiting-engine";
+import type { AutopilotDashboardSnapshot, AutopilotOperatingMode } from "@/lib/autonomous-recruiting-autopilot";
 import type { RecruitingExecutionSnapshot } from "@/lib/autonomous-recruiting-execution";
 import { friendlyFetchMessageFromError, isIgnorableFetchError } from "@/lib/friendly-fetch-errors";
 import {
@@ -26,12 +27,14 @@ type AutonomousRecruitingResponse = {
   error?: string;
   snapshot?: AutonomousRecruitingSnapshot;
   executionSnapshot?: RecruitingExecutionSnapshot;
+  autopilotDashboard?: AutopilotDashboardSnapshot;
   rules?: ApprovalRule[];
 };
 
 type CachedAutopilotPayload = {
   snapshot: AutonomousRecruitingSnapshot;
   executionSnapshot: RecruitingExecutionSnapshot | null;
+  autopilotDashboard: AutopilotDashboardSnapshot | null;
 };
 
 function readAutopilotCache(): CachedAutopilotPayload | null {
@@ -53,6 +56,7 @@ async function fetchAutonomousRecruiting(signal?: AbortSignal): Promise<CachedAu
   return {
     snapshot: parsed.snapshot,
     executionSnapshot: parsed.executionSnapshot ?? null,
+    autopilotDashboard: parsed.autopilotDashboard ?? null,
   };
 }
 
@@ -64,6 +68,9 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
   );
   const [executionSnapshot, setExecutionSnapshot] = useState<RecruitingExecutionSnapshot | null>(
     initialCache?.executionSnapshot ?? null,
+  );
+  const [autopilotDashboard, setAutopilotDashboard] = useState<AutopilotDashboardSnapshot | null>(
+    initialCache?.autopilotDashboard ?? null,
   );
   const [loading, setLoading] = useState(enabled && !initialCache);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,6 +87,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
   const applyPayload = useCallback((payload: CachedAutopilotPayload) => {
     setSnapshot(payload.snapshot);
     setExecutionSnapshot(payload.executionSnapshot);
+    setAutopilotDashboard(payload.autopilotDashboard);
   }, []);
 
   const load = useCallback(
@@ -183,6 +191,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
         applyPayload({
           snapshot: parsed.snapshot,
           executionSnapshot: parsed.executionSnapshot ?? null,
+          autopilotDashboard: parsed.autopilotDashboard ?? null,
         });
         setShowingCachedSnapshot(false);
       } catch (err) {
@@ -249,6 +258,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
       applyPayload({
         snapshot: parsed.snapshot,
         executionSnapshot: parsed.executionSnapshot ?? executionSnapshot,
+        autopilotDashboard: parsed.autopilotDashboard ?? autopilotDashboard,
       });
       setShowingCachedSnapshot(false);
     } catch (err) {
@@ -258,7 +268,88 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
     } finally {
       setSavingRules(false);
     }
-  }, [applyPayload, executionSnapshot]);
+  }, [applyPayload, executionSnapshot, autopilotDashboard]);
+
+  const runAutopilot = useCallback(() => postAction("run-autopilot"), [postAction]);
+
+  const pauseAutopilot = useCallback(async () => {
+    setActionBusy(true);
+    try {
+      const res = await fetchWithTimeout("/api/autonomous-recruiting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pause-autopilot" }),
+        timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+      });
+      const parsed = (await res.json()) as { ok: boolean; policy?: AutopilotDashboardSnapshot["policy"] };
+      if (!parsed.ok || !parsed.policy) throw new Error("Failed to pause autopilot");
+      setAutopilotDashboard((prev) => (prev ? { ...prev, policy: parsed.policy!, status: "paused" } : prev));
+    } catch (err) {
+      if (!isIgnorableFetchError(err) && !isAbortError(err)) {
+        setError(err instanceof Error ? err.message : "Failed to pause autopilot");
+      }
+    } finally {
+      setActionBusy(false);
+    }
+  }, []);
+
+  const resumeAutopilot = useCallback(async () => {
+    setActionBusy(true);
+    try {
+      const res = await fetchWithTimeout("/api/autonomous-recruiting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resume-autopilot" }),
+        timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+      });
+      const parsed = (await res.json()) as { ok: boolean; policy?: AutopilotDashboardSnapshot["policy"] };
+      if (!parsed.ok || !parsed.policy) throw new Error("Failed to resume autopilot");
+      setAutopilotDashboard((prev) =>
+        prev
+          ? {
+              ...prev,
+              policy: parsed.policy!,
+              status: parsed.policy!.mode === "manual" ? "manual" : "active",
+            }
+          : prev,
+      );
+    } catch (err) {
+      if (!isIgnorableFetchError(err) && !isAbortError(err)) {
+        setError(err instanceof Error ? err.message : "Failed to resume autopilot");
+      }
+    } finally {
+      setActionBusy(false);
+    }
+  }, []);
+
+  const setAutopilotMode = useCallback(async (mode: AutopilotOperatingMode) => {
+    setActionBusy(true);
+    try {
+      const res = await fetchWithTimeout("/api/autonomous-recruiting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "set-autopilot-mode", mode }),
+        timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+      });
+      const parsed = (await res.json()) as { ok: boolean; policy?: AutopilotDashboardSnapshot["policy"] };
+      if (!parsed.ok || !parsed.policy) throw new Error("Failed to update autopilot mode");
+      setAutopilotDashboard((prev) =>
+        prev
+          ? {
+              ...prev,
+              policy: parsed.policy!,
+              status: parsed.policy!.paused ? "paused" : parsed.policy!.mode === "manual" ? "manual" : "active",
+            }
+          : prev,
+      );
+    } catch (err) {
+      if (!isIgnorableFetchError(err) && !isAbortError(err)) {
+        setError(err instanceof Error ? err.message : "Failed to update autopilot mode");
+      }
+    } finally {
+      setActionBusy(false);
+    }
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -285,6 +376,7 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
   return {
     snapshot,
     executionSnapshot,
+    autopilotDashboard,
     loading,
     refreshing,
     error,
@@ -297,5 +389,9 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
     actionBusy,
     approveExecution,
     executeExecution,
+    runAutopilot,
+    pauseAutopilot,
+    resumeAutopilot,
+    setAutopilotMode,
   };
 }

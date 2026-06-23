@@ -7,6 +7,8 @@ import {
 import { getDmForState, normalizeStateCode } from "@/lib/dm-territory-map";
 import { buildRecruitingRecommendations } from "@/lib/recruiting-recommendation-engine";
 import { applyApprovalRulesToAds } from "@/lib/autonomous-recruiting-engine/approval-rules";
+import { applyRecommendationFeedbackToAds } from "@/lib/autonomous-recruiting-autopilot/apply-feedback-priority";
+import type { RecommendationFeedbackIndex } from "@/lib/autonomous-recruiting-autopilot/types";
 import type {
   ApprovalRule,
   RecommendedAd,
@@ -108,6 +110,7 @@ export function buildPostingRecommendations(input: {
   coverageNeeds: TerritoryCoverageNeed[];
   fetchedAt: string;
   approvalRules: ApprovalRule[];
+  feedbackIndex?: RecommendationFeedbackIndex;
 }): RecommendedAd[] {
   const jobContexts = buildJobPipelineContext(
     input.jobs.map((job) => ({
@@ -148,5 +151,8 @@ export function buildPostingRecommendations(input: {
       (b.coverageNeedScore ?? 0) - (a.coverageNeedScore ?? 0),
   );
 
-  return applyApprovalRulesToAds(sorted, input.approvalRules, input.coverageNeeds);
+  return applyRecommendationFeedbackToAds(
+    applyApprovalRulesToAds(sorted, input.approvalRules, input.coverageNeeds),
+    input.feedbackIndex,
+  );
 }

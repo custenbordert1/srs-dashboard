@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { after, before, describe, it } from "node:test";
+import { access, readFile, rm, writeFile } from "node:fs/promises";
+import { after, before, beforeEach, describe, it } from "node:test";
 import type { AutonomousRecruitingSnapshot } from "@/lib/autonomous-recruiting-engine/types";
 import { approveCorrelationWithAccountability } from "@/lib/autonomous-recruiting-execution/bridge-accountability";
 import { executePostingCorrelation, mapRecommendedAdToExecutionPayload } from "@/lib/autonomous-recruiting-execution/bridge-posting";
@@ -14,14 +13,14 @@ import {
   listCorrelations,
   planCorrelationsFromSnapshot,
 } from "@/lib/autonomous-recruiting-execution/execution-correlation";
+import {
+  installIsolatedRecruitingDataDir,
+  recruitingStorePath,
+  RECRUITING_STORE_FILES,
+  type IsolatedRecruitingDataHandle,
+} from "@/lib/test/recruiting-test-isolation";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const CORRELATION_PATH = path.join(DATA_DIR, "autopilot-execution-correlation.json");
-const LEGACY_TASKS_PATH = path.join(DATA_DIR, "autopilot-recruiter-tasks.json");
-const LEGACY_EXECUTIONS_PATH = path.join(DATA_DIR, "autopilot-executions.json");
-const ACCOUNTABILITY_PATH = path.join(DATA_DIR, "executive-accountability.json");
-const JOB_DRAFTS_PATH = path.join(DATA_DIR, "job-drafts.json");
-const AUTOMATION_RUNS_PATH = path.join(DATA_DIR, "hiring-automation-runs.json");
+let isolation: IsolatedRecruitingDataHandle;
 
 function emptySnapshot(patch: Partial<AutonomousRecruitingSnapshot> = {}): AutonomousRecruitingSnapshot {
   return {
@@ -118,25 +117,34 @@ async function pathExists(filePath: string): Promise<boolean> {
 }
 
 before(async () => {
-  await mkdir(DATA_DIR, { recursive: true });
+  isolation = await installIsolatedRecruitingDataDir("srs-p58-");
+  await rm(recruitingStorePath(RECRUITING_STORE_FILES.legacyTasks), { force: true });
+  await rm(recruitingStorePath(RECRUITING_STORE_FILES.legacyExecutions), { force: true });
+});
+
+beforeEach(async () => {
   await writeFile(
-    CORRELATION_PATH,
+    recruitingStorePath(RECRUITING_STORE_FILES.correlation),
     JSON.stringify({ correlations: [], updatedAt: new Date().toISOString() }),
   );
   await writeFile(
-    ACCOUNTABILITY_PATH,
+    recruitingStorePath(RECRUITING_STORE_FILES.accountability),
     JSON.stringify({ actions: [], forecastHistory: [], auditLog: [], updatedAt: new Date().toISOString() }),
   );
-  await writeFile(JOB_DRAFTS_PATH, JSON.stringify({ drafts: [], updatedAt: new Date().toISOString() }));
-  await writeFile(AUTOMATION_RUNS_PATH, JSON.stringify({ runs: [], updatedAt: new Date().toISOString() }));
-  await rm(LEGACY_TASKS_PATH, { force: true });
-  await rm(LEGACY_EXECUTIONS_PATH, { force: true });
+  await writeFile(
+    recruitingStorePath(RECRUITING_STORE_FILES.jobDrafts),
+    JSON.stringify({ drafts: [], updatedAt: new Date().toISOString() }),
+  );
+  await writeFile(
+    recruitingStorePath(RECRUITING_STORE_FILES.automationRuns),
+    JSON.stringify({ runs: [], updatedAt: new Date().toISOString() }),
+  );
 });
 
 after(async () => {
-  await rm(CORRELATION_PATH, { force: true });
-  await rm(LEGACY_TASKS_PATH, { force: true });
-  await rm(LEGACY_EXECUTIONS_PATH, { force: true });
+  await rm(recruitingStorePath(RECRUITING_STORE_FILES.legacyTasks), { force: true });
+  await rm(recruitingStorePath(RECRUITING_STORE_FILES.legacyExecutions), { force: true });
+  await isolation.restore();
 });
 
 describe("autonomous-recruiting-execution orchestration", () => {
@@ -158,13 +166,13 @@ describe("autonomous-recruiting-execution orchestration", () => {
     await planCorrelationsFromSnapshot(snapshot);
     await buildRecruiterTaskView({ scoredRows: [] });
 
-    assert.equal(await pathExists(LEGACY_TASKS_PATH), false);
-    assert.equal(await pathExists(LEGACY_EXECUTIONS_PATH), false);
+    assert.equal(await pathExists(recruitingStorePath(RECRUITING_STORE_FILES.legacyTasks)), false);
+    assert.equal(await pathExists(recruitingStorePath(RECRUITING_STORE_FILES.legacyExecutions)), false);
   });
 
   it("stores correlations without auditTrail field", async () => {
     await planCorrelationsFromSnapshot(emptySnapshot());
-    const raw = JSON.parse(await readFile(CORRELATION_PATH, "utf8")) as {
+    const raw = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.correlation), "utf8")) as {
       correlations: Record<string, unknown>[];
     };
 
@@ -184,7 +192,7 @@ describe("autonomous-recruiting-execution orchestration", () => {
     assert.equal(approved?.status, "approved");
     assert.ok(approved?.accountabilityActionId);
 
-    const accountability = JSON.parse(await readFile(ACCOUNTABILITY_PATH, "utf8")) as {
+    const accountability = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.accountability), "utf8")) as {
       actions: { sourceModule: string; recommendationId: string }[];
     };
     assert.ok(
@@ -206,7 +214,7 @@ describe("autonomous-recruiting-execution orchestration", () => {
     assert.equal(result.ok, true);
     assert.ok(result.correlation?.jobDraftId);
 
-    const drafts = JSON.parse(await readFile(JOB_DRAFTS_PATH, "utf8")) as {
+    const drafts = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.jobDrafts), "utf8")) as {
       drafts: { id: string }[];
     };
     assert.ok(drafts.drafts.some((row) => row.id === result.correlation?.jobDraftId));
@@ -224,7 +232,7 @@ describe("autonomous-recruiting-execution orchestration", () => {
   it("builds recruiter task view from hiring funnel without persistence", async () => {
     const tasks = buildRecruiterTaskView({ scoredRows: [] });
     assert.ok(Array.isArray(tasks));
-    assert.equal(await pathExists(LEGACY_TASKS_PATH), false);
+    assert.equal(await pathExists(recruitingStorePath(RECRUITING_STORE_FILES.legacyTasks)), false);
   });
 
   it("builds applicant monitoring with alerts for low applicants", () => {

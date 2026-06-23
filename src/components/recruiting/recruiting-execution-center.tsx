@@ -2,7 +2,12 @@
 
 import { useAutonomousRecruiting } from "@/hooks/use-autonomous-recruiting";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
-import type { ExecutionStatus } from "@/lib/autonomous-recruiting-execution";
+import type {
+  ExecutionCorrelation,
+  ExecutionFunnelStep,
+  ExecutionOutcomeMetric,
+  ExecutionStatus,
+} from "@/lib/autonomous-recruiting-execution";
 
 const STATUS_STYLES: Record<ExecutionStatus, string> = {
   detected: "border-zinc-600 bg-zinc-800/40 text-zinc-300",
@@ -71,7 +76,7 @@ export function RecruitingExecutionCenter() {
   if (!snapshot || !executionSnapshot) return null;
 
   const postingQueue = executionSnapshot.executionQueue.filter(
-    (row) => row.type === "posting" || row.type === "refresh",
+    (row: ExecutionCorrelation) => row.type === "posting" || row.type === "refresh",
   );
 
   return (
@@ -117,7 +122,7 @@ export function RecruitingExecutionCenter() {
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Execution funnel</h3>
         <div className="mt-3 flex flex-wrap gap-2">
-          {executionSnapshot.executionFunnel.map((step) => (
+          {executionSnapshot.executionFunnel.map((step: ExecutionFunnelStep) => (
             <div key={step.id} className="min-w-[6rem] rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-2 text-center">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{step.label}</p>
               <p className="mt-1 text-lg font-semibold text-zinc-100">{step.count}</p>
@@ -243,7 +248,7 @@ export function RecruitingExecutionCenter() {
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-4">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Outcomes</h3>
           <ul className="mt-3 space-y-2 text-sm">
-            {executionSnapshot.outcomes.map((outcome) => (
+            {executionSnapshot.outcomes.map((outcome: ExecutionOutcomeMetric) => (
               <li key={outcome.id} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 p-3">
                 <div className="flex justify-between gap-2">
                   <span className="text-zinc-300">{outcome.label}</span>

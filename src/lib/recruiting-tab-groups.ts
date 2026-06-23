@@ -27,6 +27,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
       "pipeline-intelligence",
       "workforce-intelligence",
       "recruiting-autopilot",
+      "recruiting-autopilot-ops",
       "recruiting-execution",
     ],
   },
@@ -59,6 +60,7 @@ const EXECUTIVE_ONLY_TAB_IDS = new Set<DashboardTabId>([
   "executive-forecasting",
   "workforce-intelligence",
   "recruiting-autopilot",
+  "recruiting-autopilot-ops",
   "recruiting-execution",
 ]);
 

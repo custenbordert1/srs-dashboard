@@ -3,6 +3,7 @@ import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
 import type { CandidateWorkflowState } from "@/lib/candidate-workflow-types";
 import type { ControlCenterSnapshot } from "@/lib/hiring-automation-engine/types";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
+import type { RecommendationFeedbackIndex } from "@/lib/autonomous-recruiting-autopilot/types";
 import { buildCoverageNeeds } from "@/lib/autonomous-recruiting-engine/build-coverage-needs";
 import { buildHiringRecommendations } from "@/lib/autonomous-recruiting-engine/build-hiring-recommendations";
 import { buildPostingRecommendations } from "@/lib/autonomous-recruiting-engine/build-posting-recommendations";
@@ -100,6 +101,7 @@ export function buildAutopilotSnapshot(input: {
   territoryStates?: string[];
   approvalRules: ApprovalRule[];
   automationRuns: ControlCenterSnapshot;
+  feedbackIndex?: RecommendationFeedbackIndex;
 }): AutonomousRecruitingSnapshot {
   const coverageNeeds = buildCoverageNeeds({
     jobs: input.jobs,
@@ -117,6 +119,7 @@ export function buildAutopilotSnapshot(input: {
     coverageNeeds,
     fetchedAt: input.fetchedAt,
     approvalRules: input.approvalRules,
+    feedbackIndex: input.feedbackIndex,
   });
 
   const hiringRecommendations = buildHiringRecommendations({
