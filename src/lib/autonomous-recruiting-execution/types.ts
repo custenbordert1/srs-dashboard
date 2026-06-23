@@ -10,7 +10,7 @@ export type ExecutionStatus =
   | "failed"
   | "archived";
 
-export type RecommendationType = "posting" | "hiring" | "coverage" | "refresh";
+export type RecommendationType = "posting" | "hiring" | "coverage" | "refresh" | "placement";
 
 export type ExecutionKpis = {
   recommendationsGenerated: number;

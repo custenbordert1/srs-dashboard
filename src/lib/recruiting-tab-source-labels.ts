@@ -19,7 +19,8 @@ export type DashboardTabId =
   | "pipeline-intelligence"
   | "recruiting-autopilot"
   | "recruiting-execution"
-  | "recruiting-autopilot-ops";
+  | "recruiting-autopilot-ops"
+  | "placement-command-center";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -210,6 +211,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Orchestrates approved autopilot recommendations — posting automation, recruiter tasks, applicant monitoring, and computed outcomes.",
+  },
+  "placement-command-center": {
+    navLabel: "Hiring & Placement",
+    sourceTag: "Executive",
+    badgeLabel: "Autonomous placement",
+    kind: "executive",
+    bannerMessage:
+      "Hiring readiness, placement intelligence, and coverage coordination — reads P58 execution correlations, candidate workflow, and MEL opportunities without duplicate stores.",
   },
 };
 

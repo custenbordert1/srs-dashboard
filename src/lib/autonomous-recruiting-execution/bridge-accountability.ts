@@ -30,6 +30,9 @@ function buildExpectedImpact(correlation: ExecutionCorrelation): string {
   if (correlation.type === "hiring") {
     return `Advance candidate workflow: ${correlation.hiringAction ?? "review"}.`;
   }
+  if (correlation.type === "placement") {
+    return `Place candidate on project: ${correlation.displayTitle ?? correlation.placementProjectId ?? "MEL opportunity"}.`;
+  }
   return "Resolve critical territory coverage gap.";
 }
 
@@ -37,6 +40,13 @@ export async function ensureAccountabilityForCorrelation(
   correlation: ExecutionCorrelation,
   actor: { displayName: string },
 ): Promise<string> {
+  if (correlation.type === "placement") {
+    const { recordPlacementRecommendationInAccountability } = await import(
+      "@/lib/placement-command-center/bridge-p61-accountability"
+    );
+    return recordPlacementRecommendationInAccountability(correlation, actor);
+  }
+
   const store = await loadExecutiveAccountabilityStore();
   const stableKey = correlation.recommendationId;
   const existing = store.actions.find(
@@ -104,9 +114,19 @@ export async function approveCorrelationWithAccountability(
   correlationId: string,
   actor: { displayName: string },
 ): Promise<ExecutionCorrelation | null> {
-  const { approveCorrelation, updateCorrelationLinks } = await import(
+  const { approveCorrelation, getCorrelation, updateCorrelationLinks } = await import(
     "@/lib/autonomous-recruiting-execution/execution-correlation"
   );
+
+  const correlation = await getCorrelation(correlationId);
+  if (!correlation) return null;
+
+  if (correlation.type === "placement") {
+    const { approvePlacementWithAccountability } = await import(
+      "@/lib/placement-command-center/bridge-p61-accountability"
+    );
+    return approvePlacementWithAccountability(correlationId, actor);
+  }
 
   const approved = await approveCorrelation(correlationId, actor.displayName);
   if (!approved) return null;

@@ -29,6 +29,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
       "recruiting-autopilot",
       "recruiting-autopilot-ops",
       "recruiting-execution",
+      "placement-command-center",
     ],
   },
   {
@@ -62,6 +63,7 @@ const EXECUTIVE_ONLY_TAB_IDS = new Set<DashboardTabId>([
   "recruiting-autopilot",
   "recruiting-autopilot-ops",
   "recruiting-execution",
+  "placement-command-center",
 ]);
 
 export function isDashboardTabId(value: string): value is DashboardTabId {

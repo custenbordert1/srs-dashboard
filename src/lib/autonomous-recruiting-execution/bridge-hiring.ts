@@ -23,8 +23,8 @@ export async function executeHiringCorrelation(
 ): Promise<ExecuteHiringResult> {
   const correlation = await getCorrelation(correlationId);
   if (!correlation) return { ok: false, error: "Correlation not found." };
-  if (correlation.type !== "hiring") {
-    return { ok: false, error: "Correlation is not a hiring recommendation.", correlation };
+  if (correlation.type !== "hiring" && correlation.type !== "placement") {
+    return { ok: false, error: "Correlation is not a hiring or placement recommendation.", correlation };
   }
   if (!correlation.candidateId) {
     return { ok: false, error: "Missing candidate on correlation.", correlation };
@@ -46,7 +46,9 @@ export async function executeHiringCorrelation(
     const run = await createAutomationRun({
       type: automationType,
       candidateId: correlation.candidateId,
-      reason: correlation.reason ?? `${correlation.hiringAction ?? "Hiring"} via autopilot execution`,
+      reason:
+        correlation.reason ??
+        `${correlation.hiringAction ?? (correlation.type === "placement" ? "Placement" : "Hiring")} via autopilot execution`,
       dataUsed: ["autopilot-execution", correlation.territory],
       expectedOutcome:
         automationType === "mark-ready-for-mel"
@@ -98,6 +100,13 @@ export async function executeCorrelation(
 
   if (correlation.type === "hiring") {
     return executeHiringCorrelation(correlationId, actor);
+  }
+
+  if (correlation.type === "placement") {
+    const { executePlacementCorrelation } = await import(
+      "@/lib/placement-command-center/bridge-placement-execution"
+    );
+    return executePlacementCorrelation(correlationId, actor);
   }
 
   if (correlation.type === "posting" || correlation.type === "refresh") {
