@@ -2,10 +2,15 @@ import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
 import type { JobDraft, JobPushAuditEntry } from "@/lib/job-management/job-draft-types";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const DRAFTS_PATH = path.join(STORE_DIR, "job-drafts.json");
-const PUSH_AUDIT_PATH = path.join(STORE_DIR, "job-push-audit.jsonl");
+function draftsPath(): string {
+  return path.join(recruitingDataDir(), "job-drafts.json");
+}
+
+function pushAuditPath(): string {
+  return path.join(recruitingDataDir(), "job-push-audit.jsonl");
+}
 
 type JobDraftStoreFile = {
   drafts: JobDraft[];
@@ -14,7 +19,7 @@ type JobDraftStoreFile = {
 
 async function readDrafts(): Promise<JobDraftStoreFile> {
   try {
-    const raw = await readFile(DRAFTS_PATH, "utf8");
+    const raw = await readFile(draftsPath(), "utf8");
     const parsed = JSON.parse(raw) as JobDraftStoreFile;
     return {
       drafts: Array.isArray(parsed.drafts) ? parsed.drafts : [],
@@ -26,8 +31,8 @@ async function readDrafts(): Promise<JobDraftStoreFile> {
 }
 
 async function writeDrafts(file: JobDraftStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(DRAFTS_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(draftsPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function listJobDrafts(): Promise<JobDraft[]> {
@@ -129,6 +134,6 @@ export async function deleteJobDraft(id: string): Promise<boolean> {
 }
 
 export async function appendJobPushAudit(entry: JobPushAuditEntry): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await appendFile(PUSH_AUDIT_PATH, `${JSON.stringify(entry)}\n`, "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await appendFile(pushAuditPath(), `${JSON.stringify(entry)}\n`, "utf8");
 }

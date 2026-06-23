@@ -25,6 +25,11 @@ import type { ExecutiveTrackedAction } from "@/lib/executive-accountability/type
 import { buildExecutiveWeeklySummary } from "@/lib/executive-accountability/weekly-summary";
 import { buildWeeklyExecutiveNarrative } from "@/lib/executive-accountability/weekly-narrative";
 import type { ExecutiveRecruitingForecastSnapshot } from "@/lib/executive-recruiting-forecast";
+import {
+  installIsolatedRecruitingDataDir,
+  recruitingStorePath,
+  RECRUITING_STORE_FILES,
+} from "@/lib/test/recruiting-test-isolation";
 
 const now = "2026-06-15T12:00:00.000Z";
 const referenceMs = new Date(now).getTime();
@@ -323,25 +328,30 @@ describe("executive accountability", () => {
   });
 
   it("records audit trail entries when action fields change", async () => {
-    const file = {
-      actions: [trackedAction()],
-      forecastHistory: [],
-      auditLog: [],
-      updatedAt: now,
-    };
-    const priorWrite = await import("node:fs/promises").then((m) => m.writeFile);
-    const storePath = `${process.cwd()}/.data/executive-accountability.json`;
-    await priorWrite(storePath, JSON.stringify(file, null, 2), "utf8");
+    const isolation = await installIsolatedRecruitingDataDir("srs-ea-");
+    try {
+      const file = {
+        actions: [trackedAction()],
+        forecastHistory: [],
+        auditLog: [],
+        updatedAt: now,
+      };
+      const priorWrite = await import("node:fs/promises").then((m) => m.writeFile);
+      const storePath = recruitingStorePath(RECRUITING_STORE_FILES.accountability);
+      await priorWrite(storePath, JSON.stringify(file, null, 2), "utf8");
 
-    const result = await updateExecutiveAction(
-      "action-1",
-      { status: "in_progress", owner: "Bill", outcomeNotes: "Escalated to DM" },
-      { displayName: "Steve" },
-    );
-    assert.ok(result.action);
-    assert.ok(result.auditLog.some((row) => row.field === "status" && row.newValue === "in_progress"));
-    assert.ok(result.auditLog.some((row) => row.field === "owner" && row.newValue === "Bill"));
-    assert.ok(result.auditLog.every((row) => row.changedBy === "Steve"));
+      const result = await updateExecutiveAction(
+        "action-1",
+        { status: "in_progress", owner: "Bill", outcomeNotes: "Escalated to DM" },
+        { displayName: "Steve" },
+      );
+      assert.ok(result.action);
+      assert.ok(result.auditLog.some((row) => row.field === "status" && row.newValue === "in_progress"));
+      assert.ok(result.auditLog.some((row) => row.field === "owner" && row.newValue === "Bill"));
+      assert.ok(result.auditLog.every((row) => row.changedBy === "Steve"));
+    } finally {
+      await isolation.restore();
+    }
   });
 
   it("appends audit entries with old and new values", () => {

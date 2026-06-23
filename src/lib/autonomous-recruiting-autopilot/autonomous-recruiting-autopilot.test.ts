@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
 import { after, before, describe, it } from "node:test";
 import { applyRecommendationFeedbackToAds } from "@/lib/autonomous-recruiting-autopilot/apply-feedback-priority";
 import {
@@ -20,15 +19,14 @@ import {
 import { planCorrelationsFromSnapshot } from "@/lib/autonomous-recruiting-execution/execution-correlation";
 import type { AutonomousRecruitingSnapshot } from "@/lib/autonomous-recruiting-engine/types";
 import type { RecruitingExecutionSnapshot } from "@/lib/autonomous-recruiting-execution";
+import {
+  installIsolatedRecruitingDataDir,
+  recruitingStorePath,
+  RECRUITING_STORE_FILES,
+  type IsolatedRecruitingDataHandle,
+} from "@/lib/test/recruiting-test-isolation";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const POLICY_PATH = path.join(DATA_DIR, "autonomous-recruiting-autopilot-policy.json");
-const RUNS_PATH = path.join(DATA_DIR, "autonomous-recruiting-autopilot-runs.json");
-const FEEDBACK_PATH = path.join(DATA_DIR, "autonomous-recruiting-feedback.json");
-const CORRELATION_PATH = path.join(DATA_DIR, "autopilot-execution-correlation.json");
-const ACCOUNTABILITY_PATH = path.join(DATA_DIR, "executive-accountability.json");
-const LEGACY_EXECUTIONS_PATH = path.join(DATA_DIR, "autopilot-executions.json");
-const LEGACY_TASKS_PATH = path.join(DATA_DIR, "autopilot-recruiter-tasks.json");
+let isolation: IsolatedRecruitingDataHandle;
 
 function emptySnapshot(): AutonomousRecruitingSnapshot {
   return {
@@ -154,25 +152,26 @@ function emptyExecutionSnapshot(): RecruitingExecutionSnapshot {
 }
 
 before(async () => {
-  await mkdir(DATA_DIR, { recursive: true });
+  isolation = await installIsolatedRecruitingDataDir("srs-p59-");
   await writeFile(
-    POLICY_PATH,
+    recruitingStorePath(RECRUITING_STORE_FILES.autopilotPolicy),
     JSON.stringify({
       policy: { mode: "semi-automatic", paused: false, updatedAt: new Date().toISOString() },
       updatedAt: new Date().toISOString(),
     }),
   );
-  await writeFile(RUNS_PATH, JSON.stringify({ runs: [], updatedAt: new Date().toISOString() }));
   await writeFile(
-    FEEDBACK_PATH,
+    recruitingStorePath(RECRUITING_STORE_FILES.autopilotRuns),
+    JSON.stringify({ runs: [], updatedAt: new Date().toISOString() }),
+  );
+  await writeFile(
+    recruitingStorePath(RECRUITING_STORE_FILES.autopilotFeedback),
     JSON.stringify({ territoryWeights: {}, typeWeights: {}, updatedAt: new Date().toISOString() }),
   );
 });
 
 after(async () => {
-  await rm(POLICY_PATH, { force: true });
-  await rm(RUNS_PATH, { force: true });
-  await rm(FEEDBACK_PATH, { force: true });
+  await isolation.restore();
 });
 
 describe("autonomous-recruiting-autopilot", () => {
@@ -214,8 +213,11 @@ describe("autonomous-recruiting-autopilot", () => {
     assert.ok(feedback.topPerforming.length > 0);
     assert.equal("auditTrail" in feedback, false);
 
-    await writeFile(FEEDBACK_PATH, JSON.stringify({ territoryWeights: feedback.territoryWeights, typeWeights: feedback.typeWeights, updatedAt: new Date().toISOString() }));
-    const raw = JSON.parse(await readFile(FEEDBACK_PATH, "utf8")) as Record<string, unknown>;
+    await writeFile(
+      recruitingStorePath(RECRUITING_STORE_FILES.autopilotFeedback),
+      JSON.stringify({ territoryWeights: feedback.territoryWeights, typeWeights: feedback.typeWeights, updatedAt: new Date().toISOString() }),
+    );
+    const raw = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.autopilotFeedback), "utf8")) as Record<string, unknown>;
     assert.ok(raw.territoryWeights);
     assert.equal("correlations" in raw, false);
   });
@@ -264,9 +266,12 @@ describe("autonomous-recruiting-autopilot", () => {
   });
 
   it("system approval records accountability with source, rule, and timestamp", async () => {
-    await writeFile(CORRELATION_PATH, JSON.stringify({ correlations: [], updatedAt: new Date().toISOString() }));
     await writeFile(
-      ACCOUNTABILITY_PATH,
+      recruitingStorePath(RECRUITING_STORE_FILES.correlation),
+      JSON.stringify({ correlations: [], updatedAt: new Date().toISOString() }),
+    );
+    await writeFile(
+      recruitingStorePath(RECRUITING_STORE_FILES.accountability),
       JSON.stringify({ actions: [], forecastHistory: [], auditLog: [], updatedAt: new Date().toISOString() }),
     );
 
@@ -282,7 +287,7 @@ describe("autonomous-recruiting-autopilot", () => {
     );
     assert.ok(approved?.accountabilityActionId);
 
-    const accountability = JSON.parse(await readFile(ACCOUNTABILITY_PATH, "utf8")) as {
+    const accountability = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.accountability), "utf8")) as {
       actions: { recommendationId: string; sourceModule: string; notes: string[] }[];
       auditLog: { field: string; newValue: string | null; changedAt: string }[];
     };
@@ -300,9 +305,9 @@ describe("autonomous-recruiting-autopilot", () => {
   });
 
   it("persists only policy, run history, and feedback weights in P59 stores", async () => {
-    const policyRaw = JSON.parse(await readFile(POLICY_PATH, "utf8")) as Record<string, unknown>;
-    const runsRaw = JSON.parse(await readFile(RUNS_PATH, "utf8")) as Record<string, unknown>;
-    const feedbackRaw = JSON.parse(await readFile(FEEDBACK_PATH, "utf8")) as Record<string, unknown>;
+    const policyRaw = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.autopilotPolicy), "utf8")) as Record<string, unknown>;
+    const runsRaw = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.autopilotRuns), "utf8")) as Record<string, unknown>;
+    const feedbackRaw = JSON.parse(await readFile(recruitingStorePath(RECRUITING_STORE_FILES.autopilotFeedback), "utf8")) as Record<string, unknown>;
 
     assert.ok(policyRaw.policy);
     assert.ok(Array.isArray(runsRaw.runs));
@@ -317,13 +322,13 @@ describe("autonomous-recruiting-autopilot", () => {
     let legacyExecutions = false;
     let legacyTasks = false;
     try {
-      await readFile(LEGACY_EXECUTIONS_PATH, "utf8");
+      await readFile(recruitingStorePath(RECRUITING_STORE_FILES.legacyExecutions), "utf8");
       legacyExecutions = true;
     } catch {
       legacyExecutions = false;
     }
     try {
-      await readFile(LEGACY_TASKS_PATH, "utf8");
+      await readFile(recruitingStorePath(RECRUITING_STORE_FILES.legacyTasks), "utf8");
       legacyTasks = true;
     } catch {
       legacyTasks = false;

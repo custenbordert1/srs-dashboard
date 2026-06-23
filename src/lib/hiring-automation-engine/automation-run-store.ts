@@ -8,9 +8,11 @@ import type {
   AutomationType,
   ControlCenterSnapshot,
 } from "@/lib/hiring-automation-engine/types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const RUNS_PATH = path.join(STORE_DIR, "hiring-automation-runs.json");
+function runsPath(): string {
+  return path.join(recruitingDataDir(), "hiring-automation-runs.json");
+}
 
 type AutomationRunStoreFile = {
   runs: AutomationRun[];
@@ -19,7 +21,7 @@ type AutomationRunStoreFile = {
 
 async function readRunsFile(): Promise<AutomationRunStoreFile> {
   try {
-    const raw = await readFile(RUNS_PATH, "utf8");
+    const raw = await readFile(runsPath(), "utf8");
     const parsed = JSON.parse(raw) as AutomationRunStoreFile;
     return {
       runs: Array.isArray(parsed.runs) ? parsed.runs : [],
@@ -31,8 +33,8 @@ async function readRunsFile(): Promise<AutomationRunStoreFile> {
 }
 
 async function writeRunsFile(file: AutomationRunStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(RUNS_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(runsPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 function audit(action: string, detail: string, actor?: string): AutomationAuditEntry {

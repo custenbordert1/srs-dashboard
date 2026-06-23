@@ -1,9 +1,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { RecommendationFeedbackIndex } from "@/lib/autonomous-recruiting-autopilot/types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const FEEDBACK_PATH = path.join(STORE_DIR, "autonomous-recruiting-feedback.json");
+function feedbackPath(): string {
+  return path.join(recruitingDataDir(), "autonomous-recruiting-feedback.json");
+}
 
 type FeedbackStoreFile = {
   territoryWeights: Record<string, number>;
@@ -19,7 +21,7 @@ const DEFAULT_FEEDBACK: FeedbackStoreFile = {
 
 async function readFeedbackFile(): Promise<FeedbackStoreFile> {
   try {
-    const raw = await readFile(FEEDBACK_PATH, "utf8");
+    const raw = await readFile(feedbackPath(), "utf8");
     const parsed = JSON.parse(raw) as FeedbackStoreFile;
     return {
       territoryWeights: parsed.territoryWeights ?? {},
@@ -32,8 +34,8 @@ async function readFeedbackFile(): Promise<FeedbackStoreFile> {
 }
 
 async function writeFeedbackFile(file: FeedbackStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(FEEDBACK_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(feedbackPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function loadRecommendationFeedbackIndex(): Promise<RecommendationFeedbackIndex> {

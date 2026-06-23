@@ -6,10 +6,15 @@ import type {
   AutopilotPolicy,
   AutopilotRunEntry,
 } from "@/lib/autonomous-recruiting-autopilot/types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const POLICY_PATH = path.join(STORE_DIR, "autonomous-recruiting-autopilot-policy.json");
-const RUNS_PATH = path.join(STORE_DIR, "autonomous-recruiting-autopilot-runs.json");
+function policyPath(): string {
+  return path.join(recruitingDataDir(), "autonomous-recruiting-autopilot-policy.json");
+}
+
+function runsPath(): string {
+  return path.join(recruitingDataDir(), "autonomous-recruiting-autopilot-runs.json");
+}
 
 const DEFAULT_POLICY: AutopilotPolicy = {
   mode: "semi-automatic",
@@ -29,7 +34,7 @@ type RunsStoreFile = {
 
 async function readPolicyFile(): Promise<PolicyStoreFile> {
   try {
-    const raw = await readFile(POLICY_PATH, "utf8");
+    const raw = await readFile(policyPath(), "utf8");
     const parsed = JSON.parse(raw) as PolicyStoreFile;
     return {
       policy: parsed.policy ?? DEFAULT_POLICY,
@@ -41,13 +46,13 @@ async function readPolicyFile(): Promise<PolicyStoreFile> {
 }
 
 async function writePolicyFile(file: PolicyStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(POLICY_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(policyPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 async function readRunsFile(): Promise<RunsStoreFile> {
   try {
-    const raw = await readFile(RUNS_PATH, "utf8");
+    const raw = await readFile(runsPath(), "utf8");
     const parsed = JSON.parse(raw) as RunsStoreFile;
     return {
       runs: Array.isArray(parsed.runs) ? parsed.runs : [],
@@ -59,8 +64,8 @@ async function readRunsFile(): Promise<RunsStoreFile> {
 }
 
 async function writeRunsFile(file: RunsStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(RUNS_PATH, JSON.stringify(file, null, 2), "utf8");
+  await mkdir(recruitingDataDir(), { recursive: true });
+  await writeFile(runsPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function loadAutopilotPolicy(): Promise<AutopilotPolicy> {
