@@ -188,6 +188,14 @@ export const LazyRecruitingAutopilotOpsPanel = dynamic(
   { loading: tabLoading("Loading autopilot operations…"), ssr: false },
 );
 
+export const LazyPlacementCommandCenterPanel = dynamic(
+  () =>
+    import("@/components/recruiting/placement-command-center-panel").then((m) => ({
+      default: m.PlacementCommandCenterPanel,
+    })),
+  { loading: tabLoading("Loading hiring & placement…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;
