@@ -1,6 +1,6 @@
 import type { RecommendedAd, TerritoryCoverageNeed } from "@/lib/autonomous-recruiting-engine/types";
+import type { ExecutionCorrelation } from "@/lib/autonomous-recruiting-execution/execution-correlation";
 import type { ApplicantPerformanceRow } from "@/lib/autonomous-recruiting-execution/types";
-import type { AutopilotExecution } from "@/lib/autonomous-recruiting-execution/execution-store";
 import { randomUUID } from "node:crypto";
 
 function territoryMatches(ad: RecommendedAd, coverage: TerritoryCoverageNeed): boolean {
@@ -15,17 +15,20 @@ export function buildRefreshRecommendations(input: {
   postingRecommendations: RecommendedAd[];
   coverageNeeds: TerritoryCoverageNeed[];
   applicantPerformance: ApplicantPerformanceRow[];
-  existingExecutions: AutopilotExecution[];
-}): { refreshAds: RecommendedAd[]; refreshExecutions: AutopilotExecution[] } {
+  existingCorrelations: ExecutionCorrelation[];
+}): { refreshAds: RecommendedAd[]; refreshCorrelations: ExecutionCorrelation[] } {
   const refreshAds: RecommendedAd[] = [];
-  const refreshExecutions: AutopilotExecution[] = [];
+  const refreshCorrelations: ExecutionCorrelation[] = [];
   const now = new Date().toISOString();
 
   const refreshCountByTerritory = new Map<string, number>();
-  for (const execution of input.existingExecutions) {
-    if (execution.type !== "refresh" && execution.payload.adType !== "refresh-ad") continue;
-    const count = refreshCountByTerritory.get(execution.territory) ?? 0;
-    refreshCountByTerritory.set(execution.territory, count + (execution.payload.refreshCount ?? 1));
+  for (const correlation of input.existingCorrelations) {
+    if (correlation.type !== "refresh" && correlation.adType !== "refresh-ad") continue;
+    const count = refreshCountByTerritory.get(correlation.territory) ?? 0;
+    refreshCountByTerritory.set(
+      correlation.territory,
+      count + (correlation.refreshCount ?? 1),
+    );
   }
 
   for (const performance of input.applicantPerformance) {
@@ -38,7 +41,12 @@ export function buildRefreshRecommendations(input: {
 
     const coverage = input.coverageNeeds.find((row) => row.territoryKey === performance.territoryKey);
     const existingRefresh = input.postingRecommendations.find(
-      (ad) => ad.adType === "refresh-ad" && territoryMatches(ad, coverage ?? { territoryLabel: performance.territoryLabel } as TerritoryCoverageNeed),
+      (ad) =>
+        ad.adType === "refresh-ad" &&
+        territoryMatches(
+          ad,
+          coverage ?? ({ territoryLabel: performance.territoryLabel } as TerritoryCoverageNeed),
+        ),
     );
 
     const refreshCount = (refreshCountByTerritory.get(performance.territoryLabel) ?? 0) + 1;
@@ -58,15 +66,15 @@ export function buildRefreshRecommendations(input: {
     refreshAds.push(ad);
 
     const recommendationId = ad.id;
-    const existingExecution = input.existingExecutions.find(
+    const existingCorrelation = input.existingCorrelations.find(
       (row) => row.recommendationId === recommendationId && row.status !== "archived",
     );
-    if (existingExecution) {
-      refreshExecutions.push(existingExecution);
+    if (existingCorrelation) {
+      refreshCorrelations.push(existingCorrelation);
       continue;
     }
 
-    const execution: AutopilotExecution = {
+    refreshCorrelations.push({
       id: randomUUID(),
       recommendationId,
       territory: ad.territory,
@@ -74,25 +82,14 @@ export function buildRefreshRecommendations(input: {
       priority: "high",
       createdAt: now,
       status: "detected",
-      payload: {
-        title: ad.title,
-        adType: "refresh-ad",
-        city: ad.city,
-        state: ad.state,
-        reason: ad.reason,
-        refreshCount,
-      },
-      auditTrail: [
-        {
-          id: randomUUID(),
-          at: now,
-          action: "detected",
-          detail: `Refresh signal: applicants below target in ${ad.territory}`,
-        },
-      ],
-    };
-    refreshExecutions.push(execution);
+      displayTitle: ad.title,
+      adType: "refresh-ad",
+      city: ad.city,
+      state: ad.state,
+      reason: ad.reason,
+      refreshCount,
+    });
   }
 
-  return { refreshAds, refreshExecutions };
+  return { refreshAds, refreshCorrelations };
 }

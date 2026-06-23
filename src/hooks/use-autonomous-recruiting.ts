@@ -206,21 +206,6 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
     [postAction],
   );
 
-  const completeTask = useCallback(
-    (taskId: string) => postAction("complete-task", { taskId }),
-    [postAction],
-  );
-
-  const reassignTask = useCallback(
-    (taskId: string, owner: string) => postAction("reassign-task", { taskId, owner }),
-    [postAction],
-  );
-
-  const escalateTask = useCallback(
-    (taskId: string) => postAction("escalate-task", { taskId }),
-    [postAction],
-  );
-
   const saveRules = useCallback(
     async (rules: ApprovalRule[]) => {
       setSavingRules(true);
@@ -312,8 +297,5 @@ export function useAutonomousRecruiting(options: { enabled?: boolean } = {}) {
     actionBusy,
     approveExecution,
     executeExecution,
-    completeTask,
-    reassignTask,
-    escalateTask,
   };
 }

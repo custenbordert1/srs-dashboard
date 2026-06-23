@@ -1,24 +1,27 @@
 import assert from "node:assert/strict";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 import type { AutonomousRecruitingSnapshot } from "@/lib/autonomous-recruiting-engine/types";
+import { approveCorrelationWithAccountability } from "@/lib/autonomous-recruiting-execution/bridge-accountability";
+import { executePostingCorrelation, mapRecommendedAdToExecutionPayload } from "@/lib/autonomous-recruiting-execution/bridge-posting";
 import { buildApplicantMonitoring } from "@/lib/autonomous-recruiting-execution/build-applicant-monitoring";
 import { buildExecutionOutcomes } from "@/lib/autonomous-recruiting-execution/build-execution-outcomes";
-import { buildRecruiterExecutionTasks } from "@/lib/autonomous-recruiting-execution/build-recruiter-execution-tasks";
+import { buildRecruiterTaskView } from "@/lib/autonomous-recruiting-execution/build-recruiter-task-view";
 import { buildRefreshRecommendations } from "@/lib/autonomous-recruiting-execution/build-refresh-recommendations";
 import {
-  approveExecution,
-  completeExecution,
-  listExecutions,
-  planExecutionsFromSnapshot,
-} from "@/lib/autonomous-recruiting-execution/execution-store";
-import { mapRecommendedAdToExecutionPayload } from "@/lib/autonomous-recruiting-execution/execute-posting-recommendation";
-import { completeTask, listRecruiterTasks, upsertRecruiterTasks } from "@/lib/autonomous-recruiting-execution/recruiter-task-store";
+  approveCorrelation,
+  listCorrelations,
+  planCorrelationsFromSnapshot,
+} from "@/lib/autonomous-recruiting-execution/execution-correlation";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
-const EXECUTIONS_PATH = path.join(DATA_DIR, "autopilot-executions.json");
-const TASKS_PATH = path.join(DATA_DIR, "autopilot-recruiter-tasks.json");
+const CORRELATION_PATH = path.join(DATA_DIR, "autopilot-execution-correlation.json");
+const LEGACY_TASKS_PATH = path.join(DATA_DIR, "autopilot-recruiter-tasks.json");
+const LEGACY_EXECUTIONS_PATH = path.join(DATA_DIR, "autopilot-executions.json");
+const ACCOUNTABILITY_PATH = path.join(DATA_DIR, "executive-accountability.json");
+const JOB_DRAFTS_PATH = path.join(DATA_DIR, "job-drafts.json");
+const AUTOMATION_RUNS_PATH = path.join(DATA_DIR, "hiring-automation-runs.json");
 
 function emptySnapshot(patch: Partial<AutonomousRecruitingSnapshot> = {}): AutonomousRecruitingSnapshot {
   return {
@@ -105,56 +108,108 @@ function emptySnapshot(patch: Partial<AutonomousRecruitingSnapshot> = {}): Auton
   };
 }
 
+async function pathExists(filePath: string): Promise<boolean> {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 before(async () => {
   await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(EXECUTIONS_PATH, JSON.stringify({ executions: [], updatedAt: new Date().toISOString() }));
-  await writeFile(TASKS_PATH, JSON.stringify({ tasks: [], updatedAt: new Date().toISOString() }));
+  await writeFile(
+    CORRELATION_PATH,
+    JSON.stringify({ correlations: [], updatedAt: new Date().toISOString() }),
+  );
+  await writeFile(
+    ACCOUNTABILITY_PATH,
+    JSON.stringify({ actions: [], forecastHistory: [], auditLog: [], updatedAt: new Date().toISOString() }),
+  );
+  await writeFile(JOB_DRAFTS_PATH, JSON.stringify({ drafts: [], updatedAt: new Date().toISOString() }));
+  await writeFile(AUTOMATION_RUNS_PATH, JSON.stringify({ runs: [], updatedAt: new Date().toISOString() }));
+  await rm(LEGACY_TASKS_PATH, { force: true });
+  await rm(LEGACY_EXECUTIONS_PATH, { force: true });
 });
 
 after(async () => {
-  await rm(EXECUTIONS_PATH, { force: true });
-  await rm(TASKS_PATH, { force: true });
+  await rm(CORRELATION_PATH, { force: true });
+  await rm(LEGACY_TASKS_PATH, { force: true });
+  await rm(LEGACY_EXECUTIONS_PATH, { force: true });
 });
 
-describe("autonomous-recruiting-execution", () => {
-  it("plans executions from autopilot snapshot with dedupe", async () => {
+describe("autonomous-recruiting-execution orchestration", () => {
+  it("plans correlations from autopilot snapshot with dedupe", async () => {
     const snapshot = emptySnapshot();
-    const first = await planExecutionsFromSnapshot(snapshot);
-    const second = await planExecutionsFromSnapshot(snapshot);
+    const first = await planCorrelationsFromSnapshot(snapshot);
+    const second = await planCorrelationsFromSnapshot(snapshot);
 
     assert.ok(first.length >= 3);
     assert.equal(first.length, second.length);
     assert.ok(first.some((row) => row.type === "posting"));
     assert.ok(first.some((row) => row.type === "hiring"));
     assert.ok(first.some((row) => row.type === "coverage"));
-    assert.ok(!first.some((row) => row.payload.candidateId === "cand-2"));
+    assert.ok(!first.some((row) => row.candidateId === "cand-2"));
   });
 
-  it("dedupes by recommendationId across plan calls", async () => {
+  it("does not write parallel recruiter task or execution stores", async () => {
     const snapshot = emptySnapshot();
-    await planExecutionsFromSnapshot(snapshot);
-    const beforeCount = (await listExecutions()).length;
-    await planExecutionsFromSnapshot(snapshot);
-    const afterCount = (await listExecutions()).length;
-    assert.equal(beforeCount, afterCount);
+    await planCorrelationsFromSnapshot(snapshot);
+    await buildRecruiterTaskView({ scoredRows: [] });
+
+    assert.equal(await pathExists(LEGACY_TASKS_PATH), false);
+    assert.equal(await pathExists(LEGACY_EXECUTIONS_PATH), false);
   });
 
-  it("approves and completes posting execution lifecycle", async () => {
-    const snapshot = emptySnapshot();
-    const planned = await planExecutionsFromSnapshot(snapshot);
+  it("stores correlations without auditTrail field", async () => {
+    await planCorrelationsFromSnapshot(emptySnapshot());
+    const raw = JSON.parse(await readFile(CORRELATION_PATH, "utf8")) as {
+      correlations: Record<string, unknown>[];
+    };
+
+    assert.ok(raw.correlations.length > 0);
+    for (const row of raw.correlations) {
+      assert.equal("auditTrail" in row, false);
+      assert.equal("payload" in row, false);
+    }
+  });
+
+  it("approves via executive accountability bridge", async () => {
+    const planned = await planCorrelationsFromSnapshot(emptySnapshot());
     const posting = planned.find((row) => row.type === "posting");
     assert.ok(posting);
 
-    const approved = await approveExecution(posting!.id, "exec-user");
+    const approved = await approveCorrelationWithAccountability(posting!.id, { displayName: "exec-user" });
     assert.equal(approved?.status, "approved");
+    assert.ok(approved?.accountabilityActionId);
 
-    const completed = await completeExecution(
-      posting!.id,
-      { summary: "Draft created", success: true, linkedResourceType: "job-draft", linkedResourceId: "draft-1" },
-      "exec-user",
+    const accountability = JSON.parse(await readFile(ACCOUNTABILITY_PATH, "utf8")) as {
+      actions: { sourceModule: string; recommendationId: string }[];
+    };
+    assert.ok(
+      accountability.actions.some(
+        (row) =>
+          row.sourceModule === "autonomous-recruiting-execution" &&
+          row.recommendationId === approved!.accountabilityActionId,
+      ),
     );
-    assert.equal(completed?.status, "completed");
-    assert.equal(completed?.linkedJobDraftId, "draft-1");
+  });
+
+  it("delegates posting execution to job-draft-store", async () => {
+    const planned = await planCorrelationsFromSnapshot(emptySnapshot());
+    const posting = planned.find((row) => row.type === "posting");
+    assert.ok(posting);
+
+    await approveCorrelation(posting!.id, "exec-user");
+    const result = await executePostingCorrelation(posting!.id, "exec-user");
+    assert.equal(result.ok, true);
+    assert.ok(result.correlation?.jobDraftId);
+
+    const drafts = JSON.parse(await readFile(JOB_DRAFTS_PATH, "utf8")) as {
+      drafts: { id: string }[];
+    };
+    assert.ok(drafts.drafts.some((row) => row.id === result.correlation?.jobDraftId));
   });
 
   it("maps recommended ad payload for execution", () => {
@@ -166,38 +221,10 @@ describe("autonomous-recruiting-execution", () => {
     assert.equal(payload.positionId, "job-1");
   });
 
-  it("builds recruiter execution tasks excluding reject recommendations", () => {
-    const snapshot = emptySnapshot();
-    const tasks = buildRecruiterExecutionTasks({
-      hiringRecommendations: snapshot.hiringRecommendations,
-      coverageNeeds: snapshot.coverageNeeds,
-      scoredRows: [],
-      executions: [],
-    });
-
-    assert.ok(tasks.some((task) => task.candidateId === "cand-1"));
-    assert.ok(!tasks.some((task) => task.candidateId === "cand-2"));
-    assert.ok(tasks.some((task) => task.label.includes("Critical coverage")));
-  });
-
-  it("upserts and completes recruiter tasks", async () => {
-    await upsertRecruiterTasks([
-      {
-        id: "task-1",
-        label: "Interview candidate",
-        owner: "Taylor",
-        priority: "high",
-        dueDate: new Date().toISOString(),
-        candidateId: "cand-1",
-        territory: "Texas DM",
-      },
-    ]);
-
-    const tasks = await listRecruiterTasks();
-    assert.equal(tasks.length, 1);
-
-    const completed = await completeTask("task-1");
-    assert.equal(completed?.status, "completed");
+  it("builds recruiter task view from hiring funnel without persistence", async () => {
+    const tasks = buildRecruiterTaskView({ scoredRows: [] });
+    assert.ok(Array.isArray(tasks));
+    assert.equal(await pathExists(LEGACY_TASKS_PATH), false);
   });
 
   it("builds applicant monitoring with alerts for low applicants", () => {
@@ -214,7 +241,7 @@ describe("autonomous-recruiting-execution", () => {
     assert.ok(rows[0]!.timeToFillDays !== null);
   });
 
-  it("builds refresh recommendations when applicants below target", () => {
+  it("builds refresh correlations when applicants below target", () => {
     const snapshot = emptySnapshot();
     const applicantPerformance = buildApplicantMonitoring({
       coverageNeeds: snapshot.coverageNeeds,
@@ -223,21 +250,22 @@ describe("autonomous-recruiting-execution", () => {
       fetchedAt: snapshot.fetchedAt,
     });
 
-    const { refreshAds, refreshExecutions } = buildRefreshRecommendations({
+    const { refreshAds, refreshCorrelations } = buildRefreshRecommendations({
       postingRecommendations: snapshot.postingRecommendations,
       coverageNeeds: snapshot.coverageNeeds,
       applicantPerformance,
-      existingExecutions: [],
+      existingCorrelations: [],
     });
 
     assert.ok(refreshAds.length > 0);
-    assert.ok(refreshExecutions.length > 0);
-    assert.equal(refreshExecutions[0]!.payload.adType, "refresh-ad");
+    assert.ok(refreshCorrelations.length > 0);
+    assert.equal(refreshCorrelations[0]!.adType, "refresh-ad");
+    assert.equal("auditTrail" in refreshCorrelations[0]!, false);
   });
 
-  it("computes execution outcomes from real execution counts", () => {
+  it("computes execution outcomes from correlation counts", () => {
     const outcomes = buildExecutionOutcomes({
-      executions: [
+      correlations: [
         {
           id: "e1",
           recommendationId: "ad-1",
@@ -246,9 +274,8 @@ describe("autonomous-recruiting-execution", () => {
           priority: "high",
           createdAt: "2026-06-23T12:00:00.000Z",
           status: "completed",
-          payload: { adType: "create-new-ad" },
-          auditTrail: [],
-          outcome: { summary: "ok", success: true },
+          adType: "create-new-ad",
+          completedAt: "2026-06-23T12:30:00.000Z",
         },
       ],
       coverageNeeds: emptySnapshot().coverageNeeds,
@@ -267,37 +294,10 @@ describe("autonomous-recruiting-execution", () => {
     assert.ok((timeSaved?.value as number) > 0);
   });
 
-  it("tracks refreshCount in refresh execution payload", () => {
-    const snapshot = emptySnapshot();
-    const applicantPerformance = buildApplicantMonitoring({
-      coverageNeeds: snapshot.coverageNeeds,
-      scoredRows: [],
-      jobs: [],
-      fetchedAt: snapshot.fetchedAt,
-    });
-
-    const first = buildRefreshRecommendations({
-      postingRecommendations: snapshot.postingRecommendations,
-      coverageNeeds: snapshot.coverageNeeds,
-      applicantPerformance,
-      existingExecutions: [],
-    });
-
-    const second = buildRefreshRecommendations({
-      postingRecommendations: snapshot.postingRecommendations,
-      coverageNeeds: snapshot.coverageNeeds,
-      applicantPerformance,
-      existingExecutions: first.refreshExecutions,
-    });
-
-    assert.equal(first.refreshExecutions[0]!.payload.refreshCount, 1);
-    assert.ok((second.refreshExecutions[0]!.payload.refreshCount ?? 0) >= 1);
-  });
-
   it("preserves recruiter oversight — reject hiring stays recommendation-only", async () => {
-    const snapshot = emptySnapshot();
-    const planned = await planExecutionsFromSnapshot(snapshot);
-    const rejectExecution = planned.find((row) => row.payload.candidateId === "cand-2");
-    assert.equal(rejectExecution, undefined);
+    const planned = await planCorrelationsFromSnapshot(emptySnapshot());
+    const rejectCorrelation = planned.find((row) => row.candidateId === "cand-2");
+    assert.equal(rejectCorrelation, undefined);
+    assert.equal((await listCorrelations()).filter((row) => row.candidateId === "cand-2").length, 0);
   });
 });

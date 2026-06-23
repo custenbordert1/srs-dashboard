@@ -1,47 +1,48 @@
 export { buildExecutionSnapshot } from "@/lib/autonomous-recruiting-execution/build-execution-snapshot";
 export { buildApplicantMonitoring } from "@/lib/autonomous-recruiting-execution/build-applicant-monitoring";
-export { buildRecruiterExecutionTasks } from "@/lib/autonomous-recruiting-execution/build-recruiter-execution-tasks";
+export { buildRecruiterTaskView } from "@/lib/autonomous-recruiting-execution/build-recruiter-task-view";
 export { buildRefreshRecommendations } from "@/lib/autonomous-recruiting-execution/build-refresh-recommendations";
+export { buildExecutionAuditView } from "@/lib/autonomous-recruiting-execution/build-execution-audit-view";
 export {
   buildExecutionOutcomes,
   EXECUTION_HOURS_SAVED_FORMULA,
 } from "@/lib/autonomous-recruiting-execution/build-execution-outcomes";
 export {
-  approveAndExecutePosting,
+  approveCorrelationWithAccountability,
+  ensureAccountabilityForCorrelation,
+  P58_SOURCE_MODULE,
+  P58_SOURCE_PHASE,
+} from "@/lib/autonomous-recruiting-execution/bridge-accountability";
+export {
+  executePostingCorrelation,
   executePostingRecommendation,
   mapRecommendedAdToExecutionPayload,
-} from "@/lib/autonomous-recruiting-execution/execute-posting-recommendation";
+} from "@/lib/autonomous-recruiting-execution/bridge-posting";
+export { executeCorrelation, executeHiringCorrelation } from "@/lib/autonomous-recruiting-execution/bridge-hiring";
 export {
+  approveCorrelation,
   approveExecution,
-  archiveExecution,
-  appendAudit,
-  completeExecution,
-  failExecution,
+  getCorrelation,
+  getCorrelationByRecommendationId,
   getExecution,
-  linkExecutionResources,
+  listCorrelations,
   listExecutions,
+  markCorrelationStatus,
+  planCorrelationsFromSnapshot,
   planExecutionsFromSnapshot,
-  startExecution,
-} from "@/lib/autonomous-recruiting-execution/execution-store";
-export {
-  completeTask,
-  createRecruiterTask,
-  escalateTask,
-  getRecruiterTask,
-  listRecruiterTasks,
-  reassignTask,
-  upsertRecruiterTasks,
-} from "@/lib/autonomous-recruiting-execution/recruiter-task-store";
+  updateCorrelationLinks,
+  upsertCorrelations,
+} from "@/lib/autonomous-recruiting-execution/execution-correlation";
 export type {
   ApplicantPerformanceRow,
-  AutopilotExecution,
-  AutopilotRecruiterTask,
   ExecutionAuditLogEntry,
+  ExecutionCorrelation,
   ExecutionFunnelStep,
   ExecutionKpis,
   ExecutionOutcomeMetric,
   ExecutionStatus,
   PostingAutomationRow,
+  RecruiterTaskView,
   RecruitingExecutionSnapshot,
   RecommendationType,
 } from "@/lib/autonomous-recruiting-execution/types";

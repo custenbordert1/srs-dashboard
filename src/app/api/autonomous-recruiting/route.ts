@@ -14,13 +14,10 @@ import {
 } from "@/lib/autonomous-recruiting-engine";
 import type { ApprovalRule } from "@/lib/autonomous-recruiting-engine/types";
 import {
-  approveExecution,
+  approveCorrelationWithAccountability,
   buildExecutionSnapshot,
-  completeTask,
-  escalateTask,
-  executePostingRecommendation,
-  planExecutionsFromSnapshot,
-  reassignTask,
+  executeCorrelation,
+  planCorrelationsFromSnapshot,
 } from "@/lib/autonomous-recruiting-execution";
 import { buildControlCenterSnapshot, listAutomationRuns } from "@/lib/hiring-automation-engine";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
@@ -142,8 +139,6 @@ export async function POST(request: Request) {
     action?: string;
     rules?: ApprovalRule[];
     executionId?: string;
-    taskId?: string;
-    owner?: string;
   };
 
   const actor = session.userId;
@@ -198,12 +193,14 @@ export async function POST(request: Request) {
       automationRuns: ctx.automationRuns,
     });
 
-    await planExecutionsFromSnapshot(snapshot);
+    await planCorrelationsFromSnapshot(snapshot);
     return respondWithExecutionSnapshot();
   }
 
   if (body.action === "approve-execution" && body.executionId) {
-    const approved = await approveExecution(body.executionId, actor);
+    const approved = await approveCorrelationWithAccountability(body.executionId, {
+      displayName: actor,
+    });
     if (!approved) {
       return NextResponse.json({ ok: false, error: "Execution cannot be approved." }, { status: 400 });
     }
@@ -211,33 +208,12 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "execute-execution" && body.executionId) {
-    const result = await executePostingRecommendation(body.executionId, actor);
+    const result = await executeCorrelation(body.executionId, actor);
     if (!result.ok) {
-      return NextResponse.json({ ok: false, error: result.error, execution: result.execution }, { status: 400 });
-    }
-    return respondWithExecutionSnapshot();
-  }
-
-  if (body.action === "complete-task" && body.taskId) {
-    const task = await completeTask(body.taskId);
-    if (!task) {
-      return NextResponse.json({ ok: false, error: "Task not found or already completed." }, { status: 400 });
-    }
-    return respondWithExecutionSnapshot();
-  }
-
-  if (body.action === "reassign-task" && body.taskId && body.owner) {
-    const task = await reassignTask(body.taskId, body.owner);
-    if (!task) {
-      return NextResponse.json({ ok: false, error: "Task not found." }, { status: 400 });
-    }
-    return respondWithExecutionSnapshot();
-  }
-
-  if (body.action === "escalate-task" && body.taskId) {
-    const task = await escalateTask(body.taskId);
-    if (!task) {
-      return NextResponse.json({ ok: false, error: "Task not found." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: result.error, correlation: result.correlation },
+        { status: 400 },
+      );
     }
     return respondWithExecutionSnapshot();
   }

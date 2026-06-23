@@ -1,5 +1,5 @@
-import type { AutopilotExecution } from "@/lib/autonomous-recruiting-execution/execution-store";
-import type { AutopilotRecruiterTask } from "@/lib/autonomous-recruiting-execution/recruiter-task-store";
+import type { ExecutionCorrelation } from "@/lib/autonomous-recruiting-execution/execution-correlation";
+import type { RecruiterTaskView } from "@/lib/autonomous-recruiting-execution/build-recruiter-task-view";
 
 export type ExecutionStatus =
   | "detected"
@@ -11,36 +11,6 @@ export type ExecutionStatus =
   | "archived";
 
 export type RecommendationType = "posting" | "hiring" | "coverage" | "refresh";
-
-export type ExecutionAuditEntry = {
-  id: string;
-  at: string;
-  action: string;
-  actor?: string;
-  detail: string;
-};
-
-export type ExecutionPayload = {
-  title?: string;
-  candidateId?: string;
-  candidateName?: string;
-  adType?: "create-new-ad" | "close-pause-ad" | "refresh-ad";
-  city?: string;
-  state?: string;
-  breezyJobId?: string;
-  positionId?: string;
-  reason?: string;
-  refreshCount?: number;
-  hiringAction?: string;
-  coverageStatus?: string;
-};
-
-export type ExecutionOutcome = {
-  summary: string;
-  success: boolean;
-  linkedResourceType?: "job-draft" | "automation-run";
-  linkedResourceId?: string;
-};
 
 export type ExecutionKpis = {
   recommendationsGenerated: number;
@@ -82,10 +52,16 @@ export type ApplicantPerformanceRow = {
   alerts: string[];
 };
 
-export type ExecutionAuditLogEntry = ExecutionAuditEntry & {
+export type ExecutionAuditLogEntry = {
+  id: string;
+  at: string;
+  action: string;
+  actor?: string;
+  detail: string;
   executionId: string;
   territory: string;
   type: RecommendationType;
+  source: "executive-accountability" | "hiring-automation-engine";
 };
 
 export type ExecutionOutcomeMetric = {
@@ -100,12 +76,12 @@ export type RecruitingExecutionSnapshot = {
   fetchedAt: string;
   kpis: ExecutionKpis;
   executionFunnel: ExecutionFunnelStep[];
-  executionQueue: AutopilotExecution[];
+  executionQueue: ExecutionCorrelation[];
   postingAutomation: PostingAutomationRow[];
-  recruiterTaskQueue: AutopilotRecruiterTask[];
+  recruiterTaskQueue: RecruiterTaskView[];
   applicantPerformance: ApplicantPerformanceRow[];
   auditLog: ExecutionAuditLogEntry[];
   outcomes: ExecutionOutcomeMetric[];
 };
 
-export type { AutopilotExecution, AutopilotRecruiterTask };
+export type { ExecutionCorrelation, RecruiterTaskView };

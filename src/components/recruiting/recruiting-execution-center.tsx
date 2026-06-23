@@ -3,7 +3,6 @@
 import { useAutonomousRecruiting } from "@/hooks/use-autonomous-recruiting";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import type { ExecutionStatus } from "@/lib/autonomous-recruiting-execution";
-import { useState } from "react";
 
 const STATUS_STYLES: Record<ExecutionStatus, string> = {
   detected: "border-zinc-600 bg-zinc-800/40 text-zinc-300",
@@ -37,13 +36,9 @@ export function RecruitingExecutionCenter() {
     actionBusy,
     approveExecution,
     executeExecution,
-    completeTask,
-    escalateTask,
-    reassignTask,
   } = useAutonomousRecruiting();
   const loadingCeilingHit = useLoadingCeiling(loading && !snapshot, EXECUTIVE_PANEL_LOADING_CEILING_MS);
   const showLoading = loading && !snapshot && !loadingCeilingHit;
-  const [reassignDraft, setReassignDraft] = useState<Record<string, string>>({});
 
   if (showLoading) {
     return (
@@ -139,8 +134,8 @@ export function RecruitingExecutionCenter() {
               <li key={row.id} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 p-3 text-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-zinc-100">{row.payload.title ?? row.recommendationId}</p>
-                    <p className="text-xs text-zinc-500">{row.territory} · {row.payload.adType}</p>
+                    <p className="font-medium text-zinc-100">{row.displayTitle ?? row.recommendationId}</p>
+                    <p className="text-xs text-zinc-500">{row.territory} · {row.adType}</p>
                   </div>
                   <span className={`rounded-md border px-2 py-0.5 text-[10px] font-medium capitalize ${STATUS_STYLES[row.status]}`}>
                     {row.status}
@@ -202,47 +197,14 @@ export function RecruitingExecutionCenter() {
               <li key={task.id} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-zinc-100">{task.label}</p>
+                    <a href={task.href} className="font-medium text-teal-200 hover:text-teal-100 hover:underline">
+                      {task.label}
+                    </a>
                     <p className="text-xs text-zinc-500">
-                      {task.owner} · {task.territory} · due {new Date(task.dueDate).toLocaleDateString()}
+                      {task.owner} · {task.candidateName} · {task.risk}
                     </p>
                   </div>
-                  <span className="text-[10px] uppercase text-zinc-400">{task.status}</span>
                 </div>
-                {task.status === "open" ? (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={actionBusy}
-                      onClick={() => void completeTask(task.id)}
-                      className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
-                    >
-                      Complete
-                    </button>
-                    <button
-                      type="button"
-                      disabled={actionBusy}
-                      onClick={() => void escalateTask(task.id)}
-                      className="rounded-md border border-amber-500/40 px-2 py-1 text-xs text-amber-100 hover:bg-amber-500/15 disabled:opacity-50"
-                    >
-                      Escalate
-                    </button>
-                    <input
-                      type="text"
-                      placeholder="Reassign to…"
-                      value={reassignDraft[task.id] ?? ""}
-                      onChange={(event) =>
-                        setReassignDraft((prev) => ({ ...prev, [task.id]: event.target.value }))
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && reassignDraft[task.id]?.trim()) {
-                          void reassignTask(task.id, reassignDraft[task.id]!.trim());
-                        }
-                      }}
-                      className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
-                    />
-                  </div>
-                ) : null}
               </li>
             ))}
           </ul>

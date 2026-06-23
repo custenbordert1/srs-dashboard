@@ -1,7 +1,6 @@
 import type { TerritoryCoverageNeed } from "@/lib/autonomous-recruiting-engine/types";
-import type { ExecutionOutcomeMetric } from "@/lib/autonomous-recruiting-execution/types";
-import type { AutopilotExecution } from "@/lib/autonomous-recruiting-execution/execution-store";
-import type { ApplicantPerformanceRow } from "@/lib/autonomous-recruiting-execution/types";
+import type { ExecutionCorrelation } from "@/lib/autonomous-recruiting-execution/execution-correlation";
+import type { ApplicantPerformanceRow, ExecutionOutcomeMetric } from "@/lib/autonomous-recruiting-execution/types";
 
 const MINUTES_POSTING_EXECUTION = 12;
 const MINUTES_HIRING_TASK = 8;
@@ -12,17 +11,17 @@ export const EXECUTION_HOURS_SAVED_FORMULA =
   "timeSaved = (completedPosting × 12 + completedHiring × 8 + completedCoverage × 15 + completedRefresh × 10) / 60";
 
 export function buildExecutionOutcomes(input: {
-  executions: AutopilotExecution[];
+  correlations: ExecutionCorrelation[];
   coverageNeeds: TerritoryCoverageNeed[];
   applicantPerformance: ApplicantPerformanceRow[];
   priorCriticalTerritories?: string[];
 }): ExecutionOutcomeMetric[] {
-  const completed = input.executions.filter((row) => row.status === "completed");
+  const completed = input.correlations.filter((row) => row.status === "completed");
   const postingCompleted = completed.filter((row) => row.type === "posting" || row.type === "refresh");
   const hiringCompleted = completed.filter((row) => row.type === "hiring");
   const coverageCompleted = completed.filter((row) => row.type === "coverage");
 
-  const postingAttempts = input.executions.filter(
+  const postingAttempts = input.correlations.filter(
     (row) => (row.type === "posting" || row.type === "refresh") && row.status !== "archived",
   );
   const postingSuccessRate =
@@ -84,7 +83,7 @@ export function buildExecutionOutcomes(input: {
       id: "executions-completed",
       label: "Executions completed",
       value: completed.length,
-      detail: `${input.executions.filter((row) => row.status === "failed").length} failed`,
+      detail: `${input.correlations.filter((row) => row.status === "failed").length} failed`,
     },
     {
       id: "territories-with-alerts",
