@@ -1,6 +1,7 @@
 "use client";
 
 import type { QueueCandidateRow } from "@/lib/candidate-action-queue";
+import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { slaToneClass } from "@/lib/candidate-action-sla";
 import {
@@ -145,6 +146,7 @@ export function CandidateQueueRow({
   busy = false,
 }: CandidateQueueRowProps) {
   const label = candidateLabel(row);
+  const unassigned = isUnassignedRecruiter(row.assignedRecruiter);
   const agingBucket = computeRecruiterAgingBucket(row);
   const zebra = rowIndex % 2 === 0 ? "bg-zinc-950/25" : "bg-transparent";
   const ownedByYou = row.assignedRecruiter === actingRecruiter;
@@ -231,6 +233,30 @@ export function CandidateQueueRow({
             title="Assign to acting recruiter"
             onClick={() => onAction({ action: "assign-recruiter", recruiter: actingRecruiter })}
           />
+          {unassigned ? (
+            <select
+              disabled={busy}
+              defaultValue=""
+              aria-label={`Assign recruiter for ${label}`}
+              title="Assign recruiter"
+              className="h-6 max-w-[5.5rem] shrink-0 rounded border border-teal-600/40 bg-teal-950/40 px-1 text-[10px] text-teal-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-500/50"
+              onChange={(e) => {
+                const recruiter = e.target.value;
+                if (!recruiter) return;
+                onAction({ action: "assign-recruiter", recruiter });
+                e.target.value = "";
+              }}
+            >
+              <option value="">Recruiter…</option>
+              {rosters.recruiters
+                .filter((name) => !isUnassignedRecruiter(name))
+                .map((recruiter) => (
+                  <option key={recruiter} value={recruiter}>
+                    {recruiter}
+                  </option>
+                ))}
+            </select>
+          ) : null}
           <QueueActionButton
             label="Follow-up"
             tone="amber"

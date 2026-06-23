@@ -23,7 +23,24 @@ describe("candidate-workspace", () => {
     assert.equal(timeline[0]?.label, "Status updated");
   });
 
-  it("resolves contact candidate for applied status", () => {
+  it("resolves assign to me for unassigned candidates before outreach actions", () => {
+    const action = resolveWorkspaceAction({
+      candidate: {
+        workflowStatus: "Applied",
+        assignedRecruiter: "Unassigned",
+        recruitingActions: emptyRecruitingActions(),
+        followUpDueAt: null,
+        paperworkStatus: "not_sent",
+        nextActionNeeded: "Review application",
+      },
+      actingRecruiter: "Taylor",
+      sendBlockReason: null,
+    });
+    assert.equal(action.kind, "assign-me");
+    assert.equal(action.label, "Assign to me");
+  });
+
+  it("resolves contact candidate for assigned applied status", () => {
     const action = resolveWorkspaceAction({
       candidate: {
         workflowStatus: "Applied",

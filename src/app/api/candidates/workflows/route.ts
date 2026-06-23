@@ -170,9 +170,14 @@ export async function POST(request: Request) {
     followUpDueAt,
     snoozedUntil,
     audit: {
-      action: "upsert_workflow",
+      action: assignedRecruiter ? "assign_recruiter" : assignedDM ? "assign_dm" : "upsert_workflow",
       byUserId: session.userId,
-      metadata: { workflowStatus: workflowStatus ?? "", hasNote: Boolean(note) },
+      metadata: {
+        workflowStatus: workflowStatus ?? "",
+        hasNote: Boolean(note),
+        assignedRecruiter: assignedRecruiter ?? "",
+        assignedDM: assignedDM ?? "",
+      },
     },
   });
 
@@ -180,7 +185,13 @@ export async function POST(request: Request) {
     action: "workflow_action",
     entityType: "workflow",
     entityId: candidateId,
-    metadata: { workflowStatus: workflowStatus ?? "", hasNote: Boolean(note) },
+    metadata: {
+      workflowStatus: workflowStatus ?? "",
+      hasNote: Boolean(note),
+      assignedRecruiter: assignedRecruiter ?? "",
+      assignedDM: assignedDM ?? "",
+      assignmentType: assignedRecruiter ? "recruiter" : assignedDM ? "dm" : "",
+    },
   });
 
   const bundle = await getCandidateWorkflowBundle();

@@ -32,7 +32,12 @@ import {
   isOnboardingRequestError,
   sendOnboardingPacket,
 } from "@/lib/onboarding-client";
-import { patchEnrichedRowsFromWorkflow } from "@/lib/patch-enriched-workflow-row";
+import {
+  mergeWorkflowStateByUpdatedAt,
+  patchEnrichedRowsFromWorkflow,
+  syncEnrichedRowsFromWorkflowState,
+} from "@/lib/patch-enriched-workflow-row";
+import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import {
   workflowNoticeAssigned,
   workflowNoticePacketSent,
@@ -879,7 +884,7 @@ export function CandidatesSection() {
 
     if (workflowsSettled.status === "fulfilled" && workflowsSettled.value.ok) {
       if (workflowsSettled.value.workflows) {
-        setWorkflowState(workflowsSettled.value.workflows);
+        setWorkflowState((prev) => mergeWorkflowStateByUpdatedAt(prev, workflowsSettled.value.workflows!));
       }
       if (workflowsSettled.value.rosters) {
         setRosters(workflowsSettled.value.rosters);
@@ -1046,14 +1051,25 @@ export function CandidatesSection() {
       workflow: CandidateWorkflowRecord,
       options?: { notice?: string; workflows?: CandidateWorkflowState },
     ) => {
+      const workflowRecord = options?.workflows?.[workflow.candidateId] ?? workflow;
       if (options?.workflows) {
-        setWorkflowState(options.workflows);
+        setWorkflowState((prev) => mergeWorkflowStateByUpdatedAt(prev, options.workflows!));
       } else {
-        setWorkflowState((prev) => ({ ...prev, [workflow.candidateId]: workflow }));
+        setWorkflowState((prev) => ({ ...prev, [workflow.candidateId]: workflowRecord }));
       }
       const breezy = committedCandidates.find((c) => c.candidateId === workflow.candidateId);
       const job = breezy ? jobsByPositionId.get(breezy.positionId) : undefined;
-      setEnrichedCandidates((prev) => patchEnrichedRowsFromWorkflow(prev, breezy, workflow, job));
+      setEnrichedCandidates((prev) => {
+        if (options?.workflows) {
+          return syncEnrichedRowsFromWorkflowState(
+            prev,
+            options.workflows,
+            committedCandidates,
+            jobsByPositionId,
+          );
+        }
+        return patchEnrichedRowsFromWorkflow(prev, breezy, workflowRecord, job);
+      });
       if (options?.notice) {
         setWorkflowNotice(options.notice);
         if (workflowNoticeTimerRef.current !== null) {
@@ -1762,21 +1778,36 @@ export function CandidatesSection() {
       });
   }, [commitWorkflowToView]);
 
-  const assignActingRecruiterToRow = useCallback(
-    (candidate: ScoredCandidateWorkflowRow) => {
-      void persistWorkflowUpdate({
-        candidateId: candidate.candidateId,
-        assignedRecruiter: actingRecruiter,
-        workflowStatus: candidate.workflowStatus,
-      })
-        .then((workflow) => {
-          commitWorkflowToView(workflow, { notice: workflowNoticeAssigned(actingRecruiter) });
+  const assignRecruiterToRow = useCallback(
+    (candidate: ScoredCandidateWorkflowRow, recruiter: string) => {
+      if (isUnassignedRecruiter(recruiter)) {
+        window.alert("Choose an acting recruiter (not Unassigned) before assigning ownership.");
+        return;
+      }
+      setWorkspaceBusy(true);
+      void persistWorkflow(candidate, candidate.workflowStatus, { assignedRecruiter: recruiter })
+        .then((result) => {
+          if (result.rosters) {
+            setRosters(result.rosters);
+          }
+          commitWorkflowToView(result.workflow, {
+            notice: workflowNoticeAssigned(recruiter),
+            workflows: result.workflows,
+          });
         })
         .catch((err) => {
           window.alert(err instanceof Error ? err.message : "Assign recruiter failed");
-        });
+        })
+        .finally(() => setWorkspaceBusy(false));
     },
-    [actingRecruiter, commitWorkflowToView],
+    [commitWorkflowToView],
+  );
+
+  const assignActingRecruiterToRow = useCallback(
+    (candidate: ScoredCandidateWorkflowRow) => {
+      assignRecruiterToRow(candidate, actingRecruiter);
+    },
+    [actingRecruiter, assignRecruiterToRow],
   );
 
   const addQuickNoteToRow = useCallback(
@@ -2272,6 +2303,7 @@ export function CandidatesSection() {
         onClose={() => setSelectedCandidateId(null)}
         matchScore={selectedCandidate?.matchPercent ?? null}
         actingRecruiter={actingRecruiter}
+        rosters={rosters}
         sendBlockReason={
           selectedCandidate
             ? getSendPaperworkBlockReason(
@@ -2300,6 +2332,10 @@ export function CandidatesSection() {
         onAssignActingRecruiter={() => {
           if (!selectedCandidate) return;
           assignActingRecruiterToRow(selectedCandidate);
+        }}
+        onAssignRecruiter={(recruiter) => {
+          if (!selectedCandidate) return;
+          assignRecruiterToRow(selectedCandidate, recruiter);
         }}
         onAdvanceWorkflow={(input) => {
           void handleWorkspaceAdvance(input);

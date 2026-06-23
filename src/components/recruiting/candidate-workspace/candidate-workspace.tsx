@@ -1,6 +1,7 @@
 "use client";
 
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
+import { CandidateAssignmentPanel } from "@/components/recruiting/candidate-workspace/candidate-assignment-panel";
 import { CandidateAutomationStatusPanel } from "@/components/recruiting/candidate-workspace/candidate-automation-status-panel";
 import { CandidateCopilotPanel } from "@/components/recruiting/candidate-workspace/candidate-copilot-panel";
 import { CandidateCommunicationLog } from "@/components/recruiting/candidate-workspace/candidate-communication-log";
@@ -23,6 +24,8 @@ import {
   resolveWorkspaceAction,
 } from "@/lib/candidate-workspace";
 import { formatCandidateDisplayName } from "@/lib/candidate-display-name";
+import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
+import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 import { useEffect } from "react";
 
 function candidateDisplayName(candidate: CandidateDrawerRow): string {
@@ -39,6 +42,7 @@ export type CandidateWorkspaceProps = {
   onClose: () => void;
   matchScore: number | null;
   actingRecruiter: string;
+  rosters: RecruiterRosters;
   sendBlockReason: SendPaperworkBlockReason | null;
   paperworkSending?: boolean;
   workspaceBusy?: boolean;
@@ -46,6 +50,7 @@ export type CandidateWorkspaceProps = {
   onSendPaperwork: (templateKey: OnboardingTemplateKey) => void;
   onRefreshPaperworkStatus: () => void;
   onAssignActingRecruiter: () => void;
+  onAssignRecruiter: (recruiter: string) => void;
   onAdvanceWorkflow: (input: {
     statusChange?: CandidateDrawerRow["workflowStatus"];
     completeFollowUp?: boolean;
@@ -60,6 +65,7 @@ export function CandidateWorkspace({
   onClose,
   matchScore,
   actingRecruiter,
+  rosters,
   sendBlockReason,
   paperworkSending = false,
   workspaceBusy = false,
@@ -67,6 +73,7 @@ export function CandidateWorkspace({
   onSendPaperwork,
   onRefreshPaperworkStatus,
   onAssignActingRecruiter,
+  onAssignRecruiter,
   onAdvanceWorkflow,
 }: CandidateWorkspaceProps) {
   useEffect(() => {
@@ -99,6 +106,8 @@ export function CandidateWorkspace({
     paperworkStatus: activeCandidate.paperworkStatus,
     recruitingActions: activeCandidate.recruitingActions,
   });
+  const needsRecruiterAssignment = isUnassignedRecruiter(activeCandidate.assignedRecruiter);
+  const assignmentBusy = workspaceBusy || paperworkSending;
 
   function runPrimaryAction() {
     switch (workspaceAction.kind) {
@@ -178,15 +187,32 @@ export function CandidateWorkspace({
         <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
           <CandidateSummary candidate={activeCandidate} matchScore={matchScore} />
 
+          <CandidateAssignmentPanel
+            assignedRecruiter={activeCandidate.assignedRecruiter}
+            actingRecruiter={actingRecruiter}
+            rosters={rosters}
+            busy={assignmentBusy}
+            onAssignToMe={onAssignActingRecruiter}
+            onAssignRecruiter={onAssignRecruiter}
+          />
+
           <CandidateGradePanel grade={activeCandidate.candidateGrade} />
-          <CandidateCopilotPanel copilot={activeCandidate.funnelAutomation.copilot} />
+          <CandidateCopilotPanel
+            copilot={activeCandidate.funnelAutomation.copilot}
+            showAssignmentActions={needsRecruiterAssignment}
+            actingRecruiter={actingRecruiter}
+            rosters={rosters}
+            busy={assignmentBusy}
+            onAssignToMe={onAssignActingRecruiter}
+            onAssignRecruiter={onAssignRecruiter}
+          />
           <CandidateAutomationStatusPanel automation={activeCandidate.funnelAutomation} />
           <CandidateResumeIntelligencePanel intelligence={activeCandidate.resumeIntelligence} />
           <CandidateQuestionnaireIntelligencePanel intelligence={activeCandidate.questionnaireIntelligence} />
 
           <CandidateNextActionCard
             action={workspaceAction}
-            busy={workspaceBusy || paperworkSending}
+            busy={assignmentBusy}
             onPrimary={runPrimaryAction}
             onComplete={runCompleteAction}
           />

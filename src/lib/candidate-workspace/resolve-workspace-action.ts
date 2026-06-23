@@ -1,4 +1,5 @@
 import type { SendPaperworkBlockReason } from "@/lib/onboarding-send-eligibility";
+import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import type { WorkspaceAction, WorkspaceActionKind } from "@/lib/candidate-workspace/types";
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { isFollowUpOverdue } from "@/lib/candidate-action-sla";
@@ -43,8 +44,16 @@ export function resolveWorkspaceAction(input: {
 }): WorkspaceAction {
   const { candidate, actingRecruiter, sendBlockReason, sendBusy = false } = input;
   const recruiter = candidate.assignedRecruiter?.trim() || "Unassigned";
-  const unassignedRecruiter =
-    recruiter === "Unassigned" || recruiter.length === 0 || recruiter !== actingRecruiter.trim();
+
+  if (isUnassignedRecruiter(recruiter)) {
+    return action(
+      "assign-me",
+      "Assign to me",
+      `Take ownership as ${actingRecruiter} before continuing outreach.`,
+      "teal",
+      { completeLabel: "Assign to me" },
+    );
+  }
 
   if (candidate.recruitingActions.needsFollowUp || isFollowUpOverdue({
     recruitingActions: candidate.recruitingActions,
@@ -111,16 +120,6 @@ export function resolveWorkspaceAction(input: {
       "Check signature status or nudge the candidate to complete paperwork.",
       "amber",
       { completeLabel: "Follow-up logged" },
-    );
-  }
-
-  if (unassignedRecruiter) {
-    return action(
-      "assign-me",
-      "Assign to me",
-      `Take ownership as ${actingRecruiter} before continuing.`,
-      "neutral",
-      { completeLabel: "Assign to me" },
     );
   }
 
