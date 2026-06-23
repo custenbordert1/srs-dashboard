@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { after, before, describe, it } from "node:test";
+import { after, before, beforeEach, describe, it } from "node:test";
 import type { AutonomousRecruitingSnapshot } from "@/lib/autonomous-recruiting-engine/types";
 import { approveCorrelationWithAccountability } from "@/lib/autonomous-recruiting-execution/bridge-accountability";
 import { executePostingCorrelation, mapRecommendedAdToExecutionPayload } from "@/lib/autonomous-recruiting-execution/bridge-posting";
@@ -119,6 +119,11 @@ async function pathExists(filePath: string): Promise<boolean> {
 
 before(async () => {
   await mkdir(DATA_DIR, { recursive: true });
+  await rm(LEGACY_TASKS_PATH, { force: true });
+  await rm(LEGACY_EXECUTIONS_PATH, { force: true });
+});
+
+beforeEach(async () => {
   await writeFile(
     CORRELATION_PATH,
     JSON.stringify({ correlations: [], updatedAt: new Date().toISOString() }),
@@ -129,12 +134,9 @@ before(async () => {
   );
   await writeFile(JOB_DRAFTS_PATH, JSON.stringify({ drafts: [], updatedAt: new Date().toISOString() }));
   await writeFile(AUTOMATION_RUNS_PATH, JSON.stringify({ runs: [], updatedAt: new Date().toISOString() }));
-  await rm(LEGACY_TASKS_PATH, { force: true });
-  await rm(LEGACY_EXECUTIONS_PATH, { force: true });
 });
 
 after(async () => {
-  await rm(CORRELATION_PATH, { force: true });
   await rm(LEGACY_TASKS_PATH, { force: true });
   await rm(LEGACY_EXECUTIONS_PATH, { force: true });
 });

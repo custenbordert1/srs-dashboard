@@ -93,6 +93,21 @@ export function evaluateApprovalRules(
   return { ads: evaluated, matchedRuleIds };
 }
 
+export function findMatchingApprovalRule(
+  ad: RecommendedAd,
+  rules: ApprovalRule[],
+  coverageNeeds: TerritoryCoverageNeed[],
+): ApprovalRule | null {
+  const applicantCountByTerritory = new Map(
+    coverageNeeds.map((row) => [row.territoryKey, row.applicantCount]),
+  );
+  return (
+    rules.find((rule) =>
+      ruleMatches(rule, ad, { coverageNeeds, applicantCountByTerritory }),
+    ) ?? null
+  );
+}
+
 export function applyApprovalRulesToAds(
   ads: RecommendedAd[],
   rules: ApprovalRule[],

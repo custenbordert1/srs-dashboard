@@ -19,6 +19,16 @@ import {
   executeCorrelation,
   planCorrelationsFromSnapshot,
 } from "@/lib/autonomous-recruiting-execution";
+import {
+  buildAutopilotDashboardSnapshot,
+  loadRecommendationFeedbackIndex,
+  pauseAutopilot,
+  resumeAutopilot,
+  runAutopilotPlanning,
+  setAutopilotMode,
+} from "@/lib/autonomous-recruiting-autopilot";
+import type { AutopilotOperatingMode } from "@/lib/autonomous-recruiting-autopilot";
+import { loadPipelineIntelligenceForSession } from "@/lib/pipeline-intelligence/load-pipeline-intelligence-context";
 import { buildControlCenterSnapshot, listAutomationRuns } from "@/lib/hiring-automation-engine";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
@@ -80,6 +90,12 @@ export async function GET(request: Request) {
 
   const startedAt = Date.now();
 
+  const [feedbackIndex, pipelineResult] = await Promise.all([
+    loadRecommendationFeedbackIndex(),
+    loadPipelineIntelligenceForSession(guard.session),
+  ]);
+  const pipelineSnapshot = pipelineResult.ok ? pipelineResult.snapshot : undefined;
+
   const snapshot = buildAutopilotSnapshot({
     jobs: ctx.jobs,
     candidates: ctx.candidates,
@@ -90,12 +106,19 @@ export async function GET(request: Request) {
     territoryStates: ctx.territoryStates,
     approvalRules: ctx.approvalRules,
     automationRuns: ctx.automationRuns,
+    feedbackIndex,
   });
 
   const executionSnapshot = await buildExecutionSnapshot({
     autopilotSnapshot: snapshot,
     jobs: ctx.jobs,
     scoredRows: ctx.scoredRows,
+  });
+
+  const autopilotDashboard = await buildAutopilotDashboardSnapshot({
+    autopilotSnapshot: snapshot,
+    executionSnapshot,
+    pipelineSnapshot,
   });
 
   const buildMs = Date.now() - startedAt;
@@ -105,6 +128,7 @@ export async function GET(request: Request) {
       ok: true,
       snapshot,
       executionSnapshot,
+      autopilotDashboard,
       meta: {
         buildMs,
         candidateCount: ctx.candidates.length,
@@ -139,6 +163,7 @@ export async function POST(request: Request) {
     action?: string;
     rules?: ApprovalRule[];
     executionId?: string;
+    mode?: AutopilotOperatingMode;
   };
 
   const actor = session.userId;
@@ -154,6 +179,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: ctx.error }, { status: 502 });
     }
 
+    const [feedbackIndex, pipelineResult] = await Promise.all([
+      loadRecommendationFeedbackIndex(),
+      loadPipelineIntelligenceForSession(session),
+    ]);
+    const pipelineSnapshot = pipelineResult.ok ? pipelineResult.snapshot : undefined;
+
     const snapshot = buildAutopilotSnapshot({
       jobs: ctx.jobs,
       candidates: ctx.candidates,
@@ -164,6 +195,7 @@ export async function POST(request: Request) {
       territoryStates: ctx.territoryStates,
       approvalRules: ctx.approvalRules,
       automationRuns: ctx.automationRuns,
+      feedbackIndex,
     });
 
     const executionSnapshot = await buildExecutionSnapshot({
@@ -172,7 +204,13 @@ export async function POST(request: Request) {
       scoredRows: ctx.scoredRows,
     });
 
-    return NextResponse.json({ ok: true, snapshot, executionSnapshot });
+    const autopilotDashboard = await buildAutopilotDashboardSnapshot({
+      autopilotSnapshot: snapshot,
+      executionSnapshot,
+      pipelineSnapshot,
+    });
+
+    return NextResponse.json({ ok: true, snapshot, executionSnapshot, autopilotDashboard });
   }
 
   if (body.action === "plan-executions") {
@@ -216,6 +254,65 @@ export async function POST(request: Request) {
       );
     }
     return respondWithExecutionSnapshot();
+  }
+
+  if (body.action === "run-autopilot") {
+    const ctx = await loadSnapshotContext(session);
+    if ("error" in ctx) {
+      return NextResponse.json({ ok: false, error: ctx.error }, { status: 502 });
+    }
+
+    const [feedbackIndex, pipelineResult] = await Promise.all([
+      loadRecommendationFeedbackIndex(),
+      loadPipelineIntelligenceForSession(session),
+    ]);
+
+    const result = await runAutopilotPlanning({
+      jobs: ctx.jobs,
+      candidates: ctx.candidates,
+      workflows: ctx.workflows,
+      opportunities: ctx.opportunities,
+      scoredRows: ctx.scoredRows,
+      fetchedAt: ctx.fetchedAt,
+      territoryStates: ctx.territoryStates,
+      approvalRules: ctx.approvalRules,
+      automationRuns: ctx.automationRuns,
+      feedbackIndex,
+      pipelineSnapshot: pipelineResult.ok ? pipelineResult.snapshot : undefined,
+    });
+
+    const autopilotDashboard = await buildAutopilotDashboardSnapshot({
+      autopilotSnapshot: result.snapshot,
+      executionSnapshot: result.executionSnapshot,
+      pipelineSnapshot: pipelineResult.ok ? pipelineResult.snapshot : undefined,
+    });
+
+    return NextResponse.json({
+      ok: true,
+      snapshot: result.snapshot,
+      executionSnapshot: result.executionSnapshot,
+      autopilotDashboard,
+      run: result.run,
+    });
+  }
+
+  if (body.action === "pause-autopilot") {
+    const policy = await pauseAutopilot(actor);
+    return NextResponse.json({ ok: true, policy });
+  }
+
+  if (body.action === "resume-autopilot") {
+    const policy = await resumeAutopilot();
+    return NextResponse.json({ ok: true, policy });
+  }
+
+  if (
+    body.action === "set-autopilot-mode" &&
+    body.mode &&
+    ["manual", "semi-automatic", "automatic"].includes(body.mode)
+  ) {
+    const policy = await setAutopilotMode(body.mode);
+    return NextResponse.json({ ok: true, policy });
   }
 
   if (body.action === "evaluate-rules") {
