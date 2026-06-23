@@ -22,6 +22,7 @@ import {
   type CandidateWorkflowStatus,
   type CandidateWorkflowStoreFile,
   type PaperworkStatus,
+  type RecruiterAssignmentSource,
   type RecruiterRosters,
 } from "@/lib/candidate-workflow-types";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
@@ -217,6 +218,9 @@ export async function upsertCandidateWorkflow(input: {
   directDepositLastHrCopyIncluded?: boolean | null;
   directDepositLastHrBccAddress?: string | null;
   paperworkHistoryMessage?: string;
+  recruiterAssignmentSource?: RecruiterAssignmentSource | null;
+  recruiterAssignmentReason?: string | null;
+  recruiterAssignmentConfidence?: number | null;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
@@ -298,6 +302,26 @@ export async function upsertCandidateWorkflow(input: {
     input.directDepositLastHrBccAddress !== undefined
       ? input.directDepositLastHrBccAddress
       : (existing?.directDepositLastHrBccAddress ?? null);
+  const recruiterAssignmentSource =
+    input.recruiterAssignmentSource !== undefined
+      ? input.recruiterAssignmentSource
+      : (existing?.recruiterAssignmentSource ?? null);
+  const recruiterAssignmentReason =
+    input.recruiterAssignmentReason !== undefined
+      ? input.recruiterAssignmentReason
+      : (existing?.recruiterAssignmentReason ?? null);
+  const recruiterAssignmentConfidence =
+    input.recruiterAssignmentConfidence !== undefined
+      ? input.recruiterAssignmentConfidence
+      : (existing?.recruiterAssignmentConfidence ?? null);
+  const recruiterAssignedAt =
+    input.assignedRecruiter?.trim() &&
+    existing?.assignedRecruiter !== assignedRecruiter &&
+    (input.recruiterAssignmentSource === "auto" || input.recruiterAssignmentSource === "manual")
+      ? now
+      : input.recruiterAssignmentSource !== undefined && input.recruiterAssignmentSource !== existing?.recruiterAssignmentSource
+        ? now
+        : (existing?.recruiterAssignedAt ?? null);
 
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
@@ -309,7 +333,17 @@ export async function upsertCandidateWorkflow(input: {
     history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
   }
   if (input.assignedRecruiter?.trim() && existing?.assignedRecruiter !== assignedRecruiter) {
-    history.unshift(event("assignment", `Assigned recruiter changed to ${assignedRecruiter}.`, now));
+    if (input.recruiterAssignmentSource === "auto") {
+      history.unshift(
+        event(
+          "assignment",
+          `Auto-assigned recruiter ${assignedRecruiter} (${recruiterAssignmentConfidence ?? 0}% confidence).`,
+          now,
+        ),
+      );
+    } else {
+      history.unshift(event("assignment", `Assigned recruiter changed to ${assignedRecruiter}.`, now));
+    }
   }
   if (
     input.recruitingActions &&
@@ -363,6 +397,10 @@ export async function upsertCandidateWorkflow(input: {
     directDepositLastDeliveryMode,
     directDepositLastHrCopyIncluded,
     directDepositLastHrBccAddress,
+    recruiterAssignmentSource,
+    recruiterAssignmentReason,
+    recruiterAssignmentConfidence,
+    recruiterAssignedAt,
     updatedAt: now,
   };
 

@@ -16,6 +16,7 @@ import { CandidateAutomationPanels } from "@/components/recruiting/candidate-aut
 import { formatCandidateDisplayName } from "@/lib/candidate-display-name";
 import type { CandidateRowAction } from "@/components/recruiting/candidate-actions-menu";
 import { CandidateWorkspace } from "@/components/recruiting/candidate-workspace";
+import { CandidateAssignmentBadge } from "@/components/recruiting/candidate-assignment-badge";
 import { buildCandidateDrawerRowFromScored } from "@/lib/build-candidate-drawer-row";
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
@@ -24,6 +25,7 @@ import {
   completeCandidateFollowUp,
   persistRecruitingActionToggle,
   persistWorkflowUpdate,
+  runAutoRecruiterAssignment,
   snoozeCandidate24h,
 } from "@/lib/candidate-workflow-client";
 import {
@@ -1301,6 +1303,25 @@ export function CandidatesSection() {
     [committedCandidates, jobsByPositionId],
   );
 
+  useEffect(() => {
+    if (loadingBundle || committedCandidates.length === 0) return;
+    let cancelled = false;
+    void runAutoRecruiterAssignment()
+      .then((parsed) => {
+        if (cancelled || !parsed.workflows || (parsed.assigned ?? 0) <= 0) return;
+        applyWorkflowsBundle(parsed.workflows);
+        if (parsed.rosters) {
+          setRosters(parsed.rosters);
+        }
+      })
+      .catch(() => {
+        // Auto-assignment is best-effort; P43 manual assignment remains available.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyWorkflowsBundle, committedCandidates.length, loadingBundle]);
+
   const selectedDrawerRow = useMemo(() => {
     if (!selectedCandidate) return null;
     const row = buildCandidateDrawerRowFromScored(selectedCandidate);
@@ -1859,6 +1880,14 @@ export function CandidatesSection() {
             >
               <div className="flex min-w-0 items-center gap-1.5">
                 <span className="truncate font-medium text-zinc-100">{candidateName(candidate)}</span>
+                {candidate.recruiterAssignmentSource ? (
+                  <CandidateAssignmentBadge
+                    source={candidate.recruiterAssignmentSource}
+                    reason={candidate.recruiterAssignmentReason}
+                    confidence={candidate.recruiterAssignmentConfidence}
+                    compact
+                  />
+                ) : null}
                 <span
                   className={`${workflowPillClass} shrink-0 ${workflowStatusPillClass(candidate.workflowStatus, candidate)}`}
                   title={candidate.workflowStatus}

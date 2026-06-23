@@ -102,6 +102,10 @@ export type CandidateDrawerRow = {
   questionnaireIntelligence: CandidateQuestionnaireIntelligence;
   candidateGrade: CandidateReadinessScore;
   funnelAutomation: CandidateFunnelAutomation;
+  recruiterAssignmentSource?: import("@/lib/candidate-workflow-types").RecruiterAssignmentSource | null;
+  recruiterAssignmentReason?: string | null;
+  recruiterAssignmentConfidence?: number | null;
+  recruiterAssignedAt?: string | null;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";

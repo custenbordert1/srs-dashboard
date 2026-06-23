@@ -206,7 +206,10 @@ export function CandidateWorkspace({
             onAssignToMe={onAssignActingRecruiter}
             onAssignRecruiter={onAssignRecruiter}
           />
-          <CandidateAutomationStatusPanel automation={activeCandidate.funnelAutomation} />
+          <CandidateAutomationStatusPanel
+            automation={activeCandidate.funnelAutomation}
+            assignmentSource={activeCandidate.recruiterAssignmentSource}
+          />
           <CandidateResumeIntelligencePanel intelligence={activeCandidate.resumeIntelligence} />
           <CandidateQuestionnaireIntelligencePanel intelligence={activeCandidate.questionnaireIntelligence} />
 

@@ -1,4 +1,5 @@
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
+import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import { buildRecruiterTasks } from "@/lib/hiring-funnel-automation/build-recruiter-tasks";
 import { evaluateCandidateFunnelAutomation } from "@/lib/hiring-funnel-automation/evaluate-candidate-automation";
 import {
@@ -49,9 +50,24 @@ export function buildExecutiveAutomationRollups(
     automationOpportunities.push(`${melTasks} MEL-ready reviews available`);
   }
 
+  const autoAssigned = candidates.filter(
+    (row) => row.recruiterAssignmentSource === "auto" && !isUnassignedRecruiter(row.assignedRecruiter),
+  );
+  const owned = candidates.filter((row) => !isUnassignedRecruiter(row.assignedRecruiter));
+  const manualRequired = candidates.filter((row) => isUnassignedRecruiter(row.assignedRecruiter));
+  const confidenceValues = autoAssigned
+    .map((row) => row.recruiterAssignmentConfidence ?? 0)
+    .filter((value) => value > 0);
+
   return {
     recruiterCapacityRisk,
     pipelineBlockers: pipelineBlockers.slice(0, 3),
     automationOpportunities: automationOpportunities.slice(0, 3),
+    autoAssignmentRate: owned.length > 0 ? Math.round((autoAssigned.length / owned.length) * 100) : 0,
+    manualAssignmentRequired: manualRequired.length,
+    assignmentConfidence:
+      confidenceValues.length > 0
+        ? Math.round(confidenceValues.reduce((sum, value) => sum + value, 0) / confidenceValues.length)
+        : 0,
   };
 }

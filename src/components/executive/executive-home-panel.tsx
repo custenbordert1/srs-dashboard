@@ -198,6 +198,7 @@ export function ExecutiveHomePanel() {
 
   const showCoverageKpis = Boolean(insights) || kpiLoading;
   const showOpenJobsKpi = jobsAvailable || openJobs > 0 || kpiLoading;
+  const assignmentRollups = recruiting.data?.executiveAutomationRollups;
 
   return (
     <div className="space-y-6">
@@ -254,6 +255,29 @@ export function ExecutiveHomePanel() {
                 value={insights ? insights.criticalTerritories.toLocaleString() : "…"}
                 hint="DM territories below health threshold"
                 loading={kpiLoading && !insights}
+              />
+            </>
+          ) : null}
+          {assignmentRollups ? (
+            <>
+              <KpiCard
+                label="Auto assignment rate"
+                value={`${assignmentRollups.autoAssignmentRate}%`}
+                hint="Owned candidates assigned automatically"
+              />
+              <KpiCard
+                label="Manual assignment required"
+                value={assignmentRollups.manualAssignmentRequired.toLocaleString()}
+                hint="Candidates still unassigned"
+              />
+              <KpiCard
+                label="Assignment confidence"
+                value={
+                  assignmentRollups.assignmentConfidence > 0
+                    ? `${assignmentRollups.assignmentConfidence}%`
+                    : "—"
+                }
+                hint="Average auto-assignment confidence"
               />
             </>
           ) : null}

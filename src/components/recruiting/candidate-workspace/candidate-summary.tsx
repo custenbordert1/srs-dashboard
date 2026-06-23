@@ -1,6 +1,7 @@
 "use client";
 
 import type { CandidateDrawerRow } from "@/components/recruiting/candidate-detail-drawer";
+import { CandidateAssignmentBadge } from "@/components/recruiting/candidate-assignment-badge";
 
 function formatDate(raw: string): string {
   if (!raw.trim()) return "—";
@@ -47,6 +48,18 @@ export function CandidateSummary({ candidate, matchScore }: CandidateSummaryProp
           <dt className="text-zinc-500">Assigned recruiter</dt>
           <dd className="text-zinc-200">{candidate.assignedRecruiter || "Unassigned"}</dd>
         </div>
+        {candidate.recruiterAssignmentSource ? (
+          <div className="sm:col-span-2">
+            <dt className="mb-1 text-zinc-500">Assignment</dt>
+            <dd>
+              <CandidateAssignmentBadge
+                source={candidate.recruiterAssignmentSource}
+                reason={candidate.recruiterAssignmentReason}
+                confidence={candidate.recruiterAssignmentConfidence}
+              />
+            </dd>
+          </div>
+        ) : null}
         <div className="sm:col-span-2">
           <dt className="text-zinc-500">Match score</dt>
           <dd className="text-lg font-semibold tabular-nums text-teal-200">

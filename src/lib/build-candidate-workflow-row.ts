@@ -32,6 +32,7 @@ import {
   type CandidateWorkflowRecord,
   type CandidateWorkflowStatus,
   type PaperworkStatus,
+  type RecruiterAssignmentSource,
 } from "@/lib/candidate-workflow-types";
 import {
   baselineCandidateFunnelAutomation,
@@ -93,6 +94,10 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   questionnaireIntelligence: CandidateQuestionnaireIntelligence;
   candidateGrade: CandidateReadinessScore;
   funnelAutomation: CandidateFunnelAutomation;
+  recruiterAssignmentSource?: RecruiterAssignmentSource | null;
+  recruiterAssignmentReason?: string | null;
+  recruiterAssignmentConfidence?: number | null;
+  recruiterAssignedAt?: string | null;
 };
 
 function stageIncludes(candidate: BreezyCandidate, words: string[]): boolean {
@@ -214,6 +219,10 @@ export function buildBaselineWorkflowRow(
     resumeIntelligence: intelligenceBundle.resume,
     questionnaireIntelligence: intelligenceBundle.questionnaire,
     candidateGrade: baselineCandidateReadinessScore(),
+    recruiterAssignmentSource: local?.recruiterAssignmentSource ?? null,
+    recruiterAssignmentReason: local?.recruiterAssignmentReason ?? null,
+    recruiterAssignmentConfidence: local?.recruiterAssignmentConfidence ?? null,
+    recruiterAssignedAt: local?.recruiterAssignedAt ?? null,
   };
   const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...baseline,
@@ -306,6 +315,10 @@ export function buildScoredWorkflowRow(
     resumeIntelligence: intelligenceBundle.resume,
     questionnaireIntelligence: intelligenceBundle.questionnaire,
     candidateGrade: intelligenceBundle.grade,
+    recruiterAssignmentSource: local?.recruiterAssignmentSource ?? null,
+    recruiterAssignmentReason: local?.recruiterAssignmentReason ?? null,
+    recruiterAssignmentConfidence: local?.recruiterAssignmentConfidence ?? null,
+    recruiterAssignedAt: local?.recruiterAssignedAt ?? null,
   };
   const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...scored,

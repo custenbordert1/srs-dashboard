@@ -161,6 +161,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "workflowStatus is invalid." }, { status: 400 });
   }
 
+  const bundleBefore = await getCandidateWorkflowBundle();
+  const existingWorkflow = bundleBefore.workflows[candidateId];
+  const manualRecruiterAssignment =
+    typeof input.assignedRecruiter === "string" &&
+    input.assignedRecruiter.trim() &&
+    input.assignedRecruiter.trim() !== (existingWorkflow?.assignedRecruiter ?? "Unassigned");
+
   const workflow = await upsertCandidateWorkflow({
     candidateId,
     workflowStatus,
@@ -169,6 +176,9 @@ export async function POST(request: Request) {
     note,
     followUpDueAt,
     snoozedUntil,
+    recruiterAssignmentSource: manualRecruiterAssignment ? "manual" : undefined,
+    recruiterAssignmentReason: manualRecruiterAssignment ? "Manually assigned by recruiter." : undefined,
+    recruiterAssignmentConfidence: manualRecruiterAssignment ? null : undefined,
     audit: {
       action: assignedRecruiter ? "assign_recruiter" : assignedDM ? "assign_dm" : "upsert_workflow",
       byUserId: session.userId,

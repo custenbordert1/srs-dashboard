@@ -66,6 +66,9 @@ export type ExecutiveAutomationRollups = {
   recruiterCapacityRisk: string | null;
   pipelineBlockers: string[];
   automationOpportunities: string[];
+  autoAssignmentRate: number;
+  manualAssignmentRequired: number;
+  assignmentConfidence: number;
 };
 
 export const RECRUITER_TASK_LABELS: Record<RecruiterTaskType, string> = {

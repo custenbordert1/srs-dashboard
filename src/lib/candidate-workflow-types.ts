@@ -5,6 +5,8 @@ import {
   type DirectDepositStatus,
 } from "@/lib/direct-deposit-types";
 
+export type RecruiterAssignmentSource = "auto" | "manual";
+
 export type CandidateWorkflowStatus =
   | "Applied"
   | "Needs Review"
@@ -64,6 +66,10 @@ export type CandidateWorkflowRecord = {
   directDepositLastHrCopyIncluded: boolean | null;
   /** BCC address used on the last DD send, if any. */
   directDepositLastHrBccAddress: string | null;
+  recruiterAssignmentSource?: RecruiterAssignmentSource | null;
+  recruiterAssignmentReason?: string | null;
+  recruiterAssignmentConfidence?: number | null;
+  recruiterAssignedAt?: string | null;
   updatedAt: string;
 };
 
@@ -162,6 +168,18 @@ export function normalizeWorkflowRecord(
       typeof raw.directDepositLastHrBccAddress === "string"
         ? raw.directDepositLastHrBccAddress
         : null,
+    recruiterAssignmentSource:
+      raw.recruiterAssignmentSource === "auto" || raw.recruiterAssignmentSource === "manual"
+        ? raw.recruiterAssignmentSource
+        : null,
+    recruiterAssignmentReason:
+      typeof raw.recruiterAssignmentReason === "string" ? raw.recruiterAssignmentReason : null,
+    recruiterAssignmentConfidence:
+      typeof raw.recruiterAssignmentConfidence === "number" &&
+      Number.isFinite(raw.recruiterAssignmentConfidence)
+        ? Math.max(0, Math.min(100, Math.round(raw.recruiterAssignmentConfidence)))
+        : null,
+    recruiterAssignedAt: typeof raw.recruiterAssignedAt === "string" ? raw.recruiterAssignedAt : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };
 }

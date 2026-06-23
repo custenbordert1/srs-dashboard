@@ -137,6 +137,9 @@ function intelligenceStub(): RecruitingIntelligenceSnapshot {
       recruiterCapacityRisk: null,
       pipelineBlockers: [],
       automationOpportunities: [],
+      autoAssignmentRate: 0,
+      manualAssignmentRequired: 0,
+      assignmentConfidence: 0,
     },
   };
 }

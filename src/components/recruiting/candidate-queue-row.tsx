@@ -2,6 +2,7 @@
 
 import type { QueueCandidateRow } from "@/lib/candidate-action-queue";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
+import { CandidateAssignmentBadge } from "@/components/recruiting/candidate-assignment-badge";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { slaToneClass } from "@/lib/candidate-action-sla";
 import {
@@ -191,6 +192,17 @@ export function CandidateQueueRow({
               {row.assignedRecruiter}
               {ownedByYou ? " (you)" : ""}
             </span>
+            {row.recruiterAssignmentSource ? (
+              <>
+                <span className="text-zinc-700"> · </span>
+                <CandidateAssignmentBadge
+                  source={row.recruiterAssignmentSource}
+                  reason={row.recruiterAssignmentReason}
+                  confidence={row.recruiterAssignmentConfidence}
+                  compact
+                />
+              </>
+            ) : null}
             {dmHint ? (
               <>
                 <span className="text-zinc-700"> · </span>

@@ -21,6 +21,28 @@ export async function fetchCandidateWorkflowBundle(): Promise<WorkflowApiRespons
   return (await res.json()) as WorkflowApiResponse;
 }
 
+export type AutoAssignApiResponse = WorkflowApiResponse & {
+  assigned?: number;
+  skipped?: number;
+  metrics?: {
+    autoAssignmentRate: number;
+    manualAssignmentRequired: number;
+    averageConfidence: number;
+  };
+};
+
+export async function runAutoRecruiterAssignment(): Promise<AutoAssignApiResponse> {
+  const res = await fetch("/api/candidates/workflows/auto-assign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  const parsed = (await res.json()) as AutoAssignApiResponse;
+  if (!res.ok || !parsed.ok) {
+    throw new Error(parsed.error ?? `Auto-assign request failed (${res.status})`);
+  }
+  return parsed;
+}
+
 export async function postCandidateWorkflow(body: Record<string, unknown>): Promise<WorkflowApiResponse> {
   const res = await fetch("/api/candidates/workflows", {
     method: "POST",

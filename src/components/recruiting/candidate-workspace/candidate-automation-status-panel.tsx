@@ -1,6 +1,7 @@
 "use client";
 
 import type { CandidateFunnelAutomation, FunnelRiskLevel } from "@/lib/hiring-funnel-automation/types";
+import type { RecruiterAssignmentSource } from "@/lib/candidate-workflow-types";
 
 const RISK_STYLES: Record<FunnelRiskLevel, string> = {
   critical: "border-red-500/40 bg-red-500/10 text-red-100",
@@ -10,9 +11,17 @@ const RISK_STYLES: Record<FunnelRiskLevel, string> = {
 
 type CandidateAutomationStatusPanelProps = {
   automation: CandidateFunnelAutomation;
+  assignmentSource?: RecruiterAssignmentSource | null;
 };
 
-export function CandidateAutomationStatusPanel({ automation }: CandidateAutomationStatusPanelProps) {
+function assignmentSourceLabel(source: RecruiterAssignmentSource): string {
+  return source === "auto" ? "Auto assigned" : "Manual assigned";
+}
+
+export function CandidateAutomationStatusPanel({
+  automation,
+  assignmentSource = null,
+}: CandidateAutomationStatusPanelProps) {
   return (
     <section className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4">
       <h3 className="text-sm font-semibold text-zinc-100">Automation & risk</h3>
@@ -43,6 +52,12 @@ export function CandidateAutomationStatusPanel({ automation }: CandidateAutomati
           <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Owner</dt>
           <dd className="text-zinc-200">{automation.owner}</dd>
         </div>
+        {assignmentSource ? (
+          <div>
+            <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Assignment source</dt>
+            <dd className="text-zinc-200">{assignmentSourceLabel(assignmentSource)}</dd>
+          </div>
+        ) : null}
         <div>
           <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Next required action</dt>
           <dd className="text-zinc-100">{automation.nextAction}</dd>

@@ -101,5 +101,9 @@ export function buildCandidateDrawerRowFromScored(
     questionnaireIntelligence: scored.questionnaireIntelligence,
     candidateGrade: scored.candidateGrade,
     funnelAutomation: scored.funnelAutomation,
+    recruiterAssignmentSource: scored.recruiterAssignmentSource ?? null,
+    recruiterAssignmentReason: scored.recruiterAssignmentReason ?? null,
+    recruiterAssignmentConfidence: scored.recruiterAssignmentConfidence ?? null,
+    recruiterAssignedAt: scored.recruiterAssignedAt ?? null,
   };
 }
