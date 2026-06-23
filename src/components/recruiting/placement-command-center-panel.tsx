@@ -20,7 +20,19 @@ function statusBadge(status: string) {
 }
 
 export function PlacementCommandCenterPanel() {
-  const { data, loading, error, showingCachedSnapshot, refresh } = usePlacementCommandCenter();
+  const {
+    data,
+    loading,
+    error,
+    showingCachedSnapshot,
+    refreshing,
+    refresh,
+    planPlacementCorrelations,
+    approvePlacement,
+    rejectPlacement,
+    needsReviewPlacement,
+    executePlacement,
+  } = usePlacementCommandCenter();
   const loadingCeilingHit = useLoadingCeiling(loading && !data, EXECUTIVE_PANEL_LOADING_CEILING_MS);
   const showLoading = loading && !data && !loadingCeilingHit;
 
@@ -45,7 +57,18 @@ export function PlacementCommandCenterPanel() {
 
   if (!data) return null;
 
-  const { kpis, funnel, readyForPlacement, paperworkBottlenecks, coverageGaps, placementQueue, autoPlacementOpportunities, timeToFill } = data;
+  const {
+    kpis,
+    funnel,
+    readyForPlacement,
+    paperworkBottlenecks,
+    coverageGaps,
+    placementQueue,
+    autoPlacementOpportunities,
+    timeToFill,
+    placementExecutionRecommendations,
+    placementOutcomes,
+  } = data;
 
   return (
     <section className="space-y-6">
@@ -70,9 +93,29 @@ export function PlacementCommandCenterPanel() {
         >
           Refresh
         </button>
+        <button
+          type="button"
+          disabled={refreshing}
+          onClick={() => void planPlacementCorrelations()}
+          className="rounded-lg border border-emerald-600/50 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-50"
+        >
+          Plan placement correlations
+        </button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <KpiCard label="Recommended placements" value={kpis.recommendedPlacements} />
+        <KpiCard label="Approved placements" value={kpis.approvedPlacements} />
+        <KpiCard
+          label="Placement success rate"
+          value={kpis.placementSuccessRate !== null ? `${kpis.placementSuccessRate}%` : "—"}
+        />
+        <KpiCard label="Coverage gaps filled" value={kpis.coverageGapsFilled} />
+        <KpiCard
+          label="Placement ROI"
+          value={kpis.placementRoi !== null ? kpis.placementRoi : "—"}
+          detail="Indexed from completed placements"
+        />
         <KpiCard label="Ready for placement" value={kpis.readyForPlacement} />
         <KpiCard label="Needs action" value={kpis.needsAction} />
         <KpiCard label="Paperwork bottlenecks" value={paperworkBottlenecks.length} />
@@ -165,26 +208,99 @@ export function PlacementCommandCenterPanel() {
       </div>
 
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/30 p-4">
+        <h3 className="text-sm font-semibold text-zinc-200">P61 placement recommendations</h3>
+        <ul className="mt-3 space-y-2 text-sm">
+          {placementExecutionRecommendations.slice(0, 8).map((row) => (
+            <li key={row.recommendationId} className="rounded-lg border border-zinc-800/60 px-3 py-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-medium text-zinc-200">{row.candidateName}</p>
+                <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300">
+                  {row.matchLabel}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500">
+                {row.recommendedProject} · confidence {row.fitScores.placementConfidence}%
+              </p>
+            </li>
+          ))}
+          {placementExecutionRecommendations.length === 0 ? (
+            <li className="text-zinc-500">No placement execution recommendations yet.</li>
+          ) : null}
+        </ul>
+        {placementOutcomes.recommendationAccuracy !== null ? (
+          <p className="mt-3 text-xs text-zinc-500">
+            Recommendation accuracy: {placementOutcomes.recommendationAccuracy}% · Time-to-fill improvement:{" "}
+            {placementOutcomes.timeToFillImprovementDays ?? "—"} days
+          </p>
+        ) : null}
+      </div>
+
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/30 p-4">
         <h3 className="text-sm font-semibold text-zinc-200">Placement queue</h3>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="text-xs uppercase tracking-wide text-zinc-500">
               <tr>
                 <th className="px-2 py-1">Candidate</th>
+                <th className="px-2 py-1">Match</th>
                 <th className="px-2 py-1">Readiness</th>
                 <th className="px-2 py-1">Score</th>
                 <th className="px-2 py-1">Project</th>
                 <th className="px-2 py-1">Execution</th>
+                <th className="px-2 py-1">Actions</th>
               </tr>
             </thead>
             <tbody>
               {placementQueue.slice(0, 12).map((row) => (
                 <tr key={row.candidateId} className="border-t border-zinc-800/60">
                   <td className="px-2 py-2 text-zinc-200">{row.candidateName}</td>
+                  <td className="px-2 py-2 text-zinc-400">{row.matchLabel ?? "—"}</td>
                   <td className="px-2 py-2 text-zinc-400">{row.readinessStatus}</td>
                   <td className="px-2 py-2 text-zinc-300">{row.placementScore}</td>
                   <td className="px-2 py-2 text-zinc-400">{row.recommendedProject ?? "—"}</td>
                   <td className="px-2 py-2 text-zinc-500">{row.correlationStatus ?? "—"}</td>
+                  <td className="px-2 py-2">
+                    {row.correlationId ? (
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          type="button"
+                          disabled={refreshing || row.approvalStatus === "approved"}
+                          onClick={() => void approvePlacement(row.correlationId!)}
+                          className="rounded border border-emerald-600/40 px-2 py-0.5 text-[11px] text-emerald-200 disabled:opacity-40"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          disabled={refreshing}
+                          onClick={() => void rejectPlacement(row.correlationId!)}
+                          className="rounded border border-red-600/40 px-2 py-0.5 text-[11px] text-red-200 disabled:opacity-40"
+                        >
+                          Reject
+                        </button>
+                        <button
+                          type="button"
+                          disabled={refreshing}
+                          onClick={() => void needsReviewPlacement(row.correlationId!)}
+                          className="rounded border border-amber-600/40 px-2 py-0.5 text-[11px] text-amber-200 disabled:opacity-40"
+                        >
+                          Needs review
+                        </button>
+                        {row.approvalStatus === "approved" ? (
+                          <button
+                            type="button"
+                            disabled={refreshing}
+                            onClick={() => void executePlacement(row.correlationId!)}
+                            className="rounded border border-sky-600/40 px-2 py-0.5 text-[11px] text-sky-200 disabled:opacity-40"
+                          >
+                            Execute
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <span className="text-zinc-600">—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

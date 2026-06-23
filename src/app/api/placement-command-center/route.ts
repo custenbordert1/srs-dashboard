@@ -16,6 +16,15 @@ import { buildControlCenterSnapshot, listAutomationRuns } from "@/lib/hiring-aut
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { buildPlacementCommandCenterSnapshot } from "@/lib/placement-command-center";
+import {
+  approvePlacementWithAccountability,
+  executePlacementCorrelation,
+  markPlacementNeedsReviewWithAccountability,
+  planPlacementCorrelations,
+  rejectPlacementWithAccountability,
+} from "@/lib/placement-command-center";
+import { guardPlacementCorrelationMutation } from "@/lib/placement-command-center/guard-placement-correlation";
+import { loadExecutiveAccountabilityStore } from "@/lib/executive-accountability/recommendation-store";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +59,7 @@ async function loadPlacementContext(session: AuthSession) {
   );
 
   const feedbackIndex = await loadRecommendationFeedbackIndex();
+  const accountabilityStore = await loadExecutiveAccountabilityStore();
 
   const autopilotSnapshot = buildAutopilotSnapshot({
     jobs,
@@ -76,6 +86,7 @@ async function loadPlacementContext(session: AuthSession) {
     correlations,
     applicantPerformance: executionSnapshot.applicantPerformance,
     opportunities,
+    accountabilityActions: accountabilityStore.actions,
     territoryStates,
     fetchedAt,
   });
@@ -114,4 +125,119 @@ export async function GET(request: Request) {
       },
     },
   );
+}
+
+type PlacementPostBody = {
+  action?: string;
+  correlationId?: string;
+  reason?: string;
+  note?: string;
+};
+
+export async function POST(request: Request) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter"],
+    requireTerritory: true,
+    auditAction: "placement_command_center_write",
+  });
+  if (isGuardFailure(guard)) return guard;
+  auditTerritoryAccess(guard.session, ROUTE);
+
+  const session = guard.session;
+  const actor = session.userId;
+  const body = (await request.json()) as PlacementPostBody;
+
+  const respondWithSnapshot = async () => {
+    const result = await loadPlacementContext(session);
+    if ("error" in result) {
+      return NextResponse.json({ ok: false, error: result.error }, { status: 502 });
+    }
+    return NextResponse.json({ ok: true, snapshot: result.snapshot });
+  };
+
+  if (body.action === "plan-placement-correlations") {
+    const result = await loadPlacementContext(session);
+    if ("error" in result) {
+      return NextResponse.json({ ok: false, error: result.error }, { status: 502 });
+    }
+
+    const planned = await planPlacementCorrelations(result.snapshot.placementExecutionRecommendations);
+    const refreshed = await loadPlacementContext(session);
+    if ("error" in refreshed) {
+      return NextResponse.json({ ok: false, error: refreshed.error }, { status: 502 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      planned: planned.length,
+      snapshot: refreshed.snapshot,
+    });
+  }
+
+  if (body.action === "approve-placement" && body.correlationId) {
+    const access = await guardPlacementCorrelationMutation(session, body.correlationId);
+    if (!access.ok) {
+      return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+    }
+
+    const approved = await approvePlacementWithAccountability(body.correlationId, {
+      displayName: actor,
+    });
+    if (!approved) {
+      return NextResponse.json({ ok: false, error: "Placement cannot be approved." }, { status: 400 });
+    }
+    return respondWithSnapshot();
+  }
+
+  if (body.action === "reject-placement" && body.correlationId) {
+    const access = await guardPlacementCorrelationMutation(session, body.correlationId);
+    if (!access.ok) {
+      return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+    }
+
+    const rejected = await rejectPlacementWithAccountability(
+      body.correlationId,
+      { displayName: actor },
+      body.reason,
+    );
+    if (!rejected) {
+      return NextResponse.json({ ok: false, error: "Placement cannot be rejected." }, { status: 400 });
+    }
+    return respondWithSnapshot();
+  }
+
+  if (body.action === "needs-review-placement" && body.correlationId) {
+    const access = await guardPlacementCorrelationMutation(session, body.correlationId);
+    if (!access.ok) {
+      return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+    }
+
+    const marked = await markPlacementNeedsReviewWithAccountability(
+      body.correlationId,
+      { displayName: actor },
+      body.note,
+    );
+    if (!marked) {
+      return NextResponse.json({ ok: false, error: "Placement cannot be marked for review." }, { status: 400 });
+    }
+    return respondWithSnapshot();
+  }
+
+  if (body.action === "execute-placement" && body.correlationId) {
+    const access = await guardPlacementCorrelationMutation(session, body.correlationId);
+    if (!access.ok) {
+      return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+    }
+
+    const result = await executePlacementCorrelation(body.correlationId, actor);
+    if (!result.ok) {
+      return NextResponse.json(
+        { ok: false, error: result.error, correlation: result.correlation },
+        { status: 400 },
+      );
+    }
+    return respondWithSnapshot();
+  }
+
+  return NextResponse.json({ ok: false, error: "Unknown action" }, { status: 400 });
 }

@@ -7,12 +7,16 @@ import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 import { buildHiringReadinessRows } from "@/lib/placement-command-center/build-hiring-readiness";
 import { buildPlacementFunnel } from "@/lib/placement-command-center/build-placement-funnel";
 import { buildPlacementRecommendations } from "@/lib/placement-command-center/build-placement-intelligence";
+import { buildPlacementExecutionRecommendations } from "@/lib/placement-command-center/build-placement-recommendation-engine";
+import { buildPlacementOutcomeMetrics } from "@/lib/placement-command-center/build-placement-outcomes";
+import type { ExecutiveTrackedAction } from "@/lib/executive-accountability/types";
 import type {
   AutoPlacementOpportunity,
   CoverageGapAwaitingCandidate,
   HiringReadinessRow,
   PaperworkBottleneck,
   PlacementCommandCenterSnapshot,
+  PlacementExecutionRecommendation,
   PlacementQueueItem,
   TimeToFillMetric,
 } from "@/lib/placement-command-center/types";
@@ -86,15 +90,25 @@ function buildCoverageGaps(
     .sort((a, b) => b.openCalls - a.openCalls);
 }
 
+function resolveApprovalStatus(
+  correlation: ExecutionCorrelation | undefined,
+): PlacementQueueItem["approvalStatus"] {
+  if (!correlation) return null;
+  if (correlation.status === "archived") return "rejected";
+  if (correlation.status === "recommended") return "needs-review";
+  if (["approved", "executing", "completed"].includes(correlation.status)) return "approved";
+  return "pending";
+}
+
 function buildPlacementQueue(
   readiness: HiringReadinessRow[],
-  recommendations: ReturnType<typeof buildPlacementRecommendations>,
+  executionRecommendations: PlacementExecutionRecommendation[],
   correlations: ExecutionCorrelation[],
 ): PlacementQueueItem[] {
-  const recByCandidate = new Map(recommendations.map((row) => [row.candidateId, row]));
+  const recByCandidate = new Map(executionRecommendations.map((row) => [row.candidateId, row]));
   const corrByCandidate = new Map(
     correlations
-      .filter((row) => row.type === "hiring" && row.candidateId)
+      .filter((row) => row.type === "placement" && row.candidateId)
       .map((row) => [row.candidateId!, row]),
   );
 
@@ -109,8 +123,10 @@ function buildPlacementQueue(
         readinessStatus: row.status,
         placementScore: rec?.placementScore ?? row.candidateScore,
         recommendedProject: rec?.recommendedProject ?? null,
+        matchLabel: rec?.matchLabel ?? null,
         correlationId: corr?.id ?? null,
         correlationStatus: corr?.status ?? null,
+        approvalStatus: resolveApprovalStatus(corr),
       };
     })
     .sort((a, b) => b.placementScore - a.placementScore)
@@ -118,17 +134,22 @@ function buildPlacementQueue(
 }
 
 function buildAutoPlacementOpportunities(
-  recommendations: ReturnType<typeof buildPlacementRecommendations>,
+  executionRecommendations: PlacementExecutionRecommendation[],
   correlations: ExecutionCorrelation[],
 ): AutoPlacementOpportunity[] {
   const corrByCandidate = new Map(
     correlations
-      .filter((row) => row.type === "hiring" && row.candidateId)
+      .filter((row) => row.type === "placement" && row.candidateId)
       .map((row) => [row.candidateId!, row]),
   );
 
-  return recommendations
-    .filter((row) => row.placementScore >= 70 && row.coverageUrgency !== "Healthy")
+  return executionRecommendations
+    .filter(
+      (row) =>
+        row.matchLabel !== "Do Not Recommend" &&
+        row.placementScore >= 70 &&
+        row.coverageUrgency !== "Healthy",
+    )
     .map((row) => {
       const corr = corrByCandidate.get(row.candidateId);
       return {
@@ -175,6 +196,7 @@ export function buildPlacementCommandCenterSnapshot(input: {
   correlations: ExecutionCorrelation[];
   applicantPerformance: ApplicantPerformanceRow[];
   opportunities: MelOpportunity[];
+  accountabilityActions?: ExecutiveTrackedAction[];
   territoryStates?: string[];
   fetchedAt: string;
 }): PlacementCommandCenterSnapshot {
@@ -187,6 +209,9 @@ export function buildPlacementCommandCenterSnapshot(input: {
     hiringRecommendations: input.autopilotSnapshot.hiringRecommendations,
     territoryStates: input.territoryStates,
   });
+  const placementExecutionRecommendations = buildPlacementExecutionRecommendations(
+    placementRecommendations,
+  );
 
   const funnel = buildPlacementFunnel({
     autopilotSnapshot: input.autopilotSnapshot,
@@ -198,9 +223,13 @@ export function buildPlacementCommandCenterSnapshot(input: {
   const readyForPlacement = readiness.filter((row) => row.status === "ready-to-place");
   const paperworkBottlenecks = buildPaperworkBottlenecks(input.scoredRows, Date.now());
   const coverageGaps = buildCoverageGaps(input.autopilotSnapshot.coverageNeeds, readiness);
-  const placementQueue = buildPlacementQueue(readiness, placementRecommendations, input.correlations);
+  const placementQueue = buildPlacementQueue(
+    readiness,
+    placementExecutionRecommendations,
+    input.correlations,
+  );
   const autoPlacementOpportunities = buildAutoPlacementOpportunities(
-    placementRecommendations,
+    placementExecutionRecommendations,
     input.correlations,
   );
   const timeToFill = buildTimeToFill(
@@ -208,6 +237,11 @@ export function buildPlacementCommandCenterSnapshot(input: {
     readiness,
     input.autopilotSnapshot.coverageNeeds,
   );
+  const placementOutcomes = buildPlacementOutcomeMetrics({
+    correlations: input.correlations,
+    accountabilityActions: input.accountabilityActions ?? [],
+    applicantPerformance: input.applicantPerformance,
+  });
 
   const needsAction = readiness.filter((row) => row.status === "needs-action").length;
   const blocked = readiness.filter((row) => row.status === "blocked").length;
@@ -230,6 +264,8 @@ export function buildPlacementCommandCenterSnapshot(input: {
     placementQueue,
     autoPlacementOpportunities,
     timeToFill,
+    placementExecutionRecommendations,
+    placementOutcomes,
     kpis: {
       readyForPlacement: readyForPlacement.length,
       needsAction,
@@ -237,6 +273,11 @@ export function buildPlacementCommandCenterSnapshot(input: {
       openCoverageGaps: coverageGaps.length,
       autoPlacementCount: autoPlacementOpportunities.length,
       avgTimeToFillDays,
+      recommendedPlacements: placementOutcomes.recommendedPlacements,
+      approvedPlacements: placementOutcomes.approvedPlacements,
+      placementSuccessRate: placementOutcomes.placementSuccessRate,
+      coverageGapsFilled: placementOutcomes.coverageGapsFilled,
+      placementRoi: placementOutcomes.placementRoi,
     },
   };
 }

@@ -19,6 +19,8 @@ import {
   executeCorrelation,
   planCorrelationsFromSnapshot,
 } from "@/lib/autonomous-recruiting-execution";
+import { getCorrelation } from "@/lib/autonomous-recruiting-execution/execution-correlation";
+import { guardPlacementCorrelationMutation } from "@/lib/placement-command-center/guard-placement-correlation";
 import {
   buildAutopilotDashboardSnapshot,
   loadRecommendationFeedbackIndex,
@@ -236,6 +238,14 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "approve-execution" && body.executionId) {
+    const correlation = await getCorrelation(body.executionId);
+    if (correlation?.type === "placement") {
+      const access = await guardPlacementCorrelationMutation(session, body.executionId);
+      if (!access.ok) {
+        return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+      }
+    }
+
     const approved = await approveCorrelationWithAccountability(body.executionId, {
       displayName: actor,
     });
@@ -246,6 +256,14 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "execute-execution" && body.executionId) {
+    const correlation = await getCorrelation(body.executionId);
+    if (correlation?.type === "placement") {
+      const access = await guardPlacementCorrelationMutation(session, body.executionId);
+      if (!access.ok) {
+        return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+      }
+    }
+
     const result = await executeCorrelation(body.executionId, actor);
     if (!result.ok) {
       return NextResponse.json(

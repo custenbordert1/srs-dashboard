@@ -26,6 +26,8 @@ export type ExecutionCorrelation = {
   displayTitle?: string;
   adType?: "create-new-ad" | "close-pause-ad" | "refresh-ad";
   hiringAction?: string;
+  placementProjectId?: string;
+  placementMatchLabel?: string;
   refreshCount?: number;
   positionId?: string;
   breezyJobId?: string;
@@ -260,6 +262,51 @@ export async function markCorrelationStatus(
       status === "completed"
         ? patch?.completedAt ?? new Date().toISOString()
         : file.correlations[index]!.completedAt,
+  };
+  file.correlations[index] = updated;
+  file.updatedAt = new Date().toISOString();
+  await writeCorrelationFile(file);
+  return updated;
+}
+
+export async function rejectCorrelation(
+  id: string,
+  actor?: string,
+  reason?: string,
+): Promise<ExecutionCorrelation | null> {
+  const file = await readCorrelationFile();
+  const index = file.correlations.findIndex((row) => row.id === id);
+  if (index < 0) return null;
+
+  const existing = file.correlations[index]!;
+  const updated: ExecutionCorrelation = {
+    ...existing,
+    status: "archived",
+    approvedBy: actor,
+    reason: reason ? `${existing.reason ?? ""} · Rejected: ${reason}`.trim() : existing.reason,
+    completedAt: new Date().toISOString(),
+  };
+  file.correlations[index] = updated;
+  file.updatedAt = new Date().toISOString();
+  await writeCorrelationFile(file);
+  return updated;
+}
+
+export async function markCorrelationForReview(
+  id: string,
+  actor?: string,
+  note?: string,
+): Promise<ExecutionCorrelation | null> {
+  const file = await readCorrelationFile();
+  const index = file.correlations.findIndex((row) => row.id === id);
+  if (index < 0) return null;
+
+  const existing = file.correlations[index]!;
+  const updated: ExecutionCorrelation = {
+    ...existing,
+    status: "recommended",
+    approvedBy: actor,
+    reason: note ? `${existing.reason ?? ""} · Needs review: ${note}`.trim() : existing.reason,
   };
   file.correlations[index] = updated;
   file.updatedAt = new Date().toISOString();

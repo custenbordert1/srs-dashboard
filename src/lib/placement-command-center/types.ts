@@ -80,8 +80,41 @@ export type PlacementQueueItem = {
   readinessStatus: HiringReadinessStatus;
   placementScore: number;
   recommendedProject: string | null;
+  matchLabel: PlacementMatchLabel | null;
   correlationId: string | null;
   correlationStatus: ExecutionCorrelation["status"] | null;
+  approvalStatus: "pending" | "approved" | "rejected" | "needs-review" | null;
+};
+
+export type PlacementMatchLabel =
+  | "Strong Match"
+  | "Good Match"
+  | "Review Needed"
+  | "Do Not Recommend";
+
+export type PlacementFitScores = {
+  placementConfidence: number;
+  territoryFit: number;
+  projectFit: number;
+  distanceFit: number;
+  availabilityFit: number;
+  readinessFit: number;
+};
+
+export type PlacementExecutionRecommendation = PlacementRecommendation & {
+  recommendationId: string;
+  matchLabel: PlacementMatchLabel;
+  fitScores: PlacementFitScores;
+};
+
+export type PlacementOutcomeMetrics = {
+  recommendedPlacements: number;
+  approvedPlacements: number;
+  placementSuccessRate: number | null;
+  coverageGapsFilled: number;
+  placementRoi: number | null;
+  timeToFillImprovementDays: number | null;
+  recommendationAccuracy: number | null;
 };
 
 export type AutoPlacementOpportunity = {
@@ -122,5 +155,12 @@ export type PlacementCommandCenterSnapshot = {
     openCoverageGaps: number;
     autoPlacementCount: number;
     avgTimeToFillDays: number | null;
+    recommendedPlacements: number;
+    approvedPlacements: number;
+    placementSuccessRate: number | null;
+    coverageGapsFilled: number;
+    placementRoi: number | null;
   };
+  placementExecutionRecommendations: PlacementExecutionRecommendation[];
+  placementOutcomes: PlacementOutcomeMetrics;
 };

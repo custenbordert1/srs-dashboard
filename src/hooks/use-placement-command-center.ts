@@ -151,6 +151,62 @@ export function usePlacementCommandCenter() {
     void load(true);
   }, [load]);
 
+  const postAction = useCallback(
+    async (action: string, payload: Record<string, string> = {}) => {
+      setRefreshing(true);
+      setError(null);
+      try {
+        const res = await fetchWithTimeout("/api/placement-command-center", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, ...payload }),
+          timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+        });
+        const parsed = (await res.json()) as PlacementResponse;
+        if (!res.ok || !parsed.ok || !parsed.snapshot) {
+          throw new Error(parsed.error ?? `Failed: ${action}`);
+        }
+        invalidateCached(PLACEMENT_CACHE_KEY);
+        setData(parsed.snapshot);
+        setShowingCachedSnapshot(false);
+      } catch (err) {
+        if (!isIgnorableFetchError(err) && !isAbortError(err)) {
+          setError(err instanceof Error ? err.message : `Failed: ${action}`);
+        }
+      } finally {
+        setRefreshing(false);
+      }
+    },
+    [],
+  );
+
+  const planPlacementCorrelations = useCallback(
+    () => postAction("plan-placement-correlations"),
+    [postAction],
+  );
+
+  const approvePlacement = useCallback(
+    (correlationId: string) => postAction("approve-placement", { correlationId }),
+    [postAction],
+  );
+
+  const rejectPlacement = useCallback(
+    (correlationId: string, reason?: string) =>
+      postAction("reject-placement", { correlationId, ...(reason ? { reason } : {}) }),
+    [postAction],
+  );
+
+  const needsReviewPlacement = useCallback(
+    (correlationId: string, note?: string) =>
+      postAction("needs-review-placement", { correlationId, ...(note ? { note } : {}) }),
+    [postAction],
+  );
+
+  const executePlacement = useCallback(
+    (correlationId: string) => postAction("execute-placement", { correlationId }),
+    [postAction],
+  );
+
   return {
     data,
     meta,
@@ -159,5 +215,10 @@ export function usePlacementCommandCenter() {
     refreshing,
     showingCachedSnapshot,
     refresh,
+    planPlacementCorrelations,
+    approvePlacement,
+    rejectPlacement,
+    needsReviewPlacement,
+    executePlacement,
   };
 }
