@@ -9,7 +9,11 @@ import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import { isFollowUpOverdue } from "@/lib/candidate-action-sla";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
-import { countEligibleForPaperwork } from "@/lib/candidate-onboarding-engine";
+import { countEligibleForPaperwork, isEligibleForSend } from "@/lib/candidate-onboarding-engine";
+import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
+import { isGradeAllowedForPaperwork } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
+import { countPromotablePaperworkFunnel } from "@/lib/candidate-onboarding-engine/promote-paperwork-funnel";
+import type { AiLetterGrade } from "@/lib/candidate-ai-scoring";
 import { listIngestedCandidates, readIngestionStore } from "@/lib/candidate-ingestion/ingestion-store";
 import { filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
@@ -41,6 +45,7 @@ type ExclusionReason =
   | "existing_packet"
   | "already_signed"
   | "wrong_action_type"
+  | "grade_blocked"
   | "other";
 
 type NearMissCandidate = {
@@ -62,27 +67,17 @@ function hasActivePacket(row: ScoredCandidateWorkflowRow): boolean {
 }
 
 /** Mirrors P65.3 `isEligibleForSend` in build-onboarding-decisions.ts */
-function isPaperworkEligible(row: ScoredCandidateWorkflowRow): boolean {
-  if (isUnassignedRecruiter(row.assignedRecruiter)) return false;
-  if (!row.actionGeneratedAt) return false;
-  if (TERMINAL_STATUSES.has(row.workflowStatus)) return false;
-  if (hasActivePacket(row)) return false;
-  if (row.paperworkStatus === "signed") return false;
-  if (!row.email?.trim()) return false;
-  const actionType = row.actionType ?? "none";
-  return actionType === "send-paperwork" || actionType === "await-signature";
-}
-
-function hasPublishedJobMatch(
+function isPaperworkEligible(
   row: ScoredCandidateWorkflowRow,
-  jobsByPositionId: Map<string, unknown>,
+  policy: Awaited<ReturnType<typeof loadCandidateOnboardingPolicy>>,
 ): boolean {
-  return Boolean(row.positionId?.trim() && jobsByPositionId.has(row.positionId));
+  return isEligibleForSend(row, policy);
 }
 
 function exclusionReason(
   row: ScoredCandidateWorkflowRow,
   jobsByPositionId: Map<string, unknown>,
+  policy: Awaited<ReturnType<typeof loadCandidateOnboardingPolicy>>,
 ): ExclusionReason {
   if (isUnassignedRecruiter(row.assignedRecruiter)) return "no_recruiter";
   if (!row.actionGeneratedAt) return "missing_p63_action";
@@ -91,6 +86,7 @@ function exclusionReason(
   if (hasActivePacket(row)) return "existing_packet";
   if (!row.email?.trim()) return "missing_contact";
   if (row.paperworkStatus === "signed" || row.workflowStatus === "Signed") return "already_signed";
+  if (!isGradeAllowedForPaperwork(row.aiGrade, policy.paperworkByGrade)) return "grade_blocked";
   const actionType = row.actionType ?? "none";
   if (actionType !== "send-paperwork" && actionType !== "await-signature") return "wrong_action_type";
   return "other";
@@ -107,11 +103,19 @@ function isFollowUpCompleted(row: ScoredCandidateWorkflowRow): boolean {
   );
 }
 
-function isNearMissPaperworkNeeded(
+function hasPublishedJobMatch(
   row: ScoredCandidateWorkflowRow,
   jobsByPositionId: Map<string, unknown>,
 ): boolean {
-  if (isPaperworkEligible(row)) return false;
+  return Boolean(row.positionId?.trim() && jobsByPositionId.has(row.positionId));
+}
+
+function isNearMissPaperworkNeeded(
+  row: ScoredCandidateWorkflowRow,
+  jobsByPositionId: Map<string, unknown>,
+  policy: Awaited<ReturnType<typeof loadCandidateOnboardingPolicy>>,
+): boolean {
+  if (isPaperworkEligible(row, policy)) return false;
   if (row.workflowStatus !== "Paperwork Needed") return false;
   if (isUnassignedRecruiter(row.assignedRecruiter)) return false;
   if (!row.actionGeneratedAt) return false;
@@ -125,10 +129,11 @@ function isNearMissPaperworkNeeded(
 }
 
 async function main() {
-  const [store, bundle, jobsResult] = await Promise.all([
+  const [store, bundle, jobsResult, policy] = await Promise.all([
     readIngestionStore(),
     getCandidateWorkflowBundle(),
     fetchBreezyJobs("published"),
+    loadCandidateOnboardingPolicy(),
   ]);
   const jobsByPositionId = new Map((jobsResult.ok ? jobsResult.jobs : []).map((job) => [job.jobId, job]));
   const scored = filterMtdCandidates(listIngestedCandidates(store)).map((candidate) =>
@@ -158,40 +163,50 @@ async function main() {
     existing_packet: 0,
     already_signed: 0,
     wrong_action_type: 0,
+    grade_blocked: 0,
     other: 0,
   };
+
+  const gradeDistribution: Partial<Record<AiLetterGrade, number>> = {};
+  const workflowStatusCounts: Partial<Record<CandidateWorkflowStatus, number>> = {};
+  let sendPaperworkActionCount = 0;
 
   const nearMissPaperworkNeeded: NearMissCandidate[] = [];
 
   for (const row of scored) {
+    gradeDistribution[row.aiGrade] = (gradeDistribution[row.aiGrade] ?? 0) + 1;
+    workflowStatusCounts[row.workflowStatus] = (workflowStatusCounts[row.workflowStatus] ?? 0) + 1;
+    if (row.actionType === "send-paperwork") sendPaperworkActionCount += 1;
+
     if (!isUnassignedRecruiter(row.assignedRecruiter)) stageCounts.assigned += 1;
     if (row.actionGeneratedAt) stageCounts.p63ActionGenerated += 1;
     if (isFollowUpCompleted(row)) stageCounts.followUpCompleted += 1;
     if (INTERVIEW_COMPLETED_STATUSES.has(row.workflowStatus)) stageCounts.interviewCompleted += 1;
-    if (isPaperworkEligible(row)) stageCounts.paperworkEligible += 1;
+    if (isPaperworkEligible(row, policy)) stageCounts.paperworkEligible += 1;
     if (hasActivePacket(row)) stageCounts.activePacket += 1;
     if (row.paperworkStatus === "signed" || row.workflowStatus === "Signed") stageCounts.signedPacket += 1;
     if (row.workflowStatus === "Ready for MEL" || row.workflowStatus === "Loaded in MEL") {
       stageCounts.readyForMel += 1;
     }
 
-    if (!isPaperworkEligible(row)) {
-      exclusionCounts[exclusionReason(row, jobsByPositionId)] += 1;
+    if (!isPaperworkEligible(row, policy)) {
+      exclusionCounts[exclusionReason(row, jobsByPositionId, policy)] += 1;
     }
 
-    if (isNearMissPaperworkNeeded(row, jobsByPositionId)) {
+    if (isNearMissPaperworkNeeded(row, jobsByPositionId, policy)) {
       nearMissPaperworkNeeded.push({
         candidateId: row.candidateId,
         name: `${row.firstName} ${row.lastName}`.trim() || row.candidateId,
         workflowStatus: row.workflowStatus,
         actionType: row.actionType ?? "none",
         requiredAction: row.requiredAction ?? null,
-        exclusionReason: exclusionReason(row, jobsByPositionId),
+        exclusionReason: exclusionReason(row, jobsByPositionId, policy),
       });
     }
   }
 
-  const engineEligible = countEligibleForPaperwork(scored);
+  const engineEligible = countEligibleForPaperwork(scored, policy);
+  const funnelPromotable = countPromotablePaperworkFunnel(scored, policy);
   const logicMatchesEngine = engineEligible === stageCounts.paperworkEligible;
 
   const verdict =
@@ -212,6 +227,12 @@ async function main() {
       {
         stageCounts,
         exclusionCounts,
+        gradeDistribution,
+        workflowStatusCounts,
+        sendPaperworkActionCount,
+        paperworkPolicyByGrade: policy.paperworkByGrade,
+        funnelPromotionEnabled: policy.funnelPromotion.enabled,
+        funnelPromotable,
         paperworkEligible: stageCounts.paperworkEligible,
         engineEligible,
         logicMatchesEngine,

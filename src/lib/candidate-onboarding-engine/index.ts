@@ -7,6 +7,7 @@ export type {
   CandidateOnboardingRunSummary,
   CandidateOnboardingMode,
   OnboardingPacketStatus,
+  PaperworkByGrade,
 } from "@/lib/candidate-onboarding-engine/types";
 export {
   DEFAULT_CANDIDATE_ONBOARDING_POLICY,
@@ -26,7 +27,18 @@ export {
 export {
   buildOnboardingDecisions,
   countEligibleForPaperwork,
+  isEligibleForSend,
 } from "@/lib/candidate-onboarding-engine/build-onboarding-decisions";
+export {
+  DEFAULT_PAPERWORK_BY_GRADE,
+  isGradeAllowedForPaperwork,
+} from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
+export {
+  applyPaperworkFunnelPromotionToRow,
+  canPromoteToPaperworkFunnel,
+  countPromotablePaperworkFunnel,
+  promotePaperworkFunnel,
+} from "@/lib/candidate-onboarding-engine/promote-paperwork-funnel";
 export { sendPaperworkPacket } from "@/lib/candidate-onboarding-engine/send-paperwork-packet";
 export { processSignatureStatus } from "@/lib/candidate-onboarding-engine/process-signature-status";
 export { runCandidateOnboarding } from "@/lib/candidate-onboarding-engine/run-candidate-onboarding";

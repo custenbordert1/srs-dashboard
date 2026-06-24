@@ -12,6 +12,7 @@ import { buildCandidateOnboardingHealth } from "@/lib/candidate-onboarding-engin
 import {
   DEFAULT_CANDIDATE_ONBOARDING_POLICY,
   loadCandidateOnboardingPolicy,
+  saveCandidateOnboardingPolicy,
 } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
 import { recordCandidateOnboarding } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { runCandidateOnboarding } from "@/lib/candidate-onboarding-engine/run-candidate-onboarding";
@@ -100,6 +101,8 @@ describe("candidate-onboarding-engine", () => {
     assert.equal(policy.send.requireApproval, true);
     assert.equal(policy.escalation.requireApproval, true);
     assert.equal(policy.maxEscalationsPerRun, 10);
+    assert.equal(policy.paperworkByGrade.D, true);
+    assert.equal(policy.funnelPromotion.enabled, true);
   });
 
   it("builds send decisions for eligible candidates", () => {
@@ -132,6 +135,43 @@ describe("candidate-onboarding-engine", () => {
     });
     assert.ok(decisions.some((d) => d.decisionType === "sync-status"));
     assert.equal(countEligibleForPaperwork([row]), 0);
+  });
+
+  it("blocks paperwork when grade is disallowed by policy", () => {
+    const row = buildScoredWorkflowRow(candidate("c-grade"), workflow("c-grade"));
+    const blockedPolicy = {
+      ...DEFAULT_CANDIDATE_ONBOARDING_POLICY,
+      paperworkByGrade: { ...DEFAULT_CANDIDATE_ONBOARDING_POLICY.paperworkByGrade, D: false },
+    };
+    assert.equal(countEligibleForPaperwork([row], blockedPolicy), 0);
+  });
+
+  it("promotes Applied screen-candidate rows toward paperwork funnel", async () => {
+    const { getCandidateWorkflowState } = await import("@/lib/candidate-workflow-store");
+    await saveCandidateOnboardingPolicy({
+      ...DEFAULT_CANDIDATE_ONBOARDING_POLICY,
+      enabled: true,
+      dryRun: false,
+      funnelPromotion: { enabled: true },
+    });
+    const row = buildScoredWorkflowRow(
+      candidate("c-promote"),
+      workflow("c-promote", {
+        workflowStatus: "Applied",
+        actionType: "screen-candidate",
+        requiredAction: "Screen Candidate",
+        actionReason: "New applicant",
+      }),
+    );
+    const result = await runCandidateOnboarding({ candidates: [row] });
+    const workflows = await getCandidateWorkflowState();
+    const updated = workflows["c-promote"];
+    assert.equal(result.funnelPromotions, 1);
+    assert.equal(result.eligibleForPaperwork, 1);
+    assert.equal(result.packetsSent, 0);
+    assert.equal(updated?.workflowStatus, "Paperwork Needed");
+    assert.equal(updated?.actionType, "send-paperwork");
+    await saveCandidateOnboardingPolicy(DEFAULT_CANDIDATE_ONBOARDING_POLICY);
   });
 
   it("dry run reports eligible without sending", async () => {

@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { CandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/types";
 import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import { DEFAULT_PAPERWORK_BY_GRADE } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
 
 function policyPath(): string {
   return path.join(recruitingDataDir(), "candidate-onboarding-policy.json");
@@ -11,6 +12,8 @@ export const DEFAULT_CANDIDATE_ONBOARDING_POLICY: CandidateOnboardingPolicy = {
   enabled: false,
   mode: "semi-automatic",
   dryRun: false,
+  paperworkByGrade: { ...DEFAULT_PAPERWORK_BY_GRADE },
+  funnelPromotion: { enabled: true },
   send: { enabled: true, requireApproval: true },
   reminders: { enabled: true },
   escalation: { enabled: true, requireApproval: true },
@@ -31,6 +34,14 @@ function mergePolicy(parsed: Partial<CandidateOnboardingPolicy>): CandidateOnboa
   return {
     ...DEFAULT_CANDIDATE_ONBOARDING_POLICY,
     ...parsed,
+    paperworkByGrade: {
+      ...DEFAULT_CANDIDATE_ONBOARDING_POLICY.paperworkByGrade,
+      ...parsed.paperworkByGrade,
+    },
+    funnelPromotion: {
+      ...DEFAULT_CANDIDATE_ONBOARDING_POLICY.funnelPromotion,
+      ...parsed.funnelPromotion,
+    },
     send: { ...DEFAULT_CANDIDATE_ONBOARDING_POLICY.send, ...parsed.send },
     reminders: { ...DEFAULT_CANDIDATE_ONBOARDING_POLICY.reminders, ...parsed.reminders },
     escalation: { ...DEFAULT_CANDIDATE_ONBOARDING_POLICY.escalation, ...parsed.escalation },

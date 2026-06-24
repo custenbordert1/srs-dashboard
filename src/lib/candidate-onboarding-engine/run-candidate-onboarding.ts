@@ -1,5 +1,5 @@
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
-import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
+import { upsertCandidateWorkflow, getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import type { CandidateAutomationMode } from "@/lib/candidate-automation-engine/types";
 import {
   buildOnboardingDecisions,
@@ -17,6 +17,11 @@ import {
 } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { processSignatureStatus } from "@/lib/candidate-onboarding-engine/process-signature-status";
 import { sendPaperworkPacket } from "@/lib/candidate-onboarding-engine/send-paperwork-packet";
+import {
+  applyPaperworkFunnelPromotionToRow,
+  canPromoteToPaperworkFunnel,
+  promotePaperworkFunnel,
+} from "@/lib/candidate-onboarding-engine/promote-paperwork-funnel";
 import type {
   CandidateOnboardingDecision,
   CandidateOnboardingResult,
@@ -130,9 +135,10 @@ export async function runCandidateOnboarding(input: {
   const policy = await loadCandidateOnboardingPolicy();
   const errors: string[] = [];
   const warnings: string[] = [];
-  const candidatesById = new Map(input.candidates.map((row) => [row.candidateId, row]));
 
-  const eligibleForPaperwork = countEligibleForPaperwork(input.candidates);
+  let candidates = input.candidates;
+  let funnelPromotions = 0;
+  let eligibleForPaperwork = countEligibleForPaperwork(input.candidates, policy);
   let packetsSent = 0;
   let statusSynced = 0;
   let remindersCreated = 0;
@@ -156,6 +162,7 @@ export async function runCandidateOnboarding(input: {
       remindersCreated: 0,
       escalationsCreated: 0,
       readyForMelCount: 0,
+      funnelPromotions: 0,
     };
     await saveOnboardingRunSummary(summary);
     return {
@@ -167,6 +174,7 @@ export async function runCandidateOnboarding(input: {
       remindersCreated: 0,
       escalationsCreated: 0,
       readyForMelCount: 0,
+      funnelPromotions: 0,
       blockedByPolicy: eligibleForPaperwork,
       blockedByBatchCap: 0,
       skipped: input.candidates.length,
@@ -175,6 +183,44 @@ export async function runCandidateOnboarding(input: {
     };
   }
 
+  if (policy.funnelPromotion.enabled) {
+    if (policy.dryRun) {
+      funnelPromotions = candidates.filter((row) => canPromoteToPaperworkFunnel(row, policy)).length;
+      candidates = candidates.map((row) =>
+        canPromoteToPaperworkFunnel(row, policy) ? applyPaperworkFunnelPromotionToRow(row) : row,
+      );
+    } else {
+      const promotion = await promotePaperworkFunnel({
+        candidates,
+        policy,
+        orchestratorRunId: input.orchestratorRunId,
+        byUserId: input.byUserId,
+      });
+      funnelPromotions = promotion.promoted;
+      if (promotion.promoted > 0) {
+        const workflows = await getCandidateWorkflowState();
+        candidates = input.candidates.map((row) => {
+          const updated = workflows[row.candidateId];
+          if (!updated) return row;
+          return {
+            ...row,
+            workflowStatus: updated.workflowStatus,
+            requiredAction: updated.requiredAction ?? row.requiredAction,
+            actionType: updated.actionType ?? row.actionType,
+            actionPriority: updated.actionPriority ?? row.actionPriority,
+            actionReason: updated.actionReason ?? row.actionReason,
+            actionDueDate: updated.actionDueDate ?? row.actionDueDate,
+            actionConfidence: updated.actionConfidence ?? row.actionConfidence,
+            actionGeneratedAt: updated.actionGeneratedAt ?? row.actionGeneratedAt,
+          };
+        });
+      }
+    }
+    eligibleForPaperwork = countEligibleForPaperwork(candidates, policy);
+  }
+
+  const candidatesById = new Map(candidates.map((row) => [row.candidateId, row]));
+
   const existingEscalations = new Set(
     (await listCandidateOnboardingRecords(500))
       .filter((row) => row.escalated)
@@ -182,10 +228,11 @@ export async function runCandidateOnboarding(input: {
   );
 
   const decisions = buildOnboardingDecisions({
-    candidates: input.candidates,
+    candidates,
     reminderHours: policy.reminderHours,
     escalationOverdueHours: policy.escalationOverdueHours,
     existingEscalations,
+    policy,
   });
 
   if (policy.dryRun) {
@@ -211,6 +258,7 @@ export async function runCandidateOnboarding(input: {
       remindersCreated: decisions.filter((d) => d.decisionType === "reminder").length,
       escalationsCreated: 0,
       readyForMelCount: decisions.filter((d) => d.decisionType === "mark-ready-for-mel").length,
+      funnelPromotions,
     };
     await saveOnboardingRunSummary(summary);
     return {
@@ -222,6 +270,7 @@ export async function runCandidateOnboarding(input: {
       remindersCreated: summary.remindersCreated,
       escalationsCreated: 0,
       readyForMelCount: summary.readyForMelCount,
+      funnelPromotions,
       blockedByPolicy,
       blockedByBatchCap,
       skipped: decisions.length,
@@ -316,6 +365,7 @@ export async function runCandidateOnboarding(input: {
     remindersCreated,
     escalationsCreated,
     readyForMelCount,
+    funnelPromotions,
   });
 
   return {
@@ -327,6 +377,7 @@ export async function runCandidateOnboarding(input: {
     remindersCreated,
     escalationsCreated,
     readyForMelCount,
+    funnelPromotions,
     blockedByPolicy,
     blockedByBatchCap,
     skipped,

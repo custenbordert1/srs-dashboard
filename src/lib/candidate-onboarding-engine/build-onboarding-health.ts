@@ -10,7 +10,9 @@ import {
 import {
   loadCandidateOnboardingPolicy,
 } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
+import { isGradeAllowedForPaperwork } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
 import type { CandidateOnboardingHealth } from "@/lib/candidate-onboarding-engine/types";
+import type { AiLetterGrade } from "@/lib/candidate-ai-scoring";
 
 function isToday(iso: string): boolean {
   const date = new Date(iso);
@@ -34,7 +36,14 @@ export async function buildCandidateOnboardingHealth(input?: {
   const candidates = input?.candidates ?? [];
   const ops = buildPaperworkOperationsMetrics(candidates);
   const eligibleForPaperwork =
-    candidates.length > 0 ? countEligibleForPaperwork(candidates) : lastRun?.eligibleForPaperwork ?? 0;
+    candidates.length > 0 ? countEligibleForPaperwork(candidates, policy) : lastRun?.eligibleForPaperwork ?? 0;
+
+  const paperworkBlockedByGrade: Partial<Record<AiLetterGrade, number>> = {};
+  for (const row of candidates) {
+    if (!isGradeAllowedForPaperwork(row.aiGrade, policy.paperworkByGrade)) {
+      paperworkBlockedByGrade[row.aiGrade] = (paperworkBlockedByGrade[row.aiGrade] ?? 0) + 1;
+    }
+  }
 
   const packetsPending = records.filter(
     (row) =>
@@ -70,5 +79,7 @@ export async function buildCandidateOnboardingHealth(input?: {
     blockedByPolicy: lastRun?.blockedByPolicy ?? 0,
     blockedByBatchCap: lastRun?.blockedByBatchCap ?? 0,
     lastRunAt: lastRun?.runAt ?? null,
+    paperworkAllowedByGrade: policy.paperworkByGrade,
+    paperworkBlockedByGrade,
   };
 }

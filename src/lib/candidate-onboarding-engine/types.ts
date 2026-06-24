@@ -1,4 +1,8 @@
+import type { AiLetterGrade } from "@/lib/candidate-ai-scoring";
+
 export type CandidateOnboardingMode = "disabled" | "semi-automatic" | "automatic";
+
+export type PaperworkByGrade = Record<AiLetterGrade, boolean>;
 
 export type OnboardingPacketStatus =
   | "draft"
@@ -16,6 +20,8 @@ export type CandidateOnboardingPolicy = {
   enabled: boolean;
   mode: CandidateOnboardingMode;
   dryRun: boolean;
+  paperworkByGrade: PaperworkByGrade;
+  funnelPromotion: { enabled: boolean };
   send: { enabled: boolean; requireApproval: boolean };
   reminders: { enabled: boolean };
   escalation: { enabled: boolean; requireApproval: boolean };
@@ -71,6 +77,7 @@ export type CandidateOnboardingRunSummary = {
   remindersCreated: number;
   escalationsCreated: number;
   readyForMelCount: number;
+  funnelPromotions: number;
 };
 
 export type CandidateOnboardingResult = {
@@ -82,6 +89,7 @@ export type CandidateOnboardingResult = {
   remindersCreated: number;
   escalationsCreated: number;
   readyForMelCount: number;
+  funnelPromotions: number;
   blockedByPolicy: number;
   blockedByBatchCap: number;
   skipped: number;
@@ -105,4 +113,6 @@ export type CandidateOnboardingHealth = {
   blockedByPolicy: number;
   blockedByBatchCap: number;
   lastRunAt: string | null;
+  paperworkAllowedByGrade: PaperworkByGrade;
+  paperworkBlockedByGrade: Partial<Record<AiLetterGrade, number>>;
 };
