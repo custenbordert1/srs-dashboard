@@ -30,6 +30,7 @@ import { applyRecruiterActions } from "@/lib/recruiter-action-engine/apply-recru
 import { buildRecruiterActionDecisions } from "@/lib/recruiter-action-engine/build-action-decision";
 import { applyRecruiterAssignments } from "@/lib/recruiter-assignment-engine/apply-recruiter-assignments";
 import { buildRecruiterAssignmentDecisions } from "@/lib/recruiter-assignment-engine/build-assignment-decision";
+import { runCandidateAutomationExecution } from "@/lib/candidate-automation-execution";
 
 const TERMINAL_STATUSES = new Set(["Not Qualified", "Active Rep", "Loaded in MEL"]);
 
@@ -217,6 +218,27 @@ export async function runCandidateAutomationEngine(input: {
       p64ProgressionsGenerated = progressionRecords.length;
     } else if (!policy.progression.enabled) {
       warnings.push("P64 progression skipped — disabled in policy.");
+    }
+
+    if (policy.execution.enabled && policy.mode !== "manual") {
+      const executionMtd = mtdCandidates.filter((candidate) =>
+        isAssignedMtdCandidate(candidate, workflows),
+      );
+      const scoredForExecution = executionMtd.map((candidate) =>
+        buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], {
+          job: jobsByPositionId.get(candidate.positionId),
+        }),
+      );
+      const execution = await runCandidateAutomationExecution({
+        candidates: scoredForExecution,
+        orchestratorRunId: runId,
+        automationMode: policy.mode,
+        byUserId: input.byUserId,
+      });
+      if (execution.warnings.length > 0) warnings.push(...execution.warnings);
+      if (execution.errors.length > 0) errors.push(...execution.errors);
+    } else if (!policy.execution.enabled) {
+      warnings.push("P65.2 execution skipped — disabled in policy.");
     }
   }
 

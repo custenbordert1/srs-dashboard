@@ -195,8 +195,8 @@ export function AutomationHealthPanel() {
           value={health.candidatesAutoProgressed.toLocaleString()}
           hint="Stage recommendations applied"
         />
-        <MetricCard label="Auto executions" value="—" hint="P65.2 — not enabled" disabled />
-        <MetricCard label="Escalations" value="—" hint="P65.3 — not enabled" disabled />
+        <MetricCard label="Auto executions" value={health.autoExecutions.toLocaleString()} hint="P65.2 completed executions" />
+        <MetricCard label="Escalations" value={health.escalations.toLocaleString()} hint="Escalation tasks created" />
         <MetricCard label="Rebalances" value="—" hint="P65.3 — not enabled" disabled />
       </div>
     </section>

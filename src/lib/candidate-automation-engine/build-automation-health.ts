@@ -4,6 +4,7 @@ import type { CandidateIngestionStoreFile } from "@/lib/candidate-ingestion/type
 import { listCandidateAutomationRuns } from "@/lib/candidate-automation-engine/automation-run-store";
 import { loadCandidateAutomationPolicy } from "@/lib/candidate-automation-engine/automation-policy-store";
 import type { CandidateAutomationHealth } from "@/lib/candidate-automation-engine/types";
+import { buildCandidateExecutionHealth } from "@/lib/candidate-automation-execution/build-execution-health";
 import type { CandidateWorkflowRecord, RecruiterRosters } from "@/lib/candidate-workflow-types";
 import { filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
 import { listIngestedCandidates } from "@/lib/candidate-ingestion/ingestion-store";
@@ -78,9 +79,10 @@ export async function buildCandidateAutomationHealth(input: {
   jobsByPositionId: Map<string, BreezyJob>;
   rosters?: RecruiterRosters;
 }): Promise<CandidateAutomationHealth> {
-  const [policy, runs] = await Promise.all([
+  const [policy, runs, executionHealth] = await Promise.all([
     loadCandidateAutomationPolicy(),
     listCandidateAutomationRuns(50),
+    buildCandidateExecutionHealth(),
   ]);
 
   const captureHealth = buildApplicantCaptureHealth({
@@ -119,8 +121,8 @@ export async function buildCandidateAutomationHealth(input: {
     p63CoveragePct: captureHealth.p63CoveragePct,
     p64CoveragePct: captureHealth.p64CoveragePct,
     ...elimination,
-    autoExecutions: 0,
-    escalations: 0,
+    autoExecutions: executionHealth.completedExecutions,
+    escalations: executionHealth.escalationsCreated,
     rebalances: 0,
   };
 }

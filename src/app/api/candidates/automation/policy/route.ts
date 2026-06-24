@@ -60,9 +60,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid automation mode." }, { status: 400 });
   }
 
-  if (next.execution.enabled || next.escalation.enabled || next.rebalance.enabled) {
+  if (next.rebalance.enabled) {
     return NextResponse.json(
-      { ok: false, error: "Execution, escalation, and rebalance controls are disabled in P65.1." },
+      { ok: false, error: "Rebalance controls are disabled until P65.3." },
       { status: 400 },
     );
   }
