@@ -14,7 +14,7 @@ import {
   startIngestionRun,
   writeIngestionStore,
 } from "@/lib/candidate-ingestion/ingestion-store";
-import { runPostImportPipeline } from "@/lib/candidate-ingestion/run-post-import-pipeline";
+import { runCandidateAutomationEngine } from "@/lib/candidate-automation-engine";
 import type { CandidateIngestionSyncResult } from "@/lib/candidate-ingestion/types";
 
 const DEFAULT_CHUNK_SIZE = 20;
@@ -192,16 +192,13 @@ export async function runCandidateIngestionSync(input?: {
   let progressionsGenerated = 0;
 
   if (runPipeline) {
-    const pipeline = await runPostImportPipeline({
-      candidates: listIngestedCandidates(store),
-      workflows,
-      rosters: bundle.rosters,
-      jobsByPositionId,
+    const automation = await runCandidateAutomationEngine({
+      trigger: "ingestion",
       byUserId: input?.byUserId,
     });
-    assigned = pipeline.assigned;
-    actionsGenerated = pipeline.actionsGenerated;
-    progressionsGenerated = pipeline.progressionsGenerated;
+    assigned = automation.p62Assigned;
+    actionsGenerated = automation.p63ActionsGenerated;
+    progressionsGenerated = automation.p64ProgressionsGenerated;
   }
 
   const scannedPositions = new Set(store.scannedPositionIds).size;

@@ -18,10 +18,11 @@ export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
   const completeCycle = searchParams.get("complete") === "true";
   const referenceMtd = Number.parseInt(searchParams.get("reference_mtd") ?? "", 10);
+  const runPipeline = searchParams.get("run_pipeline") !== "false";
 
   const result = await runCandidateIngestionSync({
     byUserId: session.userId,
-    runPipeline: true,
+    runPipeline,
     completeCycle,
     referenceBreezyMtd: Number.isFinite(referenceMtd) ? referenceMtd : undefined,
     maxRuntimeMs: completeCycle ? 115_000 : 110_000,

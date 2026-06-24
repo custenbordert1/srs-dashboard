@@ -1,6 +1,11 @@
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
 import type { ApplicantCaptureHealth } from "@/lib/candidate-ingestion/types";
 import type {
+  CandidateAutomationHealth,
+  CandidateAutomationPolicy,
+  CandidateAutomationRunResult,
+} from "@/lib/candidate-automation-engine/types";
+import type {
   CandidateWorkflowBundle,
   CandidateWorkflowRecord,
   CandidateWorkflowState,
@@ -62,10 +67,37 @@ export type IngestionSyncApiResponse = {
   captureHealth?: ApplicantCaptureHealth;
 };
 
+export type CandidateAutomationApiResponse = {
+  ok: boolean;
+  skipped?: boolean;
+  skipReason?: string;
+  runId?: string;
+  trigger?: string;
+  durationMs?: number;
+  mtdCandidatesProcessed?: number;
+  p62Assigned?: number;
+  p63ActionsGenerated?: number;
+  p64ProgressionsGenerated?: number;
+  p62CoveragePct?: number;
+  p63CoveragePct?: number;
+  p64CoveragePct?: number;
+  health?: import("@/lib/candidate-automation-engine/types").CandidateAutomationHealth;
+  errors?: string[];
+  warnings?: string[];
+  workflows?: CandidateWorkflowState;
+  rosters?: RecruiterRosters;
+  updatedAt?: string;
+  error?: string;
+};
+
 export async function runCandidateIngestionSync(options?: {
   complete?: boolean;
+  runPipeline?: boolean;
 }): Promise<IngestionSyncApiResponse> {
-  const query = options?.complete ? "?complete=true" : "";
+  const params = new URLSearchParams();
+  if (options?.complete) params.set("complete", "true");
+  if (options?.runPipeline === false) params.set("run_pipeline", "false");
+  const query = params.size > 0 ? `?${params.toString()}` : "";
   const res = await fetch(`/api/candidates/ingestion/sync${query}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -73,6 +105,18 @@ export async function runCandidateIngestionSync(options?: {
   const parsed = (await res.json()) as IngestionSyncApiResponse;
   if (!res.ok || !parsed.ok) {
     throw new Error(parsed.error ?? `Ingestion sync failed (${res.status})`);
+  }
+  return parsed;
+}
+
+export async function runCandidateAutomation(): Promise<CandidateAutomationApiResponse> {
+  const res = await fetch("/api/candidates/automation/run", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  const parsed = (await res.json()) as CandidateAutomationApiResponse;
+  if (!res.ok || !parsed.ok) {
+    throw new Error(parsed.error ?? `Automation run failed (${res.status})`);
   }
   return parsed;
 }

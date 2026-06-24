@@ -5,6 +5,7 @@ import { ExecutiveAccountabilitySummary } from "@/components/executive/executive
 import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-strip";
 import { ExecutiveSnapshotHero } from "@/components/executive/executive-snapshot-hero";
 import { ApplicantCaptureHealthPanel } from "@/components/recruiting/applicant-capture-health-panel";
+import { AutomationHealthPanel } from "@/components/executive/automation-health-panel";
 import { PipelineHealthPanel } from "@/components/executive/pipeline-health-panel";
 import type { ExecutiveDashboardSnapshot, TerritoryRollupRow } from "@/lib/dm-dashboard";
 import { buildExecutiveSnapshotContent } from "@/lib/build-executive-home-snapshot";
@@ -212,6 +213,8 @@ export function ExecutiveHomePanel() {
       <ExecutiveSnapshotHero snapshot={snapshot} lastUpdated={formatTimestamp(lastUpdated)} />
 
       <ApplicantCaptureHealthPanel />
+
+      <AutomationHealthPanel />
 
       {candidatesUnavailable && jobsAvailable ? (
         <div

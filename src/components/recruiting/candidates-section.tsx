@@ -25,10 +25,9 @@ import {
   completeCandidateFollowUp,
   persistRecruitingActionToggle,
   persistWorkflowUpdate,
-  runAutoRecruiterAssignment,
-  runAutoRecruiterAction,
-  runAutoCandidateProgression,
+  runCandidateAutomation,
   runCandidateIngestionSync,
+  fetchCandidateWorkflowBundle,
   snoozeCandidate24h,
 } from "@/lib/candidate-workflow-client";
 import {
@@ -1350,10 +1349,12 @@ export function CandidatesSection() {
 
   useEffect(() => {
     let cancelled = false;
-    void runCandidateIngestionSync()
+    void runCandidateIngestionSync({ runPipeline: false })
       .catch(() => undefined)
       .finally(() => {
-        if (!cancelled) void runCandidateIngestionSync({ complete: true }).catch(() => undefined);
+        if (!cancelled) {
+          void runCandidateIngestionSync({ complete: true, runPipeline: false }).catch(() => undefined);
+        }
       });
     return () => {
       cancelled = true;
@@ -1363,43 +1364,17 @@ export function CandidatesSection() {
   useEffect(() => {
     if (loadingBundle || committedCandidates.length === 0) return;
     let cancelled = false;
-    void runAutoRecruiterAssignment()
-      .then((parsed) => {
-        if (cancelled || !parsed.workflows || (parsed.assigned ?? 0) <= 0) return;
-        applyWorkflowsBundle(parsed.workflows);
-        if (parsed.rosters) {
-          setRosters(parsed.rosters);
-        }
-      })
-      .catch(() => {
-        // Auto-assignment is best-effort; P43 manual assignment remains available.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [applyWorkflowsBundle, committedCandidates.length, loadingBundle]);
-
-  useEffect(() => {
-    if (loadingBundle || committedCandidates.length === 0) return;
-    let cancelled = false;
-    void runAutoRecruiterAction()
+    void runCandidateAutomation()
+      .then(() => fetchCandidateWorkflowBundle())
       .then((parsed) => {
         if (cancelled || !parsed.workflows) return;
         applyWorkflowsBundle(parsed.workflows);
         if (parsed.rosters) {
           setRosters(parsed.rosters);
         }
-        return runAutoCandidateProgression();
-      })
-      .then((progressionParsed) => {
-        if (cancelled || !progressionParsed?.workflows) return;
-        applyWorkflowsBundle(progressionParsed.workflows);
-        if (progressionParsed.rosters) {
-          setRosters(progressionParsed.rosters);
-        }
       })
       .catch(() => {
-        // Auto-action and progression generation are best-effort; derived values still render on read path.
+        // Automation orchestrator is best-effort; manual workflows remain available.
       });
     return () => {
       cancelled = true;
