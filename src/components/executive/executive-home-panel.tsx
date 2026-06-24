@@ -309,6 +309,34 @@ export function ExecutiveHomePanel() {
                 value={`${assignmentRollups.recruiterSlaCompliance}%`}
                 hint="Actions completed on or before due date"
               />
+              <KpiCard
+                label="Candidates ready to advance"
+                value={assignmentRollups.candidatesReadyToAdvance.toLocaleString()}
+                hint="Progression engine recommends next stage"
+              />
+              <KpiCard
+                label="Stalled candidates"
+                value={assignmentRollups.stalledCandidates.toLocaleString()}
+                hint="Escalation or SLA breach detected"
+              />
+              <KpiCard
+                label="Progression SLA compliance"
+                value={`${assignmentRollups.progressionSlaCompliance}%`}
+                hint="Candidates not stalled in pipeline"
+              />
+              <KpiCard
+                label="Progression bottlenecks"
+                value={
+                  assignmentRollups.progressionBottlenecks.length > 0
+                    ? assignmentRollups.progressionBottlenecks[0]
+                    : "—"
+                }
+                hint={
+                  assignmentRollups.progressionBottlenecks.length > 1
+                    ? assignmentRollups.progressionBottlenecks.slice(1).join(" · ")
+                    : "Top stage concentration"
+                }
+              />
             </>
           ) : assignmentRollupsLoading ? (
             <>
@@ -316,6 +344,9 @@ export function ExecutiveHomePanel() {
               <KpiCard label="Actions due today" value="…" loading />
               <KpiCard label="Average action age" value="…" loading />
               <KpiCard label="Recruiter SLA compliance" value="…" loading />
+              <KpiCard label="Candidates ready to advance" value="…" loading />
+              <KpiCard label="Stalled candidates" value="…" loading />
+              <KpiCard label="Progression SLA compliance" value="…" loading />
             </>
           ) : null}
         </div>

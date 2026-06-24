@@ -27,6 +27,7 @@ import {
   persistWorkflowUpdate,
   runAutoRecruiterAssignment,
   runAutoRecruiterAction,
+  runAutoCandidateProgression,
   snoozeCandidate24h,
 } from "@/lib/candidate-workflow-client";
 import {
@@ -113,6 +114,7 @@ import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-act
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
 import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
+import { progressionBadgeStyle } from "@/lib/candidate-progression-engine/progression-sort";
 import {
   buildRecruiterInboxSections,
   computeRecruiterAgingBucket,
@@ -1334,9 +1336,17 @@ export function CandidatesSection() {
         if (parsed.rosters) {
           setRosters(parsed.rosters);
         }
+        return runAutoCandidateProgression();
+      })
+      .then((progressionParsed) => {
+        if (cancelled || !progressionParsed?.workflows) return;
+        applyWorkflowsBundle(progressionParsed.workflows);
+        if (progressionParsed.rosters) {
+          setRosters(progressionParsed.rosters);
+        }
       })
       .catch(() => {
-        // Auto-action generation is best-effort; derived actions still render on read path.
+        // Auto-action and progression generation are best-effort; derived values still render on read path.
       });
     return () => {
       cancelled = true;
@@ -1915,6 +1925,14 @@ export function CandidatesSection() {
                 >
                   {candidate.workflowStatus}
                 </span>
+                {candidate.recommendedStage ? (
+                  <span
+                    className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide ${progressionBadgeStyle(candidate.recommendedStage, candidate.progressionPriority)}`}
+                    title={candidate.progressionReason ?? candidate.recommendedStage}
+                  >
+                    {candidate.recommendedStage}
+                  </span>
+                ) : null}
               </div>
             </td>
             <td className={`${tdClass} truncate text-zinc-400`}>{location}</td>

@@ -113,6 +113,11 @@ export type CandidateDrawerRow = {
   actionDueDate?: string | null;
   actionConfidence?: number | null;
   actionGeneratedAt?: string | null;
+  recommendedStage?: string | null;
+  progressionReason?: string | null;
+  progressionConfidence?: number | null;
+  progressionPriority?: import("@/lib/candidate-workflow-types").RecruiterActionPriority | null;
+  progressionGeneratedAt?: string | null;
 };
 
 type DrawerTab = "overview" | "workflow" | "notes" | "assignments" | "hellosign" | "ai";

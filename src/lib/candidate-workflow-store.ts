@@ -230,6 +230,11 @@ export async function upsertCandidateWorkflow(input: {
   actionDueDate?: string | null;
   actionConfidence?: number | null;
   actionGeneratedAt?: string | null;
+  recommendedStage?: string | null;
+  progressionReason?: string | null;
+  progressionConfidence?: number | null;
+  progressionPriority?: RecruiterActionPriority | null;
+  progressionGeneratedAt?: string | null;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
@@ -346,6 +351,22 @@ export async function upsertCandidateWorkflow(input: {
     input.actionConfidence !== undefined ? input.actionConfidence : (existing?.actionConfidence ?? null);
   const actionGeneratedAt =
     input.actionGeneratedAt !== undefined ? input.actionGeneratedAt : (existing?.actionGeneratedAt ?? null);
+  const recommendedStage =
+    input.recommendedStage !== undefined ? input.recommendedStage : (existing?.recommendedStage ?? null);
+  const progressionReason =
+    input.progressionReason !== undefined ? input.progressionReason : (existing?.progressionReason ?? null);
+  const progressionConfidence =
+    input.progressionConfidence !== undefined
+      ? input.progressionConfidence
+      : (existing?.progressionConfidence ?? null);
+  const progressionPriority =
+    input.progressionPriority !== undefined
+      ? input.progressionPriority
+      : (existing?.progressionPriority ?? null);
+  const progressionGeneratedAt =
+    input.progressionGeneratedAt !== undefined
+      ? input.progressionGeneratedAt
+      : (existing?.progressionGeneratedAt ?? null);
 
   if (!existing || existing.workflowStatus !== workflowStatus) {
     history.unshift(event("status", `Status changed to ${workflowStatus}.`, now));
@@ -403,6 +424,18 @@ export async function upsertCandidateWorkflow(input: {
       ),
     );
   }
+  if (
+    input.recommendedStage?.trim() &&
+    existing?.recommendedStage !== input.recommendedStage.trim()
+  ) {
+    history.unshift(
+      event(
+        "note",
+        `Progression: ${input.recommendedStage.trim()} (${input.progressionPriority ?? "medium"} priority).`,
+        now,
+      ),
+    );
+  }
 
   const record: CandidateWorkflowRecord = {
     candidateId: input.candidateId,
@@ -447,6 +480,11 @@ export async function upsertCandidateWorkflow(input: {
     actionDueDate,
     actionConfidence,
     actionGeneratedAt,
+    recommendedStage,
+    progressionReason,
+    progressionConfidence,
+    progressionPriority,
+    progressionGeneratedAt,
     updatedAt: now,
   };
 

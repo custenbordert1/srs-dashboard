@@ -12,6 +12,7 @@ import { CandidateNotesPanel } from "@/components/recruiting/candidate-workspace
 import { CandidatePaperworkPanel } from "@/components/recruiting/candidate-workspace/candidate-paperwork-panel";
 import { CandidateQuestionnaireIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-questionnaire-intelligence-panel";
 import { CandidateRecruiterActionPanel } from "@/components/recruiting/candidate-workspace/candidate-recruiter-action-panel";
+import { CandidateProgressionPanel } from "@/components/recruiting/candidate-workspace/candidate-progression-panel";
 import { CandidateResumeIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-resume-intelligence-panel";
 import { CandidateSummary } from "@/components/recruiting/candidate-workspace/candidate-summary";
 import { CandidateTimeline } from "@/components/recruiting/candidate-workspace/candidate-timeline";
@@ -203,6 +204,14 @@ export function CandidateWorkspace({
             actionReason={activeCandidate.actionReason}
             actionDueDate={activeCandidate.actionDueDate}
             actionConfidence={activeCandidate.actionConfidence}
+          />
+
+          <CandidateProgressionPanel
+            recommendedStage={activeCandidate.recommendedStage}
+            progressionPriority={activeCandidate.progressionPriority}
+            progressionReason={activeCandidate.progressionReason}
+            progressionConfidence={activeCandidate.progressionConfidence}
+            progressionGeneratedAt={activeCandidate.progressionGeneratedAt}
           />
 
           <CandidateGradePanel grade={activeCandidate.candidateGrade} />

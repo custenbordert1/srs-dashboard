@@ -8,4 +8,6 @@ export { CandidateQuestionnaireIntelligencePanel } from "@/components/recruiting
 export { CandidateResumeIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-resume-intelligence-panel";
 export { CandidateSummary } from "@/components/recruiting/candidate-workspace/candidate-summary";
 export { CandidateTimeline } from "@/components/recruiting/candidate-workspace/candidate-timeline";
+export { CandidateProgressionPanel } from "@/components/recruiting/candidate-workspace/candidate-progression-panel";
+export { CandidateRecruiterActionPanel } from "@/components/recruiting/candidate-workspace/candidate-recruiter-action-panel";
 export { CandidateWorkspace, type CandidateWorkspaceProps } from "@/components/recruiting/candidate-workspace/candidate-workspace";

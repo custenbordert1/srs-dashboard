@@ -94,6 +94,11 @@ export type CandidateWorkflowRecord = {
   actionDueDate?: string | null;
   actionConfidence?: number | null;
   actionGeneratedAt?: string | null;
+  recommendedStage?: string | null;
+  progressionReason?: string | null;
+  progressionConfidence?: number | null;
+  progressionPriority?: RecruiterActionPriority | null;
+  progressionGeneratedAt?: string | null;
   updatedAt: string;
 };
 
@@ -214,6 +219,15 @@ export function normalizeWorkflowRecord(
         ? Math.max(0, Math.min(100, Math.round(raw.actionConfidence)))
         : null,
     actionGeneratedAt: typeof raw.actionGeneratedAt === "string" ? raw.actionGeneratedAt : null,
+    recommendedStage: typeof raw.recommendedStage === "string" ? raw.recommendedStage : null,
+    progressionReason: typeof raw.progressionReason === "string" ? raw.progressionReason : null,
+    progressionConfidence:
+      typeof raw.progressionConfidence === "number" && Number.isFinite(raw.progressionConfidence)
+        ? Math.max(0, Math.min(100, Math.round(raw.progressionConfidence)))
+        : null,
+    progressionPriority: normalizeRecruiterActionPriority(raw.progressionPriority),
+    progressionGeneratedAt:
+      typeof raw.progressionGeneratedAt === "string" ? raw.progressionGeneratedAt : null,
     updatedAt: raw.updatedAt ?? new Date(0).toISOString(),
   };
 }

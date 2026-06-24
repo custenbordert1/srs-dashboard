@@ -73,6 +73,10 @@ export type ExecutiveAutomationRollups = {
   actionsDueToday: number;
   averageActionAgeDays: number;
   recruiterSlaCompliance: number;
+  candidatesReadyToAdvance: number;
+  stalledCandidates: number;
+  progressionSlaCompliance: number;
+  progressionBottlenecks: string[];
 };
 
 export const RECRUITER_TASK_LABELS: Record<RecruiterTaskType, string> = {

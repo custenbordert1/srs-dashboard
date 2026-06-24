@@ -42,6 +42,7 @@ import {
 } from "@/lib/hiring-funnel-automation";
 import type { CandidateFunnelAutomation } from "@/lib/hiring-funnel-automation/types";
 import { buildRecruiterActionDecision } from "@/lib/recruiter-action-engine/build-action-decision";
+import { buildCandidateProgressionDecision } from "@/lib/candidate-progression-engine/build-progression-decision";
 
 export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   workflowStatus: CandidateWorkflowStatus;
@@ -108,6 +109,11 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   actionDueDate?: string | null;
   actionConfidence?: number | null;
   actionGeneratedAt?: string | null;
+  recommendedStage?: string | null;
+  progressionReason?: string | null;
+  progressionConfidence?: number | null;
+  progressionPriority?: RecruiterActionPriority | null;
+  progressionGeneratedAt?: string | null;
 };
 
 function resolveDisplayedNextAction(
@@ -254,6 +260,11 @@ export function buildBaselineWorkflowRow(
     actionDueDate: local?.actionDueDate ?? null,
     actionConfidence: local?.actionConfidence ?? null,
     actionGeneratedAt: local?.actionGeneratedAt ?? null,
+    recommendedStage: local?.recommendedStage ?? null,
+    progressionReason: local?.progressionReason ?? null,
+    progressionConfidence: local?.progressionConfidence ?? null,
+    progressionPriority: local?.progressionPriority ?? null,
+    progressionGeneratedAt: local?.progressionGeneratedAt ?? null,
   };
   const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...baseline,
@@ -358,6 +369,11 @@ export function buildScoredWorkflowRow(
     actionDueDate: local?.actionDueDate ?? null,
     actionConfidence: local?.actionConfidence ?? null,
     actionGeneratedAt: local?.actionGeneratedAt ?? null,
+    recommendedStage: local?.recommendedStage ?? null,
+    progressionReason: local?.progressionReason ?? null,
+    progressionConfidence: local?.progressionConfidence ?? null,
+    progressionPriority: local?.progressionPriority ?? null,
+    progressionGeneratedAt: local?.progressionGeneratedAt ?? null,
   };
   const withNextAction: Omit<ScoredCandidateWorkflowRow, "funnelAutomation"> = {
     ...scored,
@@ -368,13 +384,16 @@ export function buildScoredWorkflowRow(
       local?.requiredAction,
     ),
   };
-  return enrichRowWithRecruiterAction(
-    {
-      ...withNextAction,
-      funnelAutomation: evaluateCandidateFunnelAutomation(
-        { ...withNextAction, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
-      ),
-    },
+  return enrichRowWithCandidateProgression(
+    enrichRowWithRecruiterAction(
+      {
+        ...withNextAction,
+        funnelAutomation: evaluateCandidateFunnelAutomation(
+          { ...withNextAction, funnelAutomation: baselineCandidateFunnelAutomation(candidate.candidateId) },
+        ),
+      },
+      local,
+    ),
     local,
   );
 }
@@ -397,6 +416,24 @@ function enrichRowWithRecruiterAction(
     actionDueDate: decision.actionDueDate,
     actionConfidence: decision.actionConfidence,
     nextActionNeeded: decision.requiredAction,
+  };
+}
+
+function enrichRowWithCandidateProgression(
+  row: ScoredCandidateWorkflowRow,
+  local?: CandidateWorkflowRecord,
+): ScoredCandidateWorkflowRow {
+  if (local?.recommendedStage?.trim()) return row;
+
+  const decision = buildCandidateProgressionDecision(row);
+  if (!decision.shouldPersist) return row;
+
+  return {
+    ...row,
+    recommendedStage: decision.recommendedStage,
+    progressionReason: decision.progressionReason,
+    progressionConfidence: decision.progressionConfidence,
+    progressionPriority: decision.progressionPriority,
   };
 }
 

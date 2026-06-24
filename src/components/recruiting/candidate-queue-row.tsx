@@ -4,6 +4,7 @@ import type { QueueCandidateRow } from "@/lib/candidate-action-queue";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import { CandidateAssignmentBadge } from "@/components/recruiting/candidate-assignment-badge";
 import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
+import { progressionBadgeStyle } from "@/lib/candidate-progression-engine/progression-sort";
 import type { CandidateQueueActionPayload } from "@/lib/candidate-queue-actions";
 import { slaToneClass } from "@/lib/candidate-action-sla";
 import {
@@ -230,6 +231,14 @@ export function CandidateQueueRow({
                 className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${ACTION_PRIORITY_STYLES[row.actionPriority]}`}
               >
                 {row.actionPriority}
+              </span>
+            ) : null}
+            {row.recommendedStage ? (
+              <span
+                className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide ${progressionBadgeStyle(row.recommendedStage, row.progressionPriority)}`}
+                title={row.progressionReason ?? row.recommendedStage}
+              >
+                {row.recommendedStage}
               </span>
             ) : null}
           </div>

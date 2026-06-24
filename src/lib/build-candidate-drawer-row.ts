@@ -112,5 +112,10 @@ export function buildCandidateDrawerRowFromScored(
     actionDueDate: scored.actionDueDate ?? null,
     actionConfidence: scored.actionConfidence ?? null,
     actionGeneratedAt: scored.actionGeneratedAt ?? null,
+    recommendedStage: scored.recommendedStage ?? null,
+    progressionReason: scored.progressionReason ?? null,
+    progressionConfidence: scored.progressionConfidence ?? null,
+    progressionPriority: scored.progressionPriority ?? null,
+    progressionGeneratedAt: scored.progressionGeneratedAt ?? null,
   };
 }

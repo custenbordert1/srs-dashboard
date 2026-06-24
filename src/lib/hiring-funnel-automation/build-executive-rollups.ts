@@ -9,6 +9,8 @@ import {
 import type { ExecutiveAutomationRollups } from "@/lib/hiring-funnel-automation/types";
 import { buildRecruiterActionMetrics } from "@/lib/recruiter-action-engine/build-action-metrics";
 import { buildRecruiterActionDecisions } from "@/lib/recruiter-action-engine/build-action-decision";
+import { buildProgressionMetrics } from "@/lib/candidate-progression-engine/build-progression-metrics";
+import { buildCandidateProgressionDecisions } from "@/lib/candidate-progression-engine/build-progression-decision";
 
 export function buildExecutiveAutomationRollups(
   candidates: ScoredCandidateWorkflowRow[],
@@ -69,6 +71,14 @@ export function buildExecutiveAutomationRollups(
     referenceMs,
   });
 
+  const progressionDecisions = buildCandidateProgressionDecisions(candidates, referenceMs);
+  const progressionMetrics = buildProgressionMetrics({
+    candidates,
+    decisions: progressionDecisions,
+    generated: candidates.filter((row) => row.recommendedStage).length,
+    referenceMs,
+  });
+
   return {
     recruiterCapacityRisk,
     pipelineBlockers: pipelineBlockers.slice(0, 3),
@@ -83,5 +93,9 @@ export function buildExecutiveAutomationRollups(
     actionsDueToday: actionMetrics.actionsDueToday,
     averageActionAgeDays: actionMetrics.averageActionAgeDays,
     recruiterSlaCompliance: actionMetrics.recruiterSlaCompliance,
+    candidatesReadyToAdvance: progressionMetrics.candidatesReadyToAdvance,
+    stalledCandidates: progressionMetrics.stalledCandidates,
+    progressionSlaCompliance: progressionMetrics.progressionSlaCompliance,
+    progressionBottlenecks: progressionMetrics.progressionBottlenecks,
   };
 }

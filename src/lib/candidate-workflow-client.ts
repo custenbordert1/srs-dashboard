@@ -42,6 +42,17 @@ export type AutoActionApiResponse = WorkflowApiResponse & {
   };
 };
 
+export type AutoProgressionApiResponse = WorkflowApiResponse & {
+  generated?: number;
+  skipped?: number;
+  metrics?: {
+    candidatesReadyToAdvance: number;
+    stalledCandidates: number;
+    progressionSlaCompliance: number;
+    progressionBottlenecks: string[];
+  };
+};
+
 export async function runAutoRecruiterAssignment(): Promise<AutoAssignApiResponse> {
   const res = await fetch("/api/candidates/workflows/auto-assign", {
     method: "POST",
@@ -62,6 +73,18 @@ export async function runAutoRecruiterAction(): Promise<AutoActionApiResponse> {
   const parsed = (await res.json()) as AutoActionApiResponse;
   if (!res.ok || !parsed.ok) {
     throw new Error(parsed.error ?? `Auto-action request failed (${res.status})`);
+  }
+  return parsed;
+}
+
+export async function runAutoCandidateProgression(): Promise<AutoProgressionApiResponse> {
+  const res = await fetch("/api/candidates/workflows/auto-progression", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  const parsed = (await res.json()) as AutoProgressionApiResponse;
+  if (!res.ok || !parsed.ok) {
+    throw new Error(parsed.error ?? `Auto-progression request failed (${res.status})`);
   }
   return parsed;
 }
