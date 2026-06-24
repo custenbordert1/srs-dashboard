@@ -1,0 +1,49 @@
+import type { BreezyCandidate } from "@/lib/breezy-api";
+import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
+import type {
+  CandidateWorkflowRecord,
+  CandidateWorkflowStatus,
+} from "@/lib/candidate-workflow-types";
+
+function initialWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStatus {
+  const stage = candidate.stage.toLowerCase();
+  if (stage.includes("not qualified") || stage.includes("disqualif")) return "Not Qualified";
+  if (stage.includes("qualified")) return "Qualified";
+  if (stage.includes("applied")) return "Applied";
+  if (stage.includes("paperwork")) return "Paperwork Needed";
+  if (stage.includes("signed")) return "Signed";
+  return "Needs Review";
+}
+
+export async function backfillWorkflowRecordsForCandidates(input: {
+  candidates: BreezyCandidate[];
+  workflows: Record<string, CandidateWorkflowRecord>;
+  byUserId?: string;
+}): Promise<{ created: number; records: CandidateWorkflowRecord[] }> {
+  const records: CandidateWorkflowRecord[] = [];
+  let created = 0;
+
+  for (const candidate of input.candidates) {
+    if (input.workflows[candidate.candidateId]) continue;
+
+    const record = await upsertCandidateWorkflow({
+      candidateId: candidate.candidateId,
+      workflowStatus: initialWorkflowStatus(candidate),
+      assignedRecruiter: "Unassigned",
+      audit: {
+        action: "ingestion_import",
+        byUserId: input.byUserId,
+        metadata: {
+          positionId: candidate.positionId,
+          positionName: candidate.positionName,
+          appliedDate: candidate.appliedDate,
+        },
+      },
+    });
+    records.push(record);
+    input.workflows[candidate.candidateId] = record;
+    created += 1;
+  }
+
+  return { created, records };
+}

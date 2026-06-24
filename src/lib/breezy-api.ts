@@ -2113,6 +2113,56 @@ async function scanPositionsBatch(input: {
   };
 }
 
+export type BreezyPositionScanBatchResult = {
+  candidates: BreezyCandidate[];
+  positionsScanned: number;
+  positionsAvailable: number;
+  positionsSkipped: number;
+  truncated: boolean;
+  positionFetchFailed: number;
+  positionPaginationIncomplete: number;
+  positionScanTimedOut: number;
+  sanitizeRejected: number;
+  warnings: string[];
+};
+
+/** Scan an explicit slice of published positions (used by durable ingestion). */
+export async function scanBreezyPublishedPositionsBatch(input: {
+  companyId: string;
+  positions: BreezyJob[];
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+  filterToDateRange?: boolean;
+  maxRuntimeMs?: number;
+  maxPagesPerPosition?: number;
+}): Promise<BreezyPositionScanBatchResult> {
+  const deadlineMs = Date.now() + (input.maxRuntimeMs ?? BREEZY_CANDIDATE_SCAN_BUDGET_MS);
+  const batch = await scanPositionsBatch({
+    companyId: input.companyId,
+    positions: input.positions,
+    pipelineState: "published",
+    pageSize: CANDIDATES_PAGE_SIZE,
+    maxPages: input.maxPagesPerPosition ?? MAX_CANDIDATE_PAGES_PER_POSITION,
+    deadlineMs,
+    dateRangeStart: input.dateRangeStart,
+    dateRangeEnd: input.dateRangeEnd,
+    filterToDateRange: input.filterToDateRange ?? false,
+    batchDelayMs: CANDIDATE_POSITION_BATCH_DELAY_MS,
+  });
+  return {
+    candidates: batch.candidates,
+    positionsScanned: batch.positionsScanned,
+    positionsAvailable: batch.positionsAvailable,
+    positionsSkipped: batch.positionsSkipped,
+    truncated: batch.truncated,
+    positionFetchFailed: batch.positionFetchFailed,
+    positionPaginationIncomplete: batch.positionPaginationIncomplete,
+    positionScanTimedOut: batch.positionScanTimedOut,
+    sanitizeRejected: batch.sanitizeRejected,
+    warnings: batch.warnings,
+  };
+}
+
 async function fetchBreezyCandidatesFastUncached(options?: {
   positionId?: string;
   state?: string;

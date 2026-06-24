@@ -1,7 +1,8 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { guardBreezyCandidatesResult } from "@/lib/auth/breezy-territory-guard";
+import { getIngestedCandidatesSnapshot } from "@/lib/candidate-ingestion";
 import { fetchBreezyCandidates, type BreezyCandidatesScanMode } from "@/lib/breezy-api";
-import { withCandidatesFailureMeta } from "@/lib/breezy-candidates-sync";
+import { withCandidatesFailureMeta, withCandidatesSyncMeta } from "@/lib/breezy-candidates-sync";
 import {
   isBreezyCandidatesTimeoutMessage,
   logBreezyCandidatesExtract,
@@ -62,6 +63,22 @@ export async function GET(request: Request) {
     positionId: positionId ?? null,
     state: state ?? null,
   });
+
+  if (!positionId && !force && scanMode !== "preview") {
+    const ingested = await getIngestedCandidatesSnapshot();
+    if (ingested && ingested.candidates.length > 0) {
+      const guarded = guardBreezyCandidatesResult(
+        withCandidatesSyncMeta(ingested, { fromCache: true, stale: !ingested.hydrationComplete }),
+        session,
+      );
+      if (guarded.ok) {
+        return NextResponse.json(guarded, {
+          status: 200,
+          headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=120" },
+        });
+      }
+    }
+  }
 
   const breezyResult = await fetchBreezyCandidates({
       positionId,

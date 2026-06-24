@@ -1,4 +1,5 @@
 import type { RecruitingActionType } from "@/lib/candidate-recruiting-actions";
+import type { ApplicantCaptureHealth } from "@/lib/candidate-ingestion/types";
 import type {
   CandidateWorkflowBundle,
   CandidateWorkflowRecord,
@@ -52,6 +53,29 @@ export type AutoProgressionApiResponse = WorkflowApiResponse & {
     progressionBottlenecks: string[];
   };
 };
+
+export type IngestionSyncApiResponse = {
+  ok: boolean;
+  error?: string;
+  positionCoveragePct?: number;
+  cycleComplete?: boolean;
+  captureHealth?: ApplicantCaptureHealth;
+};
+
+export async function runCandidateIngestionSync(options?: {
+  complete?: boolean;
+}): Promise<IngestionSyncApiResponse> {
+  const query = options?.complete ? "?complete=true" : "";
+  const res = await fetch(`/api/candidates/ingestion/sync${query}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  const parsed = (await res.json()) as IngestionSyncApiResponse;
+  if (!res.ok || !parsed.ok) {
+    throw new Error(parsed.error ?? `Ingestion sync failed (${res.status})`);
+  }
+  return parsed;
+}
 
 export async function runAutoRecruiterAssignment(): Promise<AutoAssignApiResponse> {
   const res = await fetch("/api/candidates/workflows/auto-assign", {

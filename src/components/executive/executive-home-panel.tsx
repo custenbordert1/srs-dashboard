@@ -4,6 +4,7 @@ import { AtsHealthCard } from "@/components/executive/ats-health-card";
 import { ExecutiveAccountabilitySummary } from "@/components/executive/executive-accountability-summary";
 import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-strip";
 import { ExecutiveSnapshotHero } from "@/components/executive/executive-snapshot-hero";
+import { ApplicantCaptureHealthPanel } from "@/components/recruiting/applicant-capture-health-panel";
 import { PipelineHealthPanel } from "@/components/executive/pipeline-health-panel";
 import type { ExecutiveDashboardSnapshot, TerritoryRollupRow } from "@/lib/dm-dashboard";
 import { buildExecutiveSnapshotContent } from "@/lib/build-executive-home-snapshot";
@@ -209,6 +210,8 @@ export function ExecutiveHomePanel() {
   return (
     <div className="space-y-6">
       <ExecutiveSnapshotHero snapshot={snapshot} lastUpdated={formatTimestamp(lastUpdated)} />
+
+      <ApplicantCaptureHealthPanel />
 
       {candidatesUnavailable && jobsAvailable ? (
         <div

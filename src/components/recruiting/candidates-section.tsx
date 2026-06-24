@@ -28,6 +28,7 @@ import {
   runAutoRecruiterAssignment,
   runAutoRecruiterAction,
   runAutoCandidateProgression,
+  runCandidateIngestionSync,
   snoozeCandidate24h,
 } from "@/lib/candidate-workflow-client";
 import {
@@ -1306,6 +1307,18 @@ export function CandidatesSection() {
     },
     [committedCandidates, jobsByPositionId],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    void runCandidateIngestionSync()
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) void runCandidateIngestionSync({ complete: true }).catch(() => undefined);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (loadingBundle || committedCandidates.length === 0) return;
