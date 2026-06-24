@@ -68,6 +68,13 @@ import {
   type ScoredCandidateWorkflowRow,
 } from "@/lib/build-candidate-workflow-row";
 import { isAppliedDateInRange } from "@/lib/breezy-api";
+import {
+  CANDIDATE_QUEUE_SCOPE_LABELS,
+  candidateQueueScopeHint,
+  filterCandidatesByQueueScope,
+  isHistoricalApplicant,
+  type CandidateQueueScope,
+} from "@/lib/candidate-ingestion/candidate-queue-scope";
 import { fetchCachedBreezyJobs } from "@/lib/cached-breezy-client";
 import {
   CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
@@ -439,6 +446,12 @@ function SummaryCard({ label, value, hint }: { label: string; value: string; hin
   );
 }
 
+const AUTOMATION_TERMINAL_STATUSES = new Set<CandidateWorkflowStatus>([
+  "Not Qualified",
+  "Active Rep",
+  "Loaded in MEL",
+]);
+
 export function CandidatesSection() {
   const { opportunities: melOpportunities, loading: melLoading } = useMelOpportunities();
   /** Rows always render from this — never cleared on timeout/failed refresh. */
@@ -474,6 +487,7 @@ export function CandidatesSection() {
   const [workflowFilter, setWorkflowFilter] = useState(ALL);
   const [matchFilter, setMatchFilter] = useState(ALL);
   const [intelligenceFilter, setIntelligenceFilter] = useState(ALL);
+  const [queueScope, setQueueScope] = useState<CandidateQueueScope>("mtd");
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
   const [search, setSearch] = useState("");
@@ -1120,7 +1134,7 @@ export function CandidatesSection() {
     return () => source.close();
   }, [commitWorkflowToView]);
 
-  const candidates = useMemo(() => {
+  const allCandidates = useMemo(() => {
     if (enrichedCandidates.length > 0) {
       return enrichedCandidates;
     }
@@ -1128,6 +1142,32 @@ export function CandidatesSection() {
       buildBaselineWorkflowRow(candidate, workflowState[candidate.candidateId]),
     );
   }, [committedCandidates, enrichedCandidates, workflowState]);
+
+  const candidates = useMemo(
+    () => filterCandidatesByQueueScope(allCandidates, queueScope),
+    [allCandidates, queueScope],
+  );
+
+  const queueScopeStats = useMemo(() => {
+    const ownerUnassignedInScope = candidates.filter((candidate) =>
+      isUnassignedRecruiter(candidate.assignedRecruiter),
+    ).length;
+    const automationUnassignedInScope =
+      queueScope === "mtd"
+        ? candidates.filter(
+            (candidate) =>
+              isUnassignedRecruiter(candidate.assignedRecruiter) &&
+              !AUTOMATION_TERMINAL_STATUSES.has(candidate.workflowStatus),
+          ).length
+        : ownerUnassignedInScope;
+    return {
+      visible: candidates.length,
+      totalIngested: allCandidates.length,
+      ownerUnassignedInScope,
+      automationUnassignedInScope,
+      assignedInScope: candidates.length - ownerUnassignedInScope,
+    };
+  }, [allCandidates.length, candidates, queueScope]);
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
@@ -1946,6 +1986,14 @@ export function CandidatesSection() {
                     {candidate.recommendedStage}
                   </span>
                 ) : null}
+                {isHistoricalApplicant(candidate) ? (
+                  <span
+                    className="shrink-0 rounded border border-amber-500/35 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-100"
+                    title="Outside current MTD automation window"
+                  >
+                    Historical
+                  </span>
+                ) : null}
               </div>
             </td>
             <td className={`${tdClass} truncate text-zinc-400`}>{location}</td>
@@ -2135,6 +2183,37 @@ export function CandidatesSection() {
 
   const databaseToolbar = (
     <>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Queue scope</span>
+          {(Object.keys(CANDIDATE_QUEUE_SCOPE_LABELS) as CandidateQueueScope[]).map((scope) => {
+            const active = queueScope === scope;
+            return (
+              <button
+                key={scope}
+                type="button"
+                onClick={() => setQueueScope(scope)}
+                className={`rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  active
+                    ? "border-teal-500/50 bg-teal-500/10 text-teal-100"
+                    : "border-zinc-700 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900"
+                }`}
+              >
+                {CANDIDATE_QUEUE_SCOPE_LABELS[scope]}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] tabular-nums text-zinc-400">
+          {queueScopeStats.visible.toLocaleString()} visible · {queueScopeStats.assignedInScope.toLocaleString()}{" "}
+          assigned · {queueScopeStats.automationUnassignedInScope.toLocaleString()} unassigned
+          {queueScope === "mtd" &&
+          queueScopeStats.ownerUnassignedInScope !== queueScopeStats.automationUnassignedInScope
+            ? ` (${queueScopeStats.ownerUnassignedInScope.toLocaleString()} owner unassigned incl. terminal)`
+            : null}
+          {queueScope !== "all" ? ` · ${queueScopeStats.totalIngested.toLocaleString()} ingested total` : null}
+        </p>
+      </div>
       {selectedIds.size > 0 ? (
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-teal-500/30 bg-teal-500/5 px-2 py-1.5">
           <span className="text-[11px] font-medium text-teal-200">{selectedIds.size} selected</span>
@@ -2274,6 +2353,15 @@ export function CandidatesSection() {
             : "Refreshing Breezy candidates — inbox stays visible"}
         </p>
       </div>
+
+      {candidateQueueScopeHint(queueScope) ? (
+        <div
+          role="status"
+          className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-300"
+        >
+          {candidateQueueScopeHint(queueScope)}
+        </div>
+      ) : null}
 
       <RecruiterInbox
         candidates={candidates}

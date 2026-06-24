@@ -1,6 +1,14 @@
 export { buildApplicantCaptureHealth } from "@/lib/candidate-ingestion/build-capture-metrics";
 export { backfillWorkflowRecordsForCandidates } from "@/lib/candidate-ingestion/backfill-workflow-records";
 export {
+  CANDIDATE_QUEUE_SCOPE_LABELS,
+  candidateQueueScopeHint,
+  filterCandidatesByQueueScope,
+  isHistoricalApplicant,
+  isMtdApplicant,
+} from "@/lib/candidate-ingestion/candidate-queue-scope";
+export type { CandidateQueueScope } from "@/lib/candidate-ingestion/candidate-queue-scope";
+export {
   currentMtdDateRange,
   filterMtdCandidates,
   listIngestedMtdCandidates,

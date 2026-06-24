@@ -4,6 +4,7 @@ import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import type { BreezyJob } from "@/lib/breezy-api";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import { currentMtdDateRange, filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
+import { isMtdApplicant } from "@/lib/candidate-ingestion/candidate-queue-scope";
 import {
   ingestionPositionCoveragePct,
   listIngestedCandidates,
@@ -41,33 +42,55 @@ export function buildApplicantCaptureHealth(input: {
   let withoutP63 = 0;
   let withoutP64 = 0;
   let p62EligibleMtd = 0;
+  let p62EligibleAllIngested = 0;
   let p63EligibleMtd = 0;
   let p64EligibleMtd = 0;
   let p62AssignedMtd = 0;
+  let p62AssignedAllIngested = 0;
   let p63WithActionMtd = 0;
   let p64WithProgressionMtd = 0;
+  let unassignedHistorical = 0;
+  let totalUnassigned = 0;
 
-  for (const candidate of mtdCandidates) {
+  for (const candidate of candidates) {
     const workflow = input.workflows[candidate.candidateId];
-    if (!workflow) {
-      missingWorkflowRecords += 1;
-      unassignedApplicants += 1;
-      withoutP63 += 1;
-      withoutP64 += 1;
-      continue;
-    }
+    const inMtd = isMtdApplicant(candidate, range);
+    const terminal = workflow ? TERMINAL_STATUSES.has(workflow.workflowStatus) : false;
 
-    const terminal = TERMINAL_STATUSES.has(workflow.workflowStatus);
-    if (!terminal) {
-      p62EligibleMtd += 1;
-      p64EligibleMtd += 1;
+    if (!workflow) {
+      if (inMtd) {
+        missingWorkflowRecords += 1;
+        unassignedApplicants += 1;
+        withoutP63 += 1;
+        withoutP64 += 1;
+      }
+      totalUnassigned += 1;
+      if (!inMtd) unassignedHistorical += 1;
+      continue;
     }
 
     const row = buildScoredWorkflowRow(candidate, workflow, {
       job: input.jobsByPositionId.get(candidate.positionId),
     });
-
     const assigned = !isUnassignedRecruiter(row.assignedRecruiter);
+
+    if (!terminal) {
+      p62EligibleAllIngested += 1;
+      if (assigned) p62AssignedAllIngested += 1;
+    }
+
+    if (!assigned) {
+      totalUnassigned += 1;
+      if (!inMtd) unassignedHistorical += 1;
+    }
+
+    if (!inMtd) continue;
+
+    if (!terminal) {
+      p62EligibleMtd += 1;
+      p64EligibleMtd += 1;
+    }
+
     if (assigned) {
       p63EligibleMtd += 1;
       p62AssignedMtd += 1;
@@ -107,6 +130,10 @@ export function buildApplicantCaptureHealth(input: {
     osApplicantsMtd > 0 ? Math.round((workflowCovered / osApplicantsMtd) * 100) : 100;
   const p62CoveragePct =
     p62EligibleMtd > 0 ? Math.round((p62AssignedMtd / p62EligibleMtd) * 100) : 100;
+  const p62CoverageAllIngestedPct =
+    p62EligibleAllIngested > 0
+      ? Math.round((p62AssignedAllIngested / p62EligibleAllIngested) * 100)
+      : 100;
   const p63CoveragePct =
     p63EligibleMtd > 0 ? Math.round((p63WithActionMtd / p63EligibleMtd) * 100) : 100;
   const p64CoveragePct =
@@ -130,14 +157,18 @@ export function buildApplicantCaptureHealth(input: {
     missingWorkflowRecords,
     workflowCoveragePct,
     p62CoveragePct,
+    p62CoverageAllIngestedPct,
     p63CoveragePct,
     p64CoveragePct,
     p62EligibleMtd,
+    p62EligibleAllIngested,
     p63EligibleMtd,
     p64EligibleMtd,
     p62SkippedBelowConfidence,
     p62SkippedNoTerritory,
     unassignedApplicants,
+    unassignedHistorical,
+    totalUnassigned,
     withoutP63,
     withoutP64,
     lastSyncAt: input.store.lastChunkAt ?? input.store.updatedAt,

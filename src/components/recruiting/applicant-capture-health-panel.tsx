@@ -84,7 +84,8 @@ export function ApplicantCaptureHealthPanel() {
   if (!health) return null;
 
   const workflowAlert = health.workflowCoveragePct < 95;
-  const p62Alert = health.p62CoveragePct < 85;
+  const p62MtdAlert = health.p62CoveragePct < 85;
+  const p62AllAlert = health.p62CoverageAllIngestedPct < 85;
   const p63Alert = health.p63CoveragePct < 85;
   const p64Alert = health.p64CoveragePct < 85;
   const p62SkipHint =
@@ -121,7 +122,7 @@ export function ApplicantCaptureHealthPanel() {
           hint={`${health.captureRatePct}% capture vs Breezy ref`}
         />
         <MetricCard
-          label="Workflow coverage"
+          label="Workflow coverage (MTD)"
           value={`${health.workflowCoveragePct}%`}
           hint={`${health.missingWorkflowRecords} missing records`}
           alert={workflowAlert}
@@ -132,19 +133,25 @@ export function ApplicantCaptureHealthPanel() {
           hint={`${health.unscannedPositions} unscanned`}
         />
         <MetricCard
-          label="P62 coverage"
+          label="P62 coverage — MTD"
           value={`${health.p62CoveragePct}%`}
           hint={p62SkipHint}
-          alert={p62Alert}
+          alert={p62MtdAlert}
         />
         <MetricCard
-          label="P63 coverage"
+          label="P62 coverage — all ingested"
+          value={`${health.p62CoverageAllIngestedPct}%`}
+          hint={`${health.p62EligibleAllIngested} eligible all-time`}
+          alert={p62AllAlert}
+        />
+        <MetricCard
+          label="P63 coverage — MTD"
           value={`${health.p63CoveragePct}%`}
           hint={`${health.p63EligibleMtd} assigned MTD`}
           alert={p63Alert}
         />
         <MetricCard
-          label="P64 coverage"
+          label="P64 coverage — MTD"
           value={`${health.p64CoveragePct}%`}
           hint={`${health.p64EligibleMtd} eligible MTD`}
           alert={p64Alert}
@@ -152,6 +159,16 @@ export function ApplicantCaptureHealthPanel() {
         <MetricCard
           label="Unassigned MTD"
           value={health.unassignedApplicants.toLocaleString()}
+          hint="Non-terminal MTD without owner"
+        />
+        <MetricCard
+          label="Unassigned historical"
+          value={health.unassignedHistorical.toLocaleString()}
+          hint="Outside MTD automation window"
+        />
+        <MetricCard
+          label="Total unassigned"
+          value={health.totalUnassigned.toLocaleString()}
           hint={`${health.withoutP63} without P63 · ${health.withoutP64} without P64`}
         />
       </div>

@@ -1,15 +1,9 @@
 import { isAppliedDateInRange, type BreezyCandidate } from "@/lib/breezy-api";
 import type { CandidateIngestionStoreFile } from "@/lib/candidate-ingestion/types";
 import { listIngestedCandidates } from "@/lib/candidate-ingestion/ingestion-store";
+import { currentMtdDateRange } from "@/lib/candidate-ingestion/candidate-queue-scope";
 
-export function currentMtdDateRange(reference = new Date()): { start: string; end: string } {
-  const start = new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), 1));
-  const end = new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth() + 1, 0));
-  return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10),
-  };
-}
+export { currentMtdDateRange } from "@/lib/candidate-ingestion/candidate-queue-scope";
 
 export function filterMtdCandidates(
   candidates: BreezyCandidate[],
