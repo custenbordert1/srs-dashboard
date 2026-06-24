@@ -1,5 +1,5 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
-import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
+import { getCandidateWorkflowState, upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
 import type {
   CandidateWorkflowRecord,
   CandidateWorkflowStatus,
@@ -20,11 +20,20 @@ export async function backfillWorkflowRecordsForCandidates(input: {
   workflows: Record<string, CandidateWorkflowRecord>;
   byUserId?: string;
 }): Promise<{ created: number; records: CandidateWorkflowRecord[] }> {
+  const persisted = await getCandidateWorkflowState();
   const records: CandidateWorkflowRecord[] = [];
   let created = 0;
 
+  for (const [candidateId, record] of Object.entries(persisted)) {
+    input.workflows[candidateId] = record;
+  }
+
   for (const candidate of input.candidates) {
-    if (input.workflows[candidate.candidateId]) continue;
+    const existing = persisted[candidate.candidateId] ?? input.workflows[candidate.candidateId];
+    if (existing) {
+      input.workflows[candidate.candidateId] = existing;
+      continue;
+    }
 
     const record = await upsertCandidateWorkflow({
       candidateId: candidate.candidateId,
