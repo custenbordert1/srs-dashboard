@@ -14,6 +14,7 @@ test("maps tabs to the four navigation groups", () => {
   assert.equal(findNavGroupForTab("recruiting-autopilot-ops"), "executive");
   assert.equal(findNavGroupForTab("recruiting-execution"), "executive");
   assert.equal(findNavGroupForTab("placement-command-center"), "executive");
+  assert.equal(findNavGroupForTab("approval-queue"), "operations");
   assert.equal(findNavGroupForTab("command-center"), "operations");
   assert.equal(findNavGroupForTab("candidates"), "operations");
   assert.equal(findNavGroupForTab("dm-scorecards"), "territory-field");

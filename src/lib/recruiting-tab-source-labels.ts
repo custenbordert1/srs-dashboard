@@ -20,7 +20,8 @@ export type DashboardTabId =
   | "recruiting-autopilot"
   | "recruiting-execution"
   | "recruiting-autopilot-ops"
-  | "placement-command-center";
+  | "placement-command-center"
+  | "approval-queue";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -219,6 +220,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "executive",
     bannerMessage:
       "Hiring readiness, placement intelligence, and coverage coordination — reads P58 execution correlations, candidate workflow, and MEL opportunities without duplicate stores.",
+  },
+  "approval-queue": {
+    navLabel: "Approval Queue",
+    sourceTag: "Live · MTD",
+    badgeLabel: "Read-only queue ops",
+    kind: "live-breezy",
+    bannerMessage:
+      "P66 approval queue visibility and prioritization — no send, approve, or batch actions. Work the queue safely before automation.",
   },
 };
 
