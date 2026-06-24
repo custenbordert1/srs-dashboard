@@ -1,6 +1,8 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { mapSignatureRequestToPaperworkStatus } from "@/lib/candidate-paperwork";
+import { findActiveOnboardingRecord } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import {
+  getCandidateWorkflowState,
   recordCandidatePaperworkFailed,
   recordCandidatePaperworkSent,
 } from "@/lib/candidate-workflow-store";
@@ -12,6 +14,10 @@ import {
   signersHaveBlankEmail,
 } from "@/lib/dropbox-sign-debug";
 import { buildTemplateSignerPayload, resolveSignerRoleForTemplate } from "@/lib/onboarding-signer";
+import {
+  duplicatePaperworkSendBlockReason,
+  syncActiveOnboardingRecordAfterSend,
+} from "@/lib/onboarding-send-packet-sync";
 import { ONBOARDING_TEMPLATE_REGISTRY, validateSendPacketRequest } from "@/lib/onboarding-template-registry";
 import { auditFromSession } from "@/lib/security/audit-log";
 import { NextResponse } from "next/server";
@@ -86,6 +92,18 @@ export async function POST(request: Request) {
     );
   }
 
+  const [workflows, activeOnboarding] = await Promise.all([
+    getCandidateWorkflowState(),
+    findActiveOnboardingRecord(candidateId),
+  ]);
+  const duplicateReason = duplicatePaperworkSendBlockReason({
+    workflow: workflows[candidateId],
+    activeOnboarding,
+  });
+  if (duplicateReason) {
+    return NextResponse.json({ ok: false, error: duplicateReason }, { status: 409 });
+  }
+
   try {
     const templateLabel = ONBOARDING_TEMPLATE_REGISTRY[validation.templateKey].label;
     const finalSigners = [signerPayload.signer];
@@ -123,6 +141,8 @@ export async function POST(request: Request) {
       onboardingContactEmail: signerPayload.recipientEmail,
       byUserId: session.userId,
     });
+
+    await syncActiveOnboardingRecordAfterSend(candidateId, signature.signatureRequestId);
 
     auditFromSession(session, {
       action: "onboarding_send_packet",
