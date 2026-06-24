@@ -4,6 +4,7 @@ import type {
   CandidateWorkflowRecord,
   CandidateWorkflowStatus,
 } from "@/lib/candidate-workflow-types";
+import { hasAdvancedPaperworkState } from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
 
 function initialWorkflowStatus(candidate: BreezyCandidate): CandidateWorkflowStatus {
   const stage = candidate.stage.toLowerCase();
@@ -32,6 +33,11 @@ export async function backfillWorkflowRecordsForCandidates(input: {
     const existing = persisted[candidate.candidateId] ?? input.workflows[candidate.candidateId];
     if (existing) {
       input.workflows[candidate.candidateId] = existing;
+      continue;
+    }
+
+    const inMemory = input.workflows[candidate.candidateId];
+    if (inMemory && hasAdvancedPaperworkState(inMemory)) {
       continue;
     }
 

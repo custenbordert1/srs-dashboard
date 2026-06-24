@@ -176,6 +176,7 @@ export async function POST(request: Request) {
     note,
     followUpDueAt,
     snoozedUntil,
+    forceWorkflowStatus: workflowStatus !== undefined,
     recruiterAssignmentSource: manualRecruiterAssignment ? "manual" : undefined,
     recruiterAssignmentReason: manualRecruiterAssignment ? "Manually assigned by recruiter." : undefined,
     recruiterAssignmentConfidence: manualRecruiterAssignment ? null : undefined,

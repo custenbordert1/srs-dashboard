@@ -28,6 +28,11 @@ import {
   type RecruiterRosters,
 } from "@/lib/candidate-workflow-types";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
+import {
+  resolveAssignedRecruiter,
+  resolvePaperworkStatus,
+  resolveWorkflowStatus,
+} from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
@@ -235,13 +240,21 @@ export async function upsertCandidateWorkflow(input: {
   progressionConfidence?: number | null;
   progressionPriority?: RecruiterActionPriority | null;
   progressionGeneratedAt?: string | null;
+  /** When true, allow workflowStatus to regress from advanced paperwork stages. */
+  forceWorkflowStatus?: boolean;
+  /** When true, allow paperworkStatus to regress from sent/viewed/signed. */
+  forcePaperworkStatus?: boolean;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
   const file = await readStoreFile();
   const existing = file.workflows[input.candidateId];
-  const workflowStatus = input.workflowStatus ?? existing?.workflowStatus ?? "Needs Review";
-  const assignedRecruiter = input.assignedRecruiter?.trim() || existing?.assignedRecruiter || "Unassigned";
+  const workflowStatus = resolveWorkflowStatus(
+    input.workflowStatus,
+    existing,
+    input.forceWorkflowStatus ?? false,
+  );
+  const assignedRecruiter = resolveAssignedRecruiter(input.assignedRecruiter, existing);
   const assignedDM = input.assignedDM?.trim() || existing?.assignedDM || "Unassigned";
   const notes = input.note?.trim()
     ? [input.note.trim(), ...(existing?.notes ?? [])].slice(0, 25)
@@ -276,7 +289,11 @@ export async function upsertCandidateWorkflow(input: {
       : (existing?.paperworkSignedAt ?? null);
   const paperworkStatus =
     input.paperworkStatus !== undefined
-      ? input.paperworkStatus
+      ? resolvePaperworkStatus(
+          input.paperworkStatus,
+          existing?.paperworkStatus,
+          input.forcePaperworkStatus ?? false,
+        )
       : (existing?.paperworkStatus ?? "not_sent");
   const paperworkError =
     input.paperworkError !== undefined ? input.paperworkError : (existing?.paperworkError ?? null);

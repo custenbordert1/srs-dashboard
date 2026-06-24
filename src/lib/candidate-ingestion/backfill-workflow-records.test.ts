@@ -134,4 +134,27 @@ describe("backfill-workflow-records", () => {
     assert.equal(state["c-new"]?.assignedRecruiter, "Unassigned");
     assert.equal(state["c-new"]?.workflowStatus, "Applied");
   });
+
+  it("preserves paperwork sent state during backfill when persisted record exists", async () => {
+    await upsertCandidateWorkflow({
+      candidateId: "c-sent",
+      workflowStatus: "Paperwork Sent",
+      paperworkStatus: "sent",
+      signatureRequestId: "sig-persist",
+      paperworkSentAt: "2026-06-20T12:00:00.000Z",
+      assignedRecruiter: "Taylor",
+      recruitingActions: emptyRecruitingActions(),
+    });
+
+    await backfillWorkflowRecordsForCandidates({
+      candidates: [candidate("c-sent")],
+      workflows: {},
+    });
+
+    const state = await getCandidateWorkflowState();
+    assert.equal(state["c-sent"]?.paperworkStatus, "sent");
+    assert.equal(state["c-sent"]?.signatureRequestId, "sig-persist");
+    assert.equal(state["c-sent"]?.workflowStatus, "Paperwork Sent");
+    assert.equal(state["c-sent"]?.assignedRecruiter, "Taylor");
+  });
 });
