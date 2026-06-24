@@ -1,7 +1,9 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
+import { filterMtdCandidates, resolveCandidatesForAutomation } from "@/lib/candidate-ingestion";
+import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { runRecruiterActionEngine } from "@/lib/recruiter-action-engine";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -20,7 +22,7 @@ export async function POST(request: Request) {
   const { session } = guard;
 
   const [candidatesResult, jobsResult, bundle] = await Promise.all([
-    fetchBreezyCandidates({ scanMode: "fast" }),
+    resolveCandidatesForAutomation(),
     fetchBreezyJobs("published"),
     getCandidateWorkflowBundle(),
   ]);
@@ -29,12 +31,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: candidatesResult.error }, { status: 502 });
   }
 
-  const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const jobs = jobsResult.ok ? applyTerritoryToJobs(session, jobsResult.jobs) : [];
   const jobsByPositionId = new Map(jobs.map((job) => [job.jobId, job]));
   const workflows = { ...bundle.workflows };
 
-  const scoredCandidates = candidates.map((candidate) =>
+  const mtdCandidates = filterMtdCandidates(
+    applyTerritoryToCandidates(session, candidatesResult.candidates),
+  );
+  const assignedMtd = mtdCandidates.filter((candidate) => {
+    const workflow = workflows[candidate.candidateId];
+    return workflow && !isUnassignedRecruiter(workflow.assignedRecruiter);
+  });
+
+  const scoredCandidates = assignedMtd.map((candidate) =>
     buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], {
       job: jobsByPositionId.get(candidate.positionId),
     }),
@@ -56,6 +65,8 @@ export async function POST(request: Request) {
         generated: result.generated,
         skipped: result.skipped,
         overdueRecruiterActions: result.metrics.overdueRecruiterActions,
+        candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
+        assignedMtdCount: assignedMtd.length,
       },
     });
   }
@@ -70,5 +81,7 @@ export async function POST(request: Request) {
     workflows: updatedBundle.workflows,
     rosters: updatedBundle.rosters,
     updatedAt: updatedBundle.updatedAt,
+    assignedMtdCount: assignedMtd.length,
+    candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
   });
 }

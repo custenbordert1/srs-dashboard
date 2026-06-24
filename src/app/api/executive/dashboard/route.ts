@@ -1,6 +1,7 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { resolveCandidatesForRead } from "@/lib/candidate-ingestion";
 import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
-import { fetchBreezyCandidates, fetchBreezyJobs, peekBreezyCandidatesCache } from "@/lib/breezy-api";
+import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
@@ -27,21 +28,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: breezyCheck.error }, { status: breezyCheck.status });
   }
 
-  const peekedCandidates = peekBreezyCandidatesCache({ scanMode: "preview" });
   const [jobsResult, candidatesLive, melResult] = await Promise.all([
     fetchBreezyJobs("published"),
-    peekedCandidates?.ok
-      ? Promise.resolve(peekedCandidates)
-      : fetchBreezyCandidates({ scanMode: "preview" }),
+    resolveCandidatesForRead({ scanMode: "preview" }),
     fetchMelProjectsSheet(),
   ]);
 
   let candidatesResult = candidatesLive;
-  let candidatesFromCache = Boolean(peekedCandidates?.ok);
-  if (!candidatesResult.ok && peekedCandidates?.ok) {
-    candidatesResult = peekedCandidates;
-    candidatesFromCache = true;
-  }
+  let candidatesFromCache = candidatesResult.ok ? candidatesResult.fromIngestionStore : false;
 
   if (!jobsResult.ok) {
     const status = breezyFailureHttpStatus(jobsResult.error);
@@ -62,6 +56,7 @@ export async function GET(request: Request) {
       companyId: jobsResult.companyId,
       truncated: true,
       warnings: [candidateError],
+      fromIngestionStore: false,
     };
     candidatesFromCache = false;
   }
@@ -88,11 +83,11 @@ export async function GET(request: Request) {
       meta: {
         partialSync: candidatesResult.truncated ?? false,
         candidatesFromCache,
+        candidatesFromIngestionStore: candidatesResult.ok ? candidatesResult.fromIngestionStore : false,
         totalJobs: jobsResult.jobs.length,
         totalCandidates: candidatesResult.candidates.length,
         refreshedAt: candidatesResult.fetchedAt ?? new Date().toISOString(),
-        candidatesUnavailable:
-          !candidatesFromCache && candidatesResult.candidates.length === 0,
+        candidatesUnavailable: candidatesResult.candidates.length === 0,
         jobsAvailable: jobsResult.jobs.length > 0,
       },
     },

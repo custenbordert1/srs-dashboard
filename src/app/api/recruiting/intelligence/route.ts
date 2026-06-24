@@ -1,8 +1,9 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
+import { resolveCandidatesForRead } from "@/lib/candidate-ingestion";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import { buildRecruitingIntelligence } from "@/lib/recruiting-automation/build-recruiting-intelligence";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { assertBreezyConfigured, logBreezyRouteResult, logBreezyRouteStart } from "@/lib/breezy-route-log";
 import { breezyFailureBody, breezyFailureHttpStatus } from "@/lib/breezy-http-status";
 import { NextResponse } from "next/server";
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
 
   const [jobsResult, candidatesResult, workflows] = await Promise.all([
     fetchBreezyJobs("published"),
-    fetchBreezyCandidates(),
+    resolveCandidatesForRead({ scanMode: "preview" }),
     getCandidateWorkflowState(),
   ]);
 
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
         filteredCandidates: candidates.length,
         workflowCount: Object.keys(workflows).length,
         partialSync: candidatesResult.truncated ?? false,
+        candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
         refreshedAt: new Date().toISOString(),
       },
     },

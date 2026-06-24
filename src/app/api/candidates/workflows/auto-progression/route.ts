@@ -1,7 +1,9 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { filterMtdCandidates, resolveCandidatesForAutomation } from "@/lib/candidate-ingestion";
+import { fetchBreezyJobs } from "@/lib/breezy-api";
+import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { runCandidateProgressionEngine } from "@/lib/candidate-progression-engine";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -9,6 +11,12 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
+
+const TERMINAL_STATUSES = new Set<CandidateWorkflowStatus>([
+  "Not Qualified",
+  "Active Rep",
+  "Loaded in MEL",
+]);
 
 export async function POST(request: Request) {
   const guard = guardApiRoute(request, {
@@ -20,7 +28,7 @@ export async function POST(request: Request) {
   const { session } = guard;
 
   const [candidatesResult, jobsResult, bundle] = await Promise.all([
-    fetchBreezyCandidates({ scanMode: "fast" }),
+    resolveCandidatesForAutomation(),
     fetchBreezyJobs("published"),
     getCandidateWorkflowBundle(),
   ]);
@@ -29,12 +37,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: candidatesResult.error }, { status: 502 });
   }
 
-  const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
   const jobs = jobsResult.ok ? applyTerritoryToJobs(session, jobsResult.jobs) : [];
   const jobsByPositionId = new Map(jobs.map((job) => [job.jobId, job]));
   const workflows = { ...bundle.workflows };
 
-  const scoredCandidates = candidates.map((candidate) =>
+  const mtdCandidates = filterMtdCandidates(
+    applyTerritoryToCandidates(session, candidatesResult.candidates),
+  );
+  const eligibleMtd = mtdCandidates.filter((candidate) => {
+    const workflow = workflows[candidate.candidateId];
+    return workflow && !TERMINAL_STATUSES.has(workflow.workflowStatus);
+  });
+
+  const scoredCandidates = eligibleMtd.map((candidate) =>
     buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], {
       job: jobsByPositionId.get(candidate.positionId),
     }),
@@ -57,6 +72,8 @@ export async function POST(request: Request) {
         skipped: result.skipped,
         candidatesReadyToAdvance: result.metrics.candidatesReadyToAdvance,
         stalledCandidates: result.metrics.stalledCandidates,
+        candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
+        eligibleMtdCount: eligibleMtd.length,
       },
     });
   }
@@ -71,5 +88,7 @@ export async function POST(request: Request) {
     workflows: updatedBundle.workflows,
     rosters: updatedBundle.rosters,
     updatedAt: updatedBundle.updatedAt,
+    eligibleMtdCount: eligibleMtd.length,
+    candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
   });
 }

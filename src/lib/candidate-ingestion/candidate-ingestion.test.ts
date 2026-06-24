@@ -55,6 +55,16 @@ describe("candidate-ingestion", () => {
     };
     assert.equal(ingestionPositionCoveragePct(store), 96);
     assert.equal(isIngestionStoreUsable({ ...store, candidates: { "c-1": mockCandidate("c-1", "2026-06-01") } }), true);
+    const midRescan = {
+      ...emptyIngestionStore(),
+      publishedPositionsTotal: 352,
+      scannedPositionIds: ["pos-1"],
+      cycleComplete: false,
+      candidates: Object.fromEntries(
+        Array.from({ length: 60 }, (_, i) => [`c-${i}`, mockCandidate(`c-${i}`, "2026-06-10")]),
+      ),
+    };
+    assert.equal(isIngestionStoreUsable(midRescan), true);
   });
 
   it("builds capture health metrics for mtd applicants", () => {
@@ -112,5 +122,8 @@ describe("candidate-ingestion", () => {
     assert.equal(health.captureRatePct, 2);
     assert.equal(health.missingWorkflowRecords, 1);
     assert.equal(health.positionCoveragePct, 97);
+    assert.equal(health.p62CoveragePct, 100);
+    assert.equal(health.p63CoveragePct, 100);
+    assert.equal(health.p64CoveragePct, 0);
   });
 });

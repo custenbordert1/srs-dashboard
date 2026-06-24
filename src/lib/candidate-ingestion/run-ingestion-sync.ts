@@ -214,6 +214,7 @@ export async function runCandidateIngestionSync(input?: {
     store,
     workflows,
     jobsByPositionId,
+    rosters: bundle.rosters,
     referenceBreezyMtd: input?.referenceBreezyMtd,
   });
 

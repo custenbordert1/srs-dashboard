@@ -105,8 +105,9 @@ export function ingestionPositionCoveragePct(store: CandidateIngestionStoreFile)
 }
 
 export function isIngestionStoreUsable(store: CandidateIngestionStoreFile): boolean {
-  return (
-    Object.keys(store.candidates).length > 0 &&
-    ingestionPositionCoveragePct(store) >= 50
-  );
+  const candidateCount = Object.keys(store.candidates).length;
+  if (candidateCount === 0) return false;
+  // Keep serving the durable candidate pool during incremental position rescans.
+  if (store.cycleComplete) return true;
+  return ingestionPositionCoveragePct(store) >= 50 || candidateCount >= 50;
 }

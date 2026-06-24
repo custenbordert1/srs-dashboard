@@ -48,6 +48,14 @@ export type ApplicantCaptureHealth = {
   unscannedPositions: number;
   missingWorkflowRecords: number;
   workflowCoveragePct: number;
+  p62CoveragePct: number;
+  p63CoveragePct: number;
+  p64CoveragePct: number;
+  p62EligibleMtd: number;
+  p63EligibleMtd: number;
+  p64EligibleMtd: number;
+  p62SkippedBelowConfidence: number;
+  p62SkippedNoTerritory: number;
   unassignedApplicants: number;
   withoutP63: number;
   withoutP64: number;

@@ -1,6 +1,7 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { applyTerritoryToCandidates, applyTerritoryToJobs } from "@/lib/auth/territory-filter";
-import { fetchBreezyCandidates, fetchBreezyJobs } from "@/lib/breezy-api";
+import { filterMtdCandidates, resolveCandidatesForAutomation } from "@/lib/candidate-ingestion";
+import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { runRecruiterAssignmentEngine } from "@/lib/recruiter-assignment-engine";
 import { auditFromSession } from "@/lib/security/audit-log";
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
   const { session } = guard;
 
   const [candidatesResult, jobsResult, bundle] = await Promise.all([
-    fetchBreezyCandidates({ scanMode: "fast" }),
+    resolveCandidatesForAutomation(),
     fetchBreezyJobs("published"),
     getCandidateWorkflowBundle(),
   ]);
@@ -28,12 +29,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: candidatesResult.error }, { status: 502 });
   }
 
-  const candidates = applyTerritoryToCandidates(session, candidatesResult.candidates);
+  const mtdCandidates = filterMtdCandidates(
+    applyTerritoryToCandidates(session, candidatesResult.candidates),
+  );
   const jobs = jobsResult.ok ? applyTerritoryToJobs(session, jobsResult.jobs) : [];
   const jobsByPositionId = new Map(jobs.map((job) => [job.jobId, job]));
 
   const result = await runRecruiterAssignmentEngine({
-    candidates,
+    candidates: mtdCandidates,
     workflows: bundle.workflows,
     rosters: bundle.rosters,
     jobsByPositionId,
@@ -50,6 +53,8 @@ export async function POST(request: Request) {
         assigned: result.assigned,
         skipped: result.skipped,
         autoAssignmentRate: result.metrics.autoAssignmentRate,
+        candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
+        mtdCandidateCount: mtdCandidates.length,
       },
     });
   }
@@ -64,5 +69,7 @@ export async function POST(request: Request) {
     workflows: updatedBundle.workflows,
     rosters: updatedBundle.rosters,
     updatedAt: updatedBundle.updatedAt,
+    mtdCandidateCount: mtdCandidates.length,
+    candidatesFromIngestionStore: candidatesResult.fromIngestionStore,
   });
 }

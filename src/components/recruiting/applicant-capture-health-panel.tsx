@@ -83,9 +83,14 @@ export function ApplicantCaptureHealthPanel() {
 
   if (!health) return null;
 
-  const captureAlert = health.captureRatePct < 95;
-  const positionAlert = health.positionCoveragePct < 95;
   const workflowAlert = health.workflowCoveragePct < 95;
+  const p62Alert = health.p62CoveragePct < 85;
+  const p63Alert = health.p63CoveragePct < 85;
+  const p64Alert = health.p64CoveragePct < 85;
+  const p62SkipHint =
+    health.p62SkippedBelowConfidence > 0 || health.p62SkippedNoTerritory > 0
+      ? `${health.p62SkippedBelowConfidence} below confidence · ${health.p62SkippedNoTerritory} no territory`
+      : `${health.p62EligibleMtd} eligible MTD`;
 
   return (
     <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
@@ -106,26 +111,14 @@ export function ApplicantCaptureHealthPanel() {
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          label="Breezy applicants MTD"
-          value={health.breezyApplicantsMtd.toLocaleString()}
-          hint="Reference baseline"
+          label="Total ingested"
+          value={health.ingestionCandidateTotal.toLocaleString()}
+          hint="All applicants in durable store"
         />
         <MetricCard
-          label="OS applicants MTD"
+          label="MTD ingested"
           value={health.osApplicantsMtd.toLocaleString()}
-          hint={`${health.ingestionCandidateTotal.toLocaleString()} total ingested`}
-        />
-        <MetricCard
-          label="Capture rate"
-          value={`${health.captureRatePct}%`}
-          hint="OS MTD vs Breezy MTD"
-          alert={captureAlert}
-        />
-        <MetricCard
-          label="Position coverage"
-          value={`${health.positionCoveragePct}%`}
-          hint={`${health.unscannedPositions} unscanned`}
-          alert={positionAlert}
+          hint={`${health.captureRatePct}% capture vs Breezy ref`}
         />
         <MetricCard
           label="Workflow coverage"
@@ -134,19 +127,32 @@ export function ApplicantCaptureHealthPanel() {
           alert={workflowAlert}
         />
         <MetricCard
-          label="Unassigned"
+          label="Position coverage"
+          value={`${health.positionCoveragePct}%`}
+          hint={`${health.unscannedPositions} unscanned`}
+        />
+        <MetricCard
+          label="P62 coverage"
+          value={`${health.p62CoveragePct}%`}
+          hint={p62SkipHint}
+          alert={p62Alert}
+        />
+        <MetricCard
+          label="P63 coverage"
+          value={`${health.p63CoveragePct}%`}
+          hint={`${health.p63EligibleMtd} assigned MTD`}
+          alert={p63Alert}
+        />
+        <MetricCard
+          label="P64 coverage"
+          value={`${health.p64CoveragePct}%`}
+          hint={`${health.p64EligibleMtd} eligible MTD`}
+          alert={p64Alert}
+        />
+        <MetricCard
+          label="Unassigned MTD"
           value={health.unassignedApplicants.toLocaleString()}
-          hint="MTD without recruiter"
-        />
-        <MetricCard
-          label="Without P63"
-          value={health.withoutP63.toLocaleString()}
-          hint="Missing recruiter actions"
-        />
-        <MetricCard
-          label="Without P64"
-          value={health.withoutP64.toLocaleString()}
-          hint="Missing progression"
+          hint={`${health.withoutP63} without P63 · ${health.withoutP64} without P64`}
         />
       </div>
     </section>

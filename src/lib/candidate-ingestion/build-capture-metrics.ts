@@ -3,38 +3,32 @@ import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import type { BreezyJob } from "@/lib/breezy-api";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
+import { currentMtdDateRange, filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
 import {
   ingestionPositionCoveragePct,
   listIngestedCandidates,
 } from "@/lib/candidate-ingestion/ingestion-store";
 import type { ApplicantCaptureHealth, CandidateIngestionStoreFile } from "@/lib/candidate-ingestion/types";
+import { buildRecruiterAssignmentDecisions } from "@/lib/recruiter-assignment-engine/build-assignment-decision";
+import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
 
-const DEFAULT_MTD_RANGE = (): { start: string; end: string } => {
-  const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
-  return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10),
-  };
-};
+const TERMINAL_STATUSES = new Set(["Not Qualified", "Active Rep", "Loaded in MEL"]);
 
 export function buildApplicantCaptureHealth(input: {
   store: CandidateIngestionStoreFile;
   workflows: Record<string, CandidateWorkflowRecord>;
   jobsByPositionId: Map<string, BreezyJob>;
+  rosters?: RecruiterRosters;
   referenceBreezyMtd?: number;
   rangeStart?: string;
   rangeEnd?: string;
 }): ApplicantCaptureHealth {
   const range = {
-    start: input.rangeStart ?? DEFAULT_MTD_RANGE().start,
-    end: input.rangeEnd ?? DEFAULT_MTD_RANGE().end,
+    start: input.rangeStart ?? currentMtdDateRange().start,
+    end: input.rangeEnd ?? currentMtdDateRange().end,
   };
   const candidates = listIngestedCandidates(input.store);
-  const mtdCandidates = candidates.filter((c) =>
-    isAppliedDateInRange(c.appliedDate, range.start, range.end),
-  );
+  const mtdCandidates = filterMtdCandidates(candidates, range);
   const osApplicantsMtd = mtdCandidates.length;
   const breezyApplicantsMtd = input.referenceBreezyMtd ?? osApplicantsMtd;
   const scannedPositions = new Set(input.store.scannedPositionIds).size;
@@ -46,6 +40,12 @@ export function buildApplicantCaptureHealth(input: {
   let unassignedApplicants = 0;
   let withoutP63 = 0;
   let withoutP64 = 0;
+  let p62EligibleMtd = 0;
+  let p63EligibleMtd = 0;
+  let p64EligibleMtd = 0;
+  let p62AssignedMtd = 0;
+  let p63WithActionMtd = 0;
+  let p64WithProgressionMtd = 0;
 
   for (const candidate of mtdCandidates) {
     const workflow = input.workflows[candidate.candidateId];
@@ -56,17 +56,61 @@ export function buildApplicantCaptureHealth(input: {
       withoutP64 += 1;
       continue;
     }
+
+    const terminal = TERMINAL_STATUSES.has(workflow.workflowStatus);
+    if (!terminal) {
+      p62EligibleMtd += 1;
+      p64EligibleMtd += 1;
+    }
+
     const row = buildScoredWorkflowRow(candidate, workflow, {
       job: input.jobsByPositionId.get(candidate.positionId),
     });
-    if (isUnassignedRecruiter(row.assignedRecruiter)) unassignedApplicants += 1;
-    if (!row.requiredAction?.trim()) withoutP63 += 1;
-    if (!row.recommendedStage?.trim()) withoutP64 += 1;
+
+    const assigned = !isUnassignedRecruiter(row.assignedRecruiter);
+    if (assigned) {
+      p63EligibleMtd += 1;
+      p62AssignedMtd += 1;
+      if (!row.requiredAction?.trim()) withoutP63 += 1;
+      else p63WithActionMtd += 1;
+    } else if (!terminal) {
+      unassignedApplicants += 1;
+    }
+
+    if (!terminal) {
+      if (!row.recommendedStage?.trim()) withoutP64 += 1;
+      else p64WithProgressionMtd += 1;
+    }
+  }
+
+  let p62SkippedBelowConfidence = 0;
+  let p62SkippedNoTerritory = 0;
+  if (input.rosters && p62EligibleMtd > 0) {
+    const decisions = buildRecruiterAssignmentDecisions({
+      candidates: mtdCandidates.filter((candidate) => {
+        const workflow = input.workflows[candidate.candidateId];
+        return workflow && !TERMINAL_STATUSES.has(workflow.workflowStatus);
+      }),
+      workflows: input.workflows,
+      rosters: input.rosters,
+      jobsByPositionId: input.jobsByPositionId,
+    });
+    for (const decision of decisions) {
+      if (decision.shouldAssign) continue;
+      if (decision.reason.includes("below confidence threshold")) p62SkippedBelowConfidence += 1;
+      else if (decision.reason.includes("Territory state could not be determined")) p62SkippedNoTerritory += 1;
+    }
   }
 
   const workflowCovered = osApplicantsMtd - missingWorkflowRecords;
   const workflowCoveragePct =
     osApplicantsMtd > 0 ? Math.round((workflowCovered / osApplicantsMtd) * 100) : 100;
+  const p62CoveragePct =
+    p62EligibleMtd > 0 ? Math.round((p62AssignedMtd / p62EligibleMtd) * 100) : 100;
+  const p63CoveragePct =
+    p63EligibleMtd > 0 ? Math.round((p63WithActionMtd / p63EligibleMtd) * 100) : 100;
+  const p64CoveragePct =
+    p64EligibleMtd > 0 ? Math.round((p64WithProgressionMtd / p64EligibleMtd) * 100) : 100;
 
   const captureRatePct =
     breezyApplicantsMtd > 0
@@ -85,6 +129,14 @@ export function buildApplicantCaptureHealth(input: {
     unscannedPositions,
     missingWorkflowRecords,
     workflowCoveragePct,
+    p62CoveragePct,
+    p63CoveragePct,
+    p64CoveragePct,
+    p62EligibleMtd,
+    p63EligibleMtd,
+    p64EligibleMtd,
+    p62SkippedBelowConfidence,
+    p62SkippedNoTerritory,
     unassignedApplicants,
     withoutP63,
     withoutP64,

@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     store,
     workflows: bundle.workflows,
     jobsByPositionId,
+    rosters: bundle.rosters,
     referenceBreezyMtd: Number.isFinite(referenceMtd) ? referenceMtd : undefined,
   });
 
