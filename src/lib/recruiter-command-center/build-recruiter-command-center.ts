@@ -1,11 +1,15 @@
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import type { TerritoryCoverageNeed } from "@/lib/autonomous-recruiting-engine/types";
 import type { CandidateOnboardingRecord } from "@/lib/candidate-onboarding-engine/types";
-import { buildCandidateSlaSnapshot } from "@/lib/candidate-action-sla";
+import { buildCandidateSlaSnapshot, isMelReadyStatus } from "@/lib/candidate-action-sla";
 import { getDmForState, normalizeStateCode } from "@/lib/dm-territory-map";
 import { buildRecruiterActionDecision } from "@/lib/recruiter-action-engine/build-action-decision";
 import { compareRecruiterActionPriority } from "@/lib/recruiter-priority";
 import { scoreRecruiterWorkItemPriority } from "@/lib/recruiter-priority";
+import {
+  formatPaperworkStatusLabel,
+  summarizeSlaStatus,
+} from "@/lib/recruiter-command-center/format-candidate-export";
 import {
   assignRecruiterWorkCategory,
   categoryLabel,
@@ -28,9 +32,22 @@ const TERMINAL_STATUSES = new Set([
   "Loaded in MEL",
 ]);
 
+function resolveConfidencePercent(row: ScoredCandidateWorkflowRow): number | null {
+  if (row.actionConfidence != null) {
+    return Math.round(Math.max(0, Math.min(100, row.actionConfidence * 100)));
+  }
+  if (row.matchPercent > 0) return Math.round(row.matchPercent);
+  if (row.aiNumericScore > 0) return Math.round(row.aiNumericScore);
+  return null;
+}
+
 function candidateDisplayName(row: ScoredCandidateWorkflowRow): string {
   const parts = [row.firstName, row.lastName].filter(Boolean);
   return parts.length > 0 ? parts.join(" ") : row.candidateId;
+}
+
+function formatNotes(notes: string[]): string {
+  return notes.map((note) => note.trim()).filter(Boolean).join(" | ");
 }
 
 function pickActiveOnboardingRecord(
@@ -225,10 +242,15 @@ export function buildRecruiterCommandCenter(input: {
       candidateId: row.candidateId,
       candidateName: candidateDisplayName(row),
       email: row.email?.trim() || null,
+      phone: row.phone?.trim() || null,
+      city: row.city?.trim() || null,
+      state: row.state?.trim() || null,
       recruiter: recruiterKey,
+      assignedDm: row.assignedDM?.trim() || "Unassigned",
       positionName: row.positionName ?? "—",
       positionId: row.positionId ?? "",
       grade: row.aiGrade,
+      confidencePercent: resolveConfidencePercent(row),
       workflowStatus: row.workflowStatus,
       category,
       categoryLabel: categoryLabel(category),
@@ -242,8 +264,15 @@ export function buildRecruiterCommandCenter(input: {
       priorityReasons: scored.priorityReasons,
       positionUrgency,
       slaRisk,
+      slaStatus: summarizeSlaStatus({ sla, slaRisk }),
       coverageUrgent: positionUrgency === "Critical" || positionUrgency === "At Risk",
       queueAgeHours,
+      followUpDueDate: row.followUpDueAt,
+      paperworkStatus: row.paperworkStatus,
+      paperworkStatusLabel: formatPaperworkStatusLabel(row.paperworkStatus),
+      readyForMel: isMelReadyStatus(row.workflowStatus),
+      lastActivityDate: row.lastActionAt ?? row.appliedDate ?? null,
+      notesText: formatNotes(row.notes),
     });
   }
 
@@ -265,7 +294,7 @@ export function buildRecruiterCommandCenter(input: {
     return b.priorityScore - a.priorityScore || a.candidateId.localeCompare(b.candidateId);
   });
 
-  const limited = sorted.slice(0, limit);
+  const limited = limit === 0 ? sorted : sorted.slice(0, limit);
   const queueCounts = buildQueueCounts(sorted);
   const recruiterSummaries = buildRecruiterSummaries(sorted);
 

@@ -7,6 +7,11 @@ import type {
 } from "@/lib/recruiter-command-center/types";
 import type { RecruiterPriorityLevel } from "@/lib/recruiter-priority";
 import { RECRUITER_WORK_CATEGORY_LABELS } from "@/lib/recruiter-command-center/types";
+import {
+  filterCommandCenterWorkQueue,
+  type CommandCenterQueueFilters,
+} from "@/lib/recruiter-command-center/filter-work-queue";
+import { downloadCandidatesXlsx } from "@/lib/recruiter-command-center/export-candidates-xlsx";
 import { formatActionDueLabel } from "@/lib/recruiter-priority";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -19,6 +24,7 @@ const PRIORITY_STYLES: Record<RecruiterPriorityLevel, string> = {
 type PriorityFilter = "all" | RecruiterPriorityLevel;
 type OverdueFilter = "all" | "overdue" | "current";
 type CoverageFilter = "all" | "urgent" | "healthy";
+type ExportScope = "all" | "filtered" | "selected";
 
 function MetricCard({
   label,
@@ -62,16 +68,48 @@ function formatTimestamp(iso: string | null | undefined): string {
   }
 }
 
-function WorkQueueTable({ rows, referenceMs }: { rows: RecruiterCommandCenterWorkItem[]; referenceMs: number }) {
+function WorkQueueTable({
+  rows,
+  referenceMs,
+  selectedIds,
+  onToggleRow,
+  onToggleAll,
+  showSelection,
+}: {
+  rows: RecruiterCommandCenterWorkItem[];
+  referenceMs: number;
+  selectedIds: Set<string>;
+  onToggleRow: (candidateId: string) => void;
+  onToggleAll: (candidateIds: string[], selected: boolean) => void;
+  showSelection: boolean;
+}) {
   if (rows.length === 0) {
     return <p className="px-2 py-3 text-sm text-zinc-500">No candidates match the current filters.</p>;
   }
+
+  const allSelected = rows.length > 0 && rows.every((row) => selectedIds.has(row.candidateId));
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-xs">
         <thead>
           <tr className="text-zinc-500">
+            {showSelection ? (
+              <th className="px-2 py-2 font-medium">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={(event) =>
+                    onToggleAll(
+                      rows.map((row) => row.candidateId),
+                      event.target.checked,
+                    )
+                  }
+                  aria-label="Select all visible candidates"
+                  className="rounded border-zinc-600 bg-zinc-950"
+                />
+              </th>
+            ) : null}
             <th className="px-2 py-2 font-medium">Candidate</th>
             <th className="px-2 py-2 font-medium">Recruiter</th>
             <th className="px-2 py-2 font-medium">Category</th>
@@ -84,6 +122,17 @@ function WorkQueueTable({ rows, referenceMs }: { rows: RecruiterCommandCenterWor
         <tbody>
           {rows.map((row) => (
             <tr key={row.candidateId} className="border-t border-zinc-800/60 text-zinc-200">
+              {showSelection ? (
+                <td className="px-2 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(row.candidateId)}
+                    onChange={() => onToggleRow(row.candidateId)}
+                    aria-label={`Select ${row.candidateName}`}
+                    className="rounded border-zinc-600 bg-zinc-950"
+                  />
+                </td>
+              ) : null}
               <td className="px-2 py-2">
                 <p className="font-medium text-zinc-100">{row.candidateName}</p>
                 <p className="text-[10px] text-zinc-500">
@@ -124,6 +173,11 @@ export function RecruiterCommandCenterPanel() {
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>("all");
   const [overdueFilter, setOverdueFilter] = useState<OverdueFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [exportScope, setExportScope] = useState<ExportScope>("filtered");
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const load = useCallback(async (recruiter?: string) => {
     setLoading(true);
@@ -161,6 +215,18 @@ export function RecruiterCommandCenterPanel() {
     [commandCenter],
   );
 
+  const queueFilters = useMemo<CommandCenterQueueFilters>(
+    () => ({
+      searchQuery,
+      priorityFilter,
+      categoryFilter,
+      actionFilter,
+      coverageFilter,
+      overdueFilter,
+    }),
+    [searchQuery, priorityFilter, categoryFilter, actionFilter, coverageFilter, overdueFilter],
+  );
+
   const actionOptions = useMemo(() => {
     if (!commandCenter) return [];
     return [...new Set(commandCenter.workQueue.map((item) => item.nextAction))].sort();
@@ -168,17 +234,80 @@ export function RecruiterCommandCenterPanel() {
 
   const filteredQueue = useMemo(() => {
     if (!commandCenter) return [];
-    return commandCenter.workQueue.filter((item) => {
-      if (priorityFilter !== "all" && item.priorityLevel !== priorityFilter) return false;
-      if (categoryFilter !== "all" && item.category !== categoryFilter) return false;
-      if (actionFilter !== "all" && item.nextAction !== actionFilter) return false;
-      if (coverageFilter === "urgent" && !item.coverageUrgent) return false;
-      if (coverageFilter === "healthy" && item.coverageUrgent) return false;
-      if (overdueFilter === "overdue" && !item.actionOverdue) return false;
-      if (overdueFilter === "current" && item.actionOverdue) return false;
-      return true;
+    return filterCommandCenterWorkQueue(commandCenter.workQueue, queueFilters);
+  }, [commandCenter, queueFilters]);
+
+  const toggleRowSelection = useCallback((candidateId: string) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
     });
-  }, [commandCenter, priorityFilter, categoryFilter, actionFilter, coverageFilter, overdueFilter]);
+  }, []);
+
+  const toggleAllSelection = useCallback((candidateIds: string[], selected: boolean) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      for (const candidateId of candidateIds) {
+        if (selected) next.add(candidateId);
+        else next.delete(candidateId);
+      }
+      return next;
+    });
+  }, []);
+
+  const fetchFullWorkQueue = useCallback(async (): Promise<RecruiterCommandCenterWorkItem[]> => {
+    const params = new URLSearchParams();
+    if (recruiterFilter !== "all") params.set("recruiter", recruiterFilter);
+    params.set("limit", "0");
+    const query = params.toString();
+    const res = await fetch(`/api/recruiting/command-center${query ? `?${query}` : ""}`, {
+      cache: "no-store",
+    });
+    const data = (await res.json()) as {
+      ok?: boolean;
+      commandCenter?: RecruiterCommandCenter;
+      error?: string;
+    };
+    if (!res.ok || !data.ok || !data.commandCenter) {
+      throw new Error(data.error ?? "Failed to load candidates for export");
+    }
+    return data.commandCenter.workQueue;
+  }, [recruiterFilter]);
+
+  const handleExport = useCallback(async () => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      let items: RecruiterCommandCenterWorkItem[];
+      if (exportScope === "selected") {
+        const full = await fetchFullWorkQueue();
+        items = full.filter((item) => selectedIds.has(item.candidateId));
+        if (items.length === 0) {
+          setExportError("Select at least one candidate to export.");
+          return;
+        }
+      } else if (exportScope === "filtered") {
+        items = filterCommandCenterWorkQueue(await fetchFullWorkQueue(), queueFilters);
+        if (items.length === 0) {
+          setExportError("No candidates match the current filters.");
+          return;
+        }
+      } else {
+        items = await fetchFullWorkQueue();
+        if (items.length === 0) {
+          setExportError("No candidates available to export.");
+          return;
+        }
+      }
+      downloadCandidatesXlsx(items);
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  }, [exportScope, selectedIds, fetchFullWorkQueue, queueFilters]);
 
   const filteredTopPriorities = useMemo(() => {
     if (!commandCenter) return [];
@@ -230,15 +359,40 @@ export function RecruiterCommandCenterPanel() {
             </p>
             <p className="mt-1 text-xs text-zinc-500">Fetched {formatTimestamp(commandCenter.fetchedAt)}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => void load(recruiterFilter)}
-            disabled={loading}
-            className="rounded-lg border border-zinc-700 px-3 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-60"
-          >
-            {loading ? "Refreshing…" : "Refresh"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void load(recruiterFilter)}
+              disabled={loading}
+              className="rounded-lg border border-zinc-700 px-3 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-60"
+            >
+              {loading ? "Refreshing…" : "Refresh"}
+            </button>
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-950/60 px-2 py-1">
+              <label className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-zinc-500">
+                Export
+                <select
+                  value={exportScope}
+                  onChange={(event) => setExportScope(event.target.value as ExportScope)}
+                  className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs normal-case text-zinc-200"
+                >
+                  <option value="all">All candidates</option>
+                  <option value="filtered">Filtered only</option>
+                  <option value="selected">Selected only</option>
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => void handleExport()}
+                disabled={exporting || loading}
+                className="rounded-lg border border-teal-500/40 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-100 hover:bg-teal-500/20 disabled:opacity-60"
+              >
+                {exporting ? "Exporting…" : "Export to Excel"}
+              </button>
+            </div>
+          </div>
         </div>
+        {exportError ? <p className="mt-2 text-xs text-amber-200">{exportError}</p> : null}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {commandCenter.kpis.map((kpi) => (
@@ -256,6 +410,17 @@ export function RecruiterCommandCenterPanel() {
       <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
         <h3 className="text-sm font-semibold text-zinc-100">Filters</h3>
         <div className="mt-3 flex flex-wrap gap-3">
+          <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-[10px] uppercase tracking-wide text-zinc-500">
+            Search
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Name, email, position, recruiter…"
+              className="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-200"
+            />
+          </label>
+
           <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wide text-zinc-500">
             Recruiter
             <select
@@ -350,14 +515,33 @@ export function RecruiterCommandCenterPanel() {
         <h3 className="px-2 py-2 text-sm font-semibold text-red-100">
           Today&apos;s priorities ({filteredTopPriorities.length})
         </h3>
-        <WorkQueueTable rows={filteredTopPriorities} referenceMs={referenceMs} />
+        <WorkQueueTable
+          rows={filteredTopPriorities}
+          referenceMs={referenceMs}
+          selectedIds={selectedIds}
+          onToggleRow={toggleRowSelection}
+          onToggleAll={toggleAllSelection}
+          showSelection={exportScope === "selected"}
+        />
       </div>
 
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-2">
-        <h3 className="px-2 py-2 text-sm font-semibold text-zinc-100">
-          Unified work queue ({filteredQueue.length})
-        </h3>
-        <WorkQueueTable rows={filteredQueue} referenceMs={referenceMs} />
+        <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-2">
+          <h3 className="text-sm font-semibold text-zinc-100">
+            Unified work queue ({filteredQueue.length})
+          </h3>
+          {exportScope === "selected" ? (
+            <p className="text-[10px] text-zinc-500">{selectedIds.size} selected</p>
+          ) : null}
+        </div>
+        <WorkQueueTable
+          rows={filteredQueue}
+          referenceMs={referenceMs}
+          selectedIds={selectedIds}
+          onToggleRow={toggleRowSelection}
+          onToggleAll={toggleAllSelection}
+          showSelection={exportScope === "selected"}
+        />
       </div>
 
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-2">

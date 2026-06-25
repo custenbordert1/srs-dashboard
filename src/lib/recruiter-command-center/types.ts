@@ -1,5 +1,6 @@
 import type { AiLetterGrade } from "@/lib/candidate-ai-scoring";
 import type { CoverageStatus } from "@/lib/autonomous-recruiting-engine/types";
+import type { PaperworkStatus } from "@/lib/candidate-workflow-types";
 import type { RecruiterActionType, RecruiterActionPriority } from "@/lib/recruiter-action-engine/types";
 import type { RecruiterPriorityLevel } from "@/lib/recruiter-priority";
 
@@ -47,10 +48,15 @@ export type RecruiterCommandCenterWorkItem = {
   candidateId: string;
   candidateName: string;
   email: string | null;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
   recruiter: string;
+  assignedDm: string;
   positionName: string;
   positionId: string;
   grade: AiLetterGrade;
+  confidencePercent: number | null;
   workflowStatus: string;
   category: RecruiterWorkCategoryId;
   categoryLabel: string;
@@ -64,8 +70,15 @@ export type RecruiterCommandCenterWorkItem = {
   priorityReasons: string[];
   positionUrgency: CoverageStatus;
   slaRisk: boolean;
+  slaStatus: string;
   coverageUrgent: boolean;
   queueAgeHours: number | null;
+  followUpDueDate: string | null;
+  paperworkStatus: PaperworkStatus;
+  paperworkStatusLabel: string;
+  readyForMel: boolean;
+  lastActivityDate: string | null;
+  notesText: string;
 };
 
 export type RecruiterCommandCenterRecruiterSummary = {

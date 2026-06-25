@@ -24,7 +24,13 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const recruiterFilter = url.searchParams.get("recruiter");
   const limitParam = url.searchParams.get("limit");
-  const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
+  let limit: number | undefined;
+  if (limitParam === "0" || limitParam === "all") {
+    limit = 0;
+  } else if (limitParam) {
+    const parsed = Number.parseInt(limitParam, 10);
+    if (Number.isFinite(parsed)) limit = parsed;
+  }
 
   const [store, bundle, jobsResult, onboardingRecords, melResult] = await Promise.all([
     readIngestionStore(),
@@ -58,7 +64,7 @@ export async function GET(request: Request) {
     onboardingRecords,
     coverageNeeds,
     recruiterFilter,
-    limit: Number.isFinite(limit) ? limit : undefined,
+    limit: limit !== undefined ? limit : undefined,
   });
 
   return NextResponse.json({ ok: true, commandCenter });
