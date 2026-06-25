@@ -97,13 +97,24 @@ describe("executive-paperwork-dashboard", () => {
     assert.equal(stage, "approvalQueue");
   });
 
-  it("prioritizes failed over approval queue", () => {
+  it("keeps pending approval in approval queue when workflow has recoverable paperwork error", () => {
     const breezy = candidate("c-2");
     const wf = workflow("c-2", { paperworkStatus: "failed", paperworkError: "Dropbox error" });
     const row = buildScoredWorkflowRow(breezy, wf);
     const stage = classifyPaperworkStage({
       row,
       onboarding: onboardingRecord("c-2", { status: "pending_approval" }),
+    });
+    assert.equal(stage, "approvalQueue");
+  });
+
+  it("classifies failed when onboarding record itself failed", () => {
+    const breezy = candidate("c-2b");
+    const wf = workflow("c-2b", { paperworkStatus: "failed", paperworkError: "Dropbox error" });
+    const row = buildScoredWorkflowRow(breezy, wf);
+    const stage = classifyPaperworkStage({
+      row,
+      onboarding: onboardingRecord("c-2b", { status: "failed", failureReason: "Dropbox error" }),
     });
     assert.equal(stage, "failed");
   });

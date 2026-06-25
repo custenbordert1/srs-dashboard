@@ -50,7 +50,10 @@ export async function buildCandidateOnboardingHealth(input?: {
       row.status === "sent" ||
       row.status === "viewed" ||
       row.status === "partially_completed" ||
-      row.status === "pending_approval",
+      row.status === "pending_approval" ||
+      row.status === "queued" ||
+      row.status === "sending" ||
+      row.status === "retry_scheduled",
   ).length;
   const packetsSentToday = records.filter(
     (row) => row.sentAt && isToday(row.sentAt),

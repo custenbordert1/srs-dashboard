@@ -8,6 +8,8 @@ import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 export function duplicatePaperworkSendBlockReason(input: {
   workflow?: CandidateWorkflowRecord | null;
   activeOnboarding?: CandidateOnboardingRecord | null;
+  /** Allows the send queue worker to complete an in-flight send for this onboarding record. */
+  allowSendInProgressForOnboardingId?: string;
 }): string | null {
   const { workflow, activeOnboarding } = input;
 
@@ -30,6 +32,20 @@ export function duplicatePaperworkSendBlockReason(input: {
 
   if (activeOnboarding?.status === "sent" || activeOnboarding?.status === "completed") {
     return "Onboarding packet already sent.";
+  }
+
+  if (activeOnboarding?.status === "sending") {
+    if (input.allowSendInProgressForOnboardingId === activeOnboarding.onboardingId) {
+      return null;
+    }
+    return "Onboarding packet send in progress.";
+  }
+
+  if (activeOnboarding?.status === "queued" || activeOnboarding?.status === "retry_scheduled") {
+    if (input.allowSendInProgressForOnboardingId === activeOnboarding.onboardingId) {
+      return null;
+    }
+    return "Onboarding packet is queued for send.";
   }
 
   return null;

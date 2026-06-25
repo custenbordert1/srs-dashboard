@@ -26,12 +26,17 @@ export type PaperworkStageInput = {
 export function classifyPaperworkStage(input: PaperworkStageInput): ExecutivePaperworkStageId | null {
   const { row, onboarding } = input;
   const onboardingStatus = onboarding?.status ?? null;
+  const onboardingInSendPipeline =
+    onboardingStatus === "pending_approval" ||
+    onboardingStatus === "queued" ||
+    onboardingStatus === "sending" ||
+    onboardingStatus === "retry_scheduled";
 
   if (
     onboardingStatus === "failed" ||
     onboardingStatus === "declined" ||
-    row.paperworkStatus === "failed" ||
-    Boolean(row.paperworkError?.trim())
+    (row.paperworkStatus === "failed" && !onboardingInSendPipeline) ||
+    (Boolean(row.paperworkError?.trim()) && !onboardingInSendPipeline)
   ) {
     return "failed";
   }
@@ -65,6 +70,14 @@ export function classifyPaperworkStage(input: PaperworkStageInput): ExecutivePap
     return "approvalQueue";
   }
 
+  if (
+    onboardingStatus === "queued" ||
+    onboardingStatus === "sending" ||
+    onboardingStatus === "retry_scheduled"
+  ) {
+    return "approvalQueue";
+  }
+
   const actionType = row.actionType ?? "none";
   if (
     actionType === "send-paperwork" ||
@@ -95,7 +108,12 @@ export function detectPaperworkDrift(input: PaperworkStageInput): {
     row.paperworkStatus === "signed" ||
     row.workflowStatus === "Paperwork Sent" ||
     row.workflowStatus === "Signed";
-  const onboardingQueued = onboarding.status === "pending_approval" || onboarding.status === "draft";
+  const onboardingQueued =
+    onboarding.status === "pending_approval" ||
+    onboarding.status === "draft" ||
+    onboarding.status === "queued" ||
+    onboarding.status === "sending" ||
+    onboarding.status === "retry_scheduled";
 
   if (workflowSent && onboardingQueued) {
     reasons.push(`workflow advanced (${row.paperworkStatus}) but onboarding is ${onboarding.status}`);

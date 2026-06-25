@@ -34,6 +34,9 @@ const PAPERWORK_STATUS_RANK: Record<PaperworkStatus, number> = {
 const ONBOARDING_STATUS_RANK: Record<OnboardingPacketStatus, number> = {
   draft: 0,
   pending_approval: 1,
+  queued: 1,
+  retry_scheduled: 1,
+  sending: 1,
   sent: 2,
   viewed: 3,
   partially_completed: 3,
