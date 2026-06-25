@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   buildCandidateExportFilename,
+  formatExportDate,
   mapWorkItemToExportRow,
+  splitCandidateExportName,
   summarizeSlaStatus,
 } from "@/lib/recruiter-command-center/format-candidate-export";
 import { buildCandidateExportSheetData } from "@/lib/recruiter-command-center/export-candidates-xlsx";
@@ -63,17 +65,48 @@ describe("candidate export", () => {
   });
 
   it("maps work items to export columns", () => {
-    const row = mapWorkItemToExportRow(sampleItem());
-    assert.equal(row["Candidate name"], "Sam Rivera");
+    const row = mapWorkItemToExportRow(
+      sampleItem({
+        followUpDueDate: "2026-06-06",
+        lastActivityDate: "2026-06-24T10:00:00.000Z",
+      }),
+    );
+    assert.equal(row["First name"], "Sam");
+    assert.equal(row["Last name"], "Rivera");
     assert.equal(row.Confidence, "82%");
     assert.equal(row["Ready for MEL"], "No");
     assert.equal(row.Notes, "Strong retail background");
+    assert.equal(row["Follow-up due date"], "6/6/2026");
+    assert.equal(row["Last activity date"], "6/24/2026");
+    assert.ok(!row["Follow-up due date"].includes(":"));
+    assert.ok(!row["Last activity date"].match(/\b(AM|PM)\b/i));
+  });
+
+  it("splits single-word candidate names into first name only", () => {
+    const row = mapWorkItemToExportRow(sampleItem({ candidateName: "Madonna" }));
+    assert.equal(row["First name"], "Madonna");
+    assert.equal(row["Last name"], "");
+  });
+
+  it("formats export dates as M/D/YYYY without time", () => {
+    assert.equal(formatExportDate("2026-06-06"), "6/6/2026");
+    assert.equal(formatExportDate("2025-12-01"), "12/1/2025");
+    const dated = formatExportDate("2026-06-24T12:00:00.000Z");
+    assert.match(dated, /^\d{1,2}\/\d{1,2}\/\d{4}$/);
+    assert.ok(!dated.includes(":"));
+    assert.ok(!/\b(AM|PM)\b/i.test(dated));
+    assert.equal(splitCandidateExportName("Alex Kim").firstName, "Alex");
+    assert.equal(splitCandidateExportName("Alex Kim").lastName, "Kim");
   });
 
   it("builds sheet rows with header order", () => {
     const sheet = buildCandidateExportSheetData([sampleItem()]);
-    assert.equal(sheet[0]?.[0], "Candidate name");
-    assert.equal(sheet[1]?.[0], "Sam Rivera");
+    const header = sheet[0] ?? [];
+    assert.equal(header[0], "First name");
+    assert.equal(header[1], "Last name");
+    assert.ok(!header.includes("Candidate name"));
+    assert.equal(sheet[1]?.[0], "Sam");
+    assert.equal(sheet[1]?.[1], "Rivera");
   });
 
   it("summarizes SLA status", () => {

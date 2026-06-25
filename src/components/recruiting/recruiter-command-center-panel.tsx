@@ -11,8 +11,9 @@ import {
   filterCommandCenterWorkQueue,
   type CommandCenterQueueFilters,
 } from "@/lib/recruiter-command-center/filter-work-queue";
-import { downloadCandidatesXlsx } from "@/lib/recruiter-command-center/export-candidates-xlsx";
+import { CandidateExcelExportControls } from "@/components/recruiting/candidate-excel-export-controls";
 import { formatActionDueLabel } from "@/lib/recruiter-priority";
+import { useCandidateExcelExport } from "@/lib/recruiter-command-center/use-candidate-excel-export";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const PRIORITY_STYLES: Record<RecruiterPriorityLevel, string> = {
@@ -24,8 +25,6 @@ const PRIORITY_STYLES: Record<RecruiterPriorityLevel, string> = {
 type PriorityFilter = "all" | RecruiterPriorityLevel;
 type OverdueFilter = "all" | "overdue" | "current";
 type CoverageFilter = "all" | "urgent" | "healthy";
-type ExportScope = "all" | "filtered" | "selected";
-
 function MetricCard({
   label,
   value,
@@ -175,9 +174,6 @@ export function RecruiterCommandCenterPanel() {
   const [overdueFilter, setOverdueFilter] = useState<OverdueFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
-  const [exportScope, setExportScope] = useState<ExportScope>("filtered");
-  const [exporting, setExporting] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
 
   const load = useCallback(async (recruiter?: string) => {
     setLoading(true);
@@ -257,57 +253,18 @@ export function RecruiterCommandCenterPanel() {
     });
   }, []);
 
-  const fetchFullWorkQueue = useCallback(async (): Promise<RecruiterCommandCenterWorkItem[]> => {
-    const params = new URLSearchParams();
-    if (recruiterFilter !== "all") params.set("recruiter", recruiterFilter);
-    params.set("limit", "0");
-    const query = params.toString();
-    const res = await fetch(`/api/recruiting/command-center${query ? `?${query}` : ""}`, {
-      cache: "no-store",
-    });
-    const data = (await res.json()) as {
-      ok?: boolean;
-      commandCenter?: RecruiterCommandCenter;
-      error?: string;
-    };
-    if (!res.ok || !data.ok || !data.commandCenter) {
-      throw new Error(data.error ?? "Failed to load candidates for export");
-    }
-    return data.commandCenter.workQueue;
-  }, [recruiterFilter]);
+  const resolveFilteredExportItems = useCallback(
+    (workQueue: RecruiterCommandCenterWorkItem[]) =>
+      filterCommandCenterWorkQueue(workQueue, queueFilters),
+    [queueFilters],
+  );
 
-  const handleExport = useCallback(async () => {
-    setExporting(true);
-    setExportError(null);
-    try {
-      let items: RecruiterCommandCenterWorkItem[];
-      if (exportScope === "selected") {
-        const full = await fetchFullWorkQueue();
-        items = full.filter((item) => selectedIds.has(item.candidateId));
-        if (items.length === 0) {
-          setExportError("Select at least one candidate to export.");
-          return;
-        }
-      } else if (exportScope === "filtered") {
-        items = filterCommandCenterWorkQueue(await fetchFullWorkQueue(), queueFilters);
-        if (items.length === 0) {
-          setExportError("No candidates match the current filters.");
-          return;
-        }
-      } else {
-        items = await fetchFullWorkQueue();
-        if (items.length === 0) {
-          setExportError("No candidates available to export.");
-          return;
-        }
-      }
-      downloadCandidatesXlsx(items);
-    } catch (error) {
-      setExportError(error instanceof Error ? error.message : "Export failed");
-    } finally {
-      setExporting(false);
-    }
-  }, [exportScope, selectedIds, fetchFullWorkQueue, queueFilters]);
+  const { exportScope, setExportScope, exporting, exportError, handleExport } = useCandidateExcelExport({
+    recruiterFilter,
+    selectedIds,
+    resolveFilteredItems: resolveFilteredExportItems,
+    disabled: loading,
+  });
 
   const filteredTopPriorities = useMemo(() => {
     if (!commandCenter) return [];
@@ -368,31 +325,16 @@ export function RecruiterCommandCenterPanel() {
             >
               {loading ? "Refreshing…" : "Refresh"}
             </button>
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-950/60 px-2 py-1">
-              <label className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-zinc-500">
-                Export
-                <select
-                  value={exportScope}
-                  onChange={(event) => setExportScope(event.target.value as ExportScope)}
-                  className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs normal-case text-zinc-200"
-                >
-                  <option value="all">All candidates</option>
-                  <option value="filtered">Filtered only</option>
-                  <option value="selected">Selected only</option>
-                </select>
-              </label>
-              <button
-                type="button"
-                onClick={() => void handleExport()}
-                disabled={exporting || loading}
-                className="rounded-lg border border-teal-500/40 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-100 hover:bg-teal-500/20 disabled:opacity-60"
-              >
-                {exporting ? "Exporting…" : "Export to Excel"}
-              </button>
-            </div>
+            <CandidateExcelExportControls
+              exportScope={exportScope}
+              onExportScopeChange={setExportScope}
+              onExport={handleExport}
+              exporting={exporting}
+              disabled={loading}
+              exportError={exportError}
+            />
           </div>
         </div>
-        {exportError ? <p className="mt-2 text-xs text-amber-200">{exportError}</p> : null}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {commandCenter.kpis.map((kpi) => (

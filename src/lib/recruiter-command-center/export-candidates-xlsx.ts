@@ -7,7 +7,8 @@ import type { RecruiterCommandCenterWorkItem } from "@/lib/recruiter-command-cen
 import { buildXlsxBuffer, triggerXlsxDownload } from "@/lib/recruiter-command-center/write-xlsx-buffer";
 
 const EXPORT_COLUMN_ORDER: (keyof CandidateExportRow)[] = [
-  "Candidate name",
+  "First name",
+  "Last name",
   "Email",
   "Phone",
   "City",
