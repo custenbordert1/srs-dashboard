@@ -17,6 +17,7 @@ export {
   resolveCandidatesForAutomation,
   resolveCandidatesForRead,
 } from "@/lib/candidate-ingestion/resolve-candidates-for-read";
+export { resolveCandidatesForExport } from "@/lib/candidate-ingestion/resolve-candidates-for-export";
 export {
   emptyIngestionStore,
   ingestionPositionCoveragePct,

@@ -108,6 +108,8 @@ import {
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
 import { buildRecruiterProductivity } from "@/lib/recruiter-productivity";
+import { useCandidateExcelExport } from "@/lib/recruiter-command-center/use-candidate-excel-export";
+import type { RecruiterCommandCenterWorkItem } from "@/lib/recruiter-command-center/types";
 import { pickActingRecruiter } from "@/lib/recruiter-roster";
 import {
   CandidateMyQueuePanel,
@@ -118,6 +120,7 @@ import {
   type CandidateIntelligenceFilterId,
 } from "@/lib/candidate-readiness";
 import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
+import { CandidateExcelExportControls } from "@/components/recruiting/candidate-excel-export-controls";
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
 import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
@@ -951,7 +954,14 @@ export function CandidatesSection() {
       if (section) setScrollToInboxSection(section);
     }
     const candidateId = params.get("candidateId");
-    if (candidateId) setSelectedCandidateId(candidateId);
+    if (candidateId) {
+      setSelectedCandidateId(candidateId);
+      return;
+    }
+    setSelectedCandidateId(null);
+    if (!queue) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
   }, []);
 
   useEffect(() => {
@@ -1300,6 +1310,20 @@ export function CandidatesSection() {
     () => databaseFiltered.map((candidate) => candidate.candidateId),
     [databaseFiltered],
   );
+  const databaseFilteredIdSet = useMemo(
+    () => new Set(databaseFilteredIds),
+    [databaseFilteredIds],
+  );
+  const resolveFilteredExportItems = useCallback(
+    (workQueue: RecruiterCommandCenterWorkItem[]) =>
+      workQueue.filter((item) => databaseFilteredIdSet.has(item.candidateId)),
+    [databaseFilteredIdSet],
+  );
+  const { exportScope, setExportScope, exporting, exportError, handleExport } = useCandidateExcelExport({
+    selectedIds,
+    resolveFilteredItems: resolveFilteredExportItems,
+    disabled: loadingBundle || !hasRenderableCandidateRows,
+  });
   const allDatabaseFilteredSelected =
     databaseFilteredIds.length > 0 &&
     databaseFilteredIds.every((candidateId) => selectedIds.has(candidateId));
@@ -2309,6 +2333,17 @@ export function CandidatesSection() {
         rosters={rosters}
         onActingRecruiterChange={setActingRecruiter}
       />
+
+      <div className="flex flex-wrap items-start justify-end gap-3">
+        <CandidateExcelExportControls
+          exportScope={exportScope}
+          onExportScopeChange={setExportScope}
+          onExport={handleExport}
+          exporting={exporting}
+          disabled={loadingBundle || !hasRenderableCandidateRows}
+          exportError={exportError}
+        />
+      </div>
 
       <div
         className={`flex min-h-[1.75rem] items-center justify-center rounded-lg border px-3 ${

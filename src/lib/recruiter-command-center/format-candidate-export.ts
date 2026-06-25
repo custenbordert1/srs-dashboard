@@ -41,20 +41,49 @@ export function summarizeSlaStatus(input: {
   return parts.join("; ");
 }
 
+function parseExportDateInput(iso: string): Date | null {
+  const trimmed = iso.trim();
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    const parsed = new Date(year, month - 1, day);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export function formatExportDate(iso: string | null | undefined): string {
   if (!iso) return "";
   try {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(iso));
+    const date = parseExportDateInput(iso);
+    if (!date) return iso;
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   } catch {
     return iso;
   }
 }
 
+export function splitCandidateExportName(candidateName: string): {
+  firstName: string;
+  lastName: string;
+} {
+  const trimmed = candidateName.trim();
+  if (!trimmed) return { firstName: "", lastName: "" };
+  const spaceIndex = trimmed.indexOf(" ");
+  if (spaceIndex === -1) return { firstName: trimmed, lastName: "" };
+  return {
+    firstName: trimmed.slice(0, spaceIndex),
+    lastName: trimmed.slice(spaceIndex + 1).trim(),
+  };
+}
+
 export type CandidateExportRow = {
-  "Candidate name": string;
+  "First name": string;
+  "Last name": string;
   Email: string;
   Phone: string;
   City: string;
@@ -76,8 +105,10 @@ export type CandidateExportRow = {
 };
 
 export function mapWorkItemToExportRow(item: RecruiterCommandCenterWorkItem): CandidateExportRow {
+  const { firstName, lastName } = splitCandidateExportName(item.candidateName);
   return {
-    "Candidate name": item.candidateName,
+    "First name": firstName,
+    "Last name": lastName,
     Email: item.email ?? "",
     Phone: item.phone ?? "",
     City: item.city ?? "",
