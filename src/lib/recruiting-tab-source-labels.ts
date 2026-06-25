@@ -21,7 +21,8 @@ export type DashboardTabId =
   | "recruiting-execution"
   | "recruiting-autopilot-ops"
   | "placement-command-center"
-  | "approval-queue";
+  | "approval-queue"
+  | "recruiter-command-center";
 
 /** Visual category for nav badges and tab banners — metadata only, no data routing. */
 export type RecruitingTabSourceKind =
@@ -228,6 +229,14 @@ export const RECRUITING_TAB_SOURCE_BY_ID: Record<DashboardTabId, RecruitingTabSo
     kind: "live-breezy",
     bannerMessage:
       "P66 approval queue visibility and prioritization — no send, approve, or batch actions. Work the queue safely before automation.",
+  },
+  "recruiter-command-center": {
+    navLabel: "Recruiter Ops",
+    sourceTag: "Live · MTD",
+    badgeLabel: "Read-only operations",
+    kind: "live-breezy",
+    bannerMessage:
+      "Unified recruiter operations center — one category, one next action, and one priority score per candidate. Visibility only; no approve or send actions.",
   },
 };
 

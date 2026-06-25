@@ -9,6 +9,7 @@ import {
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import { compareRecruiterActionPriority } from "@/lib/recruiter-action-engine/action-sort";
+import { INBOX_SECTION_PRIORITY_SCORE, scoreInboxPriority } from "@/lib/recruiter-priority";
 
 /** Hours since last recruiter touch (falls back to applied date). */
 export const AGING_BUCKET_24H = 24;
@@ -299,26 +300,16 @@ export function buildRecruiterInboxSectionCounts(
   ) as Record<RecruiterInboxSectionId, number>;
 }
 
-const INBOX_PRIORITY_SCORE: Record<RecruiterInboxSectionId, number> = {
-  "overdue-follow-ups": 6,
-  "paperwork-pending": 5,
-  "interview-needed": 4,
-  "ready-for-mel": 3,
-  "newly-applied": 2,
-  "everything-else": 1,
-};
-
 export function recruiterInboxPriorityScore(
   row: ScoredCandidateWorkflowRow,
   actingRecruiter: string,
   referenceMs = Date.now(),
 ): number {
   const section = assignRecruiterInboxSection(row, actingRecruiter, referenceMs);
-  const base = INBOX_PRIORITY_SCORE[section] * 100;
-  const gradeBoost = row.candidateGrade?.overallScore ?? 0;
-  const techPenalty = row.questionnaireIntelligence?.techReady === false ? 12 : 0;
-  const paperworkBoost = row.candidateGrade?.paperworkReady ? 8 : 0;
-  return base + gradeBoost * 0.15 + paperworkBoost - techPenalty;
+  return scoreInboxPriority({
+    sectionScore: INBOX_SECTION_PRIORITY_SCORE[section],
+    row,
+  });
 }
 
 function candidateSortName(row: ScoredCandidateWorkflowRow): string {

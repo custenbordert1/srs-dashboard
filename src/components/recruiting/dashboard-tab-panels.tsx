@@ -204,6 +204,14 @@ export const LazyApprovalQueueCommandCenterPanel = dynamic(
   { loading: tabLoading("Loading approval queue…"), ssr: false },
 );
 
+export const LazyRecruiterCommandCenterPanel = dynamic(
+  () =>
+    import("@/components/recruiting/recruiter-command-center-panel").then((m) => ({
+      default: m.RecruiterCommandCenterPanel,
+    })),
+  { loading: tabLoading("Loading recruiter operations…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;

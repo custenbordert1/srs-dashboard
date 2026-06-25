@@ -4,8 +4,8 @@ import {
   isMelReadyStatus,
   isPaperworkPendingStatus,
   type CandidateSlaSnapshot,
-  type SlaSeverity,
 } from "@/lib/candidate-action-sla";
+import { scoreQueuePriority } from "@/lib/recruiter-priority";
 import type { CandidateWorkflowStatus } from "@/lib/candidate-workflow-types";
 
 export type CandidateQueueLaneId =
@@ -69,74 +69,14 @@ export function isUnassignedRecruiter(name: string): boolean {
   return !v || v === "unassigned";
 }
 
-function gradeBoost(grade: string): number {
-  if (grade === "A+") return 24;
-  if (grade === "A") return 18;
-  if (grade === "B") return 8;
-  return 0;
-}
-
-function slaBoost(severity: SlaSeverity): number {
-  if (severity === "critical") return 20;
-  if (severity === "warn") return 10;
-  return 0;
-}
-
 export function computePriorityScore(
   row: ScoredCandidateWorkflowRow,
   sla: CandidateSlaSnapshot,
 ): { score: number; reasons: string[] } {
-  const reasons: string[] = [];
-  let score = row.aiNumericScore + gradeBoost(row.aiGrade);
-
-  if (row.recruitingActions.priorityList) {
-    score += 30;
-    reasons.push("Priority list");
-  }
-  if (row.recruitingActions.dmReview) {
-    score += 8;
-    reasons.push("DM review");
-  }
-  if (row.recruitingActions.recommendInterview) {
-    score += 10;
-    reasons.push("Interview flagged");
-  }
-  if (row.recruitingActions.onboardingPacketPrep) {
-    score += 6;
-    reasons.push("Onboarding prep");
-  }
-  if (row.recruitingActions.needsFollowUp || row.followUpDueAt) {
-    score += sla.followUpOverdue ? 28 : 16;
-    reasons.push(sla.followUpOverdue ? "Follow-up overdue" : "Follow-up scheduled");
-  }
-  if (sla.appliedAgingSeverity !== "none") {
-    score += slaBoost(sla.appliedAgingSeverity);
-    reasons.push(`Applied ${sla.appliedDays ?? "?"}d`);
-  }
-  if (sla.paperworkAgingSeverity !== "none") {
-    score += slaBoost(sla.paperworkAgingSeverity);
-    reasons.push("Paperwork waiting");
-  }
-  if (isMelReadyStatus(row.workflowStatus)) {
-    score += 14;
-    reasons.push("MEL ready");
-  }
-  if (sla.recruiterInactivitySeverity !== "none") {
-    score += slaBoost(sla.recruiterInactivitySeverity);
-    reasons.push(`Inactive ${sla.statusDays ?? "?"}d`);
-  }
-  if (row.isTopMatch) {
-    score += 12;
-    reasons.push("Top match");
-  }
-  if (row.dmNeedsAssignment) {
-    score += 6;
-    reasons.push(`DM suggest ${row.suggestedDM}`);
-  }
-
+  const result = scoreQueuePriority({ row, sla });
   return {
-    score,
-    reasons: reasons.length > 0 ? reasons : [row.nextActionNeeded],
+    score: result.priorityScore,
+    reasons: result.priorityReasons,
   };
 }
 
