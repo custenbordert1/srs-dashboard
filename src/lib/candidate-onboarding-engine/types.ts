@@ -7,6 +7,9 @@ export type PaperworkByGrade = Record<AiLetterGrade, boolean>;
 export type OnboardingPacketStatus =
   | "draft"
   | "pending_approval"
+  | "queued"
+  | "sending"
+  | "retry_scheduled"
   | "sent"
   | "viewed"
   | "partially_completed"
@@ -57,6 +60,10 @@ export type CandidateOnboardingRecord = {
   reminderStage?: number;
   escalated: boolean;
   statusHistory: OnboardingStatusHistoryEntry[];
+  /** P66.2 send queue — ISO timestamp when a retry_scheduled item may be sent again. */
+  nextRetryAt?: string;
+  /** P66.2 send queue — last send attempt start time. */
+  lastSendAttemptAt?: string;
 };
 
 export type CandidateOnboardingDecision = {

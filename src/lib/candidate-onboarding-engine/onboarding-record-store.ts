@@ -70,6 +70,16 @@ export async function listCandidateOnboardingRecords(
   return (await readRecordsFile()).records.slice(0, limit);
 }
 
+export async function listAllCandidateOnboardingRecords(): Promise<CandidateOnboardingRecord[]> {
+  return (await readRecordsFile()).records;
+}
+
+export async function getOnboardingRecordById(
+  onboardingId: string,
+): Promise<CandidateOnboardingRecord | null> {
+  return (await readRecordsFile()).records.find((row) => row.onboardingId === onboardingId) ?? null;
+}
+
 export async function findActiveOnboardingRecord(
   candidateId: string,
 ): Promise<CandidateOnboardingRecord | null> {

@@ -92,6 +92,17 @@ describe("onboarding-send-packet-sync", () => {
     assert.equal(reason, "Packet already sent — awaiting signature.");
   });
 
+  it("blocks duplicate send when onboarding record is queued", () => {
+    const reason = duplicatePaperworkSendBlockReason({
+      workflow: null,
+      activeOnboarding: {
+        ...pendingRecord("c-queued", "onb-queued"),
+        status: "queued",
+      },
+    });
+    assert.equal(reason, "Onboarding packet is queued for send.");
+  });
+
   it("blocks duplicate send when onboarding record is already sent", () => {
     const reason = duplicatePaperworkSendBlockReason({
       workflow: null,
