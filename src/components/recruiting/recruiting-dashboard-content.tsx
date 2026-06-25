@@ -85,6 +85,9 @@ export function RecruitingDashboardContent({
     if (typeof window === "undefined") return;
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
+    // Tab navigation should land fresh — deep links keep candidateId/queue in the URL.
+    url.searchParams.delete("candidateId");
+    url.searchParams.delete("queue");
     window.history.replaceState(null, "", url);
   };
 

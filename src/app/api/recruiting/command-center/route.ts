@@ -4,6 +4,7 @@ import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
 import { listIngestedCandidates, readIngestionStore } from "@/lib/candidate-ingestion/ingestion-store";
+import { resolveCandidatesForExport } from "@/lib/candidate-ingestion/resolve-candidates-for-export";
 import { listCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { buildRecruiterCommandCenter } from "@/lib/recruiter-command-center";
@@ -40,10 +41,12 @@ export async function GET(request: Request) {
     fetchMelProjectsSheet(),
   ]);
 
+  const candidatePool =
+    limit === 0 ? await resolveCandidatesForExport() : listIngestedCandidates(store);
+  const mtd = filterMtdCandidates(candidatePool);
   const jobsByPositionId = new Map(
     (jobsResult.ok ? jobsResult.jobs : []).map((job) => [job.jobId, job]),
   );
-  const mtd = filterMtdCandidates(listIngestedCandidates(store));
   const candidates = mtd.map((entry) =>
     buildScoredWorkflowRow(entry, bundle.workflows[entry.candidateId], {
       job: jobsByPositionId.get(entry.positionId),

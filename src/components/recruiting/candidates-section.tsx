@@ -954,7 +954,14 @@ export function CandidatesSection() {
       if (section) setScrollToInboxSection(section);
     }
     const candidateId = params.get("candidateId");
-    if (candidateId) setSelectedCandidateId(candidateId);
+    if (candidateId) {
+      setSelectedCandidateId(candidateId);
+      return;
+    }
+    setSelectedCandidateId(null);
+    if (!queue) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
   }, []);
 
   useEffect(() => {
