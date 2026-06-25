@@ -155,6 +155,7 @@ export function useTerritoryDashboard<T>(options: UseTerritoryDashboardOptions =
     const interval =
       pollIntervalMs > 0
         ? window.setInterval(() => {
+            if (typeof document !== "undefined" && document.hidden) return;
             void runFetch("background", false);
           }, pollIntervalMs)
         : undefined;

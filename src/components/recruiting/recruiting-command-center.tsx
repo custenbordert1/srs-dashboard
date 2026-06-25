@@ -211,6 +211,7 @@ export function RecruitingCommandCenter() {
 
   useEffect(() => {
     const id = window.setInterval(() => {
+      if (document.hidden) return;
       void fetchCommandCenterBreezyData(true).then((result) => {
         setLoadState((prev) => {
           if (prev.status !== "ready") return prev;

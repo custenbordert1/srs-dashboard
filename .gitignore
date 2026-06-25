@@ -5,3 +5,8 @@
 !.env.example
 !.env.local.example
 .data/
+.DS_Store
+*.log
+.turbo/
+coverage/
+*.tsbuildinfo

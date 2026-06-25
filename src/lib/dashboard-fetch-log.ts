@@ -11,6 +11,7 @@ export type DashboardFetchLogMeta = {
 };
 
 export function logDashboardFetch(event: DashboardFetchEvent, meta: DashboardFetchLogMeta): void {
+  if (process.env.NODE_ENV === "production") return;
   console.info("[dashboard-fetch]", {
     event,
     route: meta.route,

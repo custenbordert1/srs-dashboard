@@ -22,7 +22,9 @@ export async function logBreezyRouteStart(
     hasSessionSecret: Boolean(config.sessionSecret),
     hasDmDefaultPassword: Boolean(config.dmDefaultPassword),
   };
-  console.info("[breezy-route] loaded", ctx);
+  if (process.env.NODE_ENV !== "production") {
+    console.info("[breezy-route] loaded", ctx);
+  }
   return ctx;
 }
 
@@ -31,7 +33,9 @@ export function logBreezyRouteResult(
   status: number,
   details: Record<string, unknown>,
 ): void {
-  console.info("[breezy-route] response", { route, status, ...details });
+  if (process.env.NODE_ENV !== "production") {
+    console.info("[breezy-route] response", { route, status, ...details });
+  }
 }
 
 export async function assertBreezyConfigured(route: string): Promise<
