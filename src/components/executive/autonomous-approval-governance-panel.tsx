@@ -1,17 +1,16 @@
 "use client";
 
+import {
+  ExecutiveButton,
+  ExecutiveCard,
+  ExecutivePanelError,
+  ExecutivePanelLoading,
+  ExecutiveWarningList,
+  MetricCard,
+  SectionHeader,
+} from "@/components/executive/ui";
 import type { GovernanceDashboardSnapshot } from "@/lib/autonomous-approval-governance/types";
 import { useCallback, useEffect, useState } from "react";
-
-function MetricCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
-    </div>
-  );
-}
 
 function approvalLabel(level: string): string {
   return level.replace(/_/g, " ");
@@ -65,23 +64,16 @@ export function AutonomousApprovalGovernancePanel() {
   }, [load]);
 
   if (loading && !dashboard) {
-    return (
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold text-zinc-50">Autonomous Approval & Governance</h2>
-        <div className="mt-3 h-24 animate-pulse rounded-lg bg-zinc-800/80" />
-      </section>
-    );
+    return <ExecutivePanelLoading title="Autonomous Approval & Governance" badge="Preview Mode" />;
   }
 
   if (error && !dashboard) {
     return (
-      <section className="rounded-2xl border border-amber-500/35 bg-amber-500/10 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold text-amber-100">Autonomous Approval & Governance</h2>
-        <p className="mt-2 text-sm text-amber-100/90">{error}</p>
-        <button type="button" onClick={() => void load()} className="mt-3 rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-medium text-amber-100 hover:bg-amber-500/20">
-          Retry
-        </button>
-      </section>
+      <ExecutivePanelError
+        title="Autonomous Approval & Governance"
+        message={error}
+        onRetry={() => void load()}
+      />
     );
   }
 
@@ -91,36 +83,31 @@ export function AutonomousApprovalGovernancePanel() {
   const health = dashboard.governanceHealth;
 
   return (
-    <section id="autonomous-approval-governance" className="rounded-2xl border border-teal-500/25 bg-zinc-900/40 p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-semibold text-zinc-50">Autonomous Approval & Governance</h2>
-            <span className="rounded-full border border-teal-400/40 bg-teal-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-teal-200">
-              Preview Mode
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-zinc-400">P77 governance · evaluate permissions — no approval mutations or execution</p>
-        </div>
-        <button type="button" onClick={() => void load()} disabled={loading} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-50">
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
-      </div>
+    <ExecutiveCard id="autonomous-approval-governance" variant="accent">
+      <SectionHeader
+        title="Autonomous Approval & Governance"
+        badge="Preview Mode"
+        badgeTone="info"
+        subtitle="P77 governance · evaluate permissions — no approval mutations or execution"
+        actions={
+          <ExecutiveButton onClick={() => void load()} disabled={loading}>
+            {loading ? "Refreshing…" : "Refresh"}
+          </ExecutiveButton>
+        }
+      />
 
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-300">
+      <div className="mt-5 flex flex-wrap gap-3 text-xs text-zinc-300">
         <span className={`font-semibold uppercase ${statusTone(health.status)}`}>Governance: {health.status}</span>
         <span>{health.summary}</span>
       </div>
 
       {warnings.length > 0 ? (
-        <ul className="mt-4 space-y-1 rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-100/90">
-          {warnings.map((w) => (
-            <li key={w}>{w}</li>
-          ))}
-        </ul>
+        <div className="mt-5">
+          <ExecutiveWarningList warnings={warnings} />
+        </div>
       ) : null}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Reviewed" value={String(m.totalDecisionsReviewed)} />
         <MetricCard label="Auto approved" value={String(m.autoApproved)} />
         <MetricCard label="Recruiter approval" value={String(m.recruiterApprovalRequired)} />
@@ -131,16 +118,18 @@ export function AutonomousApprovalGovernancePanel() {
         <MetricCard label="Hrs saved (est.)" value={String(m.estimatedRecruiterTimeSaved)} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-6 grid gap-5 lg:grid-cols-2">
         <div>
           <h3 className="text-sm font-semibold text-zinc-300">Approval queue (preview)</h3>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-3 space-y-2">
             {dashboard.approvalQueue.slice(0, 6).map((item) => (
-              <li key={item.decisionId} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2 text-xs">
+              <li key={item.decisionId} className="rounded-xl border border-zinc-800/35 bg-zinc-950/30 px-3.5 py-2.5 text-xs">
                 <div className="font-medium text-zinc-200">{item.recommendedAction}</div>
-                <p className="mt-1 text-zinc-500">{item.candidateName ?? "Platform"} · {approvalLabel(item.approvalLevel)}</p>
+                <p className="mt-1.5 text-zinc-500">
+                  {item.candidateName ?? "Platform"} · {approvalLabel(item.approvalLevel)}
+                </p>
                 <p className="mt-1 text-zinc-500">{item.reason}</p>
-                <p className="mt-1 text-[10px] uppercase text-zinc-600">
+                <p className="mt-1.5 text-[10px] uppercase text-zinc-600">
                   {item.confidence}% confidence · saves ~{item.timeSavedMinutesIfApproved} min
                 </p>
               </li>
@@ -149,15 +138,15 @@ export function AutonomousApprovalGovernancePanel() {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-zinc-300">Blocked by policy</h3>
-          <ul className="mt-2 list-disc pl-4 text-xs text-zinc-400">
+          <ul className="mt-3 list-disc space-y-1 pl-4 text-xs leading-relaxed text-zinc-400">
             {dashboard.blockedByPolicy.slice(0, 5).map((d) => (
               <li key={d.decisionId}>
                 {d.decision} — {d.governanceReason}
               </li>
             ))}
           </ul>
-          <h3 className="mt-4 text-sm font-semibold text-zinc-300">Policy registry</h3>
-          <ul className="mt-2 space-y-1 text-xs text-zinc-500">
+          <h3 className="mt-5 text-sm font-semibold text-zinc-300">Policy registry</h3>
+          <ul className="mt-3 space-y-1.5 text-xs text-zinc-500">
             {dashboard.policies.slice(0, 6).map((p) => (
               <li key={p.id}>
                 <span className="text-zinc-300">{p.label}</span>
@@ -167,6 +156,6 @@ export function AutonomousApprovalGovernancePanel() {
           </ul>
         </div>
       </div>
-    </section>
+    </ExecutiveCard>
   );
 }

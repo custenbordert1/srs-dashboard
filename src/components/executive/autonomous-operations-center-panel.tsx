@@ -1,17 +1,17 @@
 "use client";
 
+import {
+  ExecutiveButton,
+  ExecutiveCard,
+  ExecutivePanelError,
+  ExecutivePanelLoading,
+  ExecutiveWarningList,
+  MetricCard,
+  SectionHeader,
+  StatusBadge,
+} from "@/components/executive/ui";
 import type { OperationsDashboardSnapshot } from "@/lib/autonomous-operations-center/types";
 import { useCallback, useEffect, useState } from "react";
-
-function MetricCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-50">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
-    </div>
-  );
-}
 
 function statusTone(status: string): string {
   switch (status) {
@@ -61,23 +61,12 @@ export function AutonomousOperationsCenterPanel() {
   }, [load]);
 
   if (loading && !dashboard) {
-    return (
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold text-zinc-50">Autonomous Operations Center</h2>
-        <div className="mt-3 h-24 animate-pulse rounded-lg bg-zinc-800/80" />
-      </section>
-    );
+    return <ExecutivePanelLoading title="Autonomous Operations Center" badge="Preview Mode" />;
   }
 
   if (error && !dashboard) {
     return (
-      <section className="rounded-2xl border border-amber-500/35 bg-amber-500/10 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold text-amber-100">Autonomous Operations Center</h2>
-        <p className="mt-2 text-sm text-amber-100/90">{error}</p>
-        <button type="button" onClick={() => void load()} className="mt-3 rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-medium text-amber-100 hover:bg-amber-500/20">
-          Retry
-        </button>
-      </section>
+      <ExecutivePanelError title="Autonomous Operations Center" message={error} onRetry={() => void load()} />
     );
   }
 
@@ -86,23 +75,20 @@ export function AutonomousOperationsCenterPanel() {
   const m = dashboard.executiveMetrics;
 
   return (
-    <section id="autonomous-operations-center" className="rounded-2xl border border-rose-500/25 bg-zinc-900/40 p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-semibold text-zinc-50">Autonomous Operations Center</h2>
-            <span className="rounded-full border border-rose-400/40 bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-200">
-              Preview Mode
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-zinc-400">P75 platform monitoring · detect, explain, prioritize — no production actions</p>
-        </div>
-        <button type="button" onClick={() => void load()} disabled={loading} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-50">
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
-      </div>
+    <ExecutiveCard id="autonomous-operations-center" variant="accent">
+      <SectionHeader
+        title="Autonomous Operations Center"
+        badge="Preview Mode"
+        badgeTone="preview"
+        subtitle="P75 platform monitoring · detect, explain, prioritize — no production actions"
+        actions={
+          <ExecutiveButton onClick={() => void load()} disabled={loading}>
+            {loading ? "Refreshing…" : "Refresh"}
+          </ExecutiveButton>
+        }
+      />
 
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-300">
+      <div className="mt-5 flex flex-wrap gap-3 text-xs text-zinc-300">
         <span className={`font-semibold uppercase ${statusTone(dashboard.systemHealth.status)}`}>
           System: {dashboard.systemHealth.status}
         </span>
@@ -111,14 +97,12 @@ export function AutonomousOperationsCenterPanel() {
       </div>
 
       {warnings.length > 0 ? (
-        <ul className="mt-4 space-y-1 rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-100/90">
-          {warnings.map((w) => (
-            <li key={w}>{w}</li>
-          ))}
-        </ul>
+        <div className="mt-5">
+          <ExecutiveWarningList warnings={warnings} />
+        </div>
       ) : null}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Critical incidents" value={String(m.criticalIncidents)} />
         <MetricCard label="Open incidents" value={String(m.openIncidents)} />
         <MetricCard label="Resolved today" value={String(m.resolvedToday)} />
@@ -129,32 +113,34 @@ export function AutonomousOperationsCenterPanel() {
         <MetricCard label="Recruiter workload" value={String(m.recruiterWorkload)} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-6 grid gap-5 lg:grid-cols-2">
         <div>
           <h3 className="text-sm font-semibold text-zinc-300">Engine monitoring</h3>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-3 space-y-2">
             {dashboard.engineMonitoring.map((engine) => (
-              <li key={engine.engineId} className="rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2 text-xs">
+              <li key={engine.engineId} className="rounded-xl border border-zinc-800/35 bg-zinc-950/30 px-3.5 py-2.5 text-xs">
                 <div className="flex justify-between gap-2">
                   <span className="font-medium text-zinc-200">{engine.label}</span>
-                  <span className={`font-semibold uppercase ${statusTone(engine.status)}`}>{engine.status}</span>
+                  <StatusBadge tone={engine.status === "critical" ? "critical" : engine.status === "warning" ? "warning" : "success"}>
+                    {engine.status}
+                  </StatusBadge>
                 </div>
-                <p className="mt-1 text-zinc-500">{engine.explanation}</p>
+                <p className="mt-1.5 leading-relaxed text-zinc-500">{engine.explanation}</p>
               </li>
             ))}
           </ul>
         </div>
         <div>
           <h3 className="text-sm font-semibold text-zinc-300">Executive recommendations</h3>
-          <ul className="mt-2 list-disc pl-4 text-xs text-zinc-400">
+          <ul className="mt-3 list-disc space-y-1 pl-4 text-xs leading-relaxed text-zinc-400">
             {dashboard.executiveRecommendations.map((rec) => (
               <li key={rec}>{rec}</li>
             ))}
           </ul>
-          <h3 className="mt-4 text-sm font-semibold text-zinc-300">Predictive risks</h3>
-          <ul className="mt-2 space-y-2">
+          <h3 className="mt-5 text-sm font-semibold text-zinc-300">Predictive risks</h3>
+          <ul className="mt-3 space-y-2">
             {dashboard.predictiveRisks.slice(0, 4).map((risk) => (
-              <li key={risk.id} className="text-xs text-zinc-400">
+              <li key={risk.id} className="text-xs leading-relaxed text-zinc-400">
                 <span className="font-medium text-zinc-200">{risk.label}</span> ({risk.likelihood}) — {risk.impact}
               </li>
             ))}
@@ -163,11 +149,11 @@ export function AutonomousOperationsCenterPanel() {
       </div>
 
       {dashboard.criticalAlerts.length > 0 ? (
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-6 overflow-x-auto">
           <h3 className="text-sm font-semibold text-zinc-300">Critical alerts</h3>
-          <table className="mt-2 w-full min-w-[560px] text-left text-xs">
+          <table className="mt-3 w-full min-w-[560px] text-left text-xs">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500">
+              <tr className="border-b border-zinc-800/50 text-zinc-500">
                 <th className="pb-2 pr-3">Severity</th>
                 <th className="pb-2 pr-3">Type</th>
                 <th className="pb-2 pr-3">Engine</th>
@@ -176,7 +162,7 @@ export function AutonomousOperationsCenterPanel() {
             </thead>
             <tbody>
               {dashboard.criticalAlerts.slice(0, 8).map((issue) => (
-                <tr key={issue.issueId} className="border-b border-zinc-800/60">
+                <tr key={issue.issueId} className="border-b border-zinc-800/40">
                   <td className="py-2 pr-3 text-zinc-200">{issue.severity}</td>
                   <td className="py-2 pr-3 text-zinc-400">{issue.issueType.replace(/_/g, " ")}</td>
                   <td className="py-2 pr-3 text-zinc-400">{issue.responsibleEngine}</td>
@@ -187,6 +173,6 @@ export function AutonomousOperationsCenterPanel() {
           </table>
         </div>
       ) : null}
-    </section>
+    </ExecutiveCard>
   );
 }

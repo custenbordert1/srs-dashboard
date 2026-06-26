@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { navGroupIcon, navTabIcon } from "@/components/recruiting/dashboard-nav-icons";
 import { RecruitingSourceNavBadge } from "@/components/recruiting/recruiting-source-nav-badge";
 import type { UserRole } from "@/lib/auth/types";
 import {
@@ -27,18 +28,18 @@ type DashboardTabNavProps = {
 
 const groupButtonClass = (isActive: boolean) =>
   [
-    "rounded-lg px-3 py-2 text-sm font-semibold transition-colors sm:px-4",
+    "relative inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40 sm:px-4",
     isActive
-      ? "border border-teal-500/40 bg-teal-500/10 text-teal-100 shadow-sm shadow-teal-950/20"
-      : "border border-transparent text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200",
+      ? "bg-teal-500/12 text-teal-50 ring-1 ring-inset ring-teal-500/30 after:absolute after:-bottom-3 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-teal-400/80"
+      : "text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-200",
   ].join(" ");
 
 const subTabButtonClass = (isActive: boolean) =>
   [
-    "shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4",
+    "inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40 sm:px-3.5",
     isActive
-      ? "border border-teal-500/40 bg-teal-500/10 text-teal-200 shadow-sm shadow-teal-950/20"
-      : "border border-transparent text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200",
+      ? "bg-teal-500/10 text-teal-100 ring-1 ring-inset ring-teal-500/25"
+      : "text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-300",
   ].join(" ");
 
 export function DashboardTabNav({ activeTab, onTabChange, userRole }: DashboardTabNavProps) {
@@ -64,27 +65,26 @@ export function DashboardTabNav({ activeTab, onTabChange, userRole }: DashboardT
   return (
     <nav
       aria-label="Dashboard sections"
-      className="sticky top-0 z-40 border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md"
+      className="sticky top-0 z-40 border-b border-zinc-800/40 bg-zinc-950/95 backdrop-blur-md"
     >
-      <div className="mx-auto max-w-7xl space-y-2 px-4 py-3 sm:px-6 lg:px-8">
-        <div
-          role="tablist"
-          aria-label="Dashboard groups"
-          className="flex flex-wrap gap-1"
-        >
-          {groups.map((group) => {
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        <div role="tablist" aria-label="Dashboard groups" className="flex flex-wrap gap-1.5">
+          {groups.map((group, index) => {
             const isActive = openGroupId === group.id;
             return (
-              <button
-                key={group.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => selectGroup(group.id)}
-                className={groupButtonClass(isActive)}
-              >
-                {group.label}
-              </button>
+              <span key={group.id} className="flex items-center gap-1.5">
+                {index > 0 ? <span className="hidden h-4 w-px bg-zinc-800/80 sm:block" aria-hidden /> : null}
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => selectGroup(group.id)}
+                  className={groupButtonClass(isActive)}
+                >
+                  <span className="text-zinc-400">{navGroupIcon(group.id)}</span>
+                  {group.label}
+                </button>
+              </span>
             );
           })}
         </div>
@@ -92,30 +92,27 @@ export function DashboardTabNav({ activeTab, onTabChange, userRole }: DashboardT
         <div
           role="tablist"
           aria-label={`${groups.find((group) => group.id === openGroupId)?.label ?? "Dashboard"} sections`}
-          className="-mb-px flex flex-wrap gap-1 sm:gap-1.5"
+          className="mt-3 flex flex-wrap gap-1.5 pt-3"
         >
           {subTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const source = RECRUITING_TAB_SOURCE_BY_ID[tab.id];
+            const icon = navTabIcon(tab.id);
             const tabLabel = (
-              <span className="flex flex-col items-start gap-0.5 text-left">
+              <span className="flex items-center gap-2">
+                {icon ? <span className={isActive ? "text-teal-300/90" : "text-zinc-500"}>{icon}</span> : null}
                 <span>{tab.label}</span>
-                <RecruitingSourceNavBadge
-                  sourceTag={source.sourceTag}
-                  kind={source.kind}
-                  active={isActive}
-                />
+                {isActive ? (
+                  <RecruitingSourceNavBadge sourceTag={source.sourceTag} kind={source.kind} active />
+                ) : null}
               </span>
             );
 
             if (tab.href) {
               return (
-                <Link
-                  key={tab.id}
-                  href={tab.href}
-                  className={subTabButtonClass(false)}
-                >
-                  {tabLabel}
+                <Link key={tab.id} href={tab.href} className={subTabButtonClass(false)}>
+                  {icon ? <span className="text-zinc-500">{icon}</span> : null}
+                  {tab.label}
                 </Link>
               );
             }
