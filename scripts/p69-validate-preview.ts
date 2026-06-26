@@ -3,7 +3,10 @@
  * P69 validation — executive natural language queries (preview only).
  */
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
+import { loadP71FeatureFlags } from "@/lib/autonomous-paperwork-execution-engine/feature-flags-store";
+import { buildOnboardingSendQueueMetrics } from "@/lib/candidate-onboarding-send-queue/build-send-queue-metrics";
 import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
+import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
 import { listIngestedCandidates, readIngestionStore } from "@/lib/candidate-ingestion/ingestion-store";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import {
@@ -13,10 +16,13 @@ import {
 
 async function main() {
   const started = Date.now();
-  const [store, workflows, onboardingRecords] = await Promise.all([
+  const [store, workflows, onboardingRecords, policy, flags, sendQueueMetrics] = await Promise.all([
     readIngestionStore(),
     getCandidateWorkflowState(),
     listAllCandidateOnboardingRecords(),
+    loadCandidateOnboardingPolicy(),
+    loadP71FeatureFlags(),
+    buildOnboardingSendQueueMetrics(),
   ]);
 
   const candidates = listIngestedCandidates(store);
@@ -25,28 +31,36 @@ async function main() {
   );
   const fetchedAt = store.lastChunkAt ?? store.updatedAt ?? new Date().toISOString();
 
-  const preview = runExecutiveQueryPreview({
+  const preview = await runExecutiveQueryPreview({
     candidates,
     workflowRows,
     onboardingRecords,
+    policy,
+    flags,
+    sendQueueMetrics,
     fetchedAt,
   });
 
-  const sampleAnswers = listSupportedExecutiveQueries().map((definition) => {
-    const result = runExecutiveQueryPreview({
-      candidates,
-      workflowRows,
-      onboardingRecords,
-      question: definition.question,
-      fetchedAt,
-    });
-    return {
-      queryId: definition.id,
-      question: definition.question,
-      summary: result.answer?.summary ?? null,
-      total: result.answer?.total ?? null,
-    };
-  });
+  const sampleAnswers = await Promise.all(
+    listSupportedExecutiveQueries().map(async (definition) => {
+      const result = await runExecutiveQueryPreview({
+        candidates,
+        workflowRows,
+        onboardingRecords,
+        policy,
+        flags,
+        sendQueueMetrics,
+        question: definition.question,
+        fetchedAt,
+      });
+      return {
+        queryId: definition.id,
+        question: definition.question,
+        summary: result.answer?.summary ?? null,
+        total: result.answer?.total ?? null,
+      };
+    }),
+  );
 
   const report = {
     validatedAt: new Date().toISOString(),

@@ -54,6 +54,22 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
     id: "paperwork_top_recruiter_today",
     patterns: [/recruiter sent the most/, /top recruiter.*paperwork/, /which recruiter sent/],
   },
+  {
+    id: "paperwork_waiting_signature",
+    patterns: [/waiting for signatures/, /awaiting signature/, /how many.*waiting.*sign/],
+  },
+  {
+    id: "paperwork_blocked_auto",
+    patterns: [/blocked from automatic/, /blocked.*paperwork/, /which candidates are blocked/],
+  },
+  {
+    id: "paperwork_oldest_pending",
+    patterns: [/oldest pending paperwork/, /oldest pending packet/, /oldest packet/],
+  },
+  {
+    id: "paperwork_failed_today",
+    patterns: [/paperwork failed today/, /what paperwork failed today/, /failed paperwork today/],
+  },
 ];
 
 export function resolveExecutiveQueryId(question: string): ExecutiveQueryId | null {

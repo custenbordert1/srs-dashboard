@@ -10,6 +10,7 @@ import { ExecutionHealthPanel } from "@/components/executive/execution-health-pa
 import { ExecutivePaperworkDashboardPanel } from "@/components/executive/executive-paperwork-dashboard-panel";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
 import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-paperwork-panel";
+import { AutonomousPaperworkExecutionPanel } from "@/components/executive/autonomous-paperwork-execution-panel";
 import { ExecutiveNaturalLanguageQueriesPanel } from "@/components/executive/executive-natural-language-queries-panel";
 import { WorkforcePlacementPanel } from "@/components/executive/workforce-placement-panel";
 import { OnboardingHealthPanel } from "@/components/executive/onboarding-health-panel";
@@ -229,6 +230,8 @@ export function ExecutiveHomePanel() {
       <OnboardingHealthPanel />
 
       <AutonomousPaperworkPanel />
+
+      <AutonomousPaperworkExecutionPanel />
 
       <AutonomousOnboardingPanel />
 

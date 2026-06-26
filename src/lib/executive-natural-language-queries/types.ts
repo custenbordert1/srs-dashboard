@@ -15,7 +15,11 @@ export type ExecutiveQueryId =
   | "paperwork_failed_count"
   | "paperwork_waiting_longest"
   | "paperwork_top_recruiter_today"
-  | "paperwork_ready_for_auto";
+  | "paperwork_ready_for_auto"
+  | "paperwork_waiting_signature"
+  | "paperwork_blocked_auto"
+  | "paperwork_oldest_pending"
+  | "paperwork_failed_today";
 
 export type SupportedExecutiveQuery = {
   id: ExecutiveQueryId;
