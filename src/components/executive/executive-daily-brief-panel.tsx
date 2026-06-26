@@ -48,7 +48,7 @@ export function ExecutiveDailyBriefPanel() {
 
   if (loading && !brief) {
     return (
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
+      <section id="executive-daily-brief" className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
         <h2 className="text-lg font-semibold text-zinc-50">Executive Daily Brief</h2>
         <div className="mt-3 h-32 animate-pulse rounded-lg bg-zinc-800/80" />
       </section>

@@ -86,7 +86,7 @@ export function AutonomousOperationsCenterPanel() {
   const m = dashboard.executiveMetrics;
 
   return (
-    <section className="rounded-2xl border border-rose-500/25 bg-zinc-900/40 p-4 sm:p-5">
+    <section id="autonomous-operations-center" className="rounded-2xl border border-rose-500/25 bg-zinc-900/40 p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
