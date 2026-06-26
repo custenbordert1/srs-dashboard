@@ -16,6 +16,9 @@ import { DEFAULT_P75_FEATURE_FLAGS } from "@/lib/autonomous-operations-center/fe
 import { buildP76NlAnswers, isP76DecisionQueryId } from "@/lib/autonomous-decision-engine/build-p76-nl-answers";
 import type { P76FeatureFlags } from "@/lib/autonomous-decision-engine/types";
 import { DEFAULT_P76_FEATURE_FLAGS } from "@/lib/autonomous-decision-engine/feature-flags-store";
+import { buildP77NlAnswers, isP77GovernanceQueryId } from "@/lib/autonomous-approval-governance/build-p77-nl-answers";
+import type { P77FeatureFlags } from "@/lib/autonomous-approval-governance/types";
+import { DEFAULT_P77_FEATURE_FLAGS } from "@/lib/autonomous-approval-governance/feature-flags-store";
 import { buildDailyBriefNlAnswer, isP72BriefQueryId } from "@/lib/executive-daily-brief/build-daily-brief-nl-answers";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
@@ -46,6 +49,7 @@ async function buildAnswerForQueryId(input: {
   p74Flags?: P74FeatureFlags;
   p75Flags?: P75FeatureFlags;
   p76Flags?: P76FeatureFlags;
+  p77Flags?: P77FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -69,6 +73,11 @@ async function buildAnswerForQueryId(input: {
   const p76Flags = input.p76Flags ?? {
     ...DEFAULT_P76_FEATURE_FLAGS,
     decisionEngineEnabled: true,
+    executionMode: "preview",
+  };
+  const p77Flags = input.p77Flags ?? {
+    ...DEFAULT_P77_FEATURE_FLAGS,
+    governanceEnabled: true,
     executionMode: "preview",
   };
 
@@ -189,6 +198,27 @@ async function buildAnswerForQueryId(input: {
     if (p76Answer) return p76Answer;
   }
 
+  if (isP77GovernanceQueryId(input.queryId)) {
+    const p77Answer = buildP77NlAnswers({
+      queryId: input.queryId,
+      candidates: input.candidates,
+      workflowRows: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      p71Flags: input.flags,
+      p73Flags,
+      p74Flags,
+      p75Flags,
+      p76Flags,
+      p77Flags,
+      sendQueueMetrics: input.sendQueueMetrics,
+      opportunities: input.opportunities,
+      activeReps: input.activeReps,
+      fetchedAt: input.fetchedAt,
+    });
+    if (p77Answer) return p77Answer;
+  }
+
   return buildPaperworkQueryAnswer({
     queryId: input.queryId as Extract<
       ExecutiveQueryId,
@@ -210,6 +240,7 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
   p74Flags?: P74FeatureFlags;
   p75Flags?: P75FeatureFlags;
   p76Flags?: P76FeatureFlags;
+  p77Flags?: P77FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -252,6 +283,11 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
           decisionEngineEnabled: true,
           executionMode: "preview",
         },
+        p77Flags: input.p77Flags ?? {
+          ...DEFAULT_P77_FEATURE_FLAGS,
+          governanceEnabled: true,
+          executionMode: "preview",
+        },
         sendQueueMetrics: input.sendQueueMetrics,
         opportunities: input.opportunities,
         activeReps: input.activeReps,
@@ -283,6 +319,7 @@ export async function runExecutiveQueryPreview(input: {
   p74Flags?: P74FeatureFlags;
   p75Flags?: P75FeatureFlags;
   p76Flags?: P76FeatureFlags;
+  p77Flags?: P77FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -300,6 +337,7 @@ export async function runExecutiveQueryPreview(input: {
     p74Flags: input.p74Flags,
     p75Flags: input.p75Flags,
     p76Flags: input.p76Flags,
+    p77Flags: input.p77Flags,
     sendQueueMetrics: input.sendQueueMetrics,
     opportunities: input.opportunities,
     activeReps: input.activeReps,
@@ -340,6 +378,11 @@ export async function runExecutiveQueryPreview(input: {
         p76Flags: input.p76Flags ?? {
           ...DEFAULT_P76_FEATURE_FLAGS,
           decisionEngineEnabled: true,
+          executionMode: "preview",
+        },
+        p77Flags: input.p77Flags ?? {
+          ...DEFAULT_P77_FEATURE_FLAGS,
+          governanceEnabled: true,
           executionMode: "preview",
         },
         sendQueueMetrics: input.sendQueueMetrics,

@@ -210,6 +210,38 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
     id: "decisions_highest_value",
     patterns: [/most value decision/, /highest value recommendation/, /biggest opportunity/],
   },
+  {
+    id: "governance_auto_allowed",
+    patterns: [/what can the system do automatically/, /auto approved decisions/, /automatic actions allowed/],
+  },
+  {
+    id: "governance_requires_approval",
+    patterns: [/what requires approval/, /decisions need approval/, /approval required/],
+  },
+  {
+    id: "governance_blocked",
+    patterns: [/blocked by policy/, /what is blocked/, /policy blocks/],
+  },
+  {
+    id: "governance_why_not_automated",
+    patterns: [/why can't this be automated/, /why not automated/, /automation blocked why/],
+  },
+  {
+    id: "governance_pilot_eligible",
+    patterns: [/pilot eligible/, /which decisions pilot/, /pilot market decisions/],
+  },
+  {
+    id: "governance_safe_to_approve",
+    patterns: [/safe to approve/, /what is safe to approve/, /low risk approve/],
+  },
+  {
+    id: "governance_executive_approval",
+    patterns: [/executive approval/, /needs executive approval/, /leadership approval required/],
+  },
+  {
+    id: "governance_blocking_rules",
+    patterns: [/rules stopping automation/, /blocking rules/, /what rules block automation/],
+  },
 ];
 
 export function resolveExecutiveQueryId(question: string): ExecutiveQueryId | null {

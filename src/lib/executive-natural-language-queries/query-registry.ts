@@ -358,6 +358,62 @@ export const SUPPORTED_EXECUTIVE_QUERIES: SupportedExecutiveQuery[] = [
     examplePhrases: ["most value decision", "highest value recommendation", "biggest opportunity"],
     previewOnly: true,
   },
+  {
+    id: "governance_auto_allowed",
+    category: "governance",
+    question: "What can the system do automatically?",
+    examplePhrases: ["what can the system do automatically", "auto approved decisions", "automatic actions allowed"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_requires_approval",
+    category: "governance",
+    question: "What requires approval?",
+    examplePhrases: ["what requires approval", "decisions need approval", "approval required"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_blocked",
+    category: "governance",
+    question: "What is blocked by policy?",
+    examplePhrases: ["blocked by policy", "what is blocked", "policy blocks"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_why_not_automated",
+    category: "governance",
+    question: "Why can't this be automated?",
+    examplePhrases: ["why can't this be automated", "why not automated", "automation blocked why"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_pilot_eligible",
+    category: "governance",
+    question: "Which decisions are pilot eligible?",
+    examplePhrases: ["pilot eligible", "which decisions pilot", "pilot market decisions"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_safe_to_approve",
+    category: "governance",
+    question: "What is safe to approve?",
+    examplePhrases: ["safe to approve", "what is safe to approve", "low risk approve"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_executive_approval",
+    category: "governance",
+    question: "What needs executive approval?",
+    examplePhrases: ["executive approval", "needs executive approval", "leadership approval required"],
+    previewOnly: true,
+  },
+  {
+    id: "governance_blocking_rules",
+    category: "governance",
+    question: "What rules are stopping automation?",
+    examplePhrases: ["rules stopping automation", "blocking rules", "what rules block automation"],
+    previewOnly: true,
+  },
 ];
 
 /** Reserved for future queries — register definitions only, wire handlers separately. */
