@@ -110,6 +110,42 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
     id: "communication_waiting_approval",
     patterns: [/waiting approval/, /communications waiting approval/, /pending approval communications/],
   },
+  {
+    id: "orchestrator_system_status",
+    patterns: [/what is the system doing/, /system status/, /what is happening now/],
+  },
+  {
+    id: "orchestrator_automation_blocked",
+    patterns: [/where is automation blocked/, /automation blocked/, /blocked automation/],
+  },
+  {
+    id: "orchestrator_engine_waiting",
+    patterns: [/which engine is waiting/, /engine waiting/, /waiting engine/],
+  },
+  {
+    id: "orchestrator_candidates_stuck",
+    patterns: [/candidates are stuck/, /stuck candidates/, /which candidates stuck/],
+  },
+  {
+    id: "orchestrator_today_workflow",
+    patterns: [/today's workflow/, /show today workflow/, /workflow today/],
+  },
+  {
+    id: "orchestrator_hiring_blockers",
+    patterns: [/preventing hiring/, /hiring blockers/, /what is blocking hiring/],
+  },
+  {
+    id: "orchestrator_next_actions",
+    patterns: [/what will happen next/, /next actions/, /what happens next/],
+  },
+  {
+    id: "orchestrator_recruiter_automated",
+    patterns: [/recruiter work automated/, /how much automated/, /recruiter automation/],
+  },
+  {
+    id: "orchestrator_workflow_attention",
+    patterns: [/workflow needs attention/, /which workflow attention/, /needs attention workflow/],
+  },
 ];
 
 export function resolveExecutiveQueryId(question: string): ExecutiveQueryId | null {
