@@ -130,6 +130,41 @@ describe("ai-command-center", () => {
     assert.ok("confidence" in response);
   });
 
+  it("returns concise summaries instead of full daily brief dumps", () => {
+    const context = buildCommandCenterChatContext(sharedInput);
+    const response = buildAiCommandResponse({
+      message: "What should I work on today?",
+      context,
+      answer: {
+        queryId: "brief_needs_attention",
+        question: "What needs attention?",
+        category: "brief",
+        previewMode: true,
+        sourceSystem: "Executive Daily Brief (P72)",
+        lastRefreshedAt: REFERENCE,
+        total: 2,
+        metrics: { applicantsToday: 2 },
+        comparison: null,
+        summary: "Needs attention: 3 blocked.\n\nRecruiting Summary\n\nApplicants Today: 2",
+      },
+      queryId: "brief_needs_attention",
+    });
+    assert.ok(!response.summary.includes("Recruiting Summary"));
+    assert.ok(response.summary.includes("Needs attention"));
+  });
+
+  it("explains preview-only for paperwork execution requests", () => {
+    const context = buildCommandCenterChatContext(sharedInput);
+    const response = buildAiCommandResponse({
+      message: "Can you send those 2 applicants paperwork",
+      context,
+      answer: null,
+      queryId: null,
+    });
+    assert.ok(response.summary.includes("Preview only"));
+    assert.ok(!response.summary.includes("Recruiting Summary"));
+  });
+
   it("supports follow-up conversation memory", () => {
     const session = createCommandCenterSession();
     session.memory.lastSummary = "3 decisions require approval";

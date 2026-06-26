@@ -84,6 +84,33 @@ function buildEvidence(context: CommandCenterChatContext, answer: ExecutiveQuery
   return lines.slice(0, 8);
 }
 
+function summarizeForChat(answer: ExecutiveQueryAnswer | null, fallback: string): string {
+  if (!answer?.summary) return fallback;
+
+  const summary = answer.summary.trim();
+  const briefDumpMarker = "\n\nRecruiting Summary";
+  const markerIndex = summary.indexOf(briefDumpMarker);
+  if (markerIndex > 0) {
+    return summary.slice(0, markerIndex).trim();
+  }
+
+  if (summary.length > 480) {
+    return `${summary.slice(0, 477).trim()}…`;
+  }
+
+  return summary;
+}
+
+function buildConciseContextEvidence(context: CommandCenterChatContext): string[] {
+  const m = context.brief.metrics;
+  return [
+    `Applicants today: ${m.applicantsToday}`,
+    `Pending signatures: ${m.pendingSignatures}`,
+    `Platform health: ${context.operations.platformHealth.overall ?? "—"}%`,
+    `Approval queue: ${context.governance.approvalQueue.length} items (preview)`,
+  ];
+}
+
 function buildRecommendedActions(context: CommandCenterChatContext, queryId: ExecutiveQueryId | null): string[] {
   const actions: string[] = [];
 
@@ -107,7 +134,8 @@ export function buildAiCommandResponse(input: {
   queryId: ExecutiveQueryId | null;
 }): CommandCenterAssistantResponse {
   const { context, answer, queryId } = input;
-  const summary = answer?.summary ?? buildFallbackSummary(input.message, context);
+  const fallbackSummary = buildFallbackSummary(input.message, context);
+  const summary = summarizeForChat(answer, fallbackSummary);
   const rawSources = answer?.sourceSystem ? [answer.sourceSystem] : ["AI Command Center (P78)"];
   const sourceAttributions = formatSourceAttributions({
     sourceSystems: rawSources,
@@ -128,7 +156,7 @@ export function buildAiCommandResponse(input: {
 
   const response: CommandCenterAssistantResponse = {
     summary,
-    supportingEvidence: answer ? buildEvidence(context, answer) : [context.brief.summaryText],
+    supportingEvidence: answer ? buildEvidence(context, answer) : buildConciseContextEvidence(context),
     sourceEngines,
     sourceAttributions,
     recommendedActions: buildRecommendedActions(context, queryId),
@@ -147,12 +175,34 @@ export function buildAiCommandResponse(input: {
 
 function buildFallbackSummary(message: string, context: CommandCenterChatContext): string {
   const normalized = normalize(message);
+
+  if (/send.*paperwork|paperwork.*send|dropbox|esign|signature/i.test(normalized)) {
+    const ready = context.brief.metrics.applicantsToday;
+    return `Preview only — paperwork is not sent from chat. P77 governance blocks live execution. Review ${ready} applicant${ready === 1 ? "" : "s"} today in the paperwork queue or ask "What needs approval?"`;
+  }
+
+  if (/automate|auto.?send|execute|run workflow/i.test(normalized)) {
+    return `Preview only — automation is not executed from chat. ${context.decisions.executiveMetrics.automationReadyDecisions} decisions are automation-ready in preview. Ask "What needs approval?" for governed next steps.`;
+  }
+
   if (normalized.includes("hire")) {
     const ready = context.orchestrator.readyForAutomation.slice(0, 3);
     if (ready.length === 0) return "No candidates are automation-ready to hire today in preview.";
     return `Top hire candidates in preview: ${ready.map((r) => r.candidateName).join(", ")}.`;
   }
-  return `${context.brief.summaryText} Platform health ${context.operations.platformHealth.overall ?? "—"}%. ${context.governance.approvalQueue.length} items await approval in preview.`;
+
+  if (queryIdFromMessage(normalized)) {
+    return `Matched your question to recruiting intelligence — see evidence and recommended actions below. Platform health ${context.operations.platformHealth.overall ?? "—"}%.`;
+  }
+
+  return `I can help with recruiting priorities, approvals, risks, and next actions in preview. Platform health ${context.operations.platformHealth.overall ?? "—"}%. Try "What needs approval?" or "Who should I hire today?"`;
+}
+
+function queryIdFromMessage(normalized: string): ExecutiveQueryId | null {
+  for (const [pattern, queryId] of Object.entries(PROMPT_QUERY_MAP)) {
+    if (normalized.includes(pattern)) return queryId as ExecutiveQueryId;
+  }
+  return resolveExecutiveQueryId(normalized);
 }
 
 export function createAssistantMessage(response: CommandCenterAssistantResponse, content?: string): {

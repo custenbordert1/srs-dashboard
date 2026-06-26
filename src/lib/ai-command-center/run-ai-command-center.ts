@@ -162,6 +162,7 @@ export async function processCommandCenterChat(input: {
     opportunities: input.opportunities,
     activeReps: input.activeReps,
     question: effectiveMessage,
+    forcedQueryId: queryId,
     fetchedAt,
   });
 

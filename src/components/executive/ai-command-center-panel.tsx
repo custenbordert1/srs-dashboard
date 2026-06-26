@@ -210,7 +210,8 @@ export function AICommandCenterPanel() {
   const [typing, setTyping] = useState(false);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -247,7 +248,9 @@ export function AICommandCenterPanel() {
   }, [loadDashboard]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = chatScrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages, typing]);
 
   const sendMessage = useCallback(
@@ -287,6 +290,7 @@ export function AICommandCenterPanel() {
         setError("Chat failed");
       } finally {
         setTyping(false);
+        inputRef.current?.focus({ preventScroll: true });
       }
     },
     [dashboard, sessionId, typing],
@@ -391,100 +395,104 @@ export function AICommandCenterPanel() {
         </div>
       </div>
 
-      <div className="mt-4 max-h-[28rem] space-y-3 overflow-y-auto rounded-xl border border-zinc-800/80 bg-zinc-950/30 p-3">
-        {!hasHistory ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-sm font-medium text-zinc-300">Ask me anything about recruiting.</p>
-            <p className="mt-1 text-xs text-zinc-500">Choose a prompt below or type your own question.</p>
-            <div className="mt-4 w-full">
+      <div className="mt-4 flex flex-col overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/30">
+        <div ref={chatScrollRef} className="max-h-[28rem] min-h-[10rem] space-y-3 overflow-y-auto p-3">
+          {!hasHistory ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="text-sm font-medium text-zinc-300">Ask me anything about recruiting.</p>
+              <p className="mt-1 text-xs text-zinc-500">Choose a prompt below or type your own question.</p>
+              <div className="mt-4 w-full">
+                <SuggestedPromptChips
+                  prompts={dashboard.suggestedPrompts}
+                  disabled={typing}
+                  onSelect={(message) => void sendMessage(message)}
+                />
+              </div>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                {msg.role === "user" ? (
+                  <div className="max-w-[85%] rounded-xl bg-sky-500/15 px-3 py-2 text-sm text-sky-50">{msg.content}</div>
+                ) : msg.response ? (
+                  <div className="max-w-full flex-1">
+                    <ConversationCard response={msg.response} streaming={msg.id === streamingId} />
+                    {msg.response.followUpQuestions.length > 0 ? (
+                      <div className="mt-2">
+                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                          Suggested follow-ups
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {msg.response.followUpQuestions.map((q) => (
+                            <button
+                              key={q}
+                              type="button"
+                              disabled={typing}
+                              onClick={() => void sendMessage(q)}
+                              className="rounded-full border border-zinc-700 px-2.5 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
+                            >
+                              {q}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="text-sm text-zinc-300">{msg.content}</p>
+                )}
+              </div>
+            ))
+          )}
+          {typing ? (
+            <div className="flex items-center gap-2 text-xs text-zinc-500">
+              <span className="inline-flex gap-1">
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400 [animation-delay:0ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400 [animation-delay:150ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400 [animation-delay:300ms]" />
+              </span>
+              Assistant is thinking…
+            </div>
+          ) : null}
+        </div>
+
+        <div className="shrink-0 border-t border-zinc-800/80 bg-zinc-950/60 p-3">
+          {hasHistory ? (
+            <div className="mb-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Suggested prompts</p>
               <SuggestedPromptChips
                 prompts={dashboard.suggestedPrompts}
                 disabled={typing}
                 onSelect={(message) => void sendMessage(message)}
               />
             </div>
-          </div>
-        ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}>
-              {msg.role === "user" ? (
-                <div className="max-w-[85%] rounded-xl bg-sky-500/15 px-3 py-2 text-sm text-sky-50">{msg.content}</div>
-              ) : msg.response ? (
-                <div className="max-w-full flex-1">
-                  <ConversationCard response={msg.response} streaming={msg.id === streamingId} />
-                  {msg.response.followUpQuestions.length > 0 ? (
-                    <div className="mt-2">
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                        Suggested follow-ups
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {msg.response.followUpQuestions.map((q) => (
-                          <button
-                            key={q}
-                            type="button"
-                            disabled={typing}
-                            onClick={() => void sendMessage(q)}
-                            className="rounded-full border border-zinc-700 px-2.5 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
-                          >
-                            {q}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="text-sm text-zinc-300">{msg.content}</p>
-              )}
-            </div>
-          ))
-        )}
-        {typing ? (
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <span className="inline-flex gap-1">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400 [animation-delay:0ms]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400 [animation-delay:150ms]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-400 [animation-delay:300ms]" />
-            </span>
-            Assistant is thinking…
-          </div>
-        ) : null}
-        <div ref={bottomRef} />
-      </div>
+          ) : null}
 
-      {hasHistory ? (
-        <div className="mt-3">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Suggested prompts</p>
-          <SuggestedPromptChips
-            prompts={dashboard.suggestedPrompts}
-            disabled={typing}
-            onSelect={(message) => void sendMessage(message)}
-          />
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void sendMessage(input);
+            }}
+          >
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask anything about recruiting operations…"
+              disabled={typing}
+              className="flex-1 rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-sky-500/50 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={typing || !input.trim()}
+              className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
         </div>
-      ) : null}
-
-      <form
-        className="mt-3 flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void sendMessage(input);
-        }}
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask anything about recruiting operations…"
-          disabled={typing}
-          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-sky-500/50 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={typing || !input.trim()}
-          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-50"
-        >
-          Send
-        </button>
-      </form>
+      </div>
     </section>
   );
 }
