@@ -9,6 +9,7 @@ import { AutomationHealthPanel } from "@/components/executive/automation-health-
 import { ExecutionHealthPanel } from "@/components/executive/execution-health-panel";
 import { ExecutivePaperworkDashboardPanel } from "@/components/executive/executive-paperwork-dashboard-panel";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
+import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-paperwork-panel";
 import { ExecutiveNaturalLanguageQueriesPanel } from "@/components/executive/executive-natural-language-queries-panel";
 import { WorkforcePlacementPanel } from "@/components/executive/workforce-placement-panel";
 import { OnboardingHealthPanel } from "@/components/executive/onboarding-health-panel";
@@ -226,6 +227,8 @@ export function ExecutiveHomePanel() {
       <ExecutionHealthPanel />
 
       <OnboardingHealthPanel />
+
+      <AutonomousPaperworkPanel />
 
       <AutonomousOnboardingPanel />
 

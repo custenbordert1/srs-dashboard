@@ -28,7 +28,31 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
   },
   {
     id: "paperwork_signed_today",
-    patterns: [/signed paperwork today/, /paperwork signed today/, /signatures? today/],
+    patterns: [/signed paperwork today/, /paperwork signed today/, /signatures? today/, /candidates signed today/],
+  },
+  {
+    id: "paperwork_ready_for_auto",
+    patterns: [/ready for automatic paperwork/, /ready for auto send/, /automatic paperwork eligible/],
+  },
+  {
+    id: "paperwork_auto_sent_today",
+    patterns: [/automatically sent/, /auto sent today/, /auto paperwork today/],
+  },
+  {
+    id: "paperwork_manual_sent_today",
+    patterns: [/manually sent/, /manual paperwork/, /manual sends/],
+  },
+  {
+    id: "paperwork_failed_count",
+    patterns: [/paperwork.*failed/, /failed packets?/, /which paperwork failed/],
+  },
+  {
+    id: "paperwork_waiting_longest",
+    patterns: [/waiting the longest/, /longest to sign/, /who has been waiting/],
+  },
+  {
+    id: "paperwork_top_recruiter_today",
+    patterns: [/recruiter sent the most/, /top recruiter.*paperwork/, /which recruiter sent/],
   },
 ];
 

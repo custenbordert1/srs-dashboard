@@ -1,6 +1,7 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
-import type { CandidateOnboardingRecord } from "@/lib/candidate-onboarding-engine/types";
+import type { CandidateOnboardingRecord, CandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/types";
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
+import { buildPaperworkNlAnswers, isP70PaperworkQueryId } from "@/lib/autonomous-paperwork-engine/build-paperwork-nl-answers";
 import {
   buildApplicantQueryAnswer,
   buildExecutiveQueryCards,
@@ -21,6 +22,7 @@ function buildAnswerForQueryId(input: {
   candidates: BreezyCandidate[];
   workflowRows: ScoredCandidateWorkflowRow[];
   onboardingRecords: CandidateOnboardingRecord[];
+  policy: CandidateOnboardingPolicy;
   fetchedAt: string;
 }): ExecutiveQueryAnswer {
   if (input.queryId.startsWith("applicants_")) {
@@ -31,8 +33,22 @@ function buildAnswerForQueryId(input: {
     });
   }
 
+  if (isP70PaperworkQueryId(input.queryId)) {
+    const p70Answer = buildPaperworkNlAnswers({
+      queryId: input.queryId,
+      candidates: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      fetchedAt: input.fetchedAt,
+    });
+    if (p70Answer) return p70Answer;
+  }
+
   return buildPaperworkQueryAnswer({
-    queryId: input.queryId as Extract<ExecutiveQueryId, `paperwork_${string}`>,
+    queryId: input.queryId as Extract<
+      ExecutiveQueryId,
+      "paperwork_sent_today" | "paperwork_sent_week" | "paperwork_signed_today"
+    >,
     candidates: input.workflowRows,
     onboardingRecords: input.onboardingRecords,
     fetchedAt: input.fetchedAt,
@@ -43,6 +59,7 @@ export function buildExecutiveQueryDashboardSnapshot(input: {
   candidates: BreezyCandidate[];
   workflowRows: ScoredCandidateWorkflowRow[];
   onboardingRecords: CandidateOnboardingRecord[];
+  policy: CandidateOnboardingPolicy;
   fetchedAt?: string;
 }): ExecutiveQueryDashboardSnapshot {
   const fetchedAt = input.fetchedAt ?? new Date().toISOString();
@@ -59,6 +76,7 @@ export function buildExecutiveQueryDashboardSnapshot(input: {
       candidates: input.candidates,
       workflowRows: input.workflowRows,
       onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
       fetchedAt,
     }),
   );
@@ -80,6 +98,7 @@ export function runExecutiveQueryPreview(input: {
   candidates: BreezyCandidate[];
   workflowRows: ScoredCandidateWorkflowRow[];
   onboardingRecords: CandidateOnboardingRecord[];
+  policy: CandidateOnboardingPolicy;
   question?: string | null;
   fetchedAt?: string;
 }): ExecutiveQueryPreviewResult {
@@ -88,6 +107,7 @@ export function runExecutiveQueryPreview(input: {
     candidates: input.candidates,
     workflowRows: input.workflowRows,
     onboardingRecords: input.onboardingRecords,
+    policy: input.policy,
     fetchedAt,
   });
 
@@ -105,6 +125,7 @@ export function runExecutiveQueryPreview(input: {
         candidates: input.candidates,
         workflowRows: input.workflowRows,
         onboardingRecords: input.onboardingRecords,
+        policy: input.policy,
         fetchedAt,
       });
     } else {
