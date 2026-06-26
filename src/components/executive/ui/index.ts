@@ -1,4 +1,5 @@
 export { ActionChip, type ActionChipVariant } from "@/components/executive/ui/action-chip";
+export { AICommandCenterLoadingSkeleton } from "@/components/executive/ui/ai-command-center-loading";
 export { AIResponseCard } from "@/components/executive/ui/ai-response-card";
 export { AssistantAvatar, TypingIndicator } from "@/components/executive/ui/chat-primitives";
 export { EmptyState } from "@/components/executive/ui/empty-state";

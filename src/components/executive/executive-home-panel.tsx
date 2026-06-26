@@ -205,14 +205,17 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       ? Math.round(territoryRows.reduce((sum, row) => sum + row.healthScore, 0) / territoryRows.length)
       : null;
   const recruitingHealth = insights != null ? Math.max(0, 100 - insights.fillRiskScore) : null;
-  const operationsHealthLabel = atsFallback?.statusLabel ?? (atsHealth.loading ? "Loading…" : "Monitoring");
+  const operationsHealthLabel = atsFallback?.statusLabel ?? "Monitoring";
   const automationReadiness = assignmentRollups?.autoAssignmentRate ?? null;
   const briefingHealth: ExecutiveBriefingHealth = {
     platformHealth,
     recruitingHealth,
     operationsHealthLabel,
     automationReadiness,
-    loading: kpiLoading && !insights && !atsFallback,
+    recruitingLoading: kpiLoading && recruitingHealth == null,
+    platformLoading: loading && !data && platformHealth == null,
+    operationsLoading: atsHealth.loading && !atsFallback,
+    automationLoading: assignmentRollupsLoading,
   };
 
   return (

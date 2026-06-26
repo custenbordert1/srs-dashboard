@@ -2,13 +2,13 @@
 
 import {
   ActionChip,
+  AICommandCenterLoadingSkeleton,
   AIResponseCard,
   AssistantAvatar,
   EmptyState,
   ExecutiveButton,
   ExecutiveCard,
   ExecutivePanelError,
-  ExecutivePanelLoading,
   ExecutiveWarningList,
   formatChatTimestamp,
   GlassPanel,
@@ -159,7 +159,7 @@ export function AICommandCenterPanel() {
   }, [loadDashboard, sessionId]);
 
   if (loading && !dashboard) {
-    return <ExecutivePanelLoading title="Executive AI Assistant" badge="Preview · P77 Governed" />;
+    return <AICommandCenterLoadingSkeleton />;
   }
 
   if (error && !dashboard) {

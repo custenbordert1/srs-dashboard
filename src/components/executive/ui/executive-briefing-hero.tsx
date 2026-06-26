@@ -19,6 +19,11 @@ export type ExecutiveBriefingHealth = {
   recruitingHealth: number | null;
   operationsHealthLabel: string;
   automationReadiness: number | null;
+  recruitingLoading?: boolean;
+  platformLoading?: boolean;
+  operationsLoading?: boolean;
+  automationLoading?: boolean;
+  /** @deprecated Use per-metric loading flags */
   loading?: boolean;
 };
 
@@ -62,7 +67,7 @@ export function ExecutiveHero({ userName, snapshot, health, lastUpdated }: Execu
           </div>
 
           <div className="flex flex-col items-end gap-3">
-            {lastUpdated ? (
+            {lastUpdated && lastUpdated !== "—" ? (
               <p className="text-xs text-zinc-500">
                 Updated <span className="text-zinc-400">{lastUpdated}</span>
               </p>
@@ -82,21 +87,26 @@ export function ExecutiveHero({ userName, snapshot, health, lastUpdated }: Execu
         </div>
 
         <div className="relative mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-8">
-          <HealthGauge label="Recruiting health" value={health.recruitingHealth} loading={health.loading} />
-          <div className="flex flex-col items-center text-center">
-            <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-zinc-950/40 ring-1 ring-inset ring-white/[0.06]">
-              {health.loading ? (
-                <div className="h-5 w-16 ex-shimmer rounded" />
-              ) : (
-                <span className="px-2 text-center text-xs font-semibold leading-tight text-zinc-100">
-                  {health.operationsHealthLabel}
-                </span>
-              )}
-            </div>
-            <p className="mt-2 text-xs font-medium text-zinc-500">Operations health</p>
-          </div>
-          <HealthGauge label="Platform health" value={health.platformHealth} loading={health.loading} />
-          <HealthGauge label="Automation readiness" value={health.automationReadiness} loading={health.loading} />
+          <HealthGauge
+            label="Recruiting health"
+            value={health.recruitingHealth}
+            loading={health.recruitingLoading ?? health.loading}
+          />
+          <HealthGauge
+            label="Operations health"
+            textValue={health.operationsHealthLabel}
+            loading={health.operationsLoading ?? health.loading}
+          />
+          <HealthGauge
+            label="Platform health"
+            value={health.platformHealth}
+            loading={health.platformLoading ?? health.loading}
+          />
+          <HealthGauge
+            label="Automation readiness"
+            value={health.automationReadiness}
+            loading={health.automationLoading ?? health.loading}
+          />
         </div>
       </GlassPanel>
 

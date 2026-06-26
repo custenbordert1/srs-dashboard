@@ -229,9 +229,7 @@ export function RecruitingDashboardContent({
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="executive-home" activeTab={activeTab}>
-          <TabPanelWithSourceBanner tabId="executive-home">
-            <LazyExecutiveHomePanel userName={userName} />
-          </TabPanelWithSourceBanner>
+          <LazyExecutiveHomePanel userName={userName} />
         </DashboardTabPanel>
 
         <DashboardTabPanel tabId="executive-forecasting" activeTab={activeTab}>
