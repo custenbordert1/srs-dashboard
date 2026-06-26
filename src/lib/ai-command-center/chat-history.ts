@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createCommandCenterSession } from "@/lib/ai-command-center/conversation-state";
+import { normalizeConversationMemory } from "@/lib/ai-command-center/conversation-memory";
 import type { CommandCenterChatMessage, CommandCenterSession } from "@/lib/ai-command-center/types";
 import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
@@ -11,7 +12,8 @@ function sessionPath(sessionId: string): string {
 export async function loadChatSession(sessionId: string): Promise<CommandCenterSession> {
   try {
     const raw = await readFile(sessionPath(sessionId), "utf8");
-    return JSON.parse(raw) as CommandCenterSession;
+    const parsed = JSON.parse(raw) as CommandCenterSession;
+    return { ...parsed, memory: normalizeConversationMemory(parsed.memory) };
   } catch {
     return createCommandCenterSession(sessionId);
   }

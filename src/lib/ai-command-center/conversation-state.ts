@@ -1,16 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { CommandCenterExecutiveMetrics, CommandCenterSession, ConversationMemory } from "@/lib/ai-command-center/types";
+import { createLegacyEmptyMemory } from "@/lib/ai-command-center/conversation-memory";
 
 export function createEmptyMemory(): ConversationMemory {
-  return {
-    lastQueryId: null,
-    lastTopic: null,
-    lastSummary: null,
-    lastCandidateIds: [],
-    lastCandidateNames: [],
-    lastSourceEngines: [],
-    lastRiskLevel: null,
-  };
+  return createLegacyEmptyMemory();
 }
 
 export function createEmptyMetrics(): CommandCenterExecutiveMetrics {

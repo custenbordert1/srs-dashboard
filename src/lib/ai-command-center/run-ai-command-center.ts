@@ -14,7 +14,8 @@ import { buildCommandCenterChatContext } from "@/lib/ai-command-center/build-cha
 import { COMMAND_CENTER_SUGGESTED_PROMPTS } from "@/lib/ai-command-center/build-suggested-actions";
 import { appendMessage, loadChatSession, saveChatSession } from "@/lib/ai-command-center/chat-history";
 import { createCommandCenterSession } from "@/lib/ai-command-center/conversation-state";
-import { resolveFollowUpMessage, updateMemoryFromResponse } from "@/lib/ai-command-center/conversation-memory";
+import { buildFollowUpResponse } from "@/lib/ai-command-center/build-follow-up-response";
+import { resolveFollowUpIntent, resolveFollowUpMessage, updateMemoryFromResponse } from "@/lib/ai-command-center/conversation-memory";
 import {
   canExecuteCommandCenter,
   isPreviewCommandCenter,
@@ -140,51 +141,71 @@ export async function processCommandCenterChat(input: {
   const fetchedAt = input.fetchedAt ?? new Date().toISOString();
   const session = await loadChatSession(input.sessionId);
   const userText = input.message.trim();
-
-  const followUp = resolveFollowUpMessage(userText, session.memory);
-  const effectiveMessage = followUp ?? userText;
-  const queryId = resolveCommandCenterQuery(effectiveMessage);
+  const followUpIntent = resolveFollowUpIntent(userText);
+  const entityFollowUp = followUpIntent ? null : resolveFollowUpMessage(userText, session.memory);
 
   const context = buildCommandCenterChatContext({ ...input, fetchedAt });
 
-  const nlResult = await runExecutiveQueryPreview({
-    candidates: input.candidates,
-    workflowRows: input.workflowRows,
-    onboardingRecords: input.onboardingRecords,
-    policy: input.policy,
-    flags: input.p71Flags,
-    p73Flags: input.p73Flags,
-    p74Flags: input.p74Flags,
-    p75Flags: input.p75Flags,
-    p76Flags: input.p76Flags,
-    p77Flags: input.p77Flags,
-    sendQueueMetrics: input.sendQueueMetrics,
-    opportunities: input.opportunities,
-    activeReps: input.activeReps,
-    question: effectiveMessage,
-    forcedQueryId: queryId,
-    fetchedAt,
-  });
+  let assistantPayload;
+  let queryId: ReturnType<typeof resolveCommandCenterQuery> = null;
+  let topic = userText;
+  let nlWarnings: string[] = [];
 
-  const assistantPayload = buildAiCommandResponse({
-    message: effectiveMessage,
-    context,
-    answer: nlResult.answer,
-    queryId,
-  });
+  if (followUpIntent && session.memory.activeTurn) {
+    assistantPayload = buildFollowUpResponse({
+      intent: followUpIntent,
+      turn: session.memory.activeTurn,
+      context,
+    });
+    queryId = session.memory.activeTurn.queryId;
+    topic = session.memory.activeTurn.topic;
+  } else {
+    const effectiveMessage = entityFollowUp ?? userText;
+    queryId = resolveCommandCenterQuery(effectiveMessage);
+
+    const nlResult = await runExecutiveQueryPreview({
+      candidates: input.candidates,
+      workflowRows: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      flags: input.p71Flags,
+      p73Flags: input.p73Flags,
+      p74Flags: input.p74Flags,
+      p75Flags: input.p75Flags,
+      p76Flags: input.p76Flags,
+      p77Flags: input.p77Flags,
+      sendQueueMetrics: input.sendQueueMetrics,
+      opportunities: input.opportunities,
+      activeReps: input.activeReps,
+      question: effectiveMessage,
+      forcedQueryId: queryId,
+      fetchedAt,
+    });
+
+    assistantPayload = buildAiCommandResponse({
+      message: effectiveMessage,
+      context,
+      answer: nlResult.answer,
+      queryId,
+    });
+    topic = nlResult.answer?.question ?? effectiveMessage;
+    nlWarnings = nlResult.warnings;
+  }
 
   const assistantMsg = createAssistantMessage(assistantPayload);
   const userMsg = createUserMessage(userText);
 
   const responseTimeMs = Math.round(performance.now() - started);
   const metrics = updateMetrics(session.metrics, responseTimeMs, context);
-  const memory = updateMemoryFromResponse({
-    memory: session.memory,
-    queryId,
-    topic: nlResult.answer?.question ?? effectiveMessage,
-    summary: assistantPayload.summary,
-    response: assistantPayload,
-  });
+  const memory = followUpIntent && session.memory.activeTurn
+    ? session.memory
+    : updateMemoryFromResponse({
+        memory: session.memory,
+        userMessage: userText,
+        queryId,
+        topic,
+        response: assistantPayload,
+      });
 
   let updated = appendMessage(session, userMsg);
   updated = appendMessage(updated, assistantMsg);
@@ -200,7 +221,7 @@ export async function processCommandCenterChat(input: {
     metrics,
     warnings: [
       "Preview only — no live actions executed.",
-      ...nlResult.warnings.slice(0, 2),
+      ...nlWarnings.slice(0, 2),
     ],
   };
 }
