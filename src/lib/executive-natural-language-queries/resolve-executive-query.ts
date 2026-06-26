@@ -146,6 +146,70 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
     id: "orchestrator_workflow_attention",
     patterns: [/workflow needs attention/, /which workflow attention/, /needs attention workflow/],
   },
+  {
+    id: "operations_anything_broken",
+    patterns: [/is anything broken/, /anything broken/, /is something broken/],
+  },
+  {
+    id: "operations_critical_issues",
+    patterns: [/critical issues/, /show critical issues/, /critical problems/],
+  },
+  {
+    id: "operations_needs_attention",
+    patterns: [/what needs attention now/, /needs attention now/, /attention now/],
+  },
+  {
+    id: "operations_unhealthy_workflows",
+    patterns: [/unhealthy workflows/, /which workflows unhealthy/, /workflows unhealthy/],
+  },
+  {
+    id: "operations_recruiting_slowdown",
+    patterns: [/recruiting slowing down/, /why recruiting slow/, /slowdown recruiting/],
+  },
+  {
+    id: "operations_leadership_fix_today",
+    patterns: [/leadership fix today/, /what should leadership fix/, /fix today/],
+  },
+  {
+    id: "operations_biggest_risk",
+    patterns: [/biggest operational risk/, /biggest risk/, /operational risk/],
+  },
+  {
+    id: "operations_problem_tomorrow",
+    patterns: [/problem tomorrow/, /become a problem tomorrow/, /tomorrow risk/],
+  },
+  {
+    id: "decisions_what_next",
+    patterns: [/what should the system do next/, /what should happen next/, /system do next/],
+  },
+  {
+    id: "decisions_best",
+    patterns: [/best decision/, /what is the best decision/, /top decision/],
+  },
+  {
+    id: "decisions_why_recommended",
+    patterns: [/why did the ai recommend/, /why recommend this/, /why this recommendation/],
+  },
+  {
+    id: "decisions_need_approval",
+    patterns: [/decisions need approval/, /which decisions need approval/, /need human approval/],
+  },
+  {
+    id: "decisions_high_confidence",
+    patterns: [/high confidence actions/, /high-confidence actions/, /confident recommendations/],
+  },
+  {
+    id: "decisions_low_confidence",
+    patterns: [/low confidence recommendations/, /low-confidence recommendations/, /uncertain recommendations/],
+  },
+  {
+    id: "decisions_safest_action",
+    patterns: [/safest action/, /what is the safest action/, /lowest risk action/],
+  },
+  {
+    id: "decisions_highest_value",
+    patterns: [/most value decision/, /highest value recommendation/, /biggest opportunity/],
+  },
 ];
 
 export function resolveExecutiveQueryId(question: string): ExecutiveQueryId | null {

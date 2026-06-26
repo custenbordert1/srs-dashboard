@@ -10,6 +10,12 @@ import { DEFAULT_P73_FEATURE_FLAGS } from "@/lib/autonomous-candidate-communicat
 import { buildP74NlAnswers, isP74OrchestratorQueryId } from "@/lib/autonomous-recruiting-orchestrator/build-p74-nl-answers";
 import type { P74FeatureFlags } from "@/lib/autonomous-recruiting-orchestrator/types";
 import { DEFAULT_P74_FEATURE_FLAGS } from "@/lib/autonomous-recruiting-orchestrator/feature-flags-store";
+import { buildP75NlAnswers, isP75OperationsQueryId } from "@/lib/autonomous-operations-center/build-p75-nl-answers";
+import type { P75FeatureFlags } from "@/lib/autonomous-operations-center/types";
+import { DEFAULT_P75_FEATURE_FLAGS } from "@/lib/autonomous-operations-center/feature-flags-store";
+import { buildP76NlAnswers, isP76DecisionQueryId } from "@/lib/autonomous-decision-engine/build-p76-nl-answers";
+import type { P76FeatureFlags } from "@/lib/autonomous-decision-engine/types";
+import { DEFAULT_P76_FEATURE_FLAGS } from "@/lib/autonomous-decision-engine/feature-flags-store";
 import { buildDailyBriefNlAnswer, isP72BriefQueryId } from "@/lib/executive-daily-brief/build-daily-brief-nl-answers";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
@@ -38,6 +44,8 @@ async function buildAnswerForQueryId(input: {
   flags: P71FeatureFlags;
   p73Flags?: P73FeatureFlags;
   p74Flags?: P74FeatureFlags;
+  p75Flags?: P75FeatureFlags;
+  p76Flags?: P76FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -51,6 +59,16 @@ async function buildAnswerForQueryId(input: {
   const p74Flags = input.p74Flags ?? {
     ...DEFAULT_P74_FEATURE_FLAGS,
     orchestratorEnabled: true,
+    executionMode: "preview",
+  };
+  const p75Flags = input.p75Flags ?? {
+    ...DEFAULT_P75_FEATURE_FLAGS,
+    operationsCenterEnabled: true,
+    executionMode: "preview",
+  };
+  const p76Flags = input.p76Flags ?? {
+    ...DEFAULT_P76_FEATURE_FLAGS,
+    decisionEngineEnabled: true,
     executionMode: "preview",
   };
 
@@ -132,6 +150,45 @@ async function buildAnswerForQueryId(input: {
     if (p74Answer) return p74Answer;
   }
 
+  if (isP75OperationsQueryId(input.queryId)) {
+    const p75Answer = buildP75NlAnswers({
+      queryId: input.queryId,
+      candidates: input.candidates,
+      workflowRows: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      p71Flags: input.flags,
+      p73Flags,
+      p74Flags,
+      p75Flags,
+      sendQueueMetrics: input.sendQueueMetrics,
+      opportunities: input.opportunities,
+      activeReps: input.activeReps,
+      fetchedAt: input.fetchedAt,
+    });
+    if (p75Answer) return p75Answer;
+  }
+
+  if (isP76DecisionQueryId(input.queryId)) {
+    const p76Answer = buildP76NlAnswers({
+      queryId: input.queryId,
+      candidates: input.candidates,
+      workflowRows: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      p71Flags: input.flags,
+      p73Flags,
+      p74Flags,
+      p75Flags,
+      p76Flags,
+      sendQueueMetrics: input.sendQueueMetrics,
+      opportunities: input.opportunities,
+      activeReps: input.activeReps,
+      fetchedAt: input.fetchedAt,
+    });
+    if (p76Answer) return p76Answer;
+  }
+
   return buildPaperworkQueryAnswer({
     queryId: input.queryId as Extract<
       ExecutiveQueryId,
@@ -151,6 +208,8 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
   flags: P71FeatureFlags;
   p73Flags?: P73FeatureFlags;
   p74Flags?: P74FeatureFlags;
+  p75Flags?: P75FeatureFlags;
+  p76Flags?: P76FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -183,6 +242,16 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
           orchestratorEnabled: true,
           executionMode: "preview",
         },
+        p75Flags: input.p75Flags ?? {
+          ...DEFAULT_P75_FEATURE_FLAGS,
+          operationsCenterEnabled: true,
+          executionMode: "preview",
+        },
+        p76Flags: input.p76Flags ?? {
+          ...DEFAULT_P76_FEATURE_FLAGS,
+          decisionEngineEnabled: true,
+          executionMode: "preview",
+        },
         sendQueueMetrics: input.sendQueueMetrics,
         opportunities: input.opportunities,
         activeReps: input.activeReps,
@@ -212,6 +281,8 @@ export async function runExecutiveQueryPreview(input: {
   flags: P71FeatureFlags;
   p73Flags?: P73FeatureFlags;
   p74Flags?: P74FeatureFlags;
+  p75Flags?: P75FeatureFlags;
+  p76Flags?: P76FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -227,6 +298,8 @@ export async function runExecutiveQueryPreview(input: {
     flags: input.flags,
     p73Flags: input.p73Flags,
     p74Flags: input.p74Flags,
+    p75Flags: input.p75Flags,
+    p76Flags: input.p76Flags,
     sendQueueMetrics: input.sendQueueMetrics,
     opportunities: input.opportunities,
     activeReps: input.activeReps,
@@ -257,6 +330,16 @@ export async function runExecutiveQueryPreview(input: {
         p74Flags: input.p74Flags ?? {
           ...DEFAULT_P74_FEATURE_FLAGS,
           orchestratorEnabled: true,
+          executionMode: "preview",
+        },
+        p75Flags: input.p75Flags ?? {
+          ...DEFAULT_P75_FEATURE_FLAGS,
+          operationsCenterEnabled: true,
+          executionMode: "preview",
+        },
+        p76Flags: input.p76Flags ?? {
+          ...DEFAULT_P76_FEATURE_FLAGS,
+          decisionEngineEnabled: true,
           executionMode: "preview",
         },
         sendQueueMetrics: input.sendQueueMetrics,

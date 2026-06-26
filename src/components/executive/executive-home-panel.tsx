@@ -13,6 +13,8 @@ import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-pape
 import { AutonomousPaperworkExecutionPanel } from "@/components/executive/autonomous-paperwork-execution-panel";
 import { AutonomousCandidateCommunicationPanel } from "@/components/executive/autonomous-candidate-communication-panel";
 import { ExecutiveDailyBriefPanel } from "@/components/executive/executive-daily-brief-panel";
+import { AutonomousOperationsCenterPanel } from "@/components/executive/autonomous-operations-center-panel";
+import { AutonomousDecisionEnginePanel } from "@/components/executive/autonomous-decision-engine-panel";
 import { AutonomousRecruitingOrchestratorPanel } from "@/components/executive/autonomous-recruiting-orchestrator-panel";
 import { ExecutiveNaturalLanguageQueriesPanel } from "@/components/executive/executive-natural-language-queries-panel";
 import { WorkforcePlacementPanel } from "@/components/executive/workforce-placement-panel";
@@ -245,6 +247,10 @@ export function ExecutiveHomePanel() {
       <AutonomousCandidateCommunicationPanel />
 
       <AutonomousRecruitingOrchestratorPanel />
+
+      <AutonomousOperationsCenterPanel />
+
+      <AutonomousDecisionEnginePanel />
 
       <ExecutiveNaturalLanguageQueriesPanel />
 
