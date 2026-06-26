@@ -7,6 +7,7 @@ import { CandidateCopilotPanel } from "@/components/recruiting/candidate-workspa
 import { CandidateCommunicationLog } from "@/components/recruiting/candidate-workspace/candidate-communication-log";
 import { CandidateGradePanel } from "@/components/recruiting/candidate-workspace/candidate-grade-panel";
 import { CandidateMelReadinessPanel } from "@/components/recruiting/candidate-workspace/candidate-mel-readiness-panel";
+import { CandidateOnboardingPreviewPanel } from "@/components/recruiting/candidate-workspace/candidate-onboarding-preview-panel";
 import { CandidateNextActionCard } from "@/components/recruiting/candidate-workspace/candidate-next-action-card";
 import { CandidateNotesPanel } from "@/components/recruiting/candidate-workspace/candidate-notes-panel";
 import { CandidatePaperworkPanel } from "@/components/recruiting/candidate-workspace/candidate-paperwork-panel";
@@ -250,6 +251,7 @@ export function CandidateWorkspace({
             onRefresh={onRefreshPaperworkStatus}
           />
           <CandidateMelReadinessPanel items={melReadiness} />
+          <CandidateOnboardingPreviewPanel candidate={activeCandidate} />
           <CandidateCommunicationLog entries={communicationLog} />
         </div>
       </aside>
