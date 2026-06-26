@@ -60,7 +60,7 @@ function workflowRow(overrides: Partial<ScoredCandidateWorkflowRow> & { candidat
 
 describe("executive-natural-language-queries", () => {
   it("lists supported applicant and paperwork questions", () => {
-    assert.equal(SUPPORTED_EXECUTIVE_QUERIES.length, 51);
+    assert.equal(SUPPORTED_EXECUTIVE_QUERIES.length, 59);
     assert.ok(SUPPORTED_EXECUTIVE_QUERIES.some((row) => row.id === "applicants_today"));
     assert.ok(SUPPORTED_EXECUTIVE_QUERIES.some((row) => row.id === "paperwork_signed_today"));
     assert.ok(SUPPORTED_EXECUTIVE_QUERIES.some((row) => row.id === "paperwork_ready_for_auto"));
@@ -143,7 +143,7 @@ describe("executive-natural-language-queries", () => {
     assert.equal(result.ok, true);
     assert.equal(result.answer?.queryId, "applicants_today");
     assert.equal(result.dashboard.cards.length, 2);
-    assert.equal(result.dashboard.recentAnswers.length, 51);
+    assert.equal(result.dashboard.recentAnswers.length, 59);
     assert.ok(result.warnings.some((row) => /preview mode/i.test(row)));
   });
 });
