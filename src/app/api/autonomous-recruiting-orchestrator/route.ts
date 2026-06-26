@@ -1,28 +1,28 @@
 import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { loadP71FeatureFlags } from "@/lib/autonomous-paperwork-execution-engine/feature-flags-store";
+import { loadP73FeatureFlags } from "@/lib/autonomous-candidate-communication-engine/feature-flags-store";
+import { loadP74FeatureFlags } from "@/lib/autonomous-recruiting-orchestrator/feature-flags-store";
+import { runAutonomousRecruitingOrchestratorPreview } from "@/lib/autonomous-recruiting-orchestrator";
 import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { listIngestedCandidates, readIngestionStore } from "@/lib/candidate-ingestion/ingestion-store";
 import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
-import { loadP71FeatureFlags } from "@/lib/autonomous-paperwork-execution-engine/feature-flags-store";
-import { loadP73FeatureFlags } from "@/lib/autonomous-candidate-communication-engine/feature-flags-store";
-import { loadP74FeatureFlags } from "@/lib/autonomous-recruiting-orchestrator/feature-flags-store";
 import { buildOnboardingSendQueueMetrics } from "@/lib/candidate-onboarding-send-queue/build-send-queue-metrics";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
-import {
-  listSupportedExecutiveQueries,
-  runExecutiveQueryPreview,
-} from "@/lib/executive-natural-language-queries";
+import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
+import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
+import { buildRepIntelligenceWithGeocoding } from "@/lib/rep-intelligence/build-rep-intelligence";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 /**
- * GET /api/executive-natural-language-queries
- * GET /api/executive-natural-language-queries?q=How many applicants applied today?
- * GET /api/executive-natural-language-queries?list=supported
+ * GET /api/autonomous-recruiting-orchestrator
+ * GET /api/autonomous-recruiting-orchestrator?candidateId=...
  *
- * Read-only preview — no writes, automation, or external mutations.
+ * Read-only cross-engine orchestration preview (P74).
  */
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
@@ -33,21 +33,14 @@ export async function GET(request: Request) {
   if (isGuardFailure(guard)) return guard;
 
   const url = new URL(request.url);
-  if (url.searchParams.get("list") === "supported") {
-    return NextResponse.json({
-      ok: true,
-      previewMode: true,
-      supportedQuestions: listSupportedExecutiveQueries(),
-    });
-  }
+  const candidateId = url.searchParams.get("candidateId")?.trim() ?? "";
 
-  const question = url.searchParams.get("q")?.trim() || url.searchParams.get("query")?.trim() || "";
-
-  const [store, workflows, jobsResult, onboardingRecords, policy, flags, p73Flags, p74Flags, sendQueueMetrics] =
+  const [store, workflows, jobsResult, melResult, onboardingRecords, policy, p71Flags, p73Flags, p74Flags, sendQueueMetrics] =
     await Promise.all([
       readIngestionStore(),
       getCandidateWorkflowState(),
       fetchBreezyJobs("published"),
+      fetchMelProjectsSheet(),
       listAllCandidateOnboardingRecords(),
       loadCandidateOnboardingPolicy(),
       loadP71FeatureFlags(),
@@ -66,22 +59,30 @@ export async function GET(request: Request) {
     }),
   );
 
+  const opportunities = melResult.ok ? parseMelOpportunities(melResult.rows) : [];
+  const repSnapshot = melResult.ok
+    ? await buildRepIntelligenceWithGeocoding(melResult.rows, melResult.fetchedAt)
+    : null;
+
+  const fetchedAt = store.lastChunkAt ?? store.updatedAt ?? new Date().toISOString();
   const started = performance.now();
-  const result = await runExecutiveQueryPreview({
+  const result = runAutonomousRecruitingOrchestratorPreview({
     candidates,
     workflowRows,
     onboardingRecords,
     policy,
-    flags,
+    p71Flags,
     p73Flags,
     p74Flags,
     sendQueueMetrics,
-    question: question || null,
-    fetchedAt: store.lastChunkAt ?? store.updatedAt ?? new Date().toISOString(),
+    opportunities: melResult.ok ? opportunities : undefined,
+    activeReps: repSnapshot?.activeReps,
+    candidateId: candidateId || null,
+    fetchedAt,
   });
 
   return NextResponse.json({
     ...result,
-    meta: { buildMs: Math.round(performance.now() - started) },
+    meta: { buildMs: Math.round(performance.now() - started), melAvailable: melResult.ok },
   });
 }

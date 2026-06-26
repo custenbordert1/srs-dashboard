@@ -1,7 +1,7 @@
 export const P69_SOURCE_PHASE = "P69";
 export const P69_PREVIEW_MODE = true as const;
 
-export type ExecutiveQueryCategory = "applicants" | "paperwork" | "brief";
+export type ExecutiveQueryCategory = "applicants" | "paperwork" | "brief" | "communication" | "orchestrator";
 
 export type ExecutiveQueryId =
   | "applicants_today"
@@ -23,7 +23,22 @@ export type ExecutiveQueryId =
   | "brief_how_are_we_doing"
   | "brief_recruiting_summary"
   | "brief_what_changed"
-  | "brief_needs_attention";
+  | "brief_needs_attention"
+  | "communication_sent_today"
+  | "communication_needs_reminders"
+  | "communication_no_response"
+  | "communication_failures"
+  | "communication_welcome_today"
+  | "communication_waiting_approval"
+  | "orchestrator_system_status"
+  | "orchestrator_automation_blocked"
+  | "orchestrator_engine_waiting"
+  | "orchestrator_candidates_stuck"
+  | "orchestrator_today_workflow"
+  | "orchestrator_hiring_blockers"
+  | "orchestrator_next_actions"
+  | "orchestrator_recruiter_automated"
+  | "orchestrator_workflow_attention";
 
 export type SupportedExecutiveQuery = {
   id: ExecutiveQueryId;
