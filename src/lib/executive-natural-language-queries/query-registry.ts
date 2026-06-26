@@ -43,9 +43,51 @@ export const SUPPORTED_EXECUTIVE_QUERIES: SupportedExecutiveQuery[] = [
     examplePhrases: ["signed paperwork today", "paperwork signed today", "signatures today"],
     previewOnly: true,
   },
+  {
+    id: "paperwork_auto_sent_today",
+    category: "paperwork",
+    question: "How many paperwork packets were automatically sent today?",
+    examplePhrases: ["automatically sent today", "auto sent paperwork", "auto paperwork today"],
+    previewOnly: true,
+  },
+  {
+    id: "paperwork_manual_sent_today",
+    category: "paperwork",
+    question: "How many paperwork packets were manually sent today?",
+    examplePhrases: ["manually sent today", "manual paperwork sends"],
+    previewOnly: true,
+  },
+  {
+    id: "paperwork_failed_count",
+    category: "paperwork",
+    question: "Which paperwork packets failed?",
+    examplePhrases: ["paperwork failed", "failed packets", "failed paperwork"],
+    previewOnly: true,
+  },
+  {
+    id: "paperwork_waiting_longest",
+    category: "paperwork",
+    question: "Who has been waiting the longest to sign?",
+    examplePhrases: ["waiting longest", "longest to sign", "stalled signatures"],
+    previewOnly: true,
+  },
+  {
+    id: "paperwork_top_recruiter_today",
+    category: "paperwork",
+    question: "Which recruiter sent the most paperwork today?",
+    examplePhrases: ["recruiter sent most paperwork", "top recruiter paperwork"],
+    previewOnly: true,
+  },
+  {
+    id: "paperwork_ready_for_auto",
+    category: "paperwork",
+    question: "How many candidates are ready for automatic paperwork?",
+    examplePhrases: ["ready for automatic paperwork", "ready for auto send", "auto paperwork eligible"],
+    previewOnly: true,
+  },
 ];
 
-/** Reserved for future P69.x queries — register definitions only, wire handlers separately. */
+/** Reserved for future queries — register definitions only, wire handlers separately. */
 export const FUTURE_EXECUTIVE_QUERY_STUBS = [
   "ready_for_work_today",
   "candidates_in_onboarding",

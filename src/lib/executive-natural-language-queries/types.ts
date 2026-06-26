@@ -9,7 +9,13 @@ export type ExecutiveQueryId =
   | "applicants_month"
   | "paperwork_sent_today"
   | "paperwork_sent_week"
-  | "paperwork_signed_today";
+  | "paperwork_signed_today"
+  | "paperwork_auto_sent_today"
+  | "paperwork_manual_sent_today"
+  | "paperwork_failed_count"
+  | "paperwork_waiting_longest"
+  | "paperwork_top_recruiter_today"
+  | "paperwork_ready_for_auto";
 
 export type SupportedExecutiveQuery = {
   id: ExecutiveQueryId;
