@@ -70,6 +70,22 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
     id: "paperwork_failed_today",
     patterns: [/paperwork failed today/, /what paperwork failed today/, /failed paperwork today/],
   },
+  {
+    id: "brief_how_are_we_doing",
+    patterns: [/how are we doing/, /how are we doing today/, /status today/],
+  },
+  {
+    id: "brief_recruiting_summary",
+    patterns: [/recruiting summary/, /today's recruiting summary/, /daily recruiting summary/],
+  },
+  {
+    id: "brief_what_changed",
+    patterns: [/what changed today/, /what's different today/, /changes today/],
+  },
+  {
+    id: "brief_needs_attention",
+    patterns: [/what needs attention/, /needs attention today/, /what should i focus on/],
+  },
 ];
 
 export function resolveExecutiveQueryId(question: string): ExecutiveQueryId | null {

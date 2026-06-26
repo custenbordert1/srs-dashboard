@@ -4,6 +4,9 @@ import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-
 import type { OnboardingSendQueueMetrics } from "@/lib/candidate-onboarding-send-queue/types";
 import { buildP71NlAnswers, isP71PaperworkQueryId } from "@/lib/autonomous-paperwork-execution-engine/build-p71-nl-answers";
 import type { P71FeatureFlags } from "@/lib/autonomous-paperwork-execution-engine/types";
+import { buildDailyBriefNlAnswer, isP72BriefQueryId } from "@/lib/executive-daily-brief/build-daily-brief-nl-answers";
+import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
+import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
 import { buildPaperworkNlAnswers, isP70PaperworkQueryId } from "@/lib/autonomous-paperwork-engine/build-paperwork-nl-answers";
 import {
   buildApplicantQueryAnswer,
@@ -28,6 +31,8 @@ async function buildAnswerForQueryId(input: {
   policy: CandidateOnboardingPolicy;
   flags: P71FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
+  opportunities?: MelOpportunity[];
+  activeReps?: ActiveRep[];
   fetchedAt: string;
 }): Promise<ExecutiveQueryAnswer> {
   if (input.queryId.startsWith("applicants_")) {
@@ -36,6 +41,22 @@ async function buildAnswerForQueryId(input: {
       candidates: input.candidates,
       fetchedAt: input.fetchedAt,
     });
+  }
+
+  if (isP72BriefQueryId(input.queryId)) {
+    const briefAnswer = buildDailyBriefNlAnswer({
+      queryId: input.queryId,
+      candidates: input.candidates,
+      workflowRows: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      flags: input.flags,
+      sendQueueMetrics: input.sendQueueMetrics,
+      opportunities: input.opportunities,
+      activeReps: input.activeReps,
+      fetchedAt: input.fetchedAt,
+    });
+    if (briefAnswer) return briefAnswer;
   }
 
   if (isP71PaperworkQueryId(input.queryId)) {
@@ -80,6 +101,8 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
   policy: CandidateOnboardingPolicy;
   flags: P71FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
+  opportunities?: MelOpportunity[];
+  activeReps?: ActiveRep[];
   fetchedAt?: string;
 }): Promise<ExecutiveQueryDashboardSnapshot> {
   const fetchedAt = input.fetchedAt ?? new Date().toISOString();
@@ -100,6 +123,8 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
         policy: input.policy,
         flags: input.flags,
         sendQueueMetrics: input.sendQueueMetrics,
+        opportunities: input.opportunities,
+        activeReps: input.activeReps,
         fetchedAt,
       }),
     ),
@@ -125,6 +150,8 @@ export async function runExecutiveQueryPreview(input: {
   policy: CandidateOnboardingPolicy;
   flags: P71FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
+  opportunities?: MelOpportunity[];
+  activeReps?: ActiveRep[];
   question?: string | null;
   fetchedAt?: string;
 }): Promise<ExecutiveQueryPreviewResult> {
@@ -136,6 +163,8 @@ export async function runExecutiveQueryPreview(input: {
     policy: input.policy,
     flags: input.flags,
     sendQueueMetrics: input.sendQueueMetrics,
+    opportunities: input.opportunities,
+    activeReps: input.activeReps,
     fetchedAt,
   });
 
@@ -156,6 +185,8 @@ export async function runExecutiveQueryPreview(input: {
         policy: input.policy,
         flags: input.flags,
         sendQueueMetrics: input.sendQueueMetrics,
+        opportunities: input.opportunities,
+        activeReps: input.activeReps,
         fetchedAt,
       });
     } else {
