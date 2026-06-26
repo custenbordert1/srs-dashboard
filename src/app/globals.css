@@ -24,3 +24,33 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
+
+@keyframes executive-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes executive-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.ex-fade-in {
+  animation: executive-fade-in 0.35s ease-out both;
+}
+
+.ex-shimmer {
+  background: linear-gradient(90deg, rgb(39 39 42 / 0.45) 0%, rgb(63 63 70 / 0.55) 50%, rgb(39 39 42 / 0.45) 100%);
+  background-size: 200% 100%;
+  animation: executive-shimmer 1.6s ease-in-out infinite;
+}

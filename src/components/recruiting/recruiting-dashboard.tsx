@@ -39,6 +39,7 @@ export function RecruitingDashboard({ user }: RecruitingDashboardProps) {
         newHireMetrics={newHireMetrics}
         dmLeaderboard={dmLeaderboard}
         userRole={user.role}
+        userName={user.name}
       />
 
       <footer className="border-t border-zinc-800/80 pt-8 text-center text-xs text-zinc-600">

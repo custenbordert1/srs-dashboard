@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CardSkeleton, EmptyState, ExecutiveCard, ExecutiveButton, IconPipeline, SectionHeader } from "@/components/executive/ui";
 import { usePipelineIntelligence } from "@/hooks/use-pipeline-intelligence";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 
@@ -19,25 +20,23 @@ export function PipelineHealthPanel() {
   const bottleneckTerritories = data?.executive.topBottleneckTerritories ?? [];
 
   return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-50">Pipeline health</h2>
-          <p className="mt-1 text-sm text-zinc-500">Funnel conversion, SLA pressure, and territory bottlenecks.</p>
-        </div>
-        <Link
-          href="/?tab=pipeline-intelligence"
-          className="rounded-lg border border-teal-500/40 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-100"
-        >
-          Full pipeline view
-        </Link>
-      </div>
+    <ExecutiveCard>
+      <SectionHeader
+        title="Pipeline health"
+        subtitle="Funnel conversion, SLA pressure, and territory bottlenecks."
+        actions={
+          <Link
+            href="/?tab=pipeline-intelligence"
+            className="rounded-lg bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-100 ring-1 ring-inset ring-teal-500/25 transition-colors hover:bg-teal-500/15"
+          >
+            Full pipeline view
+          </Link>
+        }
+      />
 
       {showLoading ? (
-        <div className="mt-4 space-y-2">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div key={index} className="h-10 animate-pulse rounded bg-zinc-800/80" />
-          ))}
+        <div className="mt-6">
+          <CardSkeleton lines={4} />
         </div>
       ) : null}
 
@@ -47,13 +46,7 @@ export function PipelineHealthPanel() {
           <p className="mt-1 text-zinc-500">
             {error ?? "Loading is taking longer than expected. You can retry or open the full pipeline view."}
           </p>
-          <button
-            type="button"
-            onClick={() => refresh()}
-            className="mt-3 rounded border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
-          >
-            Retry
-          </button>
+          <ExecutiveButton onClick={() => refresh()}>Retry</ExecutiveButton>
         </div>
       ) : null}
 
@@ -68,7 +61,7 @@ export function PipelineHealthPanel() {
       {data ? (
         <div className="mt-4 space-y-6">
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Funnel conversion</h3>
+            <h3 className="text-sm font-semibold text-zinc-400">Funnel conversion</h3>
             <div className="mt-2 overflow-x-auto">
               <table className="min-w-[480px] w-full text-left text-sm">
                 <thead>
@@ -95,11 +88,15 @@ export function PipelineHealthPanel() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">SLA violations</h3>
+            <h3 className="text-sm font-semibold text-zinc-400">SLA violations</h3>
             {slaViolations.length === 0 ? (
-              <p className="mt-2 rounded-lg border border-teal-500/25 bg-teal-500/10 px-3 py-2 text-sm text-teal-100">
-                No candidates are beyond SLA right now.
-              </p>
+              <div className="mt-3">
+                <EmptyState
+                  icon={<IconPipeline size={18} />}
+                  title="No SLA violations"
+                  description="No candidates are beyond SLA right now."
+                />
+              </div>
             ) : (
               <ul className="mt-2 space-y-2">
                 {slaViolations.map((row) => (
@@ -118,11 +115,11 @@ export function PipelineHealthPanel() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-              Top bottleneck territories
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-400">Top bottleneck territories</h3>
             {bottleneckTerritories.length === 0 ? (
-              <p className="mt-2 text-sm text-zinc-500">No territory bottlenecks detected.</p>
+              <div className="mt-3">
+                <EmptyState title="No bottlenecks detected" description="Territory pipeline flow looks clear." />
+              </div>
             ) : (
               <ul className="mt-2 space-y-2">
                 {bottleneckTerritories.slice(0, 5).map((row) => (
@@ -141,6 +138,6 @@ export function PipelineHealthPanel() {
           </div>
         </div>
       ) : null}
-    </section>
+    </ExecutiveCard>
   );
 }

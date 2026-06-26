@@ -3,7 +3,6 @@
 import { AtsHealthCard } from "@/components/executive/ats-health-card";
 import { ExecutiveAccountabilitySummary } from "@/components/executive/executive-accountability-summary";
 import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-strip";
-import { ExecutiveSnapshotHero } from "@/components/executive/executive-snapshot-hero";
 import { ApplicantCaptureHealthPanel } from "@/components/recruiting/applicant-capture-health-panel";
 import { AutomationHealthPanel } from "@/components/executive/automation-health-panel";
 import { ExecutionHealthPanel } from "@/components/executive/execution-health-panel";
@@ -31,6 +30,16 @@ import { useTerritoryDashboard } from "@/hooks/use-territory-dashboard";
 import { useExecutiveAccountability } from "@/hooks/use-executive-accountability";
 import { usePipelineIntelligence } from "@/hooks/use-pipeline-intelligence";
 import { useRecruitingIntelligence } from "@/hooks/use-recruiting-intelligence";
+import {
+  EmptyState,
+  ExecutiveHero,
+  type ExecutiveBriefingHealth,
+  ExecutiveCard,
+  IconUsers,
+  MetricCard,
+  type MetricCardStatus,
+  SectionHeader,
+} from "@/components/executive/ui";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 
 function formatTimestamp(iso: string | null | undefined): string {
@@ -43,43 +52,6 @@ function formatTimestamp(iso: string | null | undefined): string {
   } catch {
     return iso;
   }
-}
-
-type KpiStatus = "normal" | "unavailable" | "pending";
-
-function KpiCard({
-  label,
-  value,
-  hint,
-  loading,
-  status = "normal",
-}: {
-  label: string;
-  value: string | number;
-  hint?: string;
-  loading?: boolean;
-  status?: KpiStatus;
-}) {
-  const valueClass =
-    status === "unavailable" || status === "pending" ? "text-amber-200" : "text-zinc-50";
-
-  return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
-      {loading ? (
-        <div className="mt-2 h-8 w-16 animate-pulse rounded bg-zinc-800/80" />
-      ) : (
-        <p className={`mt-1 text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
-      )}
-      {hint && !loading ? <p className="mt-1 text-xs text-zinc-500">{hint}</p> : null}
-      {status === "pending" && !loading ? (
-        <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-300/90">Sync pending</p>
-      ) : null}
-      {status === "unavailable" && !loading ? (
-        <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-300/90">Unavailable</p>
-      ) : null}
-    </div>
-  );
 }
 
 function sortTerritories(rows: TerritoryRollupRow[], direction: "asc" | "desc", limit: number): TerritoryRollupRow[] {
@@ -103,8 +75,8 @@ function TerritoryTable({
   const showLoading = loading && !loadingCeilingHit;
 
   return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-      <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
+    <ExecutiveCard>
+      <SectionHeader title={title} />
       {showLoading ? (
         <div className="mt-3 space-y-2">
           {Array.from({ length: 4 }, (_, index) => (
@@ -112,9 +84,12 @@ function TerritoryTable({
           ))}
         </div>
       ) : rows.length === 0 ? (
-        <p className="mt-3 rounded-lg border border-zinc-800/80 bg-zinc-950/40 px-3 py-2 text-sm text-zinc-500">
-          Territory rollups will appear once dashboard data loads.
-        </p>
+        <div className="mt-4">
+          <EmptyState
+            title="Territory rollups pending"
+            description="Territory health rankings will appear once dashboard data loads."
+          />
+        </div>
       ) : (
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[420px] text-left text-sm">
@@ -142,11 +117,11 @@ function TerritoryTable({
           </table>
         </div>
       )}
-    </section>
+    </ExecutiveCard>
   );
 }
 
-export function ExecutiveHomePanel() {
+export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
   const { data, meta, loading, error, timedOut, refresh } =
     useTerritoryDashboard<ExecutiveDashboardSnapshot>({
       endpoint: "/api/executive/dashboard",
@@ -176,7 +151,7 @@ export function ExecutiveHomePanel() {
     : candidatesUnavailable
       ? "Unavailable"
       : (insights?.totalCandidates ?? atsFallback?.candidatesCached ?? 0).toLocaleString();
-  const candidatesStatus: KpiStatus = candidatesSyncPending
+  const candidatesStatus: MetricCardStatus = candidatesSyncPending
     ? "pending"
     : candidatesUnavailable
       ? "unavailable"
@@ -224,9 +199,30 @@ export function ExecutiveHomePanel() {
         recruiting.error
       : null;
 
+  const territoryRows = data?.territoryRollups ?? [];
+  const platformHealth =
+    territoryRows.length > 0
+      ? Math.round(territoryRows.reduce((sum, row) => sum + row.healthScore, 0) / territoryRows.length)
+      : null;
+  const recruitingHealth = insights != null ? Math.max(0, 100 - insights.fillRiskScore) : null;
+  const operationsHealthLabel = atsFallback?.statusLabel ?? (atsHealth.loading ? "Loading…" : "Monitoring");
+  const automationReadiness = assignmentRollups?.autoAssignmentRate ?? null;
+  const briefingHealth: ExecutiveBriefingHealth = {
+    platformHealth,
+    recruitingHealth,
+    operationsHealthLabel,
+    automationReadiness,
+    loading: kpiLoading && !insights && !atsFallback,
+  };
+
   return (
-    <div className="space-y-6">
-      <ExecutiveSnapshotHero snapshot={snapshot} lastUpdated={formatTimestamp(lastUpdated)} />
+    <div className="space-y-12">
+      <ExecutiveHero
+        userName={userName}
+        snapshot={snapshot}
+        health={briefingHealth}
+        lastUpdated={formatTimestamp(lastUpdated)}
+      />
 
       <AICommandCenterPanel />
 
@@ -289,13 +285,13 @@ export function ExecutiveHomePanel() {
         </div>
       ) : null}
 
-      <section>
-        <h2 className="text-lg font-semibold text-zinc-50">Executive KPIs</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <ExecutiveCard>
+        <SectionHeader title="Executive KPIs" subtitle="Operational metrics across recruiting, coverage, and automation." />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {showOpenJobsKpi ? (
-            <KpiCard label="Open jobs" value={openJobs.toLocaleString()} loading={kpiLoading && !jobsAvailable} />
+            <MetricCard label="Open jobs" value={openJobs.toLocaleString()} loading={kpiLoading && !jobsAvailable} />
           ) : null}
-          <KpiCard
+          <MetricCard
             label="Candidates"
             value={candidatesValue}
             loading={kpiLoading && candidatesStatus === "normal"}
@@ -304,13 +300,13 @@ export function ExecutiveHomePanel() {
           />
           {showCoverageKpis ? (
             <>
-              <KpiCard
+              <MetricCard
                 label="Coverage risk"
                 value={insights ? `${insights.fillRiskScore}/100` : "…"}
                 hint={insights?.fillRiskLabel}
                 loading={kpiLoading && !insights}
               />
-              <KpiCard
+              <MetricCard
                 label="Critical territories"
                 value={insights ? insights.criticalTerritories.toLocaleString() : "…"}
                 hint="DM territories below health threshold"
@@ -320,17 +316,18 @@ export function ExecutiveHomePanel() {
           ) : null}
           {assignmentRollups ? (
             <>
-              <KpiCard
+              <MetricCard
                 label="Auto assignment rate"
                 value={`${assignmentRollups.autoAssignmentRate}%`}
                 hint="Owned candidates assigned automatically"
               />
-              <KpiCard
-                label="Manual assignment required"
+              <MetricCard
+                label="Candidates missing owners"
                 value={assignmentRollups.manualAssignmentRequired.toLocaleString()}
                 hint="Candidates still unassigned"
+                icon={<IconUsers size={16} />}
               />
-              <KpiCard
+              <MetricCard
                 label="Assignment confidence"
                 value={
                   assignmentRollups.assignmentConfidence > 0
@@ -339,17 +336,17 @@ export function ExecutiveHomePanel() {
                 }
                 hint="Average auto-assignment confidence"
               />
-              <KpiCard
+              <MetricCard
                 label="Overdue recruiter actions"
                 value={assignmentRollups.overdueRecruiterActions.toLocaleString()}
                 hint="Assigned candidates past action due date"
               />
-              <KpiCard
+              <MetricCard
                 label="Actions due today"
                 value={assignmentRollups.actionsDueToday.toLocaleString()}
                 hint="Recruiter actions due today"
               />
-              <KpiCard
+              <MetricCard
                 label="Average action age"
                 value={
                   assignmentRollups.averageActionAgeDays > 0
@@ -358,27 +355,27 @@ export function ExecutiveHomePanel() {
                 }
                 hint="Days since last generated action"
               />
-              <KpiCard
+              <MetricCard
                 label="Recruiter SLA compliance"
                 value={`${assignmentRollups.recruiterSlaCompliance}%`}
                 hint="Actions completed on or before due date"
               />
-              <KpiCard
+              <MetricCard
                 label="Candidates ready to advance"
                 value={assignmentRollups.candidatesReadyToAdvance.toLocaleString()}
                 hint="Progression engine recommends next stage"
               />
-              <KpiCard
+              <MetricCard
                 label="Stalled candidates"
                 value={assignmentRollups.stalledCandidates.toLocaleString()}
                 hint="Escalation or SLA breach detected"
               />
-              <KpiCard
+              <MetricCard
                 label="Progression SLA compliance"
                 value={`${assignmentRollups.progressionSlaCompliance}%`}
                 hint="Candidates not stalled in pipeline"
               />
-              <KpiCard
+              <MetricCard
                 label="Progression bottlenecks"
                 value={
                   assignmentRollups.progressionBottlenecks.length > 0
@@ -394,13 +391,13 @@ export function ExecutiveHomePanel() {
             </>
           ) : assignmentRollupsLoading ? (
             <>
-              <KpiCard label="Overdue recruiter actions" value="…" loading />
-              <KpiCard label="Actions due today" value="…" loading />
-              <KpiCard label="Average action age" value="…" loading />
-              <KpiCard label="Recruiter SLA compliance" value="…" loading />
-              <KpiCard label="Candidates ready to advance" value="…" loading />
-              <KpiCard label="Stalled candidates" value="…" loading />
-              <KpiCard label="Progression SLA compliance" value="…" loading />
+              <MetricCard label="Overdue recruiter actions" value="…" loading />
+              <MetricCard label="Actions due today" value="…" loading />
+              <MetricCard label="Average action age" value="…" loading />
+              <MetricCard label="Recruiter SLA compliance" value="…" loading />
+              <MetricCard label="Candidates ready to advance" value="…" loading />
+              <MetricCard label="Stalled candidates" value="…" loading />
+              <MetricCard label="Progression SLA compliance" value="…" loading />
             </>
           ) : null}
         </div>
@@ -419,7 +416,7 @@ export function ExecutiveHomePanel() {
             </button>
           </div>
         ) : null}
-      </section>
+      </ExecutiveCard>
 
       <ExecutiveActionsStrip
         overdueAccountability={overdueCount}

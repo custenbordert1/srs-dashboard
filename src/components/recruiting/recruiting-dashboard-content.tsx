@@ -52,6 +52,7 @@ type RecruitingDashboardContentProps = {
   newHireMetrics: NewHireMetric[];
   dmLeaderboard: DmLeaderboardRow[];
   userRole?: UserRole;
+  userName?: string;
 };
 
 function TabPanelWithSourceBanner({
@@ -75,6 +76,7 @@ export function RecruitingDashboardContent({
   newHireMetrics,
   dmLeaderboard,
   userRole,
+  userName,
 }: RecruitingDashboardContentProps) {
   const [activeTab, setActiveTab] = useState<DashboardTabId>(() =>
     getDefaultDashboardTab(userRole),
@@ -228,7 +230,7 @@ export function RecruitingDashboardContent({
 
         <DashboardTabPanel tabId="executive-home" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="executive-home">
-            <LazyExecutiveHomePanel />
+            <LazyExecutiveHomePanel userName={userName} />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 
