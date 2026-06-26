@@ -113,6 +113,34 @@ export const SUPPORTED_EXECUTIVE_QUERIES: SupportedExecutiveQuery[] = [
     examplePhrases: ["failed today", "paperwork failed today", "what failed today"],
     previewOnly: true,
   },
+  {
+    id: "brief_how_are_we_doing",
+    category: "brief",
+    question: "How are we doing today?",
+    examplePhrases: ["how are we doing", "how are we doing today", "status today"],
+    previewOnly: true,
+  },
+  {
+    id: "brief_recruiting_summary",
+    category: "brief",
+    question: "Give me today's recruiting summary.",
+    examplePhrases: ["today's recruiting summary", "recruiting summary today", "daily recruiting summary"],
+    previewOnly: true,
+  },
+  {
+    id: "brief_what_changed",
+    category: "brief",
+    question: "What changed today?",
+    examplePhrases: ["what changed today", "what's different today", "changes today"],
+    previewOnly: true,
+  },
+  {
+    id: "brief_needs_attention",
+    category: "brief",
+    question: "What needs attention today?",
+    examplePhrases: ["what needs attention", "needs attention today", "what should I focus on"],
+    previewOnly: true,
+  },
 ];
 
 /** Reserved for future queries — register definitions only, wire handlers separately. */

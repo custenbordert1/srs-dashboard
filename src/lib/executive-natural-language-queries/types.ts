@@ -1,7 +1,7 @@
 export const P69_SOURCE_PHASE = "P69";
 export const P69_PREVIEW_MODE = true as const;
 
-export type ExecutiveQueryCategory = "applicants" | "paperwork";
+export type ExecutiveQueryCategory = "applicants" | "paperwork" | "brief";
 
 export type ExecutiveQueryId =
   | "applicants_today"
@@ -19,7 +19,11 @@ export type ExecutiveQueryId =
   | "paperwork_waiting_signature"
   | "paperwork_blocked_auto"
   | "paperwork_oldest_pending"
-  | "paperwork_failed_today";
+  | "paperwork_failed_today"
+  | "brief_how_are_we_doing"
+  | "brief_recruiting_summary"
+  | "brief_what_changed"
+  | "brief_needs_attention";
 
 export type SupportedExecutiveQuery = {
   id: ExecutiveQueryId;
