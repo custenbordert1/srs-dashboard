@@ -77,7 +77,24 @@ export type CommandCenterSuggestedAction = {
   previewOnly: true;
 };
 
+export type ConversationTurnMemory = {
+  queryId: ExecutiveQueryId | null;
+  userMessage: string;
+  topic: string;
+  summary: string;
+  evidence: string[];
+  metrics: Record<string, number>;
+  recommendedActions: string[];
+  sourceEngines: string[];
+  riskLevel: CommandCenterAssistantResponse["riskLevel"];
+  approvalRequired: boolean;
+  candidateIds: string[];
+  candidateNames: string[];
+};
+
 export type ConversationMemory = {
+  activeTurn: ConversationTurnMemory | null;
+  /** @deprecated Legacy fields — use activeTurn; kept for session migration. */
   lastQueryId: ExecutiveQueryId | null;
   lastTopic: string | null;
   lastSummary: string | null;

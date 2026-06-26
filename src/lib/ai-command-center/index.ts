@@ -27,7 +27,14 @@ export {
   createEmptyMemory,
   createEmptyMetrics,
 } from "@/lib/ai-command-center/conversation-state";
-export { resolveFollowUpMessage, updateMemoryFromResponse } from "@/lib/ai-command-center/conversation-memory";
+export { buildFollowUpResponse } from "@/lib/ai-command-center/build-follow-up-response";
+export type { FollowUpIntent } from "@/lib/ai-command-center/conversation-memory";
+export {
+  normalizeConversationMemory,
+  resolveFollowUpIntent,
+  resolveFollowUpMessage,
+  updateMemoryFromResponse,
+} from "@/lib/ai-command-center/conversation-memory";
 export {
   canExecuteCommandCenter,
   DEFAULT_P78_FEATURE_FLAGS,
@@ -53,6 +60,7 @@ export type {
   CommandCenterSuggestedAction,
   CommandCenterSuggestedPrompt,
   ConversationMemory,
+  ConversationTurnMemory,
   DashboardLink,
   ExecutiveGreetingSnapshot,
   P78FeatureFlags,

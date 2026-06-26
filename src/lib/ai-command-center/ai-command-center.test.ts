@@ -14,11 +14,13 @@ import {
   buildCommandCenterChatContext,
   buildCommandCenterDashboard,
   buildExecutiveGreeting,
+  buildFollowUpResponse,
   canExecuteCommandCenter,
   createCommandCenterSession,
   DEFAULT_FOLLOW_UPS,
   DEFAULT_P78_FEATURE_FLAGS,
   resolveCommandCenterQuery,
+  resolveFollowUpIntent,
   resolveFollowUpMessage,
   resetChatSession,
 } from "@/lib/ai-command-center";
@@ -167,17 +169,79 @@ describe("ai-command-center", () => {
 
   it("supports follow-up conversation memory", () => {
     const session = createCommandCenterSession();
-    session.memory.lastSummary = "3 decisions require approval";
-    session.memory.lastTopic = "approval queue";
-    session.memory.lastCandidateNames = ["Alex Rivera"];
-    const expanded = resolveFollowUpMessage("Why?", session.memory);
-    assert.ok(expanded?.includes("Why"));
-    const next = resolveFollowUpMessage("What happens next?", session.memory);
-    assert.ok(next?.includes("next"));
+    session.memory.activeTurn = {
+      queryId: "governance_requires_approval",
+      userMessage: "What needs approval?",
+      topic: "approval queue",
+      summary: "3 decisions require approval",
+      evidence: [],
+      metrics: {},
+      recommendedActions: [],
+      sourceEngines: [],
+      riskLevel: "medium",
+      approvalRequired: true,
+      candidateIds: [],
+      candidateNames: ["Alex Rivera"],
+    };
+    session.memory.lastSummary = session.memory.activeTurn.summary;
+    session.memory.lastTopic = session.memory.activeTurn.topic;
+    session.memory.lastCandidateNames = session.memory.activeTurn.candidateNames;
+
+    assert.equal(resolveFollowUpIntent("Why?"), "why");
+    assert.equal(resolveFollowUpIntent("Show me details."), "details");
+    assert.equal(resolveFollowUpIntent("Can this be automated?"), "automation");
+
     const candidateRef = resolveFollowUpMessage("that candidate", session.memory);
     assert.ok(candidateRef?.includes("Alex Rivera"));
     const storesRef = resolveFollowUpMessage("those stores", session.memory);
     assert.ok(storesRef?.includes("stores") || storesRef?.includes("risk"));
+  });
+
+  it("builds contextual why follow-ups without repeating the prior summary", () => {
+    const context = buildCommandCenterChatContext(sharedInput);
+    const turn = {
+      queryId: "paperwork_sent_today" as const,
+      userMessage: "How many paperwork packets were sent today?",
+      topic: "How many paperwork packets were sent today?",
+      summary: "0 paperwork packets sent today.",
+      evidence: ["sent: 0", "pending: 23"],
+      metrics: { sent: 0, total: 0 },
+      recommendedActions: [],
+      sourceEngines: [],
+      riskLevel: "medium" as const,
+      approvalRequired: false,
+      candidateIds: [],
+      candidateNames: [],
+    };
+    const response = buildFollowUpResponse({ intent: "why", turn, context });
+    assert.notEqual(response.summary.trim(), turn.summary.trim());
+    assert.ok(response.summary.toLowerCase().includes("blocked") || response.summary.toLowerCase().includes("paperwork"));
+    assert.equal(response.previewOnly, true);
+  });
+
+  it("expands details and who-else follow-ups from memory", () => {
+    const context = buildCommandCenterChatContext(sharedInput);
+    const turn = {
+      queryId: "paperwork_sent_today" as const,
+      userMessage: "How many paperwork packets were sent today?",
+      topic: "How many paperwork packets were sent today?",
+      summary: "0 paperwork packets sent today.",
+      evidence: ["sent: 0"],
+      metrics: { sent: 0 },
+      recommendedActions: [],
+      sourceEngines: [],
+      riskLevel: "low" as const,
+      approvalRequired: false,
+      candidateIds: [],
+      candidateNames: [],
+    };
+    const details = buildFollowUpResponse({ intent: "details", turn, context });
+    assert.ok(details.supportingEvidence.length > turn.evidence.length);
+    assert.notEqual(details.summary, turn.summary);
+
+    const whoElse = buildFollowUpResponse({ intent: "who_else", turn, context });
+    assert.ok(whoElse.summary.length > 0);
+    assert.notEqual(whoElse.summary, turn.summary);
   });
 
   it("provides default follow-up prompts", () => {
