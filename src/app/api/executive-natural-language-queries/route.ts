@@ -5,6 +5,7 @@ import { listIngestedCandidates, readIngestionStore } from "@/lib/candidate-inge
 import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
 import { loadP71FeatureFlags } from "@/lib/autonomous-paperwork-execution-engine/feature-flags-store";
+import { loadP73FeatureFlags } from "@/lib/autonomous-candidate-communication-engine/feature-flags-store";
 import { buildOnboardingSendQueueMetrics } from "@/lib/candidate-onboarding-send-queue/build-send-queue-metrics";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import {
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
 
   const question = url.searchParams.get("q")?.trim() || url.searchParams.get("query")?.trim() || "";
 
-  const [store, workflows, jobsResult, onboardingRecords, policy, flags, sendQueueMetrics] =
+  const [store, workflows, jobsResult, onboardingRecords, policy, flags, p73Flags, sendQueueMetrics] =
     await Promise.all([
       readIngestionStore(),
       getCandidateWorkflowState(),
@@ -49,6 +50,7 @@ export async function GET(request: Request) {
       listAllCandidateOnboardingRecords(),
       loadCandidateOnboardingPolicy(),
       loadP71FeatureFlags(),
+      loadP73FeatureFlags(),
       buildOnboardingSendQueueMetrics(),
     ]);
 
@@ -69,6 +71,7 @@ export async function GET(request: Request) {
     onboardingRecords,
     policy,
     flags,
+    p73Flags,
     sendQueueMetrics,
     question: question || null,
     fetchedAt: store.lastChunkAt ?? store.updatedAt ?? new Date().toISOString(),

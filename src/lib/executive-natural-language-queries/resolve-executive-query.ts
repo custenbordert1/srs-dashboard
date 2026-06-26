@@ -86,6 +86,30 @@ const QUERY_MATCHERS: Array<{ id: ExecutiveQueryId; patterns: RegExp[] }> = [
     id: "brief_needs_attention",
     patterns: [/what needs attention/, /needs attention today/, /what should i focus on/],
   },
+  {
+    id: "communication_sent_today",
+    patterns: [/communications? sent today/, /how many communications today/, /messages sent today/],
+  },
+  {
+    id: "communication_needs_reminders",
+    patterns: [/who still needs reminders/, /needs reminders/, /pending reminders/],
+  },
+  {
+    id: "communication_no_response",
+    patterns: [/not responded/, /no response/, /candidates have not responded/],
+  },
+  {
+    id: "communication_failures",
+    patterns: [/communication failures/, /failed communications/, /show communication failures/],
+  },
+  {
+    id: "communication_welcome_today",
+    patterns: [/welcome emails today/, /who received welcome/, /welcome email today/],
+  },
+  {
+    id: "communication_waiting_approval",
+    patterns: [/waiting approval/, /communications waiting approval/, /pending approval communications/],
+  },
 ];
 
 export function resolveExecutiveQueryId(question: string): ExecutiveQueryId | null {

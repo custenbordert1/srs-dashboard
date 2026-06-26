@@ -4,6 +4,9 @@ import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-
 import type { OnboardingSendQueueMetrics } from "@/lib/candidate-onboarding-send-queue/types";
 import { buildP71NlAnswers, isP71PaperworkQueryId } from "@/lib/autonomous-paperwork-execution-engine/build-p71-nl-answers";
 import type { P71FeatureFlags } from "@/lib/autonomous-paperwork-execution-engine/types";
+import { buildP73NlAnswers, isP73CommunicationQueryId } from "@/lib/autonomous-candidate-communication-engine/build-p73-nl-answers";
+import type { P73FeatureFlags } from "@/lib/autonomous-candidate-communication-engine/types";
+import { DEFAULT_P73_FEATURE_FLAGS } from "@/lib/autonomous-candidate-communication-engine/feature-flags-store";
 import { buildDailyBriefNlAnswer, isP72BriefQueryId } from "@/lib/executive-daily-brief/build-daily-brief-nl-answers";
 import type { MelOpportunity } from "@/lib/mel-matching/matching-engine-types";
 import type { ActiveRep } from "@/lib/rep-intelligence/rep-types";
@@ -30,11 +33,18 @@ async function buildAnswerForQueryId(input: {
   onboardingRecords: CandidateOnboardingRecord[];
   policy: CandidateOnboardingPolicy;
   flags: P71FeatureFlags;
+  p73Flags?: P73FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
   fetchedAt: string;
 }): Promise<ExecutiveQueryAnswer> {
+  const p73Flags = input.p73Flags ?? {
+    ...DEFAULT_P73_FEATURE_FLAGS,
+    communicationEnabled: true,
+    executionMode: "preview",
+  };
+
   if (input.queryId.startsWith("applicants_")) {
     return buildApplicantQueryAnswer({
       queryId: input.queryId as Extract<ExecutiveQueryId, `applicants_${string}`>,
@@ -83,6 +93,18 @@ async function buildAnswerForQueryId(input: {
     if (p70Answer) return p70Answer;
   }
 
+  if (isP73CommunicationQueryId(input.queryId)) {
+    const p73Answer = buildP73NlAnswers({
+      queryId: input.queryId,
+      candidates: input.workflowRows,
+      onboardingRecords: input.onboardingRecords,
+      policy: input.policy,
+      flags: p73Flags,
+      fetchedAt: input.fetchedAt,
+    });
+    if (p73Answer) return p73Answer;
+  }
+
   return buildPaperworkQueryAnswer({
     queryId: input.queryId as Extract<
       ExecutiveQueryId,
@@ -100,6 +122,7 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
   onboardingRecords: CandidateOnboardingRecord[];
   policy: CandidateOnboardingPolicy;
   flags: P71FeatureFlags;
+  p73Flags?: P73FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -122,6 +145,11 @@ export async function buildExecutiveQueryDashboardSnapshot(input: {
         onboardingRecords: input.onboardingRecords,
         policy: input.policy,
         flags: input.flags,
+        p73Flags: input.p73Flags ?? {
+          ...DEFAULT_P73_FEATURE_FLAGS,
+          communicationEnabled: true,
+          executionMode: "preview",
+        },
         sendQueueMetrics: input.sendQueueMetrics,
         opportunities: input.opportunities,
         activeReps: input.activeReps,
@@ -149,6 +177,7 @@ export async function runExecutiveQueryPreview(input: {
   onboardingRecords: CandidateOnboardingRecord[];
   policy: CandidateOnboardingPolicy;
   flags: P71FeatureFlags;
+  p73Flags?: P73FeatureFlags;
   sendQueueMetrics: OnboardingSendQueueMetrics | null;
   opportunities?: MelOpportunity[];
   activeReps?: ActiveRep[];
@@ -184,6 +213,11 @@ export async function runExecutiveQueryPreview(input: {
         onboardingRecords: input.onboardingRecords,
         policy: input.policy,
         flags: input.flags,
+        p73Flags: input.p73Flags ?? {
+          ...DEFAULT_P73_FEATURE_FLAGS,
+          communicationEnabled: true,
+          executionMode: "preview",
+        },
         sendQueueMetrics: input.sendQueueMetrics,
         opportunities: input.opportunities,
         activeReps: input.activeReps,

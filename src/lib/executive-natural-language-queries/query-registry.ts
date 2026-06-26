@@ -141,6 +141,48 @@ export const SUPPORTED_EXECUTIVE_QUERIES: SupportedExecutiveQuery[] = [
     examplePhrases: ["what needs attention", "needs attention today", "what should I focus on"],
     previewOnly: true,
   },
+  {
+    id: "communication_sent_today",
+    category: "communication",
+    question: "How many communications were sent today?",
+    examplePhrases: ["communications sent today", "how many communications today", "messages sent today"],
+    previewOnly: true,
+  },
+  {
+    id: "communication_needs_reminders",
+    category: "communication",
+    question: "Who still needs reminders?",
+    examplePhrases: ["who still needs reminders", "needs reminders", "pending reminders"],
+    previewOnly: true,
+  },
+  {
+    id: "communication_no_response",
+    category: "communication",
+    question: "Which candidates have not responded?",
+    examplePhrases: ["not responded", "no response", "candidates have not responded"],
+    previewOnly: true,
+  },
+  {
+    id: "communication_failures",
+    category: "communication",
+    question: "Show communication failures.",
+    examplePhrases: ["communication failures", "failed communications", "show communication failures"],
+    previewOnly: true,
+  },
+  {
+    id: "communication_welcome_today",
+    category: "communication",
+    question: "Who received welcome emails today?",
+    examplePhrases: ["welcome emails today", "who received welcome", "welcome email today"],
+    previewOnly: true,
+  },
+  {
+    id: "communication_waiting_approval",
+    category: "communication",
+    question: "What communications are waiting approval?",
+    examplePhrases: ["waiting approval", "communications waiting approval", "pending approval communications"],
+    previewOnly: true,
+  },
 ];
 
 /** Reserved for future queries — register definitions only, wire handlers separately. */
