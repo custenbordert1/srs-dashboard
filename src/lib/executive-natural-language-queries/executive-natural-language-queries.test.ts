@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { DEFAULT_P71_FEATURE_FLAGS } from "@/lib/autonomous-paperwork-execution-engine/feature-flags-store";
 import { DEFAULT_CANDIDATE_ONBOARDING_POLICY } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
@@ -59,7 +60,7 @@ function workflowRow(overrides: Partial<ScoredCandidateWorkflowRow> & { candidat
 
 describe("executive-natural-language-queries", () => {
   it("lists supported applicant and paperwork questions", () => {
-    assert.equal(SUPPORTED_EXECUTIVE_QUERIES.length, 12);
+    assert.equal(SUPPORTED_EXECUTIVE_QUERIES.length, 16);
     assert.ok(SUPPORTED_EXECUTIVE_QUERIES.some((row) => row.id === "applicants_today"));
     assert.ok(SUPPORTED_EXECUTIVE_QUERIES.some((row) => row.id === "paperwork_signed_today"));
     assert.ok(SUPPORTED_EXECUTIVE_QUERIES.some((row) => row.id === "paperwork_ready_for_auto"));
@@ -126,12 +127,14 @@ describe("executive-natural-language-queries", () => {
     assert.equal(answer.metrics.pending, 2);
   });
 
-  it("runs preview without production writes", () => {
-    const result = runExecutiveQueryPreview({
+  it("runs preview without production writes", async () => {
+    const result = await runExecutiveQueryPreview({
       candidates: [breezyCandidate({ candidateId: "c-1" })],
       workflowRows: [workflowRow({ candidateId: "c-1" })],
       onboardingRecords: [],
       policy: DEFAULT_CANDIDATE_ONBOARDING_POLICY,
+      flags: DEFAULT_P71_FEATURE_FLAGS,
+      sendQueueMetrics: null,
       question: "How many applicants applied today?",
       fetchedAt: REFERENCE,
     });
@@ -140,7 +143,7 @@ describe("executive-natural-language-queries", () => {
     assert.equal(result.ok, true);
     assert.equal(result.answer?.queryId, "applicants_today");
     assert.equal(result.dashboard.cards.length, 2);
-    assert.equal(result.dashboard.recentAnswers.length, 12);
+    assert.equal(result.dashboard.recentAnswers.length, 16);
     assert.ok(result.warnings.some((row) => /preview mode/i.test(row)));
   });
 });
