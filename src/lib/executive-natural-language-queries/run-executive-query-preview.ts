@@ -325,6 +325,8 @@ export async function runExecutiveQueryPreview(input: {
   activeReps?: ActiveRep[];
   question?: string | null;
   fetchedAt?: string;
+  /** When set, resolves the answer from this query id instead of pattern-matching the question text. */
+  forcedQueryId?: ExecutiveQueryId | null;
 }): Promise<ExecutiveQueryPreviewResult> {
   const fetchedAt = input.fetchedAt ?? new Date().toISOString();
   const dashboard = await buildExecutiveQueryDashboardSnapshot({
@@ -350,11 +352,13 @@ export async function runExecutiveQueryPreview(input: {
   ];
 
   let answer: ExecutiveQueryAnswer | null = null;
-  if (input.question?.trim()) {
-    const queryId = resolveExecutiveQueryId(input.question);
-    if (queryId) {
-      answer = await buildAnswerForQueryId({
-        queryId,
+  const resolvedQueryId =
+    input.forcedQueryId ??
+    (input.question?.trim() ? resolveExecutiveQueryId(input.question) : null);
+
+  if (resolvedQueryId) {
+    answer = await buildAnswerForQueryId({
+      queryId: resolvedQueryId,
         candidates: input.candidates,
         workflowRows: input.workflowRows,
         onboardingRecords: input.onboardingRecords,
@@ -390,9 +394,8 @@ export async function runExecutiveQueryPreview(input: {
         activeReps: input.activeReps,
         fetchedAt,
       });
-    } else {
-      warnings.push(`Could not match question to a supported query: "${input.question.trim()}"`);
-    }
+  } else if (input.question?.trim()) {
+    warnings.push(`Could not match question to a supported query: "${input.question.trim()}"`);
   }
 
   return {
