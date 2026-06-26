@@ -15,6 +15,7 @@ import { AutonomousCandidateCommunicationPanel } from "@/components/executive/au
 import { ExecutiveDailyBriefPanel } from "@/components/executive/executive-daily-brief-panel";
 import { AutonomousOperationsCenterPanel } from "@/components/executive/autonomous-operations-center-panel";
 import { AutonomousDecisionEnginePanel } from "@/components/executive/autonomous-decision-engine-panel";
+import { AICommandCenterPanel } from "@/components/executive/ai-command-center-panel";
 import { AutonomousApprovalGovernancePanel } from "@/components/executive/autonomous-approval-governance-panel";
 import { AutonomousRecruitingOrchestratorPanel } from "@/components/executive/autonomous-recruiting-orchestrator-panel";
 import { ExecutiveNaturalLanguageQueriesPanel } from "@/components/executive/executive-natural-language-queries-panel";
@@ -226,6 +227,8 @@ export function ExecutiveHomePanel() {
   return (
     <div className="space-y-6">
       <ExecutiveSnapshotHero snapshot={snapshot} lastUpdated={formatTimestamp(lastUpdated)} />
+
+      <AICommandCenterPanel />
 
       <ApplicantCaptureHealthPanel />
 
