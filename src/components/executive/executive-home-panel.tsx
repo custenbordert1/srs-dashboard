@@ -7,6 +7,7 @@ import { ApplicantCaptureHealthPanel } from "@/components/recruiting/applicant-c
 import { AutomationHealthPanel } from "@/components/executive/automation-health-panel";
 import { ExecutionHealthPanel } from "@/components/executive/execution-health-panel";
 import { ExecutivePaperworkDashboardPanel } from "@/components/executive/executive-paperwork-dashboard-panel";
+import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
 import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-paperwork-panel";
 import { AutonomousPaperworkExecutionPanel } from "@/components/executive/autonomous-paperwork-execution-panel";
@@ -240,6 +241,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AutonomousPaperworkPanel />
 
       <AutonomousPaperworkExecutionPanel />
+
+      <OnboardingPipelineExecutiveCard />
 
       <AutonomousOnboardingPanel />
 

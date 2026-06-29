@@ -8,6 +8,7 @@ import { CandidateCommunicationLog } from "@/components/recruiting/candidate-wor
 import { CandidateGradePanel } from "@/components/recruiting/candidate-workspace/candidate-grade-panel";
 import { CandidateMelReadinessPanel } from "@/components/recruiting/candidate-workspace/candidate-mel-readiness-panel";
 import { CandidateOnboardingPreviewPanel } from "@/components/recruiting/candidate-workspace/candidate-onboarding-preview-panel";
+import { CandidateOnboardingPipelinePanel } from "@/components/recruiting/candidate-workspace/candidate-onboarding-pipeline-panel";
 import { CandidateWorkforcePlacementPreviewPanel } from "@/components/recruiting/candidate-workspace/candidate-workforce-placement-preview-panel";
 import { CandidateNextActionCard } from "@/components/recruiting/candidate-workspace/candidate-next-action-card";
 import { CandidateNotesPanel } from "@/components/recruiting/candidate-workspace/candidate-notes-panel";
@@ -253,6 +254,7 @@ export function CandidateWorkspace({
           />
           <CandidateMelReadinessPanel items={melReadiness} />
           <CandidateOnboardingPreviewPanel candidate={activeCandidate} />
+          <CandidateOnboardingPipelinePanel candidate={activeCandidate} />
           <CandidateWorkforcePlacementPreviewPanel candidate={activeCandidate} />
           <CandidateCommunicationLog entries={communicationLog} />
         </div>
