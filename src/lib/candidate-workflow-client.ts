@@ -78,6 +78,7 @@ export type CandidateAutomationApiResponse = {
   p62Assigned?: number;
   p63ActionsGenerated?: number;
   p64ProgressionsGenerated?: number;
+  p83Advanced?: number;
   p62CoveragePct?: number;
   p63CoveragePct?: number;
   p64CoveragePct?: number;

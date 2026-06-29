@@ -31,11 +31,21 @@ import { buildRecruiterActionDecisions } from "@/lib/recruiter-action-engine/bui
 import { applyRecruiterAssignments } from "@/lib/recruiter-assignment-engine/apply-recruiter-assignments";
 import { buildRecruiterAssignmentDecisions } from "@/lib/recruiter-assignment-engine/build-assignment-decision";
 import { runCandidateAutomationExecution } from "@/lib/candidate-automation-execution";
+import {
+  applyCandidateAdvancements,
+  buildCandidateAdvancementDecisions,
+} from "@/lib/candidate-advancement-engine";
+import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
 
 const TERMINAL_STATUSES = new Set(["Not Qualified", "Active Rep", "Loaded in MEL"]);
 
 function policyStepsEnabled(policy: typeof DEFAULT_CANDIDATE_AUTOMATION_POLICY): boolean {
-  return policy.assign.enabled || policy.actions.enabled || policy.progression.enabled;
+  return (
+    policy.assign.enabled ||
+    policy.advancement.enabled ||
+    policy.actions.enabled ||
+    policy.progression.enabled
+  );
 }
 
 function isAssignedMtdCandidate(
@@ -146,6 +156,7 @@ export async function runCandidateAutomationEngine(input: {
   let p62Assigned = 0;
   let p63ActionsGenerated = 0;
   let p64ProgressionsGenerated = 0;
+  let p83Advanced = 0;
   let skipped = false;
   let skipReason: string | undefined;
 
@@ -220,6 +231,31 @@ export async function runCandidateAutomationEngine(input: {
       warnings.push("P64 progression skipped — disabled in policy.");
     }
 
+    if (policy.advancement.enabled && policy.mode !== "manual") {
+      const onboardingPolicy = await loadCandidateOnboardingPolicy();
+      const advancementMtd = mtdCandidates.filter((candidate) =>
+        isAssignedMtdCandidate(candidate, workflows),
+      );
+      const scoredForAdvancement = advancementMtd.map((candidate) =>
+        buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], {
+          job: jobsByPositionId.get(candidate.positionId),
+        }),
+      );
+      const advancementDecisions = buildCandidateAdvancementDecisions(scoredForAdvancement, {
+        jobsByPositionId,
+        paperworkByGrade: onboardingPolicy.paperworkByGrade,
+        requireApproval: onboardingPolicy.send.requireApproval,
+      });
+      const advancementResult = await applyCandidateAdvancements({
+        decisions: advancementDecisions,
+        workflows,
+        byUserId: input.byUserId,
+      });
+      p83Advanced = advancementResult.advanced;
+    } else if (!policy.advancement.enabled) {
+      warnings.push("P83 advancement skipped — disabled in policy.");
+    }
+
     if (policy.execution.enabled && policy.mode !== "manual") {
       const executionMtd = mtdCandidates.filter((candidate) =>
         isAssignedMtdCandidate(candidate, workflows),
@@ -273,6 +309,7 @@ export async function runCandidateAutomationEngine(input: {
     p62Assigned,
     p63ActionsGenerated,
     p64ProgressionsGenerated,
+    p83Advanced,
     p62CoveragePct: captureHealth.p62CoveragePct,
     p63CoveragePct: captureHealth.p63CoveragePct,
     p64CoveragePct: captureHealth.p64CoveragePct,
@@ -297,6 +334,7 @@ export async function runCandidateAutomationEngine(input: {
     p62Assigned,
     p63ActionsGenerated,
     p64ProgressionsGenerated,
+    p83Advanced,
     p62CoveragePct: captureHealth.p62CoveragePct,
     p63CoveragePct: captureHealth.p63CoveragePct,
     p64CoveragePct: captureHealth.p64CoveragePct,
