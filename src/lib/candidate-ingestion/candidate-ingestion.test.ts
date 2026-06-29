@@ -129,7 +129,7 @@ describe("candidate-ingestion", () => {
     assert.equal(health.positionCoveragePct, 97);
     assert.equal(health.p62CoveragePct, 100);
     assert.equal(health.p63CoveragePct, 100);
-    assert.equal(health.p64CoveragePct, 0);
+    assert.equal(health.p64CoveragePct, 100);
     assert.equal(health.p62CoverageAllIngestedPct, 100);
     assert.equal(health.unassignedHistorical, 0);
     assert.equal(health.totalUnassigned, 1);
