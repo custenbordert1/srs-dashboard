@@ -36,6 +36,11 @@ import {
   buildCandidateAdvancementDecisions,
 } from "@/lib/candidate-advancement-engine";
 import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
+import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
+import {
+  loadP84FeatureFlags,
+  runAutonomousPaperworkSend,
+} from "@/lib/autonomous-paperwork-send-engine";
 
 const TERMINAL_STATUSES = new Set(["Not Qualified", "Active Rep", "Loaded in MEL"]);
 
@@ -157,6 +162,12 @@ export async function runCandidateAutomationEngine(input: {
   let p63ActionsGenerated = 0;
   let p64ProgressionsGenerated = 0;
   let p83Advanced = 0;
+  let p84Sent = 0;
+  let p84Failed = 0;
+  let p84RetriesScheduled = 0;
+  let p84Skipped = 0;
+  let p84SignaturesSynced = 0;
+  let p84ReadyForMel = 0;
   let skipped = false;
   let skipReason: string | undefined;
 
@@ -233,6 +244,7 @@ export async function runCandidateAutomationEngine(input: {
 
     if (policy.advancement.enabled && policy.mode !== "manual") {
       const onboardingPolicy = await loadCandidateOnboardingPolicy();
+      const p84Flags = policy.paperworkSend.enabled ? await loadP84FeatureFlags() : null;
       const advancementMtd = mtdCandidates.filter((candidate) =>
         isAssignedMtdCandidate(candidate, workflows),
       );
@@ -241,10 +253,14 @@ export async function runCandidateAutomationEngine(input: {
           job: jobsByPositionId.get(candidate.positionId),
         }),
       );
+      const requireAdvancementApproval =
+        p84Flags?.liveMode && !p84Flags.requireApproval
+          ? false
+          : onboardingPolicy.send.requireApproval;
       const advancementDecisions = buildCandidateAdvancementDecisions(scoredForAdvancement, {
         jobsByPositionId,
         paperworkByGrade: onboardingPolicy.paperworkByGrade,
-        requireApproval: onboardingPolicy.send.requireApproval,
+        requireApproval: requireAdvancementApproval,
       });
       const advancementResult = await applyCandidateAdvancements({
         decisions: advancementDecisions,
@@ -256,7 +272,44 @@ export async function runCandidateAutomationEngine(input: {
       warnings.push("P83 advancement skipped — disabled in policy.");
     }
 
+    if (policy.paperworkSend.enabled && policy.mode !== "manual") {
+      const p84Mtd = mtdCandidates.filter((candidate) =>
+        isAssignedMtdCandidate(candidate, workflows),
+      );
+      const scoredForP84 = p84Mtd.map((candidate) =>
+        buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], {
+          job: jobsByPositionId.get(candidate.positionId),
+        }),
+      );
+      const onboardingRecords = await listAllCandidateOnboardingRecords();
+      const onboardingByCandidateId = new Map(
+        onboardingRecords.map((record) => [record.candidateId, record] as const),
+      );
+      const p84Result = await runAutonomousPaperworkSend({
+        candidates: scoredForP84,
+        onboardingByCandidateId,
+        jobsByPositionId,
+        orchestratorRunId: runId,
+        byUserId: input.byUserId,
+      });
+      p84Sent = p84Result.sent;
+      p84Failed = p84Result.failed;
+      p84RetriesScheduled = p84Result.retriesScheduled;
+      p84Skipped = p84Result.skipped;
+      p84SignaturesSynced = p84Result.signaturesSynced;
+      p84ReadyForMel = p84Result.readyForWork;
+      if (p84Result.warnings.length > 0) warnings.push(...p84Result.warnings);
+      if (p84Result.errors.length > 0) errors.push(...p84Result.errors);
+    } else if (!policy.paperworkSend.enabled) {
+      warnings.push("P84 paperwork send skipped — disabled in policy.");
+    }
+
     if (policy.execution.enabled && policy.mode !== "manual") {
+      if (policy.paperworkSend.enabled) {
+        warnings.push(
+          "P65.2 execution paperwork sends skipped — P84 autonomous paperwork send is enabled (avoid duplicates).",
+        );
+      } else {
       const executionMtd = mtdCandidates.filter((candidate) =>
         isAssignedMtdCandidate(candidate, workflows),
       );
@@ -273,6 +326,7 @@ export async function runCandidateAutomationEngine(input: {
       });
       if (execution.warnings.length > 0) warnings.push(...execution.warnings);
       if (execution.errors.length > 0) errors.push(...execution.errors);
+      }
     } else if (!policy.execution.enabled) {
       warnings.push("P65.2 execution skipped — disabled in policy.");
     }
@@ -310,6 +364,12 @@ export async function runCandidateAutomationEngine(input: {
     p63ActionsGenerated,
     p64ProgressionsGenerated,
     p83Advanced,
+    p84Sent,
+    p84Failed,
+    p84RetriesScheduled,
+    p84Skipped,
+    p84SignaturesSynced,
+    p84ReadyForMel,
     p62CoveragePct: captureHealth.p62CoveragePct,
     p63CoveragePct: captureHealth.p63CoveragePct,
     p64CoveragePct: captureHealth.p64CoveragePct,
@@ -335,6 +395,12 @@ export async function runCandidateAutomationEngine(input: {
     p63ActionsGenerated,
     p64ProgressionsGenerated,
     p83Advanced,
+    p84Sent,
+    p84Failed,
+    p84RetriesScheduled,
+    p84Skipped,
+    p84SignaturesSynced,
+    p84ReadyForMel,
     p62CoveragePct: captureHealth.p62CoveragePct,
     p63CoveragePct: captureHealth.p63CoveragePct,
     p64CoveragePct: captureHealth.p64CoveragePct,

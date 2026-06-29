@@ -9,6 +9,7 @@ export type CandidateAutomationPolicy = {
   actions: { enabled: boolean };
   progression: { enabled: boolean };
   advancement: { enabled: boolean };
+  paperworkSend: { enabled: boolean };
   execution: { enabled: boolean };
   escalation: { enabled: boolean };
   rebalance: { enabled: boolean };
@@ -30,6 +31,12 @@ export type CandidateAutomationRunRecord = {
   p63ActionsGenerated: number;
   p64ProgressionsGenerated: number;
   p83Advanced: number;
+  p84Sent?: number;
+  p84Failed?: number;
+  p84RetriesScheduled?: number;
+  p84Skipped?: number;
+  p84SignaturesSynced?: number;
+  p84ReadyForMel?: number;
   p62CoveragePct: number;
   p63CoveragePct: number;
   p64CoveragePct: number;
@@ -54,6 +61,12 @@ export type CandidateAutomationRunResult = {
   p63ActionsGenerated: number;
   p64ProgressionsGenerated: number;
   p83Advanced: number;
+  p84Sent?: number;
+  p84Failed?: number;
+  p84RetriesScheduled?: number;
+  p84Skipped?: number;
+  p84SignaturesSynced?: number;
+  p84ReadyForMel?: number;
   p62CoveragePct: number;
   p63CoveragePct: number;
   p64CoveragePct: number;

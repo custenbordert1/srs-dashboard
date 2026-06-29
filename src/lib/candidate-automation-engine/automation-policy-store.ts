@@ -14,6 +14,7 @@ export const DEFAULT_CANDIDATE_AUTOMATION_POLICY: CandidateAutomationPolicy = {
   actions: { enabled: true },
   progression: { enabled: true },
   advancement: { enabled: true },
+  paperworkSend: { enabled: false },
   execution: { enabled: false },
   escalation: { enabled: false },
   rebalance: { enabled: false },
