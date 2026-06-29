@@ -32,6 +32,7 @@ export type CandidateIngestionSyncResult = {
   checkpointIndex: number;
   workflowsCreated: number;
   workflowsBackfilled: number;
+  workflowsReconciled: number;
   assigned: number;
   actionsGenerated: number;
   progressionsGenerated: number;

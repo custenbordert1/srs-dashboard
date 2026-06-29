@@ -3,7 +3,9 @@ import {
   findActiveOnboardingRecord,
   recordCandidateOnboarding,
 } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
+import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
+import { reconcileWorkflowFromOnboarding } from "@/lib/workflow-onboarding-reconciliation";
 
 export function duplicatePaperworkSendBlockReason(input: {
   workflow?: CandidateWorkflowRecord | null;
@@ -76,5 +78,13 @@ export async function syncActiveOnboardingRecordAfterSend(
   if (!active) return null;
   const updated = buildSentOnboardingRecordUpdate(active, signatureRequestId);
   await recordCandidateOnboarding(updated);
+
+  const workflows = await getCandidateWorkflowState();
+  await reconcileWorkflowFromOnboarding({
+    candidateId,
+    workflow: workflows[candidateId] ?? null,
+    onboarding: updated,
+  });
+
   return updated;
 }

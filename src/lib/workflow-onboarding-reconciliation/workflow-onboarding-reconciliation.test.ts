@@ -4,14 +4,18 @@ import type { BreezyCandidate } from "@/lib/breezy-api";
 import { emptyRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import type { CandidateOnboardingRecord } from "@/lib/candidate-onboarding-engine/types";
+import { recordCandidateOnboarding } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { backfillWorkflowRecordsForCandidates } from "@/lib/candidate-ingestion/backfill-workflow-records";
 import { getCandidateWorkflowState, upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
+import { isOnboardingPipelineEligible } from "@/lib/onboarding-pipeline-engine/is-pipeline-eligible";
 import {
   installIsolatedRecruitingDataDir,
   type IsolatedRecruitingDataHandle,
 } from "@/lib/test/recruiting-test-isolation";
 import {
   planWorkflowReconciliationFromOnboarding,
+  reconcileAllWorkflowsFromOnboarding,
+  reconcileWorkflowFromOnboarding,
   resolveAssignedRecruiter,
   resolvePaperworkStatus,
   resolveWorkflowStatus,
@@ -66,10 +70,12 @@ function onboardingRecord(
 before(async () => {
   isolation = await installIsolatedRecruitingDataDir("workflow-reconciliation-test-");
   process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR = isolation.dir;
+  process.env.SRS_RECRUITING_DATA_DIR = isolation.dir;
 });
 
 after(async () => {
   delete process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR;
+  delete process.env.SRS_RECRUITING_DATA_DIR;
   await isolation.restore();
 });
 
@@ -226,5 +232,127 @@ describe("reconcileWorkflowFromOnboarding planning", () => {
 
     assert.equal(plan.reconciled, false);
     assert.equal(plan.skippedReason, "workflow_already_aligned");
+  });
+});
+
+describe("P81.3 workflow reconciliation", () => {
+  it("restores paperwork state after ingestion-style workflow reset", async () => {
+    await recordCandidateOnboarding(onboardingRecord("c-reset"));
+
+    await upsertCandidateWorkflow({
+      candidateId: "c-reset",
+      workflowStatus: "Applied",
+      paperworkStatus: "not_sent",
+      assignedRecruiter: "Unassigned",
+      audit: { action: "ingestion_import" },
+    });
+
+    const result = await backfillWorkflowRecordsForCandidates({
+      candidates: [candidate("c-reset")],
+      workflows: {},
+    });
+
+    assert.equal(result.reconciled, 1);
+    const state = await getCandidateWorkflowState();
+    assert.equal(state["c-reset"]?.paperworkStatus, "sent");
+    assert.equal(state["c-reset"]?.workflowStatus, "Paperwork Sent");
+    assert.equal(state["c-reset"]?.signatureRequestId, "sig-abc");
+  });
+
+  it("restores signed state from completed onboarding record", async () => {
+    await recordCandidateOnboarding(
+      onboardingRecord("c-signed", {
+        status: "completed",
+        paperworkComplete: true,
+        completedAt: "2026-06-21T10:00:00.000Z",
+      }),
+    );
+
+    const reconciled = await reconcileWorkflowFromOnboarding({
+      candidateId: "c-signed",
+      workflow: {
+        candidateId: "c-signed",
+        workflowStatus: "Applied",
+        paperworkStatus: "not_sent",
+      } as CandidateWorkflowRecord,
+      onboarding: onboardingRecord("c-signed", {
+        status: "completed",
+        paperworkComplete: true,
+        completedAt: "2026-06-21T10:00:00.000Z",
+      }),
+    });
+
+    assert.equal(reconciled.reconciled, true);
+    const state = await getCandidateWorkflowState();
+    assert.equal(state["c-signed"]?.paperworkStatus, "signed");
+    assert.equal(state["c-signed"]?.workflowStatus, "Signed");
+    assert.equal(
+      isOnboardingPipelineEligible({
+        candidateId: "c-signed",
+        workflowStatus: state["c-signed"]!.workflowStatus,
+        paperworkStatus: state["c-signed"]!.paperworkStatus,
+      }),
+      true,
+    );
+  });
+
+  it("keeps applied-only candidates at Applied when onboarding is pending approval", async () => {
+    await recordCandidateOnboarding(
+      onboardingRecord("c-applied", {
+        status: "pending_approval",
+        signatureRequestId: undefined,
+        sentAt: undefined,
+      }),
+    );
+
+    const result = await backfillWorkflowRecordsForCandidates({
+      candidates: [candidate("c-applied")],
+      workflows: {},
+    });
+
+    assert.equal(result.created, 1);
+    assert.equal(result.reconciled, 0);
+    const state = await getCandidateWorkflowState();
+    assert.equal(state["c-applied"]?.workflowStatus, "Applied");
+    assert.equal(state["c-applied"]?.paperworkStatus, "not_sent");
+  });
+
+  it("does not create duplicate workflow records during backfill reconciliation", async () => {
+    await recordCandidateOnboarding(onboardingRecord("c-dup"));
+
+    const result = await backfillWorkflowRecordsForCandidates({
+      candidates: [candidate("c-dup"), candidate("c-dup")],
+      workflows: {},
+    });
+
+    const state = await getCandidateWorkflowState();
+    assert.equal(state["c-dup"]?.paperworkStatus, "sent");
+    assert.equal(state["c-dup"]?.signatureRequestId, "sig-abc");
+    assert.equal(result.reconciled, 1);
+  });
+
+  it("reconcileAllWorkflowsFromOnboarding repairs drifted sent records", async () => {
+    await recordCandidateOnboarding(onboardingRecord("c-drift"));
+    await upsertCandidateWorkflow({
+      candidateId: "c-drift",
+      workflowStatus: "Applied",
+      paperworkStatus: "not_sent",
+      assignedRecruiter: "Unassigned",
+      audit: { action: "ingestion_import" },
+    });
+
+    const batch = await reconcileAllWorkflowsFromOnboarding();
+    assert.equal(batch.reconciled, 1);
+
+    const state = await getCandidateWorkflowState();
+    assert.equal(state["c-drift"]?.paperworkStatus, "sent");
+    assert.equal(
+      isOnboardingPipelineEligible({
+        candidateId: "c-drift",
+        workflowStatus: state["c-drift"]!.workflowStatus,
+        paperworkStatus: state["c-drift"]!.paperworkStatus,
+      }),
+      false,
+    );
   });
 });
