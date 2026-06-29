@@ -8,6 +8,7 @@ export type CandidateAutomationPolicy = {
   assign: { enabled: boolean };
   actions: { enabled: boolean };
   progression: { enabled: boolean };
+  advancement: { enabled: boolean };
   execution: { enabled: boolean };
   escalation: { enabled: boolean };
   rebalance: { enabled: boolean };
@@ -28,6 +29,7 @@ export type CandidateAutomationRunRecord = {
   p62Assigned: number;
   p63ActionsGenerated: number;
   p64ProgressionsGenerated: number;
+  p83Advanced: number;
   p62CoveragePct: number;
   p63CoveragePct: number;
   p64CoveragePct: number;
@@ -51,6 +53,7 @@ export type CandidateAutomationRunResult = {
   p62Assigned: number;
   p63ActionsGenerated: number;
   p64ProgressionsGenerated: number;
+  p83Advanced: number;
   p62CoveragePct: number;
   p63CoveragePct: number;
   p64CoveragePct: number;
