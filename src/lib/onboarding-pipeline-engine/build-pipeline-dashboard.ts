@@ -24,6 +24,14 @@ function toPreviewInput(row: ScoredCandidateWorkflowRow): OnboardingPreviewCandi
   };
 }
 
+function toCandidateContext(row: ScoredCandidateWorkflowRow) {
+  return {
+    assignedDM: row.assignedDM,
+    positionName: row.positionName,
+    suggestedProjects: [] as string[],
+  };
+}
+
 export function buildOnboardingPipelineDashboardSnapshot(input: {
   candidates: ScoredCandidateWorkflowRow[];
   onboardingRecords: CandidateOnboardingRecord[];
@@ -33,20 +41,22 @@ export function buildOnboardingPipelineDashboardSnapshot(input: {
   const onboardingByCandidate = new Map(
     input.onboardingRecords.map((record) => [record.candidateId, record] as const),
   );
+  const scoredById = new Map(input.candidates.map((row) => [row.candidateId, row] as const));
 
   const records = input.candidates
-    .map((row) => toPreviewInput(row))
-    .filter(isOnboardingPipelineEligible)
-    .map((row) =>
-      buildOnboardingPipelineRecord({
-        row,
+    .filter((row) => isOnboardingPipelineEligible(toPreviewInput(row)))
+    .map((row) => {
+      const previewRow = toPreviewInput(row);
+      return buildOnboardingPipelineRecord({
+        row: previewRow,
         onboarding: onboardingByCandidate.get(row.candidateId) ?? null,
         referenceAt: fetchedAt,
-      }),
-    )
+        context: toCandidateContext(scoredById.get(row.candidateId) ?? row),
+      });
+    })
     .sort((a, b) => a.candidateName.localeCompare(b.candidateName));
 
-  const summary = buildOnboardingPipelineExecutiveSummary(records);
+  const summary = buildOnboardingPipelineExecutiveSummary(records, fetchedAt);
   const stalledRecords = records.filter((row) => row.stalled);
 
   return {

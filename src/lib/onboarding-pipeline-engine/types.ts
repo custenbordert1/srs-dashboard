@@ -36,6 +36,73 @@ export type OnboardingPipelineRecruiterAction = {
   previewOnly: true;
 };
 
+export type WelcomeEmailWorkflowPreview = {
+  candidateId: string;
+  subject: string;
+  bodyText: string;
+  bodyHtml: string;
+  recipientEmail: string | null;
+  replyTo: string;
+  trainingLinks: Array<{ label: string; url: string | null }>;
+  nextSteps: string[];
+  districtManager: string;
+  assignedProject: string | null;
+  onboardingSteps: string[];
+  trainingExpectations: string[];
+  previewOnly: true;
+};
+
+export type TrainingWorkflowAssignment = {
+  key: string;
+  label: string;
+  status: "not_assigned" | "assigned" | "in_progress" | "complete" | "blocked";
+  stateLabel: string;
+  dueAt: string;
+  estimatedCompletionMinutes: number;
+  assignedAt: string | null;
+  completedAt: string | null;
+  previewOnly: true;
+};
+
+export type WelcomeWorkflowTask = {
+  id: string;
+  stage: OnboardingPipelineStage;
+  label: string;
+  description: string;
+  dueAt: string;
+  estimatedMinutes: number;
+  status: "pending" | "ready" | "completed" | "blocked";
+  previewOnly: true;
+};
+
+export type OnboardingReadinessScore = {
+  score: number;
+  confidence: number;
+  blockers: string[];
+  factors: Array<{ id: string; label: string; complete: boolean; weight: number }>;
+};
+
+export type OnboardingActivityHistoryEntry = {
+  id: string;
+  label: string;
+  at: string | null;
+  status: "completed" | "current" | "upcoming";
+  detail: string | null;
+  previewOnly: true;
+};
+
+export type OnboardingDueDateScheduleSnapshot = {
+  anchorAt: string;
+  estimatedReadyForWorkAt: string;
+  currentStageDueAt: string;
+};
+
+export type OnboardingPipelineCandidateContext = {
+  assignedDM?: string;
+  positionName?: string | null;
+  suggestedProjects?: string[];
+};
+
 export type OnboardingPipelineTimelineEntry = {
   id: OnboardingPipelineStage;
   label: string;
@@ -60,6 +127,14 @@ export type OnboardingPipelineRecord = {
   recruiterActions: OnboardingPipelineRecruiterAction[];
   paperworkSignedAt: string | null;
   previewMode: typeof P80_PREVIEW_MODE;
+  welcomeEmail: WelcomeEmailWorkflowPreview | null;
+  workflowTasks: WelcomeWorkflowTask[];
+  trainingAssignments: TrainingWorkflowAssignment[];
+  readiness: OnboardingReadinessScore;
+  dueDates: OnboardingDueDateScheduleSnapshot;
+  estimatedCompletionAt: string;
+  waitingDays: number;
+  activityHistory: OnboardingActivityHistoryEntry[];
 };
 
 export type OnboardingPipelineExecutiveSummary = {
@@ -67,6 +142,13 @@ export type OnboardingPipelineExecutiveSummary = {
   readyForWorkCount: number;
   stalledCount: number;
   averageProgressPercent: number;
+  averageOnboardingDays: number | null;
+  readyThisWeekCount: number;
+  overdueOnboardingCount: number;
+  estimatedReadyForWorkThisWeek: number;
+  bottleneckStage: OnboardingPipelineStage | null;
+  bottleneckStageLabel: string | null;
+  longestWaiting: { candidateName: string; days: number } | null;
 };
 
 export type OnboardingPipelineDashboardSnapshot = {

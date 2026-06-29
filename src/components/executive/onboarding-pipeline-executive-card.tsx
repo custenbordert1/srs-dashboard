@@ -4,6 +4,11 @@ import type { OnboardingPipelineExecutiveSummary } from "@/lib/onboarding-pipeli
 import { ExecutiveCard, MetricCard, SectionHeader } from "@/components/executive/ui";
 import { useCallback, useEffect, useState } from "react";
 
+function formatDays(value: number | null): string {
+  if (value == null) return "—";
+  return `${value}d`;
+}
+
 export function OnboardingPipelineExecutiveCard() {
   const [summary, setSummary] = useState<OnboardingPipelineExecutiveSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +44,7 @@ export function OnboardingPipelineExecutiveCard() {
     <ExecutiveCard>
       <SectionHeader
         title="Onboarding Pipeline"
-        subtitle="Post-paperwork autonomous onboarding — preview mode only."
+        subtitle="P81 welcome workflow engine — preview mode only. No production actions."
         badge="Preview"
         badgeTone="preview"
       />
@@ -49,11 +54,34 @@ export function OnboardingPipelineExecutiveCard() {
       ) : error ? (
         <p className="text-sm text-rose-300">{error}</p>
       ) : summary ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard label="Total records" value={String(summary.totalRecords)} />
-          <MetricCard label="Ready for work" value={String(summary.readyForWorkCount)} />
-          <MetricCard label="Stalled" value={String(summary.stalledCount)} />
-          <MetricCard label="Avg progress" value={`${summary.averageProgressPercent}%`} />
+        <div className="mt-4 space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard label="Total records" value={String(summary.totalRecords)} />
+            <MetricCard label="Ready for work" value={String(summary.readyForWorkCount)} />
+            <MetricCard label="Stalled" value={String(summary.stalledCount)} />
+            <MetricCard label="Avg progress" value={`${summary.averageProgressPercent}%`} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <MetricCard label="Avg onboarding time" value={formatDays(summary.averageOnboardingDays)} />
+            <MetricCard label="Ready this week" value={String(summary.readyThisWeekCount)} />
+            <MetricCard label="Overdue onboarding" value={String(summary.overdueOnboardingCount)} />
+            <MetricCard
+              label="Est. ready this week"
+              value={String(summary.estimatedReadyForWorkThisWeek)}
+            />
+            <MetricCard
+              label="Bottleneck stage"
+              value={summary.bottleneckStageLabel ?? "—"}
+            />
+            <MetricCard
+              label="Longest waiting"
+              value={
+                summary.longestWaiting
+                  ? `${summary.longestWaiting.candidateName} (${summary.longestWaiting.days}d)`
+                  : "—"
+              }
+            />
+          </div>
         </div>
       ) : null}
     </ExecutiveCard>
