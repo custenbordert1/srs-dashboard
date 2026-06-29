@@ -21,6 +21,8 @@ export function mergeCandidateRecord(
     ...incoming,
     questionnaireAnswers,
     hasQuestionnaire: Boolean(questionnaireAnswers?.length) || existing.hasQuestionnaire || incoming.hasQuestionnaire,
+    questionnaireEnrichmentAttemptedAt:
+      incoming.questionnaireEnrichmentAttemptedAt ?? existing.questionnaireEnrichmentAttemptedAt,
     resumeText: incomingResumeLength >= existingResumeLength ? incoming.resumeText : existing.resumeText,
     hasResume: existing.hasResume || incoming.hasResume,
     resumeFields: incoming.resumeFields ?? existing.resumeFields,

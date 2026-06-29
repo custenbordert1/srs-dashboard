@@ -149,6 +149,8 @@ export type BreezyCandidate = {
   questionnaireAnswers?: CandidateQuestionnaireAnswer[];
   /** True when at least one questionnaire answer was extracted from Breezy. */
   hasQuestionnaire?: boolean;
+  /** ISO timestamp when questionnaire enrichment was last attempted via Breezy detail APIs. */
+  questionnaireEnrichmentAttemptedAt?: string;
   score?: number;
   /** Breezy position pipeline state when fetched (published, closed, archived, …). */
   positionPipelineStatus?: string;
@@ -714,6 +716,10 @@ function markBreezyRateLimitHit(): void {
 
 export function wasBreezyRateLimitHit(): boolean {
   return breezyRateLimitHitFlag;
+}
+
+export function resetBreezyRateLimitHit(): void {
+  resetBreezyRateLimitFlag();
 }
 
 function isRetryableBreezyError(error: string): boolean {

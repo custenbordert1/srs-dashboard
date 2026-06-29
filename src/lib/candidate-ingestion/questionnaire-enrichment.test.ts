@@ -13,7 +13,11 @@ import {
   extractQuestionnaireAnswersFromBreezyCustomFields,
   extractQuestionnaireAnswersFromBreezyQuestionnaires,
 } from "@/lib/candidate-readiness";
-import { listMtdCandidatesMissingQuestionnaire } from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
+import {
+  candidatePendingQuestionnaireEnrichment,
+  listMtdCandidatesMissingQuestionnaire,
+  listMtdCandidatesPendingQuestionnaireEnrichment,
+} from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
 import { emptyIngestionStore, mergeIngestedCandidates } from "@/lib/candidate-ingestion/ingestion-store";
 import { mergeCandidateRecord } from "@/lib/candidate-ingestion/merge-candidate-record";
 
@@ -235,6 +239,38 @@ describe("questionnaire enrichment", () => {
     const missing = listMtdCandidatesMissingQuestionnaire(merged.store, new Date("2026-06-29"));
     assert.equal(missing.length, 1);
     assert.equal(missing[0]?.candidateId, "june-1");
+  });
+
+  it("skips candidates already enriched or previously attempted", () => {
+    const enriched = applyQuestionnaireAnswersToCandidate(baseCandidate({ candidateId: "done" }), [
+      { question: "Smartphone", answer: "Yes" },
+    ]);
+    const attemptedEmpty = baseCandidate({
+      candidateId: "tried",
+      questionnaireEnrichmentAttemptedAt: "2026-06-29T12:00:00.000Z",
+      hasQuestionnaire: false,
+    });
+    assert.equal(candidatePendingQuestionnaireEnrichment(enriched), false);
+    assert.equal(candidatePendingQuestionnaireEnrichment(attemptedEmpty), false);
+    assert.equal(candidatePendingQuestionnaireEnrichment(baseCandidate({ candidateId: "pending" })), true);
+
+    const store = emptyIngestionStore();
+    const merged = mergeIngestedCandidates(store, [
+      baseCandidate({ candidateId: "pending", appliedDate: "2026-06-05" }),
+      enriched,
+      attemptedEmpty,
+    ]);
+    const pending = listMtdCandidatesPendingQuestionnaireEnrichment(merged.store, new Date("2026-06-29"));
+    assert.equal(pending.length, 1);
+    assert.equal(pending[0]?.candidateId, "pending");
+  });
+
+  it("preserves questionnaire enrichment attempted timestamp when merging", () => {
+    const merged = mergeCandidateRecord(undefined, {
+      ...baseCandidate(),
+      questionnaireEnrichmentAttemptedAt: "2026-06-29T12:00:00.000Z",
+    });
+    assert.equal(merged.questionnaireEnrichmentAttemptedAt, "2026-06-29T12:00:00.000Z");
   });
 
   it("returns candidate unchanged when enrichment payload has no answers", () => {
