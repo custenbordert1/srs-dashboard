@@ -26,6 +26,7 @@ export function runOnboardingPipelinePreview(input: {
 
   const warnings = [
     "Preview mode — no emails sent, no MEL writes, no production data changes.",
+    "P81 welcome workflow tasks are generated as preview-only records.",
     "All automation actions are generated as preview-only stubs.",
   ];
 
@@ -76,5 +77,10 @@ export function buildOnboardingPipelineCandidatePreview(input: {
     row: previewRow,
     onboarding: input.onboarding,
     referenceAt: input.fetchedAt,
+    context: {
+      assignedDM: input.row.assignedDM,
+      positionName: input.row.positionName,
+      suggestedProjects: [],
+    },
   });
 }
