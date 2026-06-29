@@ -26,3 +26,10 @@ export {
   type MtdDriftEntry,
   type MtdWorkflowDriftScan,
 } from "@/lib/workflow-onboarding-reconciliation/scan-mtd-workflow-drift";
+export {
+  loadActiveOnboardingRecordsByCandidate,
+  mapActiveOnboardingRecordsByCandidate,
+  onboardingHasRestorablePaperworkState,
+  reconcileAllWorkflowsFromOnboarding,
+  type ReconcileAllWorkflowsFromOnboardingResult,
+} from "@/lib/workflow-onboarding-reconciliation/reconcile-all-workflows-from-onboarding";

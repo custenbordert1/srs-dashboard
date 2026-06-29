@@ -6,6 +6,7 @@ import {
 } from "@/lib/breezy-api";
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { backfillWorkflowRecordsForCandidates } from "@/lib/candidate-ingestion/backfill-workflow-records";
+import { reconcileAllWorkflowsFromOnboarding } from "@/lib/workflow-onboarding-reconciliation";
 import { buildApplicantCaptureHealth } from "@/lib/candidate-ingestion/build-capture-metrics";
 import {
   listIngestedCandidates,
@@ -53,6 +54,7 @@ export async function runCandidateIngestionSync(input?: {
       checkpointIndex: store.checkpointIndex,
       workflowsCreated: 0,
       workflowsBackfilled: 0,
+      workflowsReconciled: 0,
       assigned: 0,
       actionsGenerated: 0,
       progressionsGenerated: 0,
@@ -87,6 +89,7 @@ export async function runCandidateIngestionSync(input?: {
         checkpointIndex: store.checkpointIndex,
         workflowsCreated: 0,
         workflowsBackfilled: 0,
+        workflowsReconciled: 0,
         assigned: 0,
         actionsGenerated: 0,
         progressionsGenerated: 0,
@@ -187,6 +190,11 @@ export async function runCandidateIngestionSync(input?: {
     byUserId: input?.byUserId,
   });
 
+  const reconciliation = await reconcileAllWorkflowsFromOnboarding({
+    byUserId: input?.byUserId,
+    workflows,
+  });
+
   let assigned = 0;
   let actionsGenerated = 0;
   let progressionsGenerated = 0;
@@ -228,6 +236,7 @@ export async function runCandidateIngestionSync(input?: {
     checkpointIndex: store.checkpointIndex,
     workflowsCreated: backfill.created,
     workflowsBackfilled: backfill.created,
+    workflowsReconciled: reconciliation.reconciled,
     assigned,
     actionsGenerated,
     progressionsGenerated,
