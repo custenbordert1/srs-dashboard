@@ -56,6 +56,23 @@ export function candidatePendingQuestionnaireEnrichment(candidate: BreezyCandida
   return !candidate.questionnaireEnrichmentAttemptedAt;
 }
 
+/** Clear attempted timestamps for empty enrichments so parser fixes can re-fetch once. */
+export function clearEmptyQuestionnaireEnrichmentAttempts(
+  store: CandidateIngestionStoreFile,
+  reference = new Date(),
+): CandidateIngestionStoreFile {
+  const candidates = { ...store.candidates };
+  for (const candidate of filterMtdCandidates(listIngestedCandidates(store), currentMtdDateRange(reference))) {
+    if ((candidate.questionnaireAnswers?.length ?? 0) > 0) continue;
+    if (!candidate.questionnaireEnrichmentAttemptedAt) continue;
+    candidates[candidate.candidateId] = {
+      ...candidate,
+      questionnaireEnrichmentAttemptedAt: undefined,
+    };
+  }
+  return { ...store, candidates };
+}
+
 export function listMtdCandidatesMissingQuestionnaire(
   store: CandidateIngestionStoreFile,
   reference = new Date(),

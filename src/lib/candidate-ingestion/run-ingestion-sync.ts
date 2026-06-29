@@ -15,7 +15,7 @@ import {
   startIngestionRun,
   writeIngestionStore,
 } from "@/lib/candidate-ingestion/ingestion-store";
-import { enrichIngestionStoreQuestionnaires } from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
+import { completeJuneQuestionnaireEnrichment } from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
 import { runCandidateAutomationEngine } from "@/lib/candidate-automation-engine";
 import type { CandidateIngestionSyncResult } from "@/lib/candidate-ingestion/types";
 
@@ -184,10 +184,13 @@ export async function runCandidateIngestionSync(input?: {
   }
 
   if (enrichQuestionnaires && Date.now() < deadline) {
-    const enrichment = await enrichIngestionStoreQuestionnaires({
+    const enrichment = await completeJuneQuestionnaireEnrichment({
       store,
       companyId: company.companyId,
       deadlineMs: deadline,
+      onCheckpoint: async (checkpointStore) => {
+        await writeIngestionStore(checkpointStore);
+      },
     });
     store = enrichment.store;
   }

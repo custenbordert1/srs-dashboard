@@ -61,6 +61,39 @@ describe("questionnaire enrichment", () => {
     assert.equal(answers[0]?.answer, "Yes");
   });
 
+  it("extracts Breezy text/response fields and checkbox responses from questionnaires", () => {
+    const answers = extractQuestionnaireAnswersFromBreezyQuestionnaires([
+      {
+        sections: [
+          {
+            questions: [
+              {
+                text: "How many years of professional merchandising experience do you have?",
+                response: "3–5 years",
+              },
+            ],
+          },
+        ],
+        questions: [
+          {
+            text: "What types of resets have you completed? (Select all that apply)",
+            options: [{ text: "Simple shelf resets" }, { text: "Full aisle resets" }, { text: "Seasonal resets" }],
+            responses: [true, false, true],
+          },
+          {
+            text: "Do you have reliable transportation, a valid non-expired driver’s license, and are you 18 years of age or older?",
+            response: "Yes",
+          },
+        ],
+      },
+    ]);
+    assert.equal(answers.length, 3);
+    assert.equal(answers[0]?.answer, "3–5 years");
+    assert.equal(answers[1]?.answer, "Simple shelf resets, Seasonal resets");
+    assert.equal(answers[2]?.answer, "Yes");
+    assert.ok(!answers.some((entry) => entry.answer === entry.question));
+  });
+
   it("extracts questionnaire answers from Breezy custom-fields payload", () => {
     const answers = extractQuestionnaireAnswersFromBreezyCustomFields([
       { name: "Internet access", value: "Yes" },
@@ -241,7 +274,7 @@ describe("questionnaire enrichment", () => {
     assert.equal(missing[0]?.candidateId, "june-1");
   });
 
-  it("skips candidates already enriched or previously attempted", () => {
+  it("skips enriched candidates and previously attempted empty enrichments", () => {
     const enriched = applyQuestionnaireAnswersToCandidate(baseCandidate({ candidateId: "done" }), [
       { question: "Smartphone", answer: "Yes" },
     ]);

@@ -74,6 +74,27 @@ describe("candidate-readiness", () => {
     assert.equal(answers[0]?.question, "Smartphone access");
   });
 
+  it("extracts Breezy detail questionnaire text/response and checkbox fields", () => {
+    const answers = extractQuestionnaireAnswersFromRaw({
+      questionnaire: [
+        {
+          text: "How many years of professional merchandising experience do you have?",
+          response: "1–2 years",
+        },
+        {
+          text: "What types of resets have you completed? (Select all that apply)",
+          options: [{ text: "Simple shelf resets" }, { text: "Full aisle resets" }],
+          responses: [true, true],
+        },
+      ],
+    });
+    assert.equal(answers.length, 2);
+    assert.equal(answers[0]?.question, "How many years of professional merchandising experience do you have?");
+    assert.equal(answers[0]?.answer, "1–2 years");
+    assert.equal(answers[1]?.answer, "Simple shelf resets, Full aisle resets");
+    assert.ok(!answers.some((entry) => entry.answer === entry.question));
+  });
+
   it("builds resume intelligence with quick-read signal badges", () => {
     const resume = buildResumeIntelligence(sampleCandidate());
     assert.equal(resume.available, true);
