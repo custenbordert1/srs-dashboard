@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import { mergeCandidateRecord } from "@/lib/candidate-ingestion/merge-candidate-record";
 import type { CandidateIngestionStoreFile } from "@/lib/candidate-ingestion/types";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -68,7 +69,7 @@ export function mergeIngestedCandidates(
   for (const candidate of incoming) {
     if (!candidate.candidateId) continue;
     if (!candidates[candidate.candidateId]) newCount += 1;
-    candidates[candidate.candidateId] = candidate;
+    candidates[candidate.candidateId] = mergeCandidateRecord(candidates[candidate.candidateId], candidate);
   }
   return {
     store: { ...store, candidates },

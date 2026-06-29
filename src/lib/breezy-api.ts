@@ -20,7 +20,11 @@ import {
   logFirstCandidateKeys,
 } from "@/lib/candidates-debug";
 import { logBreezyCandidatesExtract } from "@/lib/breezy-candidates-ops-log";
-import { extractQuestionnaireAnswersFromRaw } from "@/lib/candidate-readiness/questionnaire-parser";
+import {
+  applyQuestionnaireAnswersToCandidate,
+  buildQuestionnaireAnswersFromEnrichmentPayload,
+  extractQuestionnaireAnswersFromRaw,
+} from "@/lib/candidate-readiness/questionnaire-parser";
 import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
@@ -2832,4 +2836,91 @@ export function getCandidatesByPosition(
   options?: { pageSize?: number; maxPages?: number },
 ): Promise<BreezyCandidatesResult> {
   return fetchBreezyCandidates({ positionId, ...options });
+}
+
+export type BreezyCandidateEnrichmentPayload = {
+  detail: Record<string, unknown> | null;
+  questionnaires: unknown;
+  customFields: unknown;
+};
+
+function buildBreezyCandidateDetailPath(
+  companyId: string,
+  positionId: string,
+  candidateId: string,
+  suffix = "",
+): string {
+  const base = `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(positionId)}/candidate/${encodeURIComponent(candidateId)}`;
+  return suffix ? `${base}/${suffix}` : base;
+}
+
+/** Fetch per-candidate Breezy detail payloads used for questionnaire enrichment. */
+export async function fetchBreezyCandidateEnrichmentPayload(input: {
+  companyId: string;
+  positionId: string;
+  candidateId: string;
+}): Promise<{ ok: true; payload: BreezyCandidateEnrichmentPayload } | BreezyApiFailure> {
+  const { companyId, positionId, candidateId } = input;
+  const detailPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId);
+  const questionnairesPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "questionnaires");
+  const customFieldsPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "custom-fields");
+
+  const detailResult = await breezyGetWithRetry<unknown>(detailPath);
+  if (!detailResult.ok) return detailResult;
+
+  const questionnairesResult = await breezyGetWithRetry<unknown>(questionnairesPath);
+  if (!questionnairesResult.ok) return questionnairesResult;
+
+  const customFieldsResult = await breezyGetWithRetry<unknown>(customFieldsPath);
+  if (!customFieldsResult.ok) return customFieldsResult;
+
+  const detailRecord = asRecord(detailResult.data);
+
+  return {
+    ok: true,
+    payload: {
+      detail: detailRecord,
+      questionnaires: questionnairesResult.data,
+      customFields: customFieldsResult.data,
+    },
+  };
+}
+
+export function enrichBreezyCandidateWithQuestionnairePayload(
+  candidate: BreezyCandidate,
+  payload: BreezyCandidateEnrichmentPayload,
+): BreezyCandidate {
+  const answers = buildQuestionnaireAnswersFromEnrichmentPayload(payload);
+  if (answers.length === 0) return candidate;
+
+  const enriched = applyQuestionnaireAnswersToCandidate(candidate, answers);
+  if (!payload.detail) return enriched;
+
+  const detailSanitized = sanitizeCandidate(
+    { ...payload.detail, position_id: candidate.positionId } as RawBreezyCandidate,
+    {
+      jobId: candidate.positionId,
+      name: candidate.positionName,
+      city: candidate.city,
+      state: candidate.state,
+      status: candidate.positionPipelineStatus || "published",
+    },
+  );
+
+  if (!detailSanitized) return enriched;
+
+  return {
+    ...enriched,
+    resumeText:
+      detailSanitized.resumeText.length > enriched.resumeText.length
+        ? detailSanitized.resumeText
+        : enriched.resumeText,
+    hasResume: enriched.hasResume || detailSanitized.hasResume,
+    resumeFields: detailSanitized.resumeFields ?? enriched.resumeFields,
+    questionnaireAnswers:
+      enriched.questionnaireAnswers && enriched.questionnaireAnswers.length > 0
+        ? enriched.questionnaireAnswers
+        : detailSanitized.questionnaireAnswers,
+    hasQuestionnaire: enriched.hasQuestionnaire || detailSanitized.hasQuestionnaire,
+  };
 }

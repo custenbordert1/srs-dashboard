@@ -9,6 +9,10 @@ export { matchesCandidateIntelligenceFilter } from "@/lib/candidate-readiness/in
 export {
   buildQuestionnaireIntelligence,
   extractQuestionnaireAnswersFromRaw,
+  extractQuestionnaireAnswersFromBreezyQuestionnaires,
+  extractQuestionnaireAnswersFromBreezyCustomFields,
+  buildQuestionnaireAnswersFromEnrichmentPayload,
+  applyQuestionnaireAnswersToCandidate,
 } from "@/lib/candidate-readiness/questionnaire-parser";
 export { buildResumeIntelligence } from "@/lib/candidate-readiness/resume-intelligence";
 export {

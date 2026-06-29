@@ -44,8 +44,124 @@ const QUESTION_KEY_MAP: Array<{ key: keyof Omit<CandidateQuestionnaireIntelligen
   { key: "printerLaptopAccess", patterns: ["printer", "laptop", "computer access", "home office"] },
   { key: "photoUploadComfort", patterns: ["photo", "upload", "camera", "picture"] },
   { key: "scheduleUnderstanding", patterns: ["schedule", "deadline", "availability window", "understand the schedule"] },
-  { key: "availabilityNotes", patterns: ["availability", "hours available", "when can you work", "days available"] },
+  {
+    key: "availabilityNotes",
+    patterns: [
+      "availability",
+      "hours available",
+      "when can you work",
+      "days available",
+      "transportation",
+      "reliable transportation",
+      "own a vehicle",
+      "valid driver",
+      "driver license",
+      "travel",
+    ],
+  },
 ];
+
+function mergeQuestionnaireAnswerSets(
+  ...sets: CandidateQuestionnaireAnswer[][]
+): CandidateQuestionnaireAnswer[] {
+  const seen = new Map<string, CandidateQuestionnaireAnswer>();
+  for (const set of sets) {
+    for (const answer of set) {
+      const key = answer.normalizedKey || (answer.question ? normalizeKey(answer.question) : "");
+      if (!key && !answer.answer.trim()) continue;
+      seen.set(key || `answer:${seen.size}`, answer);
+    }
+  }
+  return [...seen.values()];
+}
+
+function extractAnswersFromQuestionRecords(records: unknown[]): CandidateQuestionnaireAnswer[] {
+  const answers: CandidateQuestionnaireAnswer[] = [];
+  for (const entry of records) {
+    const record = asRecord(entry);
+    if (!record) continue;
+    const question =
+      stringFromUnknown(record.question) ||
+      stringFromUnknown(record.text) ||
+      stringFromUnknown(record.title) ||
+      stringFromUnknown(record.name) ||
+      stringFromUnknown(record.label) ||
+      stringFromUnknown(record.prompt);
+    const answer =
+      stringFromUnknown(record.answer) ||
+      stringFromUnknown(record.value) ||
+      stringFromUnknown(record.response) ||
+      stringFromUnknown(record.text_value) ||
+      stringFromUnknown(record.text);
+    if (!question && !answer) continue;
+    answers.push({
+      question: question || "Question",
+      answer: answer || "",
+      normalizedKey: question ? normalizeKey(question) : undefined,
+    });
+  }
+  return answers;
+}
+
+/** Parse Breezy `/candidate/:id/questionnaires` payload into normalized answers. */
+export function extractQuestionnaireAnswersFromBreezyQuestionnaires(
+  data: unknown,
+): CandidateQuestionnaireAnswer[] {
+  if (!Array.isArray(data)) return [];
+  const answers: CandidateQuestionnaireAnswer[] = [];
+  for (const questionnaire of data) {
+    const record = asRecord(questionnaire);
+    if (!record) continue;
+    for (const key of ["questions", "responses", "answers", "items", "fields"]) {
+      const section = record[key];
+      if (Array.isArray(section)) {
+        answers.push(...extractAnswersFromQuestionRecords(section));
+      }
+    }
+  }
+  return answers;
+}
+
+/** Parse Breezy `/candidate/:id/custom-fields` payload into normalized answers. */
+export function extractQuestionnaireAnswersFromBreezyCustomFields(
+  data: unknown,
+): CandidateQuestionnaireAnswer[] {
+  if (!Array.isArray(data)) return [];
+  return extractAnswersFromQuestionRecords(
+    data.map((entry) => {
+      const record = asRecord(entry);
+      if (!record) return entry;
+      return {
+        name: record.name ?? record.label ?? record.question ?? record.title,
+        value: record.value ?? record.answer ?? record.response ?? record.text,
+      };
+    }),
+  );
+}
+
+/** Combine questionnaire answers from Breezy detail, questionnaires, and custom-fields payloads. */
+export function buildQuestionnaireAnswersFromEnrichmentPayload(payload: {
+  detail?: Record<string, unknown> | null;
+  questionnaires?: unknown;
+  customFields?: unknown;
+}): CandidateQuestionnaireAnswer[] {
+  const fromDetail = payload.detail ? extractQuestionnaireAnswersFromRaw(payload.detail) : [];
+  const fromQuestionnaires = extractQuestionnaireAnswersFromBreezyQuestionnaires(payload.questionnaires);
+  const fromCustomFields = extractQuestionnaireAnswersFromBreezyCustomFields(payload.customFields);
+  return mergeQuestionnaireAnswerSets(fromDetail, fromQuestionnaires, fromCustomFields);
+}
+
+export function applyQuestionnaireAnswersToCandidate(
+  candidate: BreezyCandidate,
+  answers: CandidateQuestionnaireAnswer[],
+): BreezyCandidate {
+  if (answers.length === 0) return candidate;
+  return {
+    ...candidate,
+    questionnaireAnswers: answers,
+    hasQuestionnaire: true,
+  };
+}
 
 /** Extract normalized questionnaire answers from raw Breezy payload at sync time. */
 export function extractQuestionnaireAnswersFromRaw(

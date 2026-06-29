@@ -166,6 +166,14 @@ describe("candidate-readiness", () => {
     assert.ok(bundle.resume.quality.employmentHistoryCount !== null);
   });
 
+  it("does not flag transportation when questionnaire is unavailable", () => {
+    const candidate = sampleCandidate({ questionnaireAnswers: undefined, hasQuestionnaire: false });
+    const bundle = buildCandidateIntelligenceBundle(candidate);
+    assert.ok(
+      !bundle.grade.gradeContributors.some((item) => item.label === "Transportation not confirmed"),
+    );
+  });
+
   it("exposes confidence and grade contributors", () => {
     const candidate = sampleCandidate({ questionnaireAnswers: undefined, hasQuestionnaire: false });
     const bundle = buildCandidateIntelligenceBundle(candidate);

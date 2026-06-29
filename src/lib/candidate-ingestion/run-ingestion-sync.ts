@@ -15,6 +15,7 @@ import {
   startIngestionRun,
   writeIngestionStore,
 } from "@/lib/candidate-ingestion/ingestion-store";
+import { enrichIngestionStoreQuestionnaires } from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
 import { runCandidateAutomationEngine } from "@/lib/candidate-automation-engine";
 import type { CandidateIngestionSyncResult } from "@/lib/candidate-ingestion/types";
 
@@ -27,12 +28,14 @@ export async function runCandidateIngestionSync(input?: {
   maxRuntimeMs?: number;
   byUserId?: string;
   runPipeline?: boolean;
+  enrichQuestionnaires?: boolean;
   referenceBreezyMtd?: number;
   completeCycle?: boolean;
 }): Promise<CandidateIngestionSyncResult> {
   const maxPositionsPerChunk = input?.maxPositionsPerChunk ?? DEFAULT_CHUNK_SIZE;
   const maxRuntimeMs = input?.maxRuntimeMs ?? DEFAULT_MAX_RUNTIME_MS;
   const runPipeline = input?.runPipeline !== false;
+  const enrichQuestionnaires = input?.enrichQuestionnaires !== false;
   const deadline = Date.now() + maxRuntimeMs;
 
   let store = await readIngestionStore();
@@ -178,6 +181,15 @@ export async function runCandidateIngestionSync(input?: {
       continue;
     }
     if (!input?.completeCycle) break;
+  }
+
+  if (enrichQuestionnaires && Date.now() < deadline) {
+    const enrichment = await enrichIngestionStoreQuestionnaires({
+      store,
+      companyId: company.companyId,
+      deadlineMs: deadline,
+    });
+    store = enrichment.store;
   }
 
   await writeIngestionStore(store);
