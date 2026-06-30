@@ -75,6 +75,29 @@ describe("p106-autonomous-paperwork-engine", () => {
     assert.equal(result.category, "already_sent");
   });
 
+  it("blocks closed job positions", () => {
+    const result = classifyPaperworkBlocker({
+      row: {
+        candidateId: "closed1",
+        email: "test@example.com",
+        positionId: "closed-job-id",
+        assignedRecruiter: "Taylor",
+        assignedDM: "DM",
+        workflowStatus: "Applied",
+        actionType: null,
+        paperworkStatus: "not_sent",
+        signatureRequestId: null,
+        stage: "",
+      } as never,
+      onboarding: null,
+      jobsByPositionId: new Map(),
+      closedJobsByPositionId: new Map([["closed-job-id", { jobId: "closed-job-id", status: "closed" } as never]]),
+      paperworkByGrade: {} as never,
+      p100SentIds: new Set(),
+    });
+    assert.equal(result.category, "closed_job");
+  });
+
   it("executeSafeSingles is not executeBatch", () => {
     const modes = ["dryRun", "executeOne", "executeSafeSingles"];
     assert.equal(modes.includes("executeBatch"), false);

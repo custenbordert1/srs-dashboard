@@ -33,6 +33,7 @@ export function classifyPaperworkBlocker(input: {
   row: ScoredCandidateWorkflowRow | null;
   onboarding: CandidateOnboardingRecord | null;
   jobsByPositionId: Map<string, BreezyJob>;
+  closedJobsByPositionId?: Map<string, BreezyJob>;
   paperworkByGrade: PaperworkByGrade;
   p100SentIds: Set<string>;
 }): {
@@ -100,6 +101,15 @@ export function classifyPaperworkBlocker(input: {
 
   const published = Boolean(row.positionId?.trim() && input.jobsByPositionId.has(row.positionId));
   if (!published) {
+    const closed = input.closedJobsByPositionId?.has(row.positionId ?? "");
+    if (closed) {
+      return {
+        category: "closed_job",
+        reason: "Candidate position is closed or archived in Breezy.",
+        recommendedFix: "Reactivate or republish the job before paperwork send.",
+        autoRepairable: false,
+      };
+    }
     return {
       category: "unpublished_job",
       reason: "No published job match for candidate position.",

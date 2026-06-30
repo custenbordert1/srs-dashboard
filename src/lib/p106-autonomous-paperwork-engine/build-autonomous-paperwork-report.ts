@@ -1,6 +1,5 @@
 import { p97AuditLogPath, p97RollbackPath } from "@/lib/approval-mode-production/approval-mode-store";
 import { p100AuditLogPath } from "@/lib/controlled-live-send/controlled-live-send-store";
-import { findActiveOnboardingRecord } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { buildPaperworkSendEligibility } from "@/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility";
 import { loadP84FeatureFlags } from "@/lib/autonomous-paperwork-send-engine/feature-flags-store";
 import { buildLiveSendOperatorChecklist } from "@/lib/live-send-operator-checklist";
@@ -47,6 +46,7 @@ export async function buildAutonomousPaperworkReport(input?: {
   mode?: AutonomousPaperworkRunMode;
   autoRepairedIds?: Set<string>;
   runSummary?: string | null;
+  candidateIds?: string[];
 }): Promise<AutonomousPaperworkReport> {
   const mode = input?.mode ?? P106_DEFAULT_MODE;
   const mtdOnly = input?.mtdOnly !== false;
@@ -64,11 +64,12 @@ export async function buildAutonomousPaperworkReport(input?: {
   );
   const { loadP100State } = await import("@/lib/controlled-live-send/controlled-live-send-store");
 
-  const [store, bundle, jobsResult, onboardingRecords, policy, p100State, p84Flags, p99, p101, p100Report] =
+  const [store, bundle, jobsResult, closedJobsResult, onboardingRecords, policy, p100State, p84Flags, p99, p101, p100Report] =
     await Promise.all([
       readIngestionStore(),
       getCandidateWorkflowBundle(),
       fetchBreezyJobs("published"),
+      fetchBreezyJobs("closed"),
       listAllCandidateOnboardingRecords(),
       loadCandidateOnboardingPolicy(),
       loadP100State(),
@@ -81,6 +82,9 @@ export async function buildAutonomousPaperworkReport(input?: {
   const jobsByPositionId = new Map(
     (jobsResult.ok ? jobsResult.jobs : []).map((job) => [job.jobId, job]),
   );
+  const closedJobsByPositionId = new Map(
+    (closedJobsResult.ok ? closedJobsResult.jobs : []).map((job) => [job.jobId, job]),
+  );
   const onboardingByCandidateId = new Map(onboardingRecords.map((r) => [r.candidateId, r]));
   const p100SentIds = new Set(p100State.sentCandidateIds);
 
@@ -91,10 +95,14 @@ export async function buildAutonomousPaperworkReport(input?: {
       : filterMtdCandidates(listIngestedCandidates(store), range);
 
   const candidateIds = new Set(ingested.map((c) => c.candidateId));
+  const targetIds =
+    input?.candidateIds?.length && input.candidateIds.length > 0
+      ? input.candidateIds.filter((id) => candidateIds.has(id) || store.candidates[id])
+      : [...candidateIds];
 
   const results: AutonomousPaperworkCandidateResult[] = [];
 
-  for (const candidateId of candidateIds) {
+  for (const candidateId of targetIds) {
     const candidate = store.candidates[candidateId];
     if (!candidate) continue;
 
@@ -102,12 +110,13 @@ export async function buildAutonomousPaperworkReport(input?: {
       job: jobsByPositionId.get(candidate.positionId),
     });
     const onboarding = onboardingByCandidateId.get(candidateId) ?? null;
-    const activeOnboarding = onboarding ?? (await findActiveOnboardingRecord(candidateId));
+    const activeOnboarding = onboarding;
 
     const blocker = classifyPaperworkBlocker({
       row,
       onboarding: activeOnboarding,
       jobsByPositionId,
+      closedJobsByPositionId,
       paperworkByGrade: policy.paperworkByGrade,
       p100SentIds,
     });

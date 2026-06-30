@@ -6,6 +6,7 @@ export type AutonomousPaperworkRunMode = "dryRun" | "executeOne" | "executeSafeS
 export type PaperworkBlockerCategory =
   | "invalid_email"
   | "unpublished_job"
+  | "closed_job"
   | "duplicate_risk"
   | "already_sent"
   | "missing_questionnaire"

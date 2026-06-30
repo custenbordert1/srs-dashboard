@@ -88,6 +88,7 @@ export async function runAutonomousPaperworkEngine(input?: {
   byUserId?: string;
   approvedBy?: string;
   approvedByUserId?: string;
+  candidateIds?: string[];
 }): Promise<AutonomousPaperworkRunResult> {
   const mode = input?.mode ?? P106_DEFAULT_MODE;
   const mtdOnly = input?.mtdOnly !== false;
@@ -98,7 +99,11 @@ export async function runAutonomousPaperworkEngine(input?: {
   ];
 
   if (mode === "dryRun") {
-    const report = await buildAutonomousPaperworkReport({ mtdOnly, mode });
+    const report = await buildAutonomousPaperworkReport({
+      mtdOnly,
+      mode,
+      candidateIds: input?.candidateIds,
+    });
     return {
       ok: true,
       mode,
@@ -110,7 +115,11 @@ export async function runAutonomousPaperworkEngine(input?: {
     };
   }
 
-  const initial = await buildAutonomousPaperworkReport({ mtdOnly, mode });
+  const initial = await buildAutonomousPaperworkReport({
+    mtdOnly,
+    mode,
+    candidateIds: input?.candidateIds,
+  });
   const repairTargets = initial.candidates
     .filter((c) => c.autoRepairable && c.category === "blocked")
     .map((c) => c.candidateId);
@@ -137,6 +146,7 @@ export async function runAutonomousPaperworkEngine(input?: {
       mtdOnly,
       mode,
       autoRepairedIds,
+      candidateIds: input?.candidateIds,
     });
 
     const next = report.readyToSend[0];
@@ -199,6 +209,7 @@ export async function runAutonomousPaperworkEngine(input?: {
     mtdOnly,
     mode,
     autoRepairedIds,
+    candidateIds: input?.candidateIds,
     runSummary: stoppedEarly
       ? `Stopped: ${stopReason}`
       : `Completed ${sendsThisRun} send(s) via ${mode}.`,
