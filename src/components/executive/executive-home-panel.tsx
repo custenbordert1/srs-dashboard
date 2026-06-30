@@ -17,6 +17,7 @@ import { LiveSendReadinessPanel } from "@/components/executive/live-send-readine
 import { ControlledLiveSendPanel } from "@/components/executive/controlled-live-send-panel";
 import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
 import { AutonomousPaperworkRunnerPanel } from "@/components/executive/autonomous-paperwork-runner-panel";
+import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { LiveSendOperatorChecklistPanel } from "@/components/executive/live-send-operator-checklist-panel";
 import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
@@ -293,6 +294,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AutonomousPaperworkEnginePanel />
 
       <AutonomousPaperworkRunnerPanel />
+
+      <PaperworkMonitorPanel />
 
       <LiveSendOperatorChecklistPanel />
 
