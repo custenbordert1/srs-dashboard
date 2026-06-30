@@ -17,6 +17,13 @@ import {
 } from "@/lib/candidate-ingestion/ingestion-store";
 import { completeJuneQuestionnaireEnrichment } from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
 import { runCandidateAutomationEngine } from "@/lib/candidate-automation-engine";
+import {
+  loadP87FeatureFlags,
+  refreshHiringDecisionPreview,
+} from "@/lib/autonomous-hiring-decision-engine";
+import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
+import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
+import { filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
 import type { CandidateIngestionSyncResult } from "@/lib/candidate-ingestion/types";
 
 const DEFAULT_CHUNK_SIZE = 20;
@@ -237,6 +244,23 @@ export async function runCandidateIngestionSync(input?: {
     rosters: bundle.rosters,
     referenceBreezyMtd: input?.referenceBreezyMtd,
   });
+
+  const p87Flags = await loadP87FeatureFlags();
+  if (p87Flags.enabled && p87Flags.refreshOnIngestion) {
+    const onboardingRecords = await listAllCandidateOnboardingRecords();
+    const mtdRows = filterMtdCandidates(listIngestedCandidates(store)).map((candidate) =>
+      buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], {
+        job: jobsByPositionId.get(candidate.positionId),
+      }),
+    );
+    await refreshHiringDecisionPreview({
+      rows: mtdRows,
+      jobsByPositionId,
+      onboardingRecords,
+      mtdOnly: false,
+      persist: true,
+    });
+  }
 
   return {
     ok: true,
