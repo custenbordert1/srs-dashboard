@@ -1,0 +1,860 @@
+{
+  "sourcePhase": "P104",
+  "generatedAt": "2026-06-30T18:19:21.186Z",
+  "sectionTitle": "Test Cohort Urgent Send Readiness",
+  "p103ValidationGeneratedAt": "2026-06-30T18:19:21.180Z",
+  "metrics": {
+    "applicantCount": 11,
+    "safeToSendNowCount": 0,
+    "alreadySentCount": 1,
+    "invalidEmailCount": 1,
+    "duplicateRiskCount": 0,
+    "blockedCount": 9,
+    "p84EligibleNowCount": 1
+  },
+  "safeToSend": [],
+  "blocked": [
+    {
+      "applicantKey": "malcolm-cooper",
+      "applicantName": "Malcolm Cooper",
+      "candidateId": "c0c920caa44f",
+      "email": "malcolmjcoope0809@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "terrel-andrews",
+      "applicantName": "Terrel Andrews",
+      "candidateId": "773445c489a7",
+      "email": "t3drewz@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "ryley-umbel",
+      "applicantName": "Ryley Umbel",
+      "candidateId": "cfcd1b8179ba",
+      "email": "ryleyumbel5@yahoo.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "lara-gh",
+      "applicantName": "Lara Gh",
+      "candidateId": "09c38dd6b79b",
+      "email": "lara.gh88@hotmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "alexandra-ridel",
+      "applicantName": "Alexandra Ridel",
+      "candidateId": "84d51041e750",
+      "email": "alexridel1995@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "darian-taylor-jr",
+      "applicantName": "Darian Taylor Jr.",
+      "candidateId": "7492888812c6",
+      "email": "flaminghotcheetos6599@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "No published job match for candidate position.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "airica-skinner",
+      "applicantName": "Airica Skinner",
+      "candidateId": "765b91a84a40",
+      "email": "airica1260@yahoo.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "izabella-bilderback",
+      "applicantName": "Izabella Bilderback",
+      "candidateId": "7818ada084aa",
+      "email": "izbilderback@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "chasity-wiggins",
+      "applicantName": "Chasity Wiggins",
+      "candidateId": "3a7eb2923ddf",
+      "email": "chasitymay1234@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    }
+  ],
+  "invalidEmail": [
+    {
+      "applicantKey": "tyesha-evans",
+      "applicantName": "Tyesha Evans",
+      "candidateId": "ce187a7283ec",
+      "email": "kayvon05@gmial.com",
+      "category": "invalid_email",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": true,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Likely typo domain: gmial.com",
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Block send — correct email before queueing paperwork."
+    }
+  ],
+  "duplicateRisk": [],
+  "alreadySent": [
+    {
+      "applicantKey": "john-sykes",
+      "applicantName": "John Sykes",
+      "candidateId": "9f8231817090",
+      "email": "johnsykes1225@gmail.com",
+      "category": "already_sent",
+      "safeToSendNow": false,
+      "inP97Cohort": true,
+      "p84EligibleNow": true,
+      "p100Ready": true,
+      "alreadyPaperworkSent": true,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [],
+      "recommendation": "Paperwork sent in P104 executeOne run."
+    }
+  ],
+  "applicants": [
+    {
+      "applicantKey": "malcolm-cooper",
+      "applicantName": "Malcolm Cooper",
+      "candidateId": "c0c920caa44f",
+      "email": "malcolmjcoope0809@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "terrel-andrews",
+      "applicantName": "Terrel Andrews",
+      "candidateId": "773445c489a7",
+      "email": "t3drewz@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "ryley-umbel",
+      "applicantName": "Ryley Umbel",
+      "candidateId": "cfcd1b8179ba",
+      "email": "ryleyumbel5@yahoo.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "tyesha-evans",
+      "applicantName": "Tyesha Evans",
+      "candidateId": "ce187a7283ec",
+      "email": "kayvon05@gmial.com",
+      "category": "invalid_email",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": true,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Likely typo domain: gmial.com",
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Block send — correct email before queueing paperwork."
+    },
+    {
+      "applicantKey": "lara-gh",
+      "applicantName": "Lara Gh",
+      "candidateId": "09c38dd6b79b",
+      "email": "lara.gh88@hotmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "alexandra-ridel",
+      "applicantName": "Alexandra Ridel",
+      "candidateId": "84d51041e750",
+      "email": "alexridel1995@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "darian-taylor-jr",
+      "applicantName": "Darian Taylor Jr.",
+      "candidateId": "7492888812c6",
+      "email": "flaminghotcheetos6599@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "No published job match for candidate position.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "airica-skinner",
+      "applicantName": "Airica Skinner",
+      "candidateId": "765b91a84a40",
+      "email": "airica1260@yahoo.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "john-sykes",
+      "applicantName": "John Sykes",
+      "candidateId": "9f8231817090",
+      "email": "johnsykes1225@gmail.com",
+      "category": "already_sent",
+      "safeToSendNow": false,
+      "inP97Cohort": true,
+      "p84EligibleNow": true,
+      "p100Ready": true,
+      "alreadyPaperworkSent": true,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [],
+      "recommendation": "Paperwork sent in P104 executeOne run."
+    },
+    {
+      "applicantKey": "izabella-bilderback",
+      "applicantName": "Izabella Bilderback",
+      "candidateId": "7818ada084aa",
+      "email": "izbilderback@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "chasity-wiggins",
+      "applicantName": "Chasity Wiggins",
+      "candidateId": "3a7eb2923ddf",
+      "email": "chasitymay1234@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    }
+  ],
+  "executions": [
+    {
+      "applicantKey": "john-sykes",
+      "applicantName": "John Sykes",
+      "candidateId": "9f8231817090",
+      "email": "johnsykes1225@gmail.com",
+      "mode": "dryRun",
+      "outcome": "simulated",
+      "signatureRequestId": null,
+      "workflowStatus": "Paperwork Needed",
+      "onboardingStatus": "pending_approval",
+      "error": null,
+      "remainingUnsentSafeCandidates": 1
+    },
+    {
+      "applicantKey": "john-sykes",
+      "applicantName": "John Sykes",
+      "candidateId": "9f8231817090",
+      "email": "johnsykes1225@gmail.com",
+      "mode": "executeOne",
+      "outcome": "sent",
+      "signatureRequestId": "0116fec632faa5386c18cddc39035437d7b10b71",
+      "workflowStatus": "Paperwork Sent",
+      "onboardingStatus": "sent",
+      "error": null,
+      "remainingUnsentSafeCandidates": 0
+    }
+  ],
+  "needingAction": [
+    {
+      "applicantKey": "malcolm-cooper",
+      "applicantName": "Malcolm Cooper",
+      "candidateId": "c0c920caa44f",
+      "email": "malcolmjcoope0809@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "terrel-andrews",
+      "applicantName": "Terrel Andrews",
+      "candidateId": "773445c489a7",
+      "email": "t3drewz@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "ryley-umbel",
+      "applicantName": "Ryley Umbel",
+      "candidateId": "cfcd1b8179ba",
+      "email": "ryleyumbel5@yahoo.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "tyesha-evans",
+      "applicantName": "Tyesha Evans",
+      "candidateId": "ce187a7283ec",
+      "email": "kayvon05@gmial.com",
+      "category": "invalid_email",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": true,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Likely typo domain: gmial.com",
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Block send — correct email before queueing paperwork."
+    },
+    {
+      "applicantKey": "lara-gh",
+      "applicantName": "Lara Gh",
+      "candidateId": "09c38dd6b79b",
+      "email": "lara.gh88@hotmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "alexandra-ridel",
+      "applicantName": "Alexandra Ridel",
+      "candidateId": "84d51041e750",
+      "email": "alexridel1995@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "darian-taylor-jr",
+      "applicantName": "Darian Taylor Jr.",
+      "candidateId": "7492888812c6",
+      "email": "flaminghotcheetos6599@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": false,
+        "detail": null
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "No published job match for candidate position.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "airica-skinner",
+      "applicantName": "Airica Skinner",
+      "candidateId": "765b91a84a40",
+      "email": "airica1260@yahoo.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "izabella-bilderback",
+      "applicantName": "Izabella Bilderback",
+      "candidateId": "7818ada084aa",
+      "email": "izbilderback@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    },
+    {
+      "applicantKey": "chasity-wiggins",
+      "applicantName": "Chasity Wiggins",
+      "candidateId": "3a7eb2923ddf",
+      "email": "chasitymay1234@gmail.com",
+      "category": "blocked",
+      "safeToSendNow": false,
+      "inP97Cohort": false,
+      "p84EligibleNow": false,
+      "p100Ready": false,
+      "alreadyPaperworkSent": false,
+      "duplicateRisk": false,
+      "invalidEmail": false,
+      "positionTitleEncoding": {
+        "flagged": true,
+        "detail": "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      },
+      "blockerReasons": [
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P97 approval-mode cohort — controlled live-send unavailable.",
+        "Store title uses typographic dash — normalized match OK (Retail Merchandiser – West Richfield, OH)."
+      ],
+      "recommendation": "Hold — Awaiting recruiter assignment.."
+    }
+  ]
+}

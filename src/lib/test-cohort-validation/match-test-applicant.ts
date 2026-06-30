@@ -1,6 +1,7 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import { normalizeStateCode } from "@/lib/dm-territory-map";
 import type { TestCohortApplicant } from "@/lib/test-cohort-validation/types";
+import { positionTitlesMatch } from "@/lib/test-cohort-validation/normalize-position-title";
 import { normalizePhoneDigits } from "@/lib/test-cohort-validation/validate-cohort-contact";
 
 export type ApplicantMatchCandidate = {
@@ -25,19 +26,12 @@ function normalizeCity(city: string): string {
   return city.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-function normalizePositionTitle(title: string): string {
-  return title.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
 function candidateFullName(candidate: BreezyCandidate): string {
   return normalizeName(`${candidate.firstName ?? ""} ${candidate.lastName ?? ""}`.trim());
 }
 
 function positionTitleMatches(applicantTitle: string, candidateTitle: string | undefined): boolean {
-  if (!candidateTitle?.trim()) return false;
-  const a = normalizePositionTitle(applicantTitle);
-  const b = normalizePositionTitle(candidateTitle);
-  return a === b || a.includes(b) || b.includes(a);
+  return positionTitlesMatch(applicantTitle, candidateTitle);
 }
 
 export function scoreApplicantMatch(
