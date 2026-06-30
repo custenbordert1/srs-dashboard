@@ -9,6 +9,7 @@ import { ExecutionHealthPanel } from "@/components/executive/execution-health-pa
 import { ExecutivePaperworkDashboardPanel } from "@/components/executive/executive-paperwork-dashboard-panel";
 import { PaperworkUnlockQueuePanel } from "@/components/executive/paperwork-unlock-queue-panel";
 import { BreezyJobPublishReviewPanel } from "@/components/executive/breezy-job-publish-review-panel";
+import { RecruiterAssignmentPreviewPanel } from "@/components/executive/recruiter-assignment-preview-panel";
 import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
 import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-paperwork-panel";
@@ -269,6 +270,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <PaperworkUnlockQueuePanel />
 
       <BreezyJobPublishReviewPanel />
+
+      <RecruiterAssignmentPreviewPanel />
 
       <RecruiterAutomationReadinessPanel />
 
