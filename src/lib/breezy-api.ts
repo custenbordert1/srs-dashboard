@@ -1068,6 +1068,110 @@ async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsR
   };
 }
 
+const BREEZY_POSITION_FETCH_CONCURRENCY = 5;
+
+export type BreezyPositionFetchSuccess = {
+  ok: true;
+  found: true;
+  job: BreezyJob;
+  positionId: string;
+  fetchedAt: string;
+  companyId: string;
+};
+
+export type BreezyPositionNotFound = {
+  ok: true;
+  found: false;
+  positionId: string;
+  fetchedAt: string;
+  companyId: string;
+};
+
+export type BreezyPositionFetchResult = BreezyPositionFetchSuccess | BreezyPositionNotFound | BreezyApiFailure;
+
+function isBreezyPositionNotFoundFailure(error: string): boolean {
+  const lower = error.toLowerCase();
+  return lower.includes("http 404") || lower.includes("not found");
+}
+
+/** Read-only GET for a single Breezy position by id or friendly_id. */
+export async function fetchBreezyPositionById(positionId: string): Promise<BreezyPositionFetchResult> {
+  ensureBreezyConfigLoaded();
+  const trimmed = positionId.trim();
+  if (!trimmed) {
+    return {
+      ok: false,
+      error: "positionId is required",
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+  if (!getBreezyApiKeySync()) return missingApiKeyFailure();
+
+  const companyResult = await resolveBreezyCompany();
+  if (!companyResult.ok) return companyResult;
+
+  const { companyId } = companyResult;
+  const path = `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(trimmed)}`;
+  const result = await breezyGetWithRetry<RawBreezyPosition>(path);
+  const fetchedAt = result.ok ? new Date().toISOString() : result.fetchedAt;
+
+  if (!result.ok) {
+    if (isBreezyPositionNotFoundFailure(result.error)) {
+      return { ok: true, found: false, positionId: trimmed, fetchedAt, companyId };
+    }
+    return result;
+  }
+
+  const job = sanitizeJob(result.data);
+  if (!job) {
+    return { ok: true, found: false, positionId: trimmed, fetchedAt, companyId };
+  }
+
+  return { ok: true, found: true, job, positionId: trimmed, fetchedAt, companyId };
+}
+
+/** Batch read-only position fetches for unlock-queue reconciliation (GET only). */
+export async function fetchBreezyPositionsByIds(positionIds: string[]): Promise<{
+  ok: true;
+  byPositionId: Map<string, BreezyPositionFetchResult>;
+  found: number;
+  notFound: number;
+  fetchErrors: number;
+  fetchedAt: string;
+}> {
+  const unique = [...new Set(positionIds.map((id) => id.trim()).filter(Boolean))];
+  const byPositionId = new Map<string, BreezyPositionFetchResult>();
+  let found = 0;
+  let notFound = 0;
+  let fetchErrors = 0;
+
+  for (let offset = 0; offset < unique.length; offset += BREEZY_POSITION_FETCH_CONCURRENCY) {
+    const batch = unique.slice(offset, offset + BREEZY_POSITION_FETCH_CONCURRENCY);
+    const results = await Promise.all(batch.map((id) => fetchBreezyPositionById(id)));
+    for (let index = 0; index < batch.length; index += 1) {
+      const id = batch[index]!;
+      const result = results[index]!;
+      byPositionId.set(id, result);
+      if (!result.ok) {
+        fetchErrors += 1;
+      } else if (result.found) {
+        found += 1;
+      } else {
+        notFound += 1;
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    byPositionId,
+    found,
+    notFound,
+    fetchErrors,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 function parseCandidateAppliedDate(raw: string): Date | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
