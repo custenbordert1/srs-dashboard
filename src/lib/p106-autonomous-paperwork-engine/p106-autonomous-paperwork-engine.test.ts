@@ -2,6 +2,16 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { classifyPaperworkBlocker } from "@/lib/p106-autonomous-paperwork-engine/classify-paperwork-blocker";
 import { P106_DEFAULT_MODE } from "@/lib/p106-autonomous-paperwork-engine/types";
+import type { BreezyJob } from "@/lib/breezy-api";
+
+function job(partial: Partial<BreezyJob> & { jobId: string; name: string }): BreezyJob {
+  return {
+    city: "Phoenix",
+    state: "AZ",
+    status: "published",
+    ...partial,
+  } as BreezyJob;
+}
 
 describe("p106-autonomous-paperwork-engine", () => {
   it("defaults to dryRun mode constant", () => {
@@ -31,12 +41,13 @@ describe("p106-autonomous-paperwork-engine", () => {
     assert.equal(result.autoRepairable, false);
   });
 
-  it("blocks unpublished job positions", () => {
+  it("blocks unmappable project positions", () => {
     const result = classifyPaperworkBlocker({
       row: {
         candidateId: "765b91a84a40",
         email: "airica1260@yahoo.com",
         positionId: "5bcaaf45192c",
+        positionTitle: "Unknown Role",
         assignedRecruiter: "Taylor",
         assignedDM: "DM",
         workflowStatus: "Applied",
@@ -47,10 +58,11 @@ describe("p106-autonomous-paperwork-engine", () => {
       } as never,
       onboarding: null,
       jobsByPositionId: new Map(),
+      publishedJobs: [],
       paperworkByGrade: {} as never,
       p100SentIds: new Set(),
     });
-    assert.equal(result.category, "unpublished_job");
+    assert.equal(result.category, "project_not_mappable");
   });
 
   it("skips already-sent candidates", () => {
@@ -75,12 +87,49 @@ describe("p106-autonomous-paperwork-engine", () => {
     assert.equal(result.category, "already_sent");
   });
 
-  it("blocks closed job positions", () => {
+  it("does not block closed ad when mapped to published project", () => {
+    const published = job({ jobId: "pub-1", name: "Solar Installer" });
+    const closed = job({ jobId: "closed-job-id", name: "Solar Installer", status: "closed" });
     const result = classifyPaperworkBlocker({
       row: {
         candidateId: "closed1",
         email: "test@example.com",
         positionId: "closed-job-id",
+        positionTitle: "Solar Installer",
+        city: "Phoenix",
+        state: "AZ",
+        assignedRecruiter: "Taylor",
+        assignedDM: "DM",
+        workflowStatus: "Paperwork Needed",
+        actionType: "send-paperwork",
+        paperworkStatus: "not_sent",
+        signatureRequestId: null,
+        hasResume: true,
+        candidateGrade: { strengths: [], concerns: [], paperworkReady: true, available: true },
+        stage: "",
+      } as never,
+      onboarding: null,
+      jobsByPositionId: new Map(),
+      closedJobsByPositionId: new Map([["closed-job-id", closed]]),
+      publishedJobs: [published],
+      paperworkByGrade: {} as never,
+      p100SentIds: new Set(),
+    });
+    assert.notEqual(result.category, "project_not_mappable");
+    assert.notEqual(result.category, "project_mapping_review");
+  });
+
+  it("blocks closed ad with low-confidence mapping", () => {
+    const published = job({ jobId: "pub-1", name: "Solar Installer", city: "Dallas", state: "TX" });
+    const closed = job({ jobId: "closed-job-id", name: "Solar Installer", status: "closed", city: "Phoenix", state: "AZ" });
+    const result = classifyPaperworkBlocker({
+      row: {
+        candidateId: "closed2",
+        email: "test@example.com",
+        positionId: "closed-job-id",
+        positionTitle: "Solar Installer",
+        city: "Phoenix",
+        state: "AZ",
         assignedRecruiter: "Taylor",
         assignedDM: "DM",
         workflowStatus: "Applied",
@@ -91,11 +140,12 @@ describe("p106-autonomous-paperwork-engine", () => {
       } as never,
       onboarding: null,
       jobsByPositionId: new Map(),
-      closedJobsByPositionId: new Map([["closed-job-id", { jobId: "closed-job-id", status: "closed" } as never]]),
+      closedJobsByPositionId: new Map([["closed-job-id", closed]]),
+      publishedJobs: [published],
       paperworkByGrade: {} as never,
       p100SentIds: new Set(),
     });
-    assert.equal(result.category, "closed_job");
+    assert.equal(result.category, "project_mapping_review");
   });
 
   it("executeSafeSingles is not executeBatch", () => {

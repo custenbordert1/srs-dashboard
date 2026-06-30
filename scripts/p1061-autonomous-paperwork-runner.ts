@@ -91,7 +91,7 @@ async function main() {
   const scheduled = process.argv.includes("--scheduled");
 
   if (scheduled) {
-    await startAutonomousPaperworkRunner();
+    await startAutonomousPaperworkRunner({ explicit: true });
     const intervalMs = Number(process.env.AUTONOMOUS_PAPERWORK_RUNNER_INTERVAL_MS) || P106_1_DEV_INTERVAL_MS;
     console.error(`[P106.1] Scheduled mode — every ${intervalMs / 1000}s (dryRun + executeOne per policy)`);
     await runCycle("dryRun");

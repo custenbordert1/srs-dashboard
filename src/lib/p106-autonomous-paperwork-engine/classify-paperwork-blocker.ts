@@ -7,6 +7,8 @@ import type { PaperworkByGrade } from "@/lib/candidate-onboarding-engine/types";
 import { duplicatePaperworkSendBlockReason } from "@/lib/onboarding-send-packet-sync";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
 import type { PaperworkBlockerCategory } from "@/lib/p106-autonomous-paperwork-engine/types";
+import { resolveClosedAdProjectMapping } from "@/lib/closed-ad-project-mapping/resolve-closed-ad-project-mapping";
+import type { ClosedAdProjectMappingResult } from "@/lib/closed-ad-project-mapping/types";
 import { validateCohortEmail } from "@/lib/test-cohort-validation/validate-cohort-contact";
 
 const TERMINAL_STATUSES = new Set([
@@ -34,6 +36,7 @@ export function classifyPaperworkBlocker(input: {
   onboarding: CandidateOnboardingRecord | null;
   jobsByPositionId: Map<string, BreezyJob>;
   closedJobsByPositionId?: Map<string, BreezyJob>;
+  publishedJobs?: BreezyJob[];
   paperworkByGrade: PaperworkByGrade;
   p100SentIds: Set<string>;
 }): {
@@ -100,26 +103,63 @@ export function classifyPaperworkBlocker(input: {
   }
 
   const published = Boolean(row.positionId?.trim() && input.jobsByPositionId.has(row.positionId));
-  if (!published) {
-    const closed = input.closedJobsByPositionId?.has(row.positionId ?? "");
-    if (closed) {
+  const projectMapping: ClosedAdProjectMappingResult = published
+    ? {
+        status: "published",
+        confidence: "high",
+        passesPublishedJobGate: true,
+        sourcePositionId: row.positionId,
+        mappedPublishedJobId: row.positionId,
+        mappedProjectName: input.jobsByPositionId.get(row.positionId!)?.name ?? null,
+        mappedCity: input.jobsByPositionId.get(row.positionId!)?.city ?? null,
+        mappedState: input.jobsByPositionId.get(row.positionId!)?.state ?? null,
+        reason: "Published Breezy position.",
+      }
+    : resolveClosedAdProjectMapping({
+        row,
+        positionTitle: row.positionName,
+        candidateCity: row.city,
+        candidateState: row.state,
+        jobsByPositionId: input.jobsByPositionId,
+        closedJobsByPositionId: input.closedJobsByPositionId,
+        publishedJobs: input.publishedJobs ?? [...input.jobsByPositionId.values()],
+      });
+
+  if (!projectMapping.passesPublishedJobGate) {
+    if (projectMapping.status === "project_mapping_review") {
       return {
-        category: "closed_job",
-        reason: "Candidate position is closed or archived in Breezy.",
-        recommendedFix: "Reactivate or republish the job before paperwork send.",
+        category: "project_mapping_review",
+        reason: projectMapping.reason,
+        recommendedFix: "Recruiter review — confirm project mapping before paperwork send.",
         autoRepairable: false,
       };
     }
     return {
-      category: "unpublished_job",
-      reason: "No published job match for candidate position.",
-      recommendedFix: "Publish or reactivate the Breezy job (no Breezy writes from engine).",
+      category: "project_not_mappable",
+      reason: projectMapping.reason,
+      recommendedFix: "Confirm active project mapping or equivalent published position.",
       autoRepairable: false,
     };
   }
 
+  if (projectMapping.status === "closed_ad_mapped_project") {
+    // Not a blocker — closed ad successfully mapped to active project; continue evaluation.
+  }
+
+  const jobsForAdvancement = new Map(input.jobsByPositionId);
+  if (
+    projectMapping.status === "closed_ad_mapped_project" &&
+    projectMapping.mappedPublishedJobId &&
+    row.positionId
+  ) {
+    const mappedJob =
+      input.publishedJobs?.find((j) => j.jobId === projectMapping.mappedPublishedJobId) ??
+      [...input.jobsByPositionId.values()].find((j) => j.jobId === projectMapping.mappedPublishedJobId);
+    if (mappedJob) jobsForAdvancement.set(row.positionId, mappedJob);
+  }
+
   const p83 = buildCandidateAdvancementDecision(row, {
-    jobsByPositionId: input.jobsByPositionId,
+    jobsByPositionId: jobsForAdvancement,
     paperworkByGrade: input.paperworkByGrade,
     requireApproval: false,
   });
@@ -145,6 +185,7 @@ export function classifyPaperworkBlocker(input: {
     row,
     onboarding: input.onboarding,
     jobsByPositionId: input.jobsByPositionId,
+    projectMapping,
   });
 
   if (!p84.eligible) {

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // no body
   }
 
-  const state = await startAutonomousPaperworkRunner({ intervalMs });
+  const state = await startAutonomousPaperworkRunner({ intervalMs, explicit: true });
 
   return NextResponse.json({
     ok: true,

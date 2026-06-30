@@ -1,0 +1,297 @@
+{
+  "generatedAt": "2026-06-30T20:56:42.212Z",
+  "mode": "dryRun",
+  "engine": {
+    "candidatesEvaluated": 382,
+    "readyToSend": 1,
+    "blocked": 374,
+    "blockerBreakdown": {
+      "missing_resume": 16,
+      "invalid_email": 1,
+      "p84_gate_failed": 3,
+      "project_not_mappable": 299,
+      "project_mapping_review": 32,
+      "duplicate_risk": 23
+    }
+  },
+  "runner": {
+    "ok": true,
+    "skippedOverlap": false,
+    "mode": "dryRun",
+    "metrics": {
+      "candidatesEvaluated": 375,
+      "newCandidates": 0,
+      "candidatesSent": 0,
+      "skippedAlreadySent": 0,
+      "blocked": 374,
+      "blockedInvalidEmail": 1,
+      "blockedDuplicate": 23,
+      "blockedUnpublishedJob": 0,
+      "blockedClosedJob": 0,
+      "blockedProjectNotMappable": 299,
+      "blockedMappingReview": 32,
+      "staleEligibleRecovered": 25,
+      "autoRepaired": 0,
+      "breezySyncOk": true
+    },
+    "blockedRegistryCount": 374,
+    "warnings": [
+      "P106.3 — no executeBatch; executeOne / executeSafeSingles only when live.",
+      "No Breezy writes.",
+      "Engine mode: dryRun.",
+      "Incremental — activity, Paperwork Needed, send-paperwork, blocked registry.",
+      "Stale eligible recovered: 25; Paperwork Needed: 25.",
+      "P106 — no executeBatch; controlled executeOne only.",
+      "No Breezy writes.",
+      "dryRun — no sends.",
+      "Ready to send this cycle: 1."
+    ]
+  },
+  "closedAdRecovery": {
+    "totalBlockedJobCandidates": 331,
+    "recoveredByMappingCount": 0,
+    "wouldSendAfterMappingCount": 0,
+    "topGroups": [
+      {
+        "positionId": "40e576f67230",
+        "jobTitle": "FIELD MERCHANDISER",
+        "city": "ERIE",
+        "state": "PA",
+        "breezyStatus": "unpublished",
+        "candidateCount": 32,
+        "candidateIds": [
+          "6f39aaa878b6",
+          "184896b9a3bd",
+          "2e9c4601d867",
+          "e775e48eb044",
+          "ddd0a10df851",
+          "edaf4c9e3eeb",
+          "41994ba5a04d",
+          "0ad801aefc7e",
+          "91555b67e0b7",
+          "fb19e110d5b5",
+          "a329230f9ca6",
+          "e391dbd851fe",
+          "54dc0c7c9e8d",
+          "4d403c923c27",
+          "4bdbebd8a0f2",
+          "ba5cf439eb6a",
+          "0d484a91b0ed",
+          "e473128881f0",
+          "ff2da0591db7",
+          "20b7653c6612",
+          "03ba05533a8d",
+          "bed77a44e0c9",
+          "642f902f60dd",
+          "f03457359151",
+          "e8d0f83be9b5",
+          "bb5386e46e37",
+          "2281fe312b4f",
+          "ce3c553c31c7",
+          "0111b4583cf8",
+          "4177a628c679",
+          "c8e577edd370",
+          "8f1d5775bc05"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "49ccc17bfbae",
+        "jobTitle": "Merchandiser- Experienced- Elko, NV",
+        "city": "Elko",
+        "state": "NV",
+        "breezyStatus": "unpublished",
+        "candidateCount": 21,
+        "candidateIds": [
+          "33cb7d7f786c",
+          "a381b6aca0e0",
+          "f1b2325774c4",
+          "06531756ae1a",
+          "621ef8c8480c",
+          "b06d222cb36a",
+          "840c0b858148",
+          "8c035453cf91",
+          "e0bfa38d5e48",
+          "fd05721aa816",
+          "26172067a9fd",
+          "a6ef153915ba",
+          "4b3ca31f4bd2",
+          "148d110d3d03",
+          "4d337a689efa",
+          "ad42c3d2949c",
+          "7c139386c5da",
+          "eb4314d21ee0",
+          "dd1747bfe124",
+          "19a0a6da9f17",
+          "5ef2901144af"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "637309d978f0",
+        "jobTitle": "Retail Merchandiser — Houston, TX",
+        "city": "Houston",
+        "state": "TX",
+        "breezyStatus": "unpublished",
+        "candidateCount": 10,
+        "candidateIds": [
+          "7e52e998cf11",
+          "faee4e65ed68",
+          "568c39b6f8f4",
+          "ae7235c3de70",
+          "ecd43a716381",
+          "c49e58cec99c",
+          "081d41f9295d",
+          "32f1be2b9068",
+          "92a112b6d1a9",
+          "3d4c70bc0fa8"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "38b6752c9513",
+        "jobTitle": "Merchandiser- Experienced- Erie, PA",
+        "city": "Erie",
+        "state": "PA",
+        "breezyStatus": "unpublished",
+        "candidateCount": 8,
+        "candidateIds": [
+          "3e98b7afbc0a",
+          "854fd7c0f321",
+          "da058768b22a",
+          "d19afefd998a",
+          "afa51ec38555",
+          "b11c21a04670",
+          "31d19faf28d2",
+          "931eca90dace"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "1fca8b2bc919",
+        "jobTitle": "Continuity Merchandiser  SF , Pine Bluff, AR",
+        "city": "Pine Bluff",
+        "state": "AR",
+        "breezyStatus": "unpublished",
+        "candidateCount": 8,
+        "candidateIds": [
+          "9f3d9246a0c9",
+          "6ed1875bcd15",
+          "9f982288b4a3",
+          "bfb75142068d",
+          "821cd855f1a5",
+          "cedbb35b794d",
+          "5a67cfe645dd",
+          "8532d6086e0c"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "2e49bfb03468",
+        "jobTitle": "Retail Merchandiser — The Woodlands, TX",
+        "city": "The Woodlands",
+        "state": "TX",
+        "breezyStatus": "unpublished",
+        "candidateCount": 6,
+        "candidateIds": [
+          "7830aa5b79b1",
+          "87ea6e6dca24",
+          "77be2be44a6b",
+          "d6cd926f864a",
+          "c6414945087b",
+          "ea49a4e6297b"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "0c8b67582360",
+        "jobTitle": "Retail Merchandiser (Flexible, Project-Based Work)",
+        "city": "Raleigh",
+        "state": "NC",
+        "breezyStatus": "unpublished",
+        "candidateCount": 6,
+        "candidateIds": [
+          "d65e154f9c69",
+          "13fbb0f37a68",
+          "e759c9d49bf8",
+          "49e97aa2743c",
+          "f00110302b4b",
+          "c01c885e4ad1"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "4484897c0852",
+        "jobTitle": "Continuity Merchandiser  SF , Newport AR",
+        "city": "Newport",
+        "state": "AR",
+        "breezyStatus": "unpublished",
+        "candidateCount": 6,
+        "candidateIds": [
+          "520ae00e6673",
+          "de921c6e199b",
+          "968499ef4533",
+          "911157c289ae",
+          "8d0a9d872b68",
+          "fd299c767d14"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "7b35b70d721a",
+        "jobTitle": "Retail Merchandiser — Pasadena, TX",
+        "city": "Pasadena",
+        "state": "TX",
+        "breezyStatus": "unpublished",
+        "candidateCount": 5,
+        "candidateIds": [
+          "a41504a9579e",
+          "b434172a5368",
+          "f1f4a5fe9f5c",
+          "b23b62a25dc2",
+          "f5edb9e2bced"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      },
+      {
+        "positionId": "a499da9f9ee5",
+        "jobTitle": "Continuity Retail Merchandiser – Princeton, WV",
+        "city": "Princeton",
+        "state": "WV",
+        "breezyStatus": "unpublished",
+        "candidateCount": 5,
+        "candidateIds": [
+          "d6415fb8e3b9",
+          "fe6fe3e3125f",
+          "69f9d37feb46",
+          "c4948597b111",
+          "8583916f98e9"
+        ],
+        "mappingStatus": "project_not_mappable",
+        "recommendedAction": "Confirm active project exists or republish equivalent position."
+      }
+    ],
+    "recoveredExamples": [],
+    "closedAdSendExamples": []
+  },
+  "p101": {
+    "goNoGo": "NO-GO",
+    "cohortLabel": "Dynamic eligible cohort (excludes already-sent)",
+    "eligibleCohortCount": 25,
+    "readyToSend": 25
+  },
+  "productionConfig": {
+    "scheduleEnabled": false,
+    "liveMode": null,
+    "dailyReconciliation": false
+  }
+}

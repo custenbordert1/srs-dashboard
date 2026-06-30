@@ -11,6 +11,7 @@ import type {
   PaperworkSendEligibilityResult,
   PaperworkSendGate,
 } from "@/lib/autonomous-paperwork-send-engine/types";
+import type { ClosedAdProjectMappingResult } from "@/lib/closed-ad-project-mapping/types";
 
 const INACTIVE_STATUSES = new Set([
   "Not Qualified",
@@ -53,6 +54,7 @@ export function buildPaperworkSendEligibility(input: {
   row: ScoredCandidateWorkflowRow;
   onboarding: CandidateOnboardingRecord | null;
   jobsByPositionId: Map<string, BreezyJob>;
+  projectMapping?: ClosedAdProjectMappingResult;
 }): PaperworkSendEligibilityResult {
   const gates: PaperworkSendGate[] = [];
   const { row, onboarding } = input;
@@ -96,13 +98,19 @@ export function buildPaperworkSendEligibility(input: {
     ),
   );
 
-  const publishedJob = hasPublishedJobMatch(row, input.jobsByPositionId);
+  const publishedJob =
+    hasPublishedJobMatch(row, input.jobsByPositionId) ||
+    input.projectMapping?.passesPublishedJobGate === true;
   gates.push(
     gate(
       "published_job",
-      "Active published Breezy position",
+      "Active published Breezy position or mapped project",
       publishedJob,
-      publishedJob ? null : "No published job match for candidate position.",
+      publishedJob
+        ? input.projectMapping?.status === "closed_ad_mapped_project"
+          ? input.projectMapping.reason
+          : null
+        : "No published job match for candidate position.",
     ),
   );
 

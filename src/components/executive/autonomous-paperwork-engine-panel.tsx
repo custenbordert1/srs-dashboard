@@ -110,7 +110,7 @@ export function AutonomousPaperworkEnginePanel() {
       </div>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5">
         <MetricCard label="Blocked email" value={m.blockedInvalidEmail.toLocaleString()} />
-        <MetricCard label="Blocked job" value={m.blockedUnpublishedJob.toLocaleString()} />
+        <MetricCard label="Not mappable" value={m.blockedUnpublishedJob.toLocaleString()} />
         <MetricCard label="Duplicate risk" value={m.blockedDuplicateRisk.toLocaleString()} />
         <MetricCard label="Blocked P84" value={m.blockedP84.toLocaleString()} />
         <MetricCard label="Manual review" value={m.blockedManualReview.toLocaleString()} />

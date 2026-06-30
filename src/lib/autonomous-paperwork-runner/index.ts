@@ -11,6 +11,12 @@ export {
   isLockStale,
 } from "@/lib/autonomous-paperwork-runner/runner-store";
 export { selectCandidatesForRunnerCycle } from "@/lib/autonomous-paperwork-runner/select-candidates-for-runner";
+export {
+  mapRunnerModeToEngineMode,
+  resolveRunnerProductionConfig,
+  shouldRunScheduledFullReconciliation,
+  P106_1_FULL_RECONCILIATION_INTERVAL_MS,
+} from "@/lib/autonomous-paperwork-runner/runner-config";
 export type {
   AutonomousPaperworkRunnerCycleResult,
   AutonomousPaperworkRunnerMode,

@@ -8,10 +8,10 @@ export type OperatorChecklistItemId =
   | "p84_live_send_enabled"
   | "rollback_artifact_present"
   | "audit_log_present"
-  | "candidate_count_27"
+  | "candidate_count_eligible"
   | "duplicate_risk_zero"
   | "invalid_email_zero"
-  | "already_sent_zero";
+  | "already_sent_excluded";
 
 export type OperatorChecklistItem = {
   id: OperatorChecklistItemId;
@@ -34,6 +34,7 @@ export type LiveSendOperatorChecklistReport = {
     p100ReadyToSend: number;
     p100AlreadySent: number;
     candidateCount: number;
+    eligibleCohortCount: number;
     duplicateRiskCount: number;
     invalidEmailCount: number;
     liveSend: boolean;
@@ -64,8 +65,8 @@ export type LiveSendOperatorChecklistReport = {
       mode: "executeBatch";
       executiveApprovalFlag: true;
       confirmationPhrase: "SEND 27 PAPERWORK PACKETS";
-      candidateCount: 27;
+      candidateCount: number;
     };
-    prerequisite: "P84 liveSend must be enabled before batch send.";
+    prerequisite: string;
   };
 };

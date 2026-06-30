@@ -97,7 +97,7 @@ export function AutonomousPaperworkRunnerPanel() {
     <ExecutiveCard>
       <SectionHeader
         title="Autonomous Paperwork Runner"
-        subtitle="P106.1 — continuous Breezy monitor, executeOne only"
+        subtitle="P106.3 — closed-ad recovery, executeOne only"
       />
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <MetricCard label="Runner status" value={statusLabel} />
@@ -118,9 +118,9 @@ export function AutonomousPaperworkRunnerPanel() {
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5">
         <MetricCard label="Invalid email" value={m.blockedInvalidEmail.toLocaleString()} />
         <MetricCard label="Duplicate" value={m.blockedDuplicate.toLocaleString()} />
-        <MetricCard label="Unpublished job" value={m.blockedUnpublishedJob.toLocaleString()} />
-        <MetricCard label="Closed job" value={m.blockedClosedJob.toLocaleString()} />
-        <MetricCard label="Manual review" value={m.blockedManualReview.toLocaleString()} />
+        <MetricCard label="Not mappable" value={m.blockedProjectNotMappable.toLocaleString()} />
+        <MetricCard label="Mapping review" value={m.blockedMappingReview.toLocaleString()} />
+        <MetricCard label="Stale recovered" value={m.staleEligibleRecovered.toLocaleString()} />
       </div>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3">
         <MetricCard

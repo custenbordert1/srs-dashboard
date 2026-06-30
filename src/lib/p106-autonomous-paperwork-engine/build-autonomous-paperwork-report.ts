@@ -6,6 +6,7 @@ import { buildLiveSendOperatorChecklist } from "@/lib/live-send-operator-checkli
 import { buildLiveSendReadinessFromStores } from "@/lib/live-send-readiness/build-live-send-readiness";
 import { buildControlledLiveSendReport } from "@/lib/controlled-live-send/execute-controlled-live-send";
 import { classifyPaperworkBlocker } from "@/lib/p106-autonomous-paperwork-engine/classify-paperwork-blocker";
+import { resolveClosedAdProjectMapping } from "@/lib/closed-ad-project-mapping/resolve-closed-ad-project-mapping";
 import type {
   AutonomousPaperworkCandidateResult,
   AutonomousPaperworkMetrics,
@@ -23,16 +24,23 @@ function buildMetrics(candidates: AutonomousPaperworkCandidateResult[]): Autonom
       (c) => c.category === "sent" && Boolean(c.signatureRequestId?.trim()),
     ).length,
     blockedInvalidEmail: candidates.filter((c) => c.blockerCategory === "invalid_email").length,
-    blockedUnpublishedJob: candidates.filter((c) => c.blockerCategory === "unpublished_job").length,
+    blockedUnpublishedJob: candidates.filter((c) => c.blockerCategory === "project_not_mappable").length,
     blockedDuplicateRisk: candidates.filter((c) => c.blockerCategory === "duplicate_risk").length,
     blockedP84: candidates.filter((c) => c.blockerCategory === "p84_gate_failed").length,
     blockedManualReview: candidates.filter(
       (c) =>
         c.category === "blocked" &&
         c.blockerCategory != null &&
-        !["invalid_email", "unpublished_job", "duplicate_risk", "p84_gate_failed", "already_sent"].includes(
-          c.blockerCategory,
-        ),
+        ![
+          "invalid_email",
+          "unpublished_job",
+          "closed_job",
+          "project_not_mappable",
+          "project_mapping_review",
+          "duplicate_risk",
+          "p84_gate_failed",
+          "already_sent",
+        ].includes(c.blockerCategory),
     ).length,
     remainingActionNeeded: candidates.filter(
       (c) => c.category === "blocked" || c.category === "ready_to_send",
@@ -82,6 +90,7 @@ export async function buildAutonomousPaperworkReport(input?: {
   const jobsByPositionId = new Map(
     (jobsResult.ok ? jobsResult.jobs : []).map((job) => [job.jobId, job]),
   );
+  const publishedJobs = jobsResult.ok ? jobsResult.jobs : [];
   const closedJobsByPositionId = new Map(
     (closedJobsResult.ok ? closedJobsResult.jobs : []).map((job) => [job.jobId, job]),
   );
@@ -117,14 +126,26 @@ export async function buildAutonomousPaperworkReport(input?: {
       onboarding: activeOnboarding,
       jobsByPositionId,
       closedJobsByPositionId,
+      publishedJobs,
       paperworkByGrade: policy.paperworkByGrade,
       p100SentIds,
+    });
+
+    const projectMapping = resolveClosedAdProjectMapping({
+      row,
+      positionTitle: candidate.positionName,
+      candidateCity: candidate.city,
+      candidateState: candidate.state,
+      jobsByPositionId,
+      closedJobsByPositionId,
+      publishedJobs,
     });
 
     const p84 = buildPaperworkSendEligibility({
       row,
       onboarding: activeOnboarding,
       jobsByPositionId,
+      projectMapping,
     });
 
     const name =

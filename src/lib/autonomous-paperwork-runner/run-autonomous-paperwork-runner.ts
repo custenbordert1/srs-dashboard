@@ -9,10 +9,17 @@ import {
   saveRunnerState,
   tryAcquireRunnerLock,
 } from "@/lib/autonomous-paperwork-runner/runner-store";
+import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import {
   computeRunnerCheckpoint,
   selectCandidatesForRunnerCycle,
+  shouldReEvaluateBlockedRecord,
 } from "@/lib/autonomous-paperwork-runner/select-candidates-for-runner";
+import {
+  mapRunnerModeToEngineMode,
+  resolveRunnerProductionConfig,
+  shouldRunScheduledFullReconciliation,
+} from "@/lib/autonomous-paperwork-runner/runner-config";
 import {
   P106_1_DEFAULT_MODE,
   P106_1_SOURCE_PHASE,
@@ -27,17 +34,13 @@ import type {
   AutonomousPaperworkRunMode,
 } from "@/lib/p106-autonomous-paperwork-engine/types";
 
-function mapRunnerModeToEngineMode(mode: AutonomousPaperworkRunnerMode): AutonomousPaperworkRunMode {
-  if (mode === "dryRun" || mode === "fullReconciliation") return "dryRun";
-  return "executeOne";
-}
-
 function buildCycleMetrics(input: {
   candidates: AutonomousPaperworkCandidateResult[];
   newCandidateIds: string[];
   sendsThisRun: number;
   autoRepaired: number;
   breezySyncOk: boolean;
+  staleEligibleRecovered?: number;
 }): AutonomousPaperworkRunnerCycleMetrics {
   const blocked = input.candidates.filter((c) => c.category === "blocked");
   return {
@@ -50,12 +53,9 @@ function buildCycleMetrics(input: {
     blockedDuplicate: blocked.filter((c) => c.blockerCategory === "duplicate_risk").length,
     blockedUnpublishedJob: blocked.filter((c) => c.blockerCategory === "unpublished_job").length,
     blockedClosedJob: blocked.filter((c) => c.blockerCategory === "closed_job").length,
-    blockedManualReview: blocked.filter(
-      (c) =>
-        c.blockerCategory === "unknown_manual_review" ||
-        c.blockerCategory === "call_first_required" ||
-        c.blockerCategory === "p84_gate_failed",
-    ).length,
+    blockedProjectNotMappable: blocked.filter((c) => c.blockerCategory === "project_not_mappable").length,
+    blockedMappingReview: blocked.filter((c) => c.blockerCategory === "project_mapping_review").length,
+    staleEligibleRecovered: input.staleEligibleRecovered ?? 0,
     autoRepaired: input.autoRepaired,
     breezySyncOk: input.breezySyncOk,
   };
@@ -119,14 +119,29 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
   byUserId?: string;
   skipBreezySync?: boolean;
 }): Promise<AutonomousPaperworkRunnerCycleResult> {
-  const mode = input?.mode ?? P106_1_DEFAULT_MODE;
+  const prodConfig = resolveRunnerProductionConfig();
+  let mode = input?.mode ?? prodConfig.defaultMode;
+  if (
+    mode === "scheduled" &&
+    shouldRunScheduledFullReconciliation({
+      lastFullReconciliationAt: (await loadRunnerState()).lastFullReconciliationAt,
+      fullReconciliationDaily: prodConfig.fullReconciliationDaily,
+    })
+  ) {
+    mode = "fullReconciliation";
+  }
   const mtdOnly = input?.mtdOnly !== false;
+  const engineMode = mapRunnerModeToEngineMode({
+    mode,
+    liveEngineMode: prodConfig.liveEngineMode,
+  });
   const warnings: string[] = [
-    "P106.1 — no executeBatch; executeOne only when not dryRun.",
+    "P106.3 — no executeBatch; executeOne / executeSafeSingles only when live.",
     "No Breezy writes.",
+    `Engine mode: ${engineMode}.`,
     mode === "fullReconciliation"
       ? "fullReconciliation — evaluating all candidates."
-      : "Incremental — new, modified, and previously blocked only.",
+      : "Incremental — activity, Paperwork Needed, send-paperwork, blocked registry.",
   ];
 
   const lock = await tryAcquireRunnerLock({ mode });
@@ -145,7 +160,9 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
         blockedDuplicate: 0,
         blockedUnpublishedJob: 0,
         blockedClosedJob: 0,
-        blockedManualReview: 0,
+        blockedProjectNotMappable: 0,
+        blockedMappingReview: 0,
+        staleEligibleRecovered: 0,
         autoRepaired: 0,
         breezySyncOk: true,
       },
@@ -179,81 +196,89 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
     }
 
     const store = await readIngestionStore();
+    const bundle = await getCandidateWorkflowBundle();
     const stateBefore = await loadRunnerState();
+
     const selection = selectCandidatesForRunnerCycle({
       store,
+      workflows: bundle.workflows,
       lastSuccessfulRunAt: stateBefore.lastSuccessfulRunAt,
       lastProcessedCheckpoint: stateBefore.lastProcessedCheckpoint,
       blockedRegistry: stateBefore.blockedRegistry,
       fullReconciliation: mode === "fullReconciliation",
-      mtdOnly,
     });
     newCandidateIds = selection.newCandidateIds;
+    warnings.push(
+      `Stale eligible recovered: ${selection.staleEligibleRecovered}; Paperwork Needed: ${selection.paperworkNeededCount}.`,
+    );
 
     if (selection.candidateIds.length === 0) {
-      warnings.push("No candidates require evaluation this cycle.");
-      engineResult = {
-        ok: true,
-        mode: "dryRun",
-        stoppedEarly: false,
-        stopReason: null,
-        sendsThisRun: 0,
-        report: {
-          sourcePhase: "P106",
-          generatedAt: new Date().toISOString(),
-          sectionTitle: "Autonomous Paperwork Engine",
-          mode: "dryRun",
-          mtdOnly,
-          metrics: {
-            candidatesEvaluated: 0,
-            readyToSend: 0,
-            sent: 0,
-            skippedAlreadySent: 0,
-            blockedInvalidEmail: 0,
-            blockedUnpublishedJob: 0,
-            blockedDuplicateRisk: 0,
-            blockedP84: 0,
-            blockedManualReview: 0,
-            remainingActionNeeded: 0,
-            autoRepairedCount: 0,
-          },
-          readyToSend: [],
-          sent: [],
-          blocked: [],
-          skippedAlreadySent: [],
-          candidates: [],
-          gates: {
-            p99Ready: true,
-            p101Go: true,
-            p100LocksPass: true,
-            liveSendEnabled: false,
-            detail: [],
-          },
-          artifactPaths: {
-            p97Audit: ".data/p97-approval-audit.jsonl",
-            p97Rollback: ".data/p97-approval-rollback.jsonl",
-            p100Audit: ".data/p100-controlled-live-send-audit.jsonl",
-          },
-          runSummary: "Empty incremental cycle.",
-        },
-        warnings: [],
-      };
-    } else {
-      engineResult = await runAutonomousPaperworkEngine({
-        mode: mapRunnerModeToEngineMode(mode),
-        mtdOnly: mode === "fullReconciliation" ? false : mtdOnly,
-        candidateIds: selection.candidateIds,
-        executiveApprovalFlag: mode !== "dryRun" && mode !== "fullReconciliation",
-        approvedBy: "P106.1 Autonomous Paperwork Runner",
-        approvedByUserId: input?.byUserId ?? "p1061-runner",
-        byUserId: input?.byUserId ?? "p1061-runner",
+      warnings.push("No candidates selected — skipping engine evaluation.");
+      const checkpoint = computeRunnerCheckpoint(store);
+      const durationMs = Date.now() - started;
+      const finalState = await releaseRunnerLock({
+        runId: lock.runId,
+        success: true,
+        error: null,
+        durationMs,
+        checkpoint,
       });
-      warnings.push(...engineResult.warnings);
+
+      const emptyMetrics = buildCycleMetrics({
+        candidates: [],
+        newCandidateIds,
+        sendsThisRun: 0,
+        autoRepaired: 0,
+        breezySyncOk,
+        staleEligibleRecovered: selection.staleEligibleRecovered,
+      });
+
+      await appendRunnerAudit({
+        mode,
+        runId: lock.runId,
+        success: true,
+        durationMs,
+        candidateCount: 0,
+        sendsThisRun: 0,
+        metrics: emptyMetrics,
+      });
+
+      const report = buildRunnerReport({
+        mode,
+        state: finalState,
+        metrics: emptyMetrics,
+        candidates: [],
+        overlapPrevented: false,
+        p106ArtifactPaths: {
+          p97Audit: ".data/p97-approval-audit.jsonl",
+          p97Rollback: ".data/p97-approval-rollback.jsonl",
+          p100Audit: ".data/p100-controlled-live-send-audit.jsonl",
+        },
+      });
+
+      return { ok: true, skippedOverlap: false, mode, report, warnings };
+    }
+
+    engineResult = await runAutonomousPaperworkEngine({
+      mode: engineMode,
+      mtdOnly: mode === "fullReconciliation" ? false : mtdOnly,
+      candidateIds: selection.candidateIds,
+      executiveApprovalFlag: engineMode !== "dryRun",
+      approvedBy: "P106.3 Autonomous Paperwork Runner",
+      approvedByUserId: input?.byUserId ?? "p1061-runner",
+      byUserId: input?.byUserId ?? "p1061-runner",
+    });
+    warnings.push(...engineResult.warnings);
+
+    const readyIds = engineResult.report.readyToSend.map((c) => c.candidateId);
+    if (readyIds.length > 0) {
+      warnings.push(`Ready to send this cycle: ${readyIds.length}.`);
     }
 
     const state = await loadRunnerState();
     const blockedRegistry = { ...state.blockedRegistry };
     for (const c of engineResult.report.candidates) {
+      const previous = blockedRegistry[c.candidateId];
       if (c.category === "blocked" && c.blockerCategory) {
         blockedRegistry[c.candidateId] = {
           candidateId: c.candidateId,
@@ -263,11 +288,25 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
           recommendedFix: c.recommendedFix,
           lastEvaluatedAt: new Date().toISOString(),
         };
-      } else if (c.category === "sent" || c.category === "ready_to_send" || c.category === "skipped_already_sent") {
+      } else if (
+        c.category === "sent" ||
+        c.category === "ready_to_send" ||
+        c.category === "skipped_already_sent" ||
+        (previous &&
+          shouldReEvaluateBlockedRecord({
+            previous,
+            currentBlockerCategory: c.blockerCategory,
+            currentCategory: c.category,
+          }) &&
+          c.category !== "blocked")
+      ) {
         delete blockedRegistry[c.candidateId];
       }
     }
     state.blockedRegistry = blockedRegistry;
+    if (mode === "fullReconciliation") {
+      state.lastFullReconciliationAt = new Date().toISOString();
+    }
     await saveRunnerState(state);
 
     const checkpoint = computeRunnerCheckpoint(store);
@@ -296,6 +335,7 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
         sendsThisRun: engineResult.sendsThisRun,
         autoRepaired: engineResult.report.metrics.autoRepairedCount,
         breezySyncOk,
+        staleEligibleRecovered: selection.staleEligibleRecovered,
       }),
     });
 
@@ -305,6 +345,7 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
       sendsThisRun: engineResult.sendsThisRun,
       autoRepaired: engineResult.report.metrics.autoRepairedCount,
       breezySyncOk,
+      staleEligibleRecovered: selection.staleEligibleRecovered,
     });
 
     const report = buildRunnerReport({
@@ -351,7 +392,14 @@ export async function runAutonomousPaperworkRunnerCycle(input?: {
 
 export async function startAutonomousPaperworkRunner(input?: {
   intervalMs?: number;
+  explicit?: boolean;
 }): Promise<Awaited<ReturnType<typeof loadRunnerState>>> {
+  const prodConfig = resolveRunnerProductionConfig();
+  if (!input?.explicit && !prodConfig.scheduleEnabled) {
+    throw new Error(
+      "Schedule not enabled — set AUTONOMOUS_PAPERWORK_RUNNER_SCHEDULE_ENABLED=true or pass explicit start.",
+    );
+  }
   const state = await loadRunnerState();
   state.scheduleEnabled = true;
   state.runnerStatus = "idle";
@@ -393,11 +441,13 @@ export async function buildAutonomousPaperworkRunnerSnapshot(): Promise<Autonomo
       blockedClosedJob: Object.values(state.blockedRegistry).filter(
         (b) => b.blockerCategory === "closed_job",
       ).length,
-      blockedManualReview: Object.values(state.blockedRegistry).filter(
-        (b) =>
-          b.blockerCategory === "unknown_manual_review" ||
-          b.blockerCategory === "call_first_required",
+      blockedProjectNotMappable: Object.values(state.blockedRegistry).filter(
+        (b) => b.blockerCategory === "project_not_mappable",
       ).length,
+      blockedMappingReview: Object.values(state.blockedRegistry).filter(
+        (b) => b.blockerCategory === "project_mapping_review",
+      ).length,
+      staleEligibleRecovered: 0,
       autoRepaired: 0,
       breezySyncOk: true,
     },

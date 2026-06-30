@@ -2,6 +2,7 @@ import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import { P106_1_FULL_RECONCILIATION_INTERVAL_MS } from "@/lib/autonomous-paperwork-runner/runner-config";
 import {
   P106_1_DEV_INTERVAL_MS,
   P106_1_RUNNER_VERSION,
@@ -33,6 +34,8 @@ function defaultState(): AutonomousPaperworkRunnerState {
     averageRunDurationMs: null,
     runCount: 0,
     blockedRegistry: {},
+    lastFullReconciliationAt: null,
+    fullReconciliationIntervalMs: P106_1_FULL_RECONCILIATION_INTERVAL_MS,
     updatedAt: new Date().toISOString(),
   };
 }

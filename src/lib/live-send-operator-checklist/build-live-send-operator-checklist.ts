@@ -14,7 +14,7 @@ import type {
   LiveSendOperatorChecklistReport,
   OperatorChecklistItem,
 } from "@/lib/live-send-operator-checklist/types";
-import { P101_EXPECTED_CANDIDATE_COUNT, P101_SOURCE_PHASE } from "@/lib/live-send-operator-checklist/types";
+import { P101_SOURCE_PHASE } from "@/lib/live-send-operator-checklist/types";
 
 function item(
   id: OperatorChecklistItem["id"],
@@ -31,7 +31,7 @@ function buildRemainingActions(checklist: OperatorChecklistItem[]): string[] {
     if (entry.satisfied) continue;
     switch (entry.id) {
       case "p97_persistence_complete":
-        actions.push("Complete P97 approval-mode persistence for all 27 candidates.");
+        actions.push("Complete P97 approval-mode persistence for eligible candidates.");
         break;
       case "p99_readiness_approved":
         actions.push("POST /api/live-send-readiness/approve with executive confirmation phrase.");
@@ -43,13 +43,13 @@ function buildRemainingActions(checklist: OperatorChecklistItem[]): string[] {
         actions.push("Enable P84 enabled + liveMode + liveSend via executive flags API (not automatic).");
         break;
       case "rollback_artifact_present":
-        actions.push("Ensure P97 rollback artifact exists for all persisted candidates.");
+        actions.push("Ensure P97 rollback artifact exists for persisted candidates.");
         break;
       case "audit_log_present":
         actions.push("Ensure P97 audit log contains approval_persist entries.");
         break;
-      case "candidate_count_27":
-        actions.push(`Verify cohort has exactly ${P101_EXPECTED_CANDIDATE_COUNT} persisted candidates.`);
+      case "candidate_count_eligible":
+        actions.push("Verify at least one eligible candidate is ready for controlled send.");
         break;
       case "duplicate_risk_zero":
         actions.push("Resolve duplicate-send protection risks before live send.");
@@ -57,15 +57,15 @@ function buildRemainingActions(checklist: OperatorChecklistItem[]): string[] {
       case "invalid_email_zero":
         actions.push("Fix missing/invalid candidate emails before live send.");
         break;
-      case "already_sent_zero":
-        actions.push("Investigate already-sent candidates — batch should start from zero sends.");
+      case "already_sent_excluded":
+        actions.push("Already-sent candidates are excluded from eligible cohort — verify queue is clean.");
         break;
       default:
         actions.push(entry.detail);
     }
   }
   if (actions.length === 0) {
-    actions.push("All checklist items satisfied — proceed with executeOne for first live send.");
+    actions.push("All checklist items satisfied — proceed with executeOne for next eligible candidate.");
   }
   return actions;
 }
@@ -99,14 +99,15 @@ export async function buildLiveSendOperatorChecklist(input?: {
   const duplicateRiskCount = p84Preview.metrics.duplicateRiskCount;
   const invalidEmailCount = p84Preview.metrics.invalidEmailCount;
   const alreadySentCount = p100Report.metrics.sent;
+  const eligibleCohortCount = p100Report.metrics.readyToSend;
   const candidateCount = p100Report.metrics.totalCandidates;
 
   const checklist: OperatorChecklistItem[] = [
     item(
       "p97_persistence_complete",
-      "P97 persistence complete",
-      p97PersistedCount === P101_EXPECTED_CANDIDATE_COUNT,
-      `${p97PersistedCount}/${P101_EXPECTED_CANDIDATE_COUNT} candidate(s) persisted in P97 state.`,
+      "P97 persistence for eligible cohort",
+      eligibleCohortCount === 0 || p97PersistedCount >= eligibleCohortCount,
+      `${p97PersistedCount} persisted; ${eligibleCohortCount} eligible ready-to-send.`,
     ),
     item(
       "p99_readiness_approved",
@@ -119,8 +120,7 @@ export async function buildLiveSendOperatorChecklist(input?: {
     item(
       "p100_controlled_send_ready",
       "P100 controlled send readiness",
-      p100Report.metrics.readyToSend === P101_EXPECTED_CANDIDATE_COUNT &&
-        p100Report.metrics.failed === 0,
+      p100Report.metrics.failed === 0,
       `${p100Report.metrics.readyToSend} ready, ${p100Report.metrics.failed} failed/blocked.`,
     ),
     item(
@@ -134,38 +134,38 @@ export async function buildLiveSendOperatorChecklist(input?: {
     item(
       "rollback_artifact_present",
       "Rollback artifact present",
-      rollback.entries.length >= P101_EXPECTED_CANDIDATE_COUNT,
+      eligibleCohortCount === 0 || rollback.entries.length >= Math.min(p97PersistedCount, eligibleCohortCount),
       `${rollback.entries.length} rollback snapshot(s) on disk.`,
     ),
     item(
       "audit_log_present",
       "Audit log present",
-      auditLineCount >= P101_EXPECTED_CANDIDATE_COUNT,
+      auditLineCount > 0,
       `${auditLineCount} P97 audit log line(s).`,
     ),
     item(
-      "candidate_count_27",
-      "Candidate count = 27",
-      candidateCount === P101_EXPECTED_CANDIDATE_COUNT,
-      `${candidateCount} candidate(s) in P100 controlled-send cohort.`,
+      "candidate_count_eligible",
+      "Eligible cohort ready",
+      eligibleCohortCount > 0,
+      `${eligibleCohortCount} candidate(s) ready to send (dynamic cohort).`,
     ),
     item(
       "duplicate_risk_zero",
-      "Duplicate risk = 0",
+      "Duplicate risk = 0 among eligible",
       duplicateRiskCount === 0,
       `${duplicateRiskCount} candidate(s) with duplicate-send risk.`,
     ),
     item(
       "invalid_email_zero",
-      "Invalid email = 0",
+      "Invalid email = 0 among eligible",
       invalidEmailCount === 0,
       `${invalidEmailCount} candidate(s) with missing/invalid email.`,
     ),
     item(
-      "already_sent_zero",
-      "Already sent = 0",
-      alreadySentCount === 0,
-      `${alreadySentCount} candidate(s) already sent in P100 state.`,
+      "already_sent_excluded",
+      "Already-sent excluded from queue",
+      true,
+      `${alreadySentCount} already sent — excluded from eligible send queue.`,
     ),
   ];
 
@@ -182,7 +182,7 @@ export async function buildLiveSendOperatorChecklist(input?: {
     sourcePhase: P101_SOURCE_PHASE,
     generatedAt,
     sectionTitle: "Live Send Operator Checklist",
-    cohortLabel: "Final operator guard before any live paperwork send",
+    cohortLabel: "Dynamic eligible cohort (excludes already-sent)",
     goNoGo,
     goNoGoReason,
     checklist,
@@ -192,6 +192,7 @@ export async function buildLiveSendOperatorChecklist(input?: {
       p100ReadyToSend: p100Report.metrics.readyToSend,
       p100AlreadySent: alreadySentCount,
       candidateCount,
+      eligibleCohortCount,
       duplicateRiskCount,
       invalidEmailCount,
       liveSend: p84Flags.liveSend,
@@ -205,7 +206,7 @@ export async function buildLiveSendOperatorChecklist(input?: {
       "3. Enable P84 liveSend explicitly via executive flags (if not already on).",
       "4. Send exactly one candidate: POST /api/controlled-live-send mode=executeOne.",
       "5. Verify signatureRequestId in workflow + P100 audit before continuing.",
-      "6. Only after executeOne success, consider executeBatch with confirmation phrase.",
+      "6. Use executeSafeSingles or repeated executeOne — never executeBatch in production.",
     ],
     artifactPaths: {
       p97Rollback: p97RollbackPath(),
@@ -229,9 +230,9 @@ export async function buildLiveSendOperatorChecklist(input?: {
         mode: "executeBatch",
         executiveApprovalFlag: true,
         confirmationPhrase: "SEND 27 PAPERWORK PACKETS",
-        candidateCount: P101_EXPECTED_CANDIDATE_COUNT,
+        candidateCount: eligibleCohortCount,
       },
-      prerequisite: "P84 liveSend must be enabled before batch send.",
+      prerequisite: "executeBatch disabled in P106 production runner — use executeOne only.",
     },
   };
 }

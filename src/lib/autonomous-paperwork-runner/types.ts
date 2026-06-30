@@ -1,5 +1,5 @@
 export const P106_1_SOURCE_PHASE = "P106.1";
-export const P106_1_RUNNER_VERSION = 1;
+export const P106_1_RUNNER_VERSION = 2;
 export const P106_1_DEFAULT_MODE = "dryRun" as const;
 export const P106_1_DEV_INTERVAL_MS = 5 * 60 * 1000;
 export const P106_1_STALE_LOCK_MS = 15 * 60 * 1000;
@@ -41,6 +41,8 @@ export type AutonomousPaperworkRunnerState = {
   averageRunDurationMs: number | null;
   runCount: number;
   blockedRegistry: Record<string, AutonomousPaperworkBlockedRecord>;
+  lastFullReconciliationAt: string | null;
+  fullReconciliationIntervalMs: number;
   updatedAt: string;
 };
 
@@ -54,7 +56,9 @@ export type AutonomousPaperworkRunnerCycleMetrics = {
   blockedDuplicate: number;
   blockedUnpublishedJob: number;
   blockedClosedJob: number;
-  blockedManualReview: number;
+  blockedProjectNotMappable: number;
+  blockedMappingReview: number;
+  staleEligibleRecovered: number;
   autoRepaired: number;
   breezySyncOk: boolean;
 };
