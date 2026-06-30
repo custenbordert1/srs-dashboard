@@ -18,6 +18,34 @@ import type {
 import { P97_LIVE_SEND, P97_SOURCE_PHASE } from "@/lib/approval-mode-production/types";
 import type { P62P83ApprovalQueueEntry } from "@/lib/p62-p83-approval-preview/types";
 
+function buildQueueEntryFromPersisted(input: {
+  persisted: P97PersistedRecord;
+  row: ScoredCandidateWorkflowRow | undefined;
+  p84Eligible: boolean | null;
+}): ApprovalModeQueueEntry {
+  return {
+    candidateId: input.persisted.candidateId,
+    candidateName: input.persisted.candidateName,
+    email: input.row?.email?.trim() || "",
+    jobTitle: input.row?.positionName ?? "",
+    city: input.row?.city ?? "",
+    state: input.row?.state ?? "",
+    recruiter: input.persisted.afterState.assignedRecruiter,
+    dm: input.persisted.afterState.assignedDM,
+    confidence: 0,
+    riskLevel: "low",
+    status: "persisted",
+    approvedBy: input.persisted.approvedBy,
+    approvedAt: input.persisted.approvedAt,
+    beforeState: input.persisted.beforeState,
+    afterState: input.persisted.afterState,
+    rollbackAvailable: Boolean(input.persisted.rollbackId),
+    p84EligibleAfterPersistence: input.p84Eligible,
+    liveSend: false,
+    manualApprovalRequired: true,
+  };
+}
+
 function buildQueueEntry(input: {
   sendEntry: P84SendQueueEntry;
   approvalMeta: P62P83ApprovalQueueEntry | null;
@@ -70,10 +98,12 @@ export async function buildApprovalModeProductionReport(input: {
 }): Promise<ApprovalModeProductionReport> {
   const state = await loadP97State();
   const persistedById = new Map(state.persisted.map((p) => [p.candidateId, p]));
+  const queuedIds = new Set<string>();
 
   const queue: ApprovalModeQueueEntry[] = [];
 
   for (const sendEntry of input.p96.sendQueue) {
+    queuedIds.add(sendEntry.candidateId);
     const persisted = persistedById.get(sendEntry.candidateId);
     let p84Eligible: boolean | null = null;
 
@@ -97,6 +127,23 @@ export async function buildApprovalModeProductionReport(input: {
         p84Eligible,
       }),
     );
+  }
+
+  for (const persisted of state.persisted) {
+    if (queuedIds.has(persisted.candidateId)) continue;
+
+    const row = input.rowsByCandidateId.get(persisted.candidateId);
+    let p84Eligible: boolean | null = null;
+    if (row) {
+      const p84 = buildPaperworkSendEligibility({
+        row,
+        onboarding: input.onboardingByCandidateId.get(persisted.candidateId) ?? null,
+        jobsByPositionId: input.jobsByPositionId,
+      });
+      p84Eligible = p84.eligible;
+    }
+
+    queue.push(buildQueueEntryFromPersisted({ persisted, row, p84Eligible }));
   }
 
   const metrics = buildMetrics(queue);
@@ -184,11 +231,30 @@ export async function buildApprovalModeProductionFromStores(input?: {
       job: jobsByPositionId.get(candidate.positionId),
     }),
   );
+  const rowsByCandidateId = new Map(rows.map((row) => [row.candidateId, row]));
+
+  const p97State = await loadP97State();
+  for (const persisted of p97State.persisted) {
+    const row = rowsByCandidateId.get(persisted.candidateId);
+    if (!row?.positionId || jobsByPositionId.has(row.positionId)) continue;
+    jobsByPositionId.set(row.positionId, {
+      jobId: row.positionId,
+      name: row.positionName ?? "",
+      city: row.city,
+      state: row.state,
+      zip: row.zipCode ?? "",
+      displayLocation: `${row.city}, ${row.state}`.replace(/^, |, $/g, ""),
+      locationSource: "missing",
+      status: "published",
+      createdDate: "",
+      updatedDate: "",
+    });
+  }
 
   return buildApprovalModeProductionReport({
     p96,
     p95ApprovalByCandidateId: new Map(p95.approvalQueue.map((e) => [e.candidateId, e])),
-    rowsByCandidateId: new Map(rows.map((row) => [row.candidateId, row])),
+    rowsByCandidateId,
     jobsByPositionId,
     onboardingByCandidateId: new Map(onboardingRecords.map((r) => [r.candidateId, r])),
     mtdRangeLabel: p96.mtdRangeLabel,

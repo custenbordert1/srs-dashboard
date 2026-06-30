@@ -2,9 +2,11 @@ import type { BreezyJob } from "@/lib/breezy-api";
 import type { P84FeatureFlags } from "@/lib/autonomous-paperwork-send-engine/types";
 import type { CandidateOnboardingRecord } from "@/lib/candidate-onboarding-engine/types";
 import type { P62P83ApprovalQueueEntry } from "@/lib/p62-p83-approval-preview/types";
+import { loadP97State } from "@/lib/approval-mode-production/approval-mode-store";
 import {
   buildMetricsFromEntries,
   buildP84SendQueueEntry,
+  buildP84SendQueueEntryFromPersistedWorkflow,
 } from "@/lib/p84-send-queue-preview/build-p84-send-queue-preview";
 import type {
   P84SendQueueEntry,
@@ -129,13 +131,74 @@ export async function buildP84SendQueuePreviewFromStores(input?: {
       job: jobsByPositionId.get(candidate.positionId),
     }),
   );
+  const rowsByCandidateId = new Map(rows.map((row) => [row.candidateId, row]));
+  const onboardingByCandidateId = new Map(onboardingRecords.map((r) => [r.candidateId, r]));
+  const p84FlagsSafe = { ...p84Flags, liveSend: false };
 
-  return buildP84SendQueuePreview({
+  const state = await loadP97State();
+  for (const persisted of state.persisted) {
+    const row = rowsByCandidateId.get(persisted.candidateId);
+    if (!row?.positionId || jobsByPositionId.has(row.positionId)) continue;
+    jobsByPositionId.set(row.positionId, {
+      jobId: row.positionId,
+      name: row.positionName ?? "",
+      city: row.city,
+      state: row.state,
+      zip: row.zipCode ?? "",
+      displayLocation: `${row.city}, ${row.state}`.replace(/^, |, $/g, ""),
+      locationSource: "missing",
+      status: "published",
+      createdDate: "",
+      updatedDate: "",
+    });
+  }
+
+  const preview = buildP84SendQueuePreview({
     approvalQueue: p95.approvalQueue,
-    rowsByCandidateId: new Map(rows.map((row) => [row.candidateId, row])),
+    rowsByCandidateId,
     jobsByPositionId,
-    onboardingByCandidateId: new Map(onboardingRecords.map((r) => [r.candidateId, r])),
-    p84Flags,
+    onboardingByCandidateId,
+    p84Flags: p84FlagsSafe,
     mtdRangeLabel: p95.mtdRangeLabel,
   });
+
+  const coveredIds = new Set(
+    [...preview.sendQueue, ...preview.blocked].map((entry) => entry.candidateId),
+  );
+  const persistedEntries: P84SendQueueEntry[] = [];
+
+  for (const persisted of state.persisted) {
+    if (coveredIds.has(persisted.candidateId)) continue;
+    const row = rowsByCandidateId.get(persisted.candidateId);
+    if (!row) continue;
+    persistedEntries.push(
+      buildP84SendQueueEntryFromPersistedWorkflow({
+        row,
+        jobsByPositionId,
+        onboarding: onboardingByCandidateId.get(persisted.candidateId) ?? null,
+        p84Flags: p84FlagsSafe,
+        approvedBy: persisted.approvedBy,
+      }),
+    );
+  }
+
+  if (!persistedEntries.length) {
+    return preview;
+  }
+
+  const allEntries = [...preview.sendQueue, ...preview.blocked, ...persistedEntries];
+  const metrics = buildMetricsFromEntries(allEntries);
+  const sendQueue = allEntries.filter((e) => e.inSendQueue);
+  const blocked = allEntries.filter((e) => !e.inSendQueue);
+
+  return {
+    ...preview,
+    cohortLabel:
+      "P95 approval queue + P97 persisted candidates — post-approval P84 send queue preview",
+    metrics,
+    sendQueue,
+    blocked,
+    sampleTraces: sendQueue.slice(0, 5),
+    finalChecklistBeforeApprovalModeProduction: buildFinalChecklist(metrics),
+  };
 }

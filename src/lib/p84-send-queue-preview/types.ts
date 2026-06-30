@@ -2,10 +2,10 @@ export const P96_SOURCE_PHASE = "P96";
 export const P96_PREVIEW_MODE = true as const;
 
 export type ApprovalPersistenceSimulation = {
-  simulatedOnly: true;
-  p62RecruiterApproved: true;
-  dmAssignmentApproved: true;
-  p83AdvancementApproved: true;
+  simulatedOnly: boolean;
+  p62RecruiterApproved: boolean;
+  dmAssignmentApproved: boolean;
+  p83AdvancementApproved: boolean;
   workflowStatus: "Paperwork Needed";
   actionType: "send-paperwork";
   detail: string;

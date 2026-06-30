@@ -68,6 +68,62 @@ function buildSafetyGates(input: {
   return gates;
 }
 
+export function buildP84SendQueueEntryFromPersistedWorkflow(input: {
+  row: ScoredCandidateWorkflowRow;
+  jobsByPositionId: Map<string, BreezyJob>;
+  onboarding: CandidateOnboardingRecord | null;
+  p84Flags: P84FeatureFlags;
+  approvedBy?: string;
+}): P84SendQueueEntry {
+  const p84 = buildPaperworkSendEligibility({
+    row: input.row,
+    onboarding: input.onboarding,
+    jobsByPositionId: input.jobsByPositionId,
+  });
+
+  const safetyGates = buildSafetyGates({ p84Gates: p84.gates, p84Flags: input.p84Flags });
+  const duplicateGate = p84.gates.find((g) => g.id === "no_duplicate");
+  const p84CoreEligible = p84.eligible;
+
+  const sendBlockedReason = p84CoreEligible
+    ? "P97 persisted — executive sign-off still required before liveSend."
+    : p84.blockingReasons[0] ?? "P84 eligibility gates not satisfied.";
+
+  return {
+    candidateId: input.row.candidateId,
+    candidateName: `${input.row.firstName ?? ""} ${input.row.lastName ?? ""}`.trim() || input.row.email || input.row.candidateId,
+    email: input.row.email?.trim() || "",
+    recruiter: input.row.assignedRecruiter,
+    dm: input.row.assignedDM,
+    jobTitle: input.row.positionName ?? "",
+    city: input.row.city,
+    state: input.row.state,
+    positionId: input.row.positionId,
+    approvalPersistence: {
+      simulatedOnly: false,
+      p62RecruiterApproved: true,
+      dmAssignmentApproved: true,
+      p83AdvancementApproved: true,
+      workflowStatus: "Paperwork Needed",
+      actionType: "send-paperwork",
+      detail: input.approvedBy
+        ? `P97 approval-mode production persisted by ${input.approvedBy} — actual workflow state.`
+        : "P97 approval-mode production persisted — actual workflow state.",
+    },
+    eligibilityResult: p84CoreEligible ? "eligible" : "blocked",
+    sendBlockedReason,
+    duplicateSendProtection: {
+      passed: duplicateGate?.passed ?? true,
+      detail: duplicateGate?.detail ?? null,
+    },
+    liveSend: false,
+    inSendQueue: p84CoreEligible,
+    safetyGates,
+    executiveApprovalRequired: true,
+    autoApproveBlocked: true,
+  };
+}
+
 export function buildP84SendQueueEntry(input: {
   approval: P62P83ApprovalQueueEntry;
   row: ScoredCandidateWorkflowRow;
