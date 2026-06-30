@@ -367,13 +367,19 @@ export function buildPaperworkEligibilityReconciliation(input: {
     blockerBreakdown,
     ruleAlignment: {
       p87ReadySignalDefinition:
-        "P56/P87 paperworkReady = questionnaire paperworkReadiness category score ≥ 70 (tech/contact readiness).",
+        "Questionnaire Ready (P56 paperworkReady) = questionnaire paperworkReadiness category score ≥ 70.",
       p84EligibilityDefinition:
-        "P84 requires recruiter assigned, workflowStatus=Paperwork Needed, actionType=send-paperwork, published job, valid email, no duplicate, not signed/rejected/inactive, and template ready.",
+        "P84 Send Eligible requires recruiter assigned, workflowStatus=Paperwork Needed, actionType=send-paperwork, published job, valid email, no duplicate, not signed/rejected/inactive, and template ready.",
       primaryMismatch:
-        "Grade readiness ≠ workflow stage. P87 counts intelligence scores; P84 counts persisted automation state.",
+        "Questionnaire Ready ≠ Workflow Ready ≠ P84 Send Eligible. Intelligence scores differ from persisted automation state.",
       explanation:
-        "The 75 vs 0 gap is expected when P83 advancement has not persisted and/or jobs are unpublished. Reconciliation simulates P83 fixes separately from real disqualifications.",
+        "The 75 vs 0 gap is expected when P83 advancement has not persisted and/or jobs are unpublished. Use P89 unlock preview for operational recovery plans.",
+      readinessLabels: {
+        questionnaireReady: "Questionnaire Ready",
+        workflowReady: "Workflow Ready",
+        p84SendEligible: "P84 Send Eligible",
+        paperworkAlreadySent: "Paperwork Already Sent",
+      },
     },
     traces,
     remainingBlockersBeforeLiveSend: [

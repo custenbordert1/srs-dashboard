@@ -124,6 +124,13 @@ export async function GET(request: Request) {
               reject: hiringDecisionEngine.rejectCount,
               missingInformation: hiringDecisionEngine.missingInformationCount,
             },
+            readinessMetrics: {
+              labels: hiringDecisionEngine.readinessLabels,
+              questionnaireReady: hiringDecisionEngine.questionnaireReadyCount,
+              workflowReady: hiringDecisionEngine.workflowReadyCount,
+              p84SendEligible: hiringDecisionEngine.p84SendEligibleCount,
+              paperworkAlreadySent: hiringDecisionEngine.paperworkAlreadySentCount,
+            },
             recruiterHoursSaved: hiringDecisionEngine.estimatedRecruiterHoursSaved,
           }
         : null,

@@ -110,6 +110,12 @@ export type PaperworkEligibilityReconciliationReport = {
     p84EligibilityDefinition: string;
     primaryMismatch: string;
     explanation: string;
+    readinessLabels: {
+      questionnaireReady: string;
+      workflowReady: string;
+      p84SendEligible: string;
+      paperworkAlreadySent: string;
+    };
   };
   traces: PaperworkEligibilityCandidateTrace[];
   remainingBlockersBeforeLiveSend: string[];

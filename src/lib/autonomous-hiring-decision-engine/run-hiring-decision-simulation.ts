@@ -1,6 +1,5 @@
-import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
-import { buildPaperworkSendEligibility } from "@/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility";
 import type { BreezyJob } from "@/lib/breezy-api";
+import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import type { CandidateOnboardingRecord } from "@/lib/candidate-onboarding-engine/types";
 import type {
   HiringDecision,
@@ -11,6 +10,12 @@ import { P87_PREVIEW_MODE, P87_SOURCE_PHASE } from "@/lib/autonomous-hiring-deci
 import { buildHiringDecisions } from "@/lib/autonomous-hiring-decision-engine/build-hiring-decision";
 import { buildHiringDecisionQueues } from "@/lib/autonomous-hiring-decision-engine/build-hiring-decision-queues";
 import { buildP88AutonomousPaperworkPreview } from "@/lib/autonomous-hiring-decision-engine/build-p88-preview";
+import {
+  classifyPaperworkReadiness,
+  isQuestionnaireReady,
+  isWorkflowReady,
+  READINESS_LABELS,
+} from "@/lib/p84-unlock-preview/readiness-labels";
 
 function topBlockReasons(decisions: HiringDecision[]): Array<{ reason: string; count: number }> {
   const counts = new Map<string, number>();
@@ -34,25 +39,13 @@ function topBlockReasons(decisions: HiringDecision[]): Array<{ reason: string; c
     .slice(0, 10);
 }
 
-function countP84Ready(input: {
-  rows: ScoredCandidateWorkflowRow[];
-  jobsByPositionId: Map<string, BreezyJob>;
-  onboardingByCandidateId: Map<string, CandidateOnboardingRecord>;
-}): number {
-  let count = 0;
-  for (const row of input.rows) {
-    const eligibility = buildPaperworkSendEligibility({
-      row,
-      onboarding: input.onboardingByCandidateId.get(row.candidateId) ?? null,
-      jobsByPositionId: input.jobsByPositionId,
-    });
-    if (eligibility.eligible) count += 1;
-  }
-  return count;
-}
-
 export function buildHiringDecisionExecutiveMetrics(
   decisions: HiringDecision[],
+  input?: {
+    rows?: ScoredCandidateWorkflowRow[];
+    jobsByPositionId?: Map<string, BreezyJob>;
+    onboardingByCandidateId?: Map<string, CandidateOnboardingRecord>;
+  },
 ): HiringDecisionExecutiveMetrics {
   const queues = buildHiringDecisionQueues(decisions);
   const qualityScores = decisions
@@ -77,11 +70,37 @@ export function buildHiringDecisionExecutiveMetrics(
     0,
   );
 
+  let questionnaireReadyCount = decisions.filter((d) =>
+    d.explanation.positiveFactors.some((p) =>
+      p.toLowerCase().includes("questionnaire ready"),
+    ),
+  ).length;
+  let workflowReadyCount = 0;
+  let p84SendEligibleCount = 0;
+  let paperworkAlreadySentCount = 0;
+
+  if (input?.rows && input.jobsByPositionId) {
+    const onboardingByCandidateId = input.onboardingByCandidateId ?? new Map();
+    questionnaireReadyCount = input.rows.filter(isQuestionnaireReady).length;
+    workflowReadyCount = input.rows.filter(isWorkflowReady).length;
+    for (const row of input.rows) {
+      const readiness = classifyPaperworkReadiness({
+        row,
+        jobsByPositionId: input.jobsByPositionId,
+        onboarding: onboardingByCandidateId.get(row.candidateId) ?? null,
+      });
+      if (readiness.p84SendEligible) p84SendEligibleCount += 1;
+      if (readiness.paperworkAlreadySent) paperworkAlreadySentCount += 1;
+    }
+  }
+
   return {
     fastTrackCandidates: queues.fast_track.length,
-    readyForPaperwork: decisions.filter((d) =>
-      d.explanation.positiveFactors.some((p) => p.toLowerCase().includes("ready for paperwork")),
-    ).length,
+    readyForPaperwork: questionnaireReadyCount,
+    questionnaireReadyCount,
+    workflowReadyCount,
+    p84SendEligibleCount,
+    paperworkAlreadySentCount,
     needsReview: queues.recruiter_review.length,
     missingInformation: queues.missing_information.length,
     blockedCandidates: queues.hold.length + queues.reject.length,
@@ -98,6 +117,7 @@ export function buildHiringDecisionExecutiveMetrics(
     recruiterTimeSavedMinutes,
     recruiterHoursSaved: Math.round((recruiterTimeSavedMinutes / 60) * 10) / 10,
     totalCandidates: decisions.length,
+    readinessLabels: READINESS_LABELS,
   };
 }
 
@@ -117,7 +137,11 @@ export function runHiringDecisionSimulation(input: {
     generatedAt,
   });
   const queues = buildHiringDecisionQueues(decisions);
-  const executiveMetrics = buildHiringDecisionExecutiveMetrics(decisions);
+  const executiveMetrics = buildHiringDecisionExecutiveMetrics(decisions, {
+    rows: input.rows,
+    jobsByPositionId: input.jobsByPositionId,
+    onboardingByCandidateId,
+  });
   const p88 = buildP88AutonomousPaperworkPreview({
     fastTrackDecisions: queues.fast_track,
     jobsByPositionId: input.jobsByPositionId,
@@ -139,12 +163,13 @@ export function runHiringDecisionSimulation(input: {
     averageConfidence: executiveMetrics.averageConfidenceScore,
     estimatedRecruiterHoursSaved: executiveMetrics.recruiterHoursSaved,
     topBlockReasons: topBlockReasons(decisions),
-    readyForPaperworkCount: executiveMetrics.readyForPaperwork,
-    readyForP84Count: countP84Ready({
-      rows: input.rows,
-      jobsByPositionId: input.jobsByPositionId,
-      onboardingByCandidateId,
-    }),
+    readyForPaperworkCount: executiveMetrics.questionnaireReadyCount,
+    questionnaireReadyCount: executiveMetrics.questionnaireReadyCount,
+    workflowReadyCount: executiveMetrics.workflowReadyCount,
+    p84SendEligibleCount: executiveMetrics.p84SendEligibleCount,
+    paperworkAlreadySentCount: executiveMetrics.paperworkAlreadySentCount,
+    readinessLabels: executiveMetrics.readinessLabels,
+    readyForP84Count: executiveMetrics.p84SendEligibleCount,
     queues,
     decisions,
     executiveMetrics,

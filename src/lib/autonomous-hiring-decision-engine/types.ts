@@ -85,7 +85,12 @@ export type HiringDecisionQueues = Record<HiringDecisionQueueId, HiringDecision[
 
 export type HiringDecisionExecutiveMetrics = {
   fastTrackCandidates: number;
+  /** @deprecated Use questionnaireReadyCount — kept for backward compatibility */
   readyForPaperwork: number;
+  questionnaireReadyCount: number;
+  workflowReadyCount: number;
+  p84SendEligibleCount: number;
+  paperworkAlreadySentCount: number;
   needsReview: number;
   missingInformation: number;
   blockedCandidates: number;
@@ -96,6 +101,12 @@ export type HiringDecisionExecutiveMetrics = {
   recruiterTimeSavedMinutes: number;
   recruiterHoursSaved: number;
   totalCandidates: number;
+  readinessLabels: {
+    questionnaireReady: string;
+    workflowReady: string;
+    p84SendEligible: string;
+    paperworkAlreadySent: string;
+  };
 };
 
 export type HiringDecisionSimulationResult = {
@@ -112,7 +123,14 @@ export type HiringDecisionSimulationResult = {
   averageConfidence: number | null;
   estimatedRecruiterHoursSaved: number;
   topBlockReasons: Array<{ reason: string; count: number }>;
+  /** @deprecated Use questionnaireReadyCount */
   readyForPaperworkCount: number;
+  questionnaireReadyCount: number;
+  workflowReadyCount: number;
+  p84SendEligibleCount: number;
+  paperworkAlreadySentCount: number;
+  readinessLabels: HiringDecisionExecutiveMetrics["readinessLabels"];
+  /** @deprecated Use p84SendEligibleCount */
   readyForP84Count: number;
   queues: HiringDecisionQueues;
   decisions: HiringDecision[];

@@ -167,7 +167,7 @@ export function buildHiringDecision(input: {
     rules.reject.rejectTerminalStatuses.includes(row.workflowStatus) ||
     review.verdict === "disqualified";
 
-  if (grade.paperworkReady) positives.push("Ready for paperwork");
+  if (grade.paperworkReady) positives.push("Questionnaire Ready");
   if (row.resumeIntelligence.available && row.resumeIntelligence.workHistoryHighlights.length > 0) {
     positives.push("Strong work history");
   }
@@ -237,7 +237,7 @@ export function buildHiringDecision(input: {
     action = "fast_track";
     if (row.questionnaireIntelligence.available) bullets.push("• Strong questionnaire");
     if (row.resumeIntelligence.available) bullets.push("• Strong work history");
-    bullets.push("• Ready for paperwork");
+    bullets.push("• Questionnaire Ready — advance via P83 for P84 send");
   } else if (review.verdict === "incomplete" || grade.confidence === "low" || grade.grade === "C") {
     action = "recruiter_review";
     if (grade.confidence === "medium") bullets.push("• Medium confidence score");
