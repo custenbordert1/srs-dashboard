@@ -13,6 +13,7 @@ import { RecruiterAssignmentPreviewPanel } from "@/components/executive/recruite
 import { P62P83ApprovalPreviewPanel } from "@/components/executive/p62-p83-approval-preview-panel";
 import { P84SendQueuePreviewPanel } from "@/components/executive/p84-send-queue-preview-panel";
 import { ApprovalModeProductionPanel } from "@/components/executive/approval-mode-production-panel";
+import { LiveSendReadinessPanel } from "@/components/executive/live-send-readiness-panel";
 import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
 import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-paperwork-panel";
@@ -281,6 +282,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <P84SendQueuePreviewPanel />
 
       <ApprovalModeProductionPanel />
+
+      <LiveSendReadinessPanel />
 
       <RecruiterAutomationReadinessPanel />
 
