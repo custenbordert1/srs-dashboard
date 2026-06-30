@@ -15,6 +15,7 @@ import { P84SendQueuePreviewPanel } from "@/components/executive/p84-send-queue-
 import { ApprovalModeProductionPanel } from "@/components/executive/approval-mode-production-panel";
 import { LiveSendReadinessPanel } from "@/components/executive/live-send-readiness-panel";
 import { ControlledLiveSendPanel } from "@/components/executive/controlled-live-send-panel";
+import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
 import { LiveSendOperatorChecklistPanel } from "@/components/executive/live-send-operator-checklist-panel";
 import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
@@ -288,6 +289,7 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <LiveSendReadinessPanel />
 
       <ControlledLiveSendPanel />
+      <AutonomousPaperworkEnginePanel />
 
       <LiveSendOperatorChecklistPanel />
 
