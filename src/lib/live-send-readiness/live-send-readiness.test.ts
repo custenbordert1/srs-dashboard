@@ -3,7 +3,11 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, it } from "node:test";
-import { loadP84FeatureFlags } from "@/lib/autonomous-paperwork-send-engine/feature-flags-store";
+import {
+  canLiveSendPaperwork,
+  DEFAULT_P84_FEATURE_FLAGS,
+  loadP84FeatureFlags,
+} from "@/lib/autonomous-paperwork-send-engine/feature-flags-store";
 import { upsertCandidateWorkflow } from "@/lib/candidate-workflow-store";
 import {
   appendP97Audit,
@@ -96,9 +100,9 @@ describe("live-send-readiness (P99)", () => {
     await restoreEnv();
   });
 
-  it("never enables liveSend by default", async () => {
-    const flags = await loadP84FeatureFlags();
-    assert.equal(flags.liveSend, false);
+  it("never enables liveSend by default", () => {
+    assert.equal(DEFAULT_P84_FEATURE_FLAGS.liveSend, false);
+    assert.equal(canLiveSendPaperwork(DEFAULT_P84_FEATURE_FLAGS), false);
   });
 
   it("rejects approval without executive flag or phrase", async () => {

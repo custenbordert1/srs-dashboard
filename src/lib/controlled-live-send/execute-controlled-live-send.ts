@@ -14,6 +14,7 @@ import {
   resolveGoNoGo,
   validateExecutionLocks,
 } from "@/lib/controlled-live-send/validate-execution-locks";
+import { resolveRemainingBatchContext } from "@/lib/controlled-live-send/resolve-remaining-batch-context";
 import type {
   ControlledLiveSendCandidateEntry,
   ControlledLiveSendExecutionEntry,
@@ -22,7 +23,7 @@ import type {
   ControlledLiveSendResult,
   ControlledLiveSendMode,
 } from "@/lib/controlled-live-send/types";
-import { P100_EXPECTED_CANDIDATE_COUNT, P100_SOURCE_PHASE } from "@/lib/controlled-live-send/types";
+import { P100_EXPECTED_CANDIDATE_COUNT, P100_REMAINING_BATCH_PHRASE, P100_SOURCE_PHASE } from "@/lib/controlled-live-send/types";
 import { prepareOnboardingSend } from "@/lib/autonomous-paperwork-send-engine/prepare-onboarding-send";
 import {
   executeOnboardingSend,
@@ -225,8 +226,16 @@ export async function buildControlledLiveSendReport(input?: {
     rollbackEntryCount: lockContext.rollbackEntryCount,
     auditEntryCount: lockContext.auditEntryCount,
     blockedCount,
-    readyCount: metrics.readyToSend + metrics.sent,
+    readyCount: metrics.readyToSend,
+    alreadySentCount: metrics.sent,
+    sentCandidateIds: p100State.sentCandidateIds,
     p84Flags: lockContext.p84Flags,
+  });
+
+  const batchContext = resolveRemainingBatchContext({
+    readyToSend: metrics.readyToSend,
+    alreadySentCount: metrics.sent,
+    sentCandidateIds: p100State.sentCandidateIds,
   });
 
   const { goNoGo, goNoGoReason } = resolveGoNoGo(safetyLocks);
@@ -245,7 +254,8 @@ export async function buildControlledLiveSendReport(input?: {
     p84Enabled: lockContext.p84Flags.enabled,
     p84LiveMode: lockContext.p84Flags.liveMode,
     readinessApproved: lockContext.readinessApproved,
-    requiredBatchConfirmationPhrase: "SEND 27 PAPERWORK PACKETS",
+    requiredBatchConfirmationPhrase: batchContext.requiredConfirmationPhrase,
+    remainingBatchConfirmationPhrase: P100_REMAINING_BATCH_PHRASE,
     expectedCandidateCount: P100_EXPECTED_CANDIDATE_COUNT,
     goNoGo,
     goNoGoReason,
@@ -293,7 +303,12 @@ export async function executeControlledLiveSend(input: {
   let stoppedEarly = false;
   let stopReason: string | null = null;
   let liveSendsThisRun = 0;
-  const maxSends = mode === "executeOne" ? 1 : mode === "executeBatch" ? P100_EXPECTED_CANDIDATE_COUNT : 0;
+  const maxSends =
+    mode === "executeOne"
+      ? 1
+      : mode === "executeBatch"
+        ? report.metrics.readyToSend
+        : 0;
 
   for (const candidateId of targetIds) {
     if (mode !== "dryRun" && liveSendsThisRun >= maxSends) break;

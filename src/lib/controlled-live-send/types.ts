@@ -1,6 +1,8 @@
 export const P100_SOURCE_PHASE = "P100";
 export const P100_CONFIRMATION_PHRASE = "SEND 27 PAPERWORK PACKETS";
+export const P100_REMAINING_BATCH_PHRASE = "SEND 26 PAPERWORK PACKETS";
 export const P100_EXPECTED_CANDIDATE_COUNT = 27;
+export const P102_FIRST_LIVE_SENT_CANDIDATE_ID = "6d548b240ab0";
 
 export type ControlledLiveSendMode = "dryRun" | "executeOne" | "executeBatch";
 
@@ -61,7 +63,8 @@ export type ControlledLiveSendReport = {
   p84Enabled: boolean;
   p84LiveMode: boolean;
   readinessApproved: boolean;
-  requiredBatchConfirmationPhrase: typeof P100_CONFIRMATION_PHRASE;
+  requiredBatchConfirmationPhrase: string;
+  remainingBatchConfirmationPhrase: typeof P100_REMAINING_BATCH_PHRASE;
   expectedCandidateCount: typeof P100_EXPECTED_CANDIDATE_COUNT;
   goNoGo: "go" | "no-go";
   goNoGoReason: string;

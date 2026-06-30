@@ -16,8 +16,10 @@ import type {
 import {
   P100_CONFIRMATION_PHRASE,
   P100_EXPECTED_CANDIDATE_COUNT,
+  P100_REMAINING_BATCH_PHRASE,
   P100_SOURCE_PHASE,
 } from "@/lib/controlled-live-send/types";
+import { isValidBatchConfirmation, resolveRemainingBatchContext } from "@/lib/controlled-live-send/resolve-remaining-batch-context";
 import { p100AuditLogPath, p100StatePath } from "@/lib/controlled-live-send/controlled-live-send-store";
 
 export type ExecutionLockInput = {
@@ -30,6 +32,8 @@ export type ExecutionLockInput = {
   auditEntryCount: number;
   blockedCount: number;
   readyCount: number;
+  alreadySentCount: number;
+  sentCandidateIds: string[];
   p84Flags: P84FeatureFlags;
 };
 
@@ -45,6 +49,20 @@ export async function countP97AuditEntries(): Promise<number> {
 export function validateExecutionLocks(input: ExecutionLockInput): ControlledLiveSendLock[] {
   const isLiveMode = input.mode === "executeOne" || input.mode === "executeBatch";
   const isBatch = input.mode === "executeBatch";
+  const batchContext = resolveRemainingBatchContext({
+    readyToSend: input.readyCount,
+    alreadySentCount: input.alreadySentCount,
+    sentCandidateIds: input.sentCandidateIds,
+  });
+  const batchPhraseValid =
+    isBatch &&
+    isValidBatchConfirmation({
+      confirmationPhrase: input.confirmationPhrase,
+      candidateCount: input.candidateCount,
+      readyToSend: input.readyCount,
+      alreadySentCount: input.alreadySentCount,
+      sentCandidateIds: input.sentCandidateIds,
+    });
 
   const locks: ControlledLiveSendLock[] = [
     {
@@ -97,12 +115,9 @@ export function validateExecutionLocks(input: ExecutionLockInput): ControlledLiv
     {
       id: "confirmation_phrase_verified",
       label: "Batch confirmation phrase",
-      satisfied:
-        !isBatch ||
-        (input.confirmationPhrase?.trim() === P100_CONFIRMATION_PHRASE &&
-          input.executiveApprovalFlag === true),
+      satisfied: !isBatch || (batchPhraseValid && input.executiveApprovalFlag === true),
       detail: isBatch
-        ? `Required phrase: "${P100_CONFIRMATION_PHRASE}".`
+        ? batchContext.detail
         : "Required only for executeBatch.",
     },
     {
@@ -110,10 +125,10 @@ export function validateExecutionLocks(input: ExecutionLockInput): ControlledLiv
       label: "Candidate count confirmation",
       satisfied:
         !isBatch ||
-        (input.candidateCount === P100_EXPECTED_CANDIDATE_COUNT &&
-          input.readyCount === P100_EXPECTED_CANDIDATE_COUNT),
+        (input.candidateCount === batchContext.requiredCandidateCount &&
+          input.readyCount === batchContext.requiredCandidateCount),
       detail: isBatch
-        ? `Must confirm ${P100_EXPECTED_CANDIDATE_COUNT} candidates with ${P100_EXPECTED_CANDIDATE_COUNT} ready.`
+        ? `Must confirm ${batchContext.requiredCandidateCount} remaining candidate(s) (${batchContext.batchMode}).`
         : "Required only for executeBatch.",
     },
     {
