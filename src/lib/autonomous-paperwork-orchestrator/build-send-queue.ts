@@ -43,6 +43,8 @@ export function buildOrchestratorCandidateRecord(input: {
   approvedForQueue: boolean;
   createdAt?: string | null;
   manualPriorityOverride?: number;
+  approvalDecision?: import("@/lib/autonomous-paperwork-approval-engine/types").ApprovalDecision;
+  approvalScore?: number;
 }): OrchestratorCandidateRecord {
   const candidateAgeDays = daysSince(input.createdAt);
   const duplicateRisk = input.eligibilityStatus === "DUPLICATE";
@@ -70,6 +72,8 @@ export function buildOrchestratorCandidateRecord(input: {
     approvedMappingReady: input.approvedMappingReady,
     onPilotAllowlist: input.onPilotAllowlist,
     safeToSend: input.approvedForQueue && !duplicateRisk,
+    approvalDecision: input.approvalDecision ?? "BLOCKED",
+    approvalScore: input.approvalScore ?? 0,
   };
   record.priorityScore = computePriorityScore(record);
   return record;

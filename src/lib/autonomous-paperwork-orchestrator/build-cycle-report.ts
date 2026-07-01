@@ -1,4 +1,5 @@
 import type { PilotConfig } from "@/lib/p122-controlled-live-paperwork-pilot/types";
+import type { ApprovalSummary } from "@/lib/autonomous-paperwork-approval-engine/types";
 import type {
   OrchestratorCandidateRecord,
   OrchestratorSafetyState,
@@ -20,6 +21,7 @@ export async function buildPaperworkCycleReport(input: {
   warnings: string[];
   errors: string[];
   pilotConfig: PilotConfig;
+  approvalSummary: ApprovalSummary | null;
 }): Promise<PaperworkCycleReport> {
   const readyCandidates = input.candidates.filter(
     (candidate) =>
@@ -73,5 +75,6 @@ export async function buildPaperworkCycleReport(input: {
     errors: input.errors,
     etaMinutes: input.sendQueue.estimatedCompletionMinutes,
     lastExecutionAt: registry.lastSendResult?.executedAt ?? null,
+    approvalSummary: input.approvalSummary,
   };
 }

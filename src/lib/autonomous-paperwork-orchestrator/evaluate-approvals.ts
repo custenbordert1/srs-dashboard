@@ -1,58 +1,64 @@
+import {
+  evaluateApprovalDecision,
+  isAutoApprovedForSendQueue,
+} from "@/lib/autonomous-paperwork-approval-engine/evaluate-approval-decision";
+import { buildApprovalPolicy } from "@/lib/autonomous-paperwork-approval-engine/build-approval-policy";
+import { daysSince } from "@/lib/autonomous-paperwork-orchestrator/evaluate-eligibility";
 import type { LoadedPaperworkCandidates } from "@/lib/autonomous-paperwork-orchestrator/load-candidates";
 import type { PaperworkEligibilityStatus } from "@/lib/autonomous-paperwork-orchestrator/types";
+import type { CandidateApprovalRecord } from "@/lib/autonomous-paperwork-approval-engine/types";
 
-const APPROVAL_READY: PaperworkEligibilityStatus[] = ["READY_TO_SEND", "READY_AFTER_APPROVAL"];
-
-export function evaluateApprovalDecision(input: {
+export function evaluateOrchestratorApproval(input: {
   context: LoadedPaperworkCandidates;
   candidateId: string;
+  candidateName: string;
   eligibilityStatus: PaperworkEligibilityStatus;
+  templateKey: string | null;
+  mappingConfidence: number;
   approvedMappingReady: boolean;
   onPilotAllowlist: boolean;
+  row: import("@/lib/build-candidate-workflow-row").ScoredCandidateWorkflowRow | null;
 }): {
+  approval: CandidateApprovalRecord;
   approvedForQueue: boolean;
   approvalRequired: boolean;
   reason: string;
 } {
-  if (!APPROVAL_READY.includes(input.eligibilityStatus)) {
-    return {
-      approvedForQueue: false,
-      approvalRequired: false,
-      reason: `Not approval-ready (${input.eligibilityStatus}).`,
-    };
-  }
+  const row = input.row;
+  const approvedMapping = input.context.approvedMappingsByCandidate.get(input.candidateId) ?? null;
+  const p109Record = input.context.p109ByCandidate.get(input.candidateId) ?? null;
+  const nativePublishedJob = Boolean(row?.positionId && input.context.jobsByPositionId.has(row.positionId));
+  const alreadySent =
+    input.eligibilityStatus === "ALREADY_SENT" ||
+    input.context.p100SentIds.has(input.candidateId) ||
+    input.context.pilotSentIds.has(input.candidateId);
+  const duplicateRisk = input.eligibilityStatus === "DUPLICATE";
 
-  if (!input.onPilotAllowlist) {
-    return {
-      approvedForQueue: false,
-      approvalRequired: true,
-      reason: "Candidate not on pilot allowlist.",
-    };
-  }
+  const approval = evaluateApprovalDecision({
+    candidateId: input.candidateId,
+    candidateName: input.candidateName,
+    row,
+    eligibilityStatus: input.eligibilityStatus,
+    templateKey: input.templateKey,
+    mappingConfidence: input.mappingConfidence,
+    approvedMapping,
+    p109Record,
+    nativePublishedJob,
+    alreadySent,
+    duplicateRisk,
+    candidateAgeDays: daysSince(row?.createdDate ?? null),
+    policy: buildApprovalPolicy(),
+  });
 
-  if (input.eligibilityStatus === "READY_AFTER_APPROVAL" && !input.approvedMappingReady) {
-    return {
-      approvedForQueue: false,
-      approvalRequired: true,
-      reason: "Approved mapping required before send.",
-    };
-  }
-
-  const nativePublished =
-    Boolean(input.context.rowsByCandidateId.get(input.candidateId)?.positionId) &&
-    input.context.jobsByPositionId.has(input.context.rowsByCandidateId.get(input.candidateId)!.positionId!);
-
-  if (!nativePublished && !input.approvedMappingReady) {
-    return {
-      approvedForQueue: false,
-      approvalRequired: true,
-      reason: "Requires approved mapping or native published project.",
-    };
-  }
+  const autoApproved = isAutoApprovedForSendQueue(approval.approvalDecision);
+  const approvedForQueue = autoApproved && input.onPilotAllowlist;
 
   return {
-    approvedForQueue: true,
-    approvalRequired: input.eligibilityStatus === "READY_AFTER_APPROVAL",
-    reason: "Approval gates satisfied for orchestrator queue.",
+    approval,
+    approvedForQueue,
+    approvalRequired: approval.approvalDecision === "NEEDS_HUMAN_APPROVAL",
+    reason: approval.recommendedNextAction,
   };
 }
+
+export { evaluateOrchestratorApproval as evaluateApprovalDecision };

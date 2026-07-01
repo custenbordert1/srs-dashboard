@@ -50,6 +50,8 @@ export type OrchestratorCandidateRecord = {
   approvedMappingReady: boolean;
   onPilotAllowlist: boolean;
   safeToSend: boolean;
+  approvalDecision: import("@/lib/autonomous-paperwork-approval-engine/types").ApprovalDecision;
+  approvalScore: number;
 };
 
 export type SendQueueSnapshot = {
@@ -113,6 +115,7 @@ export type PaperworkCycleReport = {
   errors: string[];
   etaMinutes: number | null;
   lastExecutionAt: string | null;
+  approvalSummary: import("@/lib/autonomous-paperwork-approval-engine/types").ApprovalSummary | null;
 };
 
 export type ProductionReadinessGoStatus = "GO" | "GO WITH CONDITIONS" | "NO-GO";

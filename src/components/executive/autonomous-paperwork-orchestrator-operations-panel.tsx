@@ -66,7 +66,7 @@ export function AutonomousPaperworkOrchestratorOperationsPanel() {
     <ExecutiveCard id="autonomous-paperwork-orchestrator-operations" variant="premium">
       <SectionHeader
         title="Autonomous Paperwork Operations"
-        subtitle="P123 — eligibility, queue, safety, and executeOne orchestration (preview)"
+        subtitle="P123/P124 — eligibility, approval, queue, safety, and executeOne orchestration (preview)"
         badge="P123"
       />
 
@@ -106,6 +106,57 @@ export function AutonomousPaperworkOrchestratorOperationsPanel() {
           value={report.etaMinutes != null ? `${report.etaMinutes}m` : "—"}
         />
       </div>
+
+      {report.approvalSummary ? (
+        <div className="mb-6 rounded-lg border border-zinc-800/80 bg-zinc-950/30 px-4 py-3">
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+            P124 Approval summary
+          </h3>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <MetricCard label="Auto approved" value={report.approvalSummary.autoApproved.toLocaleString()} />
+            <MetricCard
+              label="Needs human approval"
+              value={report.approvalSummary.needsHumanApproval.toLocaleString()}
+            />
+            <MetricCard label="Blocked" value={report.approvalSummary.blocked.toLocaleString()} />
+            <MetricCard label="Waiting" value={report.approvalSummary.waiting.toLocaleString()} />
+            <MetricCard
+              label="Rejected for safety"
+              value={report.approvalSummary.rejectedForSafety.toLocaleString()}
+            />
+            <MetricCard
+              label="Avg approval score"
+              value={`${report.approvalSummary.averageApprovalScore}%`}
+            />
+          </div>
+          {report.approvalSummary.topBlockers.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Top blockers</p>
+              <ul className="mt-1 space-y-1 text-sm text-zinc-300">
+                {report.approvalSummary.topBlockers.slice(0, 3).map((blocker) => (
+                  <li key={blocker.reason}>
+                    {blocker.reason} ({blocker.count})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {report.approvalSummary.highestConfidenceReady.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                Highest confidence ready
+              </p>
+              <ul className="mt-1 space-y-1 text-sm text-zinc-300">
+                {report.approvalSummary.highestConfidenceReady.slice(0, 3).map((candidate) => (
+                  <li key={candidate.candidateId}>
+                    {candidate.candidateName} — {candidate.approvalScore}%
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mb-4 rounded-lg border border-zinc-800/80 bg-zinc-950/30 px-4 py-3 text-sm text-zinc-300">
         <p>

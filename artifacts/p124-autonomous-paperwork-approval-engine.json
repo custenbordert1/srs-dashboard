@@ -1,0 +1,499 @@
+{
+  "approvalPolicy": {
+    "readonly": true,
+    "autoApproveThreshold": 90,
+    "humanApprovalThreshold": 70,
+    "waitingThreshold": 50,
+    "requirePublishedJob": true,
+    "requireValidEmail": true,
+    "requireNoDuplicateRisk": true,
+    "requireNoAlreadySent": true,
+    "requireTemplate": true,
+    "requireApprovedMappingOrNativeProject": true
+  },
+  "decisionCounts": {
+    "autoApproved": 0,
+    "needsHumanApproval": 6,
+    "blocked": 41,
+    "waiting": 304,
+    "rejectedForSafety": 31
+  },
+  "averageApprovalScore": 64,
+  "topAutoApprovedCandidates": [],
+  "humanApprovalQueue": [
+    {
+      "candidateId": "92fa58cc5870",
+      "candidateName": "Tyree nicole Gilley",
+      "email": "tyreenicolegilley932@gmail.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 83,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "No already_sent record",
+        "Approved mapping",
+        "Candidate status eligible",
+        "Project coverage need",
+        "Mapping confidence 75%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "blockingReasons": [],
+      "recommendedNextAction": "Route to human approval queue.",
+      "explanation": "NEEDS HUMAN APPROVAL — 83%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ No already_sent record\n✓ Approved mapping\n✓ Candidate status eligible\n✓ Project coverage need\n✓ Mapping confidence 75%\n✓ DM assigned\n✓ Template available\n• Candidate is recoverable but not safe for autonomous send"
+    },
+    {
+      "candidateId": "bfd12572f3e5",
+      "candidateName": "Taryn Richardson",
+      "email": "tarynrichardson816@gmail.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 81,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "No already_sent record",
+        "Approved mapping",
+        "Candidate status eligible",
+        "Project coverage need",
+        "Mapping confidence 84%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "blockingReasons": [],
+      "recommendedNextAction": "Route to human approval queue.",
+      "explanation": "NEEDS HUMAN APPROVAL — 81%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ No already_sent record\n✓ Approved mapping\n✓ Candidate status eligible\n✓ Project coverage need\n✓ Mapping confidence 84%\n✓ DM assigned\n✓ Template available\n• Candidate is recoverable but not safe for autonomous send"
+    },
+    {
+      "candidateId": "cde8b040e7a4",
+      "candidateName": "Marshall Woods",
+      "email": "marshallbw19701@outlook.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 82,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "No already_sent record",
+        "Approved mapping",
+        "Candidate status eligible",
+        "Project coverage need",
+        "Mapping confidence 84%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "blockingReasons": [],
+      "recommendedNextAction": "Route to human approval queue.",
+      "explanation": "NEEDS HUMAN APPROVAL — 82%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ No already_sent record\n✓ Approved mapping\n✓ Candidate status eligible\n✓ Project coverage need\n✓ Mapping confidence 84%\n✓ DM assigned\n✓ Template available\n• Candidate is recoverable but not safe for autonomous send"
+    },
+    {
+      "candidateId": "7c37beb6ac48",
+      "candidateName": "Angelique Cowan",
+      "email": "angelcowan12345@gmail.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 83,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "No already_sent record",
+        "Approved mapping",
+        "Candidate status eligible",
+        "Project coverage need",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "blockingReasons": [],
+      "recommendedNextAction": "Route to human approval queue.",
+      "explanation": "NEEDS HUMAN APPROVAL — 83%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ No already_sent record\n✓ Approved mapping\n✓ Candidate status eligible\n✓ Project coverage need\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n• Candidate is recoverable but not safe for autonomous send"
+    },
+    {
+      "candidateId": "8fba13c8cf25",
+      "candidateName": "Katherine Duke",
+      "email": "dukekt928@yahoo.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 80,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "No already_sent record",
+        "Approved mapping",
+        "Candidate status eligible",
+        "Project coverage need",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "blockingReasons": [],
+      "recommendedNextAction": "Route to human approval queue.",
+      "explanation": "NEEDS HUMAN APPROVAL — 80%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ No already_sent record\n✓ Approved mapping\n✓ Candidate status eligible\n✓ Project coverage need\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n• Candidate is recoverable but not safe for autonomous send"
+    },
+    {
+      "candidateId": "a364ab16b68e",
+      "candidateName": "Kaelin Prusa",
+      "email": "kaelinem@gmail.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 83,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "No already_sent record",
+        "Approved mapping",
+        "Candidate status eligible",
+        "Project coverage need",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "blockingReasons": [],
+      "recommendedNextAction": "Route to human approval queue.",
+      "explanation": "NEEDS HUMAN APPROVAL — 83%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ No already_sent record\n✓ Approved mapping\n✓ Candidate status eligible\n✓ Project coverage need\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n• Candidate is recoverable but not safe for autonomous send"
+    }
+  ],
+  "safetyRejects": [
+    {
+      "candidateId": "cfcd1b8179ba",
+      "candidateName": "Ryley Umbel",
+      "email": "ryleyumbel5@yahoo.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 50,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Paperwork already sent",
+        "already sent"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 50%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Paperwork already sent\n✗ already sent\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "ce187a7283ec",
+      "candidateName": "Tyesha Evans",
+      "email": "kayvon05@gmial.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 50,
+      "approvalReasons": [
+        "No duplicate risk",
+        "No already_sent record",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Invalid email",
+        "invalid email"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 50%\n\nReasons:\n✓ No duplicate risk\n✓ No already_sent record\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Invalid email\n✗ invalid email\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "84d51041e750",
+      "candidateName": "Alexandra Ridel",
+      "email": "alexridel1995@gmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 51,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Paperwork already sent",
+        "already sent"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 51%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Paperwork already sent\n✗ already sent\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "candidateName": "Lara Gh",
+      "email": "lara.gh88@hotmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 51,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Paperwork already sent",
+        "already sent"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 51%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Paperwork already sent\n✗ already sent\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "6d548b240ab0",
+      "candidateName": "Gary Smigocki",
+      "email": "gsmigocki@gmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 63,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "Questionnaire complete",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Paperwork already sent",
+        "already sent"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 63%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ Questionnaire complete\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Paperwork already sent\n✗ already sent\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "9f8231817090",
+      "candidateName": "John Sykes",
+      "email": "johnsykes1225@gmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 61,
+      "approvalReasons": [
+        "Valid email",
+        "No duplicate risk",
+        "Questionnaire complete",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Paperwork already sent",
+        "already sent"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 61%\n\nReasons:\n✓ Valid email\n✓ No duplicate risk\n✓ Questionnaire complete\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Paperwork already sent\n✗ already sent\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "f6c222081b94",
+      "candidateName": "Ashley Struben",
+      "email": "astruben21@gmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 63,
+      "approvalReasons": [
+        "Valid email",
+        "No already_sent record",
+        "Questionnaire complete",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Duplicate risk detected",
+        "duplicate risk"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 63%\n\nReasons:\n✓ Valid email\n✓ No already_sent record\n✓ Questionnaire complete\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Duplicate risk detected\n✗ duplicate risk\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "b9f4bb0667cd",
+      "candidateName": "Kristine Crandall",
+      "email": "jeffreyc2008@yahoo.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 62,
+      "approvalReasons": [
+        "Valid email",
+        "No already_sent record",
+        "Questionnaire complete",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Duplicate risk detected",
+        "duplicate risk"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 62%\n\nReasons:\n✓ Valid email\n✓ No already_sent record\n✓ Questionnaire complete\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Duplicate risk detected\n✗ duplicate risk\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "3f1f0edcde0a",
+      "candidateName": "Susan McCarrhy",
+      "email": "suzyq8365@hotmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 63,
+      "approvalReasons": [
+        "Valid email",
+        "No already_sent record",
+        "Questionnaire complete",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Duplicate risk detected",
+        "duplicate risk"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 63%\n\nReasons:\n✓ Valid email\n✓ No already_sent record\n✓ Questionnaire complete\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Duplicate risk detected\n✗ duplicate risk\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    },
+    {
+      "candidateId": "d2ef0cef341f",
+      "candidateName": "Rhonda K. Jarrett",
+      "email": "rjarrett410@gmail.com",
+      "approvalDecision": "REJECTED_FOR_SAFETY",
+      "approvalScore": 61,
+      "approvalReasons": [
+        "Valid email",
+        "No already_sent record",
+        "Questionnaire complete",
+        "Candidate status eligible",
+        "Mapping confidence 80%",
+        "DM assigned",
+        "Template available"
+      ],
+      "safetyReasons": [
+        "Duplicate risk detected",
+        "duplicate risk"
+      ],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "blockingReasons": [
+        "Missing approved mapping or native active project"
+      ],
+      "recommendedNextAction": "Do not send — resolve safety failure first.",
+      "explanation": "REJECTED FOR SAFETY — 61%\n\nReasons:\n✓ Valid email\n✓ No already_sent record\n✓ Questionnaire complete\n✓ Candidate status eligible\n✓ Mapping confidence 80%\n✓ DM assigned\n✓ Template available\n✗ Duplicate risk detected\n✗ duplicate risk\n• Requires published job or approved mapping\n• Missing approved mapping or native active project"
+    }
+  ],
+  "blockerReasons": [
+    {
+      "reason": "Missing approved mapping or native active project",
+      "count": 376
+    },
+    {
+      "reason": "Waiting for prerequisites before approval review",
+      "count": 304
+    },
+    {
+      "reason": "Score 73 below waiting threshold",
+      "count": 26
+    },
+    {
+      "reason": "Duplicate risk detected",
+      "count": 23
+    },
+    {
+      "reason": "duplicate risk",
+      "count": 23
+    },
+    {
+      "reason": "Paperwork already sent",
+      "count": 7
+    },
+    {
+      "reason": "already sent",
+      "count": 7
+    },
+    {
+      "reason": "Score 70 below waiting threshold",
+      "count": 6
+    },
+    {
+      "reason": "Score 72 below waiting threshold",
+      "count": 6
+    },
+    {
+      "reason": "Score 71 below waiting threshold",
+      "count": 3
+    }
+  ],
+  "goNoGo": "NO-GO",
+  "goNoGoReason": "No AUTO_APPROVED candidates — autonomous send queue empty.",
+  "generatedAt": "2026-07-01T17:27:05.536Z",
+  "sourcePhase": "P124"
+}

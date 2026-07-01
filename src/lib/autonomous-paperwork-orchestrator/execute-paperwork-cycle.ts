@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { DEFAULT_PAPERWORK_BY_GRADE } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
 import { loadPaperworkCandidates, type LoadedPaperworkCandidates } from "@/lib/autonomous-paperwork-orchestrator/load-candidates";
 import { evaluateEligibilityForCandidates } from "@/lib/autonomous-paperwork-orchestrator/evaluate-eligibility";
-import { evaluateApprovalDecision } from "@/lib/autonomous-paperwork-orchestrator/evaluate-approvals";
+import { evaluateOrchestratorApproval } from "@/lib/autonomous-paperwork-orchestrator/evaluate-approvals";
+import { buildApprovalSummary } from "@/lib/autonomous-paperwork-approval-engine/build-approval-report";
 import { evaluateOrchestratorSafety } from "@/lib/autonomous-paperwork-orchestrator/evaluate-safety";
 import { buildOrchestratorCandidateRecord, buildSendQueue } from "@/lib/autonomous-paperwork-orchestrator/build-send-queue";
 import { createOperatorTimeline } from "@/lib/autonomous-paperwork-orchestrator/operator-timeline";
@@ -39,6 +40,7 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
     "P123 — autonomous paperwork orchestrator (executeOne only).",
     "P123 — executeBatch is never used.",
     "P123 — P122 safety gates remain enforced.",
+    "P124 — only AUTO_APPROVED candidates enter send queue.",
   ];
   const errors: string[] = [];
   const pilotConfig = loadPilotConfig();
@@ -54,20 +56,33 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
     paperworkByGrade: DEFAULT_PAPERWORK_BY_GRADE,
   });
 
-  const candidates = eligibility.map((entry) => {
+  const approvals = eligibility.map((entry) => {
     const row = entry.row;
-    const approval = evaluateApprovalDecision({
+    const candidateName = row
+      ? `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim() || entry.candidateId
+      : entry.candidateId;
+    return evaluateOrchestratorApproval({
       context,
       candidateId: entry.candidateId,
+      candidateName,
       eligibilityStatus: entry.status,
+      templateKey: entry.templateKey,
+      mappingConfidence: entry.mappingConfidence,
       approvedMappingReady: entry.approvedMappingReady,
       onPilotAllowlist: pilotConfig.allowlist.includes(entry.candidateId),
+      row,
     });
+  });
+
+  const candidates = eligibility.map((entry, index) => {
+    const row = entry.row;
+    const candidateName = row
+      ? `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim() || entry.candidateId
+      : entry.candidateId;
+    const approval = approvals[index]!;
     return buildOrchestratorCandidateRecord({
       candidateId: entry.candidateId,
-      candidateName: row
-        ? `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim() || entry.candidateId
-        : entry.candidateId,
+      candidateName,
       email: row?.email?.trim() ?? "",
       positionId: row?.positionId ?? null,
       positionTitle: row?.positionName ?? null,
@@ -75,15 +90,19 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
       dm: row?.assignedDM ?? null,
       eligibilityStatus: entry.status,
       requiredAction: entry.requiredAction,
-      blockingReasons: entry.blockingReasons,
+      blockingReasons: [...entry.blockingReasons, ...approval.approval.blockingReasons],
       templateKey: entry.templateKey,
       mappingConfidence: entry.mappingConfidence,
       approvedMappingReady: entry.approvedMappingReady,
       onPilotAllowlist: pilotConfig.allowlist.includes(entry.candidateId),
       approvedForQueue: approval.approvedForQueue,
+      approvalDecision: approval.approval.approvalDecision,
+      approvalScore: approval.approval.approvalScore,
       createdAt: row?.createdDate ?? null,
     });
   });
+
+  const approvalSummary = buildApprovalSummary(approvals.map((entry) => entry.approval));
 
   timeline.add("Approval verified", "Approval decisions evaluated for queue");
   const sendQueue = buildSendQueue(candidates);
@@ -167,6 +186,7 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
     warnings,
     errors,
     pilotConfig,
+    approvalSummary,
   });
 
   await savePaperworkCycleMonitorState(report);

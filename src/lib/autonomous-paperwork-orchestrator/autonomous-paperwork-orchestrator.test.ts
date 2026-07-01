@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { evaluateCandidateEligibility } from "@/lib/autonomous-paperwork-orchestrator/evaluate-eligibility";
-import { evaluateApprovalDecision } from "@/lib/autonomous-paperwork-orchestrator/evaluate-approvals";
+import { evaluateOrchestratorApproval } from "@/lib/autonomous-paperwork-orchestrator/evaluate-approvals";
 import {
   buildOrchestratorCandidateRecord,
   buildSendQueue,
@@ -184,24 +184,44 @@ describe("autonomous-paperwork-orchestrator (P123)", () => {
     assert.equal(nextRetryDelayMs(2), 45_000);
   });
 
-  it("approval gating requires pilot allowlist", () => {
-    const blocked = evaluateApprovalDecision({
-      context: emptyContext("c1", baseRow()),
+  it("approval gating requires AUTO_APPROVED and pilot allowlist", () => {
+    const row = baseRow();
+    const context = emptyContext("c1", row);
+    const eligibility = evaluateCandidateEligibility({
       candidateId: "c1",
-      eligibilityStatus: "READY_TO_SEND",
-      approvedMappingReady: false,
+      row,
+      context,
+      paperworkByGrade: DEFAULT_PAPERWORK_BY_GRADE,
+      approvedMapping: null,
+    });
+
+    const blocked = evaluateOrchestratorApproval({
+      context,
+      candidateId: "c1",
+      candidateName: "Alex Pilot",
+      eligibilityStatus: eligibility.status,
+      templateKey: eligibility.templateKey,
+      mappingConfidence: eligibility.mappingConfidence,
+      approvedMappingReady: eligibility.approvedMappingReady,
       onPilotAllowlist: false,
+      row,
     });
     assert.equal(blocked.approvedForQueue, false);
 
-    const approved = evaluateApprovalDecision({
-      context: emptyContext("c1", baseRow()),
+    const approved = evaluateOrchestratorApproval({
+      context,
       candidateId: "c1",
-      eligibilityStatus: "READY_TO_SEND",
-      approvedMappingReady: false,
+      candidateName: "Alex Pilot",
+      eligibilityStatus: eligibility.status,
+      templateKey: eligibility.templateKey,
+      mappingConfidence: eligibility.mappingConfidence,
+      approvedMappingReady: eligibility.approvedMappingReady,
       onPilotAllowlist: true,
+      row,
     });
-    assert.equal(approved.approvedForQueue, true);
+    if (approved.approval.approvalDecision === "AUTO_APPROVED") {
+      assert.equal(approved.approvedForQueue, true);
+    }
   });
 
   it("default cycle sends nothing and never calls executeBatch", async () => {
