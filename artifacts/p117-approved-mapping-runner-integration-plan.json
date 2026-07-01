@@ -1,0 +1,153 @@
+{
+  "sourcePhase": "P117",
+  "generatedAt": "2026-07-01T15:28:10.061Z",
+  "mode": "dryRun",
+  "summary": "P117 dry-run bridge plan — flag disabled. 6 approved P109 mappings loaded. Baseline project-mapping blocked: 316; bridge unlocked: 6 (when flag on). 6 candidate(s) bridge-applied in direct proof pass. GO: Default runner unchanged when flag off; bridge safe for dry-run only.",
+  "goNoGo": "GO",
+  "goNoGoReason": "Bridge integration is dry-run only, flag-gated, and preserves default runner behavior when disabled.",
+  "bridgeFlag": {
+    "envVar": "USE_APPROVED_MAPPING_BRIDGE_DRY_RUN",
+    "enabled": false,
+    "activeInThisRun": false,
+    "constraints": [
+      "Only active when env is exactly true",
+      "Only applies when engine mode is dryRun",
+      "Never applies for executeOne or executeSafeSingles"
+    ]
+  },
+  "callSiteTrace": [
+    {
+      "layer": "P106.3 Runner",
+      "file": "src/lib/autonomous-paperwork-runner/run-autonomous-paperwork-runner.ts",
+      "function": "runAutonomousPaperworkRunnerCycle",
+      "calls": [
+        "runAutonomousPaperworkEngine"
+      ],
+      "notes": "Orchestrates ingestion sync, candidate selection, and P106 engine per cycle."
+    },
+    {
+      "layer": "P106 Engine",
+      "file": "src/lib/p106-autonomous-paperwork-engine/run-autonomous-paperwork-engine.ts",
+      "function": "runAutonomousPaperworkEngine",
+      "calls": [
+        "buildAutonomousPaperworkReport"
+      ],
+      "notes": "dryRun returns report only; executeOne calls controlled-live-send after auto-repair."
+    },
+    {
+      "layer": "P106 Report Builder",
+      "file": "src/lib/p106-autonomous-paperwork-engine/build-autonomous-paperwork-report.ts",
+      "function": "buildAutonomousPaperworkReport",
+      "calls": [
+        "classifyPaperworkBlocker",
+        "resolveClosedAdProjectMapping"
+      ],
+      "notes": "Primary production classification loop per candidate. P117 bridge hooks here when flag enabled."
+    },
+    {
+      "layer": "Classifier",
+      "file": "src/lib/p106-autonomous-paperwork-engine/classify-paperwork-blocker.ts",
+      "function": "classifyPaperworkBlocker",
+      "calls": [
+        "resolveClosedAdProjectMapping"
+      ],
+      "notes": "Ordered protection gates then closed-ad mapping inside classifier."
+    },
+    {
+      "layer": "Closed-Ad Recovery",
+      "file": "src/lib/closed-ad-project-mapping/resolve-closed-ad-project-mapping.ts",
+      "function": "resolveClosedAdProjectMapping",
+      "calls": [],
+      "notes": "Title/city/state heuristic; does not read P109 store today."
+    },
+    {
+      "layer": "P84 Eligibility",
+      "file": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility",
+      "calls": [],
+      "notes": "Uses projectMapping from report builder after classification."
+    }
+  ],
+  "integrationDesign": {
+    "gapFromP116": "P109 approved mappings affect P110/P111–P115 dry-run overlays but not classifyPaperworkBlocker in the runner path.",
+    "approach": "Optional P117 bridge wraps classifyPaperworkBlocker with P110 overlay jobs when USE_APPROVED_MAPPING_BRIDGE_DRY_RUN=true and engine mode is dryRun only.",
+    "insertionPoint": "buildAutonomousPaperworkReport candidate loop — swap classifier call when bridge active; default path unchanged.",
+    "protectionOrder": "already_sent, invalid_email, duplicate_risk evaluated in baseline before bridge overlay; protectionBlockerOverridesApproval prevents bridge unlock.",
+    "nonGoals": [
+      "No live executeOne bridge activation",
+      "No Breezy writes",
+      "No paperwork sends",
+      "No AUTONOMOUS_PAPERWORK_RUNNER_LIVE_MODE changes"
+    ],
+    "futureLivePath": "After dry-run validation, introduce separate USE_APPROVED_MAPPING_BRIDGE_LIVE flag with P101/P100 gate requirements — out of P117 scope."
+  },
+  "proof": {
+    "defaultRunnerUnchanged": true,
+    "bridgeOnlyWhenFlagEnabled": true,
+    "nonApprovedDecisionsDoNotUnlock": true,
+    "protectionOverridesApproval": true,
+    "noSends": true,
+    "noBreezyWrites": true,
+    "noLiveMode": true
+  },
+  "metrics": {
+    "baselineBlockedProjectMapping": 316,
+    "bridgeUnlockedViaApproval": 6,
+    "bridgeAppliedCount": 6,
+    "approvedMappingsLoaded": 6,
+    "protectionBlockedBridgeCount": 0,
+    "readyToSendBaseline": 1,
+    "readyToSendWithBridge": 1
+  },
+  "sampleBridgeUnlocks": [
+    {
+      "candidateId": "bfd12572f3e5",
+      "candidateName": "Taryn Richardson",
+      "baselineBlocker": "project_not_mappable",
+      "overlayBlocker": "p84_gate_failed",
+      "bridgeApplied": true
+    },
+    {
+      "candidateId": "cde8b040e7a4",
+      "candidateName": "Marshall Woods",
+      "baselineBlocker": "project_not_mappable",
+      "overlayBlocker": "p84_gate_failed",
+      "bridgeApplied": true
+    },
+    {
+      "candidateId": "8fba13c8cf25",
+      "candidateName": "Katherine Duke",
+      "baselineBlocker": "project_not_mappable",
+      "overlayBlocker": "p84_gate_failed",
+      "bridgeApplied": true
+    },
+    {
+      "candidateId": "a364ab16b68e",
+      "candidateName": "Kaelin Prusa",
+      "baselineBlocker": "project_not_mappable",
+      "overlayBlocker": "missing_resume",
+      "bridgeApplied": true
+    },
+    {
+      "candidateId": "7c37beb6ac48",
+      "candidateName": "Angelique Cowan",
+      "baselineBlocker": "project_not_mappable",
+      "overlayBlocker": "missing_resume",
+      "bridgeApplied": true
+    }
+  ],
+  "safetyStatus": {
+    "p1063RunnerDefaultUnchanged": true,
+    "bridgeDryRunOnly": true,
+    "noBreezyWrites": true,
+    "noLiveSends": true,
+    "noLiveMode": true,
+    "liveRunnerUnwired": true
+  },
+  "warnings": [
+    "P117 — dry-run bridge plan only; no live runner wiring.",
+    "P117 — no paperwork sends.",
+    "P117 — no Breezy writes.",
+    "Flag: USE_APPROVED_MAPPING_BRIDGE_DRY_RUN=unset."
+  ]
+}

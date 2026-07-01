@@ -7,6 +7,9 @@ import { buildLiveSendReadinessFromStores } from "@/lib/live-send-readiness/buil
 import { buildControlledLiveSendReport } from "@/lib/controlled-live-send/execute-controlled-live-send";
 import { classifyPaperworkBlocker } from "@/lib/p106-autonomous-paperwork-engine/classify-paperwork-blocker";
 import { resolveClosedAdProjectMapping } from "@/lib/closed-ad-project-mapping/resolve-closed-ad-project-mapping";
+import { isApprovedMappingBridgeActive } from "@/lib/p117-approved-mapping-runner-integration/bridge-flag";
+import { classifyPaperworkBlockerWithApprovedBridge } from "@/lib/p117-approved-mapping-runner-integration/classify-with-approved-bridge";
+import { resolveApprovedMappingForCandidate } from "@/lib/p117-approved-mapping-runner-integration/resolve-approved-mapping-for-candidate";
 import type {
   AutonomousPaperworkCandidateResult,
   AutonomousPaperworkMetrics,
@@ -97,6 +100,12 @@ export async function buildAutonomousPaperworkReport(input?: {
   const onboardingByCandidateId = new Map(onboardingRecords.map((r) => [r.candidateId, r]));
   const p100SentIds = new Set(p100State.sentCandidateIds);
 
+  const bridgeActive = isApprovedMappingBridgeActive({ engineMode: mode });
+  const p109Records = bridgeActive
+    ? await (await import("@/lib/p109-project-mapping-review/review-decision-store")).loadP109ReviewRecords()
+    : [];
+  const publishedJobTitleById = new Map(publishedJobs.map((job) => [job.jobId, job.name]));
+
   const range = currentMtdDateRange();
   const ingested =
     mtdOnly === false
@@ -121,7 +130,7 @@ export async function buildAutonomousPaperworkReport(input?: {
     const onboarding = onboardingByCandidateId.get(candidateId) ?? null;
     const activeOnboarding = onboarding;
 
-    const blocker = classifyPaperworkBlocker({
+    const classifyInput = {
       row,
       onboarding: activeOnboarding,
       jobsByPositionId,
@@ -129,17 +138,37 @@ export async function buildAutonomousPaperworkReport(input?: {
       publishedJobs,
       paperworkByGrade: policy.paperworkByGrade,
       p100SentIds,
-    });
+    };
 
-    const projectMapping = resolveClosedAdProjectMapping({
-      row,
-      positionTitle: candidate.positionName,
-      candidateCity: candidate.city,
-      candidateState: candidate.state,
-      jobsByPositionId,
-      closedJobsByPositionId,
-      publishedJobs,
-    });
+    let blocker: ReturnType<typeof classifyPaperworkBlocker>;
+    let projectMapping: ReturnType<typeof resolveClosedAdProjectMapping>;
+
+    if (bridgeActive) {
+      const approvedMapping = resolveApprovedMappingForCandidate({
+        candidateId,
+        closedPositionId: candidate.positionId,
+        records: p109Records,
+        publishedJobTitleById,
+      });
+      const bridged = classifyPaperworkBlockerWithApprovedBridge({
+        ...classifyInput,
+        bridgeEnabled: true,
+        approvedMapping,
+      });
+      blocker = bridged.blocker;
+      projectMapping = bridged.projectMapping;
+    } else {
+      blocker = classifyPaperworkBlocker(classifyInput);
+      projectMapping = resolveClosedAdProjectMapping({
+        row,
+        positionTitle: candidate.positionName,
+        candidateCity: candidate.city,
+        candidateState: candidate.state,
+        jobsByPositionId,
+        closedJobsByPositionId,
+        publishedJobs,
+      });
+    }
 
     const p84 = buildPaperworkSendEligibility({
       row,
