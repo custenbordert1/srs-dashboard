@@ -1,0 +1,112 @@
+{
+  "sourcePhase": "P113",
+  "generatedAt": "2026-07-01T14:22:05.273Z",
+  "mode": "dryRun",
+  "summary": "Approved group: Continuity Store Merchandiser – Payson, AZ → Continuity In-Store Merchandiser Payson, AZ. 2 candidate(s) approved locally (2 newly written, 0 already approved). 2 newly eligible via approval; 125 remaining pending. GO: 2 candidate(s) approved locally; 2 newly eligible via approval (dryRun).",
+  "goNoGo": "GO",
+  "goNoGoReason": "2 candidate(s) approved locally; 2 newly eligible via approval (dryRun).",
+  "approvedGroup": {
+    "groupId": "continuity store merchandiser - payson, az::07c1de432ea6::payson::AZ::high_80_plus::store",
+    "groupName": "Continuity Store Merchandiser – Payson, AZ → Continuity In-Store Merchandiser Payson, AZ",
+    "closedPositionTitle": "Continuity Store Merchandiser – Payson, AZ",
+    "candidateCount": 2,
+    "averageConfidence": 84,
+    "safeToApprove": "SAFE",
+    "recommendedPositionId": "07c1de432ea6",
+    "recommendedPositionTitle": "Continuity In-Store Merchandiser Payson, AZ"
+  },
+  "approvedCandidates": [
+    {
+      "candidateId": "bfd12572f3e5",
+      "candidateName": "Taryn Richardson",
+      "closedPositionId": "1e5461419b41",
+      "recommendedPositionId": "07c1de432ea6",
+      "decision": "approved",
+      "reviewer": "Taylor",
+      "notes": "Approved via P113 first safe bulk approval dry run",
+      "timestamp": "2026-07-01T14:21:41.683Z",
+      "confidenceScore": 84,
+      "mappingReasons": [
+        "Strong title token overlap",
+        "Same project code",
+        "Same city",
+        "Same state",
+        "Same territory / DM",
+        "Close proximity (0 mi)",
+        "Active posting exists",
+        "Closed posting age 1d",
+        "Application 8d ago",
+        "High coverage demand in market",
+        "Published posting 1d active",
+        "• Different client",
+        "• No historical match",
+        "• No recruiter decision"
+      ],
+      "alreadyApproved": false
+    },
+    {
+      "candidateId": "cde8b040e7a4",
+      "candidateName": "Marshall Woods",
+      "closedPositionId": "1e5461419b41",
+      "recommendedPositionId": "07c1de432ea6",
+      "decision": "approved",
+      "reviewer": "Taylor",
+      "notes": "Approved via P113 first safe bulk approval dry run",
+      "timestamp": "2026-07-01T14:21:41.684Z",
+      "confidenceScore": 84,
+      "mappingReasons": [
+        "Strong title token overlap",
+        "Same project code",
+        "Same city",
+        "Same state",
+        "Same territory / DM",
+        "Close proximity (0 mi)",
+        "Active posting exists",
+        "Closed posting age 1d",
+        "Application 10d ago",
+        "High coverage demand in market",
+        "Published posting 1d active",
+        "• Different client",
+        "• No historical match",
+        "• No recruiter decision"
+      ],
+      "alreadyApproved": false
+    }
+  ],
+  "integrationAfterApproval": {
+    "newlyEligibleViaApproval": 2,
+    "newlyEligibleCandidateIds": [
+      "bfd12572f3e5",
+      "cde8b040e7a4"
+    ],
+    "safetyExclusions": {
+      "alreadySent": 24,
+      "duplicateRisk": 0,
+      "invalidEmail": 0
+    },
+    "remainingPending": 125,
+    "approvedMappingsCount": 2
+  },
+  "safetyStatus": {
+    "p1063RunnerUnchanged": true,
+    "noBreezyWrites": true,
+    "noLiveSends": true,
+    "noLiveMode": true,
+    "dryRunOnly": true,
+    "localApprovalOnly": true,
+    "liveRunnerUnwired": true
+  },
+  "warnings": [
+    "P113 — local .data approval only; no paperwork sends.",
+    "P113 — no Breezy writes.",
+    "P113 — P106.3 live runner unchanged.",
+    "Mode: dryRun.",
+    "P110 — dryRun only; no paperwork sends.",
+    "P110 — no Breezy writes.",
+    "P110 — P106.3 runner unchanged unless this integration is explicitly invoked.",
+    "Mode: dryRun.",
+    "P108 — read-only analysis; no Breezy writes.",
+    "P108 — no live sends or production mutations.",
+    "Mode: dryRun."
+  ]
+}
