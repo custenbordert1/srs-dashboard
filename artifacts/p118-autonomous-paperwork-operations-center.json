@@ -1,0 +1,206 @@
+{
+  "sourcePhase": "P118",
+  "generatedAt": "2026-07-01T15:40:35.211Z",
+  "mode": "dryRun",
+  "summary": "P118 operations center — mode disabled. 382 evaluated; 0 ready; 375 blocked. 4 active alert(s). NO-GO: 3 live-readiness gate(s) failed.",
+  "goNoGo": "NO-GO",
+  "goNoGoReason": "3 live-readiness gate(s) failed.",
+  "healthSummary": {
+    "currentMode": "disabled",
+    "runnerScheduleEnabled": false,
+    "approvedBridgeDryRunFlag": false,
+    "lastRunAt": "2026-07-01T13:06:11.276Z",
+    "lastRunDurationMs": 362538,
+    "lastRunResult": "success",
+    "lastRunError": null,
+    "candidatesEvaluated": 382,
+    "readyToSend": 0,
+    "sentCount": 7,
+    "skippedCount": 0,
+    "blockedCount": 375,
+    "errorsCount": 0
+  },
+  "safetyStatus": [
+    {
+      "id": "dry_run_enabled",
+      "label": "Dry-run enabled",
+      "passed": true,
+      "detail": "Runner live mode unset — evaluation only."
+    },
+    {
+      "id": "live_mode_disabled",
+      "label": "Live mode disabled",
+      "passed": false,
+      "detail": "Live send path is enabled in config or P84 flags."
+    },
+    {
+      "id": "execute_batch_disabled",
+      "label": "executeBatch disabled",
+      "passed": true,
+      "detail": "P106.3 runner supports executeOne / executeSafeSingles only — no executeBatch."
+    },
+    {
+      "id": "duplicate_protection",
+      "label": "Duplicate protection",
+      "passed": true,
+      "detail": "duplicate_risk overrides approved mapping bridge."
+    },
+    {
+      "id": "already_sent_protection",
+      "label": "already_sent protection",
+      "passed": true,
+      "detail": "already_sent overrides approved mapping bridge."
+    },
+    {
+      "id": "invalid_email_protection",
+      "label": "invalid_email protection",
+      "passed": true,
+      "detail": "invalid_email overrides approved mapping bridge."
+    },
+    {
+      "id": "audit_logging",
+      "label": "Audit logging",
+      "passed": true,
+      "detail": "P97 audit log present."
+    },
+    {
+      "id": "dropbox_sign_guarded",
+      "label": "Dropbox Sign guarded",
+      "passed": false,
+      "detail": "P84 liveSend enabled — Dropbox Sign may be invoked."
+    },
+    {
+      "id": "breezy_write_protection",
+      "label": "Breezy write protection",
+      "passed": true,
+      "detail": "P106 runner and P118 operations center perform read-only Breezy access."
+    },
+    {
+      "id": "operator_checklist",
+      "label": "Operator checklist status",
+      "passed": false,
+      "detail": "P101 operator checklist NO-GO: P100 controlled send readiness: 0 ready, 25 failed/blocked. Eligible cohort ready: 0 candidate(s) ready to send (dynamic cohort). Duplicate risk = 0 among eligible: 7 candidate(s) with duplicate-send risk."
+    }
+  ],
+  "queueDepth": {
+    "readyToSend": 0,
+    "approvedMappingReady": 6,
+    "pendingMappingReview": 205,
+    "projectNotMappable": 299,
+    "projectMappingReview": 32,
+    "duplicateRisk": 23,
+    "alreadySent": 7,
+    "invalidEmail": 1,
+    "awaitingSignature": 0,
+    "signedToday": 0,
+    "readyForOnboarding": 0
+  },
+  "alerts": [
+    {
+      "type": "runner_failed",
+      "severity": "critical",
+      "reason": "No runner failure recorded.",
+      "recommendedAction": "Inspect runner audit log and rerun dry-run cycle.",
+      "affectedCount": 0,
+      "source": "p1061-runner-state",
+      "active": false
+    },
+    {
+      "type": "no_run_detected",
+      "severity": "info",
+      "reason": "No recent runner cycle detected within expected interval.",
+      "recommendedAction": "Start scheduled runner or run manual dry-run cycle.",
+      "affectedCount": 1,
+      "source": "p1061-runner-state",
+      "active": false
+    },
+    {
+      "type": "live_flag_enabled_without_operator_go",
+      "severity": "critical",
+      "reason": "Live flag not set or operator checklist is GO.",
+      "recommendedAction": "Unset AUTONOMOUS_PAPERWORK_RUNNER_LIVE_MODE until P101 GO.",
+      "affectedCount": 0,
+      "source": "runner-config+p101",
+      "active": false
+    },
+    {
+      "type": "sudden_spike_blocked",
+      "severity": "warning",
+      "reason": "High blocked mapping count (331).",
+      "recommendedAction": "Review project mapping queue and bulk approval groups.",
+      "affectedCount": 331,
+      "source": "p106-report",
+      "active": true
+    },
+    {
+      "type": "dropbox_sign_failure",
+      "severity": "warning",
+      "reason": "No Dropbox Sign monitor errors recorded.",
+      "recommendedAction": "Check P107 paperwork monitor audit and Dropbox API credentials.",
+      "affectedCount": 0,
+      "source": "p107-monitor-state",
+      "active": false
+    },
+    {
+      "type": "breezy_sync_failure",
+      "severity": "warning",
+      "reason": "No Breezy sync failure in last audit entry.",
+      "recommendedAction": "Verify Breezy API connectivity and ingestion sync.",
+      "affectedCount": 0,
+      "source": "p1061-runner-audit",
+      "active": false
+    },
+    {
+      "type": "duplicate_risk_spike",
+      "severity": "warning",
+      "reason": "23 duplicate_risk blockers.",
+      "recommendedAction": "Resolve duplicate-send risks before enabling live sends.",
+      "affectedCount": 23,
+      "source": "p106-report",
+      "active": true
+    },
+    {
+      "type": "pending_review_backlog",
+      "severity": "warning",
+      "reason": "205 pending mapping review item(s).",
+      "recommendedAction": "Work P109/P111 mapping review queue — prioritize SAFE groups.",
+      "affectedCount": 205,
+      "source": "p109-review-store",
+      "active": true
+    },
+    {
+      "type": "approved_mapping_not_used",
+      "severity": "info",
+      "reason": "6 approved mapping(s) exist but P117 dry-run bridge flag is off.",
+      "recommendedAction": "Enable USE_APPROVED_MAPPING_BRIDGE_DRY_RUN=true for dry-run impact validation.",
+      "affectedCount": 6,
+      "source": "p117-bridge-flag",
+      "active": true
+    },
+    {
+      "type": "audit_log_missing",
+      "severity": "critical",
+      "reason": "P97 audit log present.",
+      "recommendedAction": "Complete P97 approval persistence before any live send.",
+      "affectedCount": 0,
+      "source": "p97-audit-log",
+      "active": false
+    }
+  ],
+  "recommendedActions": [
+    "[warning] sudden_spike_blocked: Review project mapping queue and bulk approval groups.",
+    "[warning] duplicate_risk_spike: Resolve duplicate-send risks before enabling live sends.",
+    "[warning] pending_review_backlog: Work P109/P111 mapping review queue — prioritize SAFE groups.",
+    "[info] approved_mapping_not_used: Enable USE_APPROVED_MAPPING_BRIDGE_DRY_RUN=true for dry-run impact validation.",
+    "Safety gate failed — Live mode disabled.",
+    "Safety gate failed — Dropbox Sign guarded.",
+    "Safety gate failed — Operator checklist status."
+  ],
+  "lastRunSummary": "Last run success at 2026-07-01T13:06:11.276Z. Duration 362538ms. Evaluated 382; ready 0; sent 7; blocked 375. No sends in last audit entry.",
+  "warnings": [
+    "P118 — monitoring and visibility only.",
+    "P118 — no paperwork sends.",
+    "P118 — no Breezy writes.",
+    "P118 — no live mode activation."
+  ]
+}
