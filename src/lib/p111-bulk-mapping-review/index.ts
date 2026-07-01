@@ -1,4 +1,4 @@
-export { buildBulkMappingReviewToolsReport, previewBulkDecisionImpact } from "@/lib/p111-bulk-mapping-review/build-bulk-review-report";
+export { buildBulkMappingReviewToolsReport, previewBulkDecisionImpact, loadBulkReviewDryRunContext } from "@/lib/p111-bulk-mapping-review/build-bulk-review-report";
 export { applyBulkGroupDecision } from "@/lib/p111-bulk-mapping-review/execute-bulk-decision";
 export {
   checkCandidateBulkApproveSafety,

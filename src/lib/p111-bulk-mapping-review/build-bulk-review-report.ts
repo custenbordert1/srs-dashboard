@@ -8,7 +8,7 @@ import type { BulkReviewToolsReport } from "@/lib/p111-bulk-mapping-review/types
 import { P111_SOURCE_PHASE } from "@/lib/p111-bulk-mapping-review/types";
 import { isNewlyEligibleViaApproval } from "@/lib/p110-approved-mapping-integration/simulate-approved-mapping-eligibility";
 
-async function loadDryRunContext() {
+export async function loadBulkReviewDryRunContext() {
   const { readIngestionStore } = await import("@/lib/candidate-ingestion");
   const { getCandidateWorkflowBundle } = await import("@/lib/candidate-workflow-store");
   const { fetchBreezyJobs } = await import("@/lib/breezy-api");
@@ -64,7 +64,7 @@ export async function buildBulkMappingReviewToolsReport(): Promise<BulkReviewToo
 
   const [workflow, dryRunContext] = await Promise.all([
     buildReviewWorkflowReport(),
-    loadDryRunContext(),
+    loadBulkReviewDryRunContext(),
   ]);
 
   const safetyByCandidate = new Map<
