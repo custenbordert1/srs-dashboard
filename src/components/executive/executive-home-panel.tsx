@@ -19,6 +19,7 @@ import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomou
 import { AutonomousPaperworkRunnerPanel } from "@/components/executive/autonomous-paperwork-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
+import { BulkMappingReviewPanel } from "@/components/executive/bulk-mapping-review-panel";
 import { ProjectMappingReviewWorkflowPanel } from "@/components/executive/project-mapping-review-workflow-panel";
 import { LiveSendOperatorChecklistPanel } from "@/components/executive/live-send-operator-checklist-panel";
 import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
@@ -302,6 +303,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <ProjectMappingPanel />
 
       <ProjectMappingReviewWorkflowPanel />
+
+      <BulkMappingReviewPanel />
 
       <LiveSendOperatorChecklistPanel />
 
