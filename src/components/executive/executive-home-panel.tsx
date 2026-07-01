@@ -6,9 +6,7 @@ import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-
 import { ApplicantCaptureHealthPanel } from "@/components/recruiting/applicant-capture-health-panel";
 import { AutomationHealthPanel } from "@/components/executive/automation-health-panel";
 import { ExecutionHealthPanel } from "@/components/executive/execution-health-panel";
-import { ExecutivePaperworkDashboardPanel } from "@/components/executive/executive-paperwork-dashboard-panel";
-import { PaperworkUnlockQueuePanel } from "@/components/executive/paperwork-unlock-queue-panel";
-import { BreezyJobPublishReviewPanel } from "@/components/executive/breezy-job-publish-review-panel";
+import { ExecutiveCommandSummaryPanel } from "@/components/executive/executive-command-summary-panel";
 import { RecruiterAssignmentPreviewPanel } from "@/components/executive/recruiter-assignment-preview-panel";
 import { P62P83ApprovalPreviewPanel } from "@/components/executive/p62-p83-approval-preview-panel";
 import { P84SendQueuePreviewPanel } from "@/components/executive/p84-send-queue-preview-panel";
@@ -53,6 +51,7 @@ import {
   ExecutiveHero,
   type ExecutiveBriefingHealth,
   ExecutiveCard,
+  CollapsibleSection,
   IconUsers,
   MetricCard,
   type MetricCardStatus,
@@ -245,76 +244,62 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
         lastUpdated={formatTimestamp(lastUpdated)}
       />
 
-      <AICommandCenterPanel />
-
-      <ApplicantCaptureHealthPanel />
-
-      <AutomationHealthPanel />
-
-      <ExecutionHealthPanel />
-
-      <OnboardingHealthPanel />
-
-      <AutonomousPaperworkPanel />
-
-      <AutonomousPaperworkExecutionPanel />
-
-      <OnboardingPipelineExecutiveCard />
-
-      <AutonomousOnboardingPanel />
-
-      <WorkforcePlacementPanel />
-
-      <ExecutiveDailyBriefPanel />
-
-      <AutonomousCandidateCommunicationPanel />
-
-      <AutonomousRecruitingOrchestratorPanel />
-
-      <AutonomousOperationsCenterPanel />
-
-      <AutonomousDecisionEnginePanel />
-
-      <AutonomousApprovalGovernancePanel />
-
-      <ExecutiveNaturalLanguageQueriesPanel />
-
-      <ExecutivePaperworkDashboardPanel />
-
-      <PaperworkUnlockQueuePanel />
-
-      <BreezyJobPublishReviewPanel />
-
-      <RecruiterAssignmentPreviewPanel />
-
-      <P62P83ApprovalPreviewPanel />
-
-      <P84SendQueuePreviewPanel />
-
-      <ApprovalModeProductionPanel />
-
-      <LiveSendReadinessPanel />
-
-      <ControlledLiveSendPanel />
-      <AutonomousPaperworkEnginePanel />
-
-      <AutonomousPaperworkRunnerPanel />
+      <ExecutiveCommandSummaryPanel />
 
       <AutonomousPaperworkOperationsCenterPanel />
 
       <AutonomousRecoveryCenterPanel />
 
-      <PaperworkMonitorPanel />
+      <CollapsibleSection
+        id="advanced-platform-intelligence"
+        title="Advanced platform intelligence"
+        subtitle="AI command center, orchestration, governance, and recruiting engines"
+        defaultOpen={false}
+      >
+        <div className="space-y-12">
+          <AICommandCenterPanel />
+          <ApplicantCaptureHealthPanel />
+          <AutomationHealthPanel />
+          <ExecutionHealthPanel />
+          <OnboardingHealthPanel />
+          <AutonomousPaperworkPanel />
+          <AutonomousPaperworkExecutionPanel />
+          <OnboardingPipelineExecutiveCard />
+          <AutonomousOnboardingPanel />
+          <WorkforcePlacementPanel />
+          <ExecutiveDailyBriefPanel />
+          <AutonomousCandidateCommunicationPanel />
+          <AutonomousRecruitingOrchestratorPanel />
+          <AutonomousOperationsCenterPanel />
+          <AutonomousDecisionEnginePanel />
+          <AutonomousApprovalGovernancePanel />
+          <ExecutiveNaturalLanguageQueriesPanel />
+        </div>
+      </CollapsibleSection>
 
-      <ProjectMappingPanel />
-
-      <ProjectMappingReviewWorkflowPanel />
-
-      <BulkMappingReviewPanel />
-
-      <LiveSendOperatorChecklistPanel />
-
-      <RecruiterAutomationReadinessPanel />
+      <CollapsibleSection
+        id="paperwork-live-send-diagnostics"
+        title="Paperwork & live-send diagnostics"
+        subtitle="Engine previews, mapping tools, operator checklist, and historical artifacts"
+        defaultOpen={false}
+      >
+        <div className="space-y-12">
+          <RecruiterAssignmentPreviewPanel />
+          <P62P83ApprovalPreviewPanel />
+          <P84SendQueuePreviewPanel />
+          <ApprovalModeProductionPanel />
+          <LiveSendReadinessPanel />
+          <ControlledLiveSendPanel />
+          <AutonomousPaperworkEnginePanel />
+          <AutonomousPaperworkRunnerPanel />
+          <PaperworkMonitorPanel />
+          <ProjectMappingPanel />
+          <ProjectMappingReviewWorkflowPanel />
+          <BulkMappingReviewPanel />
+          <LiveSendOperatorChecklistPanel />
+          <RecruiterAutomationReadinessPanel />
+        </div>
+      </CollapsibleSection>
 
       {candidatesUnavailable && jobsAvailable ? (
         <div

@@ -1,3 +1,4 @@
+export { CollapsibleSection } from "@/components/executive/ui/collapsible-section";
 export { ActionChip, type ActionChipVariant } from "@/components/executive/ui/action-chip";
 export { AICommandCenterLoadingSkeleton } from "@/components/executive/ui/ai-command-center-loading";
 export { AIResponseCard } from "@/components/executive/ui/ai-response-card";

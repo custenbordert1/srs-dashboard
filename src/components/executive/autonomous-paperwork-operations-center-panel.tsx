@@ -1,5 +1,6 @@
 "use client";
 
+import { CollapsibleSection } from "@/components/executive/ui/collapsible-section";
 import {
   ExecutiveCard,
   ExecutivePanelError,
@@ -112,95 +113,82 @@ export function AutonomousPaperworkOperationsCenterPanel() {
         <MetricCard label="Blocked" value={h.blockedCount.toLocaleString()} />
       </div>
 
-      <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">Safety gates</h3>
-      <div className="mb-6 grid gap-2 md:grid-cols-2">
-        {report.safetyStatus.map((gate) => (
-          <div
-            key={gate.id}
-            className="flex items-start justify-between gap-3 rounded-lg border border-zinc-700/50 px-3 py-2 text-sm"
-          >
-            <div>
-              <div className="font-medium text-zinc-100">{gate.label}</div>
-              <div className="text-xs text-zinc-400">{gate.detail}</div>
-            </div>
-            <span
-              className={`shrink-0 text-xs font-semibold ${
-                gate.passed ? "text-emerald-300" : "text-rose-300"
-              }`}
-            >
-              {gateBadge(gate.passed)}
-            </span>
-          </div>
-        ))}
-      </div>
-
       <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">Queue depth</h3>
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <MetricCard label="Ready to send" value={q.readyToSend.toLocaleString()} />
         <MetricCard label="Approved mapping ready" value={q.approvedMappingReady.toLocaleString()} />
         <MetricCard label="Pending review" value={q.pendingMappingReview.toLocaleString()} />
         <MetricCard label="Not mappable" value={q.projectNotMappable.toLocaleString()} />
-        <MetricCard label="Mapping review" value={q.projectMappingReview.toLocaleString()} />
         <MetricCard label="Duplicate risk" value={q.duplicateRisk.toLocaleString()} />
-        <MetricCard label="Already sent" value={q.alreadySent.toLocaleString()} />
-        <MetricCard label="Invalid email" value={q.invalidEmail.toLocaleString()} />
         <MetricCard label="Awaiting signature" value={q.awaitingSignature.toLocaleString()} />
-        <MetricCard label="Signed today" value={q.signedToday.toLocaleString()} />
-        <MetricCard label="Ready for onboarding" value={q.readyForOnboarding.toLocaleString()} />
       </div>
 
-      <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Alerts ({activeAlerts.length} active)
-      </h3>
-      <div className="mb-6 space-y-2">
-        {report.alerts.map((alert) => (
-          <div
-            key={alert.type}
-            className={`rounded-lg border px-3 py-2 text-sm ${
-              alert.active
-                ? alert.severity === "critical"
-                  ? "border-rose-500/40 bg-rose-500/10"
-                  : alert.severity === "warning"
-                    ? "border-amber-500/40 bg-amber-500/10"
-                    : "border-sky-500/40 bg-sky-500/10"
-                : "border-zinc-700/40 bg-zinc-900/20 opacity-60"
-            }`}
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium text-zinc-100">{alert.type}</span>
-              <span className="text-xs uppercase text-zinc-400">{alert.severity}</span>
-              {alert.active ? (
-                <span className="text-xs text-amber-200">active</span>
-              ) : (
-                <span className="text-xs text-zinc-500">inactive</span>
-              )}
+      <CollapsibleSection title="Safety gates" subtitle="Long audit and gate details" defaultOpen={false}>
+        <div className="grid gap-2 md:grid-cols-2">
+          {report.safetyStatus.map((gate) => (
+            <div
+              key={gate.id}
+              className="flex items-start justify-between gap-3 rounded-lg border border-zinc-700/50 px-3 py-2 text-sm"
+            >
+              <div>
+                <div className="font-medium text-zinc-100">{gate.label}</div>
+                <div className="text-xs text-zinc-400">{gate.detail}</div>
+              </div>
+              <span
+                className={`shrink-0 text-xs font-semibold ${
+                  gate.passed ? "text-emerald-300" : "text-rose-300"
+                }`}
+              >
+                {gateBadge(gate.passed)}
+              </span>
             </div>
-            <p className="text-zinc-300">{alert.reason}</p>
-            <p className="text-xs text-zinc-400">
-              Action: {alert.recommendedAction} · Affected: {alert.affectedCount} · Source:{" "}
-              {alert.source}
-            </p>
+          ))}
+        </div>
+      </CollapsibleSection>
+
+      <div className="mt-4">
+        <CollapsibleSection
+          title={`Alerts (${activeAlerts.length} active)`}
+          subtitle="Verbose diagnostics"
+          defaultOpen={false}
+        >
+          <div className="space-y-2">
+            {report.alerts.map((alert) => (
+              <div
+                key={alert.type}
+                className={`rounded-lg border px-3 py-2 text-sm ${
+                  alert.active
+                    ? alert.severity === "critical"
+                      ? "border-rose-500/40 bg-rose-500/10"
+                      : alert.severity === "warning"
+                        ? "border-amber-500/40 bg-amber-500/10"
+                        : "border-sky-500/40 bg-sky-500/10"
+                    : "border-zinc-700/40 bg-zinc-900/20 opacity-60"
+                }`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-zinc-100">{alert.type}</span>
+                  <span className="text-xs uppercase text-zinc-400">{alert.severity}</span>
+                </div>
+                <p className="text-zinc-300">{alert.reason}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </CollapsibleSection>
       </div>
 
-      {report.lastRunSummary ? (
-        <>
-          <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
-            Last run summary
-          </h3>
-          <p className="mb-6 text-sm text-zinc-300">{report.lastRunSummary}</p>
-        </>
-      ) : null}
-
-      <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Recommended next actions
-      </h3>
-      <ul className="mb-4 list-disc space-y-1 pl-5 text-sm text-zinc-300">
-        {report.recommendedActions.map((action) => (
-          <li key={action}>{action}</li>
-        ))}
-      </ul>
+      <div className="mt-4">
+        <CollapsibleSection title="Runner audit details" defaultOpen={false}>
+          {report.lastRunSummary ? (
+            <p className="mb-4 text-sm text-zinc-300">{report.lastRunSummary}</p>
+          ) : null}
+          <ul className="list-disc space-y-1 pl-5 text-sm text-zinc-300">
+            {report.recommendedActions.map((action) => (
+              <li key={action}>{action}</li>
+            ))}
+          </ul>
+        </CollapsibleSection>
+      </div>
 
       {warnings.length > 0 ? (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
