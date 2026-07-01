@@ -1,5 +1,6 @@
 "use client";
 
+import { ExecutiveApiDegradedState } from "@/components/executive/executive-tab-loading-fallback";
 import {
   ExecutiveCard,
   ExecutivePanelError,
@@ -9,6 +10,13 @@ import {
   StatusBadge,
 } from "@/components/executive/ui";
 import { CollapsibleSection } from "@/components/executive/ui/collapsible-section";
+import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import {
+  DASHBOARD_REQUEST_TIMEOUT_MS,
+  fetchWithTimeout,
+  isTimeoutError,
+  timeoutErrorMessage,
+} from "@/lib/fetch-with-timeout";
 import {
   buildExecutiveCommandSummaryMetrics,
   enrichTopActions,
@@ -70,14 +78,21 @@ export function ExecutiveCommandSummaryPanel() {
   const [topActions, setTopActions] = useState<EnrichedTopAction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const loadingCeilingHit = useLoadingCeiling(loading, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [opsRes, recRes] = await Promise.all([
-        fetch("/api/autonomous-paperwork-operations-center", { cache: "no-store" }),
-        fetch("/api/autonomous-recovery", { cache: "no-store" }),
+        fetchWithTimeout("/api/autonomous-paperwork-operations-center", {
+          cache: "no-store",
+          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+        }),
+        fetchWithTimeout("/api/autonomous-recovery", {
+          cache: "no-store",
+          timeoutMs: DASHBOARD_REQUEST_TIMEOUT_MS,
+        }),
       ]);
       const opsData = (await opsRes.json()) as {
         ok?: boolean;
@@ -105,8 +120,12 @@ export function ExecutiveCommandSummaryPanel() {
       });
       setMetrics(built);
       setTopActions(enrichTopActions(recData.autonomousRecovery.actionQueue, 5));
-    } catch {
-      setError("Failed to load executive command summary");
+    } catch (err) {
+      setError(
+        isTimeoutError(err)
+          ? timeoutErrorMessage("Executive command summary", DASHBOARD_REQUEST_TIMEOUT_MS)
+          : "Failed to load executive command summary",
+      );
     } finally {
       setLoading(false);
     }
@@ -116,7 +135,19 @@ export function ExecutiveCommandSummaryPanel() {
     void load();
   }, [load]);
 
-  if (loading) return <ExecutivePanelLoading title="Executive Command Summary" badge="P120" />;
+  if (loading) {
+    if (loadingCeilingHit) {
+      return (
+        <ExecutiveApiDegradedState
+          source="executive-home"
+          message="Executive command summary is taking longer than expected."
+          onRetry={() => void load()}
+          timedOut
+        />
+      );
+    }
+    return <ExecutivePanelLoading title="Executive Command Summary" badge="P120" />;
+  }
   if (error || !metrics || !operations || !recovery) {
     return (
       <ExecutivePanelError

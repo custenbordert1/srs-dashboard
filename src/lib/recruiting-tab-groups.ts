@@ -53,8 +53,6 @@ export const ALL_DASHBOARD_TAB_IDS: DashboardTabId[] = DASHBOARD_NAV_GROUPS.flat
   (group) => group.tabIds,
 );
 
-const WORKFORCE_INTELLIGENCE_HREF = "/executive/workforce-intelligence";
-
 const EXECUTIVE_ONLY_TAB_IDS = new Set<DashboardTabId>([
   "executive-home",
   "executive-accountability",
@@ -113,13 +111,6 @@ export function getNavTabsForGroup(
 ): DashboardNavTab[] {
   return getVisibleTabIdsForGroup(groupId, userRole).map((id) => {
     const meta = getRecruitingTabSource(id);
-    if (id === "workforce-intelligence") {
-      return {
-        id,
-        label: meta.navLabel,
-        href: WORKFORCE_INTELLIGENCE_HREF,
-      };
-    }
     return { id, label: meta.navLabel };
   });
 }
