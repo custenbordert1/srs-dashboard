@@ -1,0 +1,427 @@
+{
+  "sourcePhase": "P115",
+  "generatedAt": "2026-07-01T14:48:54.597Z",
+  "mode": "dryRun",
+  "summary": "6 REVIEW FIRST group(s), 30 candidate(s). 0 splittable SAFE subgroup(s) identified. Safest next path: approve_individually for Merchandiser - Experienced → Retail Merchandiser – Pensacola Area. Bulk approval NO-GO: 6 REVIEW FIRST group(s) remain. Bulk approval is NO-GO; safest path is approve_individually for Merchandiser - Experienced → Retail Merchandiser – Pensacola Area.",
+  "bulkApprovalGoNoGo": "NO-GO",
+  "bulkApprovalGoNoGoReason": "6 REVIEW FIRST group(s) remain. Bulk approval is NO-GO; safest path is approve_individually for Merchandiser - Experienced → Retail Merchandiser – Pensacola Area.",
+  "metrics": {
+    "remainingReviewFirstGroups": 6,
+    "candidatesAffected": 30,
+    "splitRecommendationsCount": 0,
+    "splittableSafeSubgroups": 0,
+    "approveIndividuallyCount": 4,
+    "splitGroupCount": 0,
+    "requestRecruiterReviewCount": 0,
+    "rejectGroupCount": 2
+  },
+  "safestNextGroup": {
+    "groupId": "merchandiser - experienced::3f1cc8bca5f3::pensacola::FL::approvable_65_79::merchandiser",
+    "groupName": "Merchandiser - Experienced → Retail Merchandiser – Pensacola Area",
+    "action": "approve_individually",
+    "splitBy": null,
+    "candidateCount": 3,
+    "averageConfidence": 74,
+    "reason": "Full recovery expected but confidence is borderline — approve candidates individually after review."
+  },
+  "groups": [
+    {
+      "groupId": "merchandiser- experienced- elko, nv::692a90f9955d::elko::NV::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser- Experienced- Elko, NV → Retail Merchandiser - Independent Contractor - Elko, NV",
+      "closedPositionTitle": "Merchandiser- Experienced- Elko, NV",
+      "candidateCount": 21,
+      "averageConfidence": 66,
+      "minConfidence": 66,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "692a90f9955d",
+        "title": "Retail Merchandiser - Independent Contractor - Elko, NV",
+        "city": "Elko",
+        "state": "NV"
+      },
+      "missingConfidenceFactors": [
+        {
+          "factor": "position_title",
+          "detail": "Different title",
+          "affectedCandidates": 21,
+          "maxPointsAvailable": 25
+        },
+        {
+          "factor": "project_code",
+          "detail": "No project code match",
+          "affectedCandidates": 21,
+          "maxPointsAvailable": 10
+        },
+        {
+          "factor": "historical_pattern",
+          "detail": "No historical match",
+          "affectedCandidates": 21,
+          "maxPointsAvailable": 5
+        },
+        {
+          "factor": "recruiter_decision",
+          "detail": "No recruiter decision",
+          "affectedCandidates": 21,
+          "maxPointsAvailable": 2
+        },
+        {
+          "factor": "application_date",
+          "detail": "Application 207d ago",
+          "affectedCandidates": 20,
+          "maxPointsAvailable": 2
+        }
+      ],
+      "riskReason": "Missing position title: Different title",
+      "riskNotes": [
+        "Minimum confidence 66% is near the bulk-approve threshold.",
+        "Average confidence 66% is borderline for bulk approval."
+      ],
+      "whyNotSafe": "Minimum confidence 66% is near the bulk-approve threshold. Average confidence 66% is borderline for bulk approval.",
+      "whatWouldMakeItSafe": [
+        "Raise group average confidence to at least 75% (currently 66%).",
+        "Resolve borderline members below ~67% confidence (min 66%).",
+        "Improve position title: Different title (up to 25 pts).",
+        "Improve project code: No project code match (up to 10 pts).",
+        "Improve historical pattern: No historical match (up to 5 pts)."
+      ],
+      "recommendedAction": "reject_group",
+      "recommendedActionReason": "Persistent client/project mismatch with borderline confidence — consider rejecting mapping.",
+      "splitRecommendations": [],
+      "candidateIds": [
+        "33cb7d7f786c",
+        "a381b6aca0e0",
+        "f1b2325774c4",
+        "06531756ae1a",
+        "621ef8c8480c",
+        "b06d222cb36a",
+        "840c0b858148",
+        "8c035453cf91",
+        "e0bfa38d5e48",
+        "fd05721aa816",
+        "26172067a9fd",
+        "a6ef153915ba",
+        "4b3ca31f4bd2",
+        "148d110d3d03",
+        "4d337a689efa",
+        "ad42c3d2949c",
+        "7c139386c5da",
+        "eb4314d21ee0",
+        "dd1747bfe124",
+        "19a0a6da9f17",
+        "5ef2901144af"
+      ]
+    },
+    {
+      "groupId": "merchandiser - experienced::3f1cc8bca5f3::pensacola::FL::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser - Experienced → Retail Merchandiser – Pensacola Area",
+      "closedPositionTitle": "Merchandiser - Experienced",
+      "candidateCount": 3,
+      "averageConfidence": 74,
+      "minConfidence": 74,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "3f1cc8bca5f3",
+        "title": "Retail Merchandiser – Pensacola Area",
+        "city": "Pensacola",
+        "state": "FL"
+      },
+      "missingConfidenceFactors": [
+        {
+          "factor": "position_title",
+          "detail": "Weak title overlap",
+          "affectedCandidates": 3,
+          "maxPointsAvailable": 25
+        },
+        {
+          "factor": "project_code",
+          "detail": "No project code match",
+          "affectedCandidates": 3,
+          "maxPointsAvailable": 10
+        },
+        {
+          "factor": "historical_pattern",
+          "detail": "No historical match",
+          "affectedCandidates": 3,
+          "maxPointsAvailable": 5
+        },
+        {
+          "factor": "recruiter_decision",
+          "detail": "No recruiter decision",
+          "affectedCandidates": 3,
+          "maxPointsAvailable": 2
+        }
+      ],
+      "riskReason": "Missing position title: Weak title overlap",
+      "riskNotes": [],
+      "whyNotSafe": "Average confidence 74% is below the 75% SAFE threshold.",
+      "whatWouldMakeItSafe": [
+        "Raise group average confidence to at least 75% (currently 74%).",
+        "Improve position title: Weak title overlap (up to 25 pts).",
+        "Improve project code: No project code match (up to 10 pts).",
+        "Improve historical pattern: No historical match (up to 5 pts)."
+      ],
+      "recommendedAction": "approve_individually",
+      "recommendedActionReason": "Full recovery expected but confidence is borderline — approve candidates individually after review.",
+      "splitRecommendations": [],
+      "candidateIds": [
+        "a02931877eec",
+        "a173310d307e",
+        "9e35710a6382"
+      ]
+    },
+    {
+      "groupId": "retail merchandiser (flexible, project-based work) yerington, nv::e797d1fdd2c3::yerington::NV::approvable_65_79::retail merchandiser (flexible, project",
+      "groupName": "Retail Merchandiser (Flexible, Project-Based Work)  Yerington, NV → Independent Retail Merchandiser - Project-Based Work - Yerington, NV",
+      "closedPositionTitle": "Retail Merchandiser (Flexible, Project-Based Work)  Yerington, NV",
+      "candidateCount": 2,
+      "averageConfidence": 70,
+      "minConfidence": 70,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "e797d1fdd2c3",
+        "title": "Independent Retail Merchandiser - Project-Based Work - Yerington, NV",
+        "city": "Yerington",
+        "state": "NV"
+      },
+      "missingConfidenceFactors": [
+        {
+          "factor": "client",
+          "detail": "Different client",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 12
+        },
+        {
+          "factor": "project_code",
+          "detail": "No project code match",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 10
+        },
+        {
+          "factor": "historical_pattern",
+          "detail": "No historical match",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 5
+        }
+      ],
+      "riskReason": "Missing client: Different client",
+      "riskNotes": [],
+      "whyNotSafe": "Average confidence 70% is below the 75% SAFE threshold.",
+      "whatWouldMakeItSafe": [
+        "Raise group average confidence to at least 75% (currently 70%).",
+        "Improve client: Different client (up to 12 pts).",
+        "Improve project code: No project code match (up to 10 pts).",
+        "Improve historical pattern: No historical match (up to 5 pts)."
+      ],
+      "recommendedAction": "approve_individually",
+      "recommendedActionReason": "Full recovery expected but confidence is borderline — approve candidates individually after review.",
+      "splitRecommendations": [],
+      "candidateIds": [
+        "86da01f7739b",
+        "9f9d978c7e71"
+      ]
+    },
+    {
+      "groupId": "retail merchandiser (flexible, project-based work)::604de23a02a7::cincinnati::OH::approvable_65_79::retail merchandiser (flexible, project",
+      "groupName": "Retail Merchandiser (Flexible, Project-Based Work) → Retail Reset Merchandiser – Cincinnati, OH",
+      "closedPositionTitle": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "candidateCount": 2,
+      "averageConfidence": 68,
+      "minConfidence": 68,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "604de23a02a7",
+        "title": "Retail Reset Merchandiser – Cincinnati, OH",
+        "city": "Cincinnati",
+        "state": "OH"
+      },
+      "missingConfidenceFactors": [
+        {
+          "factor": "client",
+          "detail": "Different client",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 12
+        },
+        {
+          "factor": "project_code",
+          "detail": "No project code match",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 10
+        },
+        {
+          "factor": "historical_pattern",
+          "detail": "No historical match",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 5
+        },
+        {
+          "factor": "recruiter_decision",
+          "detail": "No recruiter decision",
+          "affectedCandidates": 2,
+          "maxPointsAvailable": 2
+        }
+      ],
+      "riskReason": "Missing client: Different client",
+      "riskNotes": [
+        "Average confidence 68% is borderline for bulk approval."
+      ],
+      "whyNotSafe": "Average confidence 68% is borderline for bulk approval.",
+      "whatWouldMakeItSafe": [
+        "Raise group average confidence to at least 75% (currently 68%).",
+        "Improve client: Different client (up to 12 pts).",
+        "Improve project code: No project code match (up to 10 pts).",
+        "Improve historical pattern: No historical match (up to 5 pts)."
+      ],
+      "recommendedAction": "reject_group",
+      "recommendedActionReason": "Persistent client/project mismatch with borderline confidence — consider rejecting mapping.",
+      "splitRecommendations": [],
+      "candidateIds": [
+        "3cd770217fe8",
+        "43b1ff0dacb5"
+      ]
+    },
+    {
+      "groupId": "merchandiser- experienced- perris, ca::8be652ac8518::perris::CA::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser- Experienced- Perris, CA → Retail Merchandiser - Grocery & Retail Projects - Perris, CA",
+      "closedPositionTitle": "Merchandiser- Experienced- Perris, CA",
+      "candidateCount": 1,
+      "averageConfidence": 68,
+      "minConfidence": 68,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "8be652ac8518",
+        "title": "Retail Merchandiser - Grocery & Retail Projects - Perris, CA",
+        "city": "Perris",
+        "state": "CA"
+      },
+      "missingConfidenceFactors": [
+        {
+          "factor": "position_title",
+          "detail": "Different title",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 25
+        },
+        {
+          "factor": "project_code",
+          "detail": "No project code match",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 10
+        },
+        {
+          "factor": "historical_pattern",
+          "detail": "No historical match",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 5
+        },
+        {
+          "factor": "recruiter_decision",
+          "detail": "No recruiter decision",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 2
+        }
+      ],
+      "riskReason": "Missing position title: Different title",
+      "riskNotes": [
+        "Average confidence 68% is borderline for bulk approval."
+      ],
+      "whyNotSafe": "Average confidence 68% is borderline for bulk approval.",
+      "whatWouldMakeItSafe": [
+        "Raise group average confidence to at least 75% (currently 68%).",
+        "Improve position title: Different title (up to 25 pts).",
+        "Improve project code: No project code match (up to 10 pts).",
+        "Improve historical pattern: No historical match (up to 5 pts)."
+      ],
+      "recommendedAction": "approve_individually",
+      "recommendedActionReason": "Single-candidate group — individual review safer than bulk approve.",
+      "splitRecommendations": [],
+      "candidateIds": [
+        "3fbb949f2be4"
+      ]
+    },
+    {
+      "groupId": "merchandiser - experienced::681380669f5c::battle creek::MI::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser - Experienced → Retail Reset Merchandiser – Battle Creek, MI",
+      "closedPositionTitle": "Merchandiser - Experienced",
+      "candidateCount": 1,
+      "averageConfidence": 66,
+      "minConfidence": 66,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "681380669f5c",
+        "title": "Retail Reset Merchandiser – Battle Creek, MI",
+        "city": "Battle Creek",
+        "state": "MI"
+      },
+      "missingConfidenceFactors": [
+        {
+          "factor": "position_title",
+          "detail": "Different title",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 25
+        },
+        {
+          "factor": "project_code",
+          "detail": "No project code match",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 10
+        },
+        {
+          "factor": "historical_pattern",
+          "detail": "No historical match",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 5
+        },
+        {
+          "factor": "recruiter_decision",
+          "detail": "No recruiter decision",
+          "affectedCandidates": 1,
+          "maxPointsAvailable": 2
+        }
+      ],
+      "riskReason": "Missing position title: Different title",
+      "riskNotes": [
+        "Minimum confidence 66% is near the bulk-approve threshold.",
+        "Average confidence 66% is borderline for bulk approval."
+      ],
+      "whyNotSafe": "Minimum confidence 66% is near the bulk-approve threshold. Average confidence 66% is borderline for bulk approval.",
+      "whatWouldMakeItSafe": [
+        "Raise group average confidence to at least 75% (currently 66%).",
+        "Resolve borderline members below ~67% confidence (min 66%).",
+        "Improve position title: Different title (up to 25 pts).",
+        "Improve project code: No project code match (up to 10 pts).",
+        "Improve historical pattern: No historical match (up to 5 pts)."
+      ],
+      "recommendedAction": "approve_individually",
+      "recommendedActionReason": "Single-candidate group — individual review safer than bulk approve.",
+      "splitRecommendations": [],
+      "candidateIds": [
+        "eb1913e0a9e3"
+      ]
+    }
+  ],
+  "safetyStatus": {
+    "analysisOnly": true,
+    "noApprovalsPersisted": true,
+    "noBreezyWrites": true,
+    "noLiveSends": true,
+    "noLiveMode": true,
+    "p1063RunnerUnchanged": true,
+    "liveRunnerUnwired": true
+  },
+  "warnings": [
+    "P115 — analysis only; no approvals persisted.",
+    "P115 — no paperwork sends.",
+    "P115 — no Breezy writes.",
+    "P115 — P106.3 live runner unchanged.",
+    "Mode: dryRun.",
+    "P111 — bulk review tools; local .data only.",
+    "P111 — no Breezy writes, no live sends, no live runner wiring.",
+    "Mode: dryRun.",
+    "P109 — read-only approval bridge; no Breezy writes.",
+    "P109 — no live sends or automatic paperwork.",
+    "P109 — P106.3 runner behavior unchanged.",
+    "Mode: dryRun.",
+    "P108 — read-only analysis; no Breezy writes.",
+    "P108 — no live sends or production mutations.",
+    "Mode: dryRun."
+  ]
+}
