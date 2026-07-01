@@ -1,0 +1,98 @@
+{
+  "architecture": {
+    "modules": [
+      "P122 executeOne",
+      "P123 orchestrator",
+      "P124 approval",
+      "P125 runner",
+      "P126 command center"
+    ],
+    "pipeline": "AUTO_APPROVED → Safety → executeOne → Dropbox Sign → Audit → Onboarding",
+    "executeBatch": false
+  },
+  "panels": [
+    "Runner Status",
+    "Queue Summary",
+    "Live Activity Timeline",
+    "Candidate Drilldown",
+    "Runner Controls",
+    "Health Dashboard",
+    "Executive Metrics",
+    "Diagnostics"
+  ],
+  "metrics": {
+    "todaysSends": 0,
+    "successRate": 0,
+    "averageSendTimeMinutes": 3,
+    "currentQueue": 0,
+    "readyCandidates": 0,
+    "approvalRate": 0,
+    "humanReviewPercent": 2,
+    "failurePercent": 0
+  },
+  "filters": [
+    "today",
+    "yesterday",
+    "last7days",
+    "lastHour",
+    "candidate",
+    "status",
+    "approvalDecision",
+    "failureReason",
+    "errorsOnly"
+  ],
+  "healthIndicators": {
+    "runnerHealth": "degraded",
+    "dropboxSign": "unknown",
+    "approvalEngine": "healthy",
+    "orchestrator": "degraded",
+    "queue": "degraded",
+    "apiLatencyMs": 200,
+    "lastSuccessfulSendAt": "2026-07-01T18:03:22.289Z",
+    "averageProcessingTimeMs": 133,
+    "failures": 0,
+    "retryBacklog": 0
+  },
+  "apis": [
+    "GET /api/autonomous-operations-center?scope=paperwork",
+    "GET /api/autonomous-operations-command-center",
+    "POST /api/autonomous-paperwork-runner/run-once",
+    "POST /api/autonomous-paperwork-runner/pause",
+    "POST /api/autonomous-paperwork-runner/resume",
+    "POST /api/autonomous-paperwork-runner/stop"
+  ],
+  "safetyConfirmation": {
+    "p122GatesPreserved": true,
+    "p124ApprovalPreserved": true,
+    "executeOneOnly": true,
+    "noBypassControls": true
+  },
+  "queue": {
+    "readyToSend": 0,
+    "waitingApproval": 304,
+    "humanReview": 6,
+    "blocked": 72,
+    "retryQueue": 0,
+    "completedToday": 0,
+    "failedToday": 0,
+    "duplicatePrevented": 0,
+    "skipped": 0
+  },
+  "runner": {
+    "currentState": "stopped",
+    "runningPausedIdle": "stopped",
+    "lastCycleAt": "2026-07-01T18:03:22.153Z",
+    "nextCycleAt": null,
+    "uptimeMs": 0,
+    "heartbeat": {
+      "lastAt": "2026-07-01T18:03:22.289Z",
+      "stale": true,
+      "healthy": false
+    },
+    "currentCandidate": null,
+    "currentAction": "build_queue",
+    "averageCycleTimeMs": 133
+  },
+  "generatedAt": "2026-07-01T19:33:12.171Z",
+  "sourcePhase": "P126"
+}
