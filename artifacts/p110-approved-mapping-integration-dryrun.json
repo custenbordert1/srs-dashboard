@@ -1,13 +1,13 @@
 {
   "sourcePhase": "P110",
-  "generatedAt": "2026-07-01T14:22:55.724Z",
+  "generatedAt": "2026-07-01T14:44:59.303Z",
   "mode": "dryRun",
-  "summary": "2 approved P109 mappings. 2 newly eligible via approval (dryRun). 0 still blocked, 20 need recruiter review. Safety exclusions: 24 already_sent, 0 duplicate, 0 invalid_email. GO: 2 candidate(s) would unlock via approved mappings in dryRun only.",
+  "summary": "6 approved P109 mappings. 6 newly eligible via approval (dryRun). 0 still blocked, 20 need recruiter review. Safety exclusions: 24 already_sent, 0 duplicate, 0 invalid_email. GO: 6 candidate(s) would unlock via approved mappings in dryRun only.",
   "goNoGo": "GO",
-  "goNoGoReason": "2 candidate(s) would unlock via approved mappings in dryRun only.",
+  "goNoGoReason": "6 candidate(s) would unlock via approved mappings in dryRun only.",
   "metrics": {
-    "approvedMappingsCount": 2,
-    "newlyEligibleViaApproval": 2,
+    "approvedMappingsCount": 6,
+    "newlyEligibleViaApproval": 6,
     "blockedCount": 0,
     "reviewCount": 20,
     "alreadyEligibleBaseline": 0,
@@ -19,10 +19,45 @@
     "pendingApprovals": 20,
     "rejectedApprovals": 0,
     "skippedApprovals": 0,
-    "notApproved": 309
+    "notApproved": 305
   },
   "sampleCandidates": {
     "newlyEligible": [
+      {
+        "candidateId": "92fa58cc5870",
+        "candidateName": "Tyree nicole Gilley",
+        "closedPositionId": "7959fdf7c9f1",
+        "baselineBlocker": "project_not_mappable",
+        "overlayBlocker": "missing_resume",
+        "outcome": "newly_eligible_via_approval",
+        "approvedMapping": {
+          "qualifies": true,
+          "candidateId": "92fa58cc5870",
+          "closedPositionId": "7959fdf7c9f1",
+          "recommendedPositionId": "93ebc05539b8",
+          "recommendedPositionTitle": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV",
+          "confidenceScore": 75,
+          "reviewer": "Taylor",
+          "timestamp": "2026-07-01T14:43:59.807Z",
+          "mappingReasons": [
+            "Partial title overlap",
+            "Same client",
+            "Same city",
+            "Same state",
+            "Same territory / DM",
+            "Close proximity (0 mi)",
+            "Active posting exists",
+            "Closed posting age 0d",
+            "Application 44d ago",
+            "Published posting 1d active",
+            "• No project code match",
+            "• No historical match",
+            "• No open MEL demand in market",
+            "• No recruiter decision"
+          ],
+          "reason": "P109 approved mapping by Taylor at 2026-07-01T14:43:59.807Z."
+        }
+      },
       {
         "candidateId": "bfd12572f3e5",
         "candidateName": "Taryn Richardson",
@@ -91,6 +126,76 @@
             "• No recruiter decision"
           ],
           "reason": "P109 approved mapping by Taylor at 2026-07-01T14:21:41.684Z."
+        }
+      },
+      {
+        "candidateId": "7c37beb6ac48",
+        "candidateName": "Angelique Cowan",
+        "closedPositionId": "0322103a6bdd",
+        "baselineBlocker": "project_not_mappable",
+        "overlayBlocker": "missing_resume",
+        "outcome": "newly_eligible_via_approval",
+        "approvedMapping": {
+          "qualifies": true,
+          "candidateId": "7c37beb6ac48",
+          "closedPositionId": "0322103a6bdd",
+          "recommendedPositionId": "a707da4f2564",
+          "recommendedPositionTitle": "Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+          "confidenceScore": 80,
+          "reviewer": "Taylor",
+          "timestamp": "2026-07-01T14:43:59.806Z",
+          "mappingReasons": [
+            "Partial title overlap",
+            "Same client",
+            "Same city",
+            "Same state",
+            "Same territory / DM",
+            "Close proximity (0 mi)",
+            "Active posting exists",
+            "Closed posting age 1d",
+            "Application 29d ago",
+            "High coverage demand in market",
+            "Published posting 1d active",
+            "• No project code match",
+            "• No historical match",
+            "• No recruiter decision"
+          ],
+          "reason": "P109 approved mapping by Taylor at 2026-07-01T14:43:59.806Z."
+        }
+      },
+      {
+        "candidateId": "8fba13c8cf25",
+        "candidateName": "Katherine Duke",
+        "closedPositionId": "d185be0d77ee",
+        "baselineBlocker": "project_not_mappable",
+        "overlayBlocker": "p84_gate_failed",
+        "outcome": "newly_eligible_via_approval",
+        "approvedMapping": {
+          "qualifies": true,
+          "candidateId": "8fba13c8cf25",
+          "closedPositionId": "d185be0d77ee",
+          "recommendedPositionId": "a707da4f2564",
+          "recommendedPositionTitle": "Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+          "confidenceScore": 80,
+          "reviewer": "Taylor",
+          "timestamp": "2026-07-01T14:43:59.805Z",
+          "mappingReasons": [
+            "Partial title overlap",
+            "Same client",
+            "Same city",
+            "Same state",
+            "Same territory / DM",
+            "Close proximity (0 mi)",
+            "Active posting exists",
+            "Closed posting age 1d",
+            "Application 6d ago",
+            "High coverage demand in market",
+            "Published posting 1d active",
+            "• No project code match",
+            "• No historical match",
+            "• No recruiter decision"
+          ],
+          "reason": "P109 approved mapping by Taylor at 2026-07-01T14:43:59.805Z."
         }
       }
     ],
