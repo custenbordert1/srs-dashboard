@@ -1,0 +1,139 @@
+{
+  "sourcePhase": "P110",
+  "generatedAt": "2026-07-01T14:03:27.821Z",
+  "mode": "dryRun",
+  "summary": "0 approved P109 mappings. 0 newly eligible via approval (dryRun). 0 still blocked, 20 need recruiter review. Safety exclusions: 24 already_sent, 0 duplicate, 0 invalid_email. GO: Dry-run integration safe — no approved P109 mappings yet; runner unchanged until approvals exist.",
+  "goNoGo": "GO",
+  "goNoGoReason": "Dry-run integration safe — no approved P109 mappings yet; runner unchanged until approvals exist.",
+  "metrics": {
+    "approvedMappingsCount": 0,
+    "newlyEligibleViaApproval": 0,
+    "blockedCount": 0,
+    "reviewCount": 20,
+    "alreadyEligibleBaseline": 0,
+    "safetyExclusions": {
+      "alreadySent": 24,
+      "duplicateRisk": 0,
+      "invalidEmail": 0
+    },
+    "pendingApprovals": 20,
+    "rejectedApprovals": 0,
+    "skippedApprovals": 0,
+    "notApproved": 311
+  },
+  "sampleCandidates": {
+    "newlyEligible": [],
+    "stillBlocked": [],
+    "safetyExcluded": [
+      {
+        "candidateId": "9f8231817090",
+        "candidateName": "John Sykes",
+        "closedPositionId": "1168ce44cdd1",
+        "baselineBlocker": "already_sent",
+        "overlayBlocker": null,
+        "outcome": "excluded_already_sent",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "f6c222081b94",
+        "candidateName": "Ashley Struben",
+        "closedPositionId": "2310e9993639",
+        "baselineBlocker": "already_sent",
+        "overlayBlocker": null,
+        "outcome": "excluded_already_sent",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "b9f4bb0667cd",
+        "candidateName": "Kristine Crandall",
+        "closedPositionId": "fb1e87900b7a",
+        "baselineBlocker": "already_sent",
+        "overlayBlocker": null,
+        "outcome": "excluded_already_sent",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "3f1f0edcde0a",
+        "candidateName": "Susan McCarrhy",
+        "closedPositionId": "fb1e87900b7a",
+        "baselineBlocker": "already_sent",
+        "overlayBlocker": null,
+        "outcome": "excluded_already_sent",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "d2ef0cef341f",
+        "candidateName": "Rhonda K. Jarrett",
+        "closedPositionId": "d2c368c4409a",
+        "baselineBlocker": "already_sent",
+        "overlayBlocker": null,
+        "outcome": "excluded_already_sent",
+        "approvedMapping": null
+      }
+    ],
+    "needsReview": [
+      {
+        "candidateId": "6f39aaa878b6",
+        "candidateName": "Darian Taylor Jr.",
+        "closedPositionId": "40e576f67230",
+        "baselineBlocker": "project_mapping_review",
+        "overlayBlocker": null,
+        "outcome": "needs_recruiter_review",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "184896b9a3bd",
+        "candidateName": "Elaine Langer",
+        "closedPositionId": "40e576f67230",
+        "baselineBlocker": "project_mapping_review",
+        "overlayBlocker": null,
+        "outcome": "needs_recruiter_review",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "2e9c4601d867",
+        "candidateName": "Carrie Kennedy",
+        "closedPositionId": "40e576f67230",
+        "baselineBlocker": "project_mapping_review",
+        "overlayBlocker": null,
+        "outcome": "needs_recruiter_review",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "e775e48eb044",
+        "candidateName": "sierra Walls",
+        "closedPositionId": "40e576f67230",
+        "baselineBlocker": "project_mapping_review",
+        "overlayBlocker": null,
+        "outcome": "needs_recruiter_review",
+        "approvedMapping": null
+      },
+      {
+        "candidateId": "ddd0a10df851",
+        "candidateName": "Cassandra Daily",
+        "closedPositionId": "40e576f67230",
+        "baselineBlocker": "project_mapping_review",
+        "overlayBlocker": null,
+        "outcome": "needs_recruiter_review",
+        "approvedMapping": null
+      }
+    ]
+  },
+  "safetyStatus": {
+    "p1063RunnerUnchanged": true,
+    "noBreezyWrites": true,
+    "noLiveSends": true,
+    "noLiveMode": true,
+    "protectionOrderPreserved": true,
+    "dryRunOnly": true
+  },
+  "warnings": [
+    "P110 — dryRun only; no paperwork sends.",
+    "P110 — no Breezy writes.",
+    "P110 — P106.3 runner unchanged unless this integration is explicitly invoked.",
+    "Mode: dryRun.",
+    "P108 — read-only analysis; no Breezy writes.",
+    "P108 — no live sends or production mutations.",
+    "Mode: dryRun."
+  ]
+}
