@@ -1,0 +1,303 @@
+{
+  "sourcePhase": "P130",
+  "generatedAt": "2026-07-01T20:08:59.406Z",
+  "mode": "previewOnly",
+  "targetCandidateId": "92fa58cc5870",
+  "targetCandidateName": "Tyree nicole Gilley",
+  "policy": {
+    "readonly": true,
+    "autoApproveThreshold": 90,
+    "humanApprovalThreshold": 70,
+    "waitingThreshold": 50,
+    "requirePublishedJob": true,
+    "requireValidEmail": true,
+    "requireNoDuplicateRisk": true,
+    "requireNoAlreadySent": true,
+    "requireTemplate": true,
+    "requireApprovedMappingOrNativeProject": true
+  },
+  "currentState": {
+    "candidateId": "92fa58cc5870",
+    "candidateName": "Tyree nicole Gilley",
+    "email": "tyreenicolegilley932@gmail.com",
+    "emailValid": true,
+    "duplicateStatus": {
+      "isDuplicate": false,
+      "detail": "No duplicate risk detected."
+    },
+    "alreadySentStatus": {
+      "alreadySent": false,
+      "detail": "No prior send detected."
+    },
+    "breezyJob": {
+      "positionId": "7959fdf7c9f1",
+      "positionName": "Retail Merchandiser (Flexible, Project-Based Work)  South Lake Tahoe",
+      "nativePublishedJob": false,
+      "closedJob": false,
+      "recommendedPositionId": "93ebc05539b8",
+      "recommendedPositionTitle": null,
+      "recommendedJobPublished": false
+    },
+    "projectMapping": {
+      "p109Decision": "approved",
+      "approvedMappingQualifies": true,
+      "mappingSource": "approved_mapping",
+      "mappingReasons": [
+        "Partial title overlap",
+        "Same client",
+        "Same city",
+        "Same state",
+        "Same territory / DM",
+        "Close proximity (0 mi)",
+        "Active posting exists",
+        "Closed posting age 0d",
+        "Application 44d ago",
+        "Published posting 1d active",
+        "• No project code match",
+        "• No historical match",
+        "• No open MEL demand in market",
+        "• No recruiter decision"
+      ],
+      "overlayBlocker": null,
+      "baselineBlocker": "project_not_mappable"
+    },
+    "mappingConfidence": 75,
+    "recruiterAssignment": {
+      "assigned": false,
+      "recruiter": null
+    },
+    "questionnaireResume": {
+      "hasResume": false,
+      "paperworkReady": false,
+      "complete": false
+    },
+    "template": {
+      "templateKey": "onboarding_packet",
+      "available": true
+    },
+    "eligibilityStatus": "NO_PROJECT",
+    "approvalScore": 83,
+    "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+    "scoreFactors": {
+      "validEmail": 10,
+      "noDuplicateRisk": 10,
+      "noAlreadySent": 10,
+      "approvedMapping": 15,
+      "candidateStatus": 5,
+      "coverageNeed": 5,
+      "mappingConfidence": 8,
+      "freshness": 5,
+      "dm": 5,
+      "template": 10
+    },
+    "approvalReasons": [
+      "Valid email",
+      "No duplicate risk",
+      "No already_sent record",
+      "Approved mapping",
+      "Candidate status eligible",
+      "Project coverage need",
+      "Mapping confidence 75%",
+      "DM assigned",
+      "Template available"
+    ],
+    "humanReviewReasons": [
+      "Candidate is recoverable but not safe for autonomous send"
+    ],
+    "blockingReasons": [],
+    "safetyReasons": [],
+    "scoreGapToAutoApprove": 7
+  },
+  "requiredFixes": [
+    {
+      "id": "complete_questionnaire_resume",
+      "title": "Complete questionnaire / resume",
+      "description": "Candidate lacks resume and paperwork-ready grade. P110 overlay blocker is missing_resume; completing intake unlocks score points and P122 mapping gate.",
+      "category": "manual_taylor",
+      "blockerType": "data_issue",
+      "currentValue": "hasResume=false, paperworkReady=false",
+      "targetValue": "hasResume=true, candidateGrade.paperworkReady=true",
+      "pointsGained": 10,
+      "policyGate": false,
+      "manualSteps": [
+        "Obtain resume or complete questionnaire in recruiting workflow.",
+        "Mark candidate paperwork-ready in grade policy / onboarding intake.",
+        "Re-sync recruiting sheet so hasResume and candidateGrade update locally."
+      ],
+      "softwareCanPrepare": [
+        "Re-run ingestion sync to refresh local row after Taylor updates source data.",
+        "Re-run P130 simulation to verify overlay blocker clears to unknown_manual_review."
+      ],
+      "cannotFixSafely": null
+    },
+    {
+      "id": "raise_mapping_confidence_80",
+      "title": "Raise mapping confidence to 80%+",
+      "description": "P124 demotes AUTO_APPROVED to NEEDS_HUMAN_APPROVAL when mapping confidence is below 80%, even if score threshold is met.",
+      "category": "manual_taylor",
+      "blockerType": "policy_issue",
+      "currentValue": "75%",
+      "targetValue": "80% or higher (P109 confidenceScore)",
+      "pointsGained": 0,
+      "policyGate": true,
+      "manualSteps": [
+        "Review P109 approved mapping for Tyree (closed 7959fdf7c9f1 → recommended 93ebc05539b8).",
+        "Confirm same client/city/state/territory evidence supports ≥80% confidence.",
+        "Re-approve or update mapping review record with justified confidenceScore ≥80."
+      ],
+      "softwareCanPrepare": [
+        "Validate overlay dry-run outcome via P110 simulate-approved-mapping-eligibility.",
+        "Preview post-fix approval score locally without writing to Breezy."
+      ],
+      "cannotFixSafely": "Do not artificially inflate confidence without reviewer justification."
+    },
+    {
+      "id": "assign_recruiter",
+      "title": "Assign recruiter",
+      "description": "Recruiter assignment adds +5 approval score and satisfies operational send prerequisites.",
+      "category": "manual_taylor",
+      "blockerType": "data_issue",
+      "currentValue": "Unassigned recruiter",
+      "targetValue": "Named recruiter (not Unassigned / TBD)",
+      "pointsGained": 5,
+      "policyGate": false,
+      "manualSteps": [
+        "Assign owning recruiter in Breezy / recruiting sheet for Tyree nicole Gilley.",
+        "Confirm assignedRecruiter field syncs to local workflow row."
+      ],
+      "softwareCanPrepare": [
+        "After sync, re-evaluate approval score in P130 preview."
+      ],
+      "cannotFixSafely": null
+    },
+    {
+      "id": "confirm_approved_mapping_project_link",
+      "title": "Confirm approved mapping project linkage",
+      "description": "Eligibility shows NO_PROJECT on closed original posting; P109 approved mapping is the qualifying project path (no native republish required if overlay passes).",
+      "category": "manual_taylor",
+      "blockerType": "mapping_issue",
+      "currentValue": "NO_PROJECT on closed 7959fdf7c9f1",
+      "targetValue": "P109 approved mapping qualifies with published recommended job",
+      "pointsGained": 0,
+      "policyGate": false,
+      "manualSteps": [
+        "Confirm P109 approval record matches closed position 7959fdf7c9f1.",
+        "Verify recommended job 93ebc05539b8 remains published."
+      ],
+      "softwareCanPrepare": [
+        "Local overlay job map already includes recommended position when approved mapping qualifies."
+      ],
+      "cannotFixSafely": "Do not republish closed Breezy ads without ops review."
+    }
+  ],
+  "simulation": {
+    "steps": [
+      {
+        "fixId": "complete_questionnaire_resume",
+        "title": "Complete questionnaire / resume",
+        "simulatedScore": 93,
+        "simulatedDecision": "NEEDS_HUMAN_APPROVAL",
+        "scoreDelta": 10,
+        "cumulativeFixes": [
+          "complete_questionnaire_resume"
+        ],
+        "notes": [
+          "Mapping confidence below auto threshold."
+        ]
+      },
+      {
+        "fixId": "raise_mapping_confidence_80",
+        "title": "Raise mapping confidence to 80%+",
+        "simulatedScore": 93,
+        "simulatedDecision": "AUTO_APPROVED",
+        "scoreDelta": 0,
+        "cumulativeFixes": [
+          "complete_questionnaire_resume",
+          "raise_mapping_confidence_80"
+        ],
+        "notes": []
+      },
+      {
+        "fixId": "assign_recruiter",
+        "title": "Assign recruiter",
+        "simulatedScore": 98,
+        "simulatedDecision": "AUTO_APPROVED",
+        "scoreDelta": 5,
+        "cumulativeFixes": [
+          "complete_questionnaire_resume",
+          "raise_mapping_confidence_80",
+          "assign_recruiter"
+        ],
+        "notes": []
+      },
+      {
+        "fixId": "confirm_approved_mapping_project_link",
+        "title": "Confirm approved mapping project linkage",
+        "simulatedScore": 98,
+        "simulatedDecision": "AUTO_APPROVED",
+        "scoreDelta": 0,
+        "cumulativeFixes": [
+          "complete_questionnaire_resume",
+          "raise_mapping_confidence_80",
+          "assign_recruiter",
+          "confirm_approved_mapping_project_link"
+        ],
+        "notes": []
+      }
+    ],
+    "postFixScore": 98,
+    "postFixDecision": "AUTO_APPROVED",
+    "postFixFactors": {
+      "validEmail": 10,
+      "noDuplicateRisk": 10,
+      "noAlreadySent": 10,
+      "approvedMapping": 15,
+      "questionnaire": 10,
+      "candidateStatus": 5,
+      "coverageNeed": 5,
+      "mappingConfidence": 8,
+      "freshness": 5,
+      "recruiter": 5,
+      "dm": 5,
+      "template": 10
+    },
+    "allFixesApplied": [
+      "complete_questionnaire_resume",
+      "raise_mapping_confidence_80",
+      "assign_recruiter",
+      "confirm_approved_mapping_project_link"
+    ]
+  },
+  "manualChecklist": [
+    "Confirm Tyree nicole Gilley email tyreenicolegilley932@gmail.com is correct (already valid).",
+    "Confirm no duplicate record and paperwork not already sent (already clear).",
+    "[Complete questionnaire / resume] Obtain resume or complete questionnaire in recruiting workflow.",
+    "[Complete questionnaire / resume] Mark candidate paperwork-ready in grade policy / onboarding intake.",
+    "[Complete questionnaire / resume] Re-sync recruiting sheet so hasResume and candidateGrade update locally.",
+    "[Raise mapping confidence to 80%+] Review P109 approved mapping for Tyree (closed 7959fdf7c9f1 → recommended 93ebc05539b8).",
+    "[Raise mapping confidence to 80%+] Confirm same client/city/state/territory evidence supports ≥80% confidence.",
+    "[Raise mapping confidence to 80%+] Re-approve or update mapping review record with justified confidenceScore ≥80.",
+    "[Assign recruiter] Assign owning recruiter in Breezy / recruiting sheet for Tyree nicole Gilley.",
+    "[Assign recruiter] Confirm assignedRecruiter field syncs to local workflow row.",
+    "[Confirm approved mapping project linkage] Confirm P109 approval record matches closed position 7959fdf7c9f1.",
+    "[Confirm approved mapping project linkage] Verify recommended job 93ebc05539b8 remains published.",
+    "Re-run P129 gap analysis to confirm AUTO_APPROVED count ≥1.",
+    "Re-run P128 pilot selection — mapping gate should pass after resume + overlay fix.",
+    "Do NOT enable live mode or send until AUTO_APPROVED and P122 safety checks pass."
+  ],
+  "cannotFixSafely": [
+    "Lowering autoApproveThreshold below 90 (explicitly forbidden for P130).",
+    "Automated Breezy writes or executeBatch sends.",
+    "Inflating P109 confidence without documented reviewer justification.",
+    "Bypassing READY_AFTER_APPROVAL human sign-off without reassigning to a native published job.",
+    "Do not artificially inflate confidence without reviewer justification.",
+    "Do not republish closed Breezy ads without ops review."
+  ],
+  "goNoGo": "GO WITH CONDITIONS",
+  "goNoGoReason": "Simulated post-fix state reaches AUTO_APPROVED — apply manual data fixes in source systems, re-sync, and re-validate before live pilot.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false,
+  "thresholdChanged": false
+}
