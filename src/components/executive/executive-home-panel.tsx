@@ -18,7 +18,7 @@ import { AutonomousPaperworkOrchestratorOperationsPanel } from "@/components/exe
 import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
 import { AutonomousRecoveryCenterPanel } from "@/components/executive/autonomous-recovery-center-panel";
 import { AutonomousPaperworkOperationsCenterPanel } from "@/components/executive/autonomous-paperwork-operations-center-panel";
-import { AutonomousPaperworkRunnerPanel } from "@/components/executive/autonomous-paperwork-runner-panel";
+import { AutonomousProductionRunnerPanel } from "@/components/executive/autonomous-production-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
 import { BulkMappingReviewPanel } from "@/components/executive/bulk-mapping-review-panel";
@@ -294,8 +294,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
           <ControlledLiveSendPanel />
           <ControlledLivePaperworkPilotPanel />
           <AutonomousPaperworkOrchestratorOperationsPanel />
+          <AutonomousProductionRunnerPanel />
           <AutonomousPaperworkEnginePanel />
-          <AutonomousPaperworkRunnerPanel />
           <PaperworkMonitorPanel />
           <ProjectMappingPanel />
           <ProjectMappingReviewWorkflowPanel />

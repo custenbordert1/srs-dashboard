@@ -23,7 +23,7 @@ export function AutonomousPaperworkRunnerPanel() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/autonomous-paperwork-runner", { cache: "no-store" });
+      const res = await fetch("/api/p1061-autonomous-paperwork-runner", { cache: "no-store" });
       const data = (await res.json()) as {
         ok?: boolean;
         autonomousPaperworkRunner?: AutonomousPaperworkRunnerReport;
@@ -140,7 +140,7 @@ export function AutonomousPaperworkRunnerPanel() {
           type="button"
           className="rounded-md border px-3 py-1.5 text-sm"
           disabled={running}
-          onClick={() => void postAction("/api/autonomous-paperwork-runner/run-once", { mode: "dryRun" })}
+          onClick={() => void postAction("/api/p1061-autonomous-paperwork-runner/run-once", { mode: "dryRun" })}
         >
           dryRun cycle
         </button>
@@ -148,7 +148,7 @@ export function AutonomousPaperworkRunnerPanel() {
           type="button"
           className="rounded-md border px-3 py-1.5 text-sm"
           disabled={running}
-          onClick={() => void postAction("/api/autonomous-paperwork-runner/run-once", { mode: "runOnce" })}
+          onClick={() => void postAction("/api/p1061-autonomous-paperwork-runner/run-once", { mode: "runOnce" })}
         >
           runOnce
         </button>

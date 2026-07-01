@@ -1,0 +1,123 @@
+{
+  "architecture": {
+    "pipeline": [
+      "AUTO_APPROVED",
+      "Safety Gates",
+      "P122 executeOne",
+      "Dropbox Sign",
+      "Audit",
+      "Onboarding"
+    ],
+    "modules": [
+      "P124 approval",
+      "P123 orchestrator",
+      "P122 executeOne",
+      "P125 runner"
+    ],
+    "executeBatch": false,
+    "maxConcurrentSends": 1
+  },
+  "runnerStates": [
+    "stopped",
+    "idle",
+    "running",
+    "paused"
+  ],
+  "scheduler": {
+    "modes": [
+      "manual",
+      "oneCycle",
+      "continuous",
+      "paused",
+      "stopped"
+    ],
+    "continuousEnabled": false,
+    "intervalMs": 300000,
+    "nextScheduledRunAt": null
+  },
+  "monitoring": {
+    "heartbeat": {
+      "lastAt": "2026-07-01T18:03:22.289Z",
+      "stale": false,
+      "healthy": true
+    },
+    "safetyStatus": {
+      "goNoGo": "NO-GO",
+      "reason": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true Execution blocked — dryRun default prevents sends.",
+      "checks": [
+        {
+          "id": "pilot_enabled",
+          "label": "Live pilot enabled",
+          "passed": false,
+          "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true"
+        },
+        {
+          "id": "live_mode_enabled",
+          "label": "Live mode enabled",
+          "passed": false,
+          "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true"
+        },
+        {
+          "id": "operator_go",
+          "label": "Operator GO",
+          "passed": false,
+          "detail": "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true"
+        },
+        {
+          "id": "pilot_cap_available",
+          "label": "Pilot cap available",
+          "passed": true,
+          "detail": "0/1 pilot sends used."
+        },
+        {
+          "id": "dry_run_false",
+          "label": "dryRun is false",
+          "passed": false,
+          "detail": "Execution blocked — dryRun default prevents sends."
+        },
+        {
+          "id": "confirmation_phrase",
+          "label": "Confirmation phrase",
+          "passed": true,
+          "detail": "Not required for preview/dry-run."
+        }
+      ]
+    },
+    "queueDepth": 0,
+    "retryQueueDepth": 0
+  },
+  "metrics": {
+    "queueDepth": 0,
+    "candidatesProcessedToday": 1,
+    "successfulSends": 0,
+    "failedSends": 0,
+    "safetyBlocked": 0,
+    "averageProcessingTimeMs": 133,
+    "retryQueueDepth": 0,
+    "uptimeMs": 0
+  },
+  "recoveryStrategy": {
+    "staleLockRecovery": true,
+    "exponentialRetry": true,
+    "duplicatePrevention": true,
+    "auditLogging": true
+  },
+  "safetyConfirmation": {
+    "p122GatesRequired": true,
+    "p124AutoApprovedOnly": true,
+    "executeBatchNeverUsed": true,
+    "liveExecutionEnabled": false
+  },
+  "lastCycle": {
+    "ok": true,
+    "skippedOverlap": false,
+    "warnings": [
+      "P125 — production runner (executeOne only via P122/P123).",
+      "P125 — executeBatch is never used.",
+      "P124 — only AUTO_APPROVED candidates enter send queue.",
+      "P122 — safety gates remain enforced before live send."
+    ]
+  },
+  "generatedAt": "2026-07-01T18:03:22.290Z",
+  "sourcePhase": "P125"
+}
