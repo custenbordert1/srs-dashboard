@@ -13,6 +13,7 @@ import { P84SendQueuePreviewPanel } from "@/components/executive/p84-send-queue-
 import { ApprovalModeProductionPanel } from "@/components/executive/approval-mode-production-panel";
 import { LiveSendReadinessPanel } from "@/components/executive/live-send-readiness-panel";
 import { ControlledLiveSendPanel } from "@/components/executive/controlled-live-send-panel";
+import { ControlledLivePaperworkPilotPanel } from "@/components/executive/controlled-live-paperwork-pilot-panel";
 import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
 import { AutonomousRecoveryCenterPanel } from "@/components/executive/autonomous-recovery-center-panel";
 import { AutonomousPaperworkOperationsCenterPanel } from "@/components/executive/autonomous-paperwork-operations-center-panel";
@@ -290,6 +291,7 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
           <ApprovalModeProductionPanel />
           <LiveSendReadinessPanel />
           <ControlledLiveSendPanel />
+          <ControlledLivePaperworkPilotPanel />
           <AutonomousPaperworkEnginePanel />
           <AutonomousPaperworkRunnerPanel />
           <PaperworkMonitorPanel />
