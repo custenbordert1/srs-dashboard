@@ -16,6 +16,7 @@ import { ApprovalModeProductionPanel } from "@/components/executive/approval-mod
 import { LiveSendReadinessPanel } from "@/components/executive/live-send-readiness-panel";
 import { ControlledLiveSendPanel } from "@/components/executive/controlled-live-send-panel";
 import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
+import { AutonomousRecoveryCenterPanel } from "@/components/executive/autonomous-recovery-center-panel";
 import { AutonomousPaperworkOperationsCenterPanel } from "@/components/executive/autonomous-paperwork-operations-center-panel";
 import { AutonomousPaperworkRunnerPanel } from "@/components/executive/autonomous-paperwork-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
@@ -300,6 +301,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AutonomousPaperworkRunnerPanel />
 
       <AutonomousPaperworkOperationsCenterPanel />
+
+      <AutonomousRecoveryCenterPanel />
 
       <PaperworkMonitorPanel />
 
