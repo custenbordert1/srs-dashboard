@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T20:56:42.212Z",
+  "generatedAt": "2026-07-01T13:12:18.884Z",
   "mode": "dryRun",
   "engine": {
     "candidatesEvaluated": 382,
@@ -23,18 +23,18 @@
       "newCandidates": 0,
       "candidatesSent": 0,
       "skippedAlreadySent": 0,
-      "blocked": 374,
+      "blocked": 351,
       "blockedInvalidEmail": 1,
-      "blockedDuplicate": 23,
+      "blockedDuplicate": 0,
       "blockedUnpublishedJob": 0,
       "blockedClosedJob": 0,
-      "blockedProjectNotMappable": 299,
-      "blockedMappingReview": 32,
+      "blockedProjectNotMappable": 296,
+      "blockedMappingReview": 20,
       "staleEligibleRecovered": 25,
       "autoRepaired": 0,
       "breezySyncOk": true
     },
-    "blockedRegistryCount": 374,
+    "blockedRegistryCount": 351,
     "warnings": [
       "P106.3 — no executeBatch; executeOne / executeSafeSingles only when live.",
       "No Breezy writes.",
@@ -57,7 +57,7 @@
         "jobTitle": "FIELD MERCHANDISER",
         "city": "ERIE",
         "state": "PA",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 32,
         "candidateIds": [
           "6f39aaa878b6",
@@ -93,15 +93,15 @@
           "c8e577edd370",
           "8f1d5775bc05"
         ],
-        "mappingStatus": "project_not_mappable",
-        "recommendedAction": "Confirm active project exists or republish equivalent position."
+        "mappingStatus": "project_mapping_review",
+        "recommendedAction": "Recruiter review mapping before send."
       },
       {
         "positionId": "49ccc17bfbae",
         "jobTitle": "Merchandiser- Experienced- Elko, NV",
         "city": "Elko",
         "state": "NV",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 21,
         "candidateIds": [
           "33cb7d7f786c",
@@ -134,7 +134,7 @@
         "jobTitle": "Retail Merchandiser — Houston, TX",
         "city": "Houston",
         "state": "TX",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 10,
         "candidateIds": [
           "7e52e998cf11",
@@ -156,7 +156,7 @@
         "jobTitle": "Merchandiser- Experienced- Erie, PA",
         "city": "Erie",
         "state": "PA",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 8,
         "candidateIds": [
           "3e98b7afbc0a",
@@ -176,7 +176,7 @@
         "jobTitle": "Continuity Merchandiser  SF , Pine Bluff, AR",
         "city": "Pine Bluff",
         "state": "AR",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 8,
         "candidateIds": [
           "9f3d9246a0c9",
@@ -196,7 +196,7 @@
         "jobTitle": "Retail Merchandiser — The Woodlands, TX",
         "city": "The Woodlands",
         "state": "TX",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 6,
         "candidateIds": [
           "7830aa5b79b1",
@@ -214,7 +214,7 @@
         "jobTitle": "Retail Merchandiser (Flexible, Project-Based Work)",
         "city": "Raleigh",
         "state": "NC",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 6,
         "candidateIds": [
           "d65e154f9c69",
@@ -232,7 +232,7 @@
         "jobTitle": "Continuity Merchandiser  SF , Newport AR",
         "city": "Newport",
         "state": "AR",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 6,
         "candidateIds": [
           "520ae00e6673",
@@ -250,7 +250,7 @@
         "jobTitle": "Retail Merchandiser — Pasadena, TX",
         "city": "Pasadena",
         "state": "TX",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 5,
         "candidateIds": [
           "a41504a9579e",
@@ -267,7 +267,7 @@
         "jobTitle": "Continuity Retail Merchandiser – Princeton, WV",
         "city": "Princeton",
         "state": "WV",
-        "breezyStatus": "unpublished",
+        "breezyStatus": "closed",
         "candidateCount": 5,
         "candidateIds": [
           "d6415fb8e3b9",

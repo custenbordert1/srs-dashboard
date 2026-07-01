@@ -24,7 +24,13 @@ import {
 
 let isolation: IsolatedRecruitingDataHandle;
 
+function mtdAppliedDate(): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 15, 10, 0, 0)).toISOString();
+}
+
 function mtdCandidate(id: string): BreezyCandidate {
+  const appliedDate = mtdAppliedDate();
   return {
     candidateId: id,
     firstName: "Alex",
@@ -33,10 +39,10 @@ function mtdCandidate(id: string): BreezyCandidate {
     phone: "555-0100",
     source: "Indeed",
     stage: "Applied",
-    appliedDate: "2026-06-20T10:00:00.000Z",
-    createdDate: "2026-06-20T10:00:00.000Z",
-    addedDate: "2026-06-20T10:00:00.000Z",
-    updatedDate: "2026-06-20T10:00:00.000Z",
+    appliedDate,
+    createdDate: appliedDate,
+    addedDate: appliedDate,
+    updatedDate: appliedDate,
     addedDateSource: "creation_date",
     positionName: "Merchandiser",
     positionId: "pos-1",
