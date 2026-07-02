@@ -13,6 +13,7 @@ import {
 import type { OperationsCommandCenterReport } from "@/lib/p126-autonomous-operations-command-center/types";
 import type { PaperworkRemediationEngineReport } from "@/lib/p134-paperwork-remediation-engine/types";
 import type { PaperworkRemediationExecutorReport } from "@/lib/p135-paperwork-remediation-executor/types";
+import type { AutonomousPaperworkSchedulerReport } from "@/lib/p136-autonomous-paperwork-scheduler/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function formatDuration(ms: number | null | undefined): string {
@@ -50,6 +51,10 @@ export function AutonomousOperationsCommandCenterPanel() {
   const [executorLoading, setExecutorLoading] = useState(true);
   const [executorRunning, setExecutorRunning] = useState(false);
   const [executorMessage, setExecutorMessage] = useState<string | null>(null);
+  const [scheduler, setScheduler] = useState<AutonomousPaperworkSchedulerReport | null>(null);
+  const [schedulerLoading, setSchedulerLoading] = useState(true);
+  const [schedulerRunning, setSchedulerRunning] = useState(false);
+  const [schedulerMessage, setSchedulerMessage] = useState<string | null>(null);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -135,6 +140,66 @@ export function AutonomousOperationsCommandCenterPanel() {
   useEffect(() => {
     void loadExecutor();
   }, [loadExecutor]);
+
+  const loadScheduler = useCallback(async () => {
+    setSchedulerLoading(true);
+    try {
+      const res = await fetch("/api/autonomous-paperwork-scheduler", { cache: "no-store" });
+      const data = (await res.json()) as { ok?: boolean; scheduler?: AutonomousPaperworkSchedulerReport };
+      if (res.ok && data.ok && data.scheduler) setScheduler(data.scheduler);
+    } catch {
+      setScheduler(null);
+    } finally {
+      setSchedulerLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadScheduler();
+  }, [loadScheduler]);
+
+  const postSchedulerAction = async (path: string) => {
+    setSchedulerRunning(true);
+    setSchedulerMessage(null);
+    try {
+      const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const data = (await res.json()) as { ok?: boolean; error?: string; scheduler?: AutonomousPaperworkSchedulerReport };
+      if (!res.ok || !data.ok) {
+        setSchedulerMessage(data.error ?? "Scheduler action failed");
+        return;
+      }
+      if (data.scheduler) setScheduler(data.scheduler);
+      await loadScheduler();
+      setSchedulerMessage("Scheduler action accepted.");
+    } catch {
+      setSchedulerMessage("Scheduler action failed");
+    } finally {
+      setSchedulerRunning(false);
+    }
+  };
+
+  const runSchedulerOnce = async () => {
+    setSchedulerRunning(true);
+    setSchedulerMessage(null);
+    try {
+      const res = await fetch("/api/autonomous-paperwork-scheduler/run-once", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maxRemediationCandidates: 15 }),
+      });
+      const data = (await res.json()) as { ok?: boolean; scheduler?: AutonomousPaperworkSchedulerReport; error?: string };
+      if (!res.ok || !data.scheduler) {
+        setSchedulerMessage(data.error ?? "Scheduler cycle failed");
+        return;
+      }
+      setScheduler(data.scheduler);
+      setSchedulerMessage("Preview cycle completed — no production writes.");
+    } catch {
+      setSchedulerMessage("Scheduler cycle failed");
+    } finally {
+      setSchedulerRunning(false);
+    }
+  };
 
   const runExecutorPreview = async () => {
     setExecutorRunning(true);
@@ -264,6 +329,83 @@ export function AutonomousOperationsCommandCenterPanel() {
             Refresh
           </button>
         </div>
+      </ExecutiveCard>
+
+      <ExecutiveCard>
+        <SectionHeader
+          title="Autonomous Scheduler"
+          subtitle="P136 — coordinates P123/P124/P125/P134/P135 preview workflow"
+          badge="P136"
+        />
+        {schedulerLoading && !scheduler ? (
+          <p className="text-sm text-zinc-500">Loading scheduler status…</p>
+        ) : scheduler ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <MetricCard label="Status" value={scheduler.executivePanel.schedulerStatus} />
+              <MetricCard label="Current phase" value={scheduler.executivePanel.currentPhase ?? "idle"} />
+              <MetricCard label="Last cycle" value={formatTimestamp(scheduler.executivePanel.lastCycleAt)} />
+              <MetricCard label="Next cycle" value={formatTimestamp(scheduler.executivePanel.nextCycleAt)} />
+              <MetricCard label="Runtime" value={formatDuration(scheduler.executivePanel.runtimeMs)} />
+              <MetricCard label="Heartbeat" value={scheduler.executivePanel.heartbeatHealthy ? "OK" : "Stale"} />
+              <MetricCard label="Current queue" value={scheduler.executivePanel.currentQueue.toLocaleString()} />
+              <MetricCard
+                label="Remediations done"
+                value={scheduler.executivePanel.remediationsCompleted.toLocaleString()}
+              />
+              <MetricCard
+                label="Est. approvals unlocked"
+                value={scheduler.executivePanel.estimatedApprovalsUnlocked.toLocaleString()}
+              />
+              <MetricCard label="Safety" value={scheduler.executivePanel.safetyStatus.previewOnly ? "Preview" : "—"} />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={schedulerRunning}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
+                onClick={() => void runSchedulerOnce()}
+              >
+                Run once
+              </button>
+              <button
+                type="button"
+                disabled={schedulerRunning}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
+                onClick={() => void postSchedulerAction("/api/autonomous-paperwork-scheduler/start")}
+              >
+                Start
+              </button>
+              <button
+                type="button"
+                disabled={schedulerRunning}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
+                onClick={() => void postSchedulerAction("/api/autonomous-paperwork-scheduler/pause")}
+              >
+                Pause
+              </button>
+              <button
+                type="button"
+                disabled={schedulerRunning}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
+                onClick={() => void postSchedulerAction("/api/autonomous-paperwork-scheduler/resume")}
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                disabled={schedulerRunning}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
+                onClick={() => void postSchedulerAction("/api/autonomous-paperwork-scheduler/stop")}
+              >
+                Stop
+              </button>
+            </div>
+            {schedulerMessage ? <p className="text-sm text-zinc-300">{schedulerMessage}</p> : null}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">Scheduler unavailable.</p>
+        )}
       </ExecutiveCard>
 
       <ExecutiveCard>
