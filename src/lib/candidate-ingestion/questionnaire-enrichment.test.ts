@@ -204,6 +204,8 @@ describe("questionnaire enrichment", () => {
         },
       ],
       customFields: [],
+      documents: null,
+      resume: null,
     });
     assert.equal(enriched.hasQuestionnaire, true);
     assert.ok((enriched.questionnaireAnswers?.length ?? 0) >= 5);
@@ -247,6 +249,8 @@ describe("questionnaire enrichment", () => {
           },
         ],
         customFields: [],
+        documents: null,
+        resume: null,
       },
     );
     const row = buildScoredWorkflowRow(enriched, undefined, { job: jobsByPositionId.get("p1") });
@@ -312,6 +316,8 @@ describe("questionnaire enrichment", () => {
       detail: null,
       questionnaires: [],
       customFields: [],
+      documents: null,
+      resume: null,
     });
     assert.equal(enriched.hasQuestionnaire, undefined);
     assert.equal(enriched.questionnaireAnswers?.length ?? 0, 0);

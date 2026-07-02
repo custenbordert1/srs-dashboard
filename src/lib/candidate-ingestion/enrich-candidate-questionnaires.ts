@@ -128,16 +128,18 @@ export async function enrichCandidateWithQuestionnaireDetail(input: {
 
   const enrichedCandidate = enrichBreezyCandidateWithQuestionnairePayload(candidate, payloadResult.payload);
   const hasAnswers = (enrichedCandidate.questionnaireAnswers?.length ?? 0) > 0;
+  const hasResumeAssets = (enrichedCandidate.resumeAssets?.length ?? 0) > 0;
   const storedCandidate: BreezyCandidate = {
     ...enrichedCandidate,
     questionnaireEnrichmentAttemptedAt: new Date().toISOString(),
     hasQuestionnaire: hasAnswers,
+    hasResume: enrichedCandidate.hasResume || hasResumeAssets,
   };
 
   return {
     candidateId: candidate.candidateId,
     candidate: storedCandidate,
-    enriched: hasAnswers,
+    enriched: hasAnswers || hasResumeAssets || enrichedCandidate.hasResume,
     attempted: true,
     empty: !hasAnswers,
     failed: false,

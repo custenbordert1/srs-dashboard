@@ -26,6 +26,14 @@ import {
   extractQuestionnaireAnswersFromRaw,
 } from "@/lib/candidate-readiness/questionnaire-parser";
 import {
+  extractResumeAssetsFromDocumentsPayload,
+  extractResumeAssetsFromRaw,
+  extractResumeAssetsFromResumeEndpointPayload,
+  mergeResumeTextWithAssets,
+  resolveCandidateHasResume,
+  type BreezyResumeAsset,
+} from "@/lib/recruiting-intelligence/resume-assets";
+import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
 } from "@/lib/recruiting-intelligence/resume-parser";
@@ -145,6 +153,8 @@ export type BreezyCandidate = {
   hasResume: boolean;
   /** Raw resume field fragments retained for scoring diagnostics. */
   resumeFields?: BreezyCandidateResumeFields;
+  /** Resume file metadata discovered via Breezy documents/resume endpoints or inline payload. */
+  resumeAssets?: BreezyResumeAsset[];
   /** Normalized questionnaire answers from Breezy custom attributes / screening questions. */
   questionnaireAnswers?: CandidateQuestionnaireAnswer[];
   /** True when at least one questionnaire answer was extracted from Breezy. */
@@ -590,6 +600,7 @@ function sanitizeCandidate(
   const fallbackName = splitName(stringField(record, ["name", "full_name"]));
   const dates = extractBreezyAddedDate(record);
   const resumeFields = extractResumeFieldsFromRaw(record);
+  const inlineResumeAssets = extractResumeAssetsFromRaw(record);
   const questionnaireAnswers = extractQuestionnaireAnswersFromRaw(record);
   const zipCode = extractZipFromRaw(record);
   const resumeParts = [
@@ -602,8 +613,15 @@ function sanitizeCandidate(
     resumeFields?.customAttributesText,
     resumeFields?.tags?.join(" "),
   ].filter(Boolean);
-  const resumeText = resumeParts.join("\n").trim();
-  const hasResume = resumeText.length >= 80 || (resumeText.length >= 40 && resumeParts.length >= 2);
+  const resumeText = mergeResumeTextWithAssets({
+    resumeText: resumeParts.join("\n").trim(),
+    resumeAssets: inlineResumeAssets,
+  });
+  const hasResume = resolveCandidateHasResume({
+    resumeText,
+    resumeFields,
+    resumeAssets: inlineResumeAssets,
+  });
 
   return {
     candidateId,
@@ -644,6 +662,7 @@ function sanitizeCandidate(
     resumeText,
     hasResume,
     resumeFields,
+    resumeAssets: inlineResumeAssets.length > 0 ? inlineResumeAssets : undefined,
     questionnaireAnswers: questionnaireAnswers.length > 0 ? questionnaireAnswers : undefined,
     hasQuestionnaire: questionnaireAnswers.length > 0,
     score: numberField(record, ["score", "rating"]),
@@ -2952,6 +2971,8 @@ export type BreezyCandidateEnrichmentPayload = {
   detail: Record<string, unknown> | null;
   questionnaires: unknown;
   customFields: unknown;
+  documents: unknown;
+  resume: unknown;
 };
 
 function buildBreezyCandidateDetailPath(
@@ -2974,14 +2995,20 @@ export async function fetchBreezyCandidateEnrichmentPayload(input: {
   const detailPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId);
   const questionnairesPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "questionnaires");
   const customFieldsPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "custom-fields");
+  const documentsPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "documents");
+  const resumePath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "resume");
 
   const detailResult = await breezyGetWithRetry<unknown>(detailPath);
   if (!detailResult.ok) return detailResult;
 
-  const questionnairesResult = await breezyGetWithRetry<unknown>(questionnairesPath);
-  if (!questionnairesResult.ok) return questionnairesResult;
+  const [questionnairesResult, customFieldsResult, documentsResult, resumeResult] = await Promise.all([
+    breezyGetWithRetry<unknown>(questionnairesPath),
+    breezyGetWithRetry<unknown>(customFieldsPath),
+    breezyGetWithRetry<unknown>(documentsPath),
+    breezyGetWithRetry<unknown>(resumePath),
+  ]);
 
-  const customFieldsResult = await breezyGetWithRetry<unknown>(customFieldsPath);
+  if (!questionnairesResult.ok) return questionnairesResult;
   if (!customFieldsResult.ok) return customFieldsResult;
 
   const detailRecord = asRecord(detailResult.data);
@@ -2992,6 +3019,8 @@ export async function fetchBreezyCandidateEnrichmentPayload(input: {
       detail: detailRecord,
       questionnaires: questionnairesResult.data,
       customFields: customFieldsResult.data,
+      documents: documentsResult.ok ? documentsResult.data : null,
+      resume: resumeResult.ok ? resumeResult.data : null,
     },
   };
 }
@@ -3001,9 +3030,42 @@ export function enrichBreezyCandidateWithQuestionnairePayload(
   payload: BreezyCandidateEnrichmentPayload,
 ): BreezyCandidate {
   const answers = buildQuestionnaireAnswersFromEnrichmentPayload(payload);
-  if (answers.length === 0) return candidate;
+  const documentAssets = extractResumeAssetsFromDocumentsPayload(payload.documents);
+  const resumeEndpoint = extractResumeAssetsFromResumeEndpointPayload(payload.resume);
+  const detailAssets = payload.detail ? extractResumeAssetsFromRaw(payload.detail) : [];
+  const resumeAssets = [...documentAssets, ...resumeEndpoint.assets, ...detailAssets];
+  const uniqueAssets = resumeAssets.filter(
+    (asset, index, all) =>
+      all.findIndex(
+        (entry) =>
+          entry.source === asset.source &&
+          entry.fileName === asset.fileName &&
+          entry.url === asset.url &&
+          entry.parsedTextPreview === asset.parsedTextPreview,
+      ) === index,
+  );
 
-  const enriched = applyQuestionnaireAnswersToCandidate(candidate, answers);
+  let enriched = answers.length > 0 ? applyQuestionnaireAnswersToCandidate(candidate, answers) : candidate;
+
+  if (uniqueAssets.length > 0) {
+    const mergedResumeText = mergeResumeTextWithAssets({
+      resumeText: enriched.resumeText,
+      resumeAssets: uniqueAssets,
+      supplementalParsedText: resumeEndpoint.parsedText,
+    });
+    enriched = {
+      ...enriched,
+      resumeAssets: uniqueAssets,
+      resumeText: mergedResumeText,
+      hasResume: resolveCandidateHasResume({
+        resumeText: mergedResumeText,
+        resumeFields: enriched.resumeFields,
+        resumeAssets: uniqueAssets,
+        legacyHasResume: enriched.hasResume,
+      }),
+    };
+  }
+
   if (!payload.detail) return enriched;
 
   const detailSanitized = sanitizeCandidate(
@@ -3019,14 +3081,36 @@ export function enrichBreezyCandidateWithQuestionnairePayload(
 
   if (!detailSanitized) return enriched;
 
-  return {
-    ...enriched,
+  const mergedAssets = [...(enriched.resumeAssets ?? []), ...(detailSanitized.resumeAssets ?? [])].filter(
+    (asset, index, all) =>
+      all.findIndex(
+        (entry) =>
+          entry.source === asset.source &&
+          entry.fileName === asset.fileName &&
+          entry.url === asset.url &&
+          entry.parsedTextPreview === asset.parsedTextPreview,
+      ) === index,
+  );
+  const mergedResumeText = mergeResumeTextWithAssets({
     resumeText:
       detailSanitized.resumeText.length > enriched.resumeText.length
         ? detailSanitized.resumeText
         : enriched.resumeText,
-    hasResume: enriched.hasResume || detailSanitized.hasResume,
+    resumeAssets: mergedAssets,
+    supplementalParsedText: resumeEndpoint.parsedText,
+  });
+
+  return {
+    ...enriched,
+    resumeText: mergedResumeText,
+    hasResume: resolveCandidateHasResume({
+      resumeText: mergedResumeText,
+      resumeFields: detailSanitized.resumeFields ?? enriched.resumeFields,
+      resumeAssets: mergedAssets,
+      legacyHasResume: enriched.hasResume || detailSanitized.hasResume,
+    }),
     resumeFields: detailSanitized.resumeFields ?? enriched.resumeFields,
+    resumeAssets: mergedAssets.length > 0 ? mergedAssets : enriched.resumeAssets,
     questionnaireAnswers:
       enriched.questionnaireAnswers && enriched.questionnaireAnswers.length > 0
         ? enriched.questionnaireAnswers

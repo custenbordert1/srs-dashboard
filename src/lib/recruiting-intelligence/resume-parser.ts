@@ -1,4 +1,5 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
+import { resolveCandidateHasResume } from "@/lib/recruiting-intelligence/resume-assets";
 import { extractSkillTagsFromText } from "@/lib/recruiting-intelligence/skill-tags";
 import type { CandidateSkillTagId } from "@/lib/recruiting-intelligence/types";
 
@@ -61,11 +62,12 @@ export function extractCandidateResumeText(candidate: BreezyCandidate): string {
 }
 
 export function candidateHasResume(candidate: BreezyCandidate, resumeText: string): boolean {
-  if (candidate.hasResume === true) return true;
-  const trimmed = resumeText.trim();
-  if (trimmed.length >= 80) return true;
-  if (trimmed.length >= 40 && extractSkillTagsFromText(trimmed).length >= 2) return true;
-  return false;
+  return resolveCandidateHasResume({
+    resumeText,
+    resumeFields: candidate.resumeFields,
+    resumeAssets: candidate.resumeAssets,
+    legacyHasResume: candidate.hasResume === true,
+  });
 }
 
 export function parseCandidateApplication(

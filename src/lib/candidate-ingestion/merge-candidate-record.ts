@@ -26,5 +26,9 @@ export function mergeCandidateRecord(
     resumeText: incomingResumeLength >= existingResumeLength ? incoming.resumeText : existing.resumeText,
     hasResume: existing.hasResume || incoming.hasResume,
     resumeFields: incoming.resumeFields ?? existing.resumeFields,
+    resumeAssets:
+      (incoming.resumeAssets?.length ?? 0) >= (existing.resumeAssets?.length ?? 0)
+        ? incoming.resumeAssets
+        : existing.resumeAssets,
   };
 }

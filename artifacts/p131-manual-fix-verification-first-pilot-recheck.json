@@ -1,6 +1,6 @@
 {
   "sourcePhase": "P131",
-  "generatedAt": "2026-07-01T20:39:07.144Z",
+  "generatedAt": "2026-07-02T13:12:30.797Z",
   "mode": "previewOnly",
   "targetCandidateId": "92fa58cc5870",
   "targetCandidateName": "Tyree nicole Gilley",
@@ -12,7 +12,7 @@
         "label": "Questionnaire / resume complete",
         "passed": false,
         "expected": "hasResume=true, paperworkReady=true",
-        "actual": "hasResume=false, paperworkReady=false"
+        "actual": "hasResume=true, paperworkReady=false"
       },
       {
         "id": "recruiter_assigned",
@@ -31,9 +31,9 @@
       {
         "id": "recommended_job_published",
         "label": "Recommended job 93ebc05539b8 published",
-        "passed": false,
+        "passed": true,
         "expected": "Published Breezy job 93ebc05539b8",
-        "actual": "Not found in published jobs"
+        "actual": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV"
       },
       {
         "id": "template_available",
@@ -65,8 +65,8 @@
       }
     ],
     "allPassed": false,
-    "passedCount": 4,
-    "failedCount": 4
+    "passedCount": 5,
+    "failedCount": 3
   },
   "p124Approval": {
     "approvalDecision": "NEEDS_HUMAN_APPROVAL",
@@ -85,21 +85,21 @@
     "reason": "Route to human approval queue."
   },
   "p128PilotSelection": {
-    "selectedCandidateId": "92fa58cc5870",
-    "selectedCandidateName": "Tyree nicole Gilley",
-    "matchesTarget": true,
-    "approvalDecision": "NEEDS_HUMAN_APPROVAL",
-    "approvalScore": 83,
-    "eligibilityStatus": "NO_PROJECT",
+    "selectedCandidateId": "e72d6aebdb0d",
+    "selectedCandidateName": "Erica C Portolese",
+    "matchesTarget": false,
+    "approvalDecision": "AUTO_APPROVED",
+    "approvalScore": 93,
+    "eligibilityStatus": "BLOCKED",
     "confirmations": {
       "validEmail": true,
       "noDuplicateRisk": true,
       "noAlreadySent": true,
-      "publishedJobOrApprovedMapping": false,
+      "publishedJobOrApprovedMapping": true,
       "templateAvailable": true
     },
-    "goNoGo": "NO-GO",
-    "goNoGoReason": "Selected candidate fails one or more candidate-level safety checks."
+    "goNoGo": "GO WITH CONDITIONS",
+    "goNoGoReason": "Candidate selected for controlled one-candidate pilot — enable env gates before live send."
   },
   "p122PilotReadiness": {
     "status": "blocked",
@@ -162,7 +162,7 @@
     "AUTONOMOUS_PAPERWORK_PILOT_MAX_SENDS": "1"
   },
   "goNoGo": "NO-GO",
-  "goNoGoReason": "4 verification check(s) failed — complete P130 manual fixes and re-sync data.",
+  "goNoGoReason": "3 verification check(s) failed — complete P130 manual fixes and re-sync data.",
   "executeBatchCalled": false,
   "breezyWrites": false,
   "liveModeEnabled": false,

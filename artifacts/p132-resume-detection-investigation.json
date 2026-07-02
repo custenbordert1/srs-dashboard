@@ -1,0 +1,193 @@
+{
+  "sourcePhase": "P132",
+  "generatedAt": "2026-07-02T13:12:08.596Z",
+  "mode": "readOnly",
+  "targetCandidateId": "92fa58cc5870",
+  "targetCandidateName": "Tyree nicole Gilley",
+  "hasResumeCalculationSites": [
+    {
+      "id": "breezy_sanitize_candidate",
+      "module": "src/lib/breezy-api.ts",
+      "description": "Initial Breezy list/detail sanitize",
+      "rule": "resolveCandidateHasResume(resumeText, resumeFields, inline resumeAssets)"
+    },
+    {
+      "id": "breezy_enrichment_payload",
+      "module": "src/lib/breezy-api.ts",
+      "description": "Questionnaire enrichment merges /documents and /resume",
+      "rule": "hasResume true when resumeAssets discovered or parsed text threshold met"
+    },
+    {
+      "id": "resume_parser_candidate_has_resume",
+      "module": "src/lib/recruiting-intelligence/resume-parser.ts",
+      "description": "Recruiting intelligence scoring",
+      "rule": "resolveCandidateHasResume"
+    },
+    {
+      "id": "merge_candidate_record",
+      "module": "src/lib/candidate-ingestion/merge-candidate-record.ts",
+      "description": "Ingestion merge preserves hasResume once true",
+      "rule": "existing.hasResume || incoming.hasResume"
+    },
+    {
+      "id": "build_candidate_workflow_row",
+      "module": "src/lib/build-candidate-workflow-row.ts",
+      "description": "Workflow row copies ingestion hasResume",
+      "rule": "hasResume: candidate.hasResume ?? false"
+    },
+    {
+      "id": "score_approval_confidence",
+      "module": "src/lib/autonomous-paperwork-approval-engine/score-approval-confidence.ts",
+      "description": "AUTO_APPROVED questionnaire factor",
+      "rule": "row.hasResume && candidateGrade.paperworkReady !== false"
+    },
+    {
+      "id": "classify_paperwork_blocker",
+      "module": "src/lib/p106-autonomous-paperwork-engine/classify-paperwork-blocker.ts",
+      "description": "Paperwork blocker missing_resume",
+      "rule": "!row.hasResume && paperworkReady === false"
+    }
+  ],
+  "storedIngestionRecord": {
+    "hasResume": true,
+    "resumeText": "Cashier @ Rainbow Market\nCashier Ran a country store cashiered pumped propane stalked merchandise customer service closed drawer locked doors",
+    "resumeFields": {
+      "headline": "Cashier @ Rainbow Market",
+      "summary": "",
+      "coverLetter": "",
+      "resumeBody": "",
+      "workHistoryText": "Cashier Ran a country store cashiered pumped propane stalked merchandise customer service closed drawer locked doors",
+      "educationText": "",
+      "customAttributesText": "",
+      "tags": []
+    },
+    "resumeAssets": [
+      {
+        "source": "documents",
+        "fileName": "Tyree_nicoleGilley_Resume.pdf",
+        "mimeType": null,
+        "url": "https://app.breezy.hr/api/company/53335f6ec4a5/uploads/a38f6792-4e52-4875-a6fb-0c30d3098382/Tyree_nicoleGilley_Resume.pdf?key=39937063-e664-41a4-9347-69211fa7d6a0",
+        "parsedTextPreview": null
+      },
+      {
+        "source": "detail_inline",
+        "fileName": "Tyree_nicoleGilley_Resume.pdf?key=93ef7427-b117-4df9-a65c-202669727561",
+        "mimeType": null,
+        "url": "https://api.breezy.hr/v3/company/53335f6ec4a5/position/7959fdf7c9f1/candidate/92fa58cc5870/resume",
+        "parsedTextPreview": null
+      }
+    ],
+    "questionnaireEnrichmentAttemptedAt": "2026-07-02T13:11:57.908Z"
+  },
+  "breezyRawPayload": {
+    "detailAvailable": false,
+    "documentsAvailable": false,
+    "resumeEndpointAvailable": false,
+    "rawDocuments": null,
+    "rawResume": null,
+    "detailResumeRelatedKeys": []
+  },
+  "resumeSourceFindings": {
+    "primaryResumeSource": "inline_text_fields",
+    "sourcesChecked": [
+      "resume",
+      "attachments",
+      "documents",
+      "files",
+      "candidate assets",
+      "detail inline fields",
+      "resume endpoint"
+    ],
+    "conclusion": "No resume asset found in probed payloads; headline-only profile text is insufficient for legacy hasResume rule."
+  },
+  "parserComparison": {
+    "legacyRuleResult": true,
+    "fixedRuleResult": true,
+    "resumeAssetsDetected": 2
+  },
+  "rootCause": "Stored ingestion shows hasResume=false with only headline text (141 chars). Breezy UI shows Tyree_nicoleGilley_Resume.pdf on Resume/CV tab; parser previously ignored /documents and /resume endpoints (Missing BREEZY_COMPANY_ID.).",
+  "remediation": [
+    "Parser fix: treat Breezy /documents and /resume payloads as resume assets when filenames match resume/pdf patterns.",
+    "Enrichment fix: fetch documents + resume during candidate detail enrichment and persist resumeAssets on ingestion record.",
+    "Operational: re-run questionnaire/resume enrichment or ingestion sync for Tyree so local store picks up resumeAssets.",
+    "Validation: re-run P131 manual fix verification after enrichment sync."
+  ],
+  "postFixSimulation": {
+    "hasResume": true,
+    "approvalScoreDeltaEstimate": 0
+  },
+  "p131Recheck": {
+    "verification": {
+      "checks": [
+        {
+          "id": "questionnaire_resume_complete",
+          "label": "Questionnaire / resume complete",
+          "passed": true,
+          "expected": "hasResume=true, paperworkReady=true",
+          "actual": "hasResume=true, paperworkReady=true"
+        },
+        {
+          "id": "recruiter_assigned",
+          "label": "Recruiter assigned",
+          "passed": false,
+          "expected": "Named recruiter assigned",
+          "actual": "Unassigned"
+        },
+        {
+          "id": "mapping_confidence_80",
+          "label": "P109 mapping confidence ≥80%",
+          "passed": false,
+          "expected": "≥80%",
+          "actual": "75%"
+        },
+        {
+          "id": "recommended_job_published",
+          "label": "Recommended job 93ebc05539b8 published",
+          "passed": true,
+          "expected": "Published Breezy job 93ebc05539b8",
+          "actual": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV"
+        },
+        {
+          "id": "template_available",
+          "label": "Template available",
+          "passed": true,
+          "expected": "Paperwork template assigned",
+          "actual": "onboarding_packet"
+        },
+        {
+          "id": "no_duplicate_risk",
+          "label": "No duplicate risk",
+          "passed": true,
+          "expected": "No duplicate detected",
+          "actual": "No duplicate risk detected."
+        },
+        {
+          "id": "no_already_sent",
+          "label": "No already_sent record",
+          "passed": true,
+          "expected": "Paperwork not previously sent",
+          "actual": "No prior send detected."
+        },
+        {
+          "id": "valid_email",
+          "label": "Valid email",
+          "passed": true,
+          "expected": "Valid cohort email",
+          "actual": "tyreenicolegilley932@gmail.com"
+        }
+      ],
+      "allPassed": false,
+      "passedCount": 6,
+      "failedCount": 2
+    },
+    "autoApproved": false,
+    "approvalScore": 93,
+    "goNoGo": "NO-GO"
+  },
+  "goNoGo": "NO-GO",
+  "goNoGoReason": "2 verification check(s) failed — complete P130 manual fixes and re-sync data.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}
