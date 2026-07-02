@@ -1,0 +1,4096 @@
+{
+  "sourcePhase": "P134",
+  "generatedAt": "2026-07-02T14:58:58.113Z",
+  "mode": "previewOnly",
+  "summary": {
+    "totalCandidatesEvaluated": 389,
+    "blockedCandidateCount": 389,
+    "autoApprovedCount": 0,
+    "tier1Count": 0,
+    "tier2Count": 27,
+    "tier3Count": 362,
+    "estimatedApprovalsUnlocked": 6,
+    "autoApproveThreshold": 90
+  },
+  "blockersByCategory": [
+    {
+      "id": "recruiter_assignment_missing",
+      "label": "Recruiter not assigned",
+      "count": 389
+    },
+    {
+      "id": "unpublished_closed_job",
+      "label": "Candidate on closed job posting",
+      "count": 355
+    },
+    {
+      "id": "project_mapping_issue",
+      "label": "Project mapping issue",
+      "count": 310
+    },
+    {
+      "id": "resume_missing",
+      "label": "Resume missing",
+      "count": 269
+    },
+    {
+      "id": "additional_blocker",
+      "label": "Additional policy or review blocker",
+      "count": 64
+    },
+    {
+      "id": "paperwork_ready_missing",
+      "label": "Paperwork-ready flag missing",
+      "count": 50
+    },
+    {
+      "id": "already_sent",
+      "label": "Paperwork already sent",
+      "count": 30
+    },
+    {
+      "id": "missing_published_replacement",
+      "label": "Missing native assignment to published replacement",
+      "count": 6
+    },
+    {
+      "id": "ready_after_approval_signoff",
+      "label": "Closed-ad recovery requires human sign-off",
+      "count": 6
+    },
+    {
+      "id": "mapping_confidence_below_threshold",
+      "label": "Mapping confidence below 80%",
+      "count": 1
+    },
+    {
+      "id": "invalid_email",
+      "label": "Invalid or missing email",
+      "count": 1
+    }
+  ],
+  "tierCounts": {
+    "tier1": 0,
+    "tier2": 27,
+    "tier3": 362
+  },
+  "closestToAutoApproved": [
+    {
+      "candidateId": "e72d6aebdb0d",
+      "candidateName": "Erica C Portolese",
+      "approvalScore": 85,
+      "scoreGap": 5,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "9f53ea634daf",
+      "candidateName": "Torrey Allen",
+      "approvalScore": 85,
+      "scoreGap": 5,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "approvalScore": 85,
+      "scoreGap": 5,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "40764d83ef6d",
+      "candidateName": "Rimah Malley",
+      "approvalScore": 85,
+      "scoreGap": 5,
+      "tier": 2,
+      "topBlocker": "Paperwork-ready flag missing"
+    },
+    {
+      "candidateId": "ed828f614e1d",
+      "candidateName": "Faith Withem",
+      "approvalScore": 84,
+      "scoreGap": 6,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "acff2383c00f",
+      "candidateName": "Kailie Ray",
+      "approvalScore": 83,
+      "scoreGap": 7,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "ae4b6160f57c",
+      "candidateName": "Garrett Exum",
+      "approvalScore": 83,
+      "scoreGap": 7,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "0bc4a331bb26",
+      "candidateName": "Marie Fann",
+      "approvalScore": 83,
+      "scoreGap": 7,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "c87b5e655cc6",
+      "candidateName": "Brittneyrodgers201@gmail.com 6 Rodgers",
+      "approvalScore": 83,
+      "scoreGap": 7,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    },
+    {
+      "candidateId": "30c285e12e4c",
+      "candidateName": "Richard Anthony Orosco",
+      "approvalScore": 83,
+      "scoreGap": 7,
+      "tier": 2,
+      "topBlocker": "Resume missing"
+    }
+  ],
+  "approvalsUnlockedByFix": [
+    {
+      "fixId": "unpublished_closed_job",
+      "label": "Candidate on closed job posting",
+      "candidatesUnlocked": 5
+    },
+    {
+      "fixId": "missing_published_replacement",
+      "label": "Missing native assignment to published replacement",
+      "candidatesUnlocked": 5
+    }
+  ],
+  "topRecurringRootCauses": [
+    {
+      "cause": "Recruiter not assigned",
+      "count": 389,
+      "tier": 2
+    },
+    {
+      "cause": "Candidate on closed job posting",
+      "count": 355,
+      "tier": 3
+    },
+    {
+      "cause": "Project mapping issue",
+      "count": 310,
+      "tier": 3
+    },
+    {
+      "cause": "Resume missing",
+      "count": 269,
+      "tier": 2
+    },
+    {
+      "cause": "Additional policy or review blocker",
+      "count": 64,
+      "tier": 2
+    },
+    {
+      "cause": "Paperwork-ready flag missing",
+      "count": 50,
+      "tier": 2
+    },
+    {
+      "cause": "Paperwork already sent",
+      "count": 30,
+      "tier": 3
+    },
+    {
+      "cause": "Missing native assignment to published replacement",
+      "count": 6,
+      "tier": 3
+    },
+    {
+      "cause": "Closed-ad recovery requires human sign-off",
+      "count": 6,
+      "tier": 3
+    },
+    {
+      "cause": "Mapping confidence below 80%",
+      "count": 1,
+      "tier": 3
+    }
+  ],
+  "executivePanel": {
+    "totalBlockedCandidates": 389,
+    "blockersByCategory": [
+      {
+        "id": "recruiter_assignment_missing",
+        "label": "Recruiter not assigned",
+        "count": 389
+      },
+      {
+        "id": "unpublished_closed_job",
+        "label": "Candidate on closed job posting",
+        "count": 355
+      },
+      {
+        "id": "project_mapping_issue",
+        "label": "Project mapping issue",
+        "count": 310
+      },
+      {
+        "id": "resume_missing",
+        "label": "Resume missing",
+        "count": 269
+      },
+      {
+        "id": "additional_blocker",
+        "label": "Additional policy or review blocker",
+        "count": 64
+      },
+      {
+        "id": "paperwork_ready_missing",
+        "label": "Paperwork-ready flag missing",
+        "count": 50
+      },
+      {
+        "id": "already_sent",
+        "label": "Paperwork already sent",
+        "count": 30
+      },
+      {
+        "id": "missing_published_replacement",
+        "label": "Missing native assignment to published replacement",
+        "count": 6
+      },
+      {
+        "id": "ready_after_approval_signoff",
+        "label": "Closed-ad recovery requires human sign-off",
+        "count": 6
+      },
+      {
+        "id": "mapping_confidence_below_threshold",
+        "label": "Mapping confidence below 80%",
+        "count": 1
+      },
+      {
+        "id": "invalid_email",
+        "label": "Invalid or missing email",
+        "count": 1
+      }
+    ],
+    "tier1Count": 0,
+    "tier2Count": 27,
+    "tier3Count": 362,
+    "closestToAutoApproved": [
+      {
+        "candidateId": "e72d6aebdb0d",
+        "candidateName": "Erica C Portolese",
+        "approvalScore": 85,
+        "scoreGap": 5,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "9f53ea634daf",
+        "candidateName": "Torrey Allen",
+        "approvalScore": 85,
+        "scoreGap": 5,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "9990aa40f960",
+        "candidateName": "Gregory Petties",
+        "approvalScore": 85,
+        "scoreGap": 5,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "40764d83ef6d",
+        "candidateName": "Rimah Malley",
+        "approvalScore": 85,
+        "scoreGap": 5,
+        "tier": 2,
+        "topBlocker": "Paperwork-ready flag missing"
+      },
+      {
+        "candidateId": "ed828f614e1d",
+        "candidateName": "Faith Withem",
+        "approvalScore": 84,
+        "scoreGap": 6,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "acff2383c00f",
+        "candidateName": "Kailie Ray",
+        "approvalScore": 83,
+        "scoreGap": 7,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "ae4b6160f57c",
+        "candidateName": "Garrett Exum",
+        "approvalScore": 83,
+        "scoreGap": 7,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "0bc4a331bb26",
+        "candidateName": "Marie Fann",
+        "approvalScore": 83,
+        "scoreGap": 7,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "c87b5e655cc6",
+        "candidateName": "Brittneyrodgers201@gmail.com 6 Rodgers",
+        "approvalScore": 83,
+        "scoreGap": 7,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      },
+      {
+        "candidateId": "30c285e12e4c",
+        "candidateName": "Richard Anthony Orosco",
+        "approvalScore": 83,
+        "scoreGap": 7,
+        "tier": 2,
+        "topBlocker": "Resume missing"
+      }
+    ],
+    "approvalsUnlockedByFix": [
+      {
+        "fixId": "unpublished_closed_job",
+        "label": "Candidate on closed job posting",
+        "candidatesUnlocked": 5
+      },
+      {
+        "fixId": "missing_published_replacement",
+        "label": "Missing native assignment to published replacement",
+        "candidatesUnlocked": 5
+      }
+    ],
+    "topRecurringRootCauses": [
+      {
+        "cause": "Recruiter not assigned",
+        "count": 389,
+        "tier": 2
+      },
+      {
+        "cause": "Candidate on closed job posting",
+        "count": 355,
+        "tier": 3
+      },
+      {
+        "cause": "Project mapping issue",
+        "count": 310,
+        "tier": 3
+      },
+      {
+        "cause": "Resume missing",
+        "count": 269,
+        "tier": 2
+      },
+      {
+        "cause": "Additional policy or review blocker",
+        "count": 64,
+        "tier": 2
+      },
+      {
+        "cause": "Paperwork-ready flag missing",
+        "count": 50,
+        "tier": 2
+      },
+      {
+        "cause": "Paperwork already sent",
+        "count": 30,
+        "tier": 3
+      },
+      {
+        "cause": "Missing native assignment to published replacement",
+        "count": 6,
+        "tier": 3
+      },
+      {
+        "cause": "Closed-ad recovery requires human sign-off",
+        "count": 6,
+        "tier": 3
+      },
+      {
+        "cause": "Mapping confidence below 80%",
+        "count": 1,
+        "tier": 3
+      }
+    ]
+  },
+  "candidatePlans": [
+    {
+      "candidateId": "e72d6aebdb0d",
+      "candidateName": "Erica C Portolese",
+      "email": "gigizen8@gmail.com",
+      "currentScore": 85,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 5,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "9f53ea634daf",
+      "candidateName": "Torrey Allen",
+      "email": "torreyshaeallen@gmail.com",
+      "currentScore": 85,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 5,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "currentScore": 85,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 5,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "40764d83ef6d",
+      "candidateName": "Rimah Malley",
+      "email": "rimahmalley@gmail.com",
+      "currentScore": 85,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 5,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "ed828f614e1d",
+      "candidateName": "Faith Withem",
+      "email": "faith.withem@gmail.com",
+      "currentScore": 84,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 6,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 99,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "acff2383c00f",
+      "candidateName": "Kailie Ray",
+      "email": "kailie_ray23@icloud.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 98,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "ae4b6160f57c",
+      "candidateName": "Garrett Exum",
+      "email": "exuron1@gmail.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 98,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "0bc4a331bb26",
+      "candidateName": "Marie Fann",
+      "email": "mariefann6@gmail.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 98,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "c87b5e655cc6",
+      "candidateName": "Brittneyrodgers201@gmail.com 6 Rodgers",
+      "email": "brittneyrodgers442@gmail.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 98,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "30c285e12e4c",
+      "candidateName": "Richard Anthony Orosco",
+      "email": "richardorosco63@yahoo.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 98,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "92fa58cc5870",
+      "candidateName": "Tyree nicole Gilley",
+      "email": "tyreenicolegilley932@gmail.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "mapping_confidence_below_threshold",
+          "label": "Mapping confidence below 80%",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Current mapping confidence: 75%",
+          "remediationSteps": [
+            "Review P109 approved mapping evidence.",
+            "Update confidenceScore to ≥80% with documented reviewer justification."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Closed position 7959fdf7c9f1",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "missing_published_replacement",
+          "label": "Missing native assignment to published replacement",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "P109 recommends 93ebc05539b8 (published) but candidate remains on closed posting.",
+          "remediationSteps": [
+            "Reassign in Breezy to published job Retail Merchandiser - Local Store Support - South Lake Tahoe, NV.",
+            "Re-sync ingestion so positionId matches published job."
+          ]
+        },
+        {
+          "id": "ready_after_approval_signoff",
+          "label": "Closed-ad recovery requires human sign-off",
+          "severity": "medium",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Policy demotes READY_AFTER_APPROVAL overlay from AUTO_APPROVED.",
+          "remediationSteps": [
+            "Reassign to native published job for autonomous path, OR complete human sign-off."
+          ]
+        }
+      ],
+      "manualActionCount": 6,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Mapping confidence below 80%] Review P109 approved mapping evidence.",
+        "[Mapping confidence below 80%] Update confidenceScore to ≥80% with documented reviewer justification.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Missing native assignment to published replacement] Reassign in Breezy to published job Retail Merchandiser - Local Store Support - South Lake Tahoe, NV.",
+        "[Missing native assignment to published replacement] Re-sync ingestion so positionId matches published job.",
+        "[Closed-ad recovery requires human sign-off] Reassign to native published job for autonomous path, OR complete human sign-off."
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "AUTO_APPROVED",
+      "eligibilityStatus": "READY_AFTER_APPROVAL",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "7c37beb6ac48",
+      "candidateName": "Angelique Cowan",
+      "email": "angelcowan12345@gmail.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "Closed position 0322103a6bdd",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "missing_published_replacement",
+          "label": "Missing native assignment to published replacement",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "P109 recommends a707da4f2564 (published) but candidate remains on closed posting.",
+          "remediationSteps": [
+            "Reassign in Breezy to published job Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ.",
+            "Re-sync ingestion so positionId matches published job."
+          ]
+        },
+        {
+          "id": "ready_after_approval_signoff",
+          "label": "Closed-ad recovery requires human sign-off",
+          "severity": "medium",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Policy demotes READY_AFTER_APPROVAL overlay from AUTO_APPROVED.",
+          "remediationSteps": [
+            "Reassign to native published job for autonomous path, OR complete human sign-off."
+          ]
+        }
+      ],
+      "manualActionCount": 5,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Missing native assignment to published replacement] Reassign in Breezy to published job Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ.",
+        "[Missing native assignment to published replacement] Re-sync ingestion so positionId matches published job.",
+        "[Closed-ad recovery requires human sign-off] Reassign to native published job for autonomous path, OR complete human sign-off."
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "AUTO_APPROVED",
+      "eligibilityStatus": "READY_AFTER_APPROVAL",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "a364ab16b68e",
+      "candidateName": "Kaelin Prusa",
+      "email": "kaelinem@gmail.com",
+      "currentScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "Closed position d185be0d77ee",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "missing_published_replacement",
+          "label": "Missing native assignment to published replacement",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "P109 recommends a707da4f2564 (published) but candidate remains on closed posting.",
+          "remediationSteps": [
+            "Reassign in Breezy to published job Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ.",
+            "Re-sync ingestion so positionId matches published job."
+          ]
+        },
+        {
+          "id": "ready_after_approval_signoff",
+          "label": "Closed-ad recovery requires human sign-off",
+          "severity": "medium",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Policy demotes READY_AFTER_APPROVAL overlay from AUTO_APPROVED.",
+          "remediationSteps": [
+            "Reassign to native published job for autonomous path, OR complete human sign-off."
+          ]
+        }
+      ],
+      "manualActionCount": 5,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Missing native assignment to published replacement] Reassign in Breezy to published job Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ.",
+        "[Missing native assignment to published replacement] Re-sync ingestion so positionId matches published job.",
+        "[Closed-ad recovery requires human sign-off] Reassign to native published job for autonomous path, OR complete human sign-off."
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "AUTO_APPROVED",
+      "eligibilityStatus": "READY_AFTER_APPROVAL",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "2929aebfd380",
+      "candidateName": "Bhavin Patel",
+      "email": "patel142432@sorce.email",
+      "currentScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 97,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "5ad3fb6b872d",
+      "candidateName": "Billy Joe Romero",
+      "email": "billyjoeromero1970@gmail.com",
+      "currentScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 97,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "de52f7096d0f",
+      "candidateName": "James Peters",
+      "email": "retailservicespjm@gmail.com",
+      "currentScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 97,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "cde8b040e7a4",
+      "candidateName": "Marshall Woods",
+      "email": "marshallbw19701@outlook.com",
+      "currentScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "Closed position 1e5461419b41",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "missing_published_replacement",
+          "label": "Missing native assignment to published replacement",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "P109 recommends 07c1de432ea6 (published) but candidate remains on closed posting.",
+          "remediationSteps": [
+            "Reassign in Breezy to published job Continuity In-Store Merchandiser Payson, AZ.",
+            "Re-sync ingestion so positionId matches published job."
+          ]
+        },
+        {
+          "id": "ready_after_approval_signoff",
+          "label": "Closed-ad recovery requires human sign-off",
+          "severity": "medium",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Policy demotes READY_AFTER_APPROVAL overlay from AUTO_APPROVED.",
+          "remediationSteps": [
+            "Reassign to native published job for autonomous path, OR complete human sign-off."
+          ]
+        }
+      ],
+      "manualActionCount": 5,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Missing native assignment to published replacement] Reassign in Breezy to published job Continuity In-Store Merchandiser Payson, AZ.",
+        "[Missing native assignment to published replacement] Re-sync ingestion so positionId matches published job.",
+        "[Closed-ad recovery requires human sign-off] Reassign to native published job for autonomous path, OR complete human sign-off."
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "AUTO_APPROVED",
+      "eligibilityStatus": "READY_AFTER_APPROVAL",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "650590ddbe20",
+      "candidateName": "John Wiedenhofer Jr",
+      "email": "jnc21718@gmail.com",
+      "currentScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 97,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "dfb1e12c7da7",
+      "candidateName": "Alizia Benderman",
+      "email": "bendermanalizia@gmail.com",
+      "currentScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 97,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "bfd12572f3e5",
+      "candidateName": "Taryn Richardson",
+      "email": "tarynrichardson816@gmail.com",
+      "currentScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "Closed position 1e5461419b41",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "missing_published_replacement",
+          "label": "Missing native assignment to published replacement",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "P109 recommends 07c1de432ea6 (published) but candidate remains on closed posting.",
+          "remediationSteps": [
+            "Reassign in Breezy to published job Continuity In-Store Merchandiser Payson, AZ.",
+            "Re-sync ingestion so positionId matches published job."
+          ]
+        },
+        {
+          "id": "ready_after_approval_signoff",
+          "label": "Closed-ad recovery requires human sign-off",
+          "severity": "medium",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Policy demotes READY_AFTER_APPROVAL overlay from AUTO_APPROVED.",
+          "remediationSteps": [
+            "Reassign to native published job for autonomous path, OR complete human sign-off."
+          ]
+        }
+      ],
+      "manualActionCount": 5,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Missing native assignment to published replacement] Reassign in Breezy to published job Continuity In-Store Merchandiser Payson, AZ.",
+        "[Missing native assignment to published replacement] Re-sync ingestion so positionId matches published job.",
+        "[Closed-ad recovery requires human sign-off] Reassign to native published job for autonomous path, OR complete human sign-off."
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "AUTO_APPROVED",
+      "eligibilityStatus": "READY_AFTER_APPROVAL",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "8fba13c8cf25",
+      "candidateName": "Katherine Duke",
+      "email": "dukekt928@yahoo.com",
+      "currentScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "Closed position d185be0d77ee",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "missing_published_replacement",
+          "label": "Missing native assignment to published replacement",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "AUTO_APPROVED",
+          "detail": "P109 recommends a707da4f2564 (published) but candidate remains on closed posting.",
+          "remediationSteps": [
+            "Reassign in Breezy to published job Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ.",
+            "Re-sync ingestion so positionId matches published job."
+          ]
+        },
+        {
+          "id": "ready_after_approval_signoff",
+          "label": "Closed-ad recovery requires human sign-off",
+          "severity": "medium",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Policy demotes READY_AFTER_APPROVAL overlay from AUTO_APPROVED.",
+          "remediationSteps": [
+            "Reassign to native published job for autonomous path, OR complete human sign-off."
+          ]
+        }
+      ],
+      "manualActionCount": 5,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Missing native assignment to published replacement] Reassign in Breezy to published job Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ.",
+        "[Missing native assignment to published replacement] Re-sync ingestion so positionId matches published job.",
+        "[Closed-ad recovery requires human sign-off] Reassign to native published job for autonomous path, OR complete human sign-off."
+      ],
+      "simulatedPostFixScore": 100,
+      "simulatedPostFixDecision": "AUTO_APPROVED",
+      "eligibilityStatus": "READY_AFTER_APPROVAL",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "645974cfbd46",
+      "candidateName": "BILLY ROMERO",
+      "email": "billyjoeromero1970@gmail.com",
+      "currentScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 96,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "b6c71dd117e9",
+      "candidateName": "Chenna Kesava Rao",
+      "email": "chennakesavarao413@gmail.com",
+      "currentScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 96,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "598e1b950e29",
+      "candidateName": "Cyndi Garr",
+      "email": "msgarr84@gmail.com",
+      "currentScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 96,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "missing_resume"
+    },
+    {
+      "candidateId": "c0e33ee5f599",
+      "candidateName": "Kelli Platt",
+      "email": "kelliplatt813@mailmessage.co",
+      "currentScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 96,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "6d548b240ab0",
+      "candidateName": "Gary Smigocki",
+      "email": "gsmigocki@gmail.com",
+      "currentScore": 80,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 10,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "already_sent",
+          "label": "Paperwork already sent",
+          "severity": "critical",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": false,
+          "estimatedMinutesToResolve": 0,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Paperwork already sent or in flight.",
+          "remediationSteps": [
+            "Verify signature status — no resend without ops review."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 1,
+      "remediationPlan": [
+        "[Paperwork already sent] Verify signature status — no resend without ops review.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 85,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "WAITING_SIGNATURE",
+      "p106BlockerCategory": "already_sent"
+    },
+    {
+      "candidateId": "f2a43e50cd78",
+      "candidateName": "Tarmar Sims",
+      "email": "tarmarsims@gmail.com",
+      "currentScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 95,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "edc9df960855",
+      "candidateName": "Christine Brow",
+      "email": "cbrow08@gmail.com",
+      "currentScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 95,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "9c8555abfbc7",
+      "candidateName": "Brandon Whitfield",
+      "email": "brandonmaurice834@gmail.com",
+      "currentScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 95,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "0f843baa6e92",
+      "candidateName": "Lona Drumwright",
+      "email": "lona.drumwright80@gmail.com",
+      "currentScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 95,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "cfd03224d5c8",
+      "candidateName": "Darnell Landry",
+      "email": "landrydistribution@yahoo.com",
+      "currentScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 95,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "f34acd3a4e14",
+      "candidateName": "Zechari McCree",
+      "email": "zecharimccree@gmail.com",
+      "currentScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "paperwork_ready_missing",
+          "label": "Paperwork-ready flag missing",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Resume present but candidateGrade.paperworkReady is false.",
+          "remediationSteps": [
+            "Mark candidate paperwork-ready in recruiting workflow.",
+            "Re-sync local workflow row after grade update."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "additional_blocker",
+          "label": "Additional policy or review blocker",
+          "severity": "low",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "NEEDS_HUMAN_APPROVAL",
+          "detail": "Candidate is recoverable but not safe for autonomous send",
+          "remediationSteps": [
+            "Resolve: Candidate is recoverable but not safe for autonomous send"
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Paperwork-ready flag missing] Mark candidate paperwork-ready in recruiting workflow.",
+        "[Paperwork-ready flag missing] Re-sync local workflow row after grade update.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Additional policy or review blocker] Resolve: Candidate is recoverable but not safe for autonomous send"
+      ],
+      "simulatedPostFixScore": 95,
+      "simulatedPostFixDecision": "NEEDS_HUMAN_APPROVAL",
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "p106BlockerCategory": "p84_gate_failed"
+    },
+    {
+      "candidateId": "aaa55717777d",
+      "candidateName": "Chirumamilla Praneetha",
+      "email": "chirumamilla1171@careerattainment.com",
+      "currentScore": 79,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 11,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 94,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "terminal_status"
+    },
+    {
+      "candidateId": "368f371d5fb9",
+      "candidateName": "Lily Driscoll",
+      "email": "lilydriscoll948@gmail.com",
+      "currentScore": 79,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 11,
+      "tier": 2,
+      "tierReason": "Two to three manual actions from AUTO_APPROVED.",
+      "blockers": [
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 94,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "BLOCKED",
+      "p106BlockerCategory": "terminal_status"
+    },
+    {
+      "candidateId": "ce187a7283ec",
+      "candidateName": "Tyesha Evans",
+      "email": "kayvon05@gmial.com",
+      "currentScore": 72,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 18,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "invalid_email",
+          "label": "Invalid or missing email",
+          "severity": "critical",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 10,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Invalid email: kayvon05@gmial.com",
+          "remediationSteps": [
+            "Correct candidate email in Breezy and re-sync ingestion."
+          ]
+        },
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Invalid or missing email] Correct candidate email in Breezy and re-sync ingestion.",
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 87,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "INVALID_EMAIL",
+      "p106BlockerCategory": "invalid_email"
+    },
+    {
+      "candidateId": "84d51041e750",
+      "candidateName": "Alexandra Ridel",
+      "email": "alexridel1995@gmail.com",
+      "currentScore": 68,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 22,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "already_sent",
+          "label": "Paperwork already sent",
+          "severity": "critical",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": false,
+          "estimatedMinutesToResolve": 0,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Paperwork already sent or in flight.",
+          "remediationSteps": [
+            "Verify signature status — no resend without ops review."
+          ]
+        },
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Paperwork already sent] Verify signature status — no resend without ops review.",
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 83,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "WAITING_SIGNATURE",
+      "p106BlockerCategory": "already_sent"
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "candidateName": "Lara Gh",
+      "email": "lara.gh88@hotmail.com",
+      "currentScore": 68,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 22,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "already_sent",
+          "label": "Paperwork already sent",
+          "severity": "critical",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": false,
+          "estimatedMinutesToResolve": 0,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Paperwork already sent or in flight.",
+          "remediationSteps": [
+            "Verify signature status — no resend without ops review."
+          ]
+        },
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Paperwork already sent] Verify signature status — no resend without ops review.",
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 83,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "WAITING_SIGNATURE",
+      "p106BlockerCategory": "already_sent"
+    },
+    {
+      "candidateId": "cfcd1b8179ba",
+      "candidateName": "Ryley Umbel",
+      "email": "ryleyumbel5@yahoo.com",
+      "currentScore": 67,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 23,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "already_sent",
+          "label": "Paperwork already sent",
+          "severity": "critical",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": false,
+          "estimatedMinutesToResolve": 0,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Paperwork already sent or in flight.",
+          "remediationSteps": [
+            "Verify signature status — no resend without ops review."
+          ]
+        },
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Paperwork already sent] Verify signature status — no resend without ops review.",
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 82,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "WAITING_SIGNATURE",
+      "p106BlockerCategory": "already_sent"
+    },
+    {
+      "candidateId": "773445c489a7",
+      "candidateName": "Terrel Andrews",
+      "email": "t3drewz@gmail.com",
+      "currentScore": 67,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 23,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "already_sent",
+          "label": "Paperwork already sent",
+          "severity": "critical",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": false,
+          "estimatedMinutesToResolve": 0,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Paperwork already sent or in flight.",
+          "remediationSteps": [
+            "Verify signature status — no resend without ops review."
+          ]
+        },
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Paperwork already sent] Verify signature status — no resend without ops review.",
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 82,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "WAITING_SIGNATURE",
+      "p106BlockerCategory": "already_sent"
+    },
+    {
+      "candidateId": "c0c920caa44f",
+      "candidateName": "Malcolm Cooper",
+      "email": "malcolmjcoope0809@gmail.com",
+      "currentScore": 66,
+      "currentDecision": "REJECTED_FOR_SAFETY",
+      "scoreGapToAutoApprove": 24,
+      "tier": 3,
+      "tierReason": "Critical safety blocker — not recoverable via routine manual fixes.",
+      "blockers": [
+        {
+          "id": "already_sent",
+          "label": "Paperwork already sent",
+          "severity": "critical",
+          "owner": "operations",
+          "systemCapable": false,
+          "manualActionRequired": false,
+          "estimatedMinutesToResolve": 0,
+          "expectedScoreImprovement": 0,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Paperwork already sent or in flight.",
+          "remediationSteps": [
+            "Verify signature status — no resend without ops review."
+          ]
+        },
+        {
+          "id": "resume_missing",
+          "label": "Resume missing",
+          "severity": "high",
+          "owner": "candidate",
+          "systemCapable": true,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 20,
+          "expectedScoreImprovement": 10,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Candidate has no resume on file.",
+          "remediationSteps": [
+            "Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+            "Re-run ingestion enrichment sync locally."
+          ]
+        },
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "REJECTED_FOR_SAFETY",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        }
+      ],
+      "manualActionCount": 2,
+      "remediationPlan": [
+        "[Paperwork already sent] Verify signature status — no resend without ops review.",
+        "[Resume missing] Obtain resume or fetch Breezy /documents and /resume endpoints (P132 path).",
+        "[Resume missing] Re-run ingestion enrichment sync locally.",
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet."
+      ],
+      "simulatedPostFixScore": 81,
+      "simulatedPostFixDecision": "REJECTED_FOR_SAFETY",
+      "eligibilityStatus": "ALREADY_SENT",
+      "p106BlockerCategory": "already_sent"
+    },
+    {
+      "candidateId": "9cdc414f3b49",
+      "candidateName": "Michele Neely Mackey",
+      "email": "michelemackey@verizon.net",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position 3ff89a779d45",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "f786bc64011a",
+      "candidateName": "Anna Mbah",
+      "email": "jossyen3@mailmessage.co",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position 3ff89a779d45",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "86da01f7739b",
+      "candidateName": "Aaleah MacRoberts",
+      "email": "bshraderluvsjenna@gmail.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position f977acec0610",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "9f9d978c7e71",
+      "candidateName": "Elizabeth Dorantes",
+      "email": "doranteselizabeth7878@gmail.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position f977acec0610",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "334a0e2bcb6c",
+      "candidateName": "Ronald Van Heest",
+      "email": "rronster@aol.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position b24f79293e8e",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "0957e544ac35",
+      "candidateName": "Cherokee Smith",
+      "email": "smithcherokee25@gmail.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position 38f44ec9a55b",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "6ed1875bcd15",
+      "candidateName": "Erika Lynnsey Afton",
+      "email": "erikaafton91@gmail.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position 1fca8b2bc919",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "e759c9d49bf8",
+      "candidateName": "Natasha Sharber",
+      "email": "mickeyunc2007@gmail.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position 0c8b67582360",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "9921cca9ccbd",
+      "candidateName": "Kristin Wright",
+      "email": "kristinwilson93@yahoo.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position 0369a25f7ae8",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    },
+    {
+      "candidateId": "8ec5f7b7371f",
+      "candidateName": "Rhonna Eastman",
+      "email": "eastmanrhonna1980@outlook.com",
+      "currentScore": 65,
+      "currentDecision": "WAITING",
+      "scoreGapToAutoApprove": 25,
+      "tier": 3,
+      "tierReason": "Requires structural project or mapping work.",
+      "blockers": [
+        {
+          "id": "recruiter_assignment_missing",
+          "label": "Recruiter not assigned",
+          "severity": "medium",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 5,
+          "expectedScoreImprovement": 5,
+          "expectedDecisionAfterFix": "BLOCKED",
+          "detail": "Recruiter: Unassigned",
+          "remediationSteps": [
+            "Assign owning recruiter in Breezy / recruiting sheet."
+          ]
+        },
+        {
+          "id": "unpublished_closed_job",
+          "label": "Candidate on closed job posting",
+          "severity": "high",
+          "owner": "recruiter",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 15,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed position a3b2b21c157c",
+          "remediationSteps": [
+            "Reassign candidate to an active published Breezy job.",
+            "Do not republish closed ads without ops review."
+          ]
+        },
+        {
+          "id": "project_mapping_issue",
+          "label": "Project mapping issue",
+          "severity": "high",
+          "owner": "mapping_reviewer",
+          "systemCapable": false,
+          "manualActionRequired": true,
+          "estimatedMinutesToResolve": 45,
+          "expectedScoreImprovement": 15,
+          "expectedDecisionAfterFix": "WAITING",
+          "detail": "Closed ad cannot be mapped to any active published project.",
+          "remediationSteps": [
+            "Complete P109 project mapping review.",
+            "Approve mapping to a published replacement job or publish native posting."
+          ]
+        }
+      ],
+      "manualActionCount": 3,
+      "remediationPlan": [
+        "[Recruiter not assigned] Assign owning recruiter in Breezy / recruiting sheet.",
+        "[Candidate on closed job posting] Reassign candidate to an active published Breezy job.",
+        "[Candidate on closed job posting] Do not republish closed ads without ops review.",
+        "[Project mapping issue] Complete P109 project mapping review.",
+        "[Project mapping issue] Approve mapping to a published replacement job or publish native posting."
+      ],
+      "simulatedPostFixScore": 70,
+      "simulatedPostFixDecision": "BLOCKED",
+      "eligibilityStatus": "NO_PROJECT",
+      "p106BlockerCategory": "project_not_mappable"
+    }
+  ],
+  "candidatePlansTruncated": true,
+  "totalCandidatePlans": 389,
+  "goNoGo": "GO WITH CONDITIONS",
+  "goNoGoReason": "6 blocked candidate(s) simulates to AUTO_APPROVED after documented fixes.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}

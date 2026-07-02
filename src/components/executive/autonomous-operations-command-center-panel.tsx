@@ -11,6 +11,7 @@ import {
   StatusBadge,
 } from "@/components/executive/ui";
 import type { OperationsCommandCenterReport } from "@/lib/p126-autonomous-operations-command-center/types";
+import type { PaperworkRemediationEngineReport } from "@/lib/p134-paperwork-remediation-engine/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function formatDuration(ms: number | null | undefined): string {
@@ -42,6 +43,8 @@ export function AutonomousOperationsCommandCenterPanel() {
   const [candidateQuery, setCandidateQuery] = useState("");
   const [approvalDecision, setApprovalDecision] = useState("");
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [remediation, setRemediation] = useState<PaperworkRemediationEngineReport | null>(null);
+  const [remediationLoading, setRemediationLoading] = useState(true);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -82,6 +85,29 @@ export function AutonomousOperationsCommandCenterPanel() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const loadRemediation = useCallback(async () => {
+    setRemediationLoading(true);
+    try {
+      const res = await fetch("/api/paperwork-remediation", { cache: "no-store" });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        remediation?: PaperworkRemediationEngineReport;
+        error?: string;
+      };
+      if (res.ok && data.ok && data.remediation) {
+        setRemediation(data.remediation);
+      }
+    } catch {
+      setRemediation(null);
+    } finally {
+      setRemediationLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadRemediation();
+  }, [loadRemediation]);
 
   const postRunnerAction = async (path: string) => {
     setRunning(true);
@@ -227,6 +253,71 @@ export function AutonomousOperationsCommandCenterPanel() {
           <MetricCard label="Human review %" value={`${report.metrics.humanReviewPercent}%`} />
           <MetricCard label="Failure %" value={`${report.metrics.failurePercent}%`} />
         </div>
+      </ExecutiveCard>
+
+      <ExecutiveCard>
+        <SectionHeader
+          title="Paperwork Remediation Center"
+          subtitle="P134 — blocker analysis and remediation plans (read-only)"
+          badge="P134"
+        />
+        {remediationLoading && !remediation ? (
+          <p className="text-sm text-zinc-500">Loading remediation analysis…</p>
+        ) : remediation ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <MetricCard
+                label="Blocked candidates"
+                value={remediation.executivePanel.totalBlockedCandidates.toLocaleString()}
+              />
+              <MetricCard label="Tier 1" value={remediation.executivePanel.tier1Count.toLocaleString()} />
+              <MetricCard label="Tier 2" value={remediation.executivePanel.tier2Count.toLocaleString()} />
+              <MetricCard label="Tier 3" value={remediation.executivePanel.tier3Count.toLocaleString()} />
+              <MetricCard
+                label="Est. approvals unlocked"
+                value={remediation.summary.estimatedApprovalsUnlocked.toLocaleString()}
+              />
+              <MetricCard label="GO / NO-GO" value={remediation.goNoGo} />
+            </div>
+
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-zinc-100">Blockers by category</h4>
+              <ul className="grid gap-1 text-sm text-zinc-300 md:grid-cols-2">
+                {remediation.executivePanel.blockersByCategory.slice(0, 8).map((entry) => (
+                  <li key={entry.id} className="flex justify-between gap-2 rounded border border-zinc-800/60 px-2 py-1">
+                    <span>{entry.label}</span>
+                    <span className="text-zinc-500">{entry.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-zinc-100">Closest to AUTO_APPROVED</h4>
+              <ul className="space-y-1 text-sm text-zinc-300">
+                {remediation.executivePanel.closestToAutoApproved.slice(0, 5).map((candidate) => (
+                  <li key={candidate.candidateId} className="rounded border border-zinc-800/60 px-2 py-1">
+                    {candidate.candidateName} — score {candidate.approvalScore} (gap {candidate.scoreGap}) · Tier{" "}
+                    {candidate.tier} · {candidate.topBlocker}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-zinc-100">Top recurring root causes</h4>
+              <ul className="list-disc pl-5 text-sm text-zinc-300">
+                {remediation.executivePanel.topRecurringRootCauses.slice(0, 5).map((entry) => (
+                  <li key={entry.cause}>
+                    {entry.cause} ({entry.count}) — Tier {entry.tier}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">Remediation analysis unavailable.</p>
+        )}
       </ExecutiveCard>
 
       <ExecutiveCard>
