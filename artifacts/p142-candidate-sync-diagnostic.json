@@ -1,0 +1,259 @@
+{
+  "sourcePhase": "P142",
+  "generatedAt": "2026-07-02T19:48:48.680Z",
+  "mode": "readOnly",
+  "rootCause": "Recruiting Command Center and live-snapshot use preview/in-memory Breezy scans (15 candidates) while durable ingestion holds 389. P137/P141 paperwork phases read ingestion directly, so operators see 389 evaluated candidates in certification but far fewer (or zero) on the Recruiting Command Center tab.",
+  "exactFailingComponent": "src/lib/recruiting-live-snapshot.ts — buildRecruitingLiveSnapshot() uses peekBreezyCandidatesCache(scan=preview) and fetchBreezyCandidates(scan=preview), bypassing getIngestedCandidatesSnapshot()",
+  "issueClassification": "architecture_split",
+  "recommendedFix": "Wire buildRecruitingLiveSnapshot (and Recruiting Command Center preview fetch) to fall back to getIngestedCandidatesSnapshot() when preview/fast caches are empty or undercount relative to the durable ingestion store. Short-term operator workarounds: click Refresh live snapshot after server restart; run POST /api/candidates/ingestion/sync; use /executive/autonomous-operations-command-center for paperwork queue metrics (ingestion-backed).",
+  "ingestionStore": {
+    "path": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/candidate-ingestion.json",
+    "candidateCount": 389,
+    "cycleComplete": false,
+    "publishedPositionsTotal": 191,
+    "scannedPositionCount": 24,
+    "positionCoveragePct": 13,
+    "lastChunkAt": "2026-07-01T20:58:40.077Z",
+    "updatedAt": "2026-07-02T13:11:57.909Z",
+    "usableForPaperwork": true
+  },
+  "cacheLayers": [
+    {
+      "layer": "durable_ingestion_store",
+      "pathOrKey": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/candidate-ingestion.json",
+      "candidateCount": 389,
+      "timestamp": "2026-07-02T13:11:57.909Z",
+      "notes": [
+        "cycleComplete=false",
+        "scanned 24/191 positions (13%)",
+        "Used by P123/P124/P137/P141 paperwork loaders."
+      ]
+    },
+    {
+      "layer": "ingestion_api_snapshot",
+      "pathOrKey": "getIngestedCandidatesSnapshot()",
+      "candidateCount": 389,
+      "timestamp": "2026-07-01T20:58:40.077Z",
+      "notes": [
+        "hydrationComplete=false",
+        "Served by /api/breezy/candidates when scan is not preview and force=false."
+      ]
+    },
+    {
+      "layer": "server_preview_cache",
+      "pathOrKey": "breezy-api candidatesCache (scan=preview)",
+      "candidateCount": null,
+      "timestamp": null,
+      "notes": [
+        "Cold — no preview cache in this server process.",
+        "Used by /api/recruiting/live-snapshot for Candidates Pulled KPI."
+      ]
+    },
+    {
+      "layer": "server_fast_cache",
+      "pathOrKey": "breezy-api candidatesCache (scan=fast)",
+      "candidateCount": null,
+      "timestamp": null,
+      "notes": [
+        "Background warm target for dashboard; also in-process only."
+      ]
+    }
+  ],
+  "apiPaths": [
+    {
+      "path": "/api/recruiting/live-snapshot",
+      "scanMode": "preview (via buildRecruitingLiveSnapshot)",
+      "candidateCount": 15,
+      "ok": true,
+      "usesIngestionStore": false,
+      "error": null
+    },
+    {
+      "path": "/api/breezy/candidates",
+      "scanMode": "default (ingestion fast path)",
+      "candidateCount": 389,
+      "ok": true,
+      "usesIngestionStore": true,
+      "error": null
+    },
+    {
+      "path": "/api/breezy/candidates?scan=preview",
+      "scanMode": "preview",
+      "candidateCount": 15,
+      "ok": true,
+      "usesIngestionStore": false,
+      "error": null
+    },
+    {
+      "path": "/api/autonomous-operations-center?scope=paperwork",
+      "scanMode": null,
+      "candidateCount": 389,
+      "ok": true,
+      "usesIngestionStore": true,
+      "error": null
+    }
+  ],
+  "liveSnapshot": {
+    "ok": true,
+    "syncStatus": "ready",
+    "candidatesPulled": 15,
+    "publishedJobs": 192,
+    "candidatesFromCache": false,
+    "kpiSnapshotBuilt": true,
+    "error": null
+  },
+  "commandCenterUi": {
+    "candidatesPulledLabel": "Candidates pulled",
+    "dataSourceApi": "/api/recruiting/live-snapshot",
+    "kpiSnapshotApi": "/api/breezy/candidates?scan=preview (via fetchCommandCenterBreezyData)",
+    "whyZeroCandidatesPulled": "RecruitingDataSourcesPanel displays snapshot.candidates.candidates.length from live-snapshot. That builder uses preview scan only and never reads candidate-ingestion.json. Empty preview results are returned as ok:true with syncStatus partial, so the UI shows 0 instead of —.",
+    "whyKpiSnapshotMissing": "RecruitingCommandCenter builds KPIs only when both fetchCommandCenterBreezyData candidates.ok and jobs.ok are true. A failed or non-ok preview candidates response leaves snapshot null even when jobs loaded — producing 'no KPI snapshot could be built'."
+  },
+  "paperworkCandidateSource": {
+    "loader": "loadPaperworkCandidates → readIngestionStore / listIngestedCandidates",
+    "candidateCount": 389,
+    "sameAsCommandCenterKpi": false
+  },
+  "opsComponents": [
+    {
+      "phase": "P126",
+      "name": "Operations Command Center",
+      "uiVisible": true,
+      "uiLocation": "/executive/autonomous-operations-command-center",
+      "apiRoute": "/api/autonomous-operations-center?scope=paperwork",
+      "apiRouteExists": true,
+      "notes": "Also exposed at /api/autonomous-operations-command-center. Not on Recruiting Command Center tab."
+    },
+    {
+      "phase": "P127",
+      "name": "End-to-End Preview Drill",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Script/artifact only — no executive panel."
+    },
+    {
+      "phase": "P128",
+      "name": "Pilot Candidate Selection",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Certification/selection artifact only."
+    },
+    {
+      "phase": "P129",
+      "name": "Gap Analysis",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Analysis module only."
+    },
+    {
+      "phase": "P130",
+      "name": "Fix Plan",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Analysis module only."
+    },
+    {
+      "phase": "P131",
+      "name": "Manual Verification",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Recheck module only."
+    },
+    {
+      "phase": "P132",
+      "name": "Resume Detection",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Investigation module only."
+    },
+    {
+      "phase": "P133",
+      "name": "Remaining Blockers",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Blocker report module only."
+    },
+    {
+      "phase": "P134",
+      "name": "Remediation Engine",
+      "uiVisible": true,
+      "uiLocation": "/executive/autonomous-operations-command-center",
+      "apiRoute": "/api/paperwork-remediation",
+      "apiRouteExists": true,
+      "notes": "Panel on Ops Command Center page."
+    },
+    {
+      "phase": "P135",
+      "name": "Remediation Executor",
+      "uiVisible": true,
+      "uiLocation": "/executive/autonomous-operations-command-center",
+      "apiRoute": "/api/paperwork-remediation-executor",
+      "apiRouteExists": true,
+      "notes": "Panel on Ops Command Center page."
+    },
+    {
+      "phase": "P136",
+      "name": "Scheduler",
+      "uiVisible": true,
+      "uiLocation": "/executive/autonomous-operations-command-center",
+      "apiRoute": "/api/autonomous-paperwork-scheduler",
+      "apiRouteExists": true,
+      "notes": "Panel on Ops Command Center page."
+    },
+    {
+      "phase": "P137",
+      "name": "Readiness Gate",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Gate logic in scripts/P137 artifacts — no dedicated UI panel."
+    },
+    {
+      "phase": "P138",
+      "name": "Pilot Verification",
+      "uiVisible": true,
+      "uiLocation": "/executive/autonomous-operations-command-center",
+      "apiRoute": "/api/pilot-verification",
+      "apiRouteExists": true,
+      "notes": "Pilot Verification panel."
+    },
+    {
+      "phase": "P139",
+      "name": "Operator Runbook",
+      "uiVisible": false,
+      "uiLocation": null,
+      "apiRoute": null,
+      "apiRouteExists": false,
+      "notes": "Markdown/JSON runbook artifacts only."
+    },
+    {
+      "phase": "P140",
+      "name": "Production Health",
+      "uiVisible": true,
+      "uiLocation": "/executive/autonomous-operations-command-center",
+      "apiRoute": "/api/production-health",
+      "apiRouteExists": true,
+      "notes": "Production Health panel."
+    }
+  ],
+  "whyOpsPanelsNotVisibleOnRecruitingTab": "The screenshot is the Recruiting Command Center tab (Breezy hiring KPIs). P126–P140 autonomous paperwork panels live on /executive/autonomous-operations-command-center (AppShell link: Ops Command Center), not on /executive or the recruiting dashboard.",
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false,
+  "executeBatchCalled": false
+}
