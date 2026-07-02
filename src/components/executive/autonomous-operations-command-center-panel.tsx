@@ -15,6 +15,7 @@ import type { PaperworkRemediationEngineReport } from "@/lib/p134-paperwork-reme
 import type { PaperworkRemediationExecutorReport } from "@/lib/p135-paperwork-remediation-executor/types";
 import type { AutonomousPaperworkSchedulerReport } from "@/lib/p136-autonomous-paperwork-scheduler/types";
 import type { FirstLiveSendVerificationReport } from "@/lib/p138-first-live-send-verification/types";
+import type { ProductionHealthReport } from "@/lib/p140-production-rollout-health-monitoring/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function formatDuration(ms: number | null | undefined): string {
@@ -58,6 +59,8 @@ export function AutonomousOperationsCommandCenterPanel() {
   const [schedulerMessage, setSchedulerMessage] = useState<string | null>(null);
   const [pilotVerification, setPilotVerification] = useState<FirstLiveSendVerificationReport | null>(null);
   const [pilotVerificationLoading, setPilotVerificationLoading] = useState(true);
+  const [productionHealth, setProductionHealth] = useState<ProductionHealthReport | null>(null);
+  const [productionHealthLoading, setProductionHealthLoading] = useState(true);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -178,6 +181,24 @@ export function AutonomousOperationsCommandCenterPanel() {
   useEffect(() => {
     void loadPilotVerification();
   }, [loadPilotVerification]);
+
+  const loadProductionHealth = useCallback(async () => {
+    setProductionHealthLoading(true);
+    try {
+      const res = await fetch("/api/production-health", { cache: "no-store" });
+      const data = (await res.json()) as { ok?: boolean; productionHealth?: ProductionHealthReport };
+      if (res.ok && data.ok && data.productionHealth) setProductionHealth(data.productionHealth);
+      else setProductionHealth(null);
+    } catch {
+      setProductionHealth(null);
+    } finally {
+      setProductionHealthLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadProductionHealth();
+  }, [loadProductionHealth]);
 
   const postSchedulerAction = async (path: string) => {
     setSchedulerRunning(true);
@@ -483,6 +504,77 @@ export function AutonomousOperationsCommandCenterPanel() {
           </div>
         ) : (
           <p className="text-sm text-zinc-500">Pilot verification unavailable.</p>
+        )}
+      </ExecutiveCard>
+
+      <ExecutiveCard>
+        <SectionHeader
+          title="Production Health"
+          subtitle="P140 — read-only rollout monitoring and operator alerts"
+          badge="P140"
+        />
+        {productionHealthLoading && !productionHealth ? (
+          <p className="text-sm text-zinc-500">Loading production health…</p>
+        ) : productionHealth ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <MetricCard
+                label="Health score"
+                value={`${productionHealth.executivePanel.overallHealthScore}/100`}
+              />
+              <MetricCard label="Overall" value={productionHealth.executivePanel.overallResult} />
+              <MetricCard label="Components" value={productionHealth.executivePanel.componentStatusSummary} />
+              <MetricCard label="Active alerts" value={productionHealth.executivePanel.activeAlertCount.toLocaleString()} />
+              <MetricCard label="System uptime" value={formatDuration(productionHealth.executivePanel.systemUptimeMs)} />
+              <MetricCard
+                label="Last successful cycle"
+                value={formatTimestamp(productionHealth.executivePanel.lastSuccessfulCycleAt)}
+              />
+              <MetricCard
+                label="Queue"
+                value={`${productionHealth.executivePanel.queueDepth} (${productionHealth.executivePanel.queueTrend})`}
+              />
+              <MetricCard
+                label="Retries"
+                value={`${productionHealth.executivePanel.retryCount} (${productionHealth.executivePanel.retryTrend})`}
+              />
+              <MetricCard label="Dropbox" value={productionHealth.executivePanel.dropboxHealth} />
+              <MetricCard label="Candidate sync" value={productionHealth.executivePanel.candidateSyncFreshness} />
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-zinc-100">Component status</h4>
+              <ul className="space-y-1 text-sm text-zinc-300">
+                {productionHealth.componentStatuses.map((item) => (
+                  <li key={item.id} className="flex items-start gap-2">
+                    <StatusBadge
+                      tone={
+                        item.status === "Healthy" ? "success" : item.status === "Warning" ? "warning" : "critical"
+                      }
+                    >
+                      {item.status}
+                    </StatusBadge>
+                    <span>
+                      [{item.phase}] {item.label}: {item.detail}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {productionHealth.activeAlerts.length > 0 ? (
+              <ExecutiveWarningList
+                warnings={productionHealth.activeAlerts.map((a) => `${a.title} — ${a.detail}`)}
+              />
+            ) : null}
+            <button
+              type="button"
+              className="rounded-md border border-zinc-700 px-3 py-1 text-sm text-zinc-200"
+              onClick={() => void loadProductionHealth()}
+            >
+              Refresh health
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">Production health unavailable.</p>
         )}
       </ExecutiveCard>
 
