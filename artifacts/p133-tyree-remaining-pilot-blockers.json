@@ -1,0 +1,478 @@
+{
+  "sourcePhase": "P133",
+  "generatedAt": "2026-07-02T13:32:08.298Z",
+  "mode": "previewOnly",
+  "targetCandidateId": "92fa58cc5870",
+  "targetCandidateName": "Tyree nicole Gilley",
+  "recommendedJobId": "93ebc05539b8",
+  "p132ResumeFix": {
+    "applied": true,
+    "hasResume": true,
+    "paperworkReady": false,
+    "resumeAssetsCount": 1,
+    "detail": "P132 resolved resume detection — remaining gap is paperworkReady grade, not missing PDF."
+  },
+  "currentScore": 83,
+  "currentDecision": "NEEDS_HUMAN_APPROVAL",
+  "scoreGapToAutoApprove": 7,
+  "failedGates": [
+    {
+      "id": "questionnaire_resume_complete",
+      "label": "Questionnaire / resume complete",
+      "category": "resume",
+      "passed": false,
+      "expected": "hasResume=true, paperworkReady=true",
+      "actual": "hasResume=true, paperworkReady=false",
+      "resolvedByP132": true
+    },
+    {
+      "id": "recruiter_assigned",
+      "label": "Recruiter assigned",
+      "category": "recruiter",
+      "passed": false,
+      "expected": "Named recruiter assigned",
+      "actual": "Unassigned",
+      "resolvedByP132": false
+    },
+    {
+      "id": "mapping_confidence_80",
+      "label": "P109 mapping confidence ≥80%",
+      "category": "mapping",
+      "passed": false,
+      "expected": "≥80%",
+      "actual": "75%",
+      "resolvedByP132": false
+    },
+    {
+      "id": "recommended_job_published",
+      "label": "Recommended job 93ebc05539b8 published",
+      "category": "job",
+      "passed": true,
+      "expected": "Published Breezy job 93ebc05539b8",
+      "actual": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV",
+      "resolvedByP132": false
+    },
+    {
+      "id": "template_available",
+      "label": "Template available",
+      "category": "safety",
+      "passed": true,
+      "expected": "Paperwork template assigned",
+      "actual": "onboarding_packet",
+      "resolvedByP132": false
+    },
+    {
+      "id": "no_duplicate_risk",
+      "label": "No duplicate risk",
+      "category": "safety",
+      "passed": true,
+      "expected": "No duplicate detected",
+      "actual": "No duplicate risk detected.",
+      "resolvedByP132": false
+    },
+    {
+      "id": "no_already_sent",
+      "label": "No already_sent record",
+      "category": "safety",
+      "passed": true,
+      "expected": "Paperwork not previously sent",
+      "actual": "No prior send detected.",
+      "resolvedByP132": false
+    },
+    {
+      "id": "valid_email",
+      "label": "Valid email",
+      "category": "safety",
+      "passed": true,
+      "expected": "Valid cohort email",
+      "actual": "tyreenicolegilley932@gmail.com",
+      "resolvedByP132": false
+    },
+    {
+      "id": "p124_auto_approved",
+      "label": "P124 AUTO_APPROVED decision",
+      "category": "approval",
+      "passed": false,
+      "expected": "AUTO_APPROVED",
+      "actual": "NEEDS_HUMAN_APPROVAL",
+      "resolvedByP132": false
+    },
+    {
+      "id": "p122_ready_to_send",
+      "label": "P122 pilot ready_to_send",
+      "category": "pilot",
+      "passed": false,
+      "expected": "ready_to_send",
+      "actual": "blocked",
+      "resolvedByP132": false
+    }
+  ],
+  "passedGateCount": 5,
+  "failedGateCount": 5,
+  "remainingFixes": [
+    {
+      "id": "mark_paperwork_ready",
+      "title": "Mark candidate paperwork-ready",
+      "priority": 1,
+      "category": "manual_taylor",
+      "currentValue": "hasResume=true, paperworkReady=false",
+      "targetValue": "candidateGrade.paperworkReady=true",
+      "pointsGained": 10,
+      "manualSteps": [
+        "Confirm Tyree resume asset is visible in recruiting workflow (P132 enrichment complete).",
+        "Set paperwork-ready grade in recruiting sheet / grade policy for Tyree nicole Gilley.",
+        "Re-sync local ingestion so workflow row reflects paperworkReady=true."
+      ],
+      "softwareSteps": [
+        "Re-run ingestion sync (read-only Breezy pull) after grade update.",
+        "Re-run P131 verification to confirm questionnaire_resume_complete passes."
+      ]
+    },
+    {
+      "id": "assign_recruiter",
+      "title": "Assign recruiter",
+      "priority": 2,
+      "category": "manual_taylor",
+      "currentValue": "Unassigned",
+      "targetValue": "Named recruiter (not Unassigned / TBD)",
+      "pointsGained": 5,
+      "manualSteps": [
+        "Assign owning recruiter in Breezy / recruiting sheet for Tyree nicole Gilley.",
+        "Confirm assignedRecruiter syncs to local workflow row."
+      ],
+      "softwareSteps": [
+        "Re-run P131 after sync to confirm recruiter_assigned gate passes."
+      ]
+    },
+    {
+      "id": "raise_mapping_confidence_80",
+      "title": "Raise P109 mapping confidence to 80%+",
+      "priority": 3,
+      "category": "manual_taylor",
+      "currentValue": "75%",
+      "targetValue": "≥80% confidenceScore on approved P109 record",
+      "pointsGained": 0,
+      "manualSteps": [
+        "Review P109 approved mapping: closed 7959fdf7c9f1 → recommended 93ebc05539b8.",
+        "Document same client/city/state evidence supporting ≥80% confidence.",
+        "Update P109 review record confidenceScore to 80+ with reviewer justification."
+      ],
+      "softwareSteps": [
+        "Re-run P133 blocker plan locally to confirm mapping_confidence_80 gate passes.",
+        "Preview post-fix P124 score without writing to Breezy."
+      ]
+    },
+    {
+      "id": "reassign_to_published_recommended_job",
+      "title": "Reassign to published recommended Breezy job",
+      "priority": 4,
+      "category": "manual_taylor",
+      "currentValue": "Closed position 7959fdf7c9f1",
+      "targetValue": "Active application on published 93ebc05539b8",
+      "pointsGained": 15,
+      "manualSteps": [
+        "In Breezy, reassign Tyree to published job: Retail Merchandiser - Local Store Support - South Lake Tahoe, NV.",
+        "Confirm positionId syncs locally as the published job id.",
+        "Verify eligibility moves from READY_AFTER_APPROVAL overlay to READY_TO_SEND native path."
+      ],
+      "softwareSteps": [
+        "After sync, re-run P131 — P122 approved_mapping_or_native_project should pass.",
+        "Re-run P128 pilot selection preview with Tyree on allowlist."
+      ]
+    }
+  ],
+  "manualSteps": [
+    {
+      "order": 1,
+      "fixId": "mark_paperwork_ready",
+      "step": "Confirm Tyree resume asset is visible in recruiting workflow (P132 enrichment complete)."
+    },
+    {
+      "order": 2,
+      "fixId": "mark_paperwork_ready",
+      "step": "Set paperwork-ready grade in recruiting sheet / grade policy for Tyree nicole Gilley."
+    },
+    {
+      "order": 3,
+      "fixId": "mark_paperwork_ready",
+      "step": "Re-sync local ingestion so workflow row reflects paperworkReady=true."
+    },
+    {
+      "order": 4,
+      "fixId": "assign_recruiter",
+      "step": "Assign owning recruiter in Breezy / recruiting sheet for Tyree nicole Gilley."
+    },
+    {
+      "order": 5,
+      "fixId": "assign_recruiter",
+      "step": "Confirm assignedRecruiter syncs to local workflow row."
+    },
+    {
+      "order": 6,
+      "fixId": "raise_mapping_confidence_80",
+      "step": "Review P109 approved mapping: closed 7959fdf7c9f1 → recommended 93ebc05539b8."
+    },
+    {
+      "order": 7,
+      "fixId": "raise_mapping_confidence_80",
+      "step": "Document same client/city/state evidence supporting ≥80% confidence."
+    },
+    {
+      "order": 8,
+      "fixId": "raise_mapping_confidence_80",
+      "step": "Update P109 review record confidenceScore to 80+ with reviewer justification."
+    },
+    {
+      "order": 9,
+      "fixId": "reassign_to_published_recommended_job",
+      "step": "In Breezy, reassign Tyree to published job: Retail Merchandiser - Local Store Support - South Lake Tahoe, NV."
+    },
+    {
+      "order": 10,
+      "fixId": "reassign_to_published_recommended_job",
+      "step": "Confirm positionId syncs locally as the published job id."
+    },
+    {
+      "order": 11,
+      "fixId": "reassign_to_published_recommended_job",
+      "step": "Verify eligibility moves from READY_AFTER_APPROVAL overlay to READY_TO_SEND native path."
+    }
+  ],
+  "softwareSteps": [
+    {
+      "order": 1,
+      "step": "Confirm P132 resume enrichment persisted (hasResume=true, resumeAssets present).",
+      "command": "npx tsx scripts/p132-enrich-tyree-resume.ts"
+    },
+    {
+      "order": 2,
+      "step": "After manual Breezy / sheet updates, re-sync ingestion (read-only).",
+      "command": "npx tsx scripts/p86-3-completion.ts"
+    },
+    {
+      "order": 3,
+      "step": "Re-run P131 manual fix verification recheck.",
+      "command": "npx tsx scripts/p131-manual-fix-verification-first-pilot-recheck.ts"
+    },
+    {
+      "order": 4,
+      "step": "Re-run P133 remaining blocker plan.",
+      "command": "npx tsx scripts/p133-tyree-remaining-pilot-blockers.ts"
+    },
+    {
+      "order": 5,
+      "step": "Only after AUTO_APPROVED + P122 ready_to_send: preview P122 live command (do not execute without operator GO)."
+    }
+  ],
+  "jobRemediation": {
+    "recommendedJobId": "93ebc05539b8",
+    "recommendedJobTitle": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV",
+    "recommendedJobPublished": true,
+    "currentPositionId": "7959fdf7c9f1",
+    "currentPositionClosed": true,
+    "p109Approved": true,
+    "p109Confidence": 75,
+    "action": "reassign_to_recommended",
+    "requiresPublish": false,
+    "requiresRemap": false,
+    "rationale": "Recommended job 93ebc05539b8 is already published. Tyree remains on closed position 7959fdf7c9f1, so P122 blocks on approved_mapping_or_native_project. Reassign in Breezy to the published recommended posting — do not republish the closed ad."
+  },
+  "alternativePublishedJobs": [
+    {
+      "jobId": "93ebc05539b8",
+      "name": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV",
+      "city": "South Lake Tahoe",
+      "state": "NV",
+      "status": "published",
+      "matchScore": 110,
+      "matchReasons": [
+        "Current P109 recommended job",
+        "Same state as candidate",
+        "Same city as candidate",
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": true,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "cfbe9e8ef47f",
+      "name": "Retail Display Merchandiser - Flexible Gig Work - Dayton, NV",
+      "city": "Dayton",
+      "state": "NV",
+      "status": "published",
+      "matchScore": 45,
+      "matchReasons": [
+        "Same state as candidate",
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "692a90f9955d",
+      "name": "Retail Merchandiser - Independent Contractor - Elko, NV",
+      "city": "Elko",
+      "state": "NV",
+      "status": "published",
+      "matchScore": 45,
+      "matchReasons": [
+        "Same state as candidate",
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "93b3ab14d8fc",
+      "name": "Store Merchandiser - Flexible Retail Assignments - Incline Village, NV",
+      "city": "Incline Village",
+      "state": "NV",
+      "status": "published",
+      "matchScore": 45,
+      "matchReasons": [
+        "Same state as candidate",
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "8b6c09cbe80d",
+      "name": "Retail Merchandising Specialist - Reno, NV",
+      "city": "Reno",
+      "state": "NV",
+      "status": "published",
+      "matchScore": 45,
+      "matchReasons": [
+        "Same state as candidate",
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "e797d1fdd2c3",
+      "name": "Independent Retail Merchandiser - Project-Based Work - Yerington, NV",
+      "city": "Yerington",
+      "state": "NV",
+      "status": "published",
+      "matchScore": 45,
+      "matchReasons": [
+        "Same state as candidate",
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "89f2de1d0ad1",
+      "name": "Retail Merchandiser – Frankfort, IL",
+      "city": "Frankfort",
+      "state": "IL",
+      "status": "published",
+      "matchScore": 20,
+      "matchReasons": [
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    },
+    {
+      "jobId": "a8dab0732414",
+      "name": "Field Merchandiser – Westminster, MD",
+      "city": "Westminster",
+      "state": "MD",
+      "status": "published",
+      "matchScore": 20,
+      "matchReasons": [
+        "Merchandising title match",
+        "Published status"
+      ],
+      "isCurrentRecommended": false,
+      "shouldReplaceRecommended": false
+    }
+  ],
+  "recruiterAssignment": {
+    "assigned": false,
+    "recruiter": null
+  },
+  "mappingConfidence": {
+    "current": 75,
+    "required": 80,
+    "p109Decision": "approved",
+    "approvedMappingQualifies": true
+  },
+  "p124Approval": {
+    "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+    "approvalScore": 83,
+    "autoApproved": false,
+    "humanReviewReasons": [
+      "Candidate is recoverable but not safe for autonomous send"
+    ],
+    "blockingReasons": [],
+    "safetyReasons": []
+  },
+  "p122PilotReadiness": {
+    "status": "blocked",
+    "readyToSend": false,
+    "mappingSource": "approved_mapping",
+    "blockingReasons": [
+      "Requires native published job or approved mapping."
+    ],
+    "candidateSafetyPassed": false
+  },
+  "safestFixPlan": "Keep P109 mapping to 93ebc05539b8 (already published). Raise confidence to 80%+, assign recruiter, mark paperwork-ready, then reassign Tyree in Breezy to the published recommended job. Do not republish the closed ad or remap unless ops rejects the current posting.",
+  "expectedPostFixScore": 100,
+  "expectedPostFixDecision": "AUTO_APPROVED",
+  "simulationSteps": [
+    {
+      "fixId": "complete_questionnaire_resume",
+      "title": "Complete questionnaire / resume",
+      "simulatedScore": 93,
+      "simulatedDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreDelta": 10
+    },
+    {
+      "fixId": "raise_mapping_confidence_80",
+      "title": "Raise mapping confidence to 80%+",
+      "simulatedScore": 93,
+      "simulatedDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreDelta": 0
+    },
+    {
+      "fixId": "assign_recruiter",
+      "title": "Assign recruiter",
+      "simulatedScore": 98,
+      "simulatedDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreDelta": 5
+    },
+    {
+      "fixId": "reassign_to_published_recommended_job",
+      "title": "Reassign candidate to published recommended job",
+      "simulatedScore": 100,
+      "simulatedDecision": "AUTO_APPROVED",
+      "scoreDelta": 2
+    },
+    {
+      "fixId": "verify_p109_overlay_eligibility",
+      "title": "Verify P109 overlay clears send blockers",
+      "simulatedScore": 100,
+      "simulatedDecision": "AUTO_APPROVED",
+      "scoreDelta": 0
+    }
+  ],
+  "goNoGo": "GO WITH CONDITIONS",
+  "goNoGoReason": "Remaining blockers are well-defined manual fixes — simulated post-fix reaches AUTO_APPROVED. Apply fixes, re-sync, re-validate; enable pilot env only after P131 passes.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false,
+  "thresholdChanged": false
+}
