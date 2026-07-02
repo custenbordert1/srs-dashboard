@@ -22,7 +22,16 @@ import {
   computeRecruitingIntelligenceFromBreezy,
 } from "@/lib/recruiting-breezy-adapters";
 import type { RecruitingIntelligenceSnapshot } from "@/lib/recruiting-intelligence";
+import { resolveLiveSnapshotCandidates } from "@/lib/p143-live-snapshot-ingestion-fallback/resolve-live-snapshot-candidates";
+import type { LiveSnapshotCandidateMetadata } from "@/lib/p143-live-snapshot-ingestion-fallback/types";
 import type { SheetKpiSnapshot } from "@/lib/sheet-kpi-metrics";
+
+export type RecruitingLiveSnapshotSyncStatus =
+  | "ready"
+  | "partial"
+  | "cache_only"
+  | "fallback"
+  | "unavailable";
 
 export type RecruitingLiveSnapshot = {
   ok: true;
@@ -34,8 +43,14 @@ export type RecruitingLiveSnapshot = {
   kpiSnapshot: SheetKpiSnapshot;
   diagnostics: RecruitingCacheDiagnostics;
   jobLocationDiagnostics: BreezyJobLocationDiagnostics;
-  syncStatus: "ready" | "partial" | "cache_only" | "unavailable";
+  syncStatus: RecruitingLiveSnapshotSyncStatus;
   fetchedAt: string;
+  candidateSource: LiveSnapshotCandidateMetadata["candidateSource"];
+  candidateCount: number;
+  ingestionCandidateCount: number | null;
+  previewCandidateCount: number | null;
+  fallbackReason: LiveSnapshotCandidateMetadata["fallbackReason"];
+  candidatesFreshnessTimestamp: string;
 };
 
 export type RecruitingLiveSnapshotFailure = {
@@ -53,6 +68,43 @@ export type RecruitingLiveSnapshotFailure = {
 };
 
 export type RecruitingLiveSnapshotResult = RecruitingLiveSnapshot | RecruitingLiveSnapshotFailure;
+
+async function buildSuccessSnapshot(input: {
+  jobs: BreezyJobsResult & { ok: true };
+  previewCandidates: BreezyCandidatesResult;
+  previewFromCache: boolean;
+  jobsFromCache: boolean;
+  primarySource: string;
+  sheetLiveEnabled: boolean;
+  fetchedAt: string;
+  syncStatus?: RecruitingLiveSnapshotSyncStatus;
+}): Promise<RecruitingLiveSnapshot> {
+  const resolved = await resolveLiveSnapshotCandidates({
+    previewResult: input.previewCandidates,
+    previewFromCache: input.previewFromCache,
+  });
+
+  const candidatesFromCache = input.previewFromCache && !resolved.usedIngestionFallback;
+  const syncStatus =
+    input.syncStatus ??
+    (resolved.usedIngestionFallback
+      ? "fallback"
+      : input.previewFromCache
+        ? "cache_only"
+        : "ready");
+
+  return successSnapshot({
+    jobs: input.jobs,
+    candidates: resolved.candidates,
+    candidateMetadata: resolved.metadata,
+    jobsFromCache: input.jobsFromCache,
+    candidatesFromCache,
+    primarySource: input.primarySource,
+    sheetLiveEnabled: input.sheetLiveEnabled,
+    fetchedAt: input.fetchedAt,
+    syncStatus,
+  });
+}
 
 export async function buildRecruitingLiveSnapshot(options?: {
   force?: boolean;
@@ -122,13 +174,16 @@ export async function buildRecruitingLiveSnapshot(options?: {
     }
 
     const jobs =
-      jobsResult.ok ? jobsResult : peekedCandidates ? ({ ok: true, jobs: [], fetchedAt, companyId: "", state: "published" } as BreezyJobsResult & { ok: true }) : null;
-    const candidates =
-      candidatesResult.ok
-        ? candidatesResult
-        : peekedCandidates ?? null;
+      jobsResult.ok
+        ? jobsResult
+        : peekedCandidates
+          ? ({ ok: true, jobs: [], fetchedAt, companyId: "", state: "published" } as BreezyJobsResult & {
+              ok: true;
+            })
+          : null;
+    const previewCandidates = candidatesResult.ok ? candidatesResult : peekedCandidates ?? candidatesResult;
 
-    if (!jobs?.ok || !candidates?.ok) {
+    if (!jobs?.ok) {
       return {
         ok: false,
         error: "Breezy sync incomplete — using cache where available.",
@@ -148,21 +203,22 @@ export async function buildRecruitingLiveSnapshot(options?: {
           candidatesError: candidatesResult.ok ? undefined : candidatesResult.error,
         }),
         fallback: {
-          jobs: jobs?.ok ? jobs : null,
-          candidates: candidates?.ok ? candidates : peekedCandidates,
+          jobs: null,
+          candidates: previewCandidates.ok ? previewCandidates : peekedCandidates,
         },
         fetchedAt,
       };
     }
 
-    return successSnapshot({
+    return buildSuccessSnapshot({
       jobs,
-      candidates,
+      previewCandidates,
+      previewFromCache: !candidatesResult.ok && Boolean(peekedCandidates),
       jobsFromCache: false,
-      candidatesFromCache: false,
       primarySource,
       sheetLiveEnabled,
       fetchedAt,
+      syncStatus: candidatesResult.ok ? undefined : "partial",
     });
   }
 
@@ -203,49 +259,34 @@ export async function buildRecruitingLiveSnapshot(options?: {
     };
   }
 
-  if (!jobsOk || !candidatesOk) {
-    const partialJobs = jobsOk
-      ? jobsResult
-      : ({ ok: true, jobs: [], fetchedAt, companyId: "", state: "published" } as BreezyJobsResult & {
-          ok: true;
-        });
-    const partialCandidates = candidatesOk
-      ? candidatesResult
-      : ({ ok: true, candidates: [], fetchedAt, companyId: "" } as BreezyCandidatesResult & { ok: true });
+  const partialJobs = jobsOk
+    ? jobsResult
+    : ({ ok: true, jobs: [], fetchedAt, companyId: "", state: "published" } as BreezyJobsResult & {
+        ok: true;
+      });
 
-    return successSnapshot({
-      jobs: partialJobs,
-      candidates: partialCandidates,
-      jobsFromCache: !jobsOk,
-      candidatesFromCache: usedPeek || !candidatesResult.ok,
-      primarySource,
-      sheetLiveEnabled,
-      fetchedAt,
-      syncStatus: "partial",
-    });
-  }
-
-  return successSnapshot({
-    jobs: jobsResult,
-    candidates: candidatesResult,
-    jobsFromCache: false,
-    candidatesFromCache: usedPeek,
+  return buildSuccessSnapshot({
+    jobs: partialJobs,
+    previewCandidates: candidatesResult,
+    previewFromCache: usedPeek,
+    jobsFromCache: !jobsOk,
     primarySource,
     sheetLiveEnabled,
     fetchedAt,
-    syncStatus: usedPeek ? "cache_only" : "ready",
+    syncStatus: !jobsOk || !candidatesOk ? "partial" : usedPeek ? "cache_only" : undefined,
   });
 }
 
 function successSnapshot(input: {
   jobs: BreezyJobsResult & { ok: true };
   candidates: BreezyCandidatesResult & { ok: true };
+  candidateMetadata: LiveSnapshotCandidateMetadata;
   jobsFromCache: boolean;
   candidatesFromCache: boolean;
   primarySource: string;
   sheetLiveEnabled: boolean;
   fetchedAt: string;
-  syncStatus?: RecruitingLiveSnapshot["syncStatus"];
+  syncStatus?: RecruitingLiveSnapshotSyncStatus;
 }): RecruitingLiveSnapshot {
   const intelligence = computeRecruitingIntelligenceFromBreezy(
     input.jobs.jobs,
@@ -279,5 +320,11 @@ function successSnapshot(input: {
     jobLocationDiagnostics,
     syncStatus: input.syncStatus ?? "ready",
     fetchedAt: input.fetchedAt,
+    candidateSource: input.candidateMetadata.candidateSource,
+    candidateCount: input.candidateMetadata.candidateCount,
+    ingestionCandidateCount: input.candidateMetadata.ingestionCandidateCount,
+    previewCandidateCount: input.candidateMetadata.previewCandidateCount,
+    fallbackReason: input.candidateMetadata.fallbackReason,
+    candidatesFreshnessTimestamp: input.candidateMetadata.candidatesFreshnessTimestamp,
   };
 }

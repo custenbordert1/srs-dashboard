@@ -10,6 +10,21 @@ function formatAge(ms: number | null): string {
   return `${Math.round(ms / 60_000)}m ago`;
 }
 
+function formatCandidateSource(source: string | undefined): string {
+  switch (source) {
+    case "ingestion_fallback":
+      return "Ingestion fallback";
+    case "mixed":
+      return "Ingestion fallback (mixed)";
+    case "live_cache":
+      return "Live cache";
+    case "live_preview":
+      return "Live preview";
+    default:
+      return source ?? "—";
+  }
+}
+
 export function RecruitingDataSourcesPanel() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -109,8 +124,27 @@ export function RecruitingDataSourcesPanel() {
           <DiagCard
             label="Candidates pulled"
             value={
-              snapshot.ok && snapshot.candidates.ok
-                ? snapshot.candidates.candidates.length.toLocaleString()
+              snapshot.ok
+                ? snapshot.candidateCount.toLocaleString()
+                : "partial" in snapshot && snapshot.partial && snapshot.fallback?.candidates?.ok
+                  ? snapshot.fallback.candidates.candidates.length.toLocaleString()
+                  : "—"
+            }
+          />
+          <DiagCard
+            label="Candidate source"
+            value={snapshot.ok ? formatCandidateSource(snapshot.candidateSource) : "—"}
+            warn={
+              snapshot.ok
+                ? snapshot.candidateSource === "ingestion_fallback" || snapshot.candidateSource === "mixed"
+                : false
+            }
+          />
+          <DiagCard
+            label="Preview / ingestion"
+            value={
+              snapshot.ok
+                ? `${snapshot.previewCandidateCount?.toLocaleString() ?? "—"} / ${snapshot.ingestionCandidateCount?.toLocaleString() ?? "—"}`
                 : "—"
             }
           />
@@ -128,6 +162,14 @@ export function RecruitingDataSourcesPanel() {
             }
           />
         </div>
+      ) : null}
+
+      {snapshot?.ok && snapshot.fallbackReason ? (
+        <p className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+          Serving {snapshot.candidateCount.toLocaleString()} candidates from durable ingestion fallback (
+          {snapshot.fallbackReason.replaceAll("_", " ")}). Preview scan had{" "}
+          {snapshot.previewCandidateCount?.toLocaleString() ?? "0"} candidate(s).
+        </p>
       ) : null}
 
       {snapshot?.ok && snapshot.diagnostics.staleWarning ? (

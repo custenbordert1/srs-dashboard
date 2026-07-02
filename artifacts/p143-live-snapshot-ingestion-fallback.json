@@ -1,0 +1,37 @@
+{
+  "sourcePhase": "P143",
+  "generatedAt": "2026-07-02T20:54:55.738Z",
+  "beforeCounts": {
+    "previewOnly": 0,
+    "ingestionStore": 389,
+    "uiWouldShowBeforeFix": 0
+  },
+  "afterCounts": {
+    "liveSnapshotCandidateCount": 389,
+    "candidateSource": "mixed",
+    "syncStatus": "fallback"
+  },
+  "fallbackRules": {
+    "undercountRatio": 2,
+    "useFallbackWhenPreviewEmpty": true,
+    "useFallbackWhenPreviewFailed": true,
+    "useFallbackWhenUndercountVsIngestion": true,
+    "useFallbackWhenServerBudget": true,
+    "useFallbackWhenPartialScan": true
+  },
+  "uiMetadata": {
+    "candidateSource": "mixed",
+    "candidateCount": 389,
+    "ingestionCandidateCount": 389,
+    "previewCandidateCount": 15,
+    "fallbackReason": "preview_server_budget_undercount",
+    "candidatesFreshnessTimestamp": "2026-07-01T20:58:40.077Z"
+  },
+  "safetyConfirmation": {
+    "executeBatchCalled": false,
+    "breezyWrites": false,
+    "liveModeEnabled": false,
+    "paperworkSent": false,
+    "p122ExecutionUnchanged": true
+  }
+}
