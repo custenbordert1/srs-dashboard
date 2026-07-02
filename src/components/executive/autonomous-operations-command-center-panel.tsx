@@ -14,6 +14,7 @@ import type { OperationsCommandCenterReport } from "@/lib/p126-autonomous-operat
 import type { PaperworkRemediationEngineReport } from "@/lib/p134-paperwork-remediation-engine/types";
 import type { PaperworkRemediationExecutorReport } from "@/lib/p135-paperwork-remediation-executor/types";
 import type { AutonomousPaperworkSchedulerReport } from "@/lib/p136-autonomous-paperwork-scheduler/types";
+import type { FirstLiveSendVerificationReport } from "@/lib/p138-first-live-send-verification/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function formatDuration(ms: number | null | undefined): string {
@@ -55,6 +56,8 @@ export function AutonomousOperationsCommandCenterPanel() {
   const [schedulerLoading, setSchedulerLoading] = useState(true);
   const [schedulerRunning, setSchedulerRunning] = useState(false);
   const [schedulerMessage, setSchedulerMessage] = useState<string | null>(null);
+  const [pilotVerification, setPilotVerification] = useState<FirstLiveSendVerificationReport | null>(null);
+  const [pilotVerificationLoading, setPilotVerificationLoading] = useState(true);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -157,6 +160,24 @@ export function AutonomousOperationsCommandCenterPanel() {
   useEffect(() => {
     void loadScheduler();
   }, [loadScheduler]);
+
+  const loadPilotVerification = useCallback(async () => {
+    setPilotVerificationLoading(true);
+    try {
+      const res = await fetch("/api/pilot-verification?skipLock=true", { cache: "no-store" });
+      const data = (await res.json()) as { ok?: boolean; verification?: FirstLiveSendVerificationReport };
+      if (res.ok && data.ok && data.verification) setPilotVerification(data.verification);
+      else setPilotVerification(null);
+    } catch {
+      setPilotVerification(null);
+    } finally {
+      setPilotVerificationLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadPilotVerification();
+  }, [loadPilotVerification]);
 
   const postSchedulerAction = async (path: string) => {
     setSchedulerRunning(true);
@@ -405,6 +426,63 @@ export function AutonomousOperationsCommandCenterPanel() {
           </div>
         ) : (
           <p className="text-sm text-zinc-500">Scheduler unavailable.</p>
+        )}
+      </ExecutiveCard>
+
+      <ExecutiveCard>
+        <SectionHeader
+          title="Pilot Verification"
+          subtitle="P138 — post-executeOne verification and automatic safety lock"
+          badge="P138"
+        />
+        {pilotVerificationLoading && !pilotVerification ? (
+          <p className="text-sm text-zinc-500">Loading pilot verification…</p>
+        ) : pilotVerification ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <MetricCard label="Pilot candidate" value={pilotVerification.executivePanel.pilotCandidate} />
+              <MetricCard
+                label="Signature Request ID"
+                value={pilotVerification.executivePanel.signatureRequestId ?? "—"}
+              />
+              <MetricCard label="Timestamp" value={formatTimestamp(pilotVerification.executivePanel.timestamp)} />
+              <MetricCard label="Audit status" value={pilotVerification.executivePanel.auditStatus} />
+              <MetricCard
+                label="Duplicate protection"
+                value={pilotVerification.executivePanel.duplicateProtection}
+              />
+              <MetricCard label="Pilot lock" value={pilotVerification.executivePanel.pilotLockStatus} />
+              <MetricCard label="Overall" value={pilotVerification.executivePanel.overallResult} />
+              <MetricCard label="GO / NO-GO" value={pilotVerification.goNoGo} />
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-zinc-100">Verification checklist</h4>
+              <ul className="space-y-1 text-sm text-zinc-300">
+                {pilotVerification.verificationChecklist.map((check) => (
+                  <li key={check.id} className="flex items-start gap-2">
+                    <StatusBadge tone={check.passed ? "success" : "critical"}>
+                      {check.passed ? "PASS" : "FAIL"}
+                    </StatusBadge>
+                    <span>
+                      {check.label}: {check.detail}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {pilotVerification.recommendations.length > 0 ? (
+              <ExecutiveWarningList warnings={pilotVerification.recommendations} />
+            ) : null}
+            <button
+              type="button"
+              className="rounded-md border border-zinc-700 px-3 py-1 text-sm text-zinc-200"
+              onClick={() => void loadPilotVerification()}
+            >
+              Refresh verification
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">Pilot verification unavailable.</p>
         )}
       </ExecutiveCard>
 
