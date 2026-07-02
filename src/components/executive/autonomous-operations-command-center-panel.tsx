@@ -12,6 +12,7 @@ import {
 } from "@/components/executive/ui";
 import type { OperationsCommandCenterReport } from "@/lib/p126-autonomous-operations-command-center/types";
 import type { PaperworkRemediationEngineReport } from "@/lib/p134-paperwork-remediation-engine/types";
+import type { PaperworkRemediationExecutorReport } from "@/lib/p135-paperwork-remediation-executor/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function formatDuration(ms: number | null | undefined): string {
@@ -45,6 +46,10 @@ export function AutonomousOperationsCommandCenterPanel() {
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [remediation, setRemediation] = useState<PaperworkRemediationEngineReport | null>(null);
   const [remediationLoading, setRemediationLoading] = useState(true);
+  const [executor, setExecutor] = useState<PaperworkRemediationExecutorReport | null>(null);
+  const [executorLoading, setExecutorLoading] = useState(true);
+  const [executorRunning, setExecutorRunning] = useState(false);
+  const [executorMessage, setExecutorMessage] = useState<string | null>(null);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -108,6 +113,55 @@ export function AutonomousOperationsCommandCenterPanel() {
   useEffect(() => {
     void loadRemediation();
   }, [loadRemediation]);
+
+  const loadExecutor = useCallback(async () => {
+    setExecutorLoading(true);
+    try {
+      const res = await fetch("/api/paperwork-remediation-executor?maxCandidates=15", { cache: "no-store" });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        executor?: PaperworkRemediationExecutorReport;
+      };
+      if (res.ok && data.ok && data.executor) {
+        setExecutor(data.executor);
+      }
+    } catch {
+      setExecutor(null);
+    } finally {
+      setExecutorLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadExecutor();
+  }, [loadExecutor]);
+
+  const runExecutorPreview = async () => {
+    setExecutorRunning(true);
+    setExecutorMessage(null);
+    try {
+      const res = await fetch("/api/paperwork-remediation-executor/run-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maxCandidates: 15, tierFilter: [1, 2] }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        executor?: PaperworkRemediationExecutorReport;
+        error?: string;
+      };
+      if (!res.ok || !data.ok || !data.executor) {
+        setExecutorMessage(data.error ?? "Executor preview failed");
+        return;
+      }
+      setExecutor(data.executor);
+      setExecutorMessage("Preview run completed — no production writes.");
+    } catch {
+      setExecutorMessage("Executor preview failed");
+    } finally {
+      setExecutorRunning(false);
+    }
+  };
 
   const postRunnerAction = async (path: string) => {
     setRunning(true);
@@ -258,8 +312,8 @@ export function AutonomousOperationsCommandCenterPanel() {
       <ExecutiveCard>
         <SectionHeader
           title="Paperwork Remediation Center"
-          subtitle="P134 — blocker analysis and remediation plans (read-only)"
-          badge="P134"
+          subtitle="P134 analysis + P135 preview executor (read-only)"
+          badge="P134/P135"
         />
         {remediationLoading && !remediation ? (
           <p className="text-sm text-zinc-500">Loading remediation analysis…</p>
@@ -313,6 +367,86 @@ export function AutonomousOperationsCommandCenterPanel() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="border-t border-zinc-800/60 pt-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h4 className="text-sm font-medium text-zinc-100">P135 Remediation Executor (preview)</h4>
+                <button
+                  type="button"
+                  disabled={executorRunning}
+                  className="rounded-md border border-zinc-700 px-3 py-1 text-sm text-zinc-200"
+                  onClick={() => void runExecutorPreview()}
+                >
+                  {executorRunning ? "Running preview…" : "Run preview"}
+                </button>
+              </div>
+              {executorLoading && !executor ? (
+                <p className="text-sm text-zinc-500">Loading executor status…</p>
+              ) : executor ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <MetricCard
+                      label="Automatic fixes completed"
+                      value={executor.executivePanel.automaticFixesCompleted.toLocaleString()}
+                    />
+                    <MetricCard
+                      label="Manual fixes remaining"
+                      value={executor.executivePanel.manualFixesRemaining.toLocaleString()}
+                    />
+                    <MetricCard
+                      label="Est. approvals unlocked"
+                      value={executor.executivePanel.estimatedApprovalsUnlocked.toLocaleString()}
+                    />
+                    <MetricCard label="Preview GO" value={executor.goNoGo} />
+                  </div>
+
+                  <div>
+                    <h5 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">
+                      Recently resolved (preview)
+                    </h5>
+                    <ul className="space-y-1 text-sm text-zinc-300">
+                      {executor.executivePanel.recentlyResolvedCandidates.length === 0 ? (
+                        <li className="text-zinc-500">None in latest preview run.</li>
+                      ) : (
+                        executor.executivePanel.recentlyResolvedCandidates.slice(0, 5).map((candidate) => (
+                          <li key={candidate.candidateId} className="rounded border border-zinc-800/60 px-2 py-1">
+                            {candidate.candidateName} — {candidate.beforeDecision} → {candidate.afterDecision}
+                            {candidate.scoreDelta > 0 ? ` (+${candidate.scoreDelta})` : ""}
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">Audit history</h5>
+                    <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-zinc-400">
+                      {executor.executivePanel.auditHistory.slice(-8).map((entry) => (
+                        <li key={entry.recordId}>
+                          {entry.candidateName}: {entry.action} — {entry.success ? "ok" : "failed"}
+                          {entry.decisionDelta ? ` · ${entry.decisionDelta}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {executor.executivePanel.retryableFailures.length > 0 ? (
+                    <div>
+                      <h5 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">
+                        Retry failed remediations
+                      </h5>
+                      <p className="text-sm text-zinc-400">
+                        {executor.executivePanel.retryableFailures.length} enrichment refresh failure(s) — re-run preview
+                        after ingestion sync.
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500">Executor preview unavailable.</p>
+              )}
+              {executorMessage ? <p className="mt-2 text-sm text-zinc-300">{executorMessage}</p> : null}
             </div>
           </div>
         ) : (
