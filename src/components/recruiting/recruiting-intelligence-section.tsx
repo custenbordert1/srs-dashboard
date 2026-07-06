@@ -23,6 +23,7 @@ import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
+import { CandidateAdvancementIntelligencePanel } from "@/components/executive/candidate-advancement-intelligence-panel";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { ForecastIntelligenceSection } from "./forecast-intelligence-section";
@@ -572,6 +573,17 @@ export function RecruitingIntelligenceSection() {
         summary={<p className="text-sm text-zinc-500">Candidate scoring and fit analysis.</p>}
       >
         <CandidateIntelligenceSection />
+      </DeferredSection>
+
+      <DeferredSection
+        title="Candidate advancement intelligence"
+        summary={
+          <p className="text-sm text-zinc-500">
+            P144 read-only advancement scores, hire probability, and automation preview.
+          </p>
+        }
+      >
+        <CandidateAdvancementIntelligencePanel />
       </DeferredSection>
 
       <DeferredSection

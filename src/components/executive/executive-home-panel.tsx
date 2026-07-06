@@ -40,6 +40,8 @@ import { WorkforcePlacementPanel } from "@/components/executive/workforce-placem
 import { OnboardingHealthPanel } from "@/components/executive/onboarding-health-panel";
 import { RecruiterAutomationReadinessPanel } from "@/components/executive/recruiter-automation-readiness-panel";
 import { PipelineHealthPanel } from "@/components/executive/pipeline-health-panel";
+import { CandidateAdvancementIntelligencePanel } from "@/components/executive/candidate-advancement-intelligence-panel";
+import { AutomationPreviewQueuePanel } from "@/components/executive/automation-preview-queue-panel";
 import type { ExecutiveDashboardSnapshot, TerritoryRollupRow } from "@/lib/dm-dashboard";
 import { buildExecutiveSnapshotContent } from "@/lib/build-executive-home-snapshot";
 import { sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
@@ -472,6 +474,10 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AtsHealthCard collapsible />
 
       <PipelineHealthPanel />
+
+      <CandidateAdvancementIntelligencePanel />
+
+      <AutomationPreviewQueuePanel />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <TerritoryTable
