@@ -47,6 +47,7 @@ import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-ap
 import { AutoSendPaperworkReminderPanel } from "@/components/executive/auto-send-paperwork-reminder-panel";
 import { InitialPaperworkAutomationPanel } from "@/components/executive/initial-paperwork-automation-panel";
 import { AutonomousOperationsPanel } from "@/components/executive/autonomous-operations-panel";
+import { ProductionOperationsDashboardPanel } from "@/components/executive/production-operations-dashboard-panel";
 import type { ExecutiveDashboardSnapshot, TerritoryRollupRow } from "@/lib/dm-dashboard";
 import { buildExecutiveSnapshotContent } from "@/lib/build-executive-home-snapshot";
 import { sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
@@ -493,6 +494,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <InitialPaperworkAutomationPanel />
 
       <AutonomousOperationsPanel />
+
+      <ProductionOperationsDashboardPanel />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <TerritoryTable

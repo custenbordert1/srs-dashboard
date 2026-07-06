@@ -28,6 +28,7 @@ import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-ap
 import { AutoSendPaperworkReminderPanel } from "@/components/executive/auto-send-paperwork-reminder-panel";
 import { InitialPaperworkAutomationPanel } from "@/components/executive/initial-paperwork-automation-panel";
 import { AutonomousOperationsPanel } from "@/components/executive/autonomous-operations-panel";
+import { ProductionOperationsDashboardPanel } from "@/components/executive/production-operations-dashboard-panel";
 import { ControlledPaperworkAutomationPanel } from "@/components/executive/controlled-paperwork-automation-panel";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
@@ -611,6 +612,9 @@ export function RecruitingIntelligenceSection() {
         </div>
         <div className="mt-6">
           <AutonomousOperationsPanel />
+        </div>
+        <div className="mt-6">
+          <ProductionOperationsDashboardPanel />
         </div>
       </DeferredSection>
 
