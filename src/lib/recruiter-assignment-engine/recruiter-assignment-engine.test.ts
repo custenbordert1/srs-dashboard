@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import { defaultRecruiterRosters } from "@/lib/candidate-workflow-types";
 import {
+  buildLegacyRecruiterAssignmentDecision,
   buildRecruiterAssignmentDecision,
   buildRecruiterAssignmentDecisions,
   RECRUITER_ASSIGNMENT_CONFIDENCE_THRESHOLD,
@@ -32,7 +33,7 @@ function sampleCandidate(id: string, state: string): BreezyCandidate {
 }
 
 describe("recruiter-assignment-engine", () => {
-  it("assigns recruiter when territory and roster are known", () => {
+  it("assigns territory recruiter when roster and territory are known", () => {
     const rosters = defaultRecruiterRosters();
     const decision = buildRecruiterAssignmentDecision({
       candidate: sampleCandidate("c-1", "TX"),
@@ -41,10 +42,53 @@ describe("recruiter-assignment-engine", () => {
     });
 
     assert.equal(decision.shouldAssign, true);
-    assert.equal(decision.recruiter, "Taylor");
+    assert.equal(["Jordan", "Morgan"].includes(decision.recruiter), true);
     assert.ok(decision.confidence >= RECRUITER_ASSIGNMENT_CONFIDENCE_THRESHOLD);
     assert.equal(decision.territoryState, "TX");
     assert.match(decision.reason, /Territory TX/);
+  });
+
+  it("distributes OH assignments across territory pool", () => {
+    const rosters = defaultRecruiterRosters();
+    const ownership = new Map<string, { total: number; byState: Map<string, number> }>();
+    const picks = new Set<string>();
+
+    for (let i = 0; i < 12; i += 1) {
+      const decision = buildRecruiterAssignmentDecision({
+        candidate: sampleCandidate(`oh-${i}`, "OH"),
+        rosters,
+        ownership,
+      });
+      assert.equal(decision.shouldAssign, true);
+      picks.add(decision.recruiter);
+      const bucket = ownership.get(decision.recruiter) ?? { total: 0, byState: new Map() };
+      bucket.total += 1;
+      bucket.byState.set("OH", (bucket.byState.get("OH") ?? 0) + 1);
+      ownership.set(decision.recruiter, bucket);
+    }
+
+    assert.equal(picks.size >= 2, true);
+  });
+
+  it("legacy global pool collapses to a single recruiter when only Taylor is rostered", () => {
+    const rosters = { recruiters: ["Unassigned", "Taylor", "Recruiting Team"], dms: [] };
+    const ownership = new Map([["Taylor", { total: 1, byState: new Map<string, number>() }]]);
+    const legacy = buildLegacyRecruiterAssignmentDecision({
+      candidate: sampleCandidate("legacy-1", "GA"),
+      rosters,
+      ownership,
+    });
+    const fixed = buildRecruiterAssignmentDecision({
+      candidate: sampleCandidate("legacy-1", "GA"),
+      rosters,
+      ownership: new Map(),
+    });
+
+    assert.equal(legacy.recruiter, "Taylor");
+    assert.equal(legacy.shouldAssign, false);
+    assert.equal(fixed.shouldAssign, true);
+    assert.equal(["Casey", "Riley"].includes(fixed.recruiter), true);
+    assert.notEqual(fixed.recruiter, "Taylor");
   });
 
   it("skips assignment when territory cannot be determined", () => {
