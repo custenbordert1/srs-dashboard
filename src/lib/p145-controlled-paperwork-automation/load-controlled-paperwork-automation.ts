@@ -17,7 +17,7 @@ import type {
   ControlledPaperworkAutomationSnapshot,
   P145ExecutionMode,
 } from "@/lib/p145-controlled-paperwork-automation/types";
-import { buildRecruitingLiveSnapshot } from "@/lib/recruiting-live-snapshot";
+import { buildRecruitingLiveSnapshot, type RecruitingLiveSnapshotResult } from "@/lib/recruiting-live-snapshot";
 import { evaluateCandidate, type CandidateAdvancementEvaluation } from "@/lib/recruiting/candidate-advancement-engine";
 import {
   buildPaperworkQueue,
@@ -72,9 +72,17 @@ function jobsMap(jobs: BreezyJob[]): Map<string, BreezyJob> {
 
 export async function buildPaperworkAutomationBundle(
   session: AuthSession,
+  options?: {
+    liveSnapshot?: RecruitingLiveSnapshotResult | null;
+  },
 ): Promise<PaperworkAutomationBundle> {
   const generatedAt = new Date().toISOString();
   const referenceMs = Date.parse(generatedAt);
+
+  const liveSnapshotPromise =
+    options?.liveSnapshot !== undefined
+      ? Promise.resolve(options.liveSnapshot)
+      : buildRecruitingLiveSnapshot().catch(() => null);
 
   const [workflows, candidatesResult, jobsResult, onboardingPolicy, liveSnapshot, onboardingRecords, auditEvents] =
     await Promise.all([
@@ -86,7 +94,7 @@ export async function buildPaperworkAutomationBundle(
         fetchedAt: generatedAt,
       })),
       loadCandidateOnboardingPolicy().catch(() => null),
-      buildRecruitingLiveSnapshot().catch(() => null),
+      liveSnapshotPromise,
       listAllCandidateOnboardingRecords().catch(() => []),
       loadPaperworkAutomationAuditLog().catch(() => []),
     ]);

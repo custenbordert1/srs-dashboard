@@ -1,0 +1,149 @@
+{
+  "sourcePhase": "P148",
+  "generatedAt": "2026-07-06T16:51:04.877Z",
+  "productionReadiness": {
+    "recommendation": "READY WITH CONDITIONS",
+    "score": 90,
+    "checks": {
+      "orchestratorDisabledByDefault": true,
+      "dryRunWorks": true,
+      "lockValidation": true,
+      "runHistoryOperational": true,
+      "phaseTimingsRecorded": true,
+      "noBreezyWrites": true,
+      "noExecuteBatch": true,
+      "p143ThroughP147Integration": true,
+      "gracefulRecovery": true,
+      "executiveMetrics": true
+    }
+  },
+  "dryRun": {
+    "runId": "41c36fc8-cde3-4910-a094-61d66d163fa8",
+    "durationMs": 61736,
+    "candidatesEvaluated": 389,
+    "paperworkQueueCount": 0,
+    "remindersSent": 0,
+    "initialPaperworkSent": 0,
+    "blockedCandidates": 0,
+    "phaseTimings": [
+      {
+        "phase": "refresh_live_snapshot",
+        "success": true,
+        "durationMs": 60959
+      },
+      {
+        "phase": "candidate_intelligence",
+        "success": true,
+        "durationMs": 706,
+        "cacheHit": true
+      },
+      {
+        "phase": "build_paperwork_queue",
+        "success": true,
+        "durationMs": 66,
+        "cacheHit": true
+      },
+      {
+        "phase": "auto_reminder_processing",
+        "success": true,
+        "durationMs": 1
+      },
+      {
+        "phase": "initial_paperwork_processing",
+        "success": true,
+        "durationMs": 1
+      },
+      {
+        "phase": "generate_executive_metrics",
+        "success": true,
+        "durationMs": 1
+      },
+      {
+        "phase": "persist_run_summary",
+        "success": true,
+        "durationMs": 0
+      }
+    ]
+  },
+  "lockValidation": {
+    "secondRunSkipped": true,
+    "skipReason": null
+  },
+  "safetyConfirmation": {
+    "executeBatchCalled": false,
+    "breezyWrites": false,
+    "paperworkSent": false,
+    "enabled": false
+  },
+  "runHistoryCount": 2,
+  "status": {
+    "sourcePhase": "P148",
+    "generatedAt": "2026-07-06T16:51:04.877Z",
+    "automationStatus": "stopped",
+    "enabled": false,
+    "dryRunOnly": true,
+    "lastSuccessfulRun": "2026-07-06T16:51:04.876Z",
+    "currentRun": null,
+    "lastRunDurationMs": 60064,
+    "candidatesEvaluated": 389,
+    "paperworkQueueCount": 0,
+    "remindersSent": 0,
+    "initialPaperworkSent": 0,
+    "blockedCandidates": 0,
+    "failures": [],
+    "warnings": [
+      "Partial sync during bundle build.",
+      "Partial sync during bundle build."
+    ],
+    "nextScheduledRun": null,
+    "scheduleIntervalMinutes": 5,
+    "alerts": [],
+    "observability": {
+      "phaseTimings": [
+        {
+          "phase": "refresh_live_snapshot",
+          "success": true,
+          "durationMs": 59319
+        },
+        {
+          "phase": "candidate_intelligence",
+          "success": true,
+          "durationMs": 684,
+          "cacheHit": true
+        },
+        {
+          "phase": "build_paperwork_queue",
+          "success": true,
+          "durationMs": 52,
+          "cacheHit": true
+        },
+        {
+          "phase": "auto_reminder_processing",
+          "success": true,
+          "durationMs": 0
+        },
+        {
+          "phase": "initial_paperwork_processing",
+          "success": true,
+          "durationMs": 1
+        },
+        {
+          "phase": "generate_executive_metrics",
+          "success": true,
+          "durationMs": 0
+        },
+        {
+          "phase": "persist_run_summary",
+          "success": true,
+          "durationMs": 0
+        }
+      ],
+      "cacheHitRate": 29,
+      "apiLatencyMs": 59319,
+      "executionCount": 7,
+      "skippedRuns": 0
+    },
+    "breezyWrites": false,
+    "executeBatchCalled": false
+  }
+}
