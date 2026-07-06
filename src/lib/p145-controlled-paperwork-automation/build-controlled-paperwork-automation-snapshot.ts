@@ -13,6 +13,13 @@ import {
 } from "@/lib/p145-controlled-paperwork-automation/types";
 import type { PaperworkQueueItem } from "@/lib/recruiting/paperwork-automation-engine";
 import { isP145ExecutionEnabled } from "@/lib/p145-controlled-paperwork-automation/paperwork-automation-audit-store";
+import {
+  buildDryRunSummaryFromQueue,
+  isP146AutoSendEnabled,
+  type AutoSendExecutionSummary,
+} from "@/lib/recruiting/paperwork-execution-engine";
+import type { PaperworkAutomationContext } from "@/lib/recruiting/paperwork-automation-engine";
+import { hoursSince } from "@/lib/candidate-action-sla";
 
 function average(values: number[]): number {
   if (values.length === 0) return 0;
@@ -131,6 +138,63 @@ function buildApprovalQueue(
   });
 }
 
+function buildAutoSendMetrics(input: {
+  queue: PaperworkQueueItem[];
+  auditEvents: PaperworkAutomationAuditEvent[];
+  contexts?: PaperworkAutomationContext[];
+  lastAutoSendSummary?: AutoSendExecutionSummary | null;
+  referenceMs?: number;
+}): ControlledPaperworkAutomationSnapshot["autoSend"] {
+  const referenceMs = input.referenceMs ?? Date.now();
+  const dryRun =
+    input.contexts && input.contexts.length > 0
+      ? buildDryRunSummaryFromQueue({
+          contexts: input.contexts,
+          auditEvents: input.auditEvents,
+          referenceMs,
+        })
+      : {
+          eligibleCount: 0,
+          blockedCount: 0,
+          cooldownBlocked: 0,
+          manualReviewRequired: 0,
+          duplicatesPrevented: 0,
+        };
+
+  const sentToday = input.auditEvents.filter((event) => {
+    if (event.sendResult !== "sent" || event.type !== "reminder_sent") return false;
+    const hours = hoursSince(event.at, referenceMs);
+    return hours != null && hours < 24;
+  }).length;
+
+  const sentTotal = input.lastAutoSendSummary?.sentCount ?? sentToday;
+  const attempted = input.lastAutoSendSummary?.items.filter((item) => item.autoSendEligible).length ?? 0;
+  const successRate =
+    attempted > 0 ? Math.round((sentTotal / attempted) * 100) : sentToday > 0 ? 100 : 0;
+
+  const waiting = input.queue.filter(
+    (item) =>
+      ["Send Reminder #1", "Send Reminder #2", "Wait"].includes(item.recommendedAction) &&
+      item.paperworkStatus !== "signed",
+  ).length;
+
+  return {
+    autoSendEnabled: isP146AutoSendEnabled(),
+    eligibleRemindersToday: dryRun.eligibleCount,
+    sentToday,
+    skipped: input.lastAutoSendSummary?.skippedCount ?? 0,
+    blocked: input.lastAutoSendSummary?.blockedCount ?? dryRun.blockedCount,
+    failures: input.lastAutoSendSummary?.failedCount ?? 0,
+    cooldownBlocked: input.lastAutoSendSummary?.cooldownBlocked ?? dryRun.cooldownBlocked,
+    manualReviewRequired:
+      input.lastAutoSendSummary?.manualReviewRequired ?? dryRun.manualReviewRequired,
+    duplicatesPrevented:
+      input.lastAutoSendSummary?.duplicatesPrevented ?? dryRun.duplicatesPrevented,
+    reminderSuccessRate: successRate,
+    candidatesStillWaiting: waiting,
+  };
+}
+
 export function buildControlledPaperworkAutomationSnapshot(input: {
   queue: PaperworkQueueItem[];
   generatedAt: string;
@@ -138,6 +202,9 @@ export function buildControlledPaperworkAutomationSnapshot(input: {
   candidatesEvaluated: number;
   recentAuditEvents: PaperworkAutomationAuditEvent[];
   executionMode?: P145ExecutionMode;
+  contexts?: PaperworkAutomationContext[];
+  lastAutoSendSummary?: AutoSendExecutionSummary | null;
+  referenceMs?: number;
 }): ControlledPaperworkAutomationSnapshot {
   const pilot = loadPilotConfig();
   const executionMode = input.executionMode ?? "preview";
@@ -160,5 +227,13 @@ export function buildControlledPaperworkAutomationSnapshot(input: {
     paperworkSent: false,
     liveModeEnabled: pilot.liveModeEnabled,
     executionEnabled: isP145ExecutionEnabled(),
+    autoSend: buildAutoSendMetrics({
+      queue: input.queue,
+      auditEvents: input.recentAuditEvents,
+      contexts: input.contexts,
+      lastAutoSendSummary: input.lastAutoSendSummary ?? null,
+      referenceMs: input.referenceMs,
+    }),
+    lastAutoSendSummary: input.lastAutoSendSummary ?? null,
   };
 }

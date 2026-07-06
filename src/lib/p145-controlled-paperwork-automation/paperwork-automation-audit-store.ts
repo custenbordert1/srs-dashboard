@@ -42,6 +42,16 @@ export async function appendPaperworkAutomationAuditEvent(
     reason: event.reason,
     executed: event.executed,
     simulated: event.simulated,
+    candidateName: event.candidateName,
+    email: event.email,
+    recruiter: event.recruiter,
+    autoSendEligible: event.autoSendEligible,
+    sendResult: event.sendResult,
+    blockedReason: event.blockedReason,
+    cooldownCheck: event.cooldownCheck,
+    paperworkStatusBeforeSend: event.paperworkStatusBeforeSend,
+    templateUsed: event.templateUsed,
+    executionMode: event.executionMode,
   };
   const events = [full, ...existing].slice(0, MAX_AUDIT_EVENTS);
   const now = new Date().toISOString();

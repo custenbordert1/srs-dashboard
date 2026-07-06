@@ -1,4 +1,5 @@
 import type { PaperworkQueueItem } from "@/lib/recruiting/paperwork-automation-engine";
+import type { AutoSendExecutionSummary } from "@/lib/recruiting/paperwork-execution-engine";
 
 export const P145_SOURCE_PHASE = "P145";
 export const P145_DEFAULT_MODE = "approvalRequired" as const;
@@ -23,6 +24,16 @@ export type PaperworkAutomationAuditEvent = {
   reason: string;
   executed: boolean;
   simulated: boolean;
+  candidateName?: string;
+  email?: string;
+  recruiter?: string;
+  autoSendEligible?: boolean;
+  sendResult?: "sent" | "skipped" | "blocked" | "failed";
+  blockedReason?: string | null;
+  cooldownCheck?: { passed: boolean; reason: string };
+  paperworkStatusBeforeSend?: string;
+  templateUsed?: string | null;
+  executionMode?: "dry_run" | "live";
 };
 
 export type PaperworkApprovalQueueRow = PaperworkQueueItem & {
@@ -55,6 +66,20 @@ export type PaperworkValidationReport = {
   topRecruitersByWorkload: Array<{ recruiter: string; count: number }>;
 };
 
+export type PaperworkAutoSendMetrics = {
+  autoSendEnabled: boolean;
+  eligibleRemindersToday: number;
+  sentToday: number;
+  skipped: number;
+  blocked: number;
+  failures: number;
+  cooldownBlocked: number;
+  manualReviewRequired: number;
+  duplicatesPrevented: number;
+  reminderSuccessRate: number;
+  candidatesStillWaiting: number;
+};
+
 export type ControlledPaperworkAutomationSnapshot = {
   sourcePhase: typeof P145_SOURCE_PHASE;
   generatedAt: string;
@@ -72,4 +97,6 @@ export type ControlledPaperworkAutomationSnapshot = {
   paperworkSent: false;
   liveModeEnabled: boolean;
   executionEnabled: boolean;
+  autoSend: PaperworkAutoSendMetrics;
+  lastAutoSendSummary: AutoSendExecutionSummary | null;
 };

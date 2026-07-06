@@ -25,6 +25,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CandidateAdvancementIntelligencePanel } from "@/components/executive/candidate-advancement-intelligence-panel";
 import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-approval-queue-panel";
+import { AutoSendPaperworkReminderPanel } from "@/components/executive/auto-send-paperwork-reminder-panel";
 import { ControlledPaperworkAutomationPanel } from "@/components/executive/controlled-paperwork-automation-panel";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
@@ -599,6 +600,9 @@ export function RecruitingIntelligenceSection() {
         <ControlledPaperworkAutomationPanel />
         <div className="mt-6">
           <PaperworkApprovalQueuePanel />
+        </div>
+        <div className="mt-6">
+          <AutoSendPaperworkReminderPanel />
         </div>
       </DeferredSection>
 

@@ -184,6 +184,22 @@ describe("p145-controlled-paperwork-automation snapshot", () => {
       candidatesEvaluated: 2,
       recentAuditEvents: [],
       executionMode: "approval",
+      contexts: [
+        { row: mockRow({ candidateId: "c-1" }), jobsByPositionId, onboarding: null },
+        {
+          row: mockRow({
+            candidateId: "c-2",
+            assignedRecruiter: "Sam",
+            workflowStatus: "Paperwork Sent",
+            paperworkStatus: "viewed",
+            signatureRequestId: "sig-2",
+            paperworkSentAt: new Date(Date.now() - 50 * 60 * 60 * 1000).toISOString(),
+            actionType: "await-signature",
+          }),
+          jobsByPositionId,
+          onboarding: null,
+        },
+      ],
     });
 
     assert.equal(snapshot.sourcePhase, "P145");
@@ -191,6 +207,9 @@ describe("p145-controlled-paperwork-automation snapshot", () => {
     assert.equal(snapshot.executeBatchCalled, false);
     assert.equal(snapshot.breezyWrites, false);
     assert.equal(snapshot.paperworkSent, false);
+    assert.ok(snapshot.autoSend);
+    assert.equal(snapshot.autoSend.autoSendEnabled, false);
+    assert.equal(snapshot.lastAutoSendSummary, null);
     assert.ok(snapshot.executive.outstandingPaperwork >= 1);
     assert.ok(snapshot.validation.initialPaperworkCount >= 0);
     for (const row of snapshot.approvalQueue) {

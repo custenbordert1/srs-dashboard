@@ -19,19 +19,36 @@ import type {
 } from "@/lib/p145-controlled-paperwork-automation/types";
 import { buildRecruitingLiveSnapshot } from "@/lib/recruiting-live-snapshot";
 import { evaluateCandidate } from "@/lib/recruiting/candidate-advancement-engine";
-import { buildPaperworkQueue } from "@/lib/recruiting/paperwork-automation-engine";
+import {
+  buildPaperworkQueue,
+  type PaperworkAutomationContext,
+} from "@/lib/recruiting/paperwork-automation-engine";
+import {
+  executeAutoSendPaperworkReminders,
+  isP146AutoSendEnabled,
+  type AutoSendExecutionSummary,
+} from "@/lib/recruiting/paperwork-execution-engine";
+
+export type PaperworkAutomationBundle = {
+  contexts: PaperworkAutomationContext[];
+  queue: ReturnType<typeof buildPaperworkQueue>;
+  partialSync: boolean;
+  candidatesEvaluated: number;
+  auditEvents: Awaited<ReturnType<typeof loadPaperworkAutomationAuditLog>>;
+  meta: {
+    candidatesFromIngestionStore: boolean;
+    candidateSource: string | null;
+    jobsCount: number;
+    refreshedAt: string;
+  };
+};
 
 export type ControlledPaperworkAutomationLoadResult =
   | {
       ok: true;
       snapshot: ControlledPaperworkAutomationSnapshot;
       partialSync: boolean;
-      meta: {
-        candidatesFromIngestionStore: boolean;
-        candidateSource: string | null;
-        jobsCount: number;
-        refreshedAt: string;
-      };
+      meta: PaperworkAutomationBundle["meta"];
     }
   | {
       ok: false;
@@ -44,10 +61,9 @@ function jobsMap(jobs: BreezyJob[]): Map<string, BreezyJob> {
   return new Map(jobs.map((job) => [job.jobId, job]));
 }
 
-export async function loadControlledPaperworkAutomationForSession(
+export async function buildPaperworkAutomationBundle(
   session: AuthSession,
-  options?: { executionMode?: P145ExecutionMode },
-): Promise<ControlledPaperworkAutomationLoadResult> {
+): Promise<PaperworkAutomationBundle> {
   const generatedAt = new Date().toISOString();
   const referenceMs = Date.parse(generatedAt);
 
@@ -104,28 +120,12 @@ export async function loadControlledPaperworkAutomationForSession(
 
   const queue = buildPaperworkQueue(contexts);
 
-  const snapshot = buildControlledPaperworkAutomationSnapshot({
+  return {
+    contexts,
     queue,
-    generatedAt,
     partialSync,
     candidatesEvaluated: candidates.length,
-    recentAuditEvents: auditEvents,
-    executionMode: options?.executionMode ?? "preview",
-  });
-
-  if (!candidatesResult.ok && queue.length === 0) {
-    return {
-      ok: false,
-      error: candidatesResult.error,
-      partial: true,
-      snapshot,
-    };
-  }
-
-  return {
-    ok: true,
-    snapshot,
-    partialSync,
+    auditEvents,
     meta: {
       candidatesFromIngestionStore: candidatesResult.ok ? candidatesResult.fromIngestionStore : false,
       candidateSource: liveSnapshot?.ok ? liveSnapshot.candidateSource : null,
@@ -135,7 +135,84 @@ export async function loadControlledPaperworkAutomationForSession(
   };
 }
 
-export type PaperworkApprovalAction = "approve" | "reject" | "approve_selected" | "approve_all";
+export async function loadControlledPaperworkAutomationForSession(
+  session: AuthSession,
+  options?: {
+    executionMode?: P145ExecutionMode;
+    lastAutoSendSummary?: AutoSendExecutionSummary | null;
+  },
+): Promise<ControlledPaperworkAutomationLoadResult> {
+  const bundle = await buildPaperworkAutomationBundle(session);
+
+  const snapshot = buildControlledPaperworkAutomationSnapshot({
+    queue: bundle.queue,
+    generatedAt: bundle.meta.refreshedAt,
+    partialSync: bundle.partialSync,
+    candidatesEvaluated: bundle.candidatesEvaluated,
+    recentAuditEvents: bundle.auditEvents,
+    executionMode: options?.executionMode ?? "preview",
+    contexts: bundle.contexts,
+    lastAutoSendSummary: options?.lastAutoSendSummary ?? null,
+    referenceMs: Date.parse(bundle.meta.refreshedAt),
+  });
+
+  if (!bundle.candidatesEvaluated && bundle.partialSync) {
+    return {
+      ok: false,
+      error: "Candidates unavailable",
+      partial: true,
+      snapshot,
+    };
+  }
+
+  return {
+    ok: true,
+    snapshot,
+    partialSync: bundle.partialSync,
+    meta: bundle.meta,
+  };
+}
+
+export type PaperworkApprovalAction =
+  | "approve"
+  | "reject"
+  | "approve_selected"
+  | "approve_all"
+  | "auto_send_reminders";
+
+export async function runAutoSendPaperworkReminders(input: {
+  session: AuthSession;
+  dryRun: boolean;
+}): Promise<{
+  summary: AutoSendExecutionSummary;
+  snapshot: ControlledPaperworkAutomationSnapshot;
+}> {
+  const bundle = await buildPaperworkAutomationBundle(input.session);
+  const summary = await executeAutoSendPaperworkReminders({
+    contexts: bundle.contexts,
+    auditEvents: bundle.auditEvents,
+    dryRun: input.dryRun,
+    autoSendEnabled: isP146AutoSendEnabled(),
+    userId: input.session.userId,
+    userEmail: input.session.email,
+    referenceMs: Date.parse(bundle.meta.refreshedAt),
+  });
+
+  const auditEvents = await loadPaperworkAutomationAuditLog();
+  const snapshot = buildControlledPaperworkAutomationSnapshot({
+    queue: bundle.queue,
+    generatedAt: new Date().toISOString(),
+    partialSync: bundle.partialSync,
+    candidatesEvaluated: bundle.candidatesEvaluated,
+    recentAuditEvents: auditEvents,
+    executionMode: "approval",
+    contexts: bundle.contexts,
+    lastAutoSendSummary: summary,
+    referenceMs: Date.parse(bundle.meta.refreshedAt),
+  });
+
+  return { summary, snapshot };
+}
 
 export async function recordPaperworkApprovals(input: {
   session: AuthSession;
@@ -154,7 +231,10 @@ export async function recordPaperworkApprovals(input: {
     targetIds = input.candidateIds;
   }
 
-  const isApprove = input.action === "approve" || input.action === "approve_selected" || input.action === "approve_all";
+  const isApprove =
+    input.action === "approve" ||
+    input.action === "approve_selected" ||
+    input.action === "approve_all";
   const eventType = isApprove ? "approval_given" : "approval_rejected";
 
   for (const candidateId of targetIds) {
@@ -181,5 +261,6 @@ export async function recordPaperworkApprovals(input: {
     candidatesEvaluated: input.snapshot.candidatesEvaluated,
     recentAuditEvents: auditEvents,
     executionMode: input.snapshot.executionMode,
+    lastAutoSendSummary: input.snapshot.lastAutoSendSummary,
   });
 }
