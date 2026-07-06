@@ -209,7 +209,10 @@ describe("p145-controlled-paperwork-automation snapshot", () => {
     assert.equal(snapshot.paperworkSent, false);
     assert.ok(snapshot.autoSend);
     assert.equal(snapshot.autoSend.autoSendEnabled, false);
+    assert.ok(snapshot.initialPaperwork);
+    assert.equal(snapshot.initialPaperwork.autoSendEnabled, false);
     assert.equal(snapshot.lastAutoSendSummary, null);
+    assert.equal(snapshot.lastInitialPaperworkSummary, null);
     assert.ok(snapshot.executive.outstandingPaperwork >= 1);
     assert.ok(snapshot.validation.initialPaperworkCount >= 0);
     for (const row of snapshot.approvalQueue) {

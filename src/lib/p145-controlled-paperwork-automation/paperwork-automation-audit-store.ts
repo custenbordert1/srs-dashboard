@@ -52,6 +52,9 @@ export async function appendPaperworkAutomationAuditEvent(
     paperworkStatusBeforeSend: event.paperworkStatusBeforeSend,
     templateUsed: event.templateUsed,
     executionMode: event.executionMode,
+    jobId: event.jobId,
+    validationResult: event.validationResult,
+    duplicatePrevented: event.duplicatePrevented,
   };
   const events = [full, ...existing].slice(0, MAX_AUDIT_EVENTS);
   const now = new Date().toISOString();

@@ -6,7 +6,7 @@ import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { resolveCandidatesForRead } from "@/lib/candidate-ingestion";
 import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { loadCandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
-import { DEFAULT_PAPERWORK_BY_GRADE } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
+import type { CandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/types";
 import { getCandidateWorkflowState } from "@/lib/candidate-workflow-store";
 import { buildControlledPaperworkAutomationSnapshot } from "@/lib/p145-controlled-paperwork-automation/build-controlled-paperwork-automation-snapshot";
 import {
@@ -18,23 +18,32 @@ import type {
   P145ExecutionMode,
 } from "@/lib/p145-controlled-paperwork-automation/types";
 import { buildRecruitingLiveSnapshot } from "@/lib/recruiting-live-snapshot";
-import { evaluateCandidate } from "@/lib/recruiting/candidate-advancement-engine";
+import { evaluateCandidate, type CandidateAdvancementEvaluation } from "@/lib/recruiting/candidate-advancement-engine";
 import {
   buildPaperworkQueue,
   type PaperworkAutomationContext,
 } from "@/lib/recruiting/paperwork-automation-engine";
+import { DEFAULT_PAPERWORK_BY_GRADE } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
+import { DEFAULT_CANDIDATE_ONBOARDING_POLICY } from "@/lib/candidate-onboarding-engine/onboarding-policy-store";
 import {
   executeAutoSendPaperworkReminders,
   isP146AutoSendEnabled,
   type AutoSendExecutionSummary,
 } from "@/lib/recruiting/paperwork-execution-engine";
+import {
+  executeInitialPaperworkAutoSend,
+  isP147InitialPaperworkAutoSendEnabled,
+  type InitialPaperworkExecutionSummary,
+} from "@/lib/recruiting/initial-paperwork-execution-engine";
 
 export type PaperworkAutomationBundle = {
   contexts: PaperworkAutomationContext[];
+  advancements: CandidateAdvancementEvaluation[];
   queue: ReturnType<typeof buildPaperworkQueue>;
   partialSync: boolean;
   candidatesEvaluated: number;
   auditEvents: Awaited<ReturnType<typeof loadPaperworkAutomationAuditLog>>;
+  onboardingPolicy: CandidateOnboardingPolicy;
   meta: {
     candidatesFromIngestionStore: boolean;
     candidateSource: string | null;
@@ -118,14 +127,18 @@ export async function buildPaperworkAutomationBundle(
     };
   });
 
+  const advancements = contexts.map((context) => context.advancement!).filter(Boolean);
   const queue = buildPaperworkQueue(contexts);
+  const resolvedPolicy = onboardingPolicy ?? DEFAULT_CANDIDATE_ONBOARDING_POLICY;
 
   return {
     contexts,
+    advancements,
     queue,
     partialSync,
     candidatesEvaluated: candidates.length,
     auditEvents,
+    onboardingPolicy: resolvedPolicy,
     meta: {
       candidatesFromIngestionStore: candidatesResult.ok ? candidatesResult.fromIngestionStore : false,
       candidateSource: liveSnapshot?.ok ? liveSnapshot.candidateSource : null,
@@ -140,6 +153,7 @@ export async function loadControlledPaperworkAutomationForSession(
   options?: {
     executionMode?: P145ExecutionMode;
     lastAutoSendSummary?: AutoSendExecutionSummary | null;
+    lastInitialPaperworkSummary?: InitialPaperworkExecutionSummary | null;
   },
 ): Promise<ControlledPaperworkAutomationLoadResult> {
   const bundle = await buildPaperworkAutomationBundle(session);
@@ -152,7 +166,9 @@ export async function loadControlledPaperworkAutomationForSession(
     recentAuditEvents: bundle.auditEvents,
     executionMode: options?.executionMode ?? "preview",
     contexts: bundle.contexts,
+    advancements: bundle.advancements,
     lastAutoSendSummary: options?.lastAutoSendSummary ?? null,
+    lastInitialPaperworkSummary: options?.lastInitialPaperworkSummary ?? null,
     referenceMs: Date.parse(bundle.meta.refreshedAt),
   });
 
@@ -178,7 +194,8 @@ export type PaperworkApprovalAction =
   | "reject"
   | "approve_selected"
   | "approve_all"
-  | "auto_send_reminders";
+  | "auto_send_reminders"
+  | "auto_send_initial";
 
 export async function runAutoSendPaperworkReminders(input: {
   session: AuthSession;
@@ -207,7 +224,47 @@ export async function runAutoSendPaperworkReminders(input: {
     recentAuditEvents: auditEvents,
     executionMode: "approval",
     contexts: bundle.contexts,
+    advancements: bundle.advancements,
     lastAutoSendSummary: summary,
+    lastInitialPaperworkSummary: null,
+    referenceMs: Date.parse(bundle.meta.refreshedAt),
+  });
+
+  return { summary, snapshot };
+}
+
+export async function runInitialPaperworkAutoSend(input: {
+  session: AuthSession;
+  dryRun: boolean;
+}): Promise<{
+  summary: InitialPaperworkExecutionSummary;
+  snapshot: ControlledPaperworkAutomationSnapshot;
+}> {
+  const bundle = await buildPaperworkAutomationBundle(input.session);
+  const summary = await executeInitialPaperworkAutoSend({
+    contexts: bundle.contexts,
+    advancements: bundle.advancements,
+    auditEvents: bundle.auditEvents,
+    onboardingPolicy: bundle.onboardingPolicy,
+    dryRun: input.dryRun,
+    autoSendEnabled: isP147InitialPaperworkAutoSendEnabled(),
+    userId: input.session.userId,
+    userEmail: input.session.email,
+    referenceMs: Date.parse(bundle.meta.refreshedAt),
+  });
+
+  const auditEvents = await loadPaperworkAutomationAuditLog();
+  const snapshot = buildControlledPaperworkAutomationSnapshot({
+    queue: bundle.queue,
+    generatedAt: new Date().toISOString(),
+    partialSync: bundle.partialSync,
+    candidatesEvaluated: bundle.candidatesEvaluated,
+    recentAuditEvents: auditEvents,
+    executionMode: "approval",
+    contexts: bundle.contexts,
+    advancements: bundle.advancements,
+    lastAutoSendSummary: null,
+    lastInitialPaperworkSummary: summary,
     referenceMs: Date.parse(bundle.meta.refreshedAt),
   });
 
@@ -262,5 +319,6 @@ export async function recordPaperworkApprovals(input: {
     recentAuditEvents: auditEvents,
     executionMode: input.snapshot.executionMode,
     lastAutoSendSummary: input.snapshot.lastAutoSendSummary,
+    lastInitialPaperworkSummary: input.snapshot.lastInitialPaperworkSummary,
   });
 }

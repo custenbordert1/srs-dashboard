@@ -18,6 +18,12 @@ import {
   isP146AutoSendEnabled,
   type AutoSendExecutionSummary,
 } from "@/lib/recruiting/paperwork-execution-engine";
+import {
+  evaluateInitialPaperworkEligibility,
+  isP147InitialPaperworkAutoSendEnabled,
+  type InitialPaperworkExecutionSummary,
+} from "@/lib/recruiting/initial-paperwork-execution-engine";
+import type { CandidateAdvancementEvaluation } from "@/lib/recruiting/candidate-advancement-engine";
 import type { PaperworkAutomationContext } from "@/lib/recruiting/paperwork-automation-engine";
 import { hoursSince } from "@/lib/candidate-action-sla";
 
@@ -195,6 +201,73 @@ function buildAutoSendMetrics(input: {
   };
 }
 
+function buildInitialPaperworkMetrics(input: {
+  queue: PaperworkQueueItem[];
+  auditEvents: PaperworkAutomationAuditEvent[];
+  contexts?: PaperworkAutomationContext[];
+  advancements?: CandidateAdvancementEvaluation[];
+  lastInitialPaperworkSummary?: InitialPaperworkExecutionSummary | null;
+  referenceMs?: number;
+}): ControlledPaperworkAutomationSnapshot["initialPaperwork"] {
+  const referenceMs = input.referenceMs ?? Date.now();
+  const sentToday = input.auditEvents.filter((event) => {
+    if (event.type !== "initial_paperwork_sent" || event.sendResult !== "sent") return false;
+    const hours = hoursSince(event.at, referenceMs);
+    return hours != null && hours < 24;
+  }).length;
+
+  let eligibleCandidates = input.lastInitialPaperworkSummary?.eligibleCount ?? 0;
+  let blockedCandidates = input.lastInitialPaperworkSummary?.blockedCount ?? 0;
+  let duplicatesPrevented = input.lastInitialPaperworkSummary?.duplicatesPrevented ?? 0;
+
+  if (
+    !input.lastInitialPaperworkSummary &&
+    input.contexts &&
+    input.advancements &&
+    input.contexts.length > 0
+  ) {
+    const advancementById = new Map(input.advancements.map((e) => [e.candidateId, e]));
+    for (const context of input.contexts) {
+      const advancement = advancementById.get(context.row.candidateId);
+      if (!advancement) continue;
+      const item = input.queue.find((q) => q.candidateId === context.row.candidateId);
+      if (!item || item.recommendedAction !== "Send Initial Paperwork") continue;
+      const eligibility = evaluateInitialPaperworkEligibility({
+        context,
+        advancement,
+        auditEvents: input.auditEvents,
+        referenceMs,
+      });
+      if (eligibility.eligible) eligibleCandidates += 1;
+      else blockedCandidates += 1;
+      if (eligibility.duplicatePrevented) duplicatesPrevented += 1;
+    }
+  }
+
+  const initialQueue = input.queue.filter((q) => q.recommendedAction === "Send Initial Paperwork");
+  const ages = initialQueue
+    .map((q) => q.paperworkAgeHours)
+    .filter((h): h is number => h != null);
+  const averageTimeToPaperworkHours =
+    ages.length > 0
+      ? Math.round(ages.reduce((sum, h) => sum + h, 0) / ages.length)
+      : 0;
+
+  const attempted = input.lastInitialPaperworkSummary?.eligibleCount ?? eligibleCandidates;
+  const sent = input.lastInitialPaperworkSummary?.sentCount ?? sentToday;
+  const executionSuccessRate = attempted > 0 ? Math.round((sent / attempted) * 100) : 0;
+
+  return {
+    autoSendEnabled: isP147InitialPaperworkAutoSendEnabled(),
+    initialPaperworkSentToday: sentToday,
+    eligibleCandidates,
+    blockedCandidates,
+    duplicatesPrevented,
+    executionSuccessRate,
+    averageTimeToPaperworkHours,
+  };
+}
+
 export function buildControlledPaperworkAutomationSnapshot(input: {
   queue: PaperworkQueueItem[];
   generatedAt: string;
@@ -203,7 +276,9 @@ export function buildControlledPaperworkAutomationSnapshot(input: {
   recentAuditEvents: PaperworkAutomationAuditEvent[];
   executionMode?: P145ExecutionMode;
   contexts?: PaperworkAutomationContext[];
+  advancements?: CandidateAdvancementEvaluation[];
   lastAutoSendSummary?: AutoSendExecutionSummary | null;
+  lastInitialPaperworkSummary?: InitialPaperworkExecutionSummary | null;
   referenceMs?: number;
 }): ControlledPaperworkAutomationSnapshot {
   const pilot = loadPilotConfig();
@@ -235,5 +310,14 @@ export function buildControlledPaperworkAutomationSnapshot(input: {
       referenceMs: input.referenceMs,
     }),
     lastAutoSendSummary: input.lastAutoSendSummary ?? null,
+    initialPaperwork: buildInitialPaperworkMetrics({
+      queue: input.queue,
+      auditEvents: input.recentAuditEvents,
+      contexts: input.contexts,
+      advancements: input.advancements,
+      lastInitialPaperworkSummary: input.lastInitialPaperworkSummary ?? null,
+      referenceMs: input.referenceMs,
+    }),
+    lastInitialPaperworkSummary: input.lastInitialPaperworkSummary ?? null,
   };
 }

@@ -3,9 +3,11 @@ import {
   loadControlledPaperworkAutomationForSession,
   recordPaperworkApprovals,
   runAutoSendPaperworkReminders,
+  runInitialPaperworkAutoSend,
   type PaperworkApprovalAction,
 } from "@/lib/p145-controlled-paperwork-automation/load-controlled-paperwork-automation";
 import { isP146AutoSendEnabled } from "@/lib/recruiting/paperwork-execution-engine";
+import { isP147InitialPaperworkAutoSendEnabled } from "@/lib/recruiting/initial-paperwork-execution-engine";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -48,6 +50,7 @@ export async function GET(request: Request) {
       snapshot: result.snapshot,
       meta: result.meta,
       autoSendEnabled: isP146AutoSendEnabled(),
+      initialPaperworkAutoSendEnabled: isP147InitialPaperworkAutoSendEnabled(),
     },
     {
       headers: {
@@ -114,6 +117,33 @@ export async function POST(request: Request) {
         : summary.sentCount > 0
           ? `Auto-sent ${summary.sentCount} reminder(s).`
           : "Auto-send completed with no sends.",
+    });
+  }
+
+  if (body.action === "auto_send_initial") {
+    const dryRun = body.dryRun !== false;
+    if (!dryRun && !isP147InitialPaperworkAutoSendEnabled()) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "P147_INITIAL_PAPERWORK_AUTO_SEND_ENABLED is not true — live auto-send blocked.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const { summary, snapshot } = await runInitialPaperworkAutoSend({ session, dryRun });
+
+    return NextResponse.json({
+      ok: true,
+      snapshot,
+      execution: summary,
+      initialPaperworkAutoSendEnabled: isP147InitialPaperworkAutoSendEnabled(),
+      message: dryRun
+        ? "Dry run complete — no initial paperwork sent."
+        : summary.sentCount > 0
+          ? `Auto-sent initial paperwork to ${summary.sentCount} candidate(s).`
+          : "Initial auto-send completed with no sends.",
     });
   }
 

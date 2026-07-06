@@ -10,6 +10,7 @@ import { friendlyFetchMessageFromError, isIgnorableFetchError } from "@/lib/frie
 import { fetchWithTimeout, HEAVY_REQUEST_TIMEOUT_MS, isAbortError } from "@/lib/fetch-with-timeout";
 import type { ControlledPaperworkAutomationSnapshot } from "@/lib/p145-controlled-paperwork-automation/types";
 import type { AutoSendExecutionSummary } from "@/lib/recruiting/paperwork-execution-engine";
+import type { InitialPaperworkExecutionSummary } from "@/lib/recruiting/initial-paperwork-execution-engine";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const CACHE_KEY = cacheKey(["recruiting", "paperwork-automation"]);
@@ -31,7 +32,8 @@ type ApiResponse = {
   meta?: CachePayload["meta"];
   partial?: boolean;
   autoSendEnabled?: boolean;
-  execution?: AutoSendExecutionSummary;
+  initialPaperworkAutoSendEnabled?: boolean;
+  execution?: AutoSendExecutionSummary | InitialPaperworkExecutionSummary;
   message?: string;
 };
 
@@ -53,6 +55,8 @@ async function fetchSnapshot(signal?: AbortSignal, mode: "preview" | "approval" 
     snapshot: parsed.snapshot,
     meta: parsed.meta,
     autoSendEnabled: parsed.autoSendEnabled ?? parsed.snapshot.autoSend.autoSendEnabled,
+    initialPaperworkAutoSendEnabled:
+      parsed.initialPaperworkAutoSendEnabled ?? parsed.snapshot.initialPaperwork.autoSendEnabled,
   };
 }
 
@@ -68,7 +72,9 @@ export function useControlledPaperworkAutomation() {
   const [showingCachedSnapshot, setShowingCachedSnapshot] = useState(false);
   const [acting, setActing] = useState(false);
   const [autoSendEnabled, setAutoSendEnabled] = useState(false);
+  const [initialAutoSendEnabled, setInitialAutoSendEnabled] = useState(false);
   const [lastExecution, setLastExecution] = useState<AutoSendExecutionSummary | null>(null);
+  const [lastInitialExecution, setLastInitialExecution] = useState<InitialPaperworkExecutionSummary | null>(null);
   const generation = useRef(0);
 
   const load = useCallback(async (manual = false) => {
@@ -92,6 +98,10 @@ export function useControlledPaperworkAutomation() {
       const parsed = payload as CachePayload & { autoSendEnabled?: boolean };
       if (typeof parsed.autoSendEnabled === "boolean") setAutoSendEnabled(parsed.autoSendEnabled);
       else setAutoSendEnabled(payload.snapshot.autoSend.autoSendEnabled);
+      setInitialAutoSendEnabled(
+        payload.initialPaperworkAutoSendEnabled ?? payload.snapshot.initialPaperwork.autoSendEnabled,
+      );
+      setLastInitialExecution(payload.snapshot.lastInitialPaperworkSummary);
     } catch (err) {
       if (isAbortError(err)) return;
       const cached = readCache();
@@ -148,34 +158,50 @@ export function useControlledPaperworkAutomation() {
     [data],
   );
 
-  const runAutoSendAction = useCallback(async (dryRun: boolean) => {
-    setActing(true);
-    setError(null);
-    try {
-      const res = await fetchWithTimeout("/api/recruiting/paperwork-automation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "auto_send_reminders",
-          dryRun,
-        }),
-        timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
-      });
-      const parsed = (await res.json()) as ApiResponse;
-      if (!res.ok || !parsed.snapshot) {
-        throw new Error(parsed.error ?? "Auto-send request failed");
+  const runAutoSendAction = useCallback(
+    async (dryRun: boolean, action: "auto_send_reminders" | "auto_send_initial") => {
+      setActing(true);
+      setError(null);
+      try {
+        const res = await fetchWithTimeout("/api/recruiting/paperwork-automation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            dryRun,
+          }),
+          timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+        });
+        const parsed = (await res.json()) as ApiResponse;
+        if (!res.ok || !parsed.snapshot) {
+          throw new Error(parsed.error ?? "Auto-send request failed");
+        }
+        setData(parsed.snapshot);
+        if (action === "auto_send_initial") {
+          setLastInitialExecution(
+            (parsed.execution as InitialPaperworkExecutionSummary | undefined) ??
+              parsed.snapshot.lastInitialPaperworkSummary,
+          );
+          if (typeof parsed.initialPaperworkAutoSendEnabled === "boolean") {
+            setInitialAutoSendEnabled(parsed.initialPaperworkAutoSendEnabled);
+          }
+        } else {
+          setLastExecution(
+            (parsed.execution as AutoSendExecutionSummary | undefined) ??
+              parsed.snapshot.lastAutoSendSummary,
+          );
+          if (typeof parsed.autoSendEnabled === "boolean") setAutoSendEnabled(parsed.autoSendEnabled);
+        }
+      } catch (err) {
+        if (!isIgnorableFetchError(err)) {
+          setError(friendlyFetchMessageFromError(err));
+        }
+      } finally {
+        setActing(false);
       }
-      setData(parsed.snapshot);
-      setLastExecution(parsed.execution ?? parsed.snapshot.lastAutoSendSummary);
-      if (typeof parsed.autoSendEnabled === "boolean") setAutoSendEnabled(parsed.autoSendEnabled);
-    } catch (err) {
-      if (!isIgnorableFetchError(err)) {
-        setError(friendlyFetchMessageFromError(err));
-      }
-    } finally {
-      setActing(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     void load(false);
@@ -192,8 +218,12 @@ export function useControlledPaperworkAutomation() {
     refresh: () => load(true),
     submitApproval,
     autoSendEnabled,
+    initialAutoSendEnabled,
     lastExecution,
-    runDryRun: () => runAutoSendAction(true),
-    runAutoSend: () => runAutoSendAction(false),
+    lastInitialExecution,
+    runDryRun: () => runAutoSendAction(true, "auto_send_reminders"),
+    runAutoSend: () => runAutoSendAction(false, "auto_send_reminders"),
+    runInitialDryRun: () => runAutoSendAction(true, "auto_send_initial"),
+    runInitialAutoSend: () => runAutoSendAction(false, "auto_send_initial"),
   };
 }
