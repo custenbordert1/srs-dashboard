@@ -319,8 +319,17 @@ export async function runAutonomousRecruitingCycle(input: {
     snapshotCacheHit: false,
   };
 
+  let postSnapshotBudgetStartMs: number | null = null;
+
   for (const phase of PHASE_ORDER) {
-    if (Date.now() - startedMs > maxRuntimeSeconds * 1000) {
+    if (phase === "refresh_live_snapshot") {
+      await runPhase(phase, ctx, timings, failures, warnings, runId);
+      postSnapshotBudgetStartMs = Date.now();
+      continue;
+    }
+
+    const budgetStart = postSnapshotBudgetStartMs ?? startedMs;
+    if (Date.now() - budgetStart > maxRuntimeSeconds * 1000) {
       warnings.push(`Max runtime (${maxRuntimeSeconds}s) exceeded before ${phase}.`);
       break;
     }
