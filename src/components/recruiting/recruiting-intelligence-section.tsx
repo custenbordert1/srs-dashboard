@@ -24,6 +24,8 @@ import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
 import { CandidateAdvancementIntelligencePanel } from "@/components/executive/candidate-advancement-intelligence-panel";
+import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-approval-queue-panel";
+import { ControlledPaperworkAutomationPanel } from "@/components/executive/controlled-paperwork-automation-panel";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { ForecastIntelligenceSection } from "./forecast-intelligence-section";
@@ -584,6 +586,20 @@ export function RecruitingIntelligenceSection() {
         }
       >
         <CandidateAdvancementIntelligencePanel />
+      </DeferredSection>
+
+      <DeferredSection
+        title="Controlled paperwork automation"
+        summary={
+          <p className="text-sm text-zinc-500">
+            P145 paperwork queue with recruiter approval — no automatic sends.
+          </p>
+        }
+      >
+        <ControlledPaperworkAutomationPanel />
+        <div className="mt-6">
+          <PaperworkApprovalQueuePanel />
+        </div>
       </DeferredSection>
 
       <DeferredSection
