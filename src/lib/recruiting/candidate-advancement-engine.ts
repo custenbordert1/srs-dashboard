@@ -206,7 +206,7 @@ function detectBlockers(
     blockers.push("Duplicate Candidate");
   }
   const job = row.positionId ? jobsByPositionId.get(row.positionId) : undefined;
-  if (row.positionId && !job) blockers.push("Project Closed");
+  void job;
   if (row.distanceMiles != null && row.distanceMiles > 90) blockers.push("Distance Too Far");
   if (hasRecentRecruiterContact(row, referenceMs)) {
     blockers.push("Already Contacted");
@@ -214,7 +214,6 @@ function detectBlockers(
   if (row.workflowStatus === "Paperwork Sent" || row.paperworkStatus === "sent" || row.paperworkStatus === "viewed") {
     blockers.push("Paperwork Pending");
   }
-  if (!row.positionId?.trim() || !job) blockers.push("No Published Job");
   if (row.workflowStatus === "Needs Review" || row.actionType === "needs-review") {
     blockers.push("Manual Review Required");
   }

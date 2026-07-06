@@ -12,6 +12,10 @@ import type {
   PaperworkSendGate,
 } from "@/lib/autonomous-paperwork-send-engine/types";
 import type { ClosedAdProjectMappingResult } from "@/lib/closed-ad-project-mapping/types";
+import {
+  findNearestActiveOperationalNeed,
+  hasOperationalFit,
+} from "@/lib/candidate-first-paperwork-eligibility/match-active-operational-need";
 
 const INACTIVE_STATUSES = new Set([
   "Not Qualified",
@@ -55,6 +59,8 @@ export function buildPaperworkSendEligibility(input: {
   onboarding: CandidateOnboardingRecord | null;
   jobsByPositionId: Map<string, BreezyJob>;
   projectMapping?: ClosedAdProjectMappingResult;
+  candidateFirstMode?: boolean;
+  publishedJobs?: BreezyJob[];
 }): PaperworkSendEligibilityResult {
   const gates: PaperworkSendGate[] = [];
   const { row, onboarding } = input;
@@ -98,19 +104,36 @@ export function buildPaperworkSendEligibility(input: {
     ),
   );
 
-  const publishedJob =
+  const publishedJobNative =
     hasPublishedJobMatch(row, input.jobsByPositionId) ||
     input.projectMapping?.passesPublishedJobGate === true;
+  const operationalFit =
+    input.candidateFirstMode && input.publishedJobs
+      ? findNearestActiveOperationalNeed({
+          candidateCity: row.city ?? "",
+          candidateState: row.state ?? "",
+          publishedJobs: input.publishedJobs,
+        })
+      : null;
+  const publishedJob = Boolean(
+    publishedJobNative || (input.candidateFirstMode === true && hasOperationalFit(operationalFit)),
+  );
   gates.push(
     gate(
       "published_job",
-      "Active published Breezy position or mapped project",
+      input.candidateFirstMode
+        ? "Active published position, mapped project, or operational fit"
+        : "Active published Breezy position or mapped project",
       publishedJob,
       publishedJob
         ? input.projectMapping?.status === "closed_ad_mapped_project"
           ? input.projectMapping.reason
-          : null
-        : "No published job match for candidate position.",
+          : operationalFit
+            ? `Operational fit: ${operationalFit.jobName}`
+            : null
+        : input.candidateFirstMode
+          ? "No published job or operational fit for candidate territory."
+          : "No published job match for candidate position.",
     ),
   );
 

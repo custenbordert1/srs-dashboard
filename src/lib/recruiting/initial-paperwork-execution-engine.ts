@@ -4,6 +4,8 @@ import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import { sendPaperworkPacket } from "@/lib/candidate-onboarding-engine/send-paperwork-packet";
 import type { CandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/types";
 import { buildPaperworkSendEligibility } from "@/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility";
+import { CANDIDATE_FIRST_CONFIDENCE_MIN } from "@/lib/candidate-first-paperwork-eligibility/evaluate-candidate-first-paperwork";
+import type { AdvancementBlocker } from "@/lib/recruiting/candidate-advancement-engine";
 import { duplicatePaperworkSendBlockReason } from "@/lib/onboarding-send-packet-sync";
 import type { PaperworkAutomationAuditEvent } from "@/lib/p145-controlled-paperwork-automation/types";
 import { appendPaperworkAutomationAuditEvent } from "@/lib/p145-controlled-paperwork-automation/paperwork-automation-audit-store";
@@ -60,6 +62,11 @@ export type InitialPaperworkExecutionItem = {
   signatureRequestId: string | null;
 };
 
+export type InitialPaperworkExecutionLimits = {
+  maxSends?: number;
+  stopOnFirstError?: boolean;
+};
+
 export type InitialPaperworkExecutionSummary = {
   sourcePhase: typeof P147_SOURCE_PHASE;
   generatedAt: string;
@@ -76,6 +83,8 @@ export type InitialPaperworkExecutionSummary = {
   executeBatchCalled: false;
   breezyWrites: false;
   paperworkSent: boolean;
+  capReached?: boolean;
+  stoppedOnError?: boolean;
 };
 
 export function isP147InitialPaperworkAutoSendEnabled(
@@ -104,33 +113,50 @@ function hasInitialPaperworkAuditSend(
   );
 }
 
+const SOFT_ADVANCEMENT_BLOCKERS = new Set<AdvancementBlocker>(["Project Closed", "No Published Job"]);
+
 export function evaluateInitialPaperworkEligibility(input: {
   context: PaperworkAutomationContext;
   advancement: CandidateAdvancementEvaluation;
   auditEvents: PaperworkAutomationAuditEvent[];
   referenceMs?: number;
+  candidateFirstMode?: boolean;
 }): InitialPaperworkEligibility {
   const { context, advancement, auditEvents } = input;
+  const candidateFirstMode = input.candidateFirstMode === true;
   const referenceMs = input.referenceMs ?? Date.now();
   const reasons: string[] = [];
   const row = context.row;
   const job = row.positionId ? context.jobsByPositionId.get(row.positionId) : undefined;
+  const confidenceMin = candidateFirstMode ? CANDIDATE_FIRST_CONFIDENCE_MIN : P147_INITIAL_CONFIDENCE_MIN;
 
-  if (advancement.nextAction !== "Send Paperwork") {
+  if (!candidateFirstMode && advancement.nextAction !== "Send Paperwork") {
     reasons.push(`P144 next action is "${advancement.nextAction}", not Send Paperwork.`);
   }
-  if (advancement.confidence < P147_INITIAL_CONFIDENCE_MIN) {
-    reasons.push(`Confidence ${advancement.confidence}% below ${P147_INITIAL_CONFIDENCE_MIN}% threshold.`);
+  if (advancement.confidence < confidenceMin) {
+    reasons.push(`Confidence ${advancement.confidence}% below ${confidenceMin}% threshold.`);
   }
-  if (advancement.blockers.length > 0) {
-    reasons.push(`P144 blockers: ${advancement.blockers.join(", ")}.`);
+  const relevantBlockers = candidateFirstMode
+    ? advancement.blockers.filter((b) => !SOFT_ADVANCEMENT_BLOCKERS.has(b))
+    : advancement.blockers;
+  if (relevantBlockers.length > 0) {
+    reasons.push(`P144 blockers: ${relevantBlockers.join(", ")}.`);
   }
 
   const freshItem = evaluatePaperworkCandidate({ ...context, referenceMs });
-  if (!freshItem || freshItem.recommendedAction !== "Send Initial Paperwork") {
-    reasons.push("Paperwork queue does not recommend Send Initial Paperwork.");
-  } else if (freshItem.blockers.length > 0) {
-    reasons.push(`Paperwork blockers: ${freshItem.blockers.join(", ")}.`);
+  if (!candidateFirstMode) {
+    if (!freshItem || freshItem.recommendedAction !== "Send Initial Paperwork") {
+      reasons.push("Paperwork queue does not recommend Send Initial Paperwork.");
+    } else if (freshItem.blockers.length > 0) {
+      reasons.push(`Paperwork blockers: ${freshItem.blockers.join(", ")}.`);
+    }
+  } else if (freshItem) {
+    const hardQueueBlockers = freshItem.blockers.filter(
+      (b) => b !== "Closed Project" && b !== "No Published Job",
+    );
+    if (hardQueueBlockers.length > 0) {
+      reasons.push(`Paperwork blockers: ${hardQueueBlockers.join(", ")}.`);
+    }
   }
 
   if (HIRED_STATUSES.has(row.workflowStatus) || row.paperworkStatus === "signed") {
@@ -142,11 +168,13 @@ export function evaluateInitialPaperworkEligibility(input: {
   if (!row.email?.trim()) {
     reasons.push("Missing valid email.");
   }
-  if (!row.positionId?.trim() || !job) {
-    reasons.push("No open published position.");
-  }
-  if (job && job.status !== "published") {
-    reasons.push("Position is not published.");
+  if (!candidateFirstMode) {
+    if (!row.positionId?.trim() || !job) {
+      reasons.push("No open published position.");
+    }
+    if (job && job.status !== "published") {
+      reasons.push("Position is not published.");
+    }
   }
 
   const duplicateReason = duplicatePaperworkSendBlockReason({
@@ -163,6 +191,8 @@ export function evaluateInitialPaperworkEligibility(input: {
     row,
     onboarding: context.onboarding,
     jobsByPositionId: context.jobsByPositionId,
+    candidateFirstMode,
+    publishedJobs: candidateFirstMode ? [...context.jobsByPositionId.values()] : undefined,
   });
   if (!eligibility.eligible) {
     reasons.push(...eligibility.blockingReasons);
@@ -210,6 +240,8 @@ export async function executeInitialPaperworkAutoSend(input: {
   userId: string;
   userEmail: string;
   referenceMs?: number;
+  executionLimits?: InitialPaperworkExecutionLimits;
+  candidateFirstMode?: boolean;
 }): Promise<InitialPaperworkExecutionSummary> {
   const started = Date.now();
   const referenceMs = input.referenceMs ?? started;
@@ -219,7 +251,28 @@ export async function executeInitialPaperworkAutoSend(input: {
 
   const advancementById = new Map(input.advancements.map((evaluation) => [evaluation.candidateId, evaluation]));
   const queue = buildPaperworkQueue(input.contexts);
-  const initialCandidates = queue.filter((item) => item.recommendedAction === "Send Initial Paperwork");
+  const initialCandidates = input.candidateFirstMode
+    ? input.contexts.map((context) => {
+        const item = queue.find((q) => q.candidateId === context.row.candidateId);
+        return (
+          item ?? {
+            candidateId: context.row.candidateId,
+            candidateName: `${context.row.firstName ?? ""} ${context.row.lastName ?? ""}`.trim() || context.row.candidateId,
+            recruiter: context.row.assignedRecruiter || "Unassigned",
+            project: context.row.positionName || "—",
+            currentStage: context.row.workflowStatus,
+            paperworkStatus: context.row.paperworkStatus,
+            paperworkAgeHours: null,
+            lastCommunication: null,
+            recommendedAction: "Send Initial Paperwork" as const,
+            confidence: 0,
+            blockers: [],
+            approvalRequired: true as const,
+            reason: "Candidate-first paperwork path.",
+          }
+        );
+      })
+    : queue.filter((item) => item.recommendedAction === "Send Initial Paperwork");
   const contextById = new Map(input.contexts.map((context) => [context.row.candidateId, context]));
 
   const summary: InitialPaperworkExecutionSummary = {
@@ -238,11 +291,16 @@ export async function executeInitialPaperworkAutoSend(input: {
     executeBatchCalled: false,
     breezyWrites: false,
     paperworkSent: false,
+    capReached: false,
+    stoppedOnError: false,
   };
 
+  const limits = input.executionLimits;
   let auditEvents = [...input.auditEvents];
+  let stopLoop = false;
 
   for (const item of initialCandidates) {
+    if (stopLoop) break;
     const context = contextById.get(item.candidateId);
     const advancement = advancementById.get(item.candidateId);
     if (!context || !advancement) continue;
@@ -252,6 +310,7 @@ export async function executeInitialPaperworkAutoSend(input: {
       advancement,
       auditEvents,
       referenceMs,
+      candidateFirstMode: input.candidateFirstMode,
     });
 
     if (eligibility.eligible) summary.eligibleCount += 1;
@@ -297,6 +356,10 @@ export async function executeInitialPaperworkAutoSend(input: {
         sendResult = "failed";
         summary.failedCount += 1;
         reason = !packet.ok ? packet.error : "Send failed.";
+        if (limits?.stopOnFirstError) {
+          summary.stoppedOnError = true;
+          stopLoop = true;
+        }
       }
     }
 
@@ -349,6 +412,15 @@ export async function executeInitialPaperworkAutoSend(input: {
       validationResult: eligibility.validation,
       duplicatePrevented: eligibility.duplicatePrevented,
     });
+
+    if (
+      limits?.maxSends != null &&
+      limits.maxSends > 0 &&
+      summary.sentCount >= limits.maxSends
+    ) {
+      summary.capReached = true;
+      stopLoop = true;
+    }
   }
 
   summary.executionTimeMs = Date.now() - started;

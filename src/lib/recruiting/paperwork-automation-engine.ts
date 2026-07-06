@@ -108,7 +108,14 @@ function isReadyToSend(
   policy?: CandidateOnboardingPolicy,
 ): boolean {
   if (isPaperworkComplete(row) || hasActivePacket(row)) return false;
-  const eligibility = buildPaperworkSendEligibility({ row, onboarding, jobsByPositionId });
+  const nativePublished = Boolean(row.positionId?.trim() && jobsByPositionId.has(row.positionId));
+  const eligibility = buildPaperworkSendEligibility({
+    row,
+    onboarding,
+    jobsByPositionId,
+    candidateFirstMode: !nativePublished,
+    publishedJobs: !nativePublished ? [...jobsByPositionId.values()] : undefined,
+  });
   return eligibility.eligible || isEligibleForSend(row, policy);
 }
 
@@ -154,9 +161,6 @@ function detectExclusionBlockers(
   if (onboarding?.status === "declined" || onboarding?.status === "expired" || onboarding?.status === "failed") {
     blockers.push("Cancelled Onboarding");
   }
-  const job = row.positionId ? jobsByPositionId.get(row.positionId) : undefined;
-  if (!row.positionId?.trim() || !job) blockers.push("Closed Project");
-  if (!job && row.positionId?.trim()) blockers.push("No Published Job");
   if (
     (row.notes ?? []).some((n) => /duplicate/i.test(n)) ||
     duplicatePaperworkSendBlockReason({ activeOnboarding: onboarding ?? undefined })
