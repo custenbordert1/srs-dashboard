@@ -4,14 +4,22 @@ import {
   type BreezyCandidatesSuccess,
 } from "@/lib/breezy-api";
 import {
+  runCandidateLookupRescue,
+  runFreshnessRescue,
+  shouldRunFreshnessRescue,
+  type CandidateLookupQuery,
+  type CandidateLookupRescueResult,
+  type FreshnessRescueResult,
+} from "@/lib/candidate-ingestion/fresh-candidate-ingestion-rescue";
+import {
   isIngestionStoreUsable,
   listIngestedCandidates,
   readIngestionStore,
 } from "@/lib/candidate-ingestion/ingestion-store";
 
-async function readIngestedSnapshot(): Promise<BreezyCandidatesSuccess | null> {
-  const store = await readIngestionStore();
-  if (!isIngestionStoreUsable(store)) return null;
+async function readIngestedSnapshot(
+  store: Awaited<ReturnType<typeof readIngestionStore>>,
+): Promise<BreezyCandidatesSuccess> {
   const candidates = listIngestedCandidates(store);
   const scanned = new Set(store.scannedPositionIds).size;
   const total = store.publishedPositionsTotal;
@@ -32,6 +40,9 @@ async function readIngestedSnapshot(): Promise<BreezyCandidatesSuccess | null> {
     syncNotes: [
       `Durable ingestion store: ${scanned}/${total} positions scanned.`,
       store.cycleComplete ? "Full position cycle complete." : "Ingestion cycle in progress.",
+      store.lastFreshnessRescueAt
+        ? `Last freshness rescue: ${store.lastFreshnessRescueAt}.`
+        : "No freshness rescue recorded.",
     ],
     skippedCandidatesReason: {
       sanitizeRejected: 0,
@@ -48,20 +59,56 @@ async function readIngestedSnapshot(): Promise<BreezyCandidatesSuccess | null> {
 
 export type ResolvedCandidatesRead = BreezyCandidatesSuccess & {
   fromIngestionStore: boolean;
+  freshnessRescue?: FreshnessRescueResult;
+  candidateLookupRescue?: CandidateLookupRescueResult;
 };
 
 export async function resolveCandidatesForRead(input?: {
   scanMode?: "preview" | "fast" | "full" | "all";
+  force?: boolean;
+  candidateLookup?: CandidateLookupQuery;
 }): Promise<ResolvedCandidatesRead | BreezyApiFailure> {
-  const ingested = await readIngestedSnapshot();
-  if (ingested) {
-    return { ...ingested, fromIngestionStore: true };
+  let store = await readIngestionStore();
+  let freshnessRescue: FreshnessRescueResult | undefined;
+  let candidateLookupRescue: CandidateLookupRescueResult | undefined;
+
+  if (isIngestionStoreUsable(store)) {
+    if (shouldAttemptFreshnessRescue(store, input)) {
+      const rescued = await runFreshnessRescue({ force: input?.force === true });
+      store = rescued.store;
+      freshnessRescue = rescued.result;
+    }
+
+    if (input?.candidateLookup && (input.candidateLookup.email || input.candidateLookup.name)) {
+      const lookup = await runCandidateLookupRescue(input.candidateLookup, {
+        force: input?.force === true,
+      });
+      store = lookup.store;
+      candidateLookupRescue = lookup.result;
+    }
+
+    const ingested = await readIngestedSnapshot(store);
+    return {
+      ...ingested,
+      fromIngestionStore: true,
+      freshnessRescue,
+      candidateLookupRescue,
+    };
   }
 
   const scanMode = input?.scanMode ?? "preview";
-  const breezy = await fetchBreezyCandidates({ scanMode });
+  const breezy = await fetchBreezyCandidates({ scanMode, force: input?.force });
   if (!breezy.ok) return breezy;
-  return { ...breezy, fromIngestionStore: false };
+  return { ...breezy, fromIngestionStore: false, freshnessRescue, candidateLookupRescue };
+}
+
+function shouldAttemptFreshnessRescue(
+  store: Awaited<ReturnType<typeof readIngestionStore>>,
+  input?: { force?: boolean; candidateLookup?: CandidateLookupQuery },
+): boolean {
+  if (input?.force === true) return true;
+  if (input?.candidateLookup?.email || input?.candidateLookup?.name) return true;
+  return shouldRunFreshnessRescue(store);
 }
 
 export async function resolveCandidatesForAutomation(): Promise<

@@ -16,6 +16,7 @@ import {
   writeIngestionStore,
 } from "@/lib/candidate-ingestion/ingestion-store";
 import { completeJuneQuestionnaireEnrichment } from "@/lib/candidate-ingestion/enrich-candidate-questionnaires";
+import { recordPositionScans } from "@/lib/candidate-ingestion/fresh-candidate-ingestion-rescue";
 import { runCandidateAutomationEngine } from "@/lib/candidate-automation-engine";
 import {
   loadP87FeatureFlags,
@@ -166,18 +167,23 @@ export async function runCandidateIngestionSync(input?: {
     positionsScannedThisRun += batch.positionsScanned;
 
     const scannedSet = new Set(store.scannedPositionIds);
+    const newlyScannedIds: string[] = [];
     for (const position of positions.slice(0, batch.positionsScanned)) {
       scannedSet.add(position.jobId);
+      newlyScannedIds.push(position.jobId);
     }
     const nextCheckpoint = store.checkpointIndex + batch.positionsScanned;
-    store = {
-      ...store,
-      scannedPositionIds: [...scannedSet],
-      checkpointIndex: nextCheckpoint,
-      lastChunkAt: new Date().toISOString(),
-      chunksThisRun: store.chunksThisRun + 1,
-      cycleComplete: nextCheckpoint >= store.publishedPositionsTotal,
-    };
+    store = recordPositionScans(
+      {
+        ...store,
+        scannedPositionIds: [...scannedSet],
+        checkpointIndex: nextCheckpoint,
+        lastChunkAt: new Date().toISOString(),
+        chunksThisRun: store.chunksThisRun + 1,
+        cycleComplete: nextCheckpoint >= store.publishedPositionsTotal,
+      },
+      newlyScannedIds,
+    );
     chunksProcessed += 1;
 
     if (batch.truncated && batch.positionsScanned < positions.length) {

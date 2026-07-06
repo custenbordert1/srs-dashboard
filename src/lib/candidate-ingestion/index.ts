@@ -26,6 +26,24 @@ export {
   readIngestionStore,
   writeIngestionStore,
 } from "@/lib/candidate-ingestion/ingestion-store";
+export {
+  FRESHNESS_RESCUE_MAX_POSITIONS,
+  FRESHNESS_RESCUE_POSITION_WINDOW_MS,
+  FRESHNESS_RESCUE_STORE_AGE_MS,
+  P1532_SOURCE_PHASE,
+  findCandidateInStore,
+  matchesCandidateLookup,
+  recordPositionScans,
+  runCandidateLookupRescue,
+  runFreshnessRescue,
+  selectPositionsForFreshnessRescue,
+  shouldRunFreshnessRescue,
+} from "@/lib/candidate-ingestion/fresh-candidate-ingestion-rescue";
+export type {
+  CandidateLookupQuery,
+  CandidateLookupRescueResult,
+  FreshnessRescueResult,
+} from "@/lib/candidate-ingestion/fresh-candidate-ingestion-rescue";
 export { runPostImportPipeline } from "@/lib/candidate-ingestion/run-post-import-pipeline";
 export { runCandidateIngestionSync } from "@/lib/candidate-ingestion/run-ingestion-sync";
 export type {
@@ -33,6 +51,7 @@ export type {
   CandidateIngestionStoreFile,
   CandidateIngestionSyncResult,
 } from "@/lib/candidate-ingestion/types";
+export type { ResolvedCandidatesRead } from "@/lib/candidate-ingestion/resolve-candidates-for-read";
 
 import type { BreezyCandidatesSuccess } from "@/lib/breezy-api";
 import {

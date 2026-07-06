@@ -1,0 +1,60 @@
+{
+  "sourcePhase": "P153.2",
+  "generatedAt": "2026-07-06T20:13:23.851Z",
+  "resolved": {
+    "fromIngestionStore": true,
+    "candidateCount": 419,
+    "fetchedAt": "2026-07-06T20:13:23.855Z"
+  },
+  "freshnessRescue": {
+    "ran": true,
+    "reason": "Rescanned 25 positions (0 new candidates).",
+    "positionsRescanned": 25,
+    "newCandidates": 0,
+    "rescuedCandidateIds": [],
+    "storeAgeMs": 19981
+  },
+  "candidateLookupRescue": {
+    "ran": true,
+    "found": true,
+    "candidateId": "705cdc0e7f30",
+    "source": "ingestion_store",
+    "merged": true
+  },
+  "ingestionStore": {
+    "containsTarget": true,
+    "lastChunkAt": "2026-07-06T20:13:23.855Z",
+    "lastFreshnessRescueAt": "2026-07-06T20:13:23.855Z",
+    "rescueRotationIndex": 23
+  },
+  "validation": {
+    "targetVisible": true,
+    "targetId": "705cdc0e7f30",
+    "appliedDate": "2026-07-06T19:47:35.990Z",
+    "appliedDateMatches": true,
+    "positionName": "Retail Display Merchandiser – West Chester, OH",
+    "positionMatches": true,
+    "resumeDetected": true,
+    "questionnaireDetected": true,
+    "emailHitCount": 3,
+    "p153SelectsTarget": true,
+    "p153SelectedId": "705cdc0e7f30"
+  },
+  "emailHits": [
+    {
+      "candidateId": "09049d13f466",
+      "appliedDate": "2026-05-25T16:56:23.607Z",
+      "positionName": "Continuity Merchandiser"
+    },
+    {
+      "candidateId": "42afb0469714",
+      "appliedDate": "2026-05-21T17:50:08.777Z",
+      "positionName": "Retail Merchandiser (Flexible, Project-Based Work) (Draft)"
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "appliedDate": "2026-07-06T19:47:35.990Z",
+      "positionName": "Retail Display Merchandiser – West Chester, OH"
+    }
+  ]
+}

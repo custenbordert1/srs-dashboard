@@ -28,6 +28,9 @@ export function emptyIngestionStore(): CandidateIngestionStoreFile {
     cycleComplete: false,
     chunksThisRun: 0,
     updatedAt: now,
+    positionScannedAt: {},
+    lastFreshnessRescueAt: null,
+    rescueRotationIndex: 0,
   };
 }
 
@@ -45,6 +48,12 @@ export async function readIngestionStore(): Promise<CandidateIngestionStoreFile>
         ? parsed.publishedPositionIds
         : [],
       scannedPositionIds: Array.isArray(parsed.scannedPositionIds) ? parsed.scannedPositionIds : [],
+      positionScannedAt:
+        parsed.positionScannedAt && typeof parsed.positionScannedAt === "object"
+          ? parsed.positionScannedAt
+          : {},
+      lastFreshnessRescueAt: parsed.lastFreshnessRescueAt ?? null,
+      rescueRotationIndex: typeof parsed.rescueRotationIndex === "number" ? parsed.rescueRotationIndex : 0,
     };
   } catch {
     return emptyIngestionStore();
@@ -84,6 +93,7 @@ export function startIngestionRun(store: CandidateIngestionStoreFile): Candidate
       runId: randomUUID(),
       checkpointIndex: 0,
       scannedPositionIds: [],
+      positionScannedAt: {},
       cycleComplete: false,
       chunksThisRun: 0,
     };

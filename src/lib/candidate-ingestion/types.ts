@@ -16,6 +16,11 @@ export type CandidateIngestionStoreFile = {
   cycleComplete: boolean;
   chunksThisRun: number;
   updatedAt: string;
+  /** Per-position scan timestamp for freshness rescue (current cycle). */
+  positionScannedAt?: Record<string, string>;
+  lastFreshnessRescueAt?: string | null;
+  /** Rotating offset for freshness rescue across already-scanned positions. */
+  rescueRotationIndex?: number;
 };
 
 export type CandidateIngestionSyncResult = {
