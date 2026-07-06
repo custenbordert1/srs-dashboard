@@ -18,6 +18,7 @@ import {
   isP151AutonomousAdvancementEnabled,
 } from "@/lib/p151-autonomous-candidate-advancement/advance-candidate-pipeline";
 import { appendPipelineAdvancementAuditEvent } from "@/lib/p151-autonomous-candidate-advancement/p151-advancement-audit-store";
+import { applyTerritoryDmAssignments } from "@/lib/p151-workflow-bottleneck-resolution/apply-territory-dm-assignments";
 import { applyRecruiterAssignments } from "@/lib/recruiter-assignment-engine/apply-recruiter-assignments";
 import { buildRecruiterAssignmentDecisions } from "@/lib/recruiter-assignment-engine/build-assignment-decision";
 
@@ -211,6 +212,13 @@ export async function assignRecruiters(input: {
 
       if (assignmentsCompleted >= maxAssignments) capReached = true;
     }
+
+    await applyTerritoryDmAssignments({
+      candidates,
+      workflows,
+      jobsByPositionId,
+      byUserId: input.userId ?? input.session.userId,
+    });
     rows = evaluateAll();
   } else {
     for (const row of rows) {

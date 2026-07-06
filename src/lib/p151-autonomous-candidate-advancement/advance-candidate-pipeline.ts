@@ -35,6 +35,7 @@ import {
 } from "@/lib/p151-autonomous-candidate-advancement/types";
 import { buildRecruiterAssignmentDecisions } from "@/lib/recruiter-assignment-engine/build-assignment-decision";
 import { applyRecruiterAssignments } from "@/lib/recruiter-assignment-engine/apply-recruiter-assignments";
+import { applyTerritoryDmAssignments } from "@/lib/p151-workflow-bottleneck-resolution/apply-territory-dm-assignments";
 
 export function isP151AutonomousAdvancementEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.P151_AUTONOMOUS_ADVANCEMENT_ENABLED === "true";
@@ -229,6 +230,14 @@ export async function advanceCandidatePipeline(input: {
       }
     }
 
+    analysis = buildAnalysisList();
+
+    await applyTerritoryDmAssignments({
+      candidates,
+      workflows,
+      jobsByPositionId,
+      byUserId: input.userId ?? input.session.userId,
+    });
     analysis = buildAnalysisList();
 
     const rows = candidates.map((candidate) =>
