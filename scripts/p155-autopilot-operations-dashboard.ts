@@ -36,9 +36,10 @@ function loadEnvLocal(): void {
 async function main() {
   loadEnvLocal();
 
-  const dashboard = await buildP155OperationsDashboard();
+  const built = await buildP155OperationsDashboard();
+  const dashboard = built.dashboard;
   const recentSends = await buildP155RecentSends({ limit: 25 });
-  const exceptions = await buildP155Exceptions({ limit: 50 });
+  const { exceptions } = await buildP155Exceptions({ limit: 50 });
 
   let buildPassed = false;
   let testsPassed = false;
@@ -71,6 +72,7 @@ async function main() {
       liveSendCountInRecentSends: recentSends.filter((s) => !s.dryRun).length,
     },
     dashboard,
+    dashboardWarnings: built.warnings,
     recentSends,
     exceptions,
   };

@@ -14,7 +14,8 @@ export async function executeP155AutopilotControl(input: {
   action: P155ControlAction;
   confirmLive?: boolean;
 }): Promise<P155ControlResult> {
-  const dashboard = await buildP155OperationsDashboard();
+  const built = await buildP155OperationsDashboard();
+  const dashboard = built.dashboard;
 
   if (input.action === "refresh") {
     return {
@@ -40,7 +41,7 @@ export async function executeP155AutopilotControl(input: {
       action: input.action,
       message: "Autopilot paused. Continuous daemon will not run until resumed.",
       dryRun: true,
-      dashboard: await buildP155OperationsDashboard(),
+      dashboard: (await buildP155OperationsDashboard()).dashboard,
     };
   }
 
@@ -58,7 +59,7 @@ export async function executeP155AutopilotControl(input: {
       action: input.action,
       message: "Autopilot resumed. State updated — continuous daemon still requires P154_CONTINUOUS_ENABLED=true on host.",
       dryRun: true,
-      dashboard: await buildP155OperationsDashboard(),
+      dashboard: (await buildP155OperationsDashboard()).dashboard,
     };
   }
 
@@ -100,7 +101,7 @@ export async function executeP155AutopilotControl(input: {
       ? `Dry cycle complete — evaluated ${cycleReport.metrics.candidatesEvaluated}, sent ${cycleReport.metrics.sent}.`
       : `Live cycle complete — sent ${cycleReport.metrics.sent} (capped).`,
     dryRun,
-    dashboard: await buildP155OperationsDashboard(),
+    dashboard: (await buildP155OperationsDashboard()).dashboard,
     cycleReport,
   };
 }

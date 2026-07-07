@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   if (isGuardFailure(guard)) return guard;
   auditTerritoryAccess(guard.session, ROUTE);
 
-  const [runner, dashboard] = await Promise.all([
+  const [runner, built] = await Promise.all([
     buildP1547AutopilotStatus(),
     buildP155OperationsDashboard(),
   ]);
@@ -27,6 +27,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: runner.ok,
     runner,
-    dashboard,
+    dashboard: built.dashboard,
+    warnings: built.warnings,
   });
 }

@@ -1,19 +1,45 @@
 import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { loadPaperworkAutomationAuditLog } from "@/lib/p145-controlled-paperwork-automation/paperwork-automation-audit-store";
 import { classifyCandidatesSince } from "@/lib/p154-full-candidate-backfill-continuous-processing/classify-candidates";
+import type { P1544ClassificationReport } from "@/lib/p154-full-candidate-backfill-continuous-processing/types";
 import { getP154BackfillSinceDate } from "@/lib/p154-continuous-autonomous-recruiting-runner/runner-config";
 import { loadP1547RunnerState } from "@/lib/p154-continuous-autonomous-recruiting-runner/runner-store";
 import { loadMonitorState } from "@/lib/paperwork-monitor/monitor-store";
+import { P155_SERVER_CLASSIFICATION_TIMEOUT_MS } from "@/lib/p155-autopilot-operations-dashboard/constants";
+import { withServerTimeout } from "@/lib/p155-autopilot-operations-dashboard/request-timeout";
 import type { P155ExceptionRow } from "@/lib/p155-autopilot-operations-dashboard/types";
 
 function todayStartMs(): number {
   return Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
 }
 
-export async function buildP155Exceptions(input?: { limit?: number }): Promise<P155ExceptionRow[]> {
+function emptyClassification(backfillSince: string): P1544ClassificationReport {
+  return {
+    backfillSince,
+    totalClassified: 0,
+    buckets: {
+      eligible_for_paperwork: 0,
+      already_sent: 0,
+      active_signature_request: 0,
+      already_signed: 0,
+      duplicate: 0,
+      invalid_email: 0,
+      disqualified_archived: 0,
+      needs_recruiter_assignment: 0,
+      manual_review: 0,
+      do_not_send: 0,
+    },
+    rows: [],
+  };
+}
+
+export async function buildP155Exceptions(input?: {
+  limit?: number;
+}): Promise<{ exceptions: P155ExceptionRow[]; warnings: string[] }> {
   const limit = input?.limit ?? 50;
   const sinceMs = todayStartMs();
   const rows: P155ExceptionRow[] = [];
+  const warnings: string[] = [];
 
   const audit = await loadPaperworkAutomationAuditLog();
   for (const event of audit) {
@@ -64,41 +90,51 @@ export async function buildP155Exceptions(input?: { limit?: number }): Promise<P
     });
   }
 
-  const classification = await classifyCandidatesSince({
-    backfillSince: getP154BackfillSinceDate(),
-    maxRows: 100,
+  const backfillSince = getP154BackfillSinceDate();
+  const classificationResult = await withServerTimeout({
+    label: "P155 exception classification",
+    promise: classifyCandidatesSince({ backfillSince, maxRows: 100 }),
+    timeoutMs: P155_SERVER_CLASSIFICATION_TIMEOUT_MS,
+    fallback: emptyClassification(backfillSince),
   });
 
-  for (const row of classification.rows) {
-    if (row.bucket === "invalid_email") {
-      rows.push({
-        id: `invalid-${row.candidateId}`,
-        category: "invalid_email",
-        candidateId: row.candidateId,
-        candidateName: row.candidateName,
-        detail: row.reason,
-        at: new Date().toISOString(),
-      });
-    }
-    if (row.bucket === "duplicate") {
-      rows.push({
-        id: `class-dup-${row.candidateId}`,
-        category: "duplicate_conflict",
-        candidateId: row.candidateId,
-        candidateName: row.candidateName,
-        detail: row.reason,
-        at: new Date().toISOString(),
-      });
-    }
-    if (row.bucket === "manual_review") {
-      rows.push({
-        id: `review-${row.candidateId}`,
-        category: "manual_review",
-        candidateId: row.candidateId,
-        candidateName: row.candidateName,
-        detail: row.reason,
-        at: new Date().toISOString(),
-      });
+  if (classificationResult.timedOut || classificationResult.error) {
+    warnings.push(
+      classificationResult.error ??
+        "Exception classification timed out — audit and workflow errors only.",
+    );
+  } else {
+    for (const row of classificationResult.value.rows) {
+      if (row.bucket === "invalid_email") {
+        rows.push({
+          id: `invalid-${row.candidateId}`,
+          category: "invalid_email",
+          candidateId: row.candidateId,
+          candidateName: row.candidateName,
+          detail: row.reason,
+          at: new Date().toISOString(),
+        });
+      }
+      if (row.bucket === "duplicate") {
+        rows.push({
+          id: `class-dup-${row.candidateId}`,
+          category: "duplicate_conflict",
+          candidateId: row.candidateId,
+          candidateName: row.candidateName,
+          detail: row.reason,
+          at: new Date().toISOString(),
+        });
+      }
+      if (row.bucket === "manual_review") {
+        rows.push({
+          id: `review-${row.candidateId}`,
+          category: "manual_review",
+          candidateId: row.candidateId,
+          candidateName: row.candidateName,
+          detail: row.reason,
+          at: new Date().toISOString(),
+        });
+      }
     }
   }
 
@@ -111,12 +147,13 @@ export async function buildP155Exceptions(input?: { limit?: number }): Promise<P
         candidateId: record.candidateId,
         candidateName: record.candidateId,
         detail: `Workflow paperwork status failed (${record.workflowStatus}).`,
-        at: record.updatedAt ?? new Date().toISOString(),
+        at: record.lastActionAt ?? new Date().toISOString(),
       });
     }
   }
 
-  return rows
-    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
-    .slice(0, limit);
+  return {
+    exceptions: rows.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, limit),
+    warnings,
+  };
 }

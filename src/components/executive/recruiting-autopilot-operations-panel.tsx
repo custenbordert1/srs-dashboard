@@ -4,16 +4,12 @@ import {
   ExecutiveCard,
   ExecutivePanelError,
   ExecutivePanelLoading,
+  ExecutiveWarningList,
   MetricCard,
   SectionHeader,
   StatusBadge,
 } from "@/components/executive/ui";
-import type {
-  P155ExceptionRow,
-  P155OperationsDashboard,
-  P155RecentSendRow,
-} from "@/lib/p155-autopilot-operations-dashboard/types";
-import { useCallback, useEffect, useState } from "react";
+import { useRecruitingAutopilotOperations } from "@/hooks/use-recruiting-autopilot-operations";
 
 function formatTimestamp(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -40,93 +36,42 @@ function statusTone(status: string): "success" | "warning" | "neutral" | "critic
 }
 
 export function RecruitingAutopilotOperationsPanel() {
-  const [dashboard, setDashboard] = useState<P155OperationsDashboard | null>(null);
-  const [recentSends, setRecentSends] = useState<P155RecentSendRow[]>([]);
-  const [exceptions, setExceptions] = useState<P155ExceptionRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [running, setRunning] = useState(false);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [statusRes, sendsRes, exceptionsRes] = await Promise.all([
-        fetch("/api/recruiting/autopilot/status", { cache: "no-store" }),
-        fetch("/api/recruiting/autopilot/recent-sends", { cache: "no-store" }),
-        fetch("/api/recruiting/autopilot/exceptions", { cache: "no-store" }),
-      ]);
-
-      const statusData = (await statusRes.json()) as {
-        ok?: boolean;
-        dashboard?: P155OperationsDashboard;
-        error?: string;
-      };
-      const sendsData = (await sendsRes.json()) as { sends?: P155RecentSendRow[] };
-      const exceptionsData = (await exceptionsRes.json()) as { exceptions?: P155ExceptionRow[] };
-
-      if (!statusRes.ok || !statusData.dashboard) {
-        setError(statusData.error ?? "Failed to load autopilot status");
-        return;
-      }
-
-      setDashboard(statusData.dashboard);
-      setRecentSends(sendsData.sends ?? []);
-      setExceptions(exceptionsData.exceptions ?? []);
-    } catch {
-      setError("Failed to load autopilot operations dashboard");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const postControl = async (action: string, body?: Record<string, unknown>) => {
-    setRunning(true);
-    setActionError(null);
-    setActionMessage(null);
-    try {
-      const res = await fetch("/api/recruiting/autopilot/control", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, ...body }),
-      });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        message?: string;
-        dashboard?: P155OperationsDashboard;
-        error?: string;
-      };
-      if (!res.ok || !data.ok) {
-        setActionError(data.message ?? data.error ?? "Control action failed");
-        if (data.dashboard) setDashboard(data.dashboard);
-        return;
-      }
-      if (data.dashboard) setDashboard(data.dashboard);
-      setActionMessage(data.message ?? "Action complete.");
-      await load();
-    } catch {
-      setActionError("Control action failed");
-    } finally {
-      setRunning(false);
-    }
-  };
+  const {
+    dashboard,
+    recentSends,
+    exceptions,
+    warnings,
+    sectionErrors,
+    loading,
+    loadingCeilingHit,
+    showingCachedSnapshot,
+    actionBusy,
+    actionMessage,
+    actionError,
+    refresh,
+    postControl,
+  } = useRecruitingAutopilotOperations();
 
   if (loading) {
     return <ExecutivePanelLoading title="Recruiting Autopilot Operations" badge="P155" />;
   }
 
-  if (error || !dashboard) {
+  if (loadingCeilingHit && !dashboard) {
     return (
       <ExecutivePanelError
         title="Recruiting Autopilot Operations"
-        message={error ?? "No dashboard data"}
-        onRetry={() => void load()}
+        message="Dashboard requests timed out after 5 seconds. Breezy classification may still be running — retry shortly."
+        onRetry={() => void refresh(true)}
+      />
+    );
+  }
+
+  if (!dashboard) {
+    return (
+      <ExecutivePanelError
+        title="Recruiting Autopilot Operations"
+        message={sectionErrors[0] ?? "Failed to load autopilot operations dashboard"}
+        onRetry={() => void refresh(true)}
       />
     );
   }
@@ -134,9 +79,21 @@ export function RecruitingAutopilotOperationsPanel() {
   const s = dashboard.status;
   const t = dashboard.today;
   const q = dashboard.queue;
+  const bannerWarnings = [...warnings, ...sectionErrors];
 
   return (
     <div className="space-y-6">
+      {showingCachedSnapshot || bannerWarnings.length > 0 ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          {showingCachedSnapshot ? (
+            <p className="font-medium">Showing last successful dashboard snapshot.</p>
+          ) : null}
+          {bannerWarnings.length > 0 ? (
+            <ExecutiveWarningList warnings={bannerWarnings} />
+          ) : null}
+        </div>
+      ) : null}
+
       <ExecutiveCard id="p155-autopilot-status" variant="premium">
         <SectionHeader
           title="Autopilot Status"
@@ -184,7 +141,7 @@ export function RecruitingAutopilotOperationsPanel() {
       </ExecutiveCard>
 
       <ExecutiveCard id="p155-queue-health">
-        <SectionHeader title="Queue Health" subtitle="P152 classification buckets" />
+        <SectionHeader title="Queue Health" subtitle="P152 classification with workflow fallback" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricCard label="Eligible" value={q.eligibleForPaperwork.toLocaleString()} />
           <MetricCard label="Waiting signature" value={q.waitingOnSignature.toLocaleString()} />
@@ -266,7 +223,7 @@ export function RecruitingAutopilotOperationsPanel() {
           <button
             type="button"
             className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
-            disabled={running}
+            disabled={actionBusy}
             onClick={() => void postControl("dry_cycle")}
           >
             Run dry cycle
@@ -274,7 +231,7 @@ export function RecruitingAutopilotOperationsPanel() {
           <button
             type="button"
             className="rounded-md border border-amber-700/60 px-3 py-1.5 text-sm text-amber-200"
-            disabled={running}
+            disabled={actionBusy}
             onClick={() => {
               if (
                 !window.confirm(
@@ -291,7 +248,7 @@ export function RecruitingAutopilotOperationsPanel() {
           <button
             type="button"
             className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
-            disabled={running}
+            disabled={actionBusy}
             onClick={() => void postControl("pause")}
           >
             Pause autopilot
@@ -299,7 +256,7 @@ export function RecruitingAutopilotOperationsPanel() {
           <button
             type="button"
             className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
-            disabled={running}
+            disabled={actionBusy}
             onClick={() => void postControl("resume")}
           >
             Resume autopilot
@@ -307,8 +264,8 @@ export function RecruitingAutopilotOperationsPanel() {
           <button
             type="button"
             className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
-            disabled={running}
-            onClick={() => void postControl("refresh")}
+            disabled={actionBusy}
+            onClick={() => void refresh(true)}
           >
             Refresh status
           </button>
