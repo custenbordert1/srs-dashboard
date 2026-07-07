@@ -1,0 +1,259 @@
+{
+  "sourcePhase": "P155",
+  "generatedAt": "2026-07-07T15:34:07.129Z",
+  "validation": {
+    "buildPassed": true,
+    "testsPassed": true,
+    "continuousEnabledDefault": true,
+    "noLiveSendsDuringValidation": true,
+    "liveSendCountInRecentSends": 10
+  },
+  "dashboard": {
+    "sourcePhase": "P155",
+    "generatedAt": "2026-07-07T15:33:54.841Z",
+    "status": {
+      "enabled": false,
+      "continuousEnabled": false,
+      "runnerStatus": "disabled",
+      "lastRunAt": "2026-07-07T15:10:21.366Z",
+      "nextRunAt": "2026-07-07T15:20:46.364Z",
+      "uptimeMs": 2269142,
+      "serverStartTime": "2026-07-07T14:56:05.701Z",
+      "intervalMinutes": 10,
+      "maxSendsPerCycle": 10,
+      "maxAssignmentsPerCycle": 25,
+      "processingLockHeld": false,
+      "lastError": null
+    },
+    "today": {
+      "candidatesEvaluated": 546,
+      "recruitersAssigned": 0,
+      "paperworkSent": 10,
+      "paperworkSigned": 0,
+      "activeSignatureRequests": 71,
+      "duplicatesPrevented": 26,
+      "failures": 0
+    },
+    "queue": {
+      "eligibleForPaperwork": 53,
+      "waitingOnSignature": 16,
+      "signedToday": 0,
+      "invalidEmail": 0,
+      "duplicateCandidates": 26,
+      "manualReview": 0,
+      "disqualifiedArchived": 2,
+      "needsRecruiterAssignment": 385,
+      "queueRemaining": 56
+    }
+  },
+  "recentSends": [
+    {
+      "candidateId": "de52f7096d0f",
+      "candidateName": "James Peters",
+      "email": "retailservicespjm@gmail.com",
+      "recruiter": "Alex",
+      "dm": "Trista Thomas",
+      "signatureRequestId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:02:02.203Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "ec67391a2162",
+      "candidateName": "Jackie Smart",
+      "email": "jacks0427@yahoo.com",
+      "recruiter": "Morgan",
+      "dm": "Trista Thomas",
+      "signatureRequestId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:02:01.432Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "6f8b074293e1",
+      "candidateName": "Irbania marmol",
+      "email": "irbaniam2704@hotmail.com",
+      "recruiter": "Taylor",
+      "dm": "Mindie Rodriguez",
+      "signatureRequestId": "1c9bd406248d03f06bc5bb64bceee1713ecb6f14",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:02:00.616Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "652bc90340b9",
+      "candidateName": "Harryl Avery Jr",
+      "email": "harrylaveryjr.hr@gmail.com",
+      "recruiter": "Alex",
+      "dm": "Trista Thomas",
+      "signatureRequestId": "adde89370054f67c94fb4167b546813121555719",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:59.919Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "recruiter": "Logan",
+      "dm": "Lori VandeWiele",
+      "signatureRequestId": "22bb39129aee3b3d5cb57abfdb0993913570791b",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:59.238Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "c5b23216837a",
+      "candidateName": "Getsemani",
+      "email": "cgetse24@gmail.com",
+      "recruiter": "Logan",
+      "dm": "Lori VandeWiele",
+      "signatureRequestId": "d9bc15fed7f03583e5946aa4d79e1293909e01ee",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:58.494Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "ae4b6160f57c",
+      "candidateName": "Garrett Exum",
+      "email": "exuron1@gmail.com",
+      "recruiter": "Casey",
+      "dm": "Erin Boatright",
+      "signatureRequestId": "1699fffc1f9f53226beed14cadb6a436e56f0353",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:57.802Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "5661993f5f9a",
+      "candidateName": "Francis Petitte",
+      "email": "petittef@outlook.com",
+      "recruiter": "Morgan",
+      "dm": "Trista Thomas",
+      "signatureRequestId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:56.994Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "4eb52a6c7495",
+      "candidateName": "Felicia Lewis",
+      "email": "feliciastacker95@gmail.com",
+      "recruiter": "Alex",
+      "dm": "Trista Thomas",
+      "signatureRequestId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:56.263Z",
+      "dryRun": false
+    },
+    {
+      "candidateId": "ed828f614e1d",
+      "candidateName": "Faith Withem",
+      "email": "faith.withem@gmail.com",
+      "recruiter": "Morgan",
+      "dm": "Trista Thomas",
+      "signatureRequestId": "3b193113cc740984cf6a139927c879c1a7a3fcf5",
+      "status": "sent",
+      "sentAt": "2026-07-07T14:01:55.077Z",
+      "dryRun": false
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "class-dup-2929aebfd380",
+      "category": "duplicate_conflict",
+      "candidateId": "2929aebfd380",
+      "candidateName": "Bhavin Patel",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-5ad3fb6b872d",
+      "category": "duplicate_conflict",
+      "candidateId": "5ad3fb6b872d",
+      "candidateName": "Billy Joe Romero",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-ae4b6160f57c",
+      "category": "duplicate_conflict",
+      "candidateId": "ae4b6160f57c",
+      "candidateName": "Garrett Exum",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-cfcd1b8179ba",
+      "category": "duplicate_conflict",
+      "candidateId": "cfcd1b8179ba",
+      "candidateName": "Ryley Umbel",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-aaa55717777d",
+      "category": "duplicate_conflict",
+      "candidateId": "aaa55717777d",
+      "candidateName": "Chirumamilla Praneetha",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-de52f7096d0f",
+      "category": "duplicate_conflict",
+      "candidateId": "de52f7096d0f",
+      "candidateName": "James Peters",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-147205637f24",
+      "category": "duplicate_conflict",
+      "candidateId": "147205637f24",
+      "candidateName": "Dezire Nelson",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-9990aa40f960",
+      "category": "duplicate_conflict",
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "detail": "Duplicate candidate flagged.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-ed828f614e1d",
+      "category": "duplicate_conflict",
+      "candidateId": "ed828f614e1d",
+      "candidateName": "Faith Withem",
+      "detail": "Duplicate candidate flagged.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-8367f72dbcc7",
+      "category": "duplicate_conflict",
+      "candidateId": "8367f72dbcc7",
+      "candidateName": "Edward Rak",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-6f8b074293e1",
+      "category": "duplicate_conflict",
+      "candidateId": "6f8b074293e1",
+      "candidateName": "Irbania marmol",
+      "detail": "Duplicate candidate flagged.",
+      "at": "2026-07-07T15:33:55.580Z"
+    },
+    {
+      "id": "class-dup-524e8ac69b59",
+      "category": "duplicate_conflict",
+      "candidateId": "524e8ac69b59",
+      "candidateName": "Antwon Scott",
+      "detail": "Onboarding record already has an active signature request.",
+      "at": "2026-07-07T15:33:55.580Z"
+    }
+  ]
+}

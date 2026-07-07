@@ -1,32 +1,27 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { buildP155OperationsDashboard } from "@/lib/p155-autopilot-operations-dashboard";
-import { buildP1547AutopilotStatus } from "@/lib/p154-continuous-autonomous-recruiting-runner";
+import { buildP155Exceptions } from "@/lib/p155-autopilot-operations-dashboard";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
 
-const ROUTE = "/api/recruiting/autopilot/status";
+const ROUTE = "/api/recruiting/autopilot/exceptions";
 
 export async function GET(request: Request) {
   const guard = guardApiRoute(request, {
     allowedRoles: ["executive", "recruiter"],
     requireTerritory: true,
     rateLimit: BREEZY_RATE_LIMIT,
-    auditAction: "recruiting_autopilot_status",
+    auditAction: "recruiting_autopilot_exceptions",
   });
   if (isGuardFailure(guard)) return guard;
   auditTerritoryAccess(guard.session, ROUTE);
 
-  const [runner, dashboard] = await Promise.all([
-    buildP1547AutopilotStatus(),
-    buildP155OperationsDashboard(),
-  ]);
-
-  return NextResponse.json({
-    ok: runner.ok,
-    runner,
-    dashboard,
+  const url = new URL(request.url);
+  const limit = Number.parseInt(url.searchParams.get("limit") ?? "50", 10);
+  const exceptions = await buildP155Exceptions({
+    limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 50,
   });
+
+  return NextResponse.json({ ok: true, exceptions, count: exceptions.length });
 }
