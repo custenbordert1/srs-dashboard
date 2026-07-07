@@ -2269,11 +2269,28 @@ export async function scanBreezyPublishedPositionsBatch(input: {
   maxRuntimeMs?: number;
   maxPagesPerPosition?: number;
 }): Promise<BreezyPositionScanBatchResult> {
+  return scanBreezyPositionsBatch({
+    ...input,
+    pipelineState: "published",
+  });
+}
+
+/** Scan an explicit slice of positions for any Breezy job pipeline state. */
+export async function scanBreezyPositionsBatch(input: {
+  companyId: string;
+  positions: BreezyJob[];
+  pipelineState: BreezyPositionPipelineState;
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+  filterToDateRange?: boolean;
+  maxRuntimeMs?: number;
+  maxPagesPerPosition?: number;
+}): Promise<BreezyPositionScanBatchResult> {
   const deadlineMs = Date.now() + (input.maxRuntimeMs ?? BREEZY_CANDIDATE_SCAN_BUDGET_MS);
   const batch = await scanPositionsBatch({
     companyId: input.companyId,
     positions: input.positions,
-    pipelineState: "published",
+    pipelineState: input.pipelineState,
     pageSize: CANDIDATES_PAGE_SIZE,
     maxPages: input.maxPagesPerPosition ?? MAX_CANDIDATE_PAGES_PER_POSITION,
     deadlineMs,

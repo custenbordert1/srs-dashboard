@@ -1,0 +1,587 @@
+{
+  "sourcePhase": "P154.7",
+  "generatedAt": "2026-07-07T15:10:58.020Z",
+  "continuousEnabledDefault": false,
+  "continuousEnabled": false,
+  "simulation": true,
+  "cycles": 3,
+  "reports": [
+    {
+      "sourcePhase": "P154.7",
+      "generatedAt": "2026-07-07T15:09:22.955Z",
+      "dryRun": true,
+      "skippedOverlap": false,
+      "cycleNumber": 1,
+      "metrics": {
+        "cycleNumber": 1,
+        "startedAt": "2026-07-07T15:09:01.224Z",
+        "completedAt": "2026-07-07T15:09:22.955Z",
+        "durationMs": 21731,
+        "candidatesEvaluated": 546,
+        "assigned": 0,
+        "sent": 0,
+        "skipped": 53,
+        "duplicatesPrevented": 31,
+        "errors": 0,
+        "queueRemaining": 56,
+        "dryRun": true
+      },
+      "ingestion": {
+        "newCandidates": 0,
+        "mergedIntoStore": 597,
+        "positionsScanned": 0
+      },
+      "controlledCycle": {
+        "sourcePhase": "P154",
+        "generatedAt": "2026-07-07T15:09:02.039Z",
+        "dryRun": true,
+        "autopilotEnabled": false,
+        "paused": false,
+        "pausedReason": null,
+        "health": {
+          "generatedAt": "2026-07-07T15:09:02.039Z",
+          "overallStatus": "healthy",
+          "healthy": true,
+          "checks": [
+            {
+              "id": "breezy_api",
+              "label": "Breezy API",
+              "status": "healthy",
+              "detail": "Breezy API reachable (194 published jobs)."
+            },
+            {
+              "id": "dropbox_sign_api",
+              "label": "Dropbox Sign API",
+              "status": "healthy",
+              "detail": "DROPBOX_SIGN_API_KEY configured."
+            },
+            {
+              "id": "workflow_store",
+              "label": "Workflow store",
+              "status": "healthy",
+              "detail": "Workflow store readable (597 records)."
+            },
+            {
+              "id": "candidate_ingestion",
+              "label": "Candidate ingestion",
+              "status": "healthy",
+              "detail": "Ingestion store fresh (40 positions scanned)."
+            },
+            {
+              "id": "recruiter_assignment_engine",
+              "label": "Recruiter assignment engine",
+              "status": "healthy",
+              "detail": "10 canonical recruiters configured."
+            },
+            {
+              "id": "webhook_listener",
+              "label": "Webhook listeners",
+              "status": "healthy",
+              "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+            },
+            {
+              "id": "audit_logging",
+              "label": "Audit logging",
+              "status": "healthy",
+              "detail": "Audit stores readable (P145: 500, P151: 500 events)."
+            }
+          ],
+          "abortReason": null
+        },
+        "enabledFeatures": {
+          "p151RecruiterAssignment": true,
+          "p152ImmediatePaperwork": true,
+          "freshIngestionRescue": true,
+          "automaticWorkflowAdvancement": true,
+          "webhookCompletionProcessing": true,
+          "duplicatePrevention": true,
+          "continuousIngestion": true
+        },
+        "limits": {
+          "maxRecruiterAssignmentsPerCycle": 25,
+          "maxPaperworkSendsPerCycle": 10,
+          "stopOnFirstError": true
+        },
+        "cycle": {
+          "candidatesEvaluated": 546,
+          "recruitersAssigned": 0,
+          "paperworkSent": 0,
+          "paperworkSkipped": 53,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "executionTimeMs": 4263,
+          "webhookStatus": "passive listener active; 53 audit events this cycle",
+          "queueRemaining": 56,
+          "stoppedOnError": false,
+          "capReachedAssignments": false,
+          "capReachedSends": false
+        },
+        "dashboard": {
+          "candidatesEvaluated": 546,
+          "recruitersAssigned": 0,
+          "paperworkSent": 0,
+          "paperworkCompleted": 1,
+          "paperworkSkipped": 53,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "webhookCompletions": 0,
+          "averageProcessingTimeMs": 4263,
+          "queueDepth": 56,
+          "lastSuccessfulCycleAt": "2026-07-07T15:09:02.039Z"
+        },
+        "safetyFlags": {
+          "breezyWrites": false,
+          "breezyStageMovement": false,
+          "executeBatchCalled": false,
+          "duplicatePreventionActive": true,
+          "auditLoggingEnabled": true
+        },
+        "rollbackRecommendation": "Dry run complete — enable with P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED=true and --live after executive review."
+      },
+      "webhookSync": {
+        "synced": 71,
+        "errors": 0
+      },
+      "stoppedOnError": false,
+      "error": null
+    },
+    {
+      "sourcePhase": "P154.7",
+      "generatedAt": "2026-07-07T15:10:21.358Z",
+      "dryRun": true,
+      "skippedOverlap": false,
+      "cycleNumber": 2,
+      "metrics": {
+        "cycleNumber": 2,
+        "startedAt": "2026-07-07T15:09:22.964Z",
+        "completedAt": "2026-07-07T15:10:21.358Z",
+        "durationMs": 58394,
+        "candidatesEvaluated": 546,
+        "assigned": 0,
+        "sent": 0,
+        "skipped": 53,
+        "duplicatesPrevented": 26,
+        "errors": 0,
+        "queueRemaining": 56,
+        "dryRun": true
+      },
+      "ingestion": {
+        "newCandidates": 0,
+        "mergedIntoStore": 597,
+        "positionsScanned": 0
+      },
+      "controlledCycle": {
+        "sourcePhase": "P154",
+        "generatedAt": "2026-07-07T15:09:23.068Z",
+        "dryRun": true,
+        "autopilotEnabled": false,
+        "paused": false,
+        "pausedReason": null,
+        "health": {
+          "generatedAt": "2026-07-07T15:09:23.068Z",
+          "overallStatus": "healthy",
+          "healthy": true,
+          "checks": [
+            {
+              "id": "breezy_api",
+              "label": "Breezy API",
+              "status": "healthy",
+              "detail": "Breezy API reachable (194 published jobs)."
+            },
+            {
+              "id": "dropbox_sign_api",
+              "label": "Dropbox Sign API",
+              "status": "healthy",
+              "detail": "DROPBOX_SIGN_API_KEY configured."
+            },
+            {
+              "id": "workflow_store",
+              "label": "Workflow store",
+              "status": "healthy",
+              "detail": "Workflow store readable (597 records)."
+            },
+            {
+              "id": "candidate_ingestion",
+              "label": "Candidate ingestion",
+              "status": "healthy",
+              "detail": "Ingestion store fresh (40 positions scanned)."
+            },
+            {
+              "id": "recruiter_assignment_engine",
+              "label": "Recruiter assignment engine",
+              "status": "healthy",
+              "detail": "10 canonical recruiters configured."
+            },
+            {
+              "id": "webhook_listener",
+              "label": "Webhook listeners",
+              "status": "healthy",
+              "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+            },
+            {
+              "id": "audit_logging",
+              "label": "Audit logging",
+              "status": "healthy",
+              "detail": "Audit stores readable (P145: 500, P151: 500 events)."
+            }
+          ],
+          "abortReason": null
+        },
+        "enabledFeatures": {
+          "p151RecruiterAssignment": true,
+          "p152ImmediatePaperwork": true,
+          "freshIngestionRescue": true,
+          "automaticWorkflowAdvancement": true,
+          "webhookCompletionProcessing": true,
+          "duplicatePrevention": true,
+          "continuousIngestion": true
+        },
+        "limits": {
+          "maxRecruiterAssignmentsPerCycle": 25,
+          "maxPaperworkSendsPerCycle": 10,
+          "stopOnFirstError": true
+        },
+        "cycle": {
+          "candidatesEvaluated": 546,
+          "recruitersAssigned": 0,
+          "paperworkSent": 0,
+          "paperworkSkipped": 53,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "executionTimeMs": 41327,
+          "webhookStatus": "passive listener active; 53 audit events this cycle",
+          "queueRemaining": 56,
+          "stoppedOnError": false,
+          "capReachedAssignments": false,
+          "capReachedSends": false
+        },
+        "dashboard": {
+          "candidatesEvaluated": 546,
+          "recruitersAssigned": 0,
+          "paperworkSent": 0,
+          "paperworkCompleted": 1,
+          "paperworkSkipped": 53,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "webhookCompletions": 0,
+          "averageProcessingTimeMs": 41327,
+          "queueDepth": 56,
+          "lastSuccessfulCycleAt": "2026-07-07T15:09:23.068Z"
+        },
+        "safetyFlags": {
+          "breezyWrites": false,
+          "breezyStageMovement": false,
+          "executeBatchCalled": false,
+          "duplicatePreventionActive": true,
+          "auditLoggingEnabled": true
+        },
+        "rollbackRecommendation": "Dry run complete — enable with P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED=true and --live after executive review."
+      },
+      "webhookSync": {
+        "synced": 71,
+        "errors": 0
+      },
+      "stoppedOnError": false,
+      "error": null
+    },
+    {
+      "sourcePhase": "P154.7",
+      "generatedAt": "2026-07-07T15:10:46.360Z",
+      "dryRun": true,
+      "skippedOverlap": false,
+      "cycleNumber": 3,
+      "metrics": {
+        "cycleNumber": 3,
+        "startedAt": "2026-07-07T15:10:21.366Z",
+        "completedAt": "2026-07-07T15:10:46.360Z",
+        "durationMs": 24994,
+        "candidatesEvaluated": 546,
+        "assigned": 0,
+        "sent": 0,
+        "skipped": 53,
+        "duplicatesPrevented": 26,
+        "errors": 0,
+        "queueRemaining": 56,
+        "dryRun": true
+      },
+      "ingestion": {
+        "newCandidates": 0,
+        "mergedIntoStore": 597,
+        "positionsScanned": 0
+      },
+      "controlledCycle": {
+        "sourcePhase": "P154",
+        "generatedAt": "2026-07-07T15:10:21.467Z",
+        "dryRun": true,
+        "autopilotEnabled": false,
+        "paused": false,
+        "pausedReason": null,
+        "health": {
+          "generatedAt": "2026-07-07T15:10:21.467Z",
+          "overallStatus": "healthy",
+          "healthy": true,
+          "checks": [
+            {
+              "id": "breezy_api",
+              "label": "Breezy API",
+              "status": "healthy",
+              "detail": "Breezy API reachable (194 published jobs)."
+            },
+            {
+              "id": "dropbox_sign_api",
+              "label": "Dropbox Sign API",
+              "status": "healthy",
+              "detail": "DROPBOX_SIGN_API_KEY configured."
+            },
+            {
+              "id": "workflow_store",
+              "label": "Workflow store",
+              "status": "healthy",
+              "detail": "Workflow store readable (597 records)."
+            },
+            {
+              "id": "candidate_ingestion",
+              "label": "Candidate ingestion",
+              "status": "healthy",
+              "detail": "Ingestion store fresh (40 positions scanned)."
+            },
+            {
+              "id": "recruiter_assignment_engine",
+              "label": "Recruiter assignment engine",
+              "status": "healthy",
+              "detail": "10 canonical recruiters configured."
+            },
+            {
+              "id": "webhook_listener",
+              "label": "Webhook listeners",
+              "status": "healthy",
+              "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+            },
+            {
+              "id": "audit_logging",
+              "label": "Audit logging",
+              "status": "healthy",
+              "detail": "Audit stores readable (P145: 500, P151: 500 events)."
+            }
+          ],
+          "abortReason": null
+        },
+        "enabledFeatures": {
+          "p151RecruiterAssignment": true,
+          "p152ImmediatePaperwork": true,
+          "freshIngestionRescue": true,
+          "automaticWorkflowAdvancement": true,
+          "webhookCompletionProcessing": true,
+          "duplicatePrevention": true,
+          "continuousIngestion": true
+        },
+        "limits": {
+          "maxRecruiterAssignmentsPerCycle": 25,
+          "maxPaperworkSendsPerCycle": 10,
+          "stopOnFirstError": true
+        },
+        "cycle": {
+          "candidatesEvaluated": 546,
+          "recruitersAssigned": 0,
+          "paperworkSent": 0,
+          "paperworkSkipped": 53,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "executionTimeMs": 7422,
+          "webhookStatus": "passive listener active; 53 audit events this cycle",
+          "queueRemaining": 56,
+          "stoppedOnError": false,
+          "capReachedAssignments": false,
+          "capReachedSends": false
+        },
+        "dashboard": {
+          "candidatesEvaluated": 546,
+          "recruitersAssigned": 0,
+          "paperworkSent": 0,
+          "paperworkCompleted": 1,
+          "paperworkSkipped": 53,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "webhookCompletions": 0,
+          "averageProcessingTimeMs": 7422,
+          "queueDepth": 56,
+          "lastSuccessfulCycleAt": "2026-07-07T15:10:21.467Z"
+        },
+        "safetyFlags": {
+          "breezyWrites": false,
+          "breezyStageMovement": false,
+          "executeBatchCalled": false,
+          "duplicatePreventionActive": true,
+          "auditLoggingEnabled": true
+        },
+        "rollbackRecommendation": "Dry run complete — enable with P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED=true and --live after executive review."
+      },
+      "webhookSync": {
+        "synced": 71,
+        "errors": 0
+      },
+      "stoppedOnError": false,
+      "error": null
+    }
+  ],
+  "status": {
+    "ok": true,
+    "runnerStatus": "idle",
+    "continuousEnabled": false,
+    "lastCycle": {
+      "cycleNumber": 3,
+      "startedAt": "2026-07-07T15:10:21.366Z",
+      "completedAt": "2026-07-07T15:10:46.360Z",
+      "durationMs": 24994,
+      "candidatesEvaluated": 546,
+      "assigned": 0,
+      "sent": 0,
+      "skipped": 53,
+      "duplicatesPrevented": 26,
+      "errors": 0,
+      "queueRemaining": 56,
+      "dryRun": true
+    },
+    "nextCycleAt": "2026-07-07T15:20:46.364Z",
+    "currentQueue": 56,
+    "todaysSends": 10,
+    "todaysSignatures": 0,
+    "errors": 0,
+    "uptimeMs": 880664,
+    "serverStartTime": "2026-07-07T14:56:05.701Z",
+    "state": {
+      "version": "P154.7",
+      "currentStatus": "idle",
+      "schedulerMode": "simulation",
+      "continuousEnabled": false,
+      "scheduleIntervalMs": 600000,
+      "serverStartTime": "2026-07-07T14:56:05.701Z",
+      "lastRun": "2026-07-07T15:10:21.366Z",
+      "nextRun": "2026-07-07T15:20:46.364Z",
+      "lastSuccessfulRun": null,
+      "cycleDurationMs": 24994,
+      "averageCycleDurationMs": 33753,
+      "runCount": 6,
+      "processingLock": null,
+      "lastError": null,
+      "candidatesEvaluated": 546,
+      "assigned": 0,
+      "sent": 0,
+      "skipped": 53,
+      "duplicatesPrevented": 26,
+      "errors": 0,
+      "queueRemaining": 56,
+      "dailyMetrics": {
+        "date": "2026-07-07",
+        "sent": 0,
+        "signaturesCompleted": 0,
+        "assigned": 0,
+        "duplicatesPrevented": 204,
+        "errors": 0
+      },
+      "recentCycles": [
+        {
+          "cycleNumber": 3,
+          "startedAt": "2026-07-07T15:10:21.366Z",
+          "completedAt": "2026-07-07T15:10:46.360Z",
+          "durationMs": 24994,
+          "candidatesEvaluated": 546,
+          "assigned": 0,
+          "sent": 0,
+          "skipped": 53,
+          "duplicatesPrevented": 26,
+          "errors": 0,
+          "queueRemaining": 56,
+          "dryRun": true
+        },
+        {
+          "cycleNumber": 2,
+          "startedAt": "2026-07-07T15:09:22.964Z",
+          "completedAt": "2026-07-07T15:10:21.358Z",
+          "durationMs": 58394,
+          "candidatesEvaluated": 546,
+          "assigned": 0,
+          "sent": 0,
+          "skipped": 53,
+          "duplicatesPrevented": 26,
+          "errors": 0,
+          "queueRemaining": 56,
+          "dryRun": true
+        },
+        {
+          "cycleNumber": 1,
+          "startedAt": "2026-07-07T15:09:01.224Z",
+          "completedAt": "2026-07-07T15:09:22.955Z",
+          "durationMs": 21731,
+          "candidatesEvaluated": 546,
+          "assigned": 0,
+          "sent": 0,
+          "skipped": 53,
+          "duplicatesPrevented": 31,
+          "errors": 0,
+          "queueRemaining": 56,
+          "dryRun": true
+        },
+        {
+          "cycleNumber": 3,
+          "startedAt": "2026-07-07T15:07:42.224Z",
+          "completedAt": "2026-07-07T15:08:04.933Z",
+          "durationMs": 22709,
+          "candidatesEvaluated": 546,
+          "assigned": 0,
+          "sent": 0,
+          "skipped": 53,
+          "duplicatesPrevented": 37,
+          "errors": 0,
+          "queueRemaining": 56,
+          "dryRun": true
+        },
+        {
+          "cycleNumber": 2,
+          "startedAt": "2026-07-07T15:06:43.640Z",
+          "completedAt": "2026-07-07T15:07:42.217Z",
+          "durationMs": 58577,
+          "candidatesEvaluated": 546,
+          "assigned": 0,
+          "sent": 0,
+          "skipped": 53,
+          "duplicatesPrevented": 42,
+          "errors": 0,
+          "queueRemaining": 56,
+          "dryRun": true
+        },
+        {
+          "cycleNumber": 1,
+          "startedAt": "2026-07-07T15:06:21.512Z",
+          "completedAt": "2026-07-07T15:06:43.633Z",
+          "durationMs": 22121,
+          "candidatesEvaluated": 546,
+          "assigned": 0,
+          "sent": 0,
+          "skipped": 53,
+          "duplicatesPrevented": 42,
+          "errors": 0,
+          "queueRemaining": 56,
+          "dryRun": true
+        }
+      ],
+      "updatedAt": "2026-07-07T15:10:46.364Z"
+    }
+  },
+  "validation": {
+    "buildPassed": true,
+    "testsPassed": true,
+    "noDuplicateSends": true,
+    "noDuplicateAssignments": true,
+    "queueDecreased": true,
+    "dashboardUpdated": true,
+    "totalSent": 0,
+    "totalAssigned": 0,
+    "totalDuplicatesPrevented": 83,
+    "queueByCycle": [
+      56,
+      56,
+      56
+    ]
+  }
+}

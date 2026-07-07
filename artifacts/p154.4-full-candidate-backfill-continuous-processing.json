@@ -1,0 +1,1375 @@
+{
+  "sourcePhase": "P154.4",
+  "generatedAt": "2026-07-07T13:24:16.786Z",
+  "dryRun": false,
+  "skippedOverlap": false,
+  "backfill": {
+    "backfillSince": "2026-06-01",
+    "backfillThrough": "2026-07-07",
+    "totalPositionsScanned": 401,
+    "activePositionsScanned": 81,
+    "closedPositionsScanned": 320,
+    "archivedPositionsScanned": 0,
+    "totalCandidatesFound": 65,
+    "candidatesSinceJune": 65,
+    "candidatesAlreadyInStore": 65,
+    "newlyDiscoveredCandidates": 0,
+    "candidatesMissingBeforeBackfill": 0,
+    "mergedIntoStore": 495,
+    "workflowsCreated": 0,
+    "workflowsReconciled": 0,
+    "truncated": true,
+    "warnings": [
+      "Scan stopped early (published) — server runtime budget.",
+      "closed backfill truncated at position 320.",
+      "Ingestion sync: 0 new, 20 positions.",
+      "Freshness rescue skipped: undefined"
+    ],
+    "executionTimeMs": 748840
+  },
+  "classification": {
+    "backfillSince": "2026-06-01",
+    "totalClassified": 297,
+    "buckets": {
+      "eligible_for_paperwork": 0,
+      "already_sent": 0,
+      "active_signature_request": 0,
+      "already_signed": 0,
+      "duplicate": 20,
+      "invalid_email": 0,
+      "disqualified_archived": 0,
+      "needs_recruiter_assignment": 221,
+      "manual_review": 56,
+      "do_not_send": 0
+    },
+    "rows": [
+      {
+        "candidateId": "acff2383c00f",
+        "candidateName": "acff2383c00f",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is none, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: none.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; Candidate is rejected or disqualified."
+      },
+      {
+        "candidateId": "2929aebfd380",
+        "candidateName": "2929aebfd380",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "5ad3fb6b872d",
+        "candidateName": "5ad3fb6b872d",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "ae4b6160f57c",
+        "candidateName": "ae4b6160f57c",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 61% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 61% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "cfcd1b8179ba",
+        "candidateName": "cfcd1b8179ba",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "ce187a7283ec",
+        "candidateName": "ce187a7283ec",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 60% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 60% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "84d51041e750",
+        "candidateName": "84d51041e750",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "09c38dd6b79b",
+        "candidateName": "09c38dd6b79b",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "aaa55717777d",
+        "candidateName": "aaa55717777d",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "de52f7096d0f",
+        "candidateName": "de52f7096d0f",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 61% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 61% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "0bc4a331bb26",
+        "candidateName": "0bc4a331bb26",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 60% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 60% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "c87b5e655cc6",
+        "candidateName": "c87b5e655cc6",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "e72d6aebdb0d",
+        "candidateName": "e72d6aebdb0d",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 59% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 59% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "9f53ea634daf",
+        "candidateName": "9f53ea634daf",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 59% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 59% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "147205637f24",
+        "candidateName": "147205637f24",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "9990aa40f960",
+        "candidateName": "9990aa40f960",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 59% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 59% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "368f371d5fb9",
+        "candidateName": "368f371d5fb9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "30c285e12e4c",
+        "candidateName": "30c285e12e4c",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 61% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (medium confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 61% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "ed828f614e1d",
+        "candidateName": "ed828f614e1d",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 59% below 90%.; Recent contact cooldown (P144).; Needs review: Grade C (low confidence) — recruiter review recommended.; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 59% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "b3619802b554",
+        "candidateName": "b3619802b554",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "79a9e79ccd07",
+        "candidateName": "79a9e79ccd07",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "40daa40ff82c",
+        "candidateName": "40daa40ff82c",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "4e4c1ff3505f",
+        "candidateName": "4e4c1ff3505f",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "6d548b240ab0",
+        "candidateName": "6d548b240ab0",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9cdc414f3b49",
+        "candidateName": "9cdc414f3b49",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "f786bc64011a",
+        "candidateName": "f786bc64011a",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "40764d83ef6d",
+        "candidateName": "40764d83ef6d",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 21% below 90%.; Recent contact cooldown (P144).; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 21% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "86da01f7739b",
+        "candidateName": "86da01f7739b",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9f9d978c7e71",
+        "candidateName": "9f9d978c7e71",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "6931fb8de72c",
+        "candidateName": "6931fb8de72c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "334a0e2bcb6c",
+        "candidateName": "334a0e2bcb6c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "05a9c4c35ece",
+        "candidateName": "05a9c4c35ece",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "82c9209fdaa1",
+        "candidateName": "82c9209fdaa1",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 56% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 56% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "a41504a9579e",
+        "candidateName": "a41504a9579e",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "b434172a5368",
+        "candidateName": "b434172a5368",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 40% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Resume not uploaded, Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 40% below 90% threshold.; P144 blockers: Missing Resume, Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "f1f4a5fe9f5c",
+        "candidateName": "f1f4a5fe9f5c",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "b23b62a25dc2",
+        "candidateName": "b23b62a25dc2",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 56% below 90%.; Recent contact cooldown (P144).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 56% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "f5edb9e2bced",
+        "candidateName": "f5edb9e2bced",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 56% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 56% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "7830aa5b79b1",
+        "candidateName": "7830aa5b79b1",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "87ea6e6dca24",
+        "candidateName": "87ea6e6dca24",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "77be2be44a6b",
+        "candidateName": "77be2be44a6b",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "d6cd926f864a",
+        "candidateName": "d6cd926f864a",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "c6414945087b",
+        "candidateName": "c6414945087b",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 53% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 53% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "ea49a4e6297b",
+        "candidateName": "ea49a4e6297b",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 56% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 56% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "8367f72dbcc7",
+        "candidateName": "8367f72dbcc7",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 57% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 57% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "6f8b074293e1",
+        "candidateName": "6f8b074293e1",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 55% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 55% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "9ebc9df23d93",
+        "candidateName": "9ebc9df23d93",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "f6703a9c82e3",
+        "candidateName": "f6703a9c82e3",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "38a1fb26c640",
+        "candidateName": "38a1fb26c640",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 54% below 90%.; Recent contact cooldown (P144).; Incomplete profile: Grade B — missing data blocks automation (Technology readiness unverified, Transportation not confirmed).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 54% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "5eaf40cd58c1",
+        "candidateName": "5eaf40cd58c1",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "765b91a84a40",
+        "candidateName": "765b91a84a40",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "7818ada084aa",
+        "candidateName": "7818ada084aa",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3a7eb2923ddf",
+        "candidateName": "3a7eb2923ddf",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "62f3c5f8d535",
+        "candidateName": "62f3c5f8d535",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "bfd12572f3e5",
+        "candidateName": "bfd12572f3e5",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "cde8b040e7a4",
+        "candidateName": "cde8b040e7a4",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d6415fb8e3b9",
+        "candidateName": "d6415fb8e3b9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "fe6fe3e3125f",
+        "candidateName": "fe6fe3e3125f",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "69f9d37feb46",
+        "candidateName": "69f9d37feb46",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "7e52e998cf11",
+        "candidateName": "7e52e998cf11",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 46% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 46% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "faee4e65ed68",
+        "candidateName": "faee4e65ed68",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "568c39b6f8f4",
+        "candidateName": "568c39b6f8f4",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "ae7235c3de70",
+        "candidateName": "ae7235c3de70",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "ecd43a716381",
+        "candidateName": "ecd43a716381",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "c49e58cec99c",
+        "candidateName": "c49e58cec99c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "081d41f9295d",
+        "candidateName": "081d41f9295d",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "32f1be2b9068",
+        "candidateName": "32f1be2b9068",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "92a112b6d1a9",
+        "candidateName": "92a112b6d1a9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3d4c70bc0fa8",
+        "candidateName": "3d4c70bc0fa8",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "b275fcd81aa2",
+        "candidateName": "b275fcd81aa2",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9d4d002700df",
+        "candidateName": "9d4d002700df",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "adcb3127f2aa",
+        "candidateName": "adcb3127f2aa",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d4f50086aa6c",
+        "candidateName": "d4f50086aa6c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "45bce52b070d",
+        "candidateName": "45bce52b070d",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "f28a4478b76c",
+        "candidateName": "f28a4478b76c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "8916bcff36b4",
+        "candidateName": "8916bcff36b4",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "8feb7d623f55",
+        "candidateName": "8feb7d623f55",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 44% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 44% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "5d4d951fcbc0",
+        "candidateName": "5d4d951fcbc0",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 44% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 44% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "a4792ee6051e",
+        "candidateName": "a4792ee6051e",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "276b822da485",
+        "candidateName": "276b822da485",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "13e8c31452b5",
+        "candidateName": "13e8c31452b5",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "087c2c34a74a",
+        "candidateName": "087c2c34a74a",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "076aabc360bb",
+        "candidateName": "076aabc360bb",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "f700c2780f03",
+        "candidateName": "f700c2780f03",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "c5b23216837a",
+        "candidateName": "c5b23216837a",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 44% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 44% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "e1dcf8997a44",
+        "candidateName": "e1dcf8997a44",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "1b3a2f14b63c",
+        "candidateName": "1b3a2f14b63c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "5da2f2141b96",
+        "candidateName": "5da2f2141b96",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "27269078a5b9",
+        "candidateName": "27269078a5b9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "87b2ad945d81",
+        "candidateName": "87b2ad945d81",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "1e4f1166d30f",
+        "candidateName": "1e4f1166d30f",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 45% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Incomplete profile: Grade C — missing data blocks automation (Resume not uploaded).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 45% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "54a9b92df06b",
+        "candidateName": "54a9b92df06b",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "37bb15307eac",
+        "candidateName": "37bb15307eac",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "ca747f355c14",
+        "candidateName": "ca747f355c14",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 23% below 90%.; Recent contact cooldown (P144).; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 23% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "3e98b7afbc0a",
+        "candidateName": "3e98b7afbc0a",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 8% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 8% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "6f39aaa878b6",
+        "candidateName": "6f39aaa878b6",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "0957e544ac35",
+        "candidateName": "0957e544ac35",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9f3d9246a0c9",
+        "candidateName": "9f3d9246a0c9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "6ed1875bcd15",
+        "candidateName": "6ed1875bcd15",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9f982288b4a3",
+        "candidateName": "9f982288b4a3",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3cd770217fe8",
+        "candidateName": "3cd770217fe8",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "7c37beb6ac48",
+        "candidateName": "7c37beb6ac48",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d65e154f9c69",
+        "candidateName": "d65e154f9c69",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "13fbb0f37a68",
+        "candidateName": "13fbb0f37a68",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "e759c9d49bf8",
+        "candidateName": "e759c9d49bf8",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "49e97aa2743c",
+        "candidateName": "49e97aa2743c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9921cca9ccbd",
+        "candidateName": "9921cca9ccbd",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "8ec5f7b7371f",
+        "candidateName": "8ec5f7b7371f",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 25% below 90%.; Recent contact cooldown (P144).; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 25% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "36f4e45c3d3d",
+        "candidateName": "36f4e45c3d3d",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9f8231817090",
+        "candidateName": "9f8231817090",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "5f938bcd0323",
+        "candidateName": "5f938bcd0323",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9ef7bf235ee9",
+        "candidateName": "9ef7bf235ee9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "39ddfcf9c54e",
+        "candidateName": "39ddfcf9c54e",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "c11707fe5c35",
+        "candidateName": "c11707fe5c35",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "09cad3fe5634",
+        "candidateName": "09cad3fe5634",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "1158b78ee219",
+        "candidateName": "1158b78ee219",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "91f84eae7546",
+        "candidateName": "91f84eae7546",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "a0e30984a18d",
+        "candidateName": "a0e30984a18d",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 25% below 90%.; Recent contact cooldown (P144).; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 25% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "80da14242a1c",
+        "candidateName": "80da14242a1c",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 9% below 90%.; Missing resume (P144 blocker).; Recent contact cooldown (P144).; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 9% below 90% threshold.; P144 blockers: Missing Resume, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "2f5f144c00c8",
+        "candidateName": "2f5f144c00c8",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "1ec650f8e1d9",
+        "candidateName": "1ec650f8e1d9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d021d8262ef6",
+        "candidateName": "d021d8262ef6",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "86ea44c3d95a",
+        "candidateName": "86ea44c3d95a",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "39ddf56edc32",
+        "candidateName": "39ddf56edc32",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "a02931877eec",
+        "candidateName": "a02931877eec",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3f9d1b44cf80",
+        "candidateName": "3f9d1b44cf80",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "ad40ff1f5d93",
+        "candidateName": "ad40ff1f5d93",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "4b54714e9aa9",
+        "candidateName": "4b54714e9aa9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "b1740d65c661",
+        "candidateName": "b1740d65c661",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "7492888812c6",
+        "candidateName": "7492888812c6",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "520ae00e6673",
+        "candidateName": "520ae00e6673",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "de921c6e199b",
+        "candidateName": "de921c6e199b",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "968499ef4533",
+        "candidateName": "968499ef4533",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "911157c289ae",
+        "candidateName": "911157c289ae",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "8d0a9d872b68",
+        "candidateName": "8d0a9d872b68",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "570d0e5c132e",
+        "candidateName": "570d0e5c132e",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "1b909bd699ec",
+        "candidateName": "1b909bd699ec",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3fb0c007171d",
+        "candidateName": "3fb0c007171d",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "68015bc9a375",
+        "candidateName": "68015bc9a375",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "0ed8fd3b95f3",
+        "candidateName": "0ed8fd3b95f3",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d64647ba8a8e",
+        "candidateName": "d64647ba8a8e",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "b21a84af7c29",
+        "candidateName": "b21a84af7c29",
+        "bucket": "duplicate",
+        "reason": "Duplicate candidate flagged."
+      },
+      {
+        "candidateId": "f6c222081b94",
+        "candidateName": "f6c222081b94",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "b9f4bb0667cd",
+        "candidateName": "b9f4bb0667cd",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3f1f0edcde0a",
+        "candidateName": "3f1f0edcde0a",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d2ef0cef341f",
+        "candidateName": "d2ef0cef341f",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "1373fc7562e8",
+        "candidateName": "1373fc7562e8",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "e86a51691d13",
+        "candidateName": "e86a51691d13",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "5c439012ded2",
+        "candidateName": "5c439012ded2",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "1fd5e4b48b95",
+        "candidateName": "1fd5e4b48b95",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d83f33df41bd",
+        "candidateName": "d83f33df41bd",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "18e50371df26",
+        "candidateName": "18e50371df26",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "54b56982f026",
+        "candidateName": "54b56982f026",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "fb3e7254d95a",
+        "candidateName": "fb3e7254d95a",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "ef8311c74516",
+        "candidateName": "ef8311c74516",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "ebccc8110843",
+        "candidateName": "ebccc8110843",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "c595e23aeb3e",
+        "candidateName": "c595e23aeb3e",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d39f8bc6193e",
+        "candidateName": "d39f8bc6193e",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "997145f2afff",
+        "candidateName": "997145f2afff",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "41d728d745c2",
+        "candidateName": "41d728d745c2",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "2f83213d85e9",
+        "candidateName": "2f83213d85e9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "85092c13a69d",
+        "candidateName": "85092c13a69d",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "b9c28c498c48",
+        "candidateName": "b9c28c498c48",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "37c749cb51df",
+        "candidateName": "37c749cb51df",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "d91e8871af03",
+        "candidateName": "d91e8871af03",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      },
+      {
+        "candidateId": "9a6f590ead60",
+        "candidateName": "9a6f590ead60",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "2a08788045da",
+        "candidateName": "2a08788045da",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 26% below 90%.; Recent contact cooldown (P144).; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 26% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "2dd943b6934c",
+        "candidateName": "2dd943b6934c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "a334176433f6",
+        "candidateName": "a334176433f6",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "8fba13c8cf25",
+        "candidateName": "8fba13c8cf25",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "5e290d45974f",
+        "candidateName": "5e290d45974f",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "16d6b86e06e7",
+        "candidateName": "16d6b86e06e7",
+        "bucket": "manual_review",
+        "reason": "workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 54% below 90%.; Recent contact cooldown (P144).; Current status: Applied.; Current action: screen-candidate.; No published job or operational fit for candidate territory.; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Call Candidate\", not Send Paperwork.; Confidence 54% below 90% threshold.; P144 blockers: Missing Questionnaire, Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork.; No open published position.; No published job match for candidate position."
+      },
+      {
+        "candidateId": "bb6cb33fa936",
+        "candidateName": "bb6cb33fa936",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "fb097ec4a1d6",
+        "candidateName": "fb097ec4a1d6",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "650590ddbe20",
+        "candidateName": "650590ddbe20",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "dfb1e12c7da7",
+        "candidateName": "dfb1e12c7da7",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "645974cfbd46",
+        "candidateName": "645974cfbd46",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "c0c920caa44f",
+        "candidateName": "c0c920caa44f",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "773445c489a7",
+        "candidateName": "773445c489a7",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "276f376ba2ad",
+        "candidateName": "276f376ba2ad",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "fb06444d1348",
+        "candidateName": "fb06444d1348",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "3fbb949f2be4",
+        "candidateName": "3fbb949f2be4",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "b6c71dd117e9",
+        "candidateName": "b6c71dd117e9",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "598e1b950e29",
+        "candidateName": "598e1b950e29",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "c0e33ee5f599",
+        "candidateName": "c0e33ee5f599",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "f2a43e50cd78",
+        "candidateName": "f2a43e50cd78",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "edc9df960855",
+        "candidateName": "edc9df960855",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "9c8555abfbc7",
+        "candidateName": "9c8555abfbc7",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "0f843baa6e92",
+        "candidateName": "0f843baa6e92",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "cfd03224d5c8",
+        "candidateName": "cfd03224d5c8",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "f34acd3a4e14",
+        "candidateName": "f34acd3a4e14",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "bb5d94088f10",
+        "candidateName": "bb5d94088f10",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "c70e4a31b050",
+        "candidateName": "c70e4a31b050",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "92181f9de45c",
+        "candidateName": "92181f9de45c",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "189e89cd8493",
+        "candidateName": "189e89cd8493",
+        "bucket": "needs_recruiter_assignment",
+        "reason": "Recruiter not assigned."
+      },
+      {
+        "candidateId": "652bc90340b9",
+        "candidateName": "652bc90340b9",
+        "bucket": "manual_review",
+        "reason": "P144 confidence 29% below 90%.; Recent contact cooldown (P144).; Not in P145 queue as Send Initial Paperwork.; P144 next action is \"Wait\", not Send Paperwork.; Confidence 29% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "b484a5e72135",
+        "candidateName": "b484a5e72135",
+        "bucket": "manual_review",
+        "reason": "P83 requireApproval=true blocks shouldAdvance.; workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 73% below 90%.; Recent contact cooldown (P144).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; Confidence 73% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "4eb52a6c7495",
+        "candidateName": "4eb52a6c7495",
+        "bucket": "manual_review",
+        "reason": "P83 requireApproval=true blocks shouldAdvance.; workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 75% below 90%.; Recent contact cooldown (P144).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; Confidence 75% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "e5124f6a674e",
+        "candidateName": "e5124f6a674e",
+        "bucket": "manual_review",
+        "reason": "P83 requireApproval=true blocks shouldAdvance.; workflowStatus is Applied, not Paperwork Needed.; actionType is screen-candidate, not send-paperwork.; P144 confidence 72% below 90%.; Recent contact cooldown (P144).; Current status: Applied.; Current action: screen-candidate.; Not in P145 queue as Send Initial Paperwork.; Confidence 72% below 90% threshold.; P144 blockers: Already Contacted.; Paperwork queue does not recommend Send Initial Paperwork."
+      },
+      {
+        "candidateId": "a498d752b5bb",
+        "candidateName": "a498d752b5bb",
+        "bucket": "duplicate",
+        "reason": "Onboarding record already has an active signature request."
+      }
+    ]
+  },
+  "controlledCycle": {
+    "sourcePhase": "P154",
+    "generatedAt": "2026-07-07T13:36:46.213Z",
+    "dryRun": false,
+    "autopilotEnabled": true,
+    "paused": false,
+    "pausedReason": null,
+    "health": {
+      "generatedAt": "2026-07-07T13:36:46.213Z",
+      "overallStatus": "healthy",
+      "healthy": true,
+      "checks": [
+        {
+          "id": "breezy_api",
+          "label": "Breezy API",
+          "status": "healthy",
+          "detail": "Breezy API reachable (194 published jobs)."
+        },
+        {
+          "id": "dropbox_sign_api",
+          "label": "Dropbox Sign API",
+          "status": "healthy",
+          "detail": "DROPBOX_SIGN_API_KEY configured."
+        },
+        {
+          "id": "workflow_store",
+          "label": "Workflow store",
+          "status": "healthy",
+          "detail": "Workflow store readable (497 records)."
+        },
+        {
+          "id": "candidate_ingestion",
+          "label": "Candidate ingestion",
+          "status": "healthy",
+          "detail": "Ingestion store fresh (20 positions scanned)."
+        },
+        {
+          "id": "recruiter_assignment_engine",
+          "label": "Recruiter assignment engine",
+          "status": "healthy",
+          "detail": "10 canonical recruiters configured."
+        },
+        {
+          "id": "webhook_listener",
+          "label": "Webhook listeners",
+          "status": "healthy",
+          "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+        },
+        {
+          "id": "audit_logging",
+          "label": "Audit logging",
+          "status": "healthy",
+          "detail": "Audit stores readable (P145: 119, P151: 500 events)."
+        }
+      ],
+      "abortReason": null
+    },
+    "enabledFeatures": {
+      "p151RecruiterAssignment": true,
+      "p152ImmediatePaperwork": true,
+      "freshIngestionRescue": true,
+      "automaticWorkflowAdvancement": true,
+      "webhookCompletionProcessing": true,
+      "duplicatePrevention": true,
+      "continuousIngestion": true
+    },
+    "limits": {
+      "maxRecruiterAssignmentsPerCycle": 25,
+      "maxPaperworkSendsPerCycle": 10,
+      "stopOnFirstError": true
+    },
+    "cycle": {
+      "candidatesEvaluated": 495,
+      "recruitersAssigned": 0,
+      "paperworkSent": 10,
+      "paperworkSkipped": 0,
+      "duplicatesPrevented": 0,
+      "failures": 0,
+      "executionTimeMs": 55842,
+      "webhookStatus": "passive listener active; 10 audit events this cycle",
+      "queueRemaining": 66,
+      "stoppedOnError": false,
+      "capReachedAssignments": false,
+      "capReachedSends": true
+    },
+    "dashboard": {
+      "candidatesEvaluated": 495,
+      "recruitersAssigned": 0,
+      "paperworkSent": 10,
+      "paperworkCompleted": 1,
+      "paperworkSkipped": 0,
+      "duplicatesPrevented": 0,
+      "failures": 0,
+      "webhookCompletions": 0,
+      "averageProcessingTimeMs": 55842,
+      "queueDepth": 66,
+      "lastSuccessfulCycleAt": "2026-07-07T13:36:46.213Z"
+    },
+    "safetyFlags": {
+      "breezyWrites": false,
+      "breezyStageMovement": false,
+      "executeBatchCalled": false,
+      "duplicatePreventionActive": true,
+      "auditLoggingEnabled": true
+    },
+    "rollbackRecommendation": "Monitor Dropbox Sign and audit logs for 24h before raising P154_MAX_PAPERWORK_SENDS_PER_CYCLE."
+  },
+  "dashboard": {
+    "totalCandidatesScanned": 495,
+    "totalSinceJune": 297,
+    "newCandidatesDiscovered": 0,
+    "eligibleToday": 0,
+    "sentToday": 20,
+    "signedToday": 0,
+    "activeSignatureRequests": 61,
+    "duplicatesPrevented": 0,
+    "queueRemaining": 66,
+    "nextScheduledRunAt": null,
+    "lastSuccessfulRunAt": "2026-07-07T13:24:16.786Z"
+  },
+  "safetyFlags": {
+    "breezyWrites": false,
+    "duplicatePreventionActive": true,
+    "overlapLockActive": true,
+    "stopOnFirstError": true,
+    "auditLoggingEnabled": true
+  }
+}
