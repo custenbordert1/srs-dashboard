@@ -1,0 +1,386 @@
+{
+  "sourcePhase": "P160",
+  "generatedAt": "2026-07-07T19:37:30.523Z",
+  "validation": {
+    "buildPassed": true,
+    "p160TestsPassed": true,
+    "p159TestsPassed": true,
+    "p158TestsPassed": true,
+    "p157TestsPassed": true,
+    "p156TestsPassed": true,
+    "p155TestsPassed": true,
+    "p154TestsPassed": true,
+    "continuousModeRemainsDisabled": true,
+    "daemonNotStarted": true,
+    "noWorkflowWrites": true,
+    "noRecruiterAssignments": true,
+    "noPaperworkSends": true,
+    "noBreezyWrites": true,
+    "runnerSchedulerMode": "simulation",
+    "overallReadinessScore": 81,
+    "recommendation": "ready_for_observation_mode",
+    "criticalBlockers": 0
+  },
+  "report": {
+    "sourcePhase": "P160",
+    "generatedAt": "2026-07-07T19:36:57.193Z",
+    "overallReadinessScore": 81,
+    "recommendation": "ready_for_observation_mode",
+    "recommendationDetail": "Infrastructure and integrations healthy. Deploy to server, run dry cycles, observe manual batches via P159 before enabling continuous polling.",
+    "infrastructure": {
+      "buildStatus": "ready",
+      "buildDetail": "Production build present (BUILD_ID wUKu2gTR0ukrBCmLuziEQ).",
+      "nodeVersion": "v24.15.0",
+      "nodeCompatible": true,
+      "serverCompatibility": "Node 20+ compatible with Next.js 16 — suitable for Linux PM2/systemd deployment.",
+      "runtimeHealth": "ready",
+      "environmentVariables": [
+        {
+          "id": "breezy_api_key",
+          "label": "BREEZY_API_KEY",
+          "status": "ready",
+          "detail": "BREEZY_API_KEY: configured."
+        },
+        {
+          "id": "dropbox_sign_api_key",
+          "label": "DROPBOX_SIGN_API_KEY",
+          "status": "ready",
+          "detail": "DROPBOX_SIGN_API_KEY: configured."
+        },
+        {
+          "id": "session_secret",
+          "label": "SESSION_SECRET or BREEZY_API_KEY (auth)",
+          "status": "ready",
+          "detail": "SESSION_SECRET or BREEZY_API_KEY (auth): configured."
+        },
+        {
+          "id": "p154_controlled_autopilot",
+          "label": "P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED",
+          "status": "warning",
+          "detail": "P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED not set (optional)."
+        },
+        {
+          "id": "p154_continuous",
+          "label": "P154_CONTINUOUS_ENABLED",
+          "status": "warning",
+          "detail": "P154_CONTINUOUS_ENABLED not set (optional)."
+        },
+        {
+          "id": "p151_advancement",
+          "label": "P151_AUTONOMOUS_ADVANCEMENT_ENABLED",
+          "status": "ready",
+          "detail": "P151_AUTONOMOUS_ADVANCEMENT_ENABLED: true."
+        },
+        {
+          "id": "p152_immediate",
+          "label": "P152_IMMEDIATE_PAPERWORK_ENABLED",
+          "status": "warning",
+          "detail": "P152_IMMEDIATE_PAPERWORK_ENABLED not set (optional)."
+        },
+        {
+          "id": "p158_assignments",
+          "label": "P158_AUTOMATIC_ASSIGNMENTS_ENABLED",
+          "status": "warning",
+          "detail": "P158_AUTOMATIC_ASSIGNMENTS_ENABLED not set (optional)."
+        },
+        {
+          "id": "p158_transition",
+          "label": "P158_WORKFLOW_TRANSITION_ENABLED",
+          "status": "warning",
+          "detail": "P158_WORKFLOW_TRANSITION_ENABLED not set (optional)."
+        },
+        {
+          "id": "srs_recruiting_data_dir",
+          "label": "SRS_RECRUITING_DATA_DIR",
+          "status": "warning",
+          "detail": "SRS_RECRUITING_DATA_DIR not set (optional)."
+        }
+      ],
+      "secretsConfigured": [
+        {
+          "id": "breezy",
+          "label": "Breezy API token",
+          "status": "ready",
+          "detail": "BREEZY_API_KEY configured."
+        },
+        {
+          "id": "dropbox_sign",
+          "label": "Dropbox Sign API key",
+          "status": "ready",
+          "detail": "DROPBOX_SIGN_API_KEY configured."
+        },
+        {
+          "id": "session",
+          "label": "Session secret",
+          "status": "ready",
+          "detail": "Auth secret available."
+        }
+      ]
+    },
+    "integrations": {
+      "overall": "warning",
+      "items": [
+        {
+          "id": "breezy_api",
+          "label": "Breezy API",
+          "status": "ready",
+          "detail": "Breezy API reachable (194 published jobs)."
+        },
+        {
+          "id": "dropbox_sign_api",
+          "label": "Dropbox Sign API",
+          "status": "ready",
+          "detail": "DROPBOX_SIGN_API_KEY configured."
+        },
+        {
+          "id": "workflow_store",
+          "label": "Workflow store",
+          "status": "ready",
+          "detail": "Workflow store readable (597 records)."
+        },
+        {
+          "id": "candidate_ingestion",
+          "label": "Candidate ingestion",
+          "status": "ready",
+          "detail": "Ingestion store fresh (20 positions scanned)."
+        },
+        {
+          "id": "recruiter_assignment_engine",
+          "label": "Recruiter assignment engine",
+          "status": "ready",
+          "detail": "10 canonical recruiters configured."
+        },
+        {
+          "id": "webhook_listener",
+          "label": "Webhook listeners",
+          "status": "ready",
+          "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+        },
+        {
+          "id": "audit_logging",
+          "label": "Audit logging",
+          "status": "ready",
+          "detail": "Audit stores readable (P145: 500, P151: 500 events)."
+        },
+        {
+          "id": "mel",
+          "label": "MEL",
+          "status": "warning",
+          "detail": "No live MEL API integration — candidates reach MEL via workflow status (Ready for MEL / Loaded in MEL). Manual load process required."
+        },
+        {
+          "id": "audit_store",
+          "label": "Audit store",
+          "status": "ready",
+          "detail": "P145 paperwork audit readable (500 events). Workflow + runner audit JSONL on disk."
+        }
+      ]
+    },
+    "automation": {
+      "overall": "warning",
+      "phases": [
+        {
+          "phase": "P154",
+          "label": "P154 Controlled Production Autopilot",
+          "status": "warning",
+          "detail": "P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED not set — enable on server for live capped cycles.",
+          "components": [
+            "Health: healthy",
+            "Runner: simulation",
+            "Autopilot state: active",
+            "Send cap: 10/cycle",
+            "Stop on error: true"
+          ]
+        },
+        {
+          "phase": "P155",
+          "label": "P155 Operations Dashboard",
+          "status": "ready",
+          "detail": "Dashboard operational — runner disabled, 20 sends today.",
+          "components": [
+            "GET /api/recruiting/autopilot/status",
+            "POST /api/recruiting/autopilot/control"
+          ]
+        },
+        {
+          "phase": "P156",
+          "label": "P156 Candidate Prioritization",
+          "status": "ready",
+          "detail": "Prioritization engine scored 93 candidates.",
+          "components": [
+            "GET /api/recruiting/prioritized-queue",
+            "/executive/recruiting-priorities"
+          ]
+        },
+        {
+          "phase": "P157",
+          "label": "P157 Recruiter Decision Engine",
+          "status": "ready",
+          "detail": "93 decisions generated; 1 Send Paperwork recommendations.",
+          "components": [
+            "GET /api/recruiting/recommended-actions",
+            "/executive/recruiting-decisions"
+          ]
+        },
+        {
+          "phase": "P158",
+          "label": "P158 Recruiter Assignment (+ P158.1–P158.3)",
+          "status": "ready",
+          "detail": "Assignment, simulation, diagnosis, and transition modules operational (read-only).",
+          "components": [
+            "P158 assignment queue: 52 items",
+            "P158.1 simulation: 25 would assign",
+            "P158.2 diagnosis: 25 candidates",
+            "P158.3 transition: 25 eligible"
+          ]
+        },
+        {
+          "phase": "P159",
+          "label": "P159 Operations Control Center",
+          "status": "ready",
+          "detail": "Control center live — mode manual_only, 40 sends today, recommendation: safe_for_capped_cycle.",
+          "components": [
+            "GET /api/recruiting/operations-control-center",
+            "POST /api/recruiting/operations-control-center/control",
+            "/executive/operations-control-center"
+          ]
+        }
+      ]
+    },
+    "safety": {
+      "overall": "ready",
+      "items": [
+        {
+          "id": "duplicate_protection",
+          "label": "Duplicate protection",
+          "status": "ready",
+          "detail": "P152 hard blockers + onboarding duplicate checks active on every send."
+        },
+        {
+          "id": "rollback",
+          "label": "Rollback procedures",
+          "status": "ready",
+          "detail": "P158 assignment rollback + P158.3 transition rollback + autopilot pause documented."
+        },
+        {
+          "id": "audit_logging",
+          "label": "Audit logging",
+          "status": "ready",
+          "detail": "P145 paperwork audit, P151 pipeline audit, workflow audit JSONL, P154.7 runner audit."
+        },
+        {
+          "id": "stop_on_error",
+          "label": "Stop-on-error",
+          "status": "ready",
+          "detail": "P154_STOP_ON_ERROR active — cycle halts on first failure."
+        },
+        {
+          "id": "overlap_lock",
+          "label": "Overlap lock",
+          "status": "ready",
+          "detail": "P154.7 file-based lock with 15-minute stale detection prevents concurrent cycles."
+        },
+        {
+          "id": "caps",
+          "label": "Per-cycle caps",
+          "status": "ready",
+          "detail": "Send cap 10/cycle, assignment cap 25/cycle."
+        },
+        {
+          "id": "feature_flags",
+          "label": "Feature flags (safe defaults)",
+          "status": "ready",
+          "detail": "P154_CONTINUOUS_ENABLED=false; P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED=false; P152_IMMEDIATE_PAPERWORK_ENABLED=false; P147_INITIAL_PAPERWORK_AUTO_SEND_ENABLED=false"
+        }
+      ]
+    },
+    "deployment": {
+      "overall": "blocked",
+      "items": [
+        {
+          "id": "clone",
+          "step": "Clone repository on company server",
+          "status": "pending",
+          "detail": "git clone + checkout deployment branch."
+        },
+        {
+          "id": "install",
+          "step": "npm install",
+          "status": "complete",
+          "detail": "node_modules present locally."
+        },
+        {
+          "id": "build",
+          "step": "npm run build",
+          "status": "complete",
+          "detail": ".next/BUILD_ID present."
+        },
+        {
+          "id": "env",
+          "step": "Configure environment variables (.env.local)",
+          "status": "complete",
+          "detail": "Required secrets configured in current environment."
+        },
+        {
+          "id": "pm2",
+          "step": "PM2/systemd configuration",
+          "status": "pending",
+          "detail": "Configure process manager for next start + p154.7-continuous-runner --daemon (when approved)."
+        },
+        {
+          "id": "continuous",
+          "step": "Continuous runner setup",
+          "status": "pending",
+          "detail": "Intentionally disabled — enable only after observation period."
+        },
+        {
+          "id": "health",
+          "step": "Health endpoints",
+          "status": "complete",
+          "detail": "GET /api/recruiting/production-readiness, /api/recruiting/operations-control-center, /api/recruiting/autopilot/status."
+        },
+        {
+          "id": "verify",
+          "step": "Post-deploy verification",
+          "status": "partial",
+          "detail": "Run npx tsx scripts/p159-operations-control-center.ts and p160-production-readiness.ts; confirm dry cycle."
+        }
+      ]
+    },
+    "risks": {
+      "critical": [],
+      "high": [],
+      "medium": [
+        {
+          "id": "manual-batch-operations",
+          "severity": "medium",
+          "title": "Manual batch operations required",
+          "detail": "Production currently relies on operator-triggered capped cycles, not continuous polling.",
+          "mitigation": "Use P159 Operations Control Center for each live batch until continuous mode approved."
+        }
+      ],
+      "low": [
+        {
+          "id": "mel-manual",
+          "severity": "low",
+          "title": "MEL load is manual",
+          "detail": "No automated MEL API — recruiters load signed candidates manually.",
+          "mitigation": "Document MEL handoff SOP for recruiters."
+        },
+        {
+          "id": "queue-backlog",
+          "severity": "low",
+          "title": "Paperwork queue backlog",
+          "detail": "Eligible candidates may wait for next capped cycle (max 10 sends).",
+          "mitigation": "Run additional manual batches or raise cap after monitoring."
+        }
+      ]
+    },
+    "validation": {
+      "readOnly": true,
+      "continuousModeEnabled": false,
+      "daemonRunning": false,
+      "noLiveActionsPerformed": true
+    }
+  }
+}
