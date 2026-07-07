@@ -1,0 +1,321 @@
+{
+  "sourcePhase": "P154.6-final-audit",
+  "generatedAt": "2026-07-07T14:39:23.433Z",
+  "readOnly": true,
+  "p1546SourceArtifact": "artifacts/p154.6-live-send-after-csv-import.json",
+  "recipients": [
+    {
+      "candidateId": "ed828f614e1d",
+      "candidateName": "Faith Withem",
+      "email": "faith.withem@gmail.com",
+      "signatureRequestId": "3b193113cc740984cf6a139927c879c1a7a3fcf5",
+      "sendTimestamp": "2026-07-07T14:01:55.077Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Morgan",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "faith.withem@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-9cb0a351-6ba0-41ed-9770-8311ee590077",
+      "workflowSignatureRequestId": "3b193113cc740984cf6a139927c879c1a7a3fcf5",
+      "onboardingSignatureRequestId": null
+    },
+    {
+      "candidateId": "4eb52a6c7495",
+      "candidateName": "Felicia Lewis",
+      "email": "feliciastacker95@gmail.com",
+      "signatureRequestId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe",
+      "sendTimestamp": "2026-07-07T14:01:56.263Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Alex",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "feliciastacker95@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-61806cd4-5016-4dbf-9c30-a6a163ba9f6f",
+      "workflowSignatureRequestId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe",
+      "onboardingSignatureRequestId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe"
+    },
+    {
+      "candidateId": "5661993f5f9a",
+      "candidateName": "Francis Petitte",
+      "email": "petittef@outlook.com",
+      "signatureRequestId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd",
+      "sendTimestamp": "2026-07-07T14:01:56.994Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Morgan",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "petittef@outlook.com",
+        "error": null
+      },
+      "auditEventId": "P145-58e2fe60-67fd-400f-ab3a-5abae9a27227",
+      "workflowSignatureRequestId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd",
+      "onboardingSignatureRequestId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd"
+    },
+    {
+      "candidateId": "ae4b6160f57c",
+      "candidateName": "Garrett Exum",
+      "email": "exuron1@gmail.com",
+      "signatureRequestId": "1699fffc1f9f53226beed14cadb6a436e56f0353",
+      "sendTimestamp": "2026-07-07T14:01:57.802Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Casey",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "viewed",
+        "signerEmail": "exuron1@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-11654110-031d-4931-ad14-c07b2cea66c6",
+      "workflowSignatureRequestId": "1699fffc1f9f53226beed14cadb6a436e56f0353",
+      "onboardingSignatureRequestId": "1699fffc1f9f53226beed14cadb6a436e56f0353"
+    },
+    {
+      "candidateId": "c5b23216837a",
+      "candidateName": "Getsemani",
+      "email": "cgetse24@gmail.com",
+      "signatureRequestId": "d9bc15fed7f03583e5946aa4d79e1293909e01ee",
+      "sendTimestamp": "2026-07-07T14:01:58.494Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Logan",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "cgetse24@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-48061a15-e9d1-4681-843f-c5ba0d1efcd9",
+      "workflowSignatureRequestId": "d9bc15fed7f03583e5946aa4d79e1293909e01ee",
+      "onboardingSignatureRequestId": null
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "signatureRequestId": "22bb39129aee3b3d5cb57abfdb0993913570791b",
+      "sendTimestamp": "2026-07-07T14:01:59.238Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Logan",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "shreddedsteel49@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-d4c90868-1b55-4040-bbe7-1b65a918093b",
+      "workflowSignatureRequestId": "22bb39129aee3b3d5cb57abfdb0993913570791b",
+      "onboardingSignatureRequestId": null
+    },
+    {
+      "candidateId": "652bc90340b9",
+      "candidateName": "Harryl Avery Jr",
+      "email": "harrylaveryjr.hr@gmail.com",
+      "signatureRequestId": "adde89370054f67c94fb4167b546813121555719",
+      "sendTimestamp": "2026-07-07T14:01:59.919Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Alex",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "harrylaveryjr.hr@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-f0e3e86d-a722-4971-942a-a975f38eb63f",
+      "workflowSignatureRequestId": "adde89370054f67c94fb4167b546813121555719",
+      "onboardingSignatureRequestId": "adde89370054f67c94fb4167b546813121555719"
+    },
+    {
+      "candidateId": "6f8b074293e1",
+      "candidateName": "Irbania marmol",
+      "email": "irbaniam2704@hotmail.com",
+      "signatureRequestId": "1c9bd406248d03f06bc5bb64bceee1713ecb6f14",
+      "sendTimestamp": "2026-07-07T14:02:00.616Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Taylor",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "irbaniam2704@hotmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-2f6a633b-dec0-4d71-87ec-aee1e535b50d",
+      "workflowSignatureRequestId": "1c9bd406248d03f06bc5bb64bceee1713ecb6f14",
+      "onboardingSignatureRequestId": null
+    },
+    {
+      "candidateId": "ec67391a2162",
+      "candidateName": "Jackie Smart",
+      "email": "jacks0427@yahoo.com",
+      "signatureRequestId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65",
+      "sendTimestamp": "2026-07-07T14:02:01.432Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Morgan",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "jacks0427@yahoo.com",
+        "error": null
+      },
+      "auditEventId": "P145-53ca31d1-79d1-4a78-aae2-e8e114b0e693",
+      "workflowSignatureRequestId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65",
+      "onboardingSignatureRequestId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65"
+    },
+    {
+      "candidateId": "de52f7096d0f",
+      "candidateName": "James Peters",
+      "email": "retailservicespjm@gmail.com",
+      "signatureRequestId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858",
+      "sendTimestamp": "2026-07-07T14:02:02.203Z",
+      "paperworkStatus": "sent",
+      "workflowStatus": "Paperwork Sent",
+      "testMode": true,
+      "recruiter": "Alex",
+      "verification": {
+        "workflowStatusUpdated": true,
+        "signatureRequestIdStored": true,
+        "paperworkStatusSent": true,
+        "auditEventRecorded": true,
+        "validEmail": true,
+        "dropboxSignRequestExists": true,
+        "allChecksPass": true
+      },
+      "dropboxSign": {
+        "exists": true,
+        "status": "pending",
+        "signerEmail": "retailservicespjm@gmail.com",
+        "error": null
+      },
+      "auditEventId": "P145-b9bb2cbe-9c18-49ee-ab61-2df1c48fa96f",
+      "workflowSignatureRequestId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858",
+      "onboardingSignatureRequestId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858"
+    }
+  ],
+  "summary": {
+    "totalRecipients": 10,
+    "successfulSends": 10,
+    "failedSends": 0,
+    "p1546ReportedFailures": 0,
+    "duplicateSendsPrevented": 33,
+    "duplicatePacketsSentInCycle": false,
+    "remainingEligibleQueue": 53,
+    "queueRemainingWorkflow": 56,
+    "allEmailsValid": true,
+    "allDropboxSignRequestsExist": true,
+    "allCandidatesUnique": true,
+    "allSignatureRequestIdsUnique": true,
+    "duplicateProtectionActive": true,
+    "testModeConfigured": true
+  },
+  "uniqueness": {
+    "candidatesUnique": true,
+    "emailsUnique": true,
+    "signatureRequestIdsUnique": true,
+    "duplicatePacketsSent": false
+  },
+  "overallPass": true
+}

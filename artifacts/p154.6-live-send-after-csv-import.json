@@ -1,0 +1,284 @@
+{
+  "sourcePhase": "P154.6",
+  "generatedAt": "2026-07-07T14:01:49.376Z",
+  "health": {
+    "generatedAt": "2026-07-07T14:01:49.376Z",
+    "overallStatus": "healthy",
+    "healthy": true,
+    "checks": [
+      {
+        "id": "breezy_api",
+        "label": "Breezy API",
+        "status": "healthy",
+        "detail": "Breezy API reachable (194 published jobs)."
+      },
+      {
+        "id": "dropbox_sign_api",
+        "label": "Dropbox Sign API",
+        "status": "healthy",
+        "detail": "DROPBOX_SIGN_API_KEY configured."
+      },
+      {
+        "id": "workflow_store",
+        "label": "Workflow store",
+        "status": "healthy",
+        "detail": "Workflow store readable (548 records)."
+      },
+      {
+        "id": "candidate_ingestion",
+        "label": "Candidate ingestion",
+        "status": "healthy",
+        "detail": "Ingestion store fresh (20 positions scanned)."
+      },
+      {
+        "id": "recruiter_assignment_engine",
+        "label": "Recruiter assignment engine",
+        "status": "healthy",
+        "detail": "10 canonical recruiters configured."
+      },
+      {
+        "id": "webhook_listener",
+        "label": "Webhook listeners",
+        "status": "healthy",
+        "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+      },
+      {
+        "id": "audit_logging",
+        "label": "Audit logging",
+        "status": "healthy",
+        "detail": "Audit stores readable (P145: 255, P151: 500 events)."
+      }
+    ],
+    "abortReason": null
+  },
+  "dryRunEligibility": {
+    "candidatesEvaluated": 546,
+    "eligibleCount": 63,
+    "projectedSendCount": 10,
+    "excludedCount": 483,
+    "exclusionSummary": {
+      "unassigned_recruiter": 448,
+      "duplicate_candidate": 33,
+      "disqualified_candidate": 2
+    },
+    "eligibleChangeNote": "unchanged (63)",
+    "p1545BaselineEligible": 63,
+    "activeSignaturesSkipped": 0,
+    "alreadySignedSkipped": 0,
+    "duplicatesPrevented": 33,
+    "invalidEmailSkipped": 0
+  },
+  "liveCycle": {
+    "candidatesEvaluated": 546,
+    "eligibleBeforeSend": 63,
+    "sent": 10,
+    "skipped": 0,
+    "duplicatesPrevented": 33,
+    "activeSignaturesSkipped": 0,
+    "alreadySignedSkipped": 0,
+    "invalidEmailSkipped": 0,
+    "failures": 0,
+    "queueRemaining": 56,
+    "capReached": true,
+    "stoppedOnError": false,
+    "executionTimeMs": 8001,
+    "signatureRequestIds": [
+      "3b193113cc740984cf6a139927c879c1a7a3fcf5",
+      "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe",
+      "f69edbdad6f605a9dd7152b6bc7bda95eff804fd",
+      "1699fffc1f9f53226beed14cadb6a436e56f0353",
+      "d9bc15fed7f03583e5946aa4d79e1293909e01ee",
+      "22bb39129aee3b3d5cb57abfdb0993913570791b",
+      "adde89370054f67c94fb4167b546813121555719",
+      "1c9bd406248d03f06bc5bb64bceee1713ecb6f14",
+      "5dcf9b52487771f4d92d09e7ecc829107f2acf65",
+      "39c6fb68fa7987ce29c5dfb774b1e91ac2529858"
+    ],
+    "sentDetails": [
+      {
+        "candidateId": "ed828f614e1d",
+        "candidateName": "Faith Withem",
+        "email": "faith.withem@gmail.com",
+        "signatureRequestId": "3b193113cc740984cf6a139927c879c1a7a3fcf5"
+      },
+      {
+        "candidateId": "4eb52a6c7495",
+        "candidateName": "Felicia Lewis",
+        "email": "feliciastacker95@gmail.com",
+        "signatureRequestId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe"
+      },
+      {
+        "candidateId": "5661993f5f9a",
+        "candidateName": "Francis Petitte",
+        "email": "petittef@outlook.com",
+        "signatureRequestId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd"
+      },
+      {
+        "candidateId": "ae4b6160f57c",
+        "candidateName": "Garrett Exum",
+        "email": "exuron1@gmail.com",
+        "signatureRequestId": "1699fffc1f9f53226beed14cadb6a436e56f0353"
+      },
+      {
+        "candidateId": "c5b23216837a",
+        "candidateName": "Getsemani",
+        "email": "cgetse24@gmail.com",
+        "signatureRequestId": "d9bc15fed7f03583e5946aa4d79e1293909e01ee"
+      },
+      {
+        "candidateId": "9990aa40f960",
+        "candidateName": "Gregory Petties",
+        "email": "shreddedsteel49@gmail.com",
+        "signatureRequestId": "22bb39129aee3b3d5cb57abfdb0993913570791b"
+      },
+      {
+        "candidateId": "652bc90340b9",
+        "candidateName": "Harryl Avery Jr",
+        "email": "harrylaveryjr.hr@gmail.com",
+        "signatureRequestId": "adde89370054f67c94fb4167b546813121555719"
+      },
+      {
+        "candidateId": "6f8b074293e1",
+        "candidateName": "Irbania marmol",
+        "email": "irbaniam2704@hotmail.com",
+        "signatureRequestId": "1c9bd406248d03f06bc5bb64bceee1713ecb6f14"
+      },
+      {
+        "candidateId": "ec67391a2162",
+        "candidateName": "Jackie Smart",
+        "email": "jacks0427@yahoo.com",
+        "signatureRequestId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65"
+      },
+      {
+        "candidateId": "de52f7096d0f",
+        "candidateName": "James Peters",
+        "email": "retailservicespjm@gmail.com",
+        "signatureRequestId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858"
+      }
+    ],
+    "executionItems": [
+      {
+        "candidateId": "ed828f614e1d",
+        "candidateName": "Faith Withem",
+        "email": "faith.withem@gmail.com",
+        "recruiter": "Morgan",
+        "project": "Flexible Store Retail Merchandiser Ontario, OR",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 3b193113cc740984cf6a139927c879c1a7a3fcf5.",
+        "executionMode": "live",
+        "signatureRequestId": "3b193113cc740984cf6a139927c879c1a7a3fcf5"
+      },
+      {
+        "candidateId": "4eb52a6c7495",
+        "candidateName": "Felicia Lewis",
+        "email": "feliciastacker95@gmail.com",
+        "recruiter": "Alex",
+        "project": "Retail Merchandiser - Danville Retail Coverage",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe.",
+        "executionMode": "live",
+        "signatureRequestId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe"
+      },
+      {
+        "candidateId": "5661993f5f9a",
+        "candidateName": "Francis Petitte",
+        "email": "petittef@outlook.com",
+        "recruiter": "Morgan",
+        "project": "Retail Merchandiser (Flexible, Project-Based Work)",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — f69edbdad6f605a9dd7152b6bc7bda95eff804fd.",
+        "executionMode": "live",
+        "signatureRequestId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd"
+      },
+      {
+        "candidateId": "ae4b6160f57c",
+        "candidateName": "Garrett Exum",
+        "email": "exuron1@gmail.com",
+        "recruiter": "Casey",
+        "project": "Independent Retail Reset Representative – Dothan Market",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 1699fffc1f9f53226beed14cadb6a436e56f0353.",
+        "executionMode": "live",
+        "signatureRequestId": "1699fffc1f9f53226beed14cadb6a436e56f0353"
+      },
+      {
+        "candidateId": "c5b23216837a",
+        "candidateName": "Getsemani",
+        "email": "cgetse24@gmail.com",
+        "recruiter": "Logan",
+        "project": "Continuity Merchandiser Osceola, AR",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — d9bc15fed7f03583e5946aa4d79e1293909e01ee.",
+        "executionMode": "live",
+        "signatureRequestId": "d9bc15fed7f03583e5946aa4d79e1293909e01ee"
+      },
+      {
+        "candidateId": "9990aa40f960",
+        "candidateName": "Gregory Petties",
+        "email": "shreddedsteel49@gmail.com",
+        "recruiter": "Logan",
+        "project": "Store Merchandiser Brinkley, AR",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 22bb39129aee3b3d5cb57abfdb0993913570791b.",
+        "executionMode": "live",
+        "signatureRequestId": "22bb39129aee3b3d5cb57abfdb0993913570791b"
+      },
+      {
+        "candidateId": "652bc90340b9",
+        "candidateName": "Harryl Avery Jr",
+        "email": "harrylaveryjr.hr@gmail.com",
+        "recruiter": "Alex",
+        "project": "Retail Merchandiser – West Central Illinois Region",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — adde89370054f67c94fb4167b546813121555719.",
+        "executionMode": "live",
+        "signatureRequestId": "adde89370054f67c94fb4167b546813121555719"
+      },
+      {
+        "candidateId": "6f8b074293e1",
+        "candidateName": "Irbania marmol",
+        "email": "irbaniam2704@hotmail.com",
+        "recruiter": "Taylor",
+        "project": "Retail Reset Specialist – Flexible Merchandising Work in Bethlehem, PA",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 1c9bd406248d03f06bc5bb64bceee1713ecb6f14.",
+        "executionMode": "live",
+        "signatureRequestId": "1c9bd406248d03f06bc5bb64bceee1713ecb6f14"
+      },
+      {
+        "candidateId": "ec67391a2162",
+        "candidateName": "Jackie Smart",
+        "email": "jacks0427@yahoo.com",
+        "recruiter": "Morgan",
+        "project": "Retail Merchandiser (Flexible, Project-Based Work)",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 5dcf9b52487771f4d92d09e7ecc829107f2acf65.",
+        "executionMode": "live",
+        "signatureRequestId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65"
+      },
+      {
+        "candidateId": "de52f7096d0f",
+        "candidateName": "James Peters",
+        "email": "retailservicespjm@gmail.com",
+        "recruiter": "Alex",
+        "project": "Retail Merchandiser - Champaign-Urbana Territory",
+        "sendResult": "sent",
+        "reason": "Immediate paperwork sent — 39c6fb68fa7987ce29c5dfb774b1e91ac2529858.",
+        "executionMode": "live",
+        "signatureRequestId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858"
+      }
+    ],
+    "exclusionSummary": {
+      "unassigned_recruiter": 448,
+      "duplicate_candidate": 33,
+      "disqualified_candidate": 2
+    }
+  },
+  "safetyFlags": {
+    "breezyWrites": false,
+    "maxSends": 10,
+    "stopOnFirstError": false,
+    "auditLoggingEnabled": true
+  },
+  "rollbackRecommendation": "Cap reached as designed. Monitor audit log before raising P152_MAX_SENDS_PER_CYCLE."
+}
