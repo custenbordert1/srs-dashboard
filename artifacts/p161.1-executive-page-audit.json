@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-07-08T14:48:37.375Z",
+  "sourcePhase": "P161.1",
+  "results": [
+    {
+      "name": "Executive Home",
+      "url": "/?tab=executive-home",
+      "elapsedMs": 10034,
+      "at2s": {
+        "skeletonCount": 6,
+        "textLength": 5093,
+        "hasLastUpdated": false,
+        "hasRefreshing": true,
+        "hasDegraded": false,
+        "headingCount": 26
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "textLength": 9920,
+        "hasLastUpdated": true,
+        "hasRefreshing": false,
+        "headingCount": 31
+      },
+      "classification": "loads_successfully"
+    },
+    {
+      "name": "Operations Control Center",
+      "url": "/executive/operations-control-center",
+      "elapsedMs": 20164,
+      "at2s": {
+        "skeletonCount": 0,
+        "textLength": 319,
+        "hasLastUpdated": false,
+        "hasRefreshing": false,
+        "hasDegraded": false,
+        "headingCount": 2
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "textLength": 319,
+        "hasLastUpdated": false,
+        "hasRefreshing": false,
+        "headingCount": 2
+      },
+      "classification": "loads_immediately"
+    },
+    {
+      "name": "Production Readiness",
+      "url": "/executive/production-readiness",
+      "elapsedMs": 10028,
+      "at2s": {
+        "skeletonCount": 0,
+        "textLength": 5636,
+        "hasLastUpdated": true,
+        "hasRefreshing": false,
+        "hasDegraded": true,
+        "headingCount": 8
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "textLength": 5636,
+        "hasLastUpdated": true,
+        "hasRefreshing": false,
+        "headingCount": 8
+      },
+      "classification": "loads_immediately"
+    }
+  ],
+  "pass": true
+}

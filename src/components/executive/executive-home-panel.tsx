@@ -1,5 +1,6 @@
 "use client";
 
+import { ExecutiveSystemStatusBanner } from "@/components/executive/executive-system-status-banner";
 import { AtsHealthCard } from "@/components/executive/ats-health-card";
 import { ExecutiveAccountabilitySummary } from "@/components/executive/executive-accountability-summary";
 import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-strip";
@@ -248,6 +249,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
 
   return (
     <div className="space-y-12">
+      <ExecutiveSystemStatusBanner />
+
       <ExecutiveHero
         userName={userName}
         snapshot={snapshot}

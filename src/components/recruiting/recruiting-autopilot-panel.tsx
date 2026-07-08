@@ -1,5 +1,7 @@
 "use client";
 
+import { SectionDegradedBanner, SectionErrorCard, SectionLoadingCard } from "@/components/ui/loading-state";
+import { DisabledByDesignBadge } from "@/components/ui/loading-state/disabled-by-design-badge";
 import { useAutonomousRecruiting } from "@/hooks/use-autonomous-recruiting";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import type {
@@ -304,34 +306,28 @@ export function RecruitingAutopilotPanel() {
   const [rulesDraft, setRulesDraft] = useState<ApprovalRule[] | null>(null);
 
   if (showLoading) {
-    return (
-      <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5">
-        <div className="h-8 w-56 animate-pulse rounded bg-zinc-800/80" />
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-zinc-800/60" />
-          ))}
-        </div>
-      </section>
-    );
+    return <SectionLoadingCard title="Recruiting Autopilot" rows={4} />;
   }
 
   if ((error || timedOut) && !snapshot) {
     return (
-      <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-        <p>{error ?? "Recruiting autopilot is still loading. Retry shortly."}</p>
-        <button
-          type="button"
-          onClick={() => refresh()}
-          className="mt-2 rounded-lg border border-amber-400/40 px-3 py-1 text-xs"
-        >
-          Retry
-        </button>
-      </section>
+      <SectionErrorCard
+        title="Recruiting Autopilot"
+        message={error ?? "Recruiting autopilot is still loading. Retry shortly."}
+        onRetry={() => refresh()}
+      />
     );
   }
 
-  if (!snapshot) return null;
+  if (!snapshot) {
+    return (
+      <SectionErrorCard
+        title="Recruiting Autopilot"
+        message="Autopilot snapshot unavailable — no cached data yet."
+        onRetry={() => refresh()}
+      />
+    );
+  }
 
   const rules = rulesDraft ?? snapshot.approvalRules;
   const executionByRecommendation = new Map<string, { id: string; status: string }>(
@@ -353,12 +349,13 @@ export function RecruitingAutopilotPanel() {
 
   return (
     <section className="space-y-6">
-      {showingCachedSnapshot ? (
-        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-          Showing last loaded autopilot snapshot while a fresh sync completes.
-          {error ? ` ${error}` : null}
-        </p>
-      ) : null}
+      {(showingCachedSnapshot || error) && (
+        <SectionDegradedBanner
+          stale={showingCachedSnapshot}
+          message={error ?? "Showing last loaded autopilot snapshot."}
+          onRetry={() => refresh()}
+        />
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -366,6 +363,9 @@ export function RecruitingAutopilotPanel() {
           <p className="text-sm text-zinc-500">
             Coverage-driven posting and hiring recommendations — recruiter oversight preserved.
           </p>
+          <div className="mt-2">
+            <DisabledByDesignBadge mode="observation" label="No autonomous sends from this panel" />
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <button

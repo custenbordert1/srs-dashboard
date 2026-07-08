@@ -12,7 +12,10 @@ import {
   isTimeoutError,
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
-import { P156_CLIENT_REQUEST_TIMEOUT_MS } from "@/lib/p156-candidate-prioritization/constants";
+import {
+  P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS,
+  P161_CLIENT_SECTION_TIMEOUT_MS,
+} from "@/lib/app-loading-reliability/constants";
 import type {
   P156PrioritizedQueue,
   P156QueueFilters,
@@ -90,7 +93,7 @@ export function useRecruitingPriorities() {
       try {
         const res = await fetchWithTimeout(`/api/recruiting/prioritized-queue${buildQuery(filters)}`, {
           cache: "no-store",
-          timeoutMs: P156_CLIENT_REQUEST_TIMEOUT_MS,
+          timeoutMs: P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS,
         });
         const parsed = (await res.json()) as QueuePayload & { error?: string };
         if (!res.ok) {
@@ -108,10 +111,19 @@ export function useRecruitingPriorities() {
 
         const message =
           (isTimeoutError(err)
-            ? timeoutErrorMessage("Recruiting priorities", P156_CLIENT_REQUEST_TIMEOUT_MS)
+            ? timeoutErrorMessage("Recruiting priorities", P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS)
             : friendlyFetchMessageFromError(err, "dashboard")) ??
           "Failed to load recruiting priorities";
-        setError(message);
+
+        const cached = getCachedAllowExpired<QueuePayload>(cacheKeyForFilters);
+        if (cached?.queue) {
+          setQueue(cached.queue);
+          setWarnings(cached.warnings ?? []);
+          setShowingCachedSnapshot(true);
+          setError(message);
+        } else {
+          setError(message);
+        }
       } finally {
         if (mountedRef.current && requestId === requestIdRef.current) {
           setLoading(false);

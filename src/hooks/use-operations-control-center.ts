@@ -14,12 +14,16 @@ import {
   isTimeoutError,
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
-import { P159_CLIENT_REQUEST_TIMEOUT_MS } from "@/lib/p159-operations-control-center/constants";
+import { P161_CLIENT_SECTION_TIMEOUT_MS } from "@/lib/app-loading-reliability/constants";
 import type {
   P159ControlAction,
   P159OperationsControlCenter,
 } from "@/lib/p159-operations-control-center/types";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import {
+  useSnapshotRefreshPoll,
+  type ExecutiveSnapshotClientMeta,
+} from "@/hooks/use-snapshot-refresh-poll";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const CACHE_KEY = cacheKey(["p159", "operations-control-center"]);
@@ -27,6 +31,7 @@ const CACHE_KEY = cacheKey(["p159", "operations-control-center"]);
 type DashboardPayload = {
   dashboard: P159OperationsControlCenter;
   warnings: string[];
+  meta?: ExecutiveSnapshotClientMeta | null;
 };
 
 function readCache(): DashboardPayload | null {
@@ -37,13 +42,13 @@ function readCache(): DashboardPayload | null {
 async function fetchDashboard(): Promise<DashboardPayload> {
   const res = await fetchWithTimeout("/api/recruiting/operations-control-center", {
     cache: "no-store",
-    timeoutMs: P159_CLIENT_REQUEST_TIMEOUT_MS,
+    timeoutMs: P161_CLIENT_SECTION_TIMEOUT_MS,
   });
   const parsed = (await res.json()) as DashboardPayload & { error?: string };
   if (!res.ok || !parsed.dashboard) {
     throw new Error(parsed.error ?? `Operations control center failed (${res.status})`);
   }
-  return { dashboard: parsed.dashboard, warnings: parsed.warnings ?? [] };
+  return { dashboard: parsed.dashboard, warnings: parsed.warnings ?? [], meta: parsed.meta ?? null };
 }
 
 export function useOperationsControlCenter() {
@@ -55,6 +60,7 @@ export function useOperationsControlCenter() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!initial?.dashboard);
   const [showingCachedSnapshot, setShowingCachedSnapshot] = useState(Boolean(initial?.dashboard));
+  const [meta, setMeta] = useState<ExecutiveSnapshotClientMeta | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -80,6 +86,7 @@ export function useOperationsControlCenter() {
       if (!mountedRef.current || generationRef.current !== generation) return;
       setDashboard(payload.dashboard);
       setWarnings(payload.warnings);
+      setMeta(payload.meta ?? null);
       setShowingCachedSnapshot(false);
       setCached(CACHE_KEY, payload, LONG_CLIENT_CACHE_TTL_MS);
     } catch (err) {
@@ -91,7 +98,7 @@ export function useOperationsControlCenter() {
         setShowingCachedSnapshot(true);
         setError(
           isTimeoutError(err)
-            ? timeoutErrorMessage("Operations control center", P159_CLIENT_REQUEST_TIMEOUT_MS)
+            ? timeoutErrorMessage("Operations control center", P161_CLIENT_SECTION_TIMEOUT_MS)
             : friendlyFetchMessageFromError(err, "dashboard") ?? "Dashboard unavailable",
         );
       } else if (!isIgnorableFetchError(err)) {
@@ -107,6 +114,8 @@ export function useOperationsControlCenter() {
   useEffect(() => {
     void refresh(false);
   }, [refresh]);
+
+  useSnapshotRefreshPoll(meta, () => void refresh(true));
 
   const loadingCeilingHit = useLoadingCeiling(loading && !dashboard, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
@@ -157,6 +166,7 @@ export function useOperationsControlCenter() {
     loading: loading && !dashboard && !loadingCeilingHit,
     loadingCeilingHit,
     showingCachedSnapshot,
+    meta,
     actionBusy,
     actionMessage,
     actionError,

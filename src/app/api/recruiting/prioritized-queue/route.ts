@@ -1,4 +1,7 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { emptyP156Queue } from "@/lib/app-loading-reliability/api-fallbacks";
+import { buildSafeApiResponse } from "@/lib/app-loading-reliability/safe-api-response";
+import { P161_SERVER_HEAVY_TIMEOUT_MS } from "@/lib/app-loading-reliability/constants";
 import {
   buildPrioritizedQueue,
   parseP156QueueFilters,
@@ -23,11 +26,22 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const filters = parseP156QueueFilters(url);
-  const queue = await buildPrioritizedQueue(filters);
+
+  const safe = await buildSafeApiResponse({
+    label: "Prioritized queue",
+    timeoutMs: P161_SERVER_HEAVY_TIMEOUT_MS,
+    build: async () => {
+      const queue = await buildPrioritizedQueue(filters);
+      return { queue, warnings: queue.warnings };
+    },
+    fallback: () => ({ queue: emptyP156Queue(filters), warnings: ["Degraded empty queue"] }),
+    mapWarnings: (p) => p.warnings,
+  });
 
   return NextResponse.json({
     ok: true,
-    queue,
-    warnings: queue.warnings,
+    queue: safe.payload.queue,
+    warnings: safe.warnings,
+    meta: safe.meta,
   });
 }

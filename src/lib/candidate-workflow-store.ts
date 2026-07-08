@@ -9,6 +9,7 @@ import {
   type RecruitingActionType,
 } from "@/lib/candidate-recruiting-actions";
 import { SLA_SNOOZE_HOURS } from "@/lib/candidate-action-sla";
+import { incrementWorkflowScans } from "@/lib/app-performance/performance-metrics";
 import type { DirectDepositStatus } from "@/lib/direct-deposit-types";
 import {
   defaultRecruiterRosters,
@@ -150,6 +151,7 @@ export async function appendCandidateWorkflowAudit(entry: CandidateWorkflowAudit
 }
 
 export async function getCandidateWorkflowBundle(): Promise<CandidateWorkflowBundle> {
+  incrementWorkflowScans();
   const file = await readStoreFile();
   return {
     workflows: file.workflows,

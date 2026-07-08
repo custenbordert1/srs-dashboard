@@ -12,7 +12,10 @@ import {
   isTimeoutError,
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
-import { P158_CLIENT_REQUEST_TIMEOUT_MS } from "@/lib/p158-autonomous-recruiter-assignment/assignment-config";
+import {
+  P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS,
+  P161_CLIENT_SECTION_TIMEOUT_MS,
+} from "@/lib/app-loading-reliability/constants";
 import type { P158AssignmentDashboard } from "@/lib/p158-autonomous-recruiter-assignment/types";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -31,6 +34,7 @@ export function useRecruiterAssignmentCenter() {
   const [runBusy, setRunBusy] = useState(false);
   const [runMessage, setRunMessage] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  const [showingCachedSnapshot, setShowingCachedSnapshot] = useState(Boolean(initial?.dashboard));
 
   const mountedRef = useRef(true);
   const requestIdRef = useRef(0);
@@ -53,22 +57,31 @@ export function useRecruiterAssignmentCenter() {
     try {
       const res = await fetchWithTimeout("/api/recruiting/recruiter-assignments", {
         cache: "no-store",
-        timeoutMs: P158_CLIENT_REQUEST_TIMEOUT_MS,
+        timeoutMs: P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS,
       });
       const parsed = (await res.json()) as Payload & { error?: string };
       if (!res.ok) throw new Error(parsed.error ?? `Assignment dashboard failed (${res.status})`);
       if (!mountedRef.current || requestId !== requestIdRef.current) return;
       setDashboard(parsed.dashboard);
       setWarnings(parsed.warnings ?? parsed.dashboard.warnings ?? []);
+      setShowingCachedSnapshot(false);
       setCached(CACHE_KEY, parsed, LONG_CLIENT_CACHE_TTL_MS);
     } catch (err) {
       if (!mountedRef.current || requestId !== requestIdRef.current) return;
       if (isIgnorableFetchError(err)) return;
-      setError(
+      const message =
         (isTimeoutError(err)
-          ? timeoutErrorMessage("Recruiter assignments", P158_CLIENT_REQUEST_TIMEOUT_MS)
-          : friendlyFetchMessageFromError(err, "dashboard")) ?? "Failed to load assignment center",
-      );
+          ? timeoutErrorMessage("Recruiter assignments", P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS)
+          : friendlyFetchMessageFromError(err, "dashboard")) ?? "Failed to load assignment center";
+      const cached = getCachedAllowExpired<Payload>(CACHE_KEY);
+      if (cached?.dashboard) {
+        setDashboard(cached.dashboard);
+        setWarnings(cached.warnings ?? []);
+        setShowingCachedSnapshot(true);
+        setError(message);
+      } else {
+        setError(message);
+      }
     } finally {
       if (mountedRef.current && requestId === requestIdRef.current) {
         setLoading(false);
@@ -91,7 +104,7 @@ export function useRecruiterAssignmentCenter() {
         {
           method: "POST",
           cache: "no-store",
-          timeoutMs: P158_CLIENT_REQUEST_TIMEOUT_MS,
+          timeoutMs: P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS,
         },
       );
       const parsed = (await res.json()) as {
@@ -122,7 +135,7 @@ export function useRecruiterAssignmentCenter() {
     try {
       const res = await fetchWithTimeout(
         "/api/recruiting/recruiter-assignments/run?confirmAssignment=true",
-        { method: "POST", cache: "no-store", timeoutMs: P158_CLIENT_REQUEST_TIMEOUT_MS },
+        { method: "POST", cache: "no-store", timeoutMs: P161_CLIENT_SECTION_TIMEOUT_MS },
       );
       const parsed = (await res.json()) as { message?: string; error?: string; dashboard?: P158AssignmentDashboard };
       if (!res.ok) throw new Error(parsed.error ?? "Production run failed");
@@ -143,6 +156,7 @@ export function useRecruiterAssignmentCenter() {
     loading,
     refreshing,
     loadingCeilingHit,
+    showingCachedSnapshot,
     runBusy,
     runMessage,
     runError,

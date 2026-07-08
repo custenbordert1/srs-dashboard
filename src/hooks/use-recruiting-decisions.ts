@@ -12,7 +12,10 @@ import {
   isTimeoutError,
   timeoutErrorMessage,
 } from "@/lib/fetch-with-timeout";
-import { P157_CLIENT_REQUEST_TIMEOUT_MS } from "@/lib/p157-recruiter-decision-engine/constants";
+import {
+  P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS,
+  P161_CLIENT_SECTION_TIMEOUT_MS,
+} from "@/lib/app-loading-reliability/constants";
 import type {
   P157DecisionDashboard,
   P157DecisionFilters,
@@ -91,7 +94,7 @@ export function useRecruitingDecisions() {
       try {
         const res = await fetchWithTimeout(
           `/api/recruiting/recommended-actions${buildQuery(filters)}`,
-          { cache: "no-store", timeoutMs: P157_CLIENT_REQUEST_TIMEOUT_MS },
+          { cache: "no-store", timeoutMs: P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS },
         );
         const parsed = (await res.json()) as DashboardPayload & { error?: string };
         if (!res.ok) throw new Error(parsed.error ?? `Recommended actions failed (${res.status})`);
@@ -106,10 +109,19 @@ export function useRecruitingDecisions() {
         if (isIgnorableFetchError(err)) return;
         const message =
           (isTimeoutError(err)
-            ? timeoutErrorMessage("Recruiting decisions", P157_CLIENT_REQUEST_TIMEOUT_MS)
+            ? timeoutErrorMessage("Recruiting decisions", P161_CLIENT_DASHBOARD_FETCH_TIMEOUT_MS)
             : friendlyFetchMessageFromError(err, "dashboard")) ??
           "Failed to load recruiting decisions";
-        setError(message);
+
+        const cached = getCachedAllowExpired<DashboardPayload>(cacheKeyForFilters);
+        if (cached?.dashboard) {
+          setDashboard(cached.dashboard);
+          setWarnings(cached.warnings ?? []);
+          setShowingCachedSnapshot(true);
+          setError(message);
+        } else {
+          setError(message);
+        }
       } finally {
         if (mountedRef.current && requestId === requestIdRef.current) {
           setLoading(false);

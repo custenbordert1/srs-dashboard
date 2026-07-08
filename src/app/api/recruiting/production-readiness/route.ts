@@ -1,5 +1,5 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
-import { buildP160ProductionReadiness } from "@/lib/p160-production-readiness";
+import { serveExecutiveSnapshot } from "@/lib/app-performance/serve-snapshot";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -19,6 +19,12 @@ export async function GET(request: Request) {
   const { session } = guard;
   auditTerritoryAccess(session, ROUTE);
 
-  const report = await buildP160ProductionReadiness();
-  return NextResponse.json({ ok: true, report });
+  const { snapshot, meta } = await serveExecutiveSnapshot();
+
+  return NextResponse.json({
+    ok: true,
+    report: snapshot.productionReadiness,
+    meta,
+    warnings: snapshot.warnings,
+  });
 }

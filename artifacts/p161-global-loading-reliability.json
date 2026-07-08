@@ -1,0 +1,221 @@
+{
+  "sourcePhase": "P161",
+  "generatedAt": "2026-07-07T20:05:46.838Z",
+  "validation": {
+    "buildPassed": true,
+    "p161TestsPassed": true,
+    "p160TestsPassed": true,
+    "p159TestsPassed": true,
+    "p158TestsPassed": true,
+    "p155TestsPassed": true,
+    "p154TestsPassed": true,
+    "continuousEnabled": false,
+    "continuousModeRemainsDisabled": true,
+    "daemonNotStarted": true,
+    "noPaperworkSends": true,
+    "noWorkflowWrites": true,
+    "noBreezyWrites": true,
+    "runnerSchedulerMode": "simulation",
+    "degradedSectionCount": 10,
+    "readinessScore": 76
+  },
+  "report": {
+    "sourcePhase": "P161",
+    "generatedAt": "2026-07-07T20:05:13.408Z",
+    "operatingMode": {
+      "label": "Observation mode • Manual batches • Continuous automation OFF",
+      "continuousEnabled": false,
+      "daemonRunning": false,
+      "systemMode": "manual_only",
+      "observationMode": true
+    },
+    "systemStatus": {
+      "paperworkSentToday": 40,
+      "sendBatchesToday": 4,
+      "failuresToday": 0,
+      "eligibleNow": 0,
+      "queueRemaining": 0,
+      "lastProductionCycle": "2026-07-07T15:10:21.366Z",
+      "readinessScore": 76,
+      "daemonRunning": false
+    },
+    "pageHealth": [
+      {
+        "id": "command-center",
+        "label": "Command Center",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "executive-home",
+        "label": "Executive Home",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": null
+      },
+      {
+        "id": "operations",
+        "label": "Operations",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "territory-field",
+        "label": "Territory / Field",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "admin-data",
+        "label": "Admin / Data",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "workforce-intelligence",
+        "label": "Workforce Intelligence",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "recruiting-autopilot",
+        "label": "Recruiting Autopilot",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": null
+      },
+      {
+        "id": "autopilot-ops",
+        "label": "Autopilot Ops",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "execution-center",
+        "label": "Execution Center",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "hiring-placement",
+        "label": "Hiring & Placement",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "operations-control-center",
+        "label": "Operations Control Center",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:13.411Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": null
+      },
+      {
+        "id": "production-readiness",
+        "label": "Production Readiness",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:15.459Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": null
+      },
+      {
+        "id": "recruiting-priorities",
+        "label": "Recruiting Priorities",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "recruiting-decisions",
+        "label": "Recruiting Decisions",
+        "status": "degraded",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": "Pending P161 resilient shell migration",
+        "elapsedMs": null
+      },
+      {
+        "id": "recruiter-assignment-center",
+        "label": "Recruiter Assignment Center",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:13.408Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": null
+      }
+    ],
+    "apiHealth": [
+      {
+        "id": "api-operations-control-center",
+        "label": "/api/recruiting/operations-control-center",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:13.411Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": 2041
+      },
+      {
+        "id": "api-production-readiness",
+        "label": "/api/recruiting/production-readiness",
+        "status": "healthy",
+        "lastSuccessAt": "2026-07-07T20:05:15.459Z",
+        "error": null,
+        "warning": null,
+        "elapsedMs": 17725
+      }
+    ],
+    "slowEndpoints": [
+      "/api/recruiting/production-readiness"
+    ],
+    "degradedSections": [
+      "command-center",
+      "operations",
+      "territory-field",
+      "admin-data",
+      "workforce-intelligence",
+      "autopilot-ops",
+      "execution-center",
+      "hiring-placement",
+      "recruiting-priorities",
+      "recruiting-decisions"
+    ],
+    "lastSuccessfulDataTimestamps": {
+      "p159": "2026-07-07T20:05:13.411Z",
+      "p160": "2026-07-07T20:05:15.459Z",
+      "runner": "2026-07-07T15:10:21.366Z"
+    },
+    "warnings": []
+  }
+}

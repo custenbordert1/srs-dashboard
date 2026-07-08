@@ -1,9 +1,13 @@
 "use client";
 
 import {
+  LastUpdatedBadge,
+  SectionDegradedBanner,
+  SectionErrorCard,
+  SectionLoadingCard,
+} from "@/components/ui/loading-state";
+import {
   ExecutiveCard,
-  ExecutivePanelError,
-  ExecutivePanelLoading,
   MetricCard,
   SectionHeader,
   StatusBadge,
@@ -33,17 +37,19 @@ function riskTone(severity: P160RiskSeverity): "success" | "warning" | "critical
 }
 
 export function ProductionReadinessPanel() {
-  const { report, error, loading, loadingCeilingHit, showingCachedSnapshot, refresh } =
+  const { report, error, loading, loadingCeilingHit, showingCachedSnapshot, meta, refresh } =
     useProductionReadiness();
+  const snapshotStale = Boolean(meta?.stale);
 
   if (loading) {
-    return <ExecutivePanelLoading title="Production Readiness" badge="P160" />;
+    return <SectionLoadingCard title="Production Readiness" badge="P160" />;
   }
 
   if (loadingCeilingHit && !report) {
     return (
-      <ExecutivePanelError
+      <SectionErrorCard
         title="Production Readiness"
+        badge="P160"
         message="Readiness assessment timed out — automation probes may still be running."
         onRetry={() => void refresh()}
       />
@@ -52,8 +58,9 @@ export function ProductionReadinessPanel() {
 
   if (!report) {
     return (
-      <ExecutivePanelError
+      <SectionErrorCard
         title="Production Readiness"
+        badge="P160"
         message={error ?? "Failed to load production readiness report"}
         onRetry={() => void refresh()}
       />
@@ -68,16 +75,32 @@ export function ProductionReadinessPanel() {
 
   return (
     <div className="space-y-6">
-      {(showingCachedSnapshot || error) && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          {showingCachedSnapshot ? <p>Showing cached readiness snapshot.</p> : null}
-          {error ? <p>{error}</p> : null}
-        </div>
+      {(showingCachedSnapshot || snapshotStale || error) && (
+        <SectionDegradedBanner
+          stale={showingCachedSnapshot || snapshotStale}
+          message={
+            error ??
+            (meta?.origin === "building"
+              ? "Readiness snapshot is warming up — a fresh assessment is being computed in the background."
+              : snapshotStale
+                ? "Showing a stale readiness snapshot — refreshing in the background."
+                : "Showing cached readiness snapshot.")
+          }
+          onRetry={() => void refresh()}
+        />
       )}
 
       <ExecutiveCard id="p160-score" variant="premium">
         <SectionHeader
           title="Overall Readiness Score"
+          actions={
+            <LastUpdatedBadge
+              at={report.generatedAt}
+              stale={showingCachedSnapshot || snapshotStale}
+              ageSeconds={meta?.ageSeconds ?? null}
+              refreshing={meta?.refreshing}
+            />
+          }
           subtitle="Read-only assessment — no live actions performed"
           badge="P160"
         />

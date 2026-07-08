@@ -1,10 +1,14 @@
 "use client";
 
 import {
+  LastUpdatedBadge,
+  SectionDegradedBanner,
+  SectionErrorCard,
+  SectionLoadingCard,
+  DisabledByDesignBadge,
+} from "@/components/ui/loading-state";
+import {
   ExecutiveCard,
-  ExecutivePanelError,
-  ExecutivePanelLoading,
-  ExecutiveWarningList,
   MetricCard,
   SectionHeader,
   StatusBadge,
@@ -62,21 +66,24 @@ export function OperationsControlCenterPanel() {
     loading,
     loadingCeilingHit,
     showingCachedSnapshot,
+    meta,
     actionBusy,
     actionMessage,
     actionError,
     refresh,
     postControl,
   } = useOperationsControlCenter();
+  const snapshotStale = Boolean(meta?.stale);
 
   if (loading) {
-    return <ExecutivePanelLoading title="Operations Control Center" badge="P159" />;
+    return <SectionLoadingCard title="Operations Control Center" badge="P159" />;
   }
 
   if (loadingCeilingHit && !dashboard) {
     return (
-      <ExecutivePanelError
+      <SectionErrorCard
         title="Operations Control Center"
+        badge="P159"
         message="Dashboard timed out. Classification may still be running — retry shortly."
         onRetry={() => void refresh(true)}
       />
@@ -85,8 +92,9 @@ export function OperationsControlCenterPanel() {
 
   if (!dashboard) {
     return (
-      <ExecutivePanelError
+      <SectionErrorCard
         title="Operations Control Center"
+        badge="P159"
         message={error ?? "Failed to load operations control center"}
         onRetry={() => void refresh(true)}
       />
@@ -100,13 +108,21 @@ export function OperationsControlCenterPanel() {
 
   return (
     <div className="space-y-6">
-      {(showingCachedSnapshot || bannerWarnings.length > 0) && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          {showingCachedSnapshot ? (
-            <p className="font-medium">Showing last successful dashboard snapshot.</p>
-          ) : null}
-          {bannerWarnings.length > 0 ? <ExecutiveWarningList warnings={bannerWarnings} /> : null}
-        </div>
+      {(showingCachedSnapshot || snapshotStale || bannerWarnings.length > 0) && (
+        <SectionDegradedBanner
+          stale={showingCachedSnapshot || snapshotStale}
+          message={
+            bannerWarnings[0] ??
+            (meta?.origin === "building"
+              ? "Dashboard snapshot is warming up — refreshing in the background."
+              : snapshotStale
+                ? "Showing a stale dashboard snapshot — refreshing in the background."
+                : showingCachedSnapshot
+                  ? "Showing last successful dashboard snapshot."
+                  : "Partial dashboard data")
+          }
+          onRetry={() => void refresh(true)}
+        />
       )}
 
       <ExecutiveCard id="p159-recommendation" variant="premium">
@@ -114,6 +130,19 @@ export function OperationsControlCenterPanel() {
           title="Recommendation"
           subtitle="Single operator guidance based on current production state"
           badge="P159"
+          actions={
+            <div className="flex flex-wrap gap-2">
+              <LastUpdatedBadge
+                at={dashboard.generatedAt}
+                stale={showingCachedSnapshot || snapshotStale}
+                ageSeconds={meta?.ageSeconds ?? null}
+                refreshing={meta?.refreshing}
+              />
+              {!dashboard.continuousMode.enabled ? (
+                <DisabledByDesignBadge mode="observation" label="Continuous OFF" />
+              ) : null}
+            </div>
+          }
         />
         <div className="mb-3 flex flex-wrap gap-2">
           <StatusBadge tone={modeTone(r.systemMode)}>{MODE_LABELS[r.systemMode]}</StatusBadge>

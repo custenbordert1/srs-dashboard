@@ -1,10 +1,14 @@
 "use client";
 
 import {
+  DisabledByDesignBadge,
+  LastUpdatedBadge,
+  SectionDegradedBanner,
+  SectionErrorCard,
+  SectionLoadingCard,
+} from "@/components/ui/loading-state";
+import {
   ExecutiveCard,
-  ExecutivePanelError,
-  ExecutivePanelLoading,
-  ExecutiveWarningList,
   MetricCard,
   SectionHeader,
   StatusBadge,
@@ -196,6 +200,7 @@ export function RecruiterAssignmentCenterPanel() {
     runBusy,
     runMessage,
     runError,
+    showingCachedSnapshot,
     refresh,
     runSimulation,
     runProduction,
@@ -204,13 +209,14 @@ export function RecruiterAssignmentCenterPanel() {
   const sim = useRecruiterAssignmentSimulation();
 
   if (loading) {
-    return <ExecutivePanelLoading title="Recruiter Assignment Center" badge="P158" />;
+    return <SectionLoadingCard title="Recruiter Assignment Center" badge="P158" />;
   }
 
   if (loadingCeilingHit && !dashboard) {
     return (
-      <ExecutivePanelError
+      <SectionErrorCard
         title="Recruiter Assignment Center"
+        badge="P158"
         message="Assignment center timed out — retry shortly."
         onRetry={() => void refresh()}
       />
@@ -219,8 +225,9 @@ export function RecruiterAssignmentCenterPanel() {
 
   if (!dashboard) {
     return (
-      <ExecutivePanelError
+      <SectionErrorCard
         title="Recruiter Assignment Center"
+        badge="P158"
         message={error ?? "Failed to load assignment center"}
         onRetry={() => void refresh()}
       />
@@ -233,10 +240,12 @@ export function RecruiterAssignmentCenterPanel() {
 
   return (
     <div className="space-y-6">
-      {bannerWarnings.length > 0 ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          <ExecutiveWarningList warnings={bannerWarnings} />
-        </div>
+      {bannerWarnings.length > 0 || showingCachedSnapshot ? (
+        <SectionDegradedBanner
+          stale={showingCachedSnapshot}
+          message={bannerWarnings[0] ?? "Showing cached assignment snapshot."}
+          onRetry={() => void refresh()}
+        />
       ) : null}
 
       <ExecutiveCard variant="premium">
@@ -248,7 +257,11 @@ export function RecruiterAssignmentCenterPanel() {
               : "P158 — production assignments enabled on server"
           }
           actions={
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <LastUpdatedBadge at={dashboard.generatedAt} stale={showingCachedSnapshot} />
+              {dashboard.simulationMode ? (
+                <DisabledByDesignBadge mode="manual" label="Assignments manual" />
+              ) : null}
               <button
                 type="button"
                 className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white hover:bg-white/10"
@@ -461,7 +474,7 @@ export function RecruiterAssignmentCenterPanel() {
       ) : null}
 
       {sim.loading && !sim.simulation ? (
-        <ExecutivePanelLoading title="Assignment Simulation" badge="P158.1" />
+        <SectionLoadingCard title="Assignment Simulation" badge="P158.1" />
       ) : sim.simulation ? (
         <>
           <ExecutiveCard variant="premium">
@@ -637,8 +650,9 @@ export function RecruiterAssignmentCenterPanel() {
           </ExecutiveCard>
         </>
       ) : sim.error ? (
-        <ExecutivePanelError
+        <SectionErrorCard
           title="Assignment Simulation"
+          badge="P158.1"
           message={sim.error}
           onRetry={() => void sim.refresh()}
         />

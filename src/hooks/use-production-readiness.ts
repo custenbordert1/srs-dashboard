@@ -14,10 +14,15 @@ import {
 } from "@/lib/fetch-with-timeout";
 import type { P160ProductionReadinessReport, P160ReadinessLevel } from "@/lib/p160-production-readiness/types";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
+import {
+  useSnapshotRefreshPoll,
+  type ExecutiveSnapshotClientMeta,
+} from "@/hooks/use-snapshot-refresh-poll";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const CACHE_KEY = cacheKey(["p160", "production-readiness"]);
-const REQUEST_TIMEOUT_MS = 30_000;
+// Snapshot layer (P161.1) serves cached results in <500ms — sane section timeout.
+import { P161_CLIENT_SECTION_TIMEOUT_MS } from "@/lib/app-loading-reliability/constants";
 
 function readCache(): P160ProductionReadinessReport | null {
   if (typeof window === "undefined") return null;
@@ -30,6 +35,7 @@ export function useProductionReadiness() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!initial);
   const [showingCachedSnapshot, setShowingCachedSnapshot] = useState(Boolean(initial));
+  const [meta, setMeta] = useState<ExecutiveSnapshotClientMeta | null>(null);
 
   const mountedRef = useRef(true);
   const generationRef = useRef(0);
@@ -44,20 +50,24 @@ export function useProductionReadiness() {
   const refresh = useCallback(async () => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
-    setLoading(true);
     setError(null);
 
     try {
       const res = await fetchWithTimeout("/api/recruiting/production-readiness", {
         cache: "no-store",
-        timeoutMs: REQUEST_TIMEOUT_MS,
+        timeoutMs: P161_CLIENT_SECTION_TIMEOUT_MS,
       });
-      const parsed = (await res.json()) as { report?: P160ProductionReadinessReport; error?: string };
+      const parsed = (await res.json()) as {
+        report?: P160ProductionReadinessReport;
+        meta?: ExecutiveSnapshotClientMeta;
+        error?: string;
+      };
       if (!res.ok || !parsed.report) {
         throw new Error(parsed.error ?? `Production readiness failed (${res.status})`);
       }
       if (!mountedRef.current || generationRef.current !== generation) return;
       setReport(parsed.report);
+      setMeta(parsed.meta ?? null);
       setShowingCachedSnapshot(false);
       setCached(CACHE_KEY, parsed.report, LONG_CLIENT_CACHE_TTL_MS);
     } catch (err) {
@@ -68,7 +78,7 @@ export function useProductionReadiness() {
         setShowingCachedSnapshot(true);
         setError(
           isTimeoutError(err)
-            ? timeoutErrorMessage("Production readiness", REQUEST_TIMEOUT_MS)
+            ? timeoutErrorMessage("Production readiness", P161_CLIENT_SECTION_TIMEOUT_MS)
             : friendlyFetchMessageFromError(err, "dashboard") ?? "Readiness check unavailable",
         );
       } else if (!isIgnorableFetchError(err)) {
@@ -85,9 +95,19 @@ export function useProductionReadiness() {
     void refresh();
   }, [refresh]);
 
+  useSnapshotRefreshPoll(meta, () => void refresh());
+
   const loadingCeilingHit = useLoadingCeiling(loading && !report, EXECUTIVE_PANEL_LOADING_CEILING_MS);
 
-  return { report, error, loading: loading && !report && !loadingCeilingHit, loadingCeilingHit, showingCachedSnapshot, refresh };
+  return {
+    report,
+    error,
+    loading: loading && !report && !loadingCeilingHit,
+    loadingCeilingHit,
+    showingCachedSnapshot,
+    meta,
+    refresh,
+  };
 }
 
 export function levelTone(level: P160ReadinessLevel): "success" | "warning" | "critical" | "neutral" {

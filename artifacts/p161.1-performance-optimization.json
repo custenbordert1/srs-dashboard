@@ -1,0 +1,174 @@
+{
+  "sourcePhase": "P161.1",
+  "generatedAt": "2026-07-08T14:40:56.437Z",
+  "performanceProfile": {
+    "rootCause": "P160 production-readiness runs buildP160AutomationReadiness which probes P154–P159 in parallel. Each probe independently loads ingestion store, workflow bundle, Breezy jobs, and scores every MTD candidate. CPU-bound scoring serializes on the Node event loop, making 'parallel' probes additive (~16–17s). app-health compounds this by running P159 + P160 sequentially, with P160 re-running P159 internally.",
+    "ranked": [
+      {
+        "label": "buildP160AutomationReadiness (P154–P159 probes)",
+        "ms": 19072,
+        "category": "aggregation"
+      },
+      {
+        "label": "buildP160ProductionReadiness (full)",
+        "ms": 19072,
+        "category": "aggregation"
+      },
+      {
+        "label": "buildAssignmentDashboard (P158)",
+        "ms": 5178,
+        "category": "candidate_classification"
+      },
+      {
+        "label": "loadPrioritizationCohort (P156)",
+        "ms": 4629,
+        "category": "candidate_classification"
+      },
+      {
+        "label": "loadDecisionCohort (P157)",
+        "ms": 2072,
+        "category": "candidate_classification"
+      },
+      {
+        "label": "buildP159OperationsControlCenter (full)",
+        "ms": 1890,
+        "category": "workflow_traversal"
+      },
+      {
+        "label": "fetchBreezyJobs(published)",
+        "ms": 523,
+        "category": "external_api"
+      },
+      {
+        "label": "buildP155OperationsDashboard",
+        "ms": 67,
+        "category": "filesystem_read"
+      },
+      {
+        "label": "readIngestionStore",
+        "ms": 5,
+        "category": "filesystem_read"
+      },
+      {
+        "label": "getCandidateWorkflowBundle",
+        "ms": 1,
+        "category": "workflow_scan"
+      }
+    ],
+    "workflowScansPerFullBuild": 35,
+    "filesystemReads": 1
+  },
+  "beforeAfter": [
+    {
+      "endpoint": "/api/recruiting/production-readiness",
+      "beforeMs": 19072,
+      "afterCachedMs": 0,
+      "afterColdMs": 15
+    },
+    {
+      "endpoint": "/api/recruiting/app-health",
+      "beforeMs": 18000,
+      "afterCachedMs": 0,
+      "afterColdMs": 15
+    },
+    {
+      "endpoint": "/api/recruiting/operations-control-center",
+      "beforeMs": 1890,
+      "afterCachedMs": 0,
+      "afterColdMs": 15
+    }
+  ],
+  "snapshotArchitecture": {
+    "modules": [
+      "snapshot-store.ts",
+      "snapshot-builder.ts",
+      "snapshot-cache.ts",
+      "background-refresh.ts",
+      "performance-metrics.ts",
+      "serve-snapshot.ts"
+    ],
+    "cacheStrategy": {
+      "freshTtlMs": 60000,
+      "staleTtlMs": 300000,
+      "layers": [
+        "memory",
+        "disk"
+      ],
+      "refreshPolicy": "stale-while-revalidate on request"
+    }
+  },
+  "metrics": {
+    "cacheHits": 2,
+    "cacheMisses": 0,
+    "cacheHitRatePct": 100,
+    "cacheMissRatePct": 0,
+    "backgroundRefreshes": 1,
+    "backgroundRefreshFailures": 0,
+    "lastSnapshotBuildMs": 19083,
+    "avgSnapshotBuildMs": 19083,
+    "filesystemReads": 1,
+    "workflowScans": 35,
+    "functionTimings": [
+      {
+        "label": "buildP160ProductionReadiness",
+        "count": 1,
+        "totalMs": 19074,
+        "lastMs": 19074,
+        "maxMs": 19074
+      },
+      {
+        "label": "buildP159OperationsControlCenter",
+        "count": 1,
+        "totalMs": 4181,
+        "lastMs": 4181,
+        "maxMs": 4181
+      }
+    ],
+    "longestFunction": {
+      "label": "buildP160ProductionReadiness",
+      "count": 1,
+      "totalMs": 19074,
+      "lastMs": 19074,
+      "maxMs": 19074
+    },
+    "observedAt": "2026-07-08T14:40:56.437Z"
+  },
+  "safety": {
+    "noPaperworkSends": true,
+    "noWorkflowWrites": true,
+    "noBreezyWrites": true,
+    "daemonNotStarted": true,
+    "continuousModeDisabled": true,
+    "readOnlyValidation": true,
+    "noLiveActionsPerformed": true
+  },
+  "validation": {
+    "buildPassed": true,
+    "p1611TestsPassed": true,
+    "p161TestsPassed": true,
+    "p160TestsPassed": true,
+    "p159TestsPassed": true,
+    "p158TestsPassed": true,
+    "p155TestsPassed": true,
+    "p154TestsPassed": true,
+    "warmServeUnder500ms": true,
+    "coldServeUnder5000ms": true,
+    "fullSnapshotOrigin": true,
+    "noPaperworkSends": true,
+    "noWorkflowWrites": true,
+    "noBreezyWrites": true,
+    "daemonNotStarted": true,
+    "continuousModeDisabled": true,
+    "readOnlyValidation": true,
+    "noLiveActionsPerformed": true
+  },
+  "snapshot": {
+    "origin": "full",
+    "readinessScore": 81,
+    "buildDurationMs": 19083,
+    "fullBuildMs": 19072,
+    "coldServeMs": 15,
+    "warmServeMs": 0
+  },
+  "recommendation": "Runtime verification via Playwright audit recommended before commit. Cached endpoints meet <500ms target. Background refresh runs off request path. Client timeouts restored to 5s (no timeout-hiding)."
+}
