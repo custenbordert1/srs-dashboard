@@ -53,6 +53,19 @@ async function advanceOnboardingAfterSign(input: {
   return true;
 }
 
+function inferLocalDropboxStatus(input: {
+  workflow: ActivePaperworkPacket["workflow"];
+  onboarding: ActivePaperworkPacket["onboarding"];
+}): DropboxMonitorStatus {
+  if (input.workflow.paperworkStatus === "signed" || input.workflow.workflowStatus === "Signed") {
+    return "signed";
+  }
+  if (input.workflow.paperworkStatus === "viewed") return "viewed";
+  if (input.onboarding?.status === "declined") return "declined";
+  if (input.onboarding?.status === "expired") return "expired";
+  return "awaiting_signature";
+}
+
 export async function reconcilePaperworkCandidate(input: {
   packet: ActivePaperworkPacket;
   existingTracking: PaperworkMonitorCandidateTracking | null;
@@ -108,21 +121,29 @@ export async function reconcilePaperworkCandidate(input: {
   }
 
   try {
-    const signature = await getSignatureRequest(input.packet.signatureRequestId);
-    dropboxStatus = normalizeDropboxMonitorStatus(signature);
-    const viewedAt =
-      signature.signatures.find((s) => s.lastViewedAt)?.lastViewedAt ??
-      input.packet.workflow.paperworkViewedAt;
-    const signedAt =
-      signature.signatures.find((s) => s.signedAt)?.signedAt ?? input.packet.workflow.paperworkSignedAt;
+    if (input.dryRun) {
+      dropboxStatus = inferLocalDropboxStatus({
+        workflow: input.packet.workflow,
+        onboarding: input.packet.onboarding,
+      });
+      if (dropboxStatus === "viewed" || dropboxStatus === "signed") timeline.push("Viewed");
+      if (dropboxStatus === "signed") timeline.push("Signed");
+      synced = true;
+    } else {
+      const signature = await getSignatureRequest(input.packet.signatureRequestId);
+      dropboxStatus = normalizeDropboxMonitorStatus(signature);
+      const viewedAt =
+        signature.signatures.find((s) => s.lastViewedAt)?.lastViewedAt ??
+        input.packet.workflow.paperworkViewedAt;
+      const signedAt =
+        signature.signatures.find((s) => s.signedAt)?.signedAt ?? input.packet.workflow.paperworkSignedAt;
 
-    if (dropboxStatus === "viewed" || dropboxStatus === "signed") timeline.push("Viewed");
-    if (dropboxStatus === "signed") timeline.push("Signed");
+      if (dropboxStatus === "viewed" || dropboxStatus === "signed") timeline.push("Viewed");
+      if (dropboxStatus === "signed") timeline.push("Signed");
 
-    const priorStatus = prior?.lastDropboxStatus;
-    stateChanged = priorStatus !== dropboxStatus;
+      const priorStatus = prior?.lastDropboxStatus;
+      stateChanged = priorStatus !== dropboxStatus;
 
-    if (!input.dryRun) {
       const alreadySigned =
         input.packet.workflow.paperworkStatus === "signed" &&
         input.packet.workflow.workflowStatus === "Signed";
@@ -130,6 +151,7 @@ export async function reconcilePaperworkCandidate(input: {
       if (!alreadySigned || dropboxStatus === "viewed") {
         const processed = await processSignatureStatus({
           signatureRequestId: input.packet.signatureRequestId,
+          signature,
           byUserId: input.byUserId ?? "p107-monitor",
         });
         if (!processed.ok) {
@@ -164,13 +186,59 @@ export async function reconcilePaperworkCandidate(input: {
           to: dropboxStatus,
         });
       }
-    } else {
-      synced = true;
+
+      const bundle = await getCandidateWorkflowBundle();
+      const workflow = bundle.workflows[input.packet.candidateId];
+      const onboarding = await findActiveOnboardingRecord(input.packet.candidateId);
+
+      const tracking: PaperworkMonitorCandidateTracking = {
+        candidateId: input.packet.candidateId,
+        candidateName: input.packet.candidateName,
+        signatureRequestId: input.packet.signatureRequestId,
+        lastDropboxStatus: dropboxStatus,
+        viewedAt: workflow?.paperworkViewedAt ?? viewedAt ?? prior?.viewedAt ?? null,
+        signedAt: workflow?.paperworkSignedAt ?? signedAt ?? prior?.signedAt ?? null,
+        completedAt: onboarding?.completedAt ?? prior?.completedAt ?? null,
+        lastCheckedAt: new Date().toISOString(),
+        reminderCount: prior?.reminderCount ?? 0,
+        lastReminderSentAt: prior?.lastReminderSentAt ?? null,
+        reminderHistory: prior?.reminderHistory ?? [],
+        needsAttention: prior?.needsAttention ?? false,
+        workflowStatus: workflow?.workflowStatus ?? input.packet.workflow.workflowStatus,
+        onboardingStatus: onboarding?.status ?? input.packet.onboarding?.status ?? null,
+      };
+
+      return {
+        result: {
+          candidateId: input.packet.candidateId,
+          candidateName: input.packet.candidateName,
+          signatureRequestId: input.packet.signatureRequestId,
+          dropboxStatus,
+          paperworkStatus: workflow?.paperworkStatus ?? input.packet.workflow.paperworkStatus,
+          workflowStatus: tracking.workflowStatus,
+          onboardingStatus: tracking.onboardingStatus,
+          viewedAt: tracking.viewedAt,
+          signedAt: tracking.signedAt,
+          synced,
+          stateChanged,
+          reminderGenerated: null,
+          error,
+          timeline,
+        },
+        tracking,
+      };
     }
+
+    const priorStatus = prior?.lastDropboxStatus;
+    stateChanged = priorStatus !== dropboxStatus;
 
     const bundle = await getCandidateWorkflowBundle();
     const workflow = bundle.workflows[input.packet.candidateId];
     const onboarding = await findActiveOnboardingRecord(input.packet.candidateId);
+    const viewedAt =
+      workflow?.paperworkViewedAt ?? input.packet.workflow.paperworkViewedAt ?? prior?.viewedAt ?? null;
+    const signedAt =
+      workflow?.paperworkSignedAt ?? input.packet.workflow.paperworkSignedAt ?? prior?.signedAt ?? null;
 
     const tracking: PaperworkMonitorCandidateTracking = {
       candidateId: input.packet.candidateId,

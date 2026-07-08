@@ -211,8 +211,15 @@ export async function runAutonomousRecruitingCycle(input: {
 
     assertWithinRuntime(deadlineMs);
 
+    const sentCandidateIds =
+      backfillReport.controlledCycle?.sentCandidateIds ??
+      backfillReport.controlledCycle?.cycle.sentCandidateIds ??
+      [];
+
     const webhookSync = await runPaperworkMonitorCycle({
       mode: dryRun ? "dryRun" : "runOnce",
+      monitorScope: dryRun ? "manual" : "postCycle",
+      priorityCandidateIds: sentCandidateIds,
       byUserId: input.userId ?? "p154.7-continuous-runner",
     });
 

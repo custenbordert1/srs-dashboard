@@ -19,6 +19,9 @@ export function buildPaperworkMonitorMetrics(input: {
   state: PaperworkMonitorState;
   syncedThisCycle: number;
   errorsThisCycle: number;
+  deferredThisCycle?: number;
+  projectedGetRequests?: number;
+  budgetLimit?: number;
 }): PaperworkMonitorMetrics {
   const todayStart = startOfTodayMs();
   const tracking = Object.values(input.state.candidateTracking);
@@ -73,6 +76,9 @@ export function buildPaperworkMonitorMetrics(input: {
     activePackets: input.candidates.length,
     syncedThisCycle: input.syncedThisCycle,
     errorsThisCycle: input.errorsThisCycle,
+    deferredThisCycle: input.deferredThisCycle ?? input.state.deferredReconciliationQueue?.length ?? 0,
+    projectedGetRequests: input.projectedGetRequests ?? 0,
+    budgetLimit: input.budgetLimit ?? 0,
   };
 }
 
@@ -82,6 +88,9 @@ export function buildPaperworkMonitorReport(input: {
   candidates: PaperworkMonitorCandidateResult[];
   syncedThisCycle: number;
   errorsThisCycle: number;
+  deferredThisCycle?: number;
+  projectedGetRequests?: number;
+  budgetLimit?: number;
   overlapPrevented?: boolean;
 }): PaperworkMonitorReport {
   const mode = input.mode ?? P107_DEFAULT_MODE;
@@ -90,6 +99,9 @@ export function buildPaperworkMonitorReport(input: {
     state: input.state,
     syncedThisCycle: input.syncedThisCycle,
     errorsThisCycle: input.errorsThisCycle,
+    deferredThisCycle: input.deferredThisCycle,
+    projectedGetRequests: input.projectedGetRequests,
+    budgetLimit: input.budgetLimit,
   });
 
   const nextScheduledRunAt =

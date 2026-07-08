@@ -129,6 +129,7 @@ export async function executeControlledProductionAutopilot(input: {
         stoppedOnError: true,
         capReachedAssignments: false,
         capReachedSends: false,
+        sentCandidateIds: [],
       },
       dashboard: priorState.dashboard,
       safetyFlags: {
@@ -140,6 +141,7 @@ export async function executeControlledProductionAutopilot(input: {
       },
       rollbackRecommendation:
         "System health check failed — autopilot not activated. Resolve unhealthy dependencies before retry.",
+      sentCandidateIds: [],
     };
     await saveAutopilotState({
       ...priorState,
@@ -163,6 +165,7 @@ export async function executeControlledProductionAutopilot(input: {
   let stoppedOnError = false;
   let capReachedAssignments = false;
   let capReachedSends = false;
+  let sentCandidateIds: string[] = [];
   let pausedReason: string | null = null;
 
   try {
@@ -211,6 +214,7 @@ export async function executeControlledProductionAutopilot(input: {
       paperworkSent = paperwork.sentCount;
       paperworkSkipped = paperwork.skippedCount;
       duplicatesPrevented = paperwork.duplicatesPrevented;
+      sentCandidateIds = paperwork.sentCandidateIds;
       failures += paperwork.failedCount;
       stoppedOnError = stoppedOnError || paperwork.stoppedOnError;
       capReachedSends = paperwork.capReached;
@@ -279,6 +283,7 @@ export async function executeControlledProductionAutopilot(input: {
       stoppedOnError,
       capReachedAssignments,
       capReachedSends,
+      sentCandidateIds,
     },
     dashboard,
     safetyFlags: {
@@ -289,6 +294,7 @@ export async function executeControlledProductionAutopilot(input: {
       auditLoggingEnabled: true,
     },
     rollbackRecommendation: "",
+    sentCandidateIds,
   };
   report.rollbackRecommendation = buildRollbackRecommendation(report);
 

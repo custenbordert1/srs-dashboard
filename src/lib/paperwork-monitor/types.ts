@@ -1,5 +1,5 @@
 export const P107_SOURCE_PHASE = "P107";
-export const P107_MONITOR_VERSION = 1;
+export const P107_MONITOR_VERSION = 2;
 export const P107_DEFAULT_MODE = "dryRun" as const;
 export const P107_DEV_INTERVAL_MS = 5 * 60 * 1000;
 export const P107_STALE_LOCK_MS = 15 * 60 * 1000;
@@ -74,6 +74,8 @@ export type PaperworkMonitorState = {
   emailQueue: ReminderQueueEntry[];
   recruiterQueue: ReminderQueueEntry[];
   needsAttention: ReminderQueueEntry[];
+  /** Candidate IDs queued for background reconciliation when budget or post-cycle scope defers polling. */
+  deferredReconciliationQueue: string[];
   updatedAt: string;
 };
 
@@ -98,6 +100,9 @@ export type PaperworkMonitorMetrics = {
   activePackets: number;
   syncedThisCycle: number;
   errorsThisCycle: number;
+  deferredThisCycle: number;
+  projectedGetRequests: number;
+  budgetLimit: number;
 };
 
 export type PaperworkMonitorCandidateResult = {
@@ -145,6 +150,7 @@ export type PaperworkMonitorCycleResult = {
   mode: PaperworkMonitorMode;
   report: PaperworkMonitorReport;
   warnings: string[];
+  deferredCandidateIds?: string[];
 };
 
 export type PaperworkStatusDetail = {

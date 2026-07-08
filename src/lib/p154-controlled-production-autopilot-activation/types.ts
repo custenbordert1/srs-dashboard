@@ -70,6 +70,7 @@ export type ControlledProductionAutopilotCycleReport = {
     stoppedOnError: boolean;
     capReachedAssignments: boolean;
     capReachedSends: boolean;
+    sentCandidateIds: string[];
   };
   dashboard: AutopilotDashboardMetrics;
   safetyFlags: {
@@ -80,6 +81,8 @@ export type ControlledProductionAutopilotCycleReport = {
     auditLoggingEnabled: true;
   };
   rollbackRecommendation: string;
+  /** IDs of candidates who received paperwork during this controlled cycle. */
+  sentCandidateIds: string[];
 };
 
 export type AutopilotState = {

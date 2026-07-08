@@ -317,6 +317,9 @@ export async function executeImmediatePaperworkPolicy(input: {
     maxSendsLimit,
     capReached,
     stoppedOnError,
+    sentCandidateIds: executionItems
+      .filter((item) => item.sendResult === "sent")
+      .map((item) => item.candidateId),
     safetyFlags: {
       breezyWrites: false,
       executeBatchCalled: false,

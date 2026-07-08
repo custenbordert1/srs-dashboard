@@ -2,6 +2,7 @@ import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/
 import { getMetricsSnapshot } from "@/lib/app-performance/performance-metrics";
 import { getCachedSnapshot } from "@/lib/app-performance/snapshot-cache";
 import { isRefreshing } from "@/lib/app-performance/background-refresh";
+import { getDropboxSignApiMetricsSnapshot } from "@/lib/dropbox-sign-api";
 import { BREEZY_RATE_LIMIT } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -26,6 +27,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     ok: true,
     metrics,
+    dropboxApiMetrics: getDropboxSignApiMetricsSnapshot(),
     snapshot: cached.snapshot
       ? {
           origin: cached.snapshot.origin,

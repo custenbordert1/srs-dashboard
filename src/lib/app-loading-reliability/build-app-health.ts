@@ -13,6 +13,7 @@ import { buildP159OperationsControlCenter } from "@/lib/p159-operations-control-
 import type { P159DashboardBuildResult as P159BuildResult } from "@/lib/p159-operations-control-center/build-operations-control-center";
 import { buildP160ProductionReadiness } from "@/lib/p160-production-readiness";
 import type { P160ProductionReadinessReport } from "@/lib/p160-production-readiness/types";
+import { getDropboxSignApiMetricsSnapshot, type DropboxSignApiMetricsSnapshot } from "@/lib/dropbox-sign-api";
 import { isP154ContinuousEnabled } from "@/lib/p154-continuous-autonomous-recruiting-runner/runner-config";
 import { loadP1547RunnerState } from "@/lib/p154-continuous-autonomous-recruiting-runner/runner-store";
 import type { P1547RunnerState } from "@/lib/p154-continuous-autonomous-recruiting-runner/types";
@@ -47,6 +48,7 @@ export type P161AppHealthReport = {
   degradedSections: string[];
   lastSuccessfulDataTimestamps: Record<string, string | null>;
   warnings: string[];
+  dropboxApiMetrics: DropboxSignApiMetricsSnapshot;
 };
 
 const PAGE_LABELS: Record<(typeof P161_MAJOR_PAGES)[number], string> = {
@@ -225,6 +227,7 @@ export function composeP161AppHealthReport(inputs: P161AppHealthInputs): P161App
     degradedSections: collectDegradedSectionIds([...pageHealth, ...apiHealth]),
     lastSuccessfulDataTimestamps,
     warnings,
+    dropboxApiMetrics: getDropboxSignApiMetricsSnapshot(),
   };
 }
 

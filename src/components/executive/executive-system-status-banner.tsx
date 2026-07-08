@@ -96,6 +96,36 @@ export function ExecutiveSystemStatusBanner() {
           value={systemStatus.readinessScore != null ? `${systemStatus.readinessScore}/100` : "—"}
         />
       </dl>
+
+      {data.dropboxApiMetrics ? (
+        <div className="mt-5 border-t border-zinc-800/80 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Dropbox Sign API metrics</p>
+          <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Metric label="POST requests" value={String(data.dropboxApiMetrics.postRequests)} />
+            <Metric label="GET requests" value={String(data.dropboxApiMetrics.getRequests)} />
+            <Metric label="Requests / min" value={String(data.dropboxApiMetrics.requestsPerMinute)} />
+            <Metric
+              label="Rate limit remaining"
+              value={
+                data.dropboxApiMetrics.rateLimitRemaining != null
+                  ? String(data.dropboxApiMetrics.rateLimitRemaining)
+                  : "—"
+              }
+            />
+            <Metric label="Retries" value={String(data.dropboxApiMetrics.retries)} />
+            <Metric label="429 responses" value={String(data.dropboxApiMetrics.responses429)} />
+            <Metric
+              label="Avg latency"
+              value={
+                data.dropboxApiMetrics.averageLatencyMs != null
+                  ? `${data.dropboxApiMetrics.averageLatencyMs}ms`
+                  : "—"
+              }
+            />
+            <Metric label="Cache hits" value={String(data.dropboxApiMetrics.cacheHits)} />
+          </dl>
+        </div>
+      ) : null}
     </section>
   );
 }

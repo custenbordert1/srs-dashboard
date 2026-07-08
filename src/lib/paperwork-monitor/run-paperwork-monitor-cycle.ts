@@ -1,3 +1,4 @@
+import { beginDropboxSignExecutionScope, endDropboxSignExecutionScope } from "@/lib/dropbox-sign-api";
 import { buildPaperworkMonitorReport } from "@/lib/paperwork-monitor/build-paperwork-monitor-report";
 import {
   appendMonitorAudit,
@@ -6,6 +7,7 @@ import {
   saveMonitorState,
   tryAcquireMonitorLock,
 } from "@/lib/paperwork-monitor/monitor-store";
+import { planMonitorPackets, type PaperworkMonitorScope } from "@/lib/paperwork-monitor/plan-monitor-packets";
 import { reconcilePaperworkCandidate } from "@/lib/paperwork-monitor/reconcile-paperwork-candidate";
 import { applyReminderToState, evaluateReminders } from "@/lib/paperwork-monitor/reminder-engine";
 import { selectActivePaperworkPackets } from "@/lib/paperwork-monitor/select-active-packets";
@@ -18,13 +20,17 @@ import {
 export async function runPaperworkMonitorCycle(input?: {
   mode?: PaperworkMonitorMode;
   candidateIds?: string[];
+  /** Signatures sent during the current production cycle — polled exclusively in postCycle scope. */
+  priorityCandidateIds?: string[];
+  monitorScope?: PaperworkMonitorScope;
   byUserId?: string;
 }): Promise<PaperworkMonitorCycleResult> {
   const mode = input?.mode ?? P107_DEFAULT_MODE;
   const dryRun = mode === "dryRun";
+  const monitorScope = input?.monitorScope ?? (input?.priorityCandidateIds?.length ? "postCycle" : "manual");
   const warnings: string[] = [
     "P107 — Dropbox Sign live poll; no paperwork resend.",
-    dryRun ? "dryRun — no state writes." : "Live sync — workflow and onboarding updated.",
+    dryRun ? "dryRun — no Dropbox API calls; local state only." : "Live sync — workflow and onboarding updated.",
     "Reminders queued only — not sent automatically.",
   ];
 
@@ -41,7 +47,9 @@ export async function runPaperworkMonitorCycle(input?: {
         candidates: [],
         syncedThisCycle: 0,
         errorsThisCycle: 0,
-        overlapPrevented: true,
+        deferredThisCycle: 0,
+        projectedGetRequests: 0,
+        budgetLimit: 0,
       }),
       warnings: [...warnings, "Skipped — previous monitor run still executing."],
     };
@@ -54,11 +62,30 @@ export async function runPaperworkMonitorCycle(input?: {
   let errorsThisCycle = 0;
   const candidates: import("@/lib/paperwork-monitor/types").PaperworkMonitorCandidateResult[] = [];
 
+  beginDropboxSignExecutionScope();
   try {
     let state = await loadMonitorState();
-    const packets = await selectActivePaperworkPackets({ candidateIds: input?.candidateIds });
+    const allActive = await selectActivePaperworkPackets({ candidateIds: input?.candidateIds });
+    const packetPlan = planMonitorPackets({
+      allActive,
+      scope: monitorScope,
+      priorityCandidateIds: input?.priorityCandidateIds,
+      deferredQueue: state.deferredReconciliationQueue,
+    });
+    warnings.push(...packetPlan.warnings);
 
-    for (const packet of packets) {
+    if (!dryRun && packetPlan.projectedGetRequests > packetPlan.budgetLimit && monitorScope !== "postCycle") {
+      await appendMonitorAudit({
+        action: "budget_deferral",
+        projectedGetRequests: packetPlan.projectedGetRequests,
+        budgetLimit: packetPlan.budgetLimit,
+        deferredCount: packetPlan.deferredCandidateIds.length,
+      });
+    }
+
+    state.deferredReconciliationQueue = packetPlan.deferredCandidateIds;
+
+    for (const packet of packetPlan.packetsToPoll) {
       const existing = state.candidateTracking[packet.candidateId] ?? null;
       const { result, tracking } = await reconcilePaperworkCandidate({
         packet,
@@ -105,13 +132,23 @@ export async function runPaperworkMonitorCycle(input?: {
       durationMs,
     });
 
+    if (!dryRun) {
+      finalState.deferredReconciliationQueue = packetPlan.deferredCandidateIds;
+      await saveMonitorState(finalState);
+    }
+
     await appendMonitorAudit({
       action: "cycle_complete",
       mode,
       runId: lock.runId,
-      packetCount: packets.length,
+      packetCount: packetPlan.packetsToPoll.length,
+      activePacketCount: allActive.length,
       syncedThisCycle,
       errorsThisCycle,
+      deferredThisCycle: packetPlan.deferredCandidateIds.length,
+      projectedGetRequests: packetPlan.projectedGetRequests,
+      budgetLimit: packetPlan.budgetLimit,
+      monitorScope,
       durationMs,
     });
 
@@ -125,8 +162,12 @@ export async function runPaperworkMonitorCycle(input?: {
         candidates,
         syncedThisCycle,
         errorsThisCycle,
+        deferredThisCycle: packetPlan.deferredCandidateIds.length,
+        projectedGetRequests: packetPlan.projectedGetRequests,
+        budgetLimit: packetPlan.budgetLimit,
       }),
       warnings,
+      deferredCandidateIds: packetPlan.deferredCandidateIds,
     };
   } catch (caught) {
     success = false;
@@ -149,9 +190,14 @@ export async function runPaperworkMonitorCycle(input?: {
         candidates,
         syncedThisCycle,
         errorsThisCycle,
+        deferredThisCycle: 0,
+        projectedGetRequests: 0,
+        budgetLimit: 0,
       }),
       warnings: [...warnings, error],
     };
+  } finally {
+    endDropboxSignExecutionScope();
   }
 }
 
@@ -204,5 +250,8 @@ export async function buildPaperworkMonitorSnapshot() {
     })),
     syncedThisCycle: 0,
     errorsThisCycle: 0,
+    deferredThisCycle: state.deferredReconciliationQueue.length,
+    projectedGetRequests: 0,
+    budgetLimit: 0,
   });
 }

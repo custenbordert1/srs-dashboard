@@ -37,6 +37,7 @@ function defaultState(): PaperworkMonitorState {
     emailQueue: [],
     recruiterQueue: [],
     needsAttention: [],
+    deferredReconciliationQueue: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -45,7 +46,12 @@ export async function loadMonitorState(): Promise<PaperworkMonitorState> {
   try {
     const raw = await readFile(statePath(), "utf8");
     const parsed = JSON.parse(raw) as PaperworkMonitorState;
-    return { ...defaultState(), ...parsed, version: P107_MONITOR_VERSION };
+    return {
+      ...defaultState(),
+      ...parsed,
+      version: P107_MONITOR_VERSION,
+      deferredReconciliationQueue: parsed.deferredReconciliationQueue ?? [],
+    };
   } catch {
     return defaultState();
   }

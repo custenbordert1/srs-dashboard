@@ -13,7 +13,7 @@ import {
   recordCandidateOnboarding,
 } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
 import { publishWorkflowRealtime } from "@/lib/workflow-realtime-push";
-import { DropboxSignError, getSignatureRequest } from "@/lib/dropbox-sign";
+import { DropboxSignError, getSignatureRequest, type DropboxSignRequestSummary } from "@/lib/dropbox-sign";
 
 function mapToOnboardingStatus(paperworkStatus: string, rawStatus?: string): OnboardingPacketStatus {
   if (paperworkStatus === "signed") return "completed";
@@ -35,10 +35,11 @@ export type ProcessSignatureStatusResult = {
 
 export async function processSignatureStatus(input: {
   signatureRequestId: string;
+  signature?: DropboxSignRequestSummary;
   byUserId?: string;
 }): Promise<ProcessSignatureStatusResult> {
   try {
-    const signature = await getSignatureRequest(input.signatureRequestId);
+    const signature = input.signature ?? (await getSignatureRequest(input.signatureRequestId));
     const paperworkStatus = mapSignatureRequestToPaperworkStatus(signature);
     const onboardingStatus = mapToOnboardingStatus(paperworkStatus, signature.rawStatus);
     const workflows = await getCandidateWorkflowState();

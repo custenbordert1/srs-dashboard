@@ -62,6 +62,8 @@ export type ImmediatePaperworkPolicyReport = {
   maxSendsLimit: number;
   capReached: boolean;
   stoppedOnError: boolean;
+  /** Candidate IDs that received live paperwork during this P152 run. */
+  sentCandidateIds: string[];
   safetyFlags: {
     breezyWrites: false;
     executeBatchCalled: false;
