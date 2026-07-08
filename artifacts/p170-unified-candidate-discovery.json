@@ -1,0 +1,76 @@
+{
+  "sourcePhase": "P170",
+  "generatedAt": "2026-07-08T20:16:51.439Z",
+  "query": "Irby",
+  "result": {
+    "sourcePhase": "P170",
+    "generatedAt": "2026-07-08T20:16:51.424Z",
+    "readOnly": true,
+    "query": {
+      "raw": "Irby",
+      "name": "Irby",
+      "email": null,
+      "phone": null,
+      "candidateId": null,
+      "positionId": null
+    },
+    "found": true,
+    "source": "ingestion_store",
+    "rescueInvoked": false,
+    "rescueSource": null,
+    "hydratedIntoStore": false,
+    "candidate": {
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "email": "patricia.irby@aol.com",
+      "phone": "+1 714 883 5164",
+      "positionId": "a707da4f2564",
+      "positionName": "Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+      "appliedDate": "2026-07-07T21:44:53.270Z",
+      "city": "Lake Havasu City",
+      "state": "AZ",
+      "stage": "Applied"
+    },
+    "discovery": {
+      "foundInBreezy": true,
+      "foundInIngestion": true,
+      "foundInSearch": true,
+      "evaluatedByP157": true,
+      "eligibleForP169": true,
+      "paperworkStatus": "Not sent (Applied)",
+      "p157Action": "Applied",
+      "p169Outcome": "AUTO_SEND_PAPERWORK candidate"
+    },
+    "warnings": []
+  },
+  "validation": {
+    "passed": true,
+    "checks": {
+      "continuousModeUnchanged": true,
+      "daemonNotStarted": true,
+      "noPaperworkSent": true,
+      "workflowStoreUnchanged": true,
+      "runnerStoreUnchanged": true,
+      "auditLogUnchanged": true,
+      "dropboxMetricsUnchanged": true,
+      "usesExistingArchitecture": true
+    }
+  },
+  "architecture": {
+    "usesIngestionStore": true,
+    "usesP153RescuePath": true,
+    "noFullIndexRebuild": true,
+    "noNewSearchIndex": true
+  },
+  "checks": {
+    "resultRendered": true,
+    "readOnlyFlag": true,
+    "patriciaFound": true,
+    "sourceIndicated": true,
+    "discoveryStatusPresent": true,
+    "usesIngestionStore": true,
+    "usesP153RescuePath": true,
+    "noFullIndexRebuild": true,
+    "validationReadOnlyPassed": true
+  }
+}

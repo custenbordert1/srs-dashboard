@@ -79,6 +79,7 @@ import {
   CANDIDATES_PREVIEW_CLIENT_TIMEOUT_MS,
   fetchAndMergeFastCandidates,
   fetchAndMergeFullCandidates,
+  fetchAndMergeIngestionBase,
   fetchCandidatesForTab,
   peekTabCandidatesCache,
   shouldHydrateFullCandidates,
@@ -122,6 +123,7 @@ import {
 import { RecruiterActionCenterHero } from "@/components/recruiting/recruiter-action-center-hero";
 import { CandidateExcelExportControls } from "@/components/recruiting/candidate-excel-export-controls";
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
+import { CandidateDiscoveryPanel } from "@/components/recruiting/candidate-discovery-panel";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
 import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
 import { progressionBadgeStyle } from "@/lib/candidate-progression-engine/progression-sort";
@@ -944,6 +946,29 @@ export function CandidatesSection() {
     const id = window.setTimeout(() => void loadBundle(), 0);
     return () => window.clearTimeout(id);
   }, [loadBundle]);
+
+  // P170 — merge the durable ingestion store as a base layer so the displayed
+  // list is "Ingestion Store + Live Preview" rather than preview-only. This runs
+  // once after mount and never removes freshly loaded preview/fast rows.
+  useEffect(() => {
+    let cancelled = false;
+    const id = window.setTimeout(() => {
+      void fetchAndMergeIngestionBase(breezySnapshotRef.current)
+        .then((merged) => {
+          if (cancelled || !merged || !merged.ok || merged.candidates.length === 0) return;
+          const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
+          if (merged.candidates.length < priorCount) return;
+          commitCandidatesSuccess(merged);
+        })
+        .catch(() => {
+          /* ingestion base is best-effort; preview/fast still render */
+        });
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+    };
+  }, [commitCandidatesSuccess]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -2386,6 +2411,9 @@ export function CandidatesSection() {
         onSearchChange={setSearch}
         searchPending={search.trim() !== debouncedSearch.trim()}
         databaseToolbar={databaseToolbar}
+        discoveryPanel={
+          <CandidateDiscoveryPanel syncedQuery={search} onOpenCandidate={setSelectedCandidateId} />
+        }
       />
 
       <RecruiterCollapsibleSection

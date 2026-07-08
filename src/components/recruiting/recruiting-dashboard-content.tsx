@@ -31,6 +31,8 @@ import {
   LazyPlacementCommandCenterPanel,
   LazyApprovalQueueCommandCenterPanel,
   LazyRecruiterCommandCenterPanel,
+  LazyRecruitingExceptionQueuePanel,
+  LazyLifecycleExceptionQueuePanel,
   LazyWorkforceIntelligencePanel,
 } from "./dashboard-tab-panels";
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
@@ -126,6 +128,8 @@ export function RecruitingDashboardContent({
 
         <DashboardTabPanel tabId="recruiter-command-center" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="recruiter-command-center">
+            <LazyRecruitingExceptionQueuePanel />
+            <LazyLifecycleExceptionQueuePanel />
             <LazyRecruiterCommandCenterPanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>

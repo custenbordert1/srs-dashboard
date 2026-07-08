@@ -1,0 +1,113 @@
+{
+  "sourcePhase": "P169",
+  "generatedAt": "2026-07-08T19:28:33.474Z",
+  "orchestratorEnabled": false,
+  "console": {
+    "sourcePhase": "P169",
+    "generatedAt": "2026-07-08T19:28:33.473Z",
+    "readOnly": true,
+    "status": "paused",
+    "statusLabel": "Paused",
+    "enabled": false,
+    "paused": false,
+    "lastCycle": {
+      "at": null,
+      "agoLabel": "never",
+      "durationMs": null,
+      "candidatesEvaluated": 0,
+      "paperworkSent": 0,
+      "skipped": 0,
+      "exceptions": 0,
+      "dropboxRequests": null
+    },
+    "nextCycle": {
+      "at": null,
+      "inMs": null,
+      "inLabel": "—"
+    },
+    "metrics": {
+      "candidatesEvaluated": 0,
+      "paperworkSent": 0,
+      "skipped": 0,
+      "exceptions": 0,
+      "readyForMel": 0,
+      "waitingSignature": 0,
+      "dropboxRequests": null
+    },
+    "dropbox": {
+      "currentBudget": 35,
+      "usedToday": 0,
+      "withinBudget": true
+    },
+    "runner": {
+      "status": "stopped",
+      "healthy": true
+    },
+    "scheduler": {
+      "recommendation": "WAIT_10_MINUTES",
+      "nextRecommendedRunAt": null
+    },
+    "health": {
+      "score": 60,
+      "label": "warning"
+    },
+    "config": {
+      "enabled": false,
+      "paused": false,
+      "cycleIntervalMs": 420000,
+      "maxSendsPerCycle": 10,
+      "dropboxBudgetReserve": 5,
+      "minimumConfidence": 80,
+      "maximumRetries": 3,
+      "exceptionThreshold": 25,
+      "readinessThreshold": 80,
+      "maintenanceWindows": [],
+      "pauseSchedule": {
+        "pausedUntil": null,
+        "reason": null
+      },
+      "updatedAt": "2026-07-08T19:28:32.535Z"
+    },
+    "recentCycles": [],
+    "warnings": [
+      "Autonomous orchestrator is disabled — set P169_ORCHESTRATOR_ENABLED=true to enable."
+    ]
+  },
+  "exceptions": {
+    "total": 0,
+    "byCategory": []
+  },
+  "pathCheck": {
+    "usesP159LiveCycle": true,
+    "noNewSendImplementation": true,
+    "noContinuousModeAutoEnable": true
+  },
+  "validation": {
+    "passed": true,
+    "checks": {
+      "continuousModeUnchanged": true,
+      "daemonNotStarted": true,
+      "noAutoEnableWhenDisabled": true,
+      "runnerStoreUnchangedUnlessLive": true,
+      "workflowStoreUnchanged": true,
+      "dropboxUnchangedUnlessLive": true,
+      "auditUnchangedUnlessLive": true,
+      "usesP159Path": true
+    }
+  },
+  "safety": {
+    "continuousModeBefore": false,
+    "continuousModeAfter": false,
+    "daemonNotStarted": true
+  },
+  "checks": {
+    "consoleRendered": true,
+    "statusPresent": true,
+    "healthScoreInRange": true,
+    "exceptionQueueReadable": true,
+    "usesP159Path": true,
+    "noNewSendLogic": true,
+    "notAutoEnabled": true,
+    "validationPassed": true
+  }
+}

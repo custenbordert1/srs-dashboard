@@ -23,6 +23,8 @@ import { ProductionSchedulerPanel } from "@/components/executive/production-sche
 import { ExecutiveApprovalPanel } from "@/components/executive/executive-approval-panel";
 import { ExecutiveDecisionCenter } from "@/components/executive/executive-decision-center";
 import { ExecutiveReadinessAdvisorPanel } from "@/components/executive/executive-readiness-advisor-panel";
+import { AutonomousRecruiterOperationsPanel } from "@/components/executive/autonomous-recruiter-operations-panel";
+import { AutonomousLifecycleOperationsPanel } from "@/components/executive/autonomous-lifecycle-operations-panel";
 import { AutonomousProductionRunnerPanel } from "@/components/executive/autonomous-production-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
@@ -267,6 +269,10 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <ExecutiveDecisionCenter />
 
       <ExecutiveReadinessAdvisorPanel />
+
+      <AutonomousRecruiterOperationsPanel />
+
+      <AutonomousLifecycleOperationsPanel />
 
       <AutonomousRecoveryCenterPanel />
 

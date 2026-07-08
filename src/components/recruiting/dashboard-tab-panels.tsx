@@ -248,6 +248,22 @@ export const LazyRecruiterCommandCenterPanel = dynamic(
   { loading: tabLoading("Loading recruiter operations…"), ssr: false },
 );
 
+export const LazyRecruitingExceptionQueuePanel = dynamic(
+  () =>
+    import("@/components/recruiting/recruiting-exception-queue-panel").then((m) => ({
+      default: m.RecruitingExceptionQueuePanel,
+    })),
+  { loading: tabLoading("Loading exception queue…"), ssr: false },
+);
+
+export const LazyLifecycleExceptionQueuePanel = dynamic(
+  () =>
+    import("@/components/recruiting/lifecycle-exception-queue-panel").then((m) => ({
+      default: m.LifecycleExceptionQueuePanel,
+    })),
+  { loading: tabLoading("Loading lifecycle exceptions…"), ssr: false },
+);
+
 type DashboardTabPanelProps = {
   tabId: DashboardTabId;
   activeTab: DashboardTabId;

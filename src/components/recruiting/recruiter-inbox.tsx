@@ -26,6 +26,8 @@ type RecruiterInboxProps = {
   onSearchChange: (value: string) => void;
   searchPending?: boolean;
   databaseToolbar?: ReactNode;
+  /** P170 server-backed unified discovery search + status panel. */
+  discoveryPanel?: ReactNode;
 };
 
 const TODAY_SUMMARY: Array<{
@@ -119,6 +121,7 @@ export function RecruiterInbox({
   onSearchChange,
   searchPending,
   databaseToolbar,
+  discoveryPanel,
 }: RecruiterInboxProps) {
   const databaseRef = useRef<HTMLElement>(null);
 
@@ -257,6 +260,8 @@ export function RecruiterInbox({
           <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400">Search database</p>
           <p className="mt-0.5 text-xs text-zinc-500">Full candidate search when someone is outside today&apos;s queues.</p>
         </div>
+
+        {discoveryPanel}
 
         <section
           id="inbox-search-database"
