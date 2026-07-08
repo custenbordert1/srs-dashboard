@@ -21,6 +21,7 @@ import { AutonomousRecoveryCenterPanel } from "@/components/executive/autonomous
 import { AutonomousPaperworkOperationsCenterPanel } from "@/components/executive/autonomous-paperwork-operations-center-panel";
 import { ProductionSchedulerPanel } from "@/components/executive/production-scheduler-panel";
 import { ExecutiveApprovalPanel } from "@/components/executive/executive-approval-panel";
+import { ExecutiveDecisionCenter } from "@/components/executive/executive-decision-center";
 import { AutonomousProductionRunnerPanel } from "@/components/executive/autonomous-production-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
@@ -262,13 +263,22 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
 
       <ExecutiveCommandSummaryPanel />
 
-      <AutonomousPaperworkOperationsCenterPanel />
-
-      <ProductionSchedulerPanel />
-
-      <ExecutiveApprovalPanel />
+      <ExecutiveDecisionCenter />
 
       <AutonomousRecoveryCenterPanel />
+
+      <CollapsibleSection
+        id="legacy-decision-panels"
+        title="Legacy decision panels"
+        subtitle="P118 operations center, P167 scheduler, and P168 approval queue (superseded by Decision Center)"
+        defaultOpen={false}
+      >
+        <div className="space-y-12">
+          <AutonomousPaperworkOperationsCenterPanel />
+          <ProductionSchedulerPanel />
+          <ExecutiveApprovalPanel />
+        </div>
+      </CollapsibleSection>
 
       <CollapsibleSection
         id="advanced-platform-intelligence"
