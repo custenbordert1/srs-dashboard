@@ -1,0 +1,250 @@
+{
+  "validation": {
+    "generatedAt": "2026-07-08T17:28:58.152Z",
+    "sourcePhase": "P167",
+    "passed": true,
+    "checks": {
+      "recommendationValid": true,
+      "confidenceInRange": true,
+      "simulationsCount": true,
+      "timelineFromToday": true,
+      "noPaperworkSent": true,
+      "noNewRunnerErrors": true,
+      "continuousModeUnchanged": true,
+      "daemonNotStarted": true,
+      "dropboxMetricsUnchanged": true,
+      "workflowStoreUnchanged": true,
+      "runnerStoreUnchanged": true,
+      "auditLogUnchanged": true,
+      "readOnlySimulations": true
+    },
+    "todayProductionHistory": {
+      "cyclesObserved": 2,
+      "totalPaperworkSent": 20,
+      "totalApiEstimate": 210,
+      "cycles": [
+        {
+          "cycleId": "cycle-1-2026-07-08T16:30:41.532Z",
+          "startedAt": "2026-07-08T16:30:41.532Z",
+          "completedAt": "2026-07-08T16:41:17.919Z",
+          "durationMs": 636387,
+          "paperworkSent": 10,
+          "apiRequestsEstimate": 20,
+          "apiRequestsSource": "measured",
+          "errors": 0,
+          "queueBefore": null,
+          "queueAfter": 54,
+          "dryRun": false
+        },
+        {
+          "cycleId": "cycle-1-2026-07-08T15:21:30.118Z",
+          "startedAt": "2026-07-08T15:21:30.118Z",
+          "completedAt": "2026-07-08T15:33:19.810Z",
+          "durationMs": 709692,
+          "paperworkSent": 10,
+          "apiRequestsEstimate": 190,
+          "apiRequestsSource": "estimated",
+          "errors": 6,
+          "queueBefore": null,
+          "queueAfter": 25,
+          "dryRun": false
+        }
+      ]
+    },
+    "before": {
+      "continuousMode": false,
+      "runnerStatus": "stopped",
+      "schedulerMode": "simulation",
+      "dailySent": 20,
+      "dailyErrors": 7
+    },
+    "after": {
+      "continuousMode": false,
+      "runnerStatus": "stopped",
+      "schedulerMode": "simulation",
+      "dailySent": 20,
+      "dailyErrors": 7
+    },
+    "decision": {
+      "recommendation": "WAIT_10_MINUTES",
+      "confidence": 87,
+      "reason": "Wait 10 minutes before next capped cycle. Projected 10 sends; queue 54 → 44.",
+      "limitingFactor": "Deferred reconciliation backlog",
+      "nextRecommendedRunAt": "2026-07-08T17:38:58.148Z",
+      "estimatedCandidatesNextCycle": 10,
+      "projectedDropboxApiUsage": {
+        "postRequests": 10,
+        "getRequests": 10,
+        "totalRequests": 20,
+        "withinBudget": true,
+        "budgetCeiling": 35
+      },
+      "projectedQueueAfterCycle": 44
+    },
+    "warnings": []
+  },
+  "report": {
+    "sourcePhase": "P167",
+    "generatedAt": "2026-07-08T17:28:58.152Z",
+    "decision": {
+      "recommendation": "WAIT_10_MINUTES",
+      "confidence": 87,
+      "reason": "Wait 10 minutes before next capped cycle. Projected 10 sends; queue 54 → 44.",
+      "limitingFactor": "Deferred reconciliation backlog",
+      "nextRecommendedRunAt": "2026-07-08T17:38:58.148Z",
+      "estimatedCandidatesNextCycle": 10,
+      "projectedDropboxApiUsage": {
+        "postRequests": 10,
+        "getRequests": 10,
+        "totalRequests": 20,
+        "withinBudget": true,
+        "budgetCeiling": 35
+      },
+      "projectedQueueAfterCycle": 44
+    },
+    "context": {
+      "eligibleNow": 40,
+      "queueRemaining": 54,
+      "waitingOnSignature": 9,
+      "readyAfterRecruiterAssignment": 403,
+      "activeSignatureCount": 87,
+      "deferredReconciliationCount": 77,
+      "recruitersAvailable": 10,
+      "timeSinceLastCycleMs": 2859386,
+      "lastCycleAt": "2026-07-08T16:41:17.919Z",
+      "lastSuccessfulCycleAt": "2026-07-08T16:41:17.919Z",
+      "dropboxRequestsPerMinute": 0,
+      "dropboxRateLimitRemaining": null,
+      "dropboxResponses429": 0,
+      "dropboxThrottlingDetected": false,
+      "recentSendFailures": 0,
+      "recentWorkflowFailures": 7,
+      "productionReadinessScore": 60,
+      "processingLockHeld": false,
+      "daemonActive": false,
+      "continuousModeEnabled": false,
+      "runnerHealthy": true,
+      "duplicateProtectionActive": true,
+      "monitorBudget": 25,
+      "sendCapPerCycle": 10,
+      "todayPaperworkSent": 20,
+      "todayFailures": 7
+    },
+    "timeline": [
+      {
+        "cycleId": "cycle-1-2026-07-08T16:30:41.532Z",
+        "startedAt": "2026-07-08T16:30:41.532Z",
+        "completedAt": "2026-07-08T16:41:17.919Z",
+        "durationMs": 636387,
+        "paperworkSent": 10,
+        "apiRequestsEstimate": 20,
+        "apiRequestsSource": "measured",
+        "errors": 0,
+        "queueBefore": null,
+        "queueAfter": 54,
+        "dryRun": false
+      },
+      {
+        "cycleId": "cycle-1-2026-07-08T15:21:30.118Z",
+        "startedAt": "2026-07-08T15:21:30.118Z",
+        "completedAt": "2026-07-08T15:33:19.810Z",
+        "durationMs": 709692,
+        "paperworkSent": 10,
+        "apiRequestsEstimate": 190,
+        "apiRequestsSource": "estimated",
+        "errors": 6,
+        "queueBefore": null,
+        "queueAfter": 25,
+        "dryRun": false
+      }
+    ],
+    "simulations": [
+      {
+        "scenario": "run_now",
+        "delayMinutes": 0,
+        "recommendation": "READY_NOW",
+        "expectedSends": 10,
+        "expectedApiUsage": {
+          "post": 10,
+          "get": 10,
+          "total": 20
+        },
+        "expectedQueueReduction": 10,
+        "expectedBacklog": 44,
+        "notes": [
+          "Read-only simulation — no production actions taken.",
+          "All simulated gates pass for immediate capped cycle."
+        ]
+      },
+      {
+        "scenario": "run_in_2_min",
+        "delayMinutes": 2,
+        "recommendation": "WAIT_2_MINUTES",
+        "expectedSends": 10,
+        "expectedApiUsage": {
+          "post": 10,
+          "get": 10,
+          "total": 20
+        },
+        "expectedQueueReduction": 10,
+        "expectedBacklog": 44,
+        "notes": [
+          "Read-only simulation — no production actions taken.",
+          "Simulated run after 2 minute spacing."
+        ]
+      },
+      {
+        "scenario": "run_in_5_min",
+        "delayMinutes": 5,
+        "recommendation": "WAIT_5_MINUTES",
+        "expectedSends": 10,
+        "expectedApiUsage": {
+          "post": 10,
+          "get": 10,
+          "total": 20
+        },
+        "expectedQueueReduction": 10,
+        "expectedBacklog": 44,
+        "notes": [
+          "Read-only simulation — no production actions taken.",
+          "Simulated run after 5 minute spacing."
+        ]
+      },
+      {
+        "scenario": "run_in_10_min",
+        "delayMinutes": 10,
+        "recommendation": "WAIT_10_MINUTES",
+        "expectedSends": 10,
+        "expectedApiUsage": {
+          "post": 10,
+          "get": 10,
+          "total": 20
+        },
+        "expectedQueueReduction": 10,
+        "expectedBacklog": 44,
+        "notes": [
+          "Read-only simulation — no production actions taken.",
+          "Simulated run after 10 minute spacing."
+        ]
+      },
+      {
+        "scenario": "run_in_15_min",
+        "delayMinutes": 15,
+        "recommendation": "WAIT_15_MINUTES",
+        "expectedSends": 10,
+        "expectedApiUsage": {
+          "post": 10,
+          "get": 10,
+          "total": 20
+        },
+        "expectedQueueReduction": 10,
+        "expectedBacklog": 44,
+        "notes": [
+          "Read-only simulation — no production actions taken.",
+          "Simulated run after 15 minute spacing."
+        ]
+      }
+    ],
+    "warnings": []
+  }
+}
