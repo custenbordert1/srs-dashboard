@@ -6,8 +6,11 @@ import {
 } from "@/lib/p108-intelligent-project-mapping/mapping-review-store";
 import type { MappingReviewAction } from "@/lib/p108-intelligent-project-mapping/types";
 import type { P109ReviewDecision, P109ReviewDecisionRecord } from "@/lib/p109-project-mapping-review/types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const P109_STORE_PATH = path.join(process.cwd(), ".data", "p109-project-mapping-review-decisions.json");
+function p109StorePath(): string {
+  return path.join(recruitingDataDir(), "p109-project-mapping-review-decisions.json");
+}
 
 type P109StoreFile = {
   updatedAt: string;
@@ -21,11 +24,11 @@ function p109ToP108Action(decision: P109ReviewDecision): MappingReviewAction {
 }
 
 async function ensureStoreDir(): Promise<void> {
-  await mkdir(path.dirname(P109_STORE_PATH), { recursive: true });
+  await mkdir(path.dirname(p109StorePath()), { recursive: true });
 }
 
 export function p109ReviewStorePath(): string {
-  return P109_STORE_PATH;
+  return p109StorePath();
 }
 
 function migrateP108Record(record: {
@@ -58,7 +61,7 @@ function migrateP108Record(record: {
 export async function loadP109ReviewRecords(): Promise<P109ReviewDecisionRecord[]> {
   const p109Records: P109ReviewDecisionRecord[] = [];
   try {
-    const raw = await readFile(P109_STORE_PATH, "utf8");
+    const raw = await readFile(p109StorePath(), "utf8");
     const parsed = JSON.parse(raw) as P109StoreFile;
     if (Array.isArray(parsed.records)) p109Records.push(...parsed.records);
   } catch {
@@ -114,7 +117,7 @@ export async function saveP109ReviewDecision(input: {
     updatedAt: new Date().toISOString(),
     records: filtered,
   };
-  await writeFile(P109_STORE_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await writeFile(p109StorePath(), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 
   await saveMappingReviewDecision({
     candidateId: input.candidateId,

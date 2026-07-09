@@ -36,10 +36,11 @@ import {
 } from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
 function workflowDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
-  return override ? path.resolve(override) : path.join(process.cwd(), ".data");
+  return override ? path.resolve(override) : recruitingDataDir();
 }
 
 function storePaths() {

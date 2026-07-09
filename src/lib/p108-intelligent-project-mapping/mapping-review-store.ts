@@ -1,8 +1,11 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import type { MappingReviewAction, MappingReviewRecord } from "@/lib/p108-intelligent-project-mapping/types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
-const REVIEW_STORE_PATH = path.join(process.cwd(), ".data", "p108-mapping-review-decisions.json");
+function reviewStorePath(): string {
+  return path.join(recruitingDataDir(), "p108-mapping-review-decisions.json");
+}
 
 type ReviewStoreFile = {
   updatedAt: string;
@@ -10,16 +13,16 @@ type ReviewStoreFile = {
 };
 
 async function ensureStoreDir(): Promise<void> {
-  await mkdir(path.dirname(REVIEW_STORE_PATH), { recursive: true });
+  await mkdir(path.dirname(reviewStorePath()), { recursive: true });
 }
 
 export function mappingReviewStorePath(): string {
-  return REVIEW_STORE_PATH;
+  return reviewStorePath();
 }
 
 export async function loadMappingReviewRecords(): Promise<MappingReviewRecord[]> {
   try {
-    const raw = await readFile(REVIEW_STORE_PATH, "utf8");
+    const raw = await readFile(reviewStorePath(), "utf8");
     const parsed = JSON.parse(raw) as ReviewStoreFile;
     return Array.isArray(parsed.records) ? parsed.records : [];
   } catch {
@@ -52,7 +55,7 @@ export async function saveMappingReviewDecision(input: {
     updatedAt: new Date().toISOString(),
     records: filtered,
   };
-  await writeFile(REVIEW_STORE_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await writeFile(reviewStorePath(), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   return record;
 }
 

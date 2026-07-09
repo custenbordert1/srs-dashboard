@@ -1,6 +1,17 @@
-import path from "node:path";
+import { mkdir } from "node:fs/promises";
+import {
+  canWriteRecruitingFilesystem,
+  resolveRecruitingDataDir,
+} from "@/lib/runtime-storage";
+
+export { canWriteRecruitingFilesystem, useInMemoryPersistence } from "@/lib/runtime-storage";
 
 export function recruitingDataDir(): string {
-  const override = process.env.SRS_RECRUITING_DATA_DIR?.trim();
-  return override ? path.resolve(override) : path.join(process.cwd(), ".data");
+  return resolveRecruitingDataDir();
+}
+
+/** Creates the recruiting data directory when filesystem persistence is enabled. */
+export async function ensureRecruitingDataDir(): Promise<void> {
+  if (!canWriteRecruitingFilesystem()) return;
+  await mkdir(recruitingDataDir(), { recursive: true });
 }

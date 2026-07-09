@@ -2,10 +2,11 @@ import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
 function hrDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
-  return override ? path.resolve(override) : path.join(process.cwd(), ".data");
+  return override ? path.resolve(override) : recruitingDataDir();
 }
 
 export type HrPaperworkNoticeType = "paperwork_viewed" | "paperwork_signed";

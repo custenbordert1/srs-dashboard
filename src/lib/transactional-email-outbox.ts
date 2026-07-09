@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { DIRECT_DEPOSIT_EMAIL_SUBJECT } from "@/lib/direct-deposit-types";
+import { recruitingDataDir } from "@/lib/recruiting-data-dir";
 
 export type TransactionalEmailOutboxRow = {
   id: string;
@@ -18,7 +19,7 @@ export type TransactionalEmailOutboxRow = {
 
 function emailDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
-  return override ? path.resolve(override) : path.join(process.cwd(), ".data");
+  return override ? path.resolve(override) : recruitingDataDir();
 }
 
 export function transactionalEmailOutboxPath(): string {

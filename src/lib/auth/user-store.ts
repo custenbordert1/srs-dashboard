@@ -5,9 +5,13 @@ import type { DashboardUser, UserPublic, UsersFile } from "@/lib/auth/types";
 import { toPublicUser } from "@/lib/auth/session";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { recruitingDataDir, useInMemoryPersistence } from "@/lib/recruiting-data-dir";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const USERS_PATH = path.join(DATA_DIR, "users.json");
+function usersPath(): string {
+  return path.join(recruitingDataDir(), "users.json");
+}
+
+let memoryUsers: UsersFile | null = null;
 
 function slugify(value: string): string {
   return value
@@ -17,8 +21,11 @@ function slugify(value: string): string {
 }
 
 async function readUsersFile(): Promise<UsersFile> {
+  if (useInMemoryPersistence()) {
+    return memoryUsers ?? { users: [] };
+  }
   try {
-    const raw = await readFile(USERS_PATH, "utf8");
+    const raw = await readFile(usersPath(), "utf8");
     const parsed = JSON.parse(raw) as UsersFile;
     if (!parsed.users || !Array.isArray(parsed.users)) return { users: [] };
     return parsed;
@@ -28,8 +35,13 @@ async function readUsersFile(): Promise<UsersFile> {
 }
 
 async function writeUsersFile(file: UsersFile): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(USERS_PATH, JSON.stringify(file, null, 2), "utf8");
+  if (useInMemoryPersistence()) {
+    memoryUsers = file;
+    return;
+  }
+  const dir = recruitingDataDir();
+  await mkdir(dir, { recursive: true });
+  await writeFile(usersPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 function defaultPassword(): string {
