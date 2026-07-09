@@ -3,9 +3,9 @@ import { getConfiguredDefaultPassword } from "@/lib/auth/auth-env";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import type { DashboardUser, UserPublic, UsersFile } from "@/lib/auth/types";
 import { toPublicUser } from "@/lib/auth/session";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { recruitingDataDir, useInMemoryPersistence } from "@/lib/recruiting-data-dir";
+import { recruitingDataDir, safeRecruitingMkdir, useInMemoryPersistence } from "@/lib/recruiting-data-dir";
 
 function usersPath(): string {
   return path.join(recruitingDataDir(), "users.json");
@@ -39,8 +39,7 @@ async function writeUsersFile(file: UsersFile): Promise<void> {
     memoryUsers = file;
     return;
   }
-  const dir = recruitingDataDir();
-  await mkdir(dir, { recursive: true });
+  await safeRecruitingMkdir(recruitingDataDir());
   await writeFile(usersPath(), JSON.stringify(file, null, 2), "utf8");
 }
 

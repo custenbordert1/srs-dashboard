@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import type { PilotSafetyLockStatus } from "@/lib/p138-first-live-send-verification/types";
 
 export type PilotSafetyLockState = {
@@ -41,7 +41,7 @@ export async function loadPilotSafetyLockState(): Promise<PilotSafetyLockState |
 }
 
 export async function savePilotSafetyLockState(state: PilotSafetyLockState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(p138PilotSafetyLockPath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
 

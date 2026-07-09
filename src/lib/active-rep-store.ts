@@ -6,7 +6,7 @@ import {
   type WorkforceImportSummary,
 } from "@/lib/workforce-intelligence/workforce-roster";
 import path from "node:path";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const STORE_PATH = path.join(recruitingDataDir(), "active-reps.json");
 
@@ -86,7 +86,7 @@ async function readStore(): Promise<ActiveRepStoreFile> {
 
 async function writeStore(file: ActiveRepStoreFile): Promise<void> {
   const storeDir = recruitingDataDir();
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   await writeFile(STORE_PATH, JSON.stringify(file, null, 2), "utf8");
 }
 

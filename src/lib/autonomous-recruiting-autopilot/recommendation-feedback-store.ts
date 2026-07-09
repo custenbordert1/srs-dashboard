@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { RecommendationFeedbackIndex } from "@/lib/autonomous-recruiting-autopilot/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function feedbackPath(): string {
   return path.join(recruitingDataDir(), "autonomous-recruiting-feedback.json");
@@ -34,7 +34,7 @@ async function readFeedbackFile(): Promise<FeedbackStoreFile> {
 }
 
 async function writeFeedbackFile(file: FeedbackStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(feedbackPath(), JSON.stringify(file, null, 2), "utf8");
 }
 

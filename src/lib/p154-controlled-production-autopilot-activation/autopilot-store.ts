@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import type {
   AutopilotDashboardMetrics,
   AutopilotEnabledFeatures,
@@ -75,7 +75,7 @@ export async function loadAutopilotState(): Promise<AutopilotState> {
 }
 
 export async function saveAutopilotState(state: AutopilotState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }

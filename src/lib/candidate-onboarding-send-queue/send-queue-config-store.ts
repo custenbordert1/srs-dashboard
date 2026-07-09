@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { OnboardingSendQueueConfig } from "@/lib/candidate-onboarding-send-queue/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function configPath(): string {
   return path.join(recruitingDataDir(), "candidate-onboarding-send-queue-config.json");
@@ -48,7 +48,7 @@ export async function saveOnboardingSendQueueConfig(
 ): Promise<OnboardingSendQueueConfig> {
   const now = new Date().toISOString();
   const saved = { ...config, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(configPath(), `${JSON.stringify({ config: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return saved;
 }

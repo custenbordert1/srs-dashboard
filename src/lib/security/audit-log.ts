@@ -1,7 +1,7 @@
-import { mkdir, appendFile } from "node:fs/promises";
+import { appendFile } from "node:fs/promises";
 import path from "node:path";
 import type { AuthSession, UserRole } from "@/lib/auth/types";
-import { recruitingDataDir, useInMemoryPersistence } from "@/lib/recruiting-data-dir";
+import { recruitingDataDir, safeRecruitingMkdir, useInMemoryPersistence } from "@/lib/recruiting-data-dir";
 
 export type AuditRole = UserRole | "anonymous";
 
@@ -60,8 +60,7 @@ function appendEntry(entry: AuditLogEntry): void {
   const line = `${JSON.stringify(entry)}\n`;
   writeQueue = writeQueue
     .then(async () => {
-      const logDir = recruitingDataDir();
-      await mkdir(logDir, { recursive: true });
+      await safeRecruitingMkdir(recruitingDataDir());
       await appendFile(auditLogPath(), line, "utf8");
     })
     .catch((err) => {

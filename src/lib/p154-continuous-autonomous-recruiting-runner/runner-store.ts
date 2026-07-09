@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import {
   getP154IntervalMs,
   isP154ContinuousEnabled,
@@ -84,7 +84,7 @@ export async function loadP1547RunnerState(): Promise<P1547RunnerState> {
 }
 
 export async function saveP1547RunnerState(state: P1547RunnerState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   state.dailyMetrics = normalizeDailyMetrics(state);
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");

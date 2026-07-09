@@ -1,7 +1,7 @@
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import {
   P107_DEV_INTERVAL_MS,
   P107_MONITOR_VERSION,
@@ -58,7 +58,7 @@ export async function loadMonitorState(): Promise<PaperworkMonitorState> {
 }
 
 export async function saveMonitorState(state: PaperworkMonitorState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
@@ -113,7 +113,7 @@ export async function releaseMonitorLock(input: {
 }
 
 export async function appendMonitorAudit(entry: Record<string, unknown>): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await appendFile(monitorAuditPath(), `${JSON.stringify({ at: new Date().toISOString(), ...entry })}\n`, "utf8");
 }
 

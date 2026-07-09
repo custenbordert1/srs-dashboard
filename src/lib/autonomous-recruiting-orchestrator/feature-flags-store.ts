@@ -6,7 +6,7 @@ import {
   P74_DEFAULT_ORCHESTRATOR_ENABLED,
   P74_PREVIEW_MODE,
 } from "@/lib/autonomous-recruiting-orchestrator/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p74-recruiting-orchestrator-flags.json");
@@ -66,7 +66,7 @@ export async function loadP74FeatureFlags(): Promise<P74FeatureFlags> {
 export async function saveP74FeatureFlags(flags: P74FeatureFlags): Promise<P74FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP74FeatureFlagsFromEnv(saved);
 }

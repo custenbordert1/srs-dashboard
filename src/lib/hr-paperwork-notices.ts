@@ -2,7 +2,7 @@ import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function hrDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
@@ -48,7 +48,7 @@ export async function appendHrPaperworkNotice(input: {
 
   const storeDir = hrDataDir();
   const noticesPath = path.join(storeDir, "hr-paperwork-notices.jsonl");
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   await appendFile(noticesPath, `${JSON.stringify(notice)}\n`, "utf8");
   return notice;
 }

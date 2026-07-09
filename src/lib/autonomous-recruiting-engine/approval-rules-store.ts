@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { ApprovalRule } from "@/lib/autonomous-recruiting-engine/types";
 import { DEFAULT_APPROVAL_RULES } from "@/lib/autonomous-recruiting-engine/approval-rules";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function rulesPath(): string {
   return path.join(recruitingDataDir(), "autonomous-recruiting-approval-rules.json");
@@ -29,7 +29,7 @@ async function readRulesFile(): Promise<ApprovalRulesStoreFile> {
 
 async function writeRulesFile(file: ApprovalRulesStoreFile): Promise<void> {
   const storeDir = recruitingDataDir();
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   await writeFile(rulesPath(), JSON.stringify(file, null, 2), "utf8");
 }
 

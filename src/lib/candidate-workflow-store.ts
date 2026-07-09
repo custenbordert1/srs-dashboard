@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
+import { readFile, writeFile, appendFile } from "node:fs/promises";
 import {
   applyRecruitingActionToggle,
   completeFollowUpActions,
@@ -36,7 +36,7 @@ import {
 } from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import { recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function workflowDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
@@ -141,13 +141,13 @@ async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
 
 async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
   const { storeDir, storePath } = storePaths();
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   await writeFile(storePath, JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function appendCandidateWorkflowAudit(entry: CandidateWorkflowAuditEntry): Promise<void> {
   const { storeDir, auditPath } = storePaths();
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   await appendFile(auditPath, `${JSON.stringify(entry)}\n`, "utf8");
 }
 

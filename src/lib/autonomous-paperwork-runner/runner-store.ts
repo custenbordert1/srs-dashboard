@@ -1,7 +1,7 @@
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import { P106_1_FULL_RECONCILIATION_INTERVAL_MS } from "@/lib/autonomous-paperwork-runner/runner-config";
 import {
   P106_1_DEV_INTERVAL_MS,
@@ -51,7 +51,7 @@ export async function loadRunnerState(): Promise<AutonomousPaperworkRunnerState>
 }
 
 export async function saveRunnerState(state: AutonomousPaperworkRunnerState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
@@ -110,7 +110,7 @@ export async function releaseRunnerLock(input: {
 }
 
 export async function appendRunnerAudit(entry: Record<string, unknown>): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await appendFile(runnerAuditPath(), `${JSON.stringify({ at: new Date().toISOString(), ...entry })}\n`, "utf8");
 }
 

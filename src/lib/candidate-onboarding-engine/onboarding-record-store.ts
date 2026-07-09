@@ -5,7 +5,7 @@ import type {
   CandidateOnboardingRecord,
   CandidateOnboardingRunSummary,
 } from "@/lib/candidate-onboarding-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_RECORDS = 500;
 
@@ -41,7 +41,7 @@ async function readRecordsFile(): Promise<RecordsStoreFile> {
 }
 
 async function writeRecordsFile(file: RecordsStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(recordsPath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 
@@ -105,7 +105,7 @@ export async function findOnboardingBySignatureRequest(
 export async function saveOnboardingRunSummary(
   summary: CandidateOnboardingRunSummary,
 ): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(
     summaryPath(),
     `${JSON.stringify({ summary, updatedAt: new Date().toISOString() }, null, 2)}\n`,

@@ -3,12 +3,14 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import {
   canWriteRecruitingFilesystem,
   isServerlessRuntime,
+  isUnsafeDataDir,
   resolveRecruitingDataDir,
   useInMemoryPersistence,
 } from "@/lib/runtime-storage";
 
 describe("runtime-storage", () => {
   const originalEnv = { ...process.env };
+  const originalCwd = process.cwd;
 
   beforeEach(() => {
     process.env = { ...originalEnv };
@@ -16,6 +18,7 @@ describe("runtime-storage", () => {
 
   afterEach(() => {
     process.env = { ...originalEnv };
+    process.cwd = originalCwd;
   });
 
   it("uses project .data in local development", () => {
@@ -37,7 +40,25 @@ describe("runtime-storage", () => {
     assert.equal(useInMemoryPersistence(), true);
     assert.equal(canWriteRecruitingFilesystem(), false);
     assert.equal(resolveRecruitingDataDir(), "/tmp/srs-dashboard-data");
-    assert.notEqual(resolveRecruitingDataDir(), `${process.cwd()}/.data`);
+  });
+
+  it("treats relative SRS_RECRUITING_DATA_DIR on serverless as in-memory", () => {
+    process.env.VERCEL = "1";
+    process.env.SRS_RECRUITING_DATA_DIR = ".data";
+
+    assert.equal(useInMemoryPersistence(), true);
+    assert.equal(resolveRecruitingDataDir(), "/tmp/srs-dashboard-data");
+    assert.equal(isUnsafeDataDir("/var/task/.data"), true);
+  });
+
+  it("detects /var/task bundle root without VERCEL env", () => {
+    delete process.env.VERCEL;
+    delete process.env.VERCEL_ENV;
+    process.cwd = () => "/var/task";
+
+    assert.equal(isServerlessRuntime(), true);
+    assert.equal(useInMemoryPersistence(), true);
+    assert.equal(resolveRecruitingDataDir(), "/tmp/srs-dashboard-data");
   });
 
   it("seeds users in memory on serverless without touching bundle .data", async () => {

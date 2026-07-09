@@ -14,7 +14,7 @@ import {
   type P169OrchestratorCycleRecord,
   type P169OrchestratorState,
 } from "@/lib/p169-autonomous-recruiting-orchestrator/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function statePath(): string {
   return path.join(recruitingDataDir(), "p169-autonomous-orchestrator-state.json");
@@ -61,7 +61,7 @@ export async function loadP169OrchestratorState(): Promise<P169OrchestratorState
 }
 
 export async function saveP169OrchestratorState(state: P169OrchestratorState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
@@ -81,7 +81,7 @@ export async function appendP169CycleRecord(
 ): Promise<P169OrchestratorCycleRecord[]> {
   const history = await loadP169CycleHistory();
   const next = [record, ...history].slice(0, P169_MAX_CYCLE_HISTORY);
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(historyPath(), `${JSON.stringify(next, null, 2)}\n`, "utf8");
   return next;
 }

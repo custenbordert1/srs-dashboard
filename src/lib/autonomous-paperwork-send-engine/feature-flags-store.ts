@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { P84FeatureFlags } from "@/lib/autonomous-paperwork-send-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p84-paperwork-send-flags.json");
@@ -55,7 +55,7 @@ export async function loadP84FeatureFlags(): Promise<P84FeatureFlags> {
 export async function saveP84FeatureFlags(flags: P84FeatureFlags): Promise<P84FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP84FeatureFlagsFromEnv(saved);
 }

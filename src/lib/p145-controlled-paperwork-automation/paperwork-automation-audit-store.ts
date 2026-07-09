@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { PaperworkAutomationAuditEvent } from "@/lib/p145-controlled-paperwork-automation/types";
 import { P145_SOURCE_PHASE } from "@/lib/p145-controlled-paperwork-automation/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_AUDIT_EVENTS = 500;
 
@@ -58,7 +58,7 @@ export async function appendPaperworkAutomationAuditEvent(
   };
   const events = [full, ...existing].slice(0, MAX_AUDIT_EVENTS);
   const now = new Date().toISOString();
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(auditPath(), `${JSON.stringify({ events, updatedAt: now }, null, 2)}\n`, "utf8");
   return events;
 }

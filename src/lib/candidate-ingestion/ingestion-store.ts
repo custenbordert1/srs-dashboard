@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import type { BreezyCandidate } from "@/lib/breezy-api";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import { mergeCandidateRecord } from "@/lib/candidate-ingestion/merge-candidate-record";
 import type { CandidateIngestionStoreFile } from "@/lib/candidate-ingestion/types";
 import path from "node:path";
@@ -61,7 +61,7 @@ export async function readIngestionStore(): Promise<CandidateIngestionStoreFile>
 }
 
 export async function writeIngestionStore(store: CandidateIngestionStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   const payload: CandidateIngestionStoreFile = {
     ...store,
     updatedAt: new Date().toISOString(),

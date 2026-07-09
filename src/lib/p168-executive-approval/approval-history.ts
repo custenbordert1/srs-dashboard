@@ -6,7 +6,7 @@ import type {
   P168LastExecution,
 } from "@/lib/p168-executive-approval/approval-types";
 import { P168_SOURCE_PHASE } from "@/lib/p168-executive-approval/approval-types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_HISTORY = 200;
 
@@ -51,7 +51,7 @@ export async function appendP168ApprovalHistoryEntry(
   };
   const entries = [full, ...existing].slice(0, MAX_HISTORY);
   const now = new Date().toISOString();
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(historyPath(), `${JSON.stringify({ entries, updatedAt: now }, null, 2)}\n`, "utf8");
   return entries;
 }

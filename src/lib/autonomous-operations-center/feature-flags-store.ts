@@ -6,7 +6,7 @@ import {
   P75_DEFAULT_OPERATIONS_CENTER_ENABLED,
   P75_PREVIEW_MODE,
 } from "@/lib/autonomous-operations-center/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p75-operations-center-flags.json");
@@ -66,7 +66,7 @@ export async function loadP75FeatureFlags(): Promise<P75FeatureFlags> {
 export async function saveP75FeatureFlags(flags: P75FeatureFlags): Promise<P75FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP75FeatureFlagsFromEnv(saved);
 }

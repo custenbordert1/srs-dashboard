@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import {
   getP154BackfillSince,
   getP1544MaxAssignmentsPerCycle,
@@ -81,7 +81,7 @@ export async function loadP1544State(): Promise<P1544ContinuousState> {
 }
 
 export async function saveP1544State(state: P1544ContinuousState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }

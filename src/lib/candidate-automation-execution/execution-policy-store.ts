@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { CandidateExecutionPolicy } from "@/lib/candidate-automation-execution/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function policyPath(): string {
   return path.join(recruitingDataDir(), "candidate-automation-execution-policy.json");
@@ -47,7 +47,7 @@ async function readPolicyFile(): Promise<PolicyStoreFile> {
 }
 
 async function writePolicyFile(file: PolicyStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(policyPath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 

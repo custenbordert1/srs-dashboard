@@ -1,7 +1,7 @@
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import {
   P125_DEFAULT_INTERVAL_MS,
   P125_RUNNER_VERSION,
@@ -86,7 +86,7 @@ export async function loadProductionRunnerState(): Promise<ProductionRunnerState
 }
 
 export async function saveProductionRunnerState(state: ProductionRunnerState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   state.executeBatchCalled = false;
   state.dailyMetrics = normalizeDailyMetrics(state);
@@ -183,7 +183,7 @@ export async function releaseProductionRunnerLock(input: {
 }
 
 export async function appendProductionRunnerAudit(entry: Record<string, unknown>): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await appendFile(
     productionRunnerAuditPath(),
     `${JSON.stringify({ at: new Date().toISOString(), ...entry })}\n`,

@@ -341,14 +341,15 @@ export async function buildBreezyEnvironmentValidation(input?: {
   if (overallOk && rerunP92OnSuccess) {
     p92RerunTriggered = true;
     try {
-      const { mkdir, writeFile } = await import("node:fs/promises");
+      const { writeFile } = await import("node:fs/promises");
       const path = await import("node:path");
+      const { recruitingDataDir, safeRecruitingMkdir } = await import("@/lib/recruiting-data-dir");
       const { buildBreezyJobStatusReconciliationFromStores } = await import(
         "@/lib/breezy-job-status-reconciliation"
       );
       const report = await buildBreezyJobStatusReconciliationFromStores({ mtdOnly: true });
-      const outDir = path.join(process.cwd(), ".data");
-      await mkdir(outDir, { recursive: true });
+      const outDir = recruitingDataDir();
+      await safeRecruitingMkdir(outDir);
       const artifactPath = path.join(outDir, "p92-breezy-job-status-reconciliation.json");
       await writeFile(artifactPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
       p92RerunSummary = {

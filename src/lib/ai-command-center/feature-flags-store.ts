@@ -6,7 +6,7 @@ import {
   P78_DEFAULT_EXECUTION_MODE,
   P78_PREVIEW_MODE,
 } from "@/lib/ai-command-center/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p78-command-center-flags.json");
@@ -66,7 +66,7 @@ export async function loadP78FeatureFlags(): Promise<P78FeatureFlags> {
 export async function saveP78FeatureFlags(flags: P78FeatureFlags): Promise<P78FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP78FeatureFlagsFromEnv(saved);
 }

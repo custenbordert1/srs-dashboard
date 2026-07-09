@@ -1,7 +1,7 @@
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import {
   P148_DEFAULT_INTERVAL_MINUTES,
   P148_DEFAULT_MAX_RUNTIME_SECONDS,
@@ -84,7 +84,7 @@ export async function loadOrchestratorState(): Promise<OrchestratorState> {
 }
 
 export async function saveOrchestratorState(state: OrchestratorState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   state.executeBatchCalled = false;
   await writeFile(stateFilePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
@@ -196,12 +196,12 @@ export async function appendOrchestratorRunRecord(
 ): Promise<void> {
   const existing = await loadOrchestratorRunHistory();
   const next = [record, ...existing].slice(0, P148_MAX_RUN_HISTORY);
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(historyFilePath(), `${JSON.stringify(next, null, 2)}\n`, "utf8");
 }
 
 export async function appendOrchestratorAudit(entry: Record<string, unknown>): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await appendFile(
     orchestratorAuditPath(),
     `${JSON.stringify({ at: new Date().toISOString(), ...entry })}\n`,

@@ -17,7 +17,7 @@ import {
   type P171LifecycleState,
   type P171LifecycleTransition,
 } from "@/lib/p171-autonomous-candidate-lifecycle-manager/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function statePath(): string {
   return path.join(recruitingDataDir(), "p171-lifecycle-manager-state.json");
@@ -65,7 +65,7 @@ export async function loadP171LifecycleState(): Promise<P171LifecycleManagerStat
 }
 
 export async function saveP171LifecycleState(state: P171LifecycleManagerState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   await writeFile(statePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
@@ -85,7 +85,7 @@ export async function appendP171CycleRecord(
 ): Promise<P171LifecycleCycleRecord[]> {
   const history = await loadP171CycleHistory();
   const next = [record, ...history].slice(0, P171_MAX_CYCLE_HISTORY);
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(historyPath(), `${JSON.stringify(next, null, 2)}\n`, "utf8");
   return next;
 }

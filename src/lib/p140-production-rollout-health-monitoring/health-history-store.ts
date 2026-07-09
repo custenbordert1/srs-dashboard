@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import type { HealthMetricsSnapshot } from "@/lib/p140-production-rollout-health-monitoring/types";
 
 const MAX_SNAPSHOTS = 48;
@@ -31,7 +31,7 @@ export async function appendHealthSnapshot(snapshot: HealthMetricsSnapshot): Pro
     store.snapshots = store.snapshots.slice(-MAX_SNAPSHOTS);
   }
   store.updatedAt = new Date().toISOString();
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(historyPath(), `${JSON.stringify(store, null, 2)}\n`, "utf8");
   return store;
 }

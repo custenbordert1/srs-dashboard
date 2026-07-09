@@ -8,7 +8,7 @@ import type {
   AutomationType,
   ControlCenterSnapshot,
 } from "@/lib/hiring-automation-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function runsPath(): string {
   return path.join(recruitingDataDir(), "hiring-automation-runs.json");
@@ -33,7 +33,7 @@ async function readRunsFile(): Promise<AutomationRunStoreFile> {
 }
 
 async function writeRunsFile(file: AutomationRunStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(runsPath(), JSON.stringify(file, null, 2), "utf8");
 }
 

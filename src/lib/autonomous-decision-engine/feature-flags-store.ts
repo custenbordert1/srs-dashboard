@@ -6,7 +6,7 @@ import {
   P76_DEFAULT_EXECUTION_MODE,
   P76_PREVIEW_MODE,
 } from "@/lib/autonomous-decision-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p76-decision-engine-flags.json");
@@ -66,7 +66,7 @@ export async function loadP76FeatureFlags(): Promise<P76FeatureFlags> {
 export async function saveP76FeatureFlags(flags: P76FeatureFlags): Promise<P76FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP76FeatureFlagsFromEnv(saved);
 }

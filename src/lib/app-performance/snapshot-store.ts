@@ -95,6 +95,7 @@ export async function readSnapshotFromDisk(): Promise<ExecutiveSnapshot | null> 
 
 export async function writeSnapshotToDisk(snapshot: ExecutiveSnapshot): Promise<void> {
   const target = snapshotPath();
-  await mkdir(path.dirname(target), { recursive: true });
+  const { safeRecruitingMkdir } = await import("@/lib/recruiting-data-dir");
+  await safeRecruitingMkdir(path.dirname(target));
   await writeFile(target, JSON.stringify(snapshot, null, 2), "utf8");
 }

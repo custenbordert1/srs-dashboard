@@ -1,7 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 export type TransactionalEmailPayload = {
   from: string;
@@ -33,7 +33,7 @@ export async function appendTransactionalEmailOutbox(
 ): Promise<void> {
   const storeDir = emailDataDir();
   const outboxPath = path.join(storeDir, "transactional-email-outbox.jsonl");
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   const row = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),

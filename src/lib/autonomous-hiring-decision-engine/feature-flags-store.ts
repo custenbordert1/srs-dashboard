@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { P87FeatureFlags } from "@/lib/autonomous-hiring-decision-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p87-hiring-decision-flags.json");
@@ -48,7 +48,7 @@ export async function loadP87FeatureFlags(): Promise<P87FeatureFlags> {
 export async function saveP87FeatureFlags(flags: P87FeatureFlags): Promise<P87FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP87FeatureFlagsFromEnv(saved);
 }

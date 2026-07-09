@@ -1,7 +1,7 @@
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import {
   P136_DEFAULT_INTERVAL_MS,
   P136_SCHEDULER_VERSION,
@@ -57,7 +57,7 @@ export async function loadSchedulerState(): Promise<SchedulerState> {
 }
 
 export async function saveSchedulerState(state: SchedulerState): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   state.updatedAt = new Date().toISOString();
   state.executeBatchCalled = false;
   await writeFile(stateFilePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
@@ -162,7 +162,7 @@ export async function releaseSchedulerLock(input: {
 }
 
 export async function appendSchedulerAudit(entry: Record<string, unknown>): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await appendFile(
     schedulerAuditPath(),
     `${JSON.stringify({ at: new Date().toISOString(), ...entry })}\n`,

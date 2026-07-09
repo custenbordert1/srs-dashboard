@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import type { PaperworkCycleMonitorState, PaperworkCycleReport } from "@/lib/autonomous-paperwork-orchestrator/types";
 
 export function paperworkCycleStatePath(): string {
@@ -22,6 +22,6 @@ export async function savePaperworkCycleMonitorState(report: PaperworkCycleRepor
     updatedAt: new Date().toISOString(),
     currentCycle: report,
   };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(paperworkCycleStatePath(), `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }

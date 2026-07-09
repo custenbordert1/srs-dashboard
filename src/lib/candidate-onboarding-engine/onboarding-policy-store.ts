@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { CandidateOnboardingPolicy } from "@/lib/candidate-onboarding-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 import { DEFAULT_PAPERWORK_BY_GRADE } from "@/lib/candidate-onboarding-engine/paperwork-grade-policy";
 
 function policyPath(): string {
@@ -63,7 +63,7 @@ async function readPolicyFile(): Promise<PolicyStoreFile> {
 }
 
 async function writePolicyFile(file: PolicyStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(policyPath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 

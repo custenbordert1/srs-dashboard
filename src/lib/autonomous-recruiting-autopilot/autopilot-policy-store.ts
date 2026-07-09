@@ -6,7 +6,7 @@ import type {
   AutopilotPolicy,
   AutopilotRunEntry,
 } from "@/lib/autonomous-recruiting-autopilot/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function policyPath(): string {
   return path.join(recruitingDataDir(), "autonomous-recruiting-autopilot-policy.json");
@@ -46,7 +46,7 @@ async function readPolicyFile(): Promise<PolicyStoreFile> {
 }
 
 async function writePolicyFile(file: PolicyStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(policyPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
@@ -64,7 +64,7 @@ async function readRunsFile(): Promise<RunsStoreFile> {
 }
 
 async function writeRunsFile(file: RunsStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(runsPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
