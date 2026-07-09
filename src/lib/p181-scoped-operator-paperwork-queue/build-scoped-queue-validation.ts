@@ -48,9 +48,11 @@ export async function buildP181ScopedQueueValidationReport(input?: {
     ({
       userId: "p181-validation",
       email: "p181@validation.local",
+      name: "P181 Validation",
       role: "executive",
-      territory: { states: [], dmNames: [] },
-    } as AuthSession);
+      territoryStates: [],
+      expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+    } satisfies AuthSession);
 
   const [candidatesResult, jobsResult, bundle, onboardingRecords] = await Promise.all([
     resolveCandidatesForRead({ scanMode: "preview" }),

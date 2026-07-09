@@ -41,12 +41,12 @@ import type { CandidateQuestionnaireAnswer } from "@/lib/candidate-readiness/typ
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
-const BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS = 15_000;
+export const BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS = 15_000;
 /** Server scan budget — keep below route maxDuration (120s). */
-const BREEZY_CANDIDATE_SCAN_BUDGET_MS = 115_000;
-const BREEZY_GET_MAX_ATTEMPTS = 5;
+export const BREEZY_CANDIDATE_SCAN_BUDGET_MS = 115_000;
+export const BREEZY_GET_MAX_ATTEMPTS = 5;
 const BREEZY_GET_RETRY_BASE_MS = 900;
-const BREEZY_MAX_REQUESTS_PER_MINUTE = 40;
+export const BREEZY_MAX_REQUESTS_PER_MINUTE = 40;
 const breezyRequestTimestamps: number[] = [];
 const BREEZY_CACHE_TTL_MS = 60_000;
 /** Ok candidate snapshots — longer TTL for tab warm + reuse across dashboard opens. */
