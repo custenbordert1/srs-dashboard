@@ -39,11 +39,19 @@ export type ImmediatePaperworkCandidateRow = {
   projectedSend: boolean;
 };
 
+export type ImmediatePaperworkSendQueueReport = {
+  profile: "operator" | "autonomous";
+  scopedCandidateCount: number;
+  globalCandidateCount: number;
+  operatorScopedOnly: boolean;
+};
+
 export type ImmediatePaperworkPolicyReport = {
   sourcePhase: typeof P152_SOURCE_PHASE;
   generatedAt: string;
   dryRun: boolean;
   immediatePaperworkEnabled: boolean;
+  sendQueue: ImmediatePaperworkSendQueueReport;
   candidatesEvaluated: number;
   eligibleCount: number;
   excludedCount: number;

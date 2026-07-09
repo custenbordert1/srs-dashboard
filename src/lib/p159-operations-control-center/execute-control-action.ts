@@ -14,11 +14,22 @@ import {
   isP154ContinuousEnabled,
 } from "@/lib/p154-continuous-autonomous-recruiting-runner/runner-config";
 import type { P159ControlAction, P159ControlResult } from "@/lib/p159-operations-control-center/types";
+import { resolveP169EnvConfig } from "@/lib/p169-autonomous-recruiting-orchestrator/orchestrator-config";
+import {
+  evaluateSendCycleGates,
+  resolveGateProfileForP159LiveCycleAsync,
+} from "@/lib/p179-operator-controlled-send-gate-profile";
+import {
+  resolveSendQueueForGateProfile,
+  type OperatorSendQueueScope,
+} from "@/lib/p181-scoped-operator-paperwork-queue";
 
 export async function executeP159OperationsControl(input: {
   session: AuthSession;
   action: P159ControlAction;
   confirmLive?: boolean;
+  candidateIds?: string[];
+  sendQueueScope?: OperatorSendQueueScope;
 }): Promise<P159ControlResult> {
   const built = await buildP159OperationsControlCenter();
   const dashboard = built.dashboard;
@@ -94,15 +105,22 @@ export async function executeP159OperationsControl(input: {
   const dryRun = input.action === "dry_cycle" || !enabled || input.confirmLive !== true;
   const maxSends = getP154MaxPaperworkSendsPerCycle();
 
-  if (input.action === "live_cycle" && !enabled) {
-    return {
-      ok: false,
-      action: input.action,
-      message: `Live cycle blocked — set ${dashboard.liveCycleGates.envFlagRequired}=true on the server. Send cap: ${maxSends}/cycle.`,
-      dryRun: true,
-      dashboard,
-    };
-  }
+  const gateProfile =
+    input.action === "live_cycle"
+      ? await resolveGateProfileForP159LiveCycleAsync({
+          confirmLive: input.confirmLive,
+          sessionRole: input.session.role,
+        })
+      : "autonomous";
+
+  const p169Config = resolveP169EnvConfig();
+  const cycleGates =
+    input.action === "live_cycle"
+      ? await evaluateSendCycleGates({
+          profile: gateProfile,
+          readinessThreshold: p169Config.readinessThreshold,
+        })
+      : null;
 
   if (input.action === "live_cycle" && !input.confirmLive) {
     return {
@@ -114,11 +132,38 @@ export async function executeP159OperationsControl(input: {
     };
   }
 
+  if (input.action === "live_cycle" && cycleGates && !cycleGates.pass) {
+    return {
+      ok: false,
+      action: input.action,
+      message: `Live cycle blocked (${gateProfile} profile) — ${cycleGates.blockingFactors.join("; ")}`,
+      dryRun: true,
+      dashboard,
+    };
+  }
+
+  if (input.action === "live_cycle" && !enabled && gateProfile === "autonomous") {
+    return {
+      ok: false,
+      action: input.action,
+      message: `Live cycle blocked — set ${dashboard.liveCycleGates.envFlagRequired}=true on the server. Send cap: ${maxSends}/cycle.`,
+      dryRun: true,
+      dashboard,
+    };
+  }
+
+  const sendQueue = resolveSendQueueForGateProfile({
+    gateProfile,
+    candidateIds: input.candidateIds,
+    sendQueueScope: input.sendQueueScope,
+  });
+
   const cycleReport = await runAutonomousRecruitingCycle({
     session: input.session,
     dryRun,
     mode: "manual",
     userId: input.session.userId,
+    sendQueue,
   });
 
   return {

@@ -4,6 +4,7 @@ import type { P171LifecycleConfig } from "@/lib/p171-autonomous-candidate-lifecy
 export type P171LifecycleGateEvaluation = {
   pass: boolean;
   blockingFactors: string[];
+  warnings: string[];
   schedulerRecommendation: string;
   approvalAction: string;
   runnerHealthy: boolean;
@@ -35,6 +36,7 @@ export async function evaluateP171LifecycleGates(
   return {
     pass: gates.pass,
     blockingFactors: gates.blockingFactors,
+    warnings: gates.warnings,
     schedulerRecommendation: gates.schedulerRecommendation,
     approvalAction: gates.approvalAction,
     runnerHealthy: gates.runnerHealthy,

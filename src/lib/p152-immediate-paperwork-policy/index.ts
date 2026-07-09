@@ -14,6 +14,7 @@ export type {
   ImmediatePaperworkExecutionItem,
   ImmediatePaperworkHardBlocker,
   ImmediatePaperworkPolicyReport,
+  ImmediatePaperworkSendQueueReport,
   LegacyPaperworkBlocker,
 } from "@/lib/p152-immediate-paperwork-policy/types";
 export { P152_DEFAULT_MAX_SENDS, P152_SOURCE_PHASE } from "@/lib/p152-immediate-paperwork-policy/types";

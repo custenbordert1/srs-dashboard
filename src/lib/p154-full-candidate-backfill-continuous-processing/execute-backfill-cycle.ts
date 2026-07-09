@@ -119,6 +119,7 @@ export async function executeP1544BackfillContinuousCycle(input: {
   fullBackfill?: boolean;
   skipLock?: boolean;
   userId?: string;
+  sendQueue?: import("@/lib/p181-scoped-operator-paperwork-queue/types").PaperworkSendQueueInput;
 }): Promise<P1544CycleReport> {
   const generatedAt = new Date().toISOString();
   const mode = input.mode ?? "manual";
@@ -214,6 +215,7 @@ export async function executeP1544BackfillContinuousCycle(input: {
         session: input.session,
         dryRun: !live,
         userId: input.userId ?? input.session.userId,
+        sendQueue: input.sendQueue,
       });
       if (controlledCycle.cycle.stoppedOnError && controlledCycle.cycle.failures > 0) {
         throw new Error(controlledCycle.pausedReason ?? "Controlled cycle stopped on error.");

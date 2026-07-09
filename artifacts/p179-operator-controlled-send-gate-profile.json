@@ -1,0 +1,717 @@
+{
+  "sourcePhase": "P179",
+  "generatedAt": "2026-07-09T16:41:31.161Z",
+  "readOnly": true,
+  "gateProfiles": {
+    "operator": {
+      "profile": "operator",
+      "pass": true,
+      "blockingFactors": [],
+      "warnings": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ],
+      "schedulerRecommendation": "WAIT_10_MINUTES",
+      "approvalAction": "WAIT",
+      "readinessScore": 70,
+      "runnerHealthy": true,
+      "runnerStatus": "stopped",
+      "dropboxWithinBudget": true,
+      "healthScore": 95
+    },
+    "autonomous": {
+      "profile": "autonomous",
+      "pass": false,
+      "blockingFactors": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ],
+      "warnings": [],
+      "schedulerRecommendation": "WAIT_10_MINUTES",
+      "approvalAction": "WAIT",
+      "readinessScore": 70,
+      "runnerHealthy": true,
+      "runnerStatus": "stopped",
+      "dropboxWithinBudget": true,
+      "healthScore": 60
+    }
+  },
+  "summary": {
+    "paperworkReadyCount": 21,
+    "operatorGateProfilePass": true,
+    "operatorSendAllowed": false,
+    "autonomousSendAllowed": false,
+    "maxSendsWithinDropboxBudget": 17,
+    "projectedSendCount": 21,
+    "projectedDropboxApiCalls": 42,
+    "dropboxWithinBudget": false,
+    "blockedCandidateCount": 4,
+    "warningCount": 6
+  },
+  "candidates": [
+    {
+      "candidateId": "5e64219daaf9",
+      "name": "David Karp",
+      "email": "dmgkarp@gmail.com",
+      "assignedRecruiter": "Logan",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "84ec8ad83176",
+      "name": "april white",
+      "email": "greatdeals0501@gmail.com",
+      "assignedRecruiter": "Casey",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "86a8d6804b6b",
+      "name": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "assignedRecruiter": "Sam",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "80d87b758578",
+      "name": "Liaunda Lang",
+      "email": "capri_lang@yahoo.com",
+      "assignedRecruiter": "Riley",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "cda9067dac4b",
+      "name": "Mista Clark",
+      "email": "mistac6@gmail.com",
+      "assignedRecruiter": "Casey",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "1bd395fce633",
+      "name": "Norah Jones",
+      "email": "norahjones2224@gmail.com",
+      "assignedRecruiter": "Casey",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "2419559af1ba",
+      "name": "Jasmine Barber",
+      "email": "jasmineshanae90@gmail.com",
+      "assignedRecruiter": "Casey",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "88bb0f06e75e",
+      "name": "Terry Bryant",
+      "email": "tjbryant2019@gmail.com",
+      "assignedRecruiter": "Casey",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "21dc66d94d31",
+      "name": "Patrick Berry",
+      "email": "bezothered@gmail.com",
+      "assignedRecruiter": "Drew",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "46551846149e",
+      "name": "Lindsey Aaron",
+      "email": "miayasmommy.la@gmail.com",
+      "assignedRecruiter": "Logan",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "445225a971f7",
+      "name": "Gianna DelGarbino",
+      "email": "giannadelgarbino@gmail.com",
+      "assignedRecruiter": "Taylor",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "91faef15d8fd",
+      "name": "Nykol Tindle",
+      "email": "nykolcooper2@gmail.com",
+      "assignedRecruiter": "Alex",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "email": "patricia.irby@aol.com",
+      "assignedRecruiter": "Logan",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "email": "darryltwo@hotmail.com",
+      "assignedRecruiter": "Unassigned",
+      "workflowStatus": "Paperwork Sent",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Recruiter not assigned."
+      ],
+      "p157Action": "Candidate Duplicate",
+      "p169Outcome": "NEEDS_MANUAL_REVIEW",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "b32054c06f54",
+      "name": "Karen Burkes",
+      "email": "mrskarenburkes@gmail.com",
+      "assignedRecruiter": "Logan",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "6a850de9dc05",
+      "name": "Gabriella Gandy",
+      "email": "gabriellagandy9@gmail.com",
+      "assignedRecruiter": "Casey",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "email": "crumplatrese1@gmail.com",
+      "assignedRecruiter": "Unassigned",
+      "workflowStatus": "Applied",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Recruiter not assigned."
+      ],
+      "p157Action": "Assign Recruiter",
+      "p169Outcome": "WAIT_NEXT_CYCLE",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Assign Recruiter (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Assign Recruiter (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "6b40ff3b280a",
+      "name": "Monique Franklin",
+      "email": "franklinmonique392@gmail.com",
+      "assignedRecruiter": "Alex",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "082c0eec6cff",
+      "name": "Lovett Roberts",
+      "email": "teddylove092386@gmail.com",
+      "assignedRecruiter": "Riley",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "1e0fbce8a310",
+      "name": "Tasha Early",
+      "email": "etasha575@gmail.com",
+      "assignedRecruiter": "Riley",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "88340ea1bf94",
+      "name": "Rebekah Hoover",
+      "email": "rrhoover90@gmail.com",
+      "assignedRecruiter": "Logan",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "71ceb040896c",
+      "name": "DEAN B. SERGIACOMI",
+      "email": "dsergiacomi@comcast.net",
+      "assignedRecruiter": "Chris",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "27d9e13536b0",
+      "name": "William Gustafson",
+      "email": "willy93gizmo29pb@gmail.com",
+      "assignedRecruiter": "Riley",
+      "workflowStatus": "Paperwork Needed",
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "p157Action": "Send Paperwork",
+      "p169Outcome": "AUTO_SEND_PAPERWORK",
+      "operatorSendAllowed": true,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [],
+      "autonomousBlockers": [
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "email": "jrstagen@gmail.com",
+      "assignedRecruiter": "Morgan",
+      "workflowStatus": "Paperwork Sent",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "p157Action": "Candidate Duplicate",
+      "p169Outcome": "NEEDS_MANUAL_REVIEW",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "email": "custenborder.taylor@gmail.com",
+      "assignedRecruiter": "Taylor",
+      "workflowStatus": "Signed",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "p157Action": "Candidate Duplicate",
+      "p169Outcome": "NEEDS_MANUAL_REVIEW",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    }
+  ],
+  "blockedCandidates": [
+    {
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "email": "darryltwo@hotmail.com",
+      "assignedRecruiter": "Unassigned",
+      "workflowStatus": "Paperwork Sent",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Recruiter not assigned."
+      ],
+      "p157Action": "Candidate Duplicate",
+      "p169Outcome": "NEEDS_MANUAL_REVIEW",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "email": "crumplatrese1@gmail.com",
+      "assignedRecruiter": "Unassigned",
+      "workflowStatus": "Applied",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Recruiter not assigned."
+      ],
+      "p157Action": "Assign Recruiter",
+      "p169Outcome": "WAIT_NEXT_CYCLE",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Assign Recruiter (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Recruiter not assigned.",
+        "P157 action is Assign Recruiter (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "email": "jrstagen@gmail.com",
+      "assignedRecruiter": "Morgan",
+      "workflowStatus": "Paperwork Sent",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "p157Action": "Candidate Duplicate",
+      "p169Outcome": "NEEDS_MANUAL_REVIEW",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "email": "custenborder.taylor@gmail.com",
+      "assignedRecruiter": "Taylor",
+      "workflowStatus": "Signed",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "p157Action": "Candidate Duplicate",
+      "p169Outcome": "NEEDS_MANUAL_REVIEW",
+      "operatorSendAllowed": false,
+      "autonomousSendAllowed": false,
+      "operatorBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)"
+      ],
+      "autonomousBlockers": [
+        "Onboarding record already has an active signature request.",
+        "P157 action is Candidate Duplicate (not Send Paperwork)",
+        "Production readiness score 70 is below 80",
+        "P154 controlled production autopilot env gate is not enabled",
+        "Scheduler recommends WAIT_10_MINUTES",
+        "Executive approval recommendation is WAIT"
+      ]
+    }
+  ],
+  "warnings": [
+    "Production readiness score 70 is below 80",
+    "P154 controlled production autopilot env gate is not enabled",
+    "Scheduler recommends WAIT_10_MINUTES",
+    "Executive approval recommendation is WAIT",
+    "Projected Dropbox API usage (42) exceeds cycle budget (35) for 21 sends",
+    "Autonomous gates blocked: Production readiness score 70 is below 80; P154 controlled production autopilot env gate is not enabled; Scheduler recommends WAIT_10_MINUTES; Executive approval recommendation is WAIT"
+  ],
+  "safetyConfirmation": [
+    "Read-only validation — no paperwork sends",
+    "No Breezy or Dropbox writes",
+    "No automation enabled, no daemon started",
+    "Operator profile: readiness/scheduler/executive factors are warnings only",
+    "Autonomous profile: all production gates remain strict"
+  ],
+  "validation": {
+    "testsPassed": true,
+    "noPaperworkSends": true,
+    "noAutomationEnabled": true,
+    "noBreezyWrites": true,
+    "noDropboxCalls": true
+  }
+}

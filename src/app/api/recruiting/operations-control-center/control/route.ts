@@ -23,6 +23,8 @@ const ALLOWED_ACTIONS = new Set<P159ControlAction>([
 type PostBody = {
   action?: P159ControlAction;
   confirmLive?: boolean;
+  candidateIds?: string[];
+  sendQueueScope?: import("@/lib/p181-scoped-operator-paperwork-queue/types").OperatorSendQueueScope;
 };
 
 export async function POST(request: Request) {
@@ -59,6 +61,8 @@ export async function POST(request: Request) {
     session,
     action,
     confirmLive: body.confirmLive,
+    candidateIds: Array.isArray(body.candidateIds) ? body.candidateIds : undefined,
+    sendQueueScope: body.sendQueueScope,
   });
 
   return NextResponse.json(result, { status: result.ok ? 200 : 409 });

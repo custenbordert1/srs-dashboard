@@ -87,6 +87,7 @@ export async function executeControlledProductionAutopilot(input: {
   session: AuthSession;
   dryRun?: boolean;
   userId?: string;
+  sendQueue?: import("@/lib/p181-scoped-operator-paperwork-queue/types").PaperworkSendQueueInput;
 }): Promise<ControlledProductionAutopilotCycleReport> {
   const started = Date.now();
   const generatedAt = new Date().toISOString();
@@ -210,6 +211,7 @@ export async function executeControlledProductionAutopilot(input: {
         dryRun: !liveExecution,
         userId: input.userId ?? input.session.userId,
         userEmail: input.session.email,
+        sendQueue: input.sendQueue,
       });
       paperworkSent = paperwork.sentCount;
       paperworkSkipped = paperwork.skippedCount;

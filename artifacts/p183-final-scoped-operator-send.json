@@ -1,0 +1,305 @@
+{
+  "sourcePhase": "P183",
+  "generatedAt": "2026-07-09T18:58:54.785Z",
+  "preSend": {
+    "sendQueueProfile": "operator",
+    "scope": {
+      "candidateIds": [
+        "88bb0f06e75e",
+        "1e0fbce8a310",
+        "27d9e13536b0"
+      ],
+      "cohort": "explicit"
+    },
+    "scopedCandidateCount": 3,
+    "remainingEligibleCount": 3,
+    "sendCap": 3,
+    "candidateIds": [
+      "88bb0f06e75e",
+      "1e0fbce8a310",
+      "27d9e13536b0"
+    ],
+    "candidates": [
+      {
+        "candidateId": "88bb0f06e75e",
+        "name": "Terry Bryant",
+        "email": "tjbryant2019@gmail.com",
+        "assignedRecruiter": "Casey",
+        "workflowStatus": "Paperwork Needed",
+        "paperworkStatus": "not_sent",
+        "p152Eligible": true,
+        "blockers": [],
+        "alreadySent": false,
+        "alreadySigned": false,
+        "activeSignature": false
+      },
+      {
+        "candidateId": "1e0fbce8a310",
+        "name": "Tasha Early",
+        "email": "etasha575@gmail.com",
+        "assignedRecruiter": "Riley",
+        "workflowStatus": "Paperwork Needed",
+        "paperworkStatus": "not_sent",
+        "p152Eligible": true,
+        "blockers": [],
+        "alreadySent": false,
+        "alreadySigned": false,
+        "activeSignature": false
+      },
+      {
+        "candidateId": "27d9e13536b0",
+        "name": "William Gustafson",
+        "email": "willy93gizmo29pb@gmail.com",
+        "assignedRecruiter": "Riley",
+        "workflowStatus": "Paperwork Needed",
+        "paperworkStatus": "not_sent",
+        "p152Eligible": true,
+        "blockers": [],
+        "alreadySent": false,
+        "alreadySigned": false,
+        "activeSignature": false
+      }
+    ],
+    "projectedDropboxApiCalls": 6,
+    "projectedDropboxPost": 3,
+    "projectedDropboxGet": 3,
+    "dropboxWithinBudget": true,
+    "expectedRuntimeMinutes": "8–14",
+    "dropboxPacingRequestsPerMinute": 8,
+    "continuousMode": false,
+    "daemonActive": false,
+    "runnerStatus": "stopped",
+    "lockHeld": false,
+    "gateProfile": "operator",
+    "operatorGatePass": true,
+    "operatorWarnings": [
+      "Production readiness score 0 is below 80",
+      "P154 controlled production autopilot env gate is not enabled",
+      "Scheduler recommends WAIT_10_MINUTES",
+      "Executive approval recommendation is WAIT"
+    ],
+    "operatorHardBlockers": [],
+    "readinessScore": 0,
+    "schedulerRecommendation": "WAIT_10_MINUTES",
+    "approvalAction": "WAIT",
+    "p178ReadyInStore": 3,
+    "blockers": []
+  },
+  "postSend": {
+    "executed": true,
+    "ok": true,
+    "message": "Live cycle complete — sent 3 (cap 3).",
+    "sentCount": 3,
+    "skippedCount": 0,
+    "failedCount": 0,
+    "capReached": true,
+    "stoppedOnError": false,
+    "executionTimeMs": 639265,
+    "sentCandidateIds": [
+      "88bb0f06e75e",
+      "1e0fbce8a310",
+      "27d9e13536b0"
+    ],
+    "sentCandidates": [
+      {
+        "candidateId": "88bb0f06e75e",
+        "name": "Terry Bryant",
+        "email": "tjbryant2019@gmail.com"
+      },
+      {
+        "candidateId": "1e0fbce8a310",
+        "name": "Tasha Early",
+        "email": "etasha575@gmail.com"
+      },
+      {
+        "candidateId": "27d9e13536b0",
+        "name": "William Gustafson",
+        "email": "willy93gizmo29pb@gmail.com"
+      }
+    ],
+    "dropboxPostDelta": 3,
+    "dropboxGetDelta": 0,
+    "dropboxRequestDelta": 3,
+    "dropbox429Delta": 0,
+    "dropboxRetriesDelta": 0,
+    "dropboxRateLimitedPausedMsDelta": 0,
+    "remainingP178ReadyCount": 0,
+    "remainingP178ReadyIds": [],
+    "globalPoolLeakDetected": false,
+    "globalLeakCandidateIds": [],
+    "p152CandidatesEvaluated": 673,
+    "cycleReport": {
+      "sourcePhase": "P154.7",
+      "generatedAt": "2026-07-09T19:09:30.206Z",
+      "dryRun": false,
+      "skippedOverlap": false,
+      "cycleNumber": 1,
+      "metrics": {
+        "cycleNumber": 1,
+        "startedAt": "2026-07-09T18:59:02.033Z",
+        "completedAt": "2026-07-09T19:09:30.206Z",
+        "durationMs": 628173,
+        "candidatesEvaluated": 673,
+        "assigned": 0,
+        "sent": 3,
+        "skipped": 0,
+        "duplicatesPrevented": 47,
+        "errors": 0,
+        "queueRemaining": 92,
+        "dryRun": false
+      },
+      "ingestion": {
+        "newCandidates": 0,
+        "mergedIntoStore": 673,
+        "positionsScanned": 401
+      },
+      "controlledCycle": {
+        "sourcePhase": "P154",
+        "generatedAt": "2026-07-09T19:09:25.942Z",
+        "dryRun": false,
+        "autopilotEnabled": true,
+        "paused": false,
+        "pausedReason": null,
+        "health": {
+          "generatedAt": "2026-07-09T19:09:25.942Z",
+          "overallStatus": "healthy",
+          "healthy": true,
+          "checks": [
+            {
+              "id": "breezy_api",
+              "label": "Breezy API",
+              "status": "healthy",
+              "detail": "Breezy API reachable (264 published jobs)."
+            },
+            {
+              "id": "dropbox_sign_api",
+              "label": "Dropbox Sign API",
+              "status": "healthy",
+              "detail": "DROPBOX_SIGN_API_KEY configured."
+            },
+            {
+              "id": "workflow_store",
+              "label": "Workflow store",
+              "status": "healthy",
+              "detail": "Workflow store readable (680 records)."
+            },
+            {
+              "id": "candidate_ingestion",
+              "label": "Candidate ingestion",
+              "status": "healthy",
+              "detail": "Ingestion store fresh (162 positions scanned)."
+            },
+            {
+              "id": "recruiter_assignment_engine",
+              "label": "Recruiter assignment engine",
+              "status": "healthy",
+              "detail": "10 canonical recruiters configured."
+            },
+            {
+              "id": "webhook_listener",
+              "label": "Webhook listeners",
+              "status": "healthy",
+              "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+            },
+            {
+              "id": "audit_logging",
+              "label": "Audit logging",
+              "status": "healthy",
+              "detail": "Audit stores readable (P145: 500, P151: 500 events)."
+            }
+          ],
+          "abortReason": null
+        },
+        "enabledFeatures": {
+          "p151RecruiterAssignment": true,
+          "p152ImmediatePaperwork": true,
+          "freshIngestionRescue": true,
+          "automaticWorkflowAdvancement": true,
+          "webhookCompletionProcessing": true,
+          "duplicatePrevention": true,
+          "continuousIngestion": true
+        },
+        "limits": {
+          "maxRecruiterAssignmentsPerCycle": 25,
+          "maxPaperworkSendsPerCycle": 3,
+          "stopOnFirstError": true
+        },
+        "cycle": {
+          "candidatesEvaluated": 673,
+          "recruitersAssigned": 0,
+          "paperworkSent": 3,
+          "paperworkSkipped": 0,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "executionTimeMs": 4161,
+          "webhookStatus": "passive listener active; 3 audit events this cycle",
+          "queueRemaining": 92,
+          "stoppedOnError": false,
+          "capReachedAssignments": false,
+          "capReachedSends": false,
+          "sentCandidateIds": [
+            "88bb0f06e75e",
+            "1e0fbce8a310",
+            "27d9e13536b0"
+          ]
+        },
+        "dashboard": {
+          "candidatesEvaluated": 673,
+          "recruitersAssigned": 0,
+          "paperworkSent": 3,
+          "paperworkCompleted": 15,
+          "paperworkSkipped": 0,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "webhookCompletions": 0,
+          "averageProcessingTimeMs": 4161,
+          "queueDepth": 92,
+          "lastSuccessfulCycleAt": "2026-07-09T19:09:25.942Z"
+        },
+        "safetyFlags": {
+          "breezyWrites": false,
+          "breezyStageMovement": false,
+          "executeBatchCalled": false,
+          "duplicatePreventionActive": true,
+          "auditLoggingEnabled": true
+        },
+        "rollbackRecommendation": "Monitor Dropbox Sign and audit logs for 24h before raising P154_MAX_PAPERWORK_SENDS_PER_CYCLE.",
+        "sentCandidateIds": [
+          "88bb0f06e75e",
+          "1e0fbce8a310",
+          "27d9e13536b0"
+        ]
+      },
+      "webhookSync": {
+        "synced": 3,
+        "errors": 0
+      },
+      "stoppedOnError": false,
+      "error": null
+    },
+    "runnerStatusAfter": "stopped",
+    "daemonActiveAfter": false,
+    "continuousModeAfter": false,
+    "scopedRemainingEligibleAfter": 0,
+    "workingTreeStatus": "M src/app/api/recruiting/operations-control-center/control/route.ts\n M src/lib/breezy-api.ts\n M src/lib/candidate-ingestion/merge-candidate-record.ts\n M src/lib/candidate-ingestion/run-ingestion-sync.ts\n M src/lib/candidate-ingestion/types.ts\n M src/lib/p152-immediate-paperwork-policy/execute-immediate-paperwork-policy.ts\n M src/lib/p152-immediate-paperwork-policy/index.ts\n M src/lib/p152-immediate-paperwork-policy/types.ts\n M src/lib/p154-continuous-autonomous-recruiting-runner/run-autonomous-recruiting-cycle.ts\n M src/lib/p154-controlled-production-autopilot-activation/execute-controlled-production-autopilot.ts\n M src/lib/p154-full-candidate-backfill-continuous-processing/execute-backfill-cycle.ts\n M src/lib/p159-operations-control-center/execute-control-action.ts\n M src/lib/p169-autonomous-recruiting-orchestrator/evaluate-cycle-gates.ts\n M src/lib/p171-autonomous-candidate-lifecycle-manager/evaluate-lifecycle-gates.ts\n?? artifacts/breezy-validation-report.json\n?? artifacts/breezy-validation-report.md\n?? artifacts/p174-breezy-sync-validation.json\n?? artifacts/p174-breezy-sync-validation.md\n?? artifacts/p174.1-complete-sync-validation.json\n?? artifacts/p174.1-complete-sync-validation.md\n?? artifacts/p175-breezy-export-import.json\n?? artifacts/p175-breezy-export-import.md\n?? artifacts/p175.1-post-import-automation-readiness.json\n?? artifacts/p175.1-post-import-automation-readiness.md\n?? artifacts/p176-recruiter-assignment-before-paperwork.json\n?? artifacts/p176-recruiter-assignment-before-paperwork.md\n?? artifacts/p176.1-post-assignment-paperwork-validation.json\n?? artifacts/p176.1-post-assignment-paperwork-validation.md\n?? artifacts/p177-questionnaire-gate-diagnosis.json\n?? artifacts/p177-questionnaire-gate-diagnosis.md\n?? artifacts/p177.1-business-workflow-validation.json\n?? artifacts/p177.1-business-workflow-validation.md\n?? artifacts/p178-p1583-workflow-transition.json\n?? artifacts/p178-p1583-workflow-transition.md\n?? artifacts/p179-operator-controlled-send-gate-profile.json\n?? artifacts/p179-operator-controlled-send-gate-profile.md\n?? artifacts/p180-operator-controlled-send-cycle.json\n?? artifacts/p180-operator-controlled-send-cycle.md\n?? artifacts/p181-scoped-operator-paperwork-queue.json\n?? artifacts/p181-scoped-operator-paperwork-queue.md\n?? artifacts/p182-scoped-operator-live-send.json\n?? artifacts/p182-scoped-operator-live-send.md\n?? diagnostics/\n?? scripts/p173-breezy-production-validation.ts\n?? scripts/p174-breezy-sync-validation.ts\n?? scripts/p174.1-complete-sync-validation.ts\n?? scripts/p174.1-rescan-stall-check.ts\n?? scripts/p175-breezy-export-import.ts\n?? scripts/p175.1-post-import-automation-readiness.ts\n?? scripts/p176-recruiter-assignment-before-paperwork.ts\n?? scripts/p176.1-post-assignment-paperwork-validation.ts\n?? scripts/p177-questionnaire-gate-diagnosis.ts\n?? scripts/p179-operator-controlled-send-gate-profile.ts\n?? scripts/p181-scoped-operator-paperwork-queue.ts\n?? scripts/p182-scoped-operator-live-send.ts\n?? scripts/p183-final-scoped-operator-send.ts\n?? src/app/api/recruiting/breezy-export-import/\n?? src/app/api/recruiting/breezy-sync/\n?? src/lib/candidate-ingestion/build-ingestion-scan-queue.test.ts\n?? src/lib/candidate-ingestion/build-ingestion-scan-queue.ts\n?? src/lib/p174-breezy-sync-reliability/\n?? src/lib/p175-breezy-export-import/\n?? src/lib/p175.1-post-import-automation-readiness/\n?? src/lib/p176-recruiter-assignment-before-paperwork/\n?? src/lib/p176.1-post-assignment-paperwork-validation/\n?? src/lib/p177-questionnaire-gate-diagnosis/\n?? src/lib/p179-operator-controlled-send-gate-profile/\n?? src/lib/p181-scoped-operator-paperwork-queue/"
+  },
+  "validation": {
+    "zeroGlobalQueueLeakage": true,
+    "onlyScopedCandidatesEvaluatedForSend": true,
+    "noDuplicatePaperwork": true,
+    "noBreezyWrites": true,
+    "noDaemonStarted": true,
+    "envLocalUnchanged": true,
+    "continuousModeRemainedOff": true
+  },
+  "safetyFlags": {
+    "operatorScopedOnly": true,
+    "explicitCandidateIds": [
+      "88bb0f06e75e",
+      "1e0fbce8a310",
+      "27d9e13536b0"
+    ],
+    "breezyWrites": false,
+    "envLocalNotModified": true
+  }
+}

@@ -30,6 +30,11 @@ import {
   isOnboardingTemplateKey,
   type OnboardingTemplateKey,
 } from "@/lib/onboarding-template-registry";
+import type { PaperworkSendQueueInput } from "@/lib/p181-scoped-operator-paperwork-queue/types";
+import {
+  resolvePaperworkSendQueue,
+  sortSendQueueCandidateRows,
+} from "@/lib/p181-scoped-operator-paperwork-queue/select-send-queue-candidates";
 
 export function isP152ImmediatePaperworkEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.P152_IMMEDIATE_PAPERWORK_ENABLED === "true";
@@ -127,6 +132,7 @@ export async function executeImmediatePaperworkPolicy(input: {
   dryRun?: boolean;
   userId?: string;
   userEmail?: string;
+  sendQueue?: PaperworkSendQueueInput;
 }): Promise<ImmediatePaperworkPolicyReport> {
   const started = Date.now();
   const generatedAt = new Date().toISOString();
@@ -157,8 +163,18 @@ export async function executeImmediatePaperworkPolicy(input: {
   const jobsByPositionId = new Map(jobs.map((job) => [job.jobId, job]));
   const onboardingByCandidate = new Map(onboardingRecords.map((r) => [r.candidateId, r]));
 
-  const candidateRows = candidates
-    .map((candidate) =>
+  const sendQueueResolved = await resolvePaperworkSendQueue({
+    sendQueue: input.sendQueue,
+    allCandidates: candidates,
+    workflows: bundle.workflows,
+    jobsByPositionId,
+  });
+  const selectionCandidates = sendQueueResolved.candidates;
+
+  const candidateRows = sortSendQueueCandidateRows({
+    profile: sendQueueResolved.profile,
+    scope: sendQueueResolved.scope,
+    rows: selectionCandidates.map((candidate) =>
       evaluateCandidateRow({
         candidate,
         workflow: bundle.workflows[candidate.candidateId],
@@ -167,11 +183,8 @@ export async function executeImmediatePaperworkPolicy(input: {
         auditEvents,
         referenceMs,
       }),
-    )
-    .sort((a, b) => {
-      if (a.eligible !== b.eligible) return a.eligible ? -1 : 1;
-      return a.candidateName.localeCompare(b.candidateName);
-    });
+    ),
+  });
 
   const exclusionSummary: Record<string, number> = {};
   const legacyBypassSummary: Record<string, number> = {};
@@ -217,7 +230,7 @@ export async function executeImmediatePaperworkPolicy(input: {
       break;
     }
 
-    const candidate = candidates.find((c) => c.candidateId === item.candidateId);
+    const candidate = selectionCandidates.find((c) => c.candidateId === item.candidateId);
     if (!candidate) continue;
     const row = buildScoredWorkflowRow(candidate, bundle.workflows[item.candidateId], {
       job: jobsByPositionId.get(candidate.positionId ?? ""),
@@ -299,6 +312,12 @@ export async function executeImmediatePaperworkPolicy(input: {
     generatedAt,
     dryRun: !liveExecution,
     immediatePaperworkEnabled: liveExecution,
+    sendQueue: {
+      profile: sendQueueResolved.summary.profile,
+      scopedCandidateCount: sendQueueResolved.summary.scopedCandidateCount,
+      globalCandidateCount: sendQueueResolved.summary.globalCandidateCount,
+      operatorScopedOnly: sendQueueResolved.summary.operatorScopedOnly,
+    },
     candidatesEvaluated: candidateRows.length,
     eligibleCount: eligibleRows.length,
     excludedCount: candidateRows.length - eligibleRows.length,

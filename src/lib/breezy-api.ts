@@ -164,6 +164,10 @@ export type BreezyCandidate = {
   score?: number;
   /** Breezy position pipeline state when fetched (published, closed, archived, …). */
   positionPipelineStatus?: string;
+  /** Platform ingestion provenance (API sync, export import, or both). */
+  ingestionSource?: "breezy_api" | "breezy_export" | "merged";
+  /** True when Breezy candidate _id was not available from export import. */
+  breezyCandidateIdUnavailable?: boolean;
 };
 
 export type BreezyJobsSuccess = {
@@ -933,11 +937,22 @@ export function sortPublishedJobsByRecentUpdated(jobs: BreezyJob[]): BreezyJob[]
     });
 }
 
-/** Preview scan: applicantCount DESC, then updated_at DESC (unknown counts sort last). */
-export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] {
+const RECENT_JOB_ACTIVITY_MS = 48 * 60 * 60 * 1000;
+
+/**
+ * P174 — Prioritize positions with recent activity, then applicant volume, then recency.
+ * Used by preview, fast, full, and durable ingestion sync.
+ */
+export function sortPublishedJobsForApplicantPriority(jobs: BreezyJob[]): BreezyJob[] {
+  const now = Date.now();
   return [...jobs]
     .filter((job) => job.jobId)
     .sort((a, b) => {
+      const aRecent =
+        (parseJobUpdatedDate(a)?.getTime() ?? 0) >= now - RECENT_JOB_ACTIVITY_MS ? 1 : 0;
+      const bRecent =
+        (parseJobUpdatedDate(b)?.getTime() ?? 0) >= now - RECENT_JOB_ACTIVITY_MS ? 1 : 0;
+      if (bRecent !== aRecent) return bRecent - aRecent;
       const countB = b.candidateCount ?? -1;
       const countA = a.candidateCount ?? -1;
       if (countB !== countA) return countB - countA;
@@ -945,6 +960,11 @@ export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] 
       const ta = parseJobUpdatedDate(a)?.getTime() ?? 0;
       return tb - ta;
     });
+}
+
+/** Preview scan: applicant priority (alias for P174 unified ordering). */
+export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] {
+  return sortPublishedJobsForApplicantPriority(jobs);
 }
 
 export function countPreviewJobApplicantBuckets(jobs: BreezyJob[]): {
@@ -2676,10 +2696,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   if (!jobsResult.ok) return jobsResult;
 
   const publishedJobs = jobsResult.jobs.map((position) => ({ ...position, status: jobState }));
-  const sortedPositions =
-    options.scanMode === "preview"
-      ? sortPublishedJobsForPreviewScan(publishedJobs)
-      : sortPublishedJobsByRecentUpdated(publishedJobs);
+  const sortedPositions = sortPublishedJobsForApplicantPriority(publishedJobs);
   const totalAvailable = sortedPositions.length;
   const scanMode = options.scanMode;
 

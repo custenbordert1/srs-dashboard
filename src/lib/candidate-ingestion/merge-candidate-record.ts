@@ -1,5 +1,15 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
 
+export function mergeIngestionSource(
+  existing?: BreezyCandidate["ingestionSource"],
+  incoming?: BreezyCandidate["ingestionSource"],
+): BreezyCandidate["ingestionSource"] | undefined {
+  if (!existing) return incoming;
+  if (!incoming) return existing;
+  if (existing === incoming) return existing;
+  return "merged";
+}
+
 export function mergeCandidateRecord(
   existing: BreezyCandidate | undefined,
   incoming: BreezyCandidate,
@@ -19,6 +29,11 @@ export function mergeCandidateRecord(
   return {
     ...existing,
     ...incoming,
+    ingestionSource: mergeIngestionSource(existing.ingestionSource, incoming.ingestionSource),
+    breezyCandidateIdUnavailable:
+      existing.breezyCandidateIdUnavailable === false
+        ? false
+        : incoming.breezyCandidateIdUnavailable ?? existing.breezyCandidateIdUnavailable,
     questionnaireAnswers,
     hasQuestionnaire: Boolean(questionnaireAnswers?.length) || existing.hasQuestionnaire || incoming.hasQuestionnaire,
     questionnaireEnrichmentAttemptedAt:

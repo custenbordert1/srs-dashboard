@@ -65,6 +65,7 @@ export async function runAutonomousRecruitingCycle(input: {
   fullBackfill?: boolean;
   skipLock?: boolean;
   userId?: string;
+  sendQueue?: import("@/lib/p181-scoped-operator-paperwork-queue/types").PaperworkSendQueueInput;
 }): Promise<P1547CycleReport> {
   const startedAt = new Date().toISOString();
   const startedMs = Date.now();
@@ -150,6 +151,7 @@ export async function runAutonomousRecruitingCycle(input: {
         session: input.session,
         dryRun: true,
         userId: input.userId ?? input.session.userId,
+        sendQueue: input.sendQueue,
       });
       backfillReport = {
         sourcePhase: "P154.4",
@@ -206,6 +208,7 @@ export async function runAutonomousRecruitingCycle(input: {
         fullBackfill: input.fullBackfill ?? cycleNumber === 1,
         skipLock: true,
         userId: input.userId ?? input.session.userId,
+        sendQueue: input.sendQueue,
       });
     }
 

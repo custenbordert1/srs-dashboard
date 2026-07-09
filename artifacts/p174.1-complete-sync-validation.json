@@ -1,0 +1,899 @@
+{
+  "sourcePhase": "P174.1",
+  "generatedAt": "2026-07-09T14:46:07.804Z",
+  "durationMs": 506432,
+  "stopReason": "all_positions_scanned_no_new_candidates_two_passes",
+  "fullParityAchieved": false,
+  "engineReaches100PctWithoutAdditionalCode": "no",
+  "exportTarget": 367,
+  "final": {
+    "positionCoveragePct": 100,
+    "positionsScanned": 206,
+    "positionsTotal": 206,
+    "candidatesIngested": 162,
+    "exportIngestionMatches": 161,
+    "exportCoveragePct": 44,
+    "cycleComplete": true,
+    "remainingPositions": 0,
+    "remainingExportCandidates": 206,
+    "estimatedMinutesRemaining": 0
+  },
+  "newestCandidateValidation": {
+    "july9": {
+      "inIngestion": 3,
+      "exportTotal": 3
+    },
+    "july8": {
+      "inIngestion": 7,
+      "exportTotal": 7
+    },
+    "july7": {
+      "inIngestion": 10,
+      "exportTotal": 10
+    },
+    "p170StoreHits": 161,
+    "p157CohortSize": 110,
+    "p171Tracked": 0
+  },
+  "coverageAfterInvocations": [
+    {
+      "at": "2026-07-09T14:39:57.728Z",
+      "invocation": 0,
+      "positionsScanned": 34,
+      "positionsTotal": 203,
+      "positionCoveragePct": 17,
+      "candidatesIngested": 6,
+      "exportIngestionMatches": 6,
+      "exportCoveragePct": 2,
+      "apiPreviewCount": 6,
+      "apiFastCount": 18,
+      "p170StoreHits": 6,
+      "p157CohortSize": 5,
+      "p171Tracked": 0,
+      "cycleComplete": false,
+      "newestJuly9InIngestion": 0,
+      "newestJuly8InIngestion": 1,
+      "newestJuly7InIngestion": 0
+    },
+    {
+      "at": "2026-07-09T14:42:01.823Z",
+      "invocation": 1,
+      "positionsScanned": 115,
+      "positionsTotal": 206,
+      "positionCoveragePct": 56,
+      "candidatesIngested": 87,
+      "exportIngestionMatches": 88,
+      "exportCoveragePct": 24,
+      "apiPreviewCount": 0,
+      "apiFastCount": 0,
+      "p170StoreHits": 88,
+      "p157CohortSize": 62,
+      "p171Tracked": 0,
+      "cycleComplete": false,
+      "newestJuly9InIngestion": 1,
+      "newestJuly8InIngestion": 4,
+      "newestJuly7InIngestion": 6
+    },
+    {
+      "at": "2026-07-09T14:44:04.778Z",
+      "invocation": 2,
+      "positionsScanned": 196,
+      "positionsTotal": 206,
+      "positionCoveragePct": 95,
+      "candidatesIngested": 155,
+      "exportIngestionMatches": 155,
+      "exportCoveragePct": 42,
+      "apiPreviewCount": 0,
+      "apiFastCount": 0,
+      "p170StoreHits": 155,
+      "p157CohortSize": 107,
+      "p171Tracked": 0,
+      "cycleComplete": false,
+      "newestJuly9InIngestion": 2,
+      "newestJuly8InIngestion": 7,
+      "newestJuly7InIngestion": 10
+    },
+    {
+      "at": "2026-07-09T14:46:07.792Z",
+      "invocation": 3,
+      "positionsScanned": 206,
+      "positionsTotal": 206,
+      "positionCoveragePct": 100,
+      "candidatesIngested": 162,
+      "exportIngestionMatches": 161,
+      "exportCoveragePct": 44,
+      "apiPreviewCount": 2,
+      "apiFastCount": 21,
+      "p170StoreHits": 161,
+      "p157CohortSize": 110,
+      "p171Tracked": 0,
+      "cycleComplete": true,
+      "newestJuly9InIngestion": 3,
+      "newestJuly8InIngestion": 7,
+      "newestJuly7InIngestion": 10
+    }
+  ],
+  "invocationSummaries": [
+    {
+      "invocation": 1,
+      "elapsedMs": 124095,
+      "ok": true,
+      "error": null,
+      "chunksProcessed": 4,
+      "positionsScannedThisRun": 81,
+      "newCandidates": 81,
+      "totalCandidates": 87,
+      "scannedPositions": 115,
+      "positionCoveragePct": 56,
+      "cycleComplete": false,
+      "snapshot": {
+        "at": "2026-07-09T14:42:01.823Z",
+        "invocation": 1,
+        "positionsScanned": 115,
+        "positionsTotal": 206,
+        "positionCoveragePct": 56,
+        "candidatesIngested": 87,
+        "exportIngestionMatches": 88,
+        "exportCoveragePct": 24,
+        "apiPreviewCount": 0,
+        "apiFastCount": 0,
+        "p170StoreHits": 88,
+        "p157CohortSize": 62,
+        "p171Tracked": 0,
+        "cycleComplete": false,
+        "newestJuly9InIngestion": 1,
+        "newestJuly8InIngestion": 4,
+        "newestJuly7InIngestion": 6
+      }
+    },
+    {
+      "invocation": 2,
+      "elapsedMs": 122955,
+      "ok": true,
+      "error": null,
+      "chunksProcessed": 4,
+      "positionsScannedThisRun": 81,
+      "newCandidates": 68,
+      "totalCandidates": 155,
+      "scannedPositions": 196,
+      "positionCoveragePct": 95,
+      "cycleComplete": false,
+      "snapshot": {
+        "at": "2026-07-09T14:44:04.778Z",
+        "invocation": 2,
+        "positionsScanned": 196,
+        "positionsTotal": 206,
+        "positionCoveragePct": 95,
+        "candidatesIngested": 155,
+        "exportIngestionMatches": 155,
+        "exportCoveragePct": 42,
+        "apiPreviewCount": 0,
+        "apiFastCount": 0,
+        "p170StoreHits": 155,
+        "p157CohortSize": 107,
+        "p171Tracked": 0,
+        "cycleComplete": false,
+        "newestJuly9InIngestion": 2,
+        "newestJuly8InIngestion": 7,
+        "newestJuly7InIngestion": 10
+      }
+    },
+    {
+      "invocation": 3,
+      "elapsedMs": 123014,
+      "ok": true,
+      "error": null,
+      "chunksProcessed": 1,
+      "positionsScannedThisRun": 10,
+      "newCandidates": 7,
+      "totalCandidates": 162,
+      "scannedPositions": 206,
+      "positionCoveragePct": 100,
+      "cycleComplete": true,
+      "snapshot": {
+        "at": "2026-07-09T14:46:07.792Z",
+        "invocation": 3,
+        "positionsScanned": 206,
+        "positionsTotal": 206,
+        "positionCoveragePct": 100,
+        "candidatesIngested": 162,
+        "exportIngestionMatches": 161,
+        "exportCoveragePct": 44,
+        "apiPreviewCount": 2,
+        "apiFastCount": 21,
+        "p170StoreHits": 161,
+        "p157CohortSize": 110,
+        "p171Tracked": 0,
+        "cycleComplete": true,
+        "newestJuly9InIngestion": 3,
+        "newestJuly8InIngestion": 7,
+        "newestJuly7InIngestion": 10
+      }
+    }
+  ],
+  "chunkRecords": [
+    {
+      "chunkNumber": 1,
+      "positionsQueued": 25,
+      "positionsScanned": 25,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 24,
+      "candidatesNew": 24,
+      "elapsedMs": 3657,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "c29463ebed27",
+        "82ab21df2d22",
+        "c65bbe651f0c",
+        "fdb39f9158fa",
+        "e51fce4e6811",
+        "d3b2353e509a",
+        "aee6bedad16b",
+        "c906e3abe85c",
+        "e0065232eeff",
+        "f7c834a75e50",
+        "f8f9afaa12b8",
+        "f292959788ed",
+        "e1102866fb72",
+        "4ced078b1d24",
+        "89f2de1d0ad1",
+        "c1b711cf8507",
+        "d4495f39d126",
+        "a5ff4db5697e",
+        "1b69b246215f",
+        "d8b2e0a30a04",
+        "a6f6cb5c9b81",
+        "ffb6ded24970",
+        "3701bf7d5bc8",
+        "f227d68de2c3",
+        "29a2a945bc8d"
+      ],
+      "invocation": 1
+    },
+    {
+      "chunkNumber": 2,
+      "positionsQueued": 25,
+      "positionsScanned": 25,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 37,
+      "candidatesNew": 37,
+      "elapsedMs": 57859,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "a5b9b69865b1",
+        "963907fdb482",
+        "cc187b603971",
+        "2516778d8637",
+        "4b2dc7e02dff",
+        "fb0b00a21510",
+        "4ba7a3520d5e",
+        "9039efa6a3f3",
+        "869bf920efce",
+        "c5f099f441fd",
+        "46396613f0cf",
+        "56a16d1fd9dd",
+        "204e04da061d",
+        "e797d1fdd2c3",
+        "cfbe9e8ef47f",
+        "692a90f9955d",
+        "93ebc05539b8",
+        "8b6c09cbe80d",
+        "93b3ab14d8fc",
+        "cfd52392ca92",
+        "bed0e3203b93",
+        "9890b9a243ad",
+        "a627022595e4",
+        "8561a483ff19",
+        "eca6605062b9"
+      ],
+      "invocation": 1
+    },
+    {
+      "chunkNumber": 3,
+      "positionsQueued": 25,
+      "positionsScanned": 25,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 15,
+      "candidatesNew": 15,
+      "elapsedMs": 3950,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "bd2d3f75244d",
+        "e54a8fb298a6",
+        "681380669f5c",
+        "30070462bb3d",
+        "d9d199503e62",
+        "379554e72ec5",
+        "71ebdb99604e",
+        "dcf114d05f31",
+        "072bebf529da",
+        "cc595e5dfd2a",
+        "ae64281bdec2",
+        "181080eac0a9",
+        "a812fd7d57e2",
+        "df50d2bc8947",
+        "a707da4f2564",
+        "d1df8fd0c0a2",
+        "9038b32ee8c1",
+        "a5ba02d775f3",
+        "5656670dad25",
+        "2032d66015ae",
+        "bcec23eed536",
+        "93fecad3c5b8",
+        "7ff59cd27a0b",
+        "e8795a1b1bdd",
+        "8be652ac8518"
+      ],
+      "invocation": 1
+    },
+    {
+      "chunkNumber": 4,
+      "positionsQueued": 25,
+      "positionsScanned": 6,
+      "positionsSkipped": 19,
+      "candidatesRetrieved": 5,
+      "candidatesNew": 5,
+      "elapsedMs": 55122,
+      "truncated": true,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [
+        "Scan stopped early (published) — server runtime budget."
+      ],
+      "positionIdsScanned": [
+        "a4eadf456192",
+        "e65c176ca290",
+        "af4dd339e1fc",
+        "a60b1bfb8129",
+        "6bc178fb4d8f",
+        "31a322f742d3"
+      ],
+      "invocation": 1
+    },
+    {
+      "chunkNumber": 1,
+      "positionsQueued": 25,
+      "positionsScanned": 25,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 20,
+      "candidatesNew": 20,
+      "elapsedMs": 3600,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "4efbbb221b0e",
+        "222e783c1048",
+        "19e3bf80f151",
+        "a8dab0732414",
+        "d3b1d2cf8208",
+        "05174dfb6692",
+        "db1816430ada",
+        "4407080cb44b",
+        "115ca4ab9312",
+        "8d5267e02215",
+        "3617a09d324d",
+        "481847ba267f",
+        "d70a5f6fcfb7",
+        "04f1aee878d5",
+        "d18754f8a1f7",
+        "49496f6a107f",
+        "abc921869ce7",
+        "07c1de432ea6",
+        "4f621592e4c9",
+        "f5af187585f0",
+        "f76197ce26b4",
+        "a67731517733",
+        "2139fe09c0ce",
+        "f21ba470af11",
+        "518105b9e712"
+      ],
+      "invocation": 2
+    },
+    {
+      "chunkNumber": 2,
+      "positionsQueued": 25,
+      "positionsScanned": 25,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 20,
+      "candidatesNew": 20,
+      "elapsedMs": 57879,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "18b99db53d1a",
+        "48b0b66c49b9",
+        "3f1cc8bca5f3",
+        "e953956bcaec",
+        "469a45d48ae6",
+        "aea50fa8c479",
+        "d8acecdbcabd",
+        "997a2b9e3f29",
+        "2f8789050afa",
+        "36c545d59245",
+        "31688cdda5af",
+        "2cb3a7854dac",
+        "29beffb51e4a",
+        "e57fe4d0572e",
+        "66f67280076a",
+        "a9121b3908b5",
+        "18df031e9d6c",
+        "d794ac5e3b20",
+        "a5a3a72649a4",
+        "e304095b7862",
+        "f565c7bcbdba",
+        "ceaad7b61c0b",
+        "d018d8f8c441",
+        "0b62a74c4df7",
+        "bc706f5945b9"
+      ],
+      "invocation": 2
+    },
+    {
+      "chunkNumber": 3,
+      "positionsQueued": 25,
+      "positionsScanned": 25,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 20,
+      "candidatesNew": 20,
+      "elapsedMs": 4250,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "8003ef8e5eae",
+        "f2bf0e4e7864",
+        "0ea1bd20c9a9",
+        "5dc5e3a43213",
+        "5f11dfb289cb",
+        "afb2b8b84a05",
+        "38a1cb745690",
+        "10f8302ce400",
+        "23517874e24a",
+        "8161fb2a4f20",
+        "7136488b7cc2",
+        "0e826b4a99cb",
+        "ec37d95e5b07",
+        "bfdd78df9146",
+        "f2deee7b0751",
+        "7293eda98b96",
+        "6e191516f911",
+        "678e5fc6e2ac",
+        "7f1a7f37a8ba",
+        "17bf9398b4e2",
+        "74109bd5b7ff",
+        "cade6e565bee",
+        "4f131d388260",
+        "b9f0403e5b70",
+        "85281c46b0a8"
+      ],
+      "invocation": 2
+    },
+    {
+      "chunkNumber": 4,
+      "positionsQueued": 16,
+      "positionsScanned": 6,
+      "positionsSkipped": 10,
+      "candidatesRetrieved": 8,
+      "candidatesNew": 8,
+      "elapsedMs": 54804,
+      "truncated": true,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [
+        "Scan stopped early (published) — server runtime budget."
+      ],
+      "positionIdsScanned": [
+        "5e5f35569ef7",
+        "a3e519ad3c77",
+        "0158f8551074",
+        "c98854000ff2",
+        "85d0d93da291",
+        "358534f26c71"
+      ],
+      "invocation": 2
+    },
+    {
+      "chunkNumber": 1,
+      "positionsQueued": 10,
+      "positionsScanned": 10,
+      "positionsSkipped": 0,
+      "candidatesRetrieved": 7,
+      "candidatesNew": 7,
+      "elapsedMs": 1436,
+      "truncated": false,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionPaginationIncomplete": 0,
+      "sanitizeRejected": 0,
+      "warnings": [],
+      "positionIdsScanned": [
+        "92b8b89066b4",
+        "36282272ec0e",
+        "4f747df373b2",
+        "32d61c2a0c06",
+        "70572d29fb90",
+        "b3e344b86575",
+        "5bf168a3cd7b",
+        "80d6b43f5fa8",
+        "6fe92578bc8d",
+        "8c6b1a725136"
+      ],
+      "invocation": 3
+    }
+  ],
+  "missingExportSample": [
+    {
+      "name": "Jess Bartley",
+      "email": "jbartley09@hotmail.com",
+      "appliedAt": "2026-06-30T14:06:43.000Z",
+      "position": "Merchandiser - Experienced"
+    },
+    {
+      "name": "Kerri Haynes",
+      "email": "kerrihaynes2008@gmail.com",
+      "appliedAt": "2026-06-29T18:06:16.000Z",
+      "position": "Merchandiser- Experienced- Perris, CA"
+    },
+    {
+      "name": "Rebbie Williford",
+      "email": "willifordrebbie567@gmail.com",
+      "appliedAt": "2026-06-29T03:07:07.000Z",
+      "position": "Retail Service Representative ‚Äì Athens Store Network"
+    },
+    {
+      "name": "MARK WALKER",
+      "email": "walker6851@gmail.com",
+      "appliedAt": "2026-06-29T01:07:28.000Z",
+      "position": "Retail Field Representative ‚Äì Merchandising & Audits in LaGrange, GA"
+    },
+    {
+      "name": "Da'mon Sims",
+      "email": "damesims2025@gmail.com",
+      "appliedAt": "2026-06-29T00:06:14.000Z",
+      "position": "Continuity Merchandiser"
+    },
+    {
+      "name": "Ashley Cook",
+      "email": "cookashley2024@gmail.com",
+      "appliedAt": "2026-06-28T22:07:27.000Z",
+      "position": "Retail Project Merchandiser ‚Äì Treasure Coast Region"
+    },
+    {
+      "name": "Jim Leppo",
+      "email": "jimleppo@yahoo.com",
+      "appliedAt": "2026-06-28T13:07:36.000Z",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)"
+    },
+    {
+      "name": "Brittaney Henderson",
+      "email": "henderson.brittaney003@gmail.com",
+      "appliedAt": "2026-06-28T00:07:32.000Z",
+      "position": "Continuity Merchandiser  SF , Wynne, AR"
+    },
+    {
+      "name": "Kenya Moses",
+      "email": "kenyamoses0@gmail.com",
+      "appliedAt": "2026-06-28T00:07:15.000Z",
+      "position": "Continuity Merchandiser  SF , Caruthersville, MO"
+    },
+    {
+      "name": "Rodric Friendly",
+      "email": "friendlyrodric@gmail.com",
+      "appliedAt": "2026-06-27T19:06:35.000Z",
+      "position": "Retail Merchandiser ‚Äî Atlanta, GA"
+    },
+    {
+      "name": "Damon Sims",
+      "email": "simslogin12@gmail.com",
+      "appliedAt": "2026-06-27T19:06:27.000Z",
+      "position": "Continuity Merchandiser"
+    },
+    {
+      "name": "Nasean Wright",
+      "email": "naseanwright0103@yahoo.com",
+      "appliedAt": "2026-06-27T16:06:30.000Z",
+      "position": "Continuity Merchandiser  SF , Georgetown, KY"
+    },
+    {
+      "name": "Kayla Corkindale",
+      "email": "krmuller1997@gmail.com",
+      "appliedAt": "2026-06-27T13:07:35.000Z",
+      "position": "Merchandiser - Experienced"
+    },
+    {
+      "name": "Rashekee Grimes",
+      "email": "dabigrg@hotmail.com",
+      "appliedAt": "2026-06-26T23:07:01.000Z",
+      "position": "Continuity Merchandiser Barnwell, SC"
+    },
+    {
+      "name": "Rashekee Grimes",
+      "email": "dabigrg@hotmail.com",
+      "appliedAt": "2026-06-26T23:06:19.000Z",
+      "position": "Continuity Merchandiser  SF , Barnwell, SC"
+    },
+    {
+      "name": "Tiffany Royal",
+      "email": "tiffroyal2011@gmail.com",
+      "appliedAt": "2026-06-26T20:06:23.000Z",
+      "position": "Retail Service Representative ‚Äì Athens Store Network"
+    },
+    {
+      "name": "Edward Rak",
+      "email": "erak57@gmail.com",
+      "appliedAt": "2026-06-26T13:06:37.000Z",
+      "position": "Retail Reset Specialist ‚Äì Flexible Merchandising Work in Bethlehem, PA"
+    },
+    {
+      "name": "Travonta Freeman",
+      "email": "travontafreeman96@outlook.com",
+      "appliedAt": "2026-06-26T12:07:17.000Z",
+      "position": "Retail Merchandiser ‚Äî Houston, TX"
+    },
+    {
+      "name": "Erin Henry",
+      "email": "erinohenry@gmail.com",
+      "appliedAt": "2026-06-25T21:07:36.000Z",
+      "position": "Merchandiser - Experienced"
+    },
+    {
+      "name": "Payton Terry",
+      "email": "paytonterry5@gmail.com",
+      "appliedAt": "2026-06-25T16:07:34.000Z",
+      "position": "Continuity Merchandiser  SF , Dawsonville, GA"
+    },
+    {
+      "name": "Dezire Nelson",
+      "email": "nelsondezire83@gmail.com",
+      "appliedAt": "2026-06-25T12:06:11.000Z",
+      "position": "Store Merchandising Associate ‚Äî Dorchester, MA"
+    },
+    {
+      "name": "Ricarunia Harris",
+      "email": "ricarunia03@icloud.com",
+      "appliedAt": "2026-06-25T03:07:26.000Z",
+      "position": "Continuity Merchandiser  SF , Pine Bluff, AR"
+    },
+    {
+      "name": "Elizabeth Torrence",
+      "email": "bethtorrence27@hotmail.com",
+      "appliedAt": "2026-06-25T01:06:52.000Z",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)"
+    },
+    {
+      "name": "Katherine Duke",
+      "email": "dukekt928@yahoo.com",
+      "appliedAt": "2026-06-24T18:06:01.000Z",
+      "position": "Continuity Merchandiser  SF , Lake Havasu City, AZ"
+    },
+    {
+      "name": "Steven Robbins",
+      "email": "kingcolerobbins@gmail.com",
+      "appliedAt": "2026-06-24T17:06:59.000Z",
+      "position": "Retail Merchandiser McKinney, TX"
+    },
+    {
+      "name": "Aidan Collins",
+      "email": "collinsaidan545@gmail.com",
+      "appliedAt": "2026-06-24T13:07:37.000Z",
+      "position": "Retail Merchandiser ‚Äì Southwest Indiana Territory"
+    },
+    {
+      "name": "John Deandrade",
+      "email": "jdgator1953@gmail.com",
+      "appliedAt": "2026-06-24T13:07:16.000Z",
+      "position": "Continuity Merchandiser"
+    },
+    {
+      "name": "Karissa McIntire",
+      "email": "mcintirebasketballrhs@gmail.com",
+      "appliedAt": "2026-06-24T12:07:25.000Z",
+      "position": "Retail Merchandiser ‚Äì Southwest Indiana Territory"
+    },
+    {
+      "name": "Jason",
+      "email": "jastoc03@gmail.com",
+      "appliedAt": "2026-06-24T00:06:34.000Z",
+      "position": "Retail Merchandiser ‚Äî The Woodlands, TX"
+    },
+    {
+      "name": "Tomara Orr",
+      "email": "tmerielle@gmail.com",
+      "appliedAt": "2026-06-23T23:06:42.000Z",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)"
+    },
+    {
+      "name": "Rhonda K. Jarrett",
+      "email": "rjarrett410@gmail.com",
+      "appliedAt": "2026-06-23T19:06:05.000Z",
+      "position": "Merchandiser - Experienced"
+    },
+    {
+      "name": "Chasity Abad",
+      "email": "chasnrulo@gmail.com",
+      "appliedAt": "2026-06-23T07:06:21.000Z",
+      "position": "Continuity Merchandiser Newport, AR"
+    },
+    {
+      "name": "Mary Matchella Washington",
+      "email": "mswashington_1982@hotmail.com",
+      "appliedAt": "2026-06-23T01:07:15.000Z",
+      "position": "Store Merchandiser ‚Äì Destin, FL"
+    },
+    {
+      "name": "Teresa Terres",
+      "email": "tck121960@gmail.com",
+      "appliedAt": "2026-06-23T01:06:51.000Z",
+      "position": "Retail Merchandiser needed- Sequim, WA"
+    },
+    {
+      "name": "Melissa Bunting",
+      "email": "gericke35@gmail.com",
+      "appliedAt": "2026-06-23T01:06:01.000Z",
+      "position": "Merchandiser - Experienced"
+    },
+    {
+      "name": "Taryn Richardson",
+      "email": "tarynrichardson816@gmail.com",
+      "appliedAt": "2026-06-23T00:06:39.000Z",
+      "position": "Continuity Store Merchandiser ‚Äì Payson, AZ"
+    },
+    {
+      "name": "Brooke Clausen",
+      "email": "brookejones2430@gmail.com",
+      "appliedAt": "2026-06-22T20:07:38.000Z",
+      "position": "Continuity Merchandiser  SF , Newport AR"
+    },
+    {
+      "name": "Alexandria Emory",
+      "email": "alexemory3@gmail.com",
+      "appliedAt": "2026-06-22T20:06:42.000Z",
+      "position": "Continuity Merchandiser Richmond, KY"
+    },
+    {
+      "name": "joshua nicholas",
+      "email": "jnicks1985@atomicmail.io",
+      "appliedAt": "2026-06-22T18:06:57.000Z",
+      "position": "Continuity Merchandiser  SF , Owensboro, KY"
+    },
+    {
+      "name": "Darian Taylor Jr.",
+      "email": "flaminghotcheetos6599@gmail.com",
+      "appliedAt": "2026-06-22T03:07:15.000Z",
+      "position": "Continuity Merchandiser  SF , Hermitage, PA"
+    },
+    {
+      "name": "Darian Taylor Jr.",
+      "email": "flaminghotcheetos6599@gmail.com",
+      "appliedAt": "2026-06-22T03:06:20.000Z",
+      "position": "FIELD MERCHANDISER"
+    },
+    {
+      "name": "Airica Skinner",
+      "email": "airica1260@yahoo.com",
+      "appliedAt": "2026-06-22T02:06:58.000Z",
+      "position": "Retail Merchandiser ‚Äì West Richfield, OH"
+    },
+    {
+      "name": "Deborah Martin",
+      "email": "deborahamay76@gmail.com",
+      "appliedAt": "2026-06-21T23:06:49.000Z",
+      "position": "Continuity Merchandiser  SF , Owensboro, KY"
+    },
+    {
+      "name": "Connie Cheryl Munn",
+      "email": "cmunn28@yahoo.com",
+      "appliedAt": "2026-06-21T12:06:30.000Z",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)"
+    },
+    {
+      "name": "John Sykes",
+      "email": "johnsykes1225@gmail.com",
+      "appliedAt": "2026-06-21T08:06:34.000Z",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)"
+    },
+    {
+      "name": "Kimberly Applegarth",
+      "email": "applegarthkimberly41@gmail.com",
+      "appliedAt": "2026-06-21T05:06:20.000Z",
+      "position": "Continuity Merchandiser  SF , Osceola AR"
+    },
+    {
+      "name": "Nathan Ullrich",
+      "email": "nathaneullrich@gmail.com",
+      "appliedAt": "2026-06-21T04:06:57.000Z",
+      "position": "Experienced Retail Merchandiser (Flexible, Part-Time)"
+    },
+    {
+      "name": "Sara Walker",
+      "email": "saramarie2916@yahoo.com",
+      "appliedAt": "2026-06-21T03:06:34.000Z",
+      "position": "Retail Merchandiser ‚Äî Pasadena, TX"
+    },
+    {
+      "name": "Marshall Woods",
+      "email": "marshallbw19701@outlook.com",
+      "appliedAt": "2026-06-21T01:07:18.000Z",
+      "position": "Continuity Store Merchandiser ‚Äì Payson, AZ"
+    },
+    {
+      "name": "Tariah Hardy",
+      "email": "tariah.monea@icloud.com",
+      "appliedAt": "2026-06-20T18:07:29.000Z",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)"
+    }
+  ],
+  "stallAnalysis": {
+    "primaryBottleneck": "breezy_api_returns_fewer_candidates_than_export_per_position",
+    "totalFetchFailed": 0,
+    "totalTimeouts": 0,
+    "totalTruncated": 2,
+    "totalPaginationIncomplete": 0,
+    "totalSanitizeRejected": 0,
+    "avgCandidatesPerChunk": 17.333333333333332,
+    "avgPositionsPerChunk": 19.11111111111111,
+    "evidence": [
+      "Stop reason: all_positions_scanned_no_new_candidates_two_passes",
+      "Final position coverage: 100%",
+      "Final export ingestion match: 44% (161/367 rows, 156/354 unique emails)",
+      "Initial sync chunks: 9; two follow-up full re-scan passes: 0 new candidates",
+      "Total position fetch failures: 0",
+      "Total position timeouts: 0",
+      "Total pagination incomplete: 0",
+      "Truncated chunks (runtime budget): 2",
+      "Export position Applied column sum: 152 vs 162 ingested (API-aligned)",
+      "Export Applicants sheet: 367 rows / 354 unique emails vs 162 ingested"
+    ]
+  },
+  "rescanValidation": {
+    "passes": 2,
+    "deltaIngested": 0,
+    "deltaExportMatches": 0,
+    "stalled": true,
+    "pass1NewCandidates": 0,
+    "pass2NewCandidates": 0,
+    "note": "After cycleComplete reset, two full 206-position re-scans retrieved existing candidates only (0 merges)."
+  },
+  "exportParityAnalysis": {
+    "exportApplicantRows": 367,
+    "exportUniqueEmails": 354,
+    "exportDuplicateEmailRows": 13,
+    "ingestedCandidates": 162,
+    "exportRowMatches": 161,
+    "uniqueEmailMatches": 156,
+    "positionsSheetAppliedSum": 152,
+    "liveApiPreviewCount": 3,
+    "liveApiFastCount": 23
+  },
+  "conclusion": "Synchronization engine completes 100% position coverage and ingests all candidates returned by the Breezy per-position API (~162). It cannot reach export parity (367/354 unique) without architectural changes: the Excel export contains ~198 unique candidates not returned by the live API after exhaustive per-position scanning. Measured defects ruled out: timeouts (0), fetch failures (0), pagination gaps (0), sanitize rejection (0), checkpoint corruption, and post-cycle stall (0 new after 2 full passes)."
+}

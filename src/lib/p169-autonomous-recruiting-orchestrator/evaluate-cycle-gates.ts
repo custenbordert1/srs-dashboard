@@ -1,12 +1,13 @@
 import { buildP168ExecutiveApprovalReport } from "@/lib/p168-executive-approval/approval-engine";
-import { evaluateRunNextBatchGates } from "@/lib/p168-executive-approval/build-approval-recommendation";
 import { buildP167ProductionSchedulerReport } from "@/lib/p167-intelligent-production-scheduler";
 import { gatherP167SchedulerContext } from "@/lib/p167-intelligent-production-scheduler/gather-scheduler-context";
+import { evaluateSendCycleGatesFromContext } from "@/lib/p179-operator-controlled-send-gate-profile/evaluate-send-cycle-gates";
 import type { P169OrchestratorConfig } from "@/lib/p169-autonomous-recruiting-orchestrator/types";
 
 export type P169CycleGateEvaluation = {
   pass: boolean;
   blockingFactors: string[];
+  warnings: string[];
   schedulerRecommendation: string;
   approvalAction: string;
   readinessScore: number | null;
@@ -14,8 +15,12 @@ export type P169CycleGateEvaluation = {
   runnerStatus: string;
   dropboxWithinBudget: boolean;
   healthScore: number;
+  gateProfile: "autonomous";
 };
 
+/**
+ * P169/P171 autonomous cycles always use the strict autonomous gate profile.
+ */
 export async function evaluateP169CycleGates(
   config: P169OrchestratorConfig,
 ): Promise<P169CycleGateEvaluation> {
@@ -25,46 +30,25 @@ export async function evaluateP169CycleGates(
     buildP168ExecutiveApprovalReport(),
   ]);
 
-  const gates = evaluateRunNextBatchGates(ctx);
-  const blockingFactors = [...gates.blockingFactors];
-
-  if (ctx.readinessScore != null && ctx.readinessScore <= config.readinessThreshold) {
-    if (!blockingFactors.some((f) => f.includes("readiness"))) {
-      blockingFactors.push(
-        `Production readiness ${ctx.readinessScore} below P169 threshold ${config.readinessThreshold}`,
-      );
-    }
-  }
-
-  if (approval.recommendation.action !== "RUN_NEXT_BATCH") {
-    blockingFactors.push(`Executive approval recommendation is ${approval.recommendation.action}`);
-  }
-
-  const schedulerReady = scheduler.decision.recommendation === "READY_NOW";
-  if (!schedulerReady) {
-    blockingFactors.push(`Scheduler recommends ${scheduler.decision.recommendation}`);
-  }
-
-  const readinessScore =
-    ctx.readinessScore ?? scheduler.context.productionReadinessScore ?? null;
-  const dropboxWithinBudget = approval.recommendation.expectedDropboxApiRequests <= 35;
-
-  let healthScore = 100;
-  if (!ctx.health.healthy) healthScore -= 25;
-  if (!dropboxWithinBudget) healthScore -= 15;
-  if (readinessScore != null && readinessScore <= config.readinessThreshold) healthScore -= 20;
-  if (blockingFactors.length > 0) healthScore -= Math.min(30, blockingFactors.length * 5);
-  healthScore = Math.max(0, Math.min(100, healthScore));
+  const gates = evaluateSendCycleGatesFromContext({
+    profile: "autonomous",
+    ctx,
+    scheduler,
+    approvalAction: approval.recommendation.action,
+    readinessThreshold: config.readinessThreshold,
+  });
 
   return {
-    pass: blockingFactors.length === 0,
-    blockingFactors,
-    schedulerRecommendation: scheduler.decision.recommendation,
-    approvalAction: approval.recommendation.action,
-    readinessScore,
-    runnerHealthy: ctx.health.healthy,
-    runnerStatus: ctx.runner.currentStatus,
-    dropboxWithinBudget,
-    healthScore,
+    pass: gates.pass,
+    blockingFactors: gates.blockingFactors,
+    warnings: gates.warnings,
+    schedulerRecommendation: gates.schedulerRecommendation,
+    approvalAction: gates.approvalAction,
+    readinessScore: gates.readinessScore,
+    runnerHealthy: gates.runnerHealthy,
+    runnerStatus: gates.runnerStatus,
+    dropboxWithinBudget: gates.dropboxWithinBudget,
+    healthScore: gates.healthScore,
+    gateProfile: "autonomous",
   };
 }

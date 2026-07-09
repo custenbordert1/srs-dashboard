@@ -23,6 +23,23 @@ export type CandidateIngestionStoreFile = {
   rescueRotationIndex?: number;
 };
 
+export type CandidateIngestionChunkRecord = {
+  chunkNumber: number;
+  positionsQueued: number;
+  positionsScanned: number;
+  positionsSkipped: number;
+  candidatesRetrieved: number;
+  candidatesNew: number;
+  elapsedMs: number;
+  truncated: boolean;
+  positionFetchFailed: number;
+  positionScanTimedOut: number;
+  positionPaginationIncomplete: number;
+  sanitizeRejected: number;
+  warnings: string[];
+  positionIdsScanned: string[];
+};
+
 export type CandidateIngestionSyncResult = {
   ok: boolean;
   error?: string;
@@ -42,6 +59,7 @@ export type CandidateIngestionSyncResult = {
   actionsGenerated: number;
   progressionsGenerated: number;
   captureHealth: ApplicantCaptureHealth;
+  chunkRecords?: CandidateIngestionChunkRecord[];
 };
 
 export type ApplicantCaptureHealth = {
