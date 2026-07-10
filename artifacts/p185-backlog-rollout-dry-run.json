@@ -1,0 +1,285 @@
+{
+  "phase": "P185",
+  "generatedAt": "2026-07-10T16:35:46.087Z",
+  "mode": "dry_run",
+  "liveSendingEnabled": false,
+  "backlog": {
+    "totalCandidatesEvaluated": 677,
+    "totalEligibleForPaperwork": 0,
+    "totalAlreadySent": 132,
+    "totalWithActiveEnvelopes": 132,
+    "totalRejected": 677,
+    "rejectionReasons": [
+      {
+        "reason": "Current status: Applied",
+        "count": 529
+      },
+      {
+        "reason": "Job not found.",
+        "count": 528
+      },
+      {
+        "reason": "Position is not accepting candidates.",
+        "count": 528
+      },
+      {
+        "reason": "Paperwork already pending or in flight.",
+        "count": 132
+      },
+      {
+        "reason": "Current status: Paperwork Sent",
+        "count": 115
+      },
+      {
+        "reason": "Packet already sent — awaiting signature.",
+        "count": 115
+      },
+      {
+        "reason": "Current status: Signed",
+        "count": 17
+      },
+      {
+        "reason": "Paperwork already completed.",
+        "count": 17
+      },
+      {
+        "reason": "Paperwork already signed.",
+        "count": 17
+      },
+      {
+        "reason": "Current status: Needs Review",
+        "count": 10
+      },
+      {
+        "reason": "Candidate appears archived/withdrawn.",
+        "count": 8
+      },
+      {
+        "reason": "Current status: Not Qualified",
+        "count": 6
+      },
+      {
+        "reason": "Candidate already hired.",
+        "count": 3
+      }
+    ],
+    "rejectionReasonDetails": [
+      {
+        "reason": "Current status: Applied",
+        "count": 529,
+        "sampleCandidateIds": [
+          "fc9fe75e5e36",
+          "fe26ac4bd3f7",
+          "2969a7a83a25",
+          "6a891047f999",
+          "bb5d94088f10"
+        ]
+      },
+      {
+        "reason": "Job not found.",
+        "count": 528,
+        "sampleCandidateIds": [
+          "ec0b5c34690e",
+          "3e1a34625fc3",
+          "c9f5bb769a06",
+          "4496378a887d",
+          "edc9df960855"
+        ]
+      },
+      {
+        "reason": "Position is not accepting candidates.",
+        "count": 528,
+        "sampleCandidateIds": [
+          "ec0b5c34690e",
+          "3e1a34625fc3",
+          "c9f5bb769a06",
+          "4496378a887d",
+          "edc9df960855"
+        ]
+      },
+      {
+        "reason": "Paperwork already pending or in flight.",
+        "count": 132,
+        "sampleCandidateIds": [
+          "21dc66d94d31",
+          "c3b611496cfd",
+          "5e64219daaf9",
+          "445225a971f7",
+          "84d51041e750"
+        ]
+      },
+      {
+        "reason": "Current status: Paperwork Sent",
+        "count": 115,
+        "sampleCandidateIds": [
+          "21dc66d94d31",
+          "c3b611496cfd",
+          "5e64219daaf9",
+          "445225a971f7",
+          "84d51041e750"
+        ]
+      },
+      {
+        "reason": "Packet already sent — awaiting signature.",
+        "count": 115,
+        "sampleCandidateIds": [
+          "21dc66d94d31",
+          "c3b611496cfd",
+          "5e64219daaf9",
+          "445225a971f7",
+          "84d51041e750"
+        ]
+      },
+      {
+        "reason": "Current status: Signed",
+        "count": 17,
+        "sampleCandidateIds": [
+          "705cdc0e7f30",
+          "a498d752b5bb",
+          "c0c920caa44f",
+          "ae4b6160f57c",
+          "87b2ad945d81"
+        ]
+      },
+      {
+        "reason": "Paperwork already completed.",
+        "count": 17,
+        "sampleCandidateIds": [
+          "705cdc0e7f30",
+          "a498d752b5bb",
+          "c0c920caa44f",
+          "ae4b6160f57c",
+          "87b2ad945d81"
+        ]
+      },
+      {
+        "reason": "Paperwork already signed.",
+        "count": 17,
+        "sampleCandidateIds": [
+          "705cdc0e7f30",
+          "a498d752b5bb",
+          "c0c920caa44f",
+          "ae4b6160f57c",
+          "87b2ad945d81"
+        ]
+      },
+      {
+        "reason": "Current status: Needs Review",
+        "count": 10,
+        "sampleCandidateIds": [
+          "e2399d01283c",
+          "69b657731d37",
+          "2ee57df05ade",
+          "f5de8a5e2e16",
+          "a0119c861d63"
+        ]
+      },
+      {
+        "reason": "Candidate appears archived/withdrawn.",
+        "count": 8,
+        "sampleCandidateIds": [
+          "aaa55717777d",
+          "368f371d5fb9",
+          "3d9b2654c350",
+          "acff2383c00f",
+          "8555b204c619"
+        ]
+      },
+      {
+        "reason": "Current status: Not Qualified",
+        "count": 6,
+        "sampleCandidateIds": [
+          "368f371d5fb9",
+          "3d9b2654c350",
+          "8555b204c619",
+          "5a67e3cb1612",
+          "4cf22b397e39"
+        ]
+      },
+      {
+        "reason": "Candidate already hired.",
+        "count": 3,
+        "sampleCandidateIds": [
+          "69b657731d37",
+          "b75cb02eba63",
+          "2ee57df05ade"
+        ]
+      }
+    ],
+    "currentQueueDepth": 0,
+    "estimatedMinutesToClearEligibleBacklog": 0,
+    "estimatedCyclesAt10PerCycle": 0,
+    "cadence": "every 10 minutes",
+    "maxSendsPerCycle": 10
+  },
+  "gates": {
+    "durableStorageHealthy": true,
+    "dropboxSignHealthy": true,
+    "breezySourceHealthy": true,
+    "schedulerAuthenticationConfigured": false,
+    "leaseAvailable": true,
+    "recentDryRunSuccessful": true,
+    "killSwitchInactive": true,
+    "circuitBreakerClosed": true
+  },
+  "blockers": [
+    "Scheduler authentication not configured (set CRON_SECRET or P185_CRON_SECRET)."
+  ],
+  "liveReadyForActivation": false,
+  "note": "One or more gates unhealthy — do not send. Fix blockers before live activation.",
+  "controlledRolloutConfig": {
+    "schedulerCadence": "*/10 * * * *",
+    "maxSendsPerCycle": 10,
+    "maxPerMinute": 4,
+    "maxPerHour": 40,
+    "maxPerDay": 200,
+    "concurrentSends": 2,
+    "maxFailuresPerCycle": 3,
+    "p184Enabled": false,
+    "p184Mode": "dry_run",
+    "p185ProductionAutomationEnabled": false
+  },
+  "environmentChangesRequiredBeforeLive": [
+    "Set CRON_SECRET (or P185_CRON_SECRET) in the deployment environment",
+    "Set P185_PRODUCTION_AUTOMATION_ENABLED=1",
+    "On serverless: set P185_DURABLE_DATA_DIR to a durable volume (not /tmp)",
+    "Enable P184 via update_config: enabled=true (keep mode=dry_run until final step)",
+    "Confirm another dry-run after enablement",
+    "Set P184 mode=live only after all gates green",
+    "Do not raise maxSendsPerCycle above 10 for initial rollout"
+  ],
+  "p184Cycle": {
+    "evaluated": 677,
+    "eligible": 0,
+    "sentSimulated": 0,
+    "failed": 0,
+    "skipped": 0,
+    "retriesScheduled": 0,
+    "durationMs": 1209,
+    "warnings": [
+      "Dry run mode — validations only; Dropbox Sign not called."
+    ]
+  },
+  "storage": {
+    "adapter": "local_filesystem",
+    "durable": true,
+    "healthy": true,
+    "detail": "Forced durable local filesystem adapter (test/dev).",
+    "dataDir": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data"
+  },
+  "breezy": {
+    "healthy": true,
+    "detail": "Fetched 263 published jobs.",
+    "publishedJobs": 263
+  },
+  "healthSummary": {
+    "runnerStatus": "idle",
+    "schedulerStatus": "misconfigured",
+    "liveEnablementBlockers": [
+      "P184 mode is not live.",
+      "P184 enabled is false.",
+      "Production paperwork automation environment flag disabled.",
+      "Scheduler authentication not configured."
+    ]
+  }
+}

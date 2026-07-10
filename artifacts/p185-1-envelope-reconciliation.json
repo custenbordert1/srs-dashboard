@@ -1,0 +1,1071 @@
+{
+  "generatedAt": "2026-07-10T16:46:02.094Z",
+  "summary": {
+    "attempted": 132,
+    "byLifecycle": {
+      "confirmed_sent": 59,
+      "signed": 25,
+      "viewed": 48
+    },
+    "replacementReview": 0,
+    "unresolved": 0
+  },
+  "rows": [
+    {
+      "candidateId": "21dc66d94d31",
+      "envelopeId": "5163def8ade0fc0bdab8945cb965f53251b96302",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "c3b611496cfd",
+      "envelopeId": "b47e50f955fd64730b118470c846c7e733ec70dc",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "5e64219daaf9",
+      "envelopeId": "96f942aa11b6cef1a7de75dbc2a066e214f05e3c",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "445225a971f7",
+      "envelopeId": "46a0d87a92fc3a49db86ec0afe4095023a6b03c4",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "84d51041e750",
+      "envelopeId": "90be7f1a4306985ff4c1f164d189836aa7987725",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "c70e4a31b050",
+      "envelopeId": "6bb351bf900ba396d07d12814ce63ace53526b3f",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "envelopeId": "9ca6e0bec9fb723e61505dd75efcbabff267eacd",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "92181f9de45c",
+      "envelopeId": "45bfe8666bc8a3509636f417638ef450126797c8",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "envelopeId": "dbbd0a70c4f40a5a8621761c74e8332ff153d94b",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "189e89cd8493",
+      "envelopeId": "73fe4efcebe157f4578b34bfe62f0e616347b41c",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "91faef15d8fd",
+      "envelopeId": "13c60bfe55c244ab6a8a17637be78ebfea6f1a8c",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "652bc90340b9",
+      "envelopeId": "adde89370054f67c94fb4167b546813121555719",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "c87b5e655cc6",
+      "envelopeId": "65caf73838626e601f33039cd26710ac77024581",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "aaa55717777d",
+      "envelopeId": "fc2ac195ab744ef4e7c3fdca9068f8bcb915547e",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "94f3eb998444",
+      "envelopeId": "74bb8e226ee0e22f88677f1931b570af0eb35438",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "4eb52a6c7495",
+      "envelopeId": "4a9558c59e8b4e54a98d55669b8fe814cd3e8ffe",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "e5124f6a674e",
+      "envelopeId": "40aac6329066436d6d07b2d49a0de387eaeee403",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "6b40ff3b280a",
+      "envelopeId": "622b85da214529c8338f6baf81428989fb9413e9",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "a498d752b5bb",
+      "envelopeId": "8351b57d40359982c77ce21f41734cffd5efc8fc",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "de52f7096d0f",
+      "envelopeId": "39c6fb68fa7987ce29c5dfb774b1e91ac2529858",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "db05da0112e4",
+      "envelopeId": "43bcce5a9088e9dc9cd014af640501b82c9bec3d",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "94b37988e89c",
+      "envelopeId": "65ccb3f482d86000052bc9d58d727382c30eea3d",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "598e1b950e29",
+      "envelopeId": "d0bf52038d5d2f455c218eb0fda00932c1a48a09",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "c0c920caa44f",
+      "envelopeId": "2b403b2ea18f0698b5ad1c4d4bdc51a3ca788c1c",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "773445c489a7",
+      "envelopeId": "f9180e35fbdc03c19522a7efee1e39068fe5bd52",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "cfcd1b8179ba",
+      "envelopeId": "a4ddf042161a6d5f564f588d06765cbb0d43f4fc",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "f71f2c217365",
+      "envelopeId": "9d1fc6b666d6204ee3fff9a951176c11ae01b2d2",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "4496378a887d",
+      "envelopeId": "2e9993f0aec7184ce68413cd635a4daadafa5db4",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "edc9df960855",
+      "envelopeId": "6eb988014c9d849c04b3dfcb61d94b0ab15eac56",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "9c8555abfbc7",
+      "envelopeId": "8cad97278e7cd4e699ec8c7f3d28c970755f2448",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "cfd03224d5c8",
+      "envelopeId": "1d36d1a82a05028c26b48146cd50724d9f699e61",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "envelopeId": "22bb39129aee3b3d5cb57abfdb0993913570791b",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "46551846149e",
+      "envelopeId": "0b4b645a015a73d3b6a37a78afd5b362985bf801",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "f8bc83d66e0d",
+      "envelopeId": "11e3a8e1da3255dede8a804c4e679aa3c05211cf",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "86a8d6804b6b",
+      "envelopeId": "a8b3281c9d1d6fdc23708fe2ee125b6130f788fe",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "b32054c06f54",
+      "envelopeId": "1de8a317e8bb1e21695883e60d4c934efaf3c494",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "e72d6aebdb0d",
+      "envelopeId": "4f4e0fc8cb7497d20760c1237b0e3f65947de17b",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "98400c5310f6",
+      "envelopeId": "b8271be51036aa0af2ad27f6ac569258aa93b5d3",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "1bd395fce633",
+      "envelopeId": "a9c4d56131264b8454d52a3ed3900af9109b536f",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "6a850de9dc05",
+      "envelopeId": "b55b84e7393f0a5533fa1d28d9ebb53d71d83bd5",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "71ceb040896c",
+      "envelopeId": "e140c961dd5978ecb6c2d61d24db3c169bf5c44b",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "6d548b240ab0",
+      "envelopeId": "1edd6efb32d151bd0a1a046a3bb9ec393529e512",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "b75cb02eba63",
+      "envelopeId": "6b73853bdf743736823a233e74195c2c18b0cf72",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "26bbea1bc09f",
+      "envelopeId": "d9d1b95ebccc7573c42d9dcb1b86969fe3b5efc9",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "acff2383c00f",
+      "envelopeId": "877a346dd1f1b04e2411c8d9e8348d81123a30c0",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "fe36c9f1249e",
+      "envelopeId": "5d2a7ce0997927047773190ea0271e23fe02186a",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "29d7115c30f8",
+      "envelopeId": "19355334bd29b6cb5cf537b960895a59a1c99ba9",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "ed828f614e1d",
+      "envelopeId": "3b193113cc740984cf6a139927c879c1a7a3fcf5",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "e2fd01fa07c4",
+      "envelopeId": "d5d6bdef0ca730e794efacaf0363e8feb330ab4d",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "88340ea1bf94",
+      "envelopeId": "b9d7160f1df48bfb91bf29b63a7c5c29d594ea33",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "27d9e13536b0",
+      "envelopeId": "67ea327d6be87b8f8873f2c3bc9344f6a92961a6",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "43b865d3468e",
+      "envelopeId": "2fdb9a7e1246801fbfc2002dfb7e3f001af48303",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "535782a23bda",
+      "envelopeId": "31317edbce6e3651d96c5bdd4e09b275610b754e",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "2419559af1ba",
+      "envelopeId": "4dfcf63a2a67a1a4028418bda72b35c61087b5e4",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "082c0eec6cff",
+      "envelopeId": "106a6bee472c4ce7481eaee96a2b6a03e5954e86",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "88bb0f06e75e",
+      "envelopeId": "5e7d13115f048879d0edd4e95a63da649bc6f774",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "1e0fbce8a310",
+      "envelopeId": "2f0aa933cca7d53321d9403480ca56cc2ea647ed",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "84ec8ad83176",
+      "envelopeId": "58387459360a5877eef0040c9b94c2917a747a01",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "cda9067dac4b",
+      "envelopeId": "df936db824ce18f56b172bb1e866a3b4d904d187",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "2929aebfd380",
+      "envelopeId": "4d353aae663ca50ed94538fea5971c55b572e41d",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "92a666327d98",
+      "envelopeId": "29d6eeb780d4aa8d07fd05195a51717a66e03073",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "80d87b758578",
+      "envelopeId": "12a603fb5f0013b203fd6bcad06affe5adadd869",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "5ad3fb6b872d",
+      "envelopeId": "2c825ca11a449a5b4ab238932301198ce90c0871",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "ae4b6160f57c",
+      "envelopeId": "1699fffc1f9f53226beed14cadb6a436e56f0353",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "8367f72dbcc7",
+      "envelopeId": "c50a0cebd323c095af2272ec51260ddae9e9f7dd",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "5eaf40cd58c1",
+      "envelopeId": "d504a1addf5937d832b398b04e720a1a5ef0fef3",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "6f8b074293e1",
+      "envelopeId": "1c9bd406248d03f06bc5bb64bceee1713ecb6f14",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "f1f4a5fe9f5c",
+      "envelopeId": "07a339200b57f8bc790700aadba2ee1cd4c8162b",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "82c9209fdaa1",
+      "envelopeId": "ef29ebeafb5cc70da8101cc9b4ded4f509a287b9",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "05a9c4c35ece",
+      "envelopeId": "d867c3802c5330a0aa896e2d144bb8adea10ba96",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "87b2ad945d81",
+      "envelopeId": "e5b3890be751cd7c945873e7f601b56c5a33dcce",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "1e4f1166d30f",
+      "envelopeId": "36cf533ce45f5795978ac83564b80b0dd0730074",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "54a9b92df06b",
+      "envelopeId": "ceb3f987661eae29f4ced4623c053b964ab357c3",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "37bb15307eac",
+      "envelopeId": "4b84f75986bb8dcfb8f5f8a8f8d3949d4899027a",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "5661993f5f9a",
+      "envelopeId": "f69edbdad6f605a9dd7152b6bc7bda95eff804fd",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "ec67391a2162",
+      "envelopeId": "5dcf9b52487771f4d92d09e7ecc829107f2acf65",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "9f8231817090",
+      "envelopeId": "0116fec632faa5386c18cddc39035437d7b10b71",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "a0e30984a18d",
+      "envelopeId": "4c00bf479b92b42d9aadcbcad89ea6c0bf1d8a55",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "80da14242a1c",
+      "envelopeId": "43a1c19ecb9e84db5a3aae8815d17eb0b1573984",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "2f5f144c00c8",
+      "envelopeId": "bc891faa523889357f947a6f3801a0844af53308",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "bbf8df76d8df",
+      "envelopeId": "c7b623c690f9259fcbcbb16aab7dc0ce8ac9c199",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "d64647ba8a8e",
+      "envelopeId": "ec83c98cfc1380a28d2679d59e9520b96cabdc6e",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "b21a84af7c29",
+      "envelopeId": "9f8863fd5fd2c585648e7764ee2df58da4b48c77",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "f6c222081b94",
+      "envelopeId": "e3732cce3ed6fcb9e2daa808ef56118a05a9c104",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "b9f4bb0667cd",
+      "envelopeId": "eb2df1721a7bdb8eb9e727fb685884090496fe26",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "3f1f0edcde0a",
+      "envelopeId": "cccfcbaaee9859897b949ef6d23b54aac5a1982e",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "d2ef0cef341f",
+      "envelopeId": "e0f01a160df0bc98ad8e2984f46e8dd64acd58c0",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "1373fc7562e8",
+      "envelopeId": "f1ccec2ee0eaed946aaa0309475eb9e67119627a",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "e86a51691d13",
+      "envelopeId": "36310d1bdf523dc4d869517c40e837ea8af33c8a",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "5c439012ded2",
+      "envelopeId": "d771eecb7b207e041eeb27c2929ee4a8f39f1574",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "d83f33df41bd",
+      "envelopeId": "156c76d67b6a975f6986b79cf6a02f0afad2755b",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "ab3633d2b89d",
+      "envelopeId": "ab92514af5469f3468ffd14101aedf16da83dd2e",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "18e50371df26",
+      "envelopeId": "c20b90b414bf9428743574d87bd18537d46069e2",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "1fd5e4b48b95",
+      "envelopeId": "83807da7f675ba1cb64e65dc9556cb19034b2880",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "54b56982f026",
+      "envelopeId": "a62126383f8c1ed733ae2d45bd2cf87164b17da1",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "53df904d8c18",
+      "envelopeId": "33adcd9cbcb5fc8e56aa2201b33182b367221ebd",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "0100790e8bc4",
+      "envelopeId": "35f1cb67b0a90eb77b5a24038cfca8ca43293bb9",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "ebccc8110843",
+      "envelopeId": "12e377def865f1b5234219c29877599dc1219205",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "41d728d745c2",
+      "envelopeId": "e5aeed645e29d3c93ca3d09cf31370434ef7eeef",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "85092c13a69d",
+      "envelopeId": "4f5898a0dce85e5898edeb6b118c8e8455ecffd5",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "2f83213d85e9",
+      "envelopeId": "8e4c9a859a73e3ebb7a3130353bc6b966438498a",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "b9c28c498c48",
+      "envelopeId": "79620ff5d1b07a3b6a4b0422b157185a59e47f13",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "d91e8871af03",
+      "envelopeId": "54414a58dd2f43df3463b7c6f45e5451e9083394",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "d564979d997d",
+      "envelopeId": "fddbadd98e059ca14ae13a3463dffb46740a00d7",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "9a6f590ead60",
+      "envelopeId": "efa8c7a534e61444626a5d930da2558570e7256e",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "2a08788045da",
+      "envelopeId": "6933c799ae39dcb4c203b8e435184916ac161908",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "e96bcadec889",
+      "envelopeId": "b80bf51a5b890c6fb57cb24799f4c7bf5265f4df",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "2dd943b6934c",
+      "envelopeId": "6c767fd67266470ea4c6417fd31d28348bd03092",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "a334176433f6",
+      "envelopeId": "f89d978e3d1622628d4048345949d942ab796002",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "c595e23aeb3e",
+      "envelopeId": "f3a6e5cce6ae5e3ae2c3fde5f116d5795a34e332",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "7830aa5b79b1",
+      "envelopeId": "67721e008bbb4e4739df5ce29f7215f11362c4ec",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "87ea6e6dca24",
+      "envelopeId": "6cb8cc83675d110a33a38415c09fb87c3d6bac97",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "d6cd926f864a",
+      "envelopeId": "7c6c5c834a819bd2675cef9ed20b93534658cdb3",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "fb3e7254d95a",
+      "envelopeId": "480aefacc9d8e01e37d4907131f038caaf80fabb",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "ef8311c74516",
+      "envelopeId": "7a6ada9f45f07e9b6ece73026de64bcfc1aa5e34",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "f786bc64011a",
+      "envelopeId": "29a7ef7ae9ce871e0fb191446a477279eeada50f",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "3e98b7afbc0a",
+      "envelopeId": "5a900cf1431acb09a0e32bf82ec8ffee867af5dc",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "e5139eb7ffd6",
+      "envelopeId": "3da15924d8ceb2b616d3278160a3489071ff8c06",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "147205637f24",
+      "envelopeId": "5f8f54daa6e1df06ae6a42b9c115e619ca178738",
+      "lifecycle": "signed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "3f83160751e7",
+      "envelopeId": "241d671fae95c46badba9e3c6b88389bb137b4f2",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "8916bcff36b4",
+      "envelopeId": "f81d0f08fa39507f942c007c60c9d79189033594",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "8feb7d623f55",
+      "envelopeId": "bdf8ee5d566960bc71c6c5b59fa8e3c13c7979b3",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "19f33a020c15",
+      "envelopeId": "11a81436e5cba464b2db949f0e8d91c8908114ec",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "5d4d951fcbc0",
+      "envelopeId": "dc8a33d04dccc6b9873b575828bb077d63491b03",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "a4792ee6051e",
+      "envelopeId": "9397bd3ed135ae2dc08ddc859d733859b8dda7d2",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "524e8ac69b59",
+      "envelopeId": "07f1e085566a52ac8cb402503269399374c6201a",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "276b822da485",
+      "envelopeId": "9e5f6851fd30607ceef9ea7702cdab830b34530f",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "13e8c31452b5",
+      "envelopeId": "f4c44fb159589885f147a3ac85eed0faa012fbf0",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "a173310d307e",
+      "envelopeId": "e92ae4aed832817e52cc9e71195172654b70b8f8",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "a02931877eec",
+      "envelopeId": "d43d1f39ff57a539d0594593a4b372d91bd7a048",
+      "lifecycle": "viewed",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "c5b23216837a",
+      "envelopeId": "d9bc15fed7f03583e5946aa4d79e1293909e01ee",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    },
+    {
+      "candidateId": "afa4123cd361",
+      "envelopeId": "18799c092cecb75edaa16cd0e9b62108d3791b43",
+      "lifecycle": "confirmed_sent",
+      "replacementEligible": false,
+      "replacementReason": null,
+      "error": null
+    }
+  ]
+}

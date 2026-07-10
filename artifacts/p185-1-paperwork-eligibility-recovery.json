@@ -1,0 +1,159 @@
+{
+  "phase": "P185.1",
+  "generatedAt": "2026-07-10T16:46:02.094Z",
+  "rootCause": [
+    "Most unmatched IDs are closed/historical Breezy positions not present in the published-only job map used by P184/P185.",
+    "P185 built jobsByPositionId from published jobs keyed only by jobId in some paths; closed ads and friendlyId aliases were not applied.",
+    "Zero candidates currently have workflowStatus Paperwork Needed — Applied is not positive hiring-selection evidence."
+  ],
+  "mappingCoverage": {
+    "beforeUnmatched": 528,
+    "afterUnresolved": 209,
+    "beforeMatched": 149,
+    "afterMatched": 468,
+    "coveragePctAfter": 69.1
+  },
+  "envelopeReconciliation": {
+    "attempted": 132,
+    "byLifecycle": {
+      "confirmed_sent": 59,
+      "signed": 25,
+      "viewed": 48
+    },
+    "replacementReview": 0,
+    "unresolved": 0
+  },
+  "classifications": {
+    "already_active_packet": 107,
+    "paperwork_completed": 25,
+    "eligible_new_packet": 0,
+    "eligible_replacement_packet": 0,
+    "awaiting_hiring_approval": 0,
+    "applied_not_selected": 330,
+    "unresolved_job": 209,
+    "ambiguous_candidate_state": 0,
+    "invalid_contact": 0,
+    "withdrawn_or_archived": 6,
+    "hired_no_action": 0,
+    "blocked_other": 0
+  },
+  "dryRun": {
+    "evaluated": 677,
+    "eligible": 0,
+    "rejected": 677,
+    "queueDepth": 0,
+    "estimatedClearanceMinutes": 0,
+    "projectedSendsPerHour": 0,
+    "projectedSendsPerDay": 0,
+    "rejectionReasons": [
+      {
+        "reason": "Current status: Applied",
+        "count": 529
+      },
+      {
+        "reason": "Position is not accepting candidates.",
+        "count": 528
+      },
+      {
+        "reason": "Job status: closed",
+        "count": 319
+      },
+      {
+        "reason": "Job not found.",
+        "count": 209
+      },
+      {
+        "reason": "Paperwork already pending or in flight.",
+        "count": 132
+      },
+      {
+        "reason": "Current status: Paperwork Sent",
+        "count": 115
+      },
+      {
+        "reason": "Packet already sent — awaiting signature.",
+        "count": 115
+      },
+      {
+        "reason": "Current status: Signed",
+        "count": 17
+      },
+      {
+        "reason": "Paperwork already completed.",
+        "count": 17
+      },
+      {
+        "reason": "Paperwork already signed.",
+        "count": 17
+      },
+      {
+        "reason": "Current status: Needs Review",
+        "count": 10
+      },
+      {
+        "reason": "Candidate appears archived/withdrawn.",
+        "count": 8
+      },
+      {
+        "reason": "Current status: Not Qualified",
+        "count": 6
+      },
+      {
+        "reason": "Candidate already hired.",
+        "count": 3
+      }
+    ]
+  },
+  "comparison": {
+    "beforeEligible": 0,
+    "afterEligible": 0,
+    "beforeUnmatchedJobs": 528,
+    "afterUnresolvedJobs": 209
+  },
+  "gates": {
+    "durableStorageHealthy": true,
+    "dropboxSignHealthy": true,
+    "breezySourceHealthy": true,
+    "schedulerAuthConfigured": false,
+    "recentDryRunSuccessful": true,
+    "killSwitchInactive": true,
+    "circuitBreakerClosed": true,
+    "p184Mode": "dry_run",
+    "p184Enabled": false,
+    "p185ProductionFlag": false,
+    "eligibleCohortCount": 0,
+    "unresolvedMappingCount": 209,
+    "envelopeReconcileUnresolved": 0,
+    "mappingCoveragePct": 69.1
+  },
+  "liveReady": false,
+  "liveBlockers": [
+    "CRON_SECRET / P185_CRON_SECRET not configured.",
+    "P185_PRODUCTION_AUTOMATION_ENABLED is not set (intentional for this phase).",
+    "P184 remains enabled=false / mode=dry_run (intentional — do not auto-enable)."
+  ],
+  "controlledLimits": {
+    "cadence": "*/10 * * * *",
+    "maxSendsPerCycle": 10,
+    "maxPerMinute": 4,
+    "maxPerHour": 40,
+    "maxPerDay": 200,
+    "concurrentSends": 2,
+    "maxFailuresPerCycle": 3
+  },
+  "activationSteps": [
+    "Operator-review cohort buckets A/B/C/D in local secured review file",
+    "Set CRON_SECRET or P185_CRON_SECRET in deployment (never commit)",
+    "Confirm durable storage (P185_DURABLE_DATA_DIR on serverless)",
+    "Confirm Dropbox Sign + templates",
+    "Advance/approve hiring for awaiting_hiring_approval candidates as needed",
+    "Re-run P185.1 dry-run until eligible cohort matches operator approval",
+    "Enable P184 enabled=true with mode=dry_run, then mode=live only after gates green",
+    "Set P185_PRODUCTION_AUTOMATION_ENABLED=1 only after operator sign-off"
+  ],
+  "warnings": [
+    "Live sending remains disabled.",
+    "Applied candidates were not auto-advanced to Paperwork Needed.",
+    "Envelope reconciliation completed against Dropbox Sign where reachable."
+  ]
+}

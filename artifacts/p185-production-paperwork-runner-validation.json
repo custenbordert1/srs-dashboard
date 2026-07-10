@@ -1,0 +1,93 @@
+{
+  "phase": "P185",
+  "generatedAt": "2026-07-10T16:30:00.000Z",
+  "storageAdapterSelected": "local_filesystem",
+  "storageDurabilityResult": "durable — Local filesystem adapter (development or company-hosted disk). Production serverless requires P185_DURABLE_DATA_DIR or /mnt volume; /tmp and in-memory fail closed for live.",
+  "schedulerConfiguration": {
+    "expression": "*/10 * * * *",
+    "intervalMs": 600000,
+    "maxSendsPerCycle": 10,
+    "path": "/api/cron/p185-paperwork-automation",
+    "vercelCron": true,
+    "companyServerExample": "*/10 * * * * curl -X POST -H \"Authorization: Bearer $CRON_SECRET\" https://host/api/cron/p185-paperwork-automation"
+  },
+  "authenticationResult": "Scheduler secret configured via CRON_SECRET or P185_CRON_SECRET (header Bearer / x-cron-secret). Query-string secrets rejected. Current local env may be unset — endpoint returns 503/401 until configured.",
+  "leaseConcurrencySimulation": "PASS — overlapping acquire blocked; expired lease takeover succeeds; two-instance test: held lease skips second runner; release then second runs.",
+  "candidateSourceMapping": [
+    {
+      "source": "Breezy/ingestion candidateId",
+      "target": "ScoredCandidateWorkflowRow.candidateId",
+      "fallback": "Skip candidate — missing id is not eligibility proof"
+    },
+    {
+      "source": "candidate.stage / workflowStatus",
+      "target": "row.stage / row.workflowStatus",
+      "fallback": "Treat as unknown stage; P184 gates decide eligibility"
+    },
+    {
+      "source": "candidate.email / onboardingContactEmail",
+      "target": "row.email",
+      "fallback": "Empty email fails P184 valid_email gate — never assume eligible"
+    },
+    {
+      "source": "archived / withdrawn flags on ingestion or workflow",
+      "target": "row notes + stage signals consumed by P184 not_archived",
+      "fallback": "Missing archive flag ≠ active; P184 requires positive clear signals"
+    },
+    {
+      "source": "candidate.positionId + Breezy published jobs",
+      "target": "row.positionId + jobsByPositionId",
+      "fallback": "Missing job → P184 job_active/position_accepting fail closed"
+    },
+    {
+      "source": "job open/closed (Breezy published list)",
+      "target": "BreezyJob in jobsByPositionId",
+      "fallback": "Unpublished/missing job is not treated as open"
+    },
+    {
+      "source": "P184 highDemandPositionIds / executivePriorityJobIds",
+      "target": "queue priority only (not eligibility)",
+      "fallback": "Default demand/priority scores when unset"
+    },
+    {
+      "source": "CandidateOnboardingRecord",
+      "target": "onboardingByCandidateId",
+      "fallback": "null onboarding → P184 evaluates as not yet sent"
+    },
+    {
+      "source": "onboarding.signatureRequestId / paperworkStatus",
+      "target": "Dropbox envelope + paperwork history for P184 gates",
+      "fallback": "Missing envelope ≠ safe to send; duplicate gates still apply"
+    },
+    {
+      "source": "updatedDate / stage change timestamps",
+      "target": "cursor watermark + updated-since filter",
+      "fallback": "Full reconciliation when cursor stale or cadence due"
+    }
+  ],
+  "dryRunCycleResults": {
+    "testsPassed": 17,
+    "dryRunCycle": "PASS — evaluates via P184, persists lastDryRunSuccessAt",
+    "liveGatedCycle": "PASS — live only when all gates pass; mocked Dropbox send recorded sent_unverified then confirmed",
+    "missingEmail": "PASS — zero sends when email missing"
+  },
+  "restartRecoveryResults": "PASS — stale send_requested with envelope recovered to sent_unverified then confirmed_sent; P184 queue/rate-limit timestamps reload from disk after memory reset.",
+  "reconciliationResults": "PASS — verification transitions sent_unverified → confirmed_sent; second pass does not re-verify confirmed; never resends on verify failure.",
+  "circuitBreakerResults": "PASS — operator open blocks cycles; kill switch and pause-until skip sends; failure threshold opens circuit.",
+  "duplicateSendSimulation": "PASS — P184 idempotency keys + completedIdempotencyKeys + P185 envelope/operation records; reconciliation never calls send.",
+  "timeoutBudgetSimulation": "PASS — deadline in the past skips before candidate load / P184 claim.",
+  "productionBlockers": [
+    "CRON_SECRET / P185_CRON_SECRET must be set in deployment",
+    "P185_PRODUCTION_AUTOMATION_ENABLED must be explicitly set to 1 for scheduled live",
+    "P184 config must be enabled with mode=live (not set by this change)",
+    "Durable storage required for live (P185_DURABLE_DATA_DIR or non-/tmp volume on serverless)",
+    "Dropbox Sign credentials required",
+    "Successful recent dry-run validation required before live",
+    "Live sending left disabled by default"
+  ],
+  "liveEnablementReadiness": false,
+  "warnings": [
+    "System left in scheduled dry-run / disabled mode — do not enable live without operator checklist.",
+    "Vercel Cron configured at */10 * * * * — runs authenticated endpoint only."
+  ]
+}

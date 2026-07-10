@@ -17,6 +17,7 @@ import { ControlledLiveSendPanel } from "@/components/executive/controlled-live-
 import { ControlledLivePaperworkPilotPanel } from "@/components/executive/controlled-live-paperwork-pilot-panel";
 import { AutonomousPaperworkOrchestratorOperationsPanel } from "@/components/executive/autonomous-paperwork-orchestrator-operations-panel";
 import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
+import { AutonomousPaperworkSendEnginePanel } from "@/components/executive/autonomous-paperwork-send-engine-panel";
 import { AutonomousRecoveryCenterPanel } from "@/components/executive/autonomous-recovery-center-panel";
 import { AutonomousPaperworkOperationsCenterPanel } from "@/components/executive/autonomous-paperwork-operations-center-panel";
 import { ProductionSchedulerPanel } from "@/components/executive/production-scheduler-panel";
@@ -515,6 +516,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AutomationPreviewQueuePanel />
 
       <ControlledPaperworkAutomationPanel />
+
+      <AutonomousPaperworkSendEnginePanel />
 
       <PaperworkApprovalQueuePanel />
 

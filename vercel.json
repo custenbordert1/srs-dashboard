@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/p185-paperwork-automation",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}
