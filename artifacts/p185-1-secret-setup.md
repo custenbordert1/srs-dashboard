@@ -13,6 +13,16 @@ Required for scheduled production (after operator approval):
 | DROPBOX_SIGN_API_KEY | Dropbox Sign API |
 | DROPBOX_SIGN_TEMPLATE_* | Required template IDs |
 
+## Vercel Cron note (Hobby vs Pro)
+
+Hobby accounts only allow **once-per-day** cron expressions. A `*/10 * * * *` entry in `vercel.json` fails deployment on Hobby.
+
+Until the project is on **Pro** (or an external/company cron invokes `/api/cron/p185-paperwork-automation` every 10 minutes), do **not** add a sub-daily Vercel cron. Use the authorized operator/API path or:
+
+```
+*/10 * * * * curl -X POST -H "Authorization: Bearer $CRON_SECRET" https://<host>/api/cron/p185-paperwork-automation
+```
+
 Local example (.env.local — gitignored):
 
 ```
