@@ -1,0 +1,481 @@
+{
+  "sourcePhase": "P182",
+  "generatedAt": "2026-07-09T18:38:44.840Z",
+  "preSend": {
+    "sendQueueProfile": "operator",
+    "scope": {
+      "cohort": "p178_ready",
+      "newestApplicants": 25
+    },
+    "scopedPoolCount": 20,
+    "eligibleCount": 20,
+    "remainingEligibleCount": 20,
+    "p178ReadyCount": 20,
+    "sendCap": 17,
+    "projectedDropboxApiCalls": 34,
+    "dropboxWithinBudget": true,
+    "continuousMode": false,
+    "daemonActive": false,
+    "runnerStatus": "stopped",
+    "lockHeld": false,
+    "gateProfile": "operator",
+    "operatorGatePass": true,
+    "operatorWarnings": [
+      "Production readiness score 70 is below 80",
+      "P154 controlled production autopilot env gate is not enabled",
+      "Scheduler recommends WAIT_10_MINUTES",
+      "Executive approval recommendation is WAIT"
+    ],
+    "operatorHardBlockers": [],
+    "selectedCandidates": [
+      {
+        "candidateId": "5e64219daaf9",
+        "name": "David Karp",
+        "email": "dmgkarp@gmail.com"
+      },
+      {
+        "candidateId": "86a8d6804b6b",
+        "name": "Gregory Petties",
+        "email": "shreddedsteel49@gmail.com"
+      },
+      {
+        "candidateId": "80d87b758578",
+        "name": "Liaunda Lang",
+        "email": "capri_lang@yahoo.com"
+      },
+      {
+        "candidateId": "cda9067dac4b",
+        "name": "Mista Clark",
+        "email": "mistac6@gmail.com"
+      },
+      {
+        "candidateId": "1bd395fce633",
+        "name": "Norah Jones",
+        "email": "norahjones2224@gmail.com"
+      },
+      {
+        "candidateId": "2419559af1ba",
+        "name": "Jasmine Barber",
+        "email": "jasmineshanae90@gmail.com"
+      },
+      {
+        "candidateId": "88bb0f06e75e",
+        "name": "Terry Bryant",
+        "email": "tjbryant2019@gmail.com"
+      },
+      {
+        "candidateId": "21dc66d94d31",
+        "name": "Patrick Berry",
+        "email": "bezothered@gmail.com"
+      },
+      {
+        "candidateId": "46551846149e",
+        "name": "Lindsey Aaron",
+        "email": "miayasmommy.la@gmail.com"
+      },
+      {
+        "candidateId": "445225a971f7",
+        "name": "Gianna DelGarbino",
+        "email": "giannadelgarbino@gmail.com"
+      },
+      {
+        "candidateId": "91faef15d8fd",
+        "name": "Nykol Tindle",
+        "email": "nykolcooper2@gmail.com"
+      },
+      {
+        "candidateId": "98400c5310f6",
+        "name": "Patricia Irby",
+        "email": "patricia.irby@aol.com"
+      },
+      {
+        "candidateId": "b32054c06f54",
+        "name": "Karen Burkes",
+        "email": "mrskarenburkes@gmail.com"
+      },
+      {
+        "candidateId": "6a850de9dc05",
+        "name": "Gabriella Gandy",
+        "email": "gabriellagandy9@gmail.com"
+      },
+      {
+        "candidateId": "6b40ff3b280a",
+        "name": "Monique Franklin",
+        "email": "franklinmonique392@gmail.com"
+      },
+      {
+        "candidateId": "082c0eec6cff",
+        "name": "Lovett Roberts",
+        "email": "teddylove092386@gmail.com"
+      },
+      {
+        "candidateId": "1e0fbce8a310",
+        "name": "Tasha Early",
+        "email": "etasha575@gmail.com"
+      }
+    ],
+    "patriciaIrby": {
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "inScopedPool": true,
+      "p152Eligible": true,
+      "paperworkStatus": "not_sent",
+      "remainingEligible": true,
+      "blockers": []
+    },
+    "blockers": [],
+    "scopedCandidateIds": [
+      "5e64219daaf9",
+      "86a8d6804b6b",
+      "80d87b758578",
+      "cda9067dac4b",
+      "1bd395fce633",
+      "2419559af1ba",
+      "88bb0f06e75e",
+      "21dc66d94d31",
+      "46551846149e",
+      "445225a971f7",
+      "91faef15d8fd",
+      "98400c5310f6",
+      "b32054c06f54",
+      "6a850de9dc05",
+      "6b40ff3b280a",
+      "082c0eec6cff",
+      "1e0fbce8a310",
+      "88340ea1bf94",
+      "71ceb040896c",
+      "27d9e13536b0"
+    ]
+  },
+  "postSend": {
+    "executed": true,
+    "ok": true,
+    "message": "Live cycle complete — sent 17 (cap 17).",
+    "sentCount": 17,
+    "skippedCount": 0,
+    "failedCount": 0,
+    "capReached": true,
+    "stoppedOnError": false,
+    "executionTimeMs": 724650,
+    "sentCandidateIds": [
+      "5e64219daaf9",
+      "71ceb040896c",
+      "6a850de9dc05",
+      "445225a971f7",
+      "86a8d6804b6b",
+      "2419559af1ba",
+      "b32054c06f54",
+      "80d87b758578",
+      "46551846149e",
+      "082c0eec6cff",
+      "cda9067dac4b",
+      "6b40ff3b280a",
+      "1bd395fce633",
+      "91faef15d8fd",
+      "98400c5310f6",
+      "21dc66d94d31",
+      "88340ea1bf94"
+    ],
+    "sentCandidates": [
+      {
+        "candidateId": "5e64219daaf9",
+        "name": "David Karp",
+        "email": "dmgkarp@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "86a8d6804b6b",
+        "name": "Gregory Petties",
+        "email": "shreddedsteel49@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "80d87b758578",
+        "name": "Liaunda Lang",
+        "email": "capri_lang@yahoo.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "cda9067dac4b",
+        "name": "Mista Clark",
+        "email": "mistac6@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "1bd395fce633",
+        "name": "Norah Jones",
+        "email": "norahjones2224@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "2419559af1ba",
+        "name": "Jasmine Barber",
+        "email": "jasmineshanae90@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "21dc66d94d31",
+        "name": "Patrick Berry",
+        "email": "bezothered@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "46551846149e",
+        "name": "Lindsey Aaron",
+        "email": "miayasmommy.la@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "445225a971f7",
+        "name": "Gianna DelGarbino",
+        "email": "giannadelgarbino@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "91faef15d8fd",
+        "name": "Nykol Tindle",
+        "email": "nykolcooper2@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "98400c5310f6",
+        "name": "Patricia Irby",
+        "email": "patricia.irby@aol.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "b32054c06f54",
+        "name": "Karen Burkes",
+        "email": "mrskarenburkes@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "6a850de9dc05",
+        "name": "Gabriella Gandy",
+        "email": "gabriellagandy9@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "6b40ff3b280a",
+        "name": "Monique Franklin",
+        "email": "franklinmonique392@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "082c0eec6cff",
+        "name": "Lovett Roberts",
+        "email": "teddylove092386@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "88340ea1bf94",
+        "name": "Rebekah Hoover",
+        "email": "rrhoover90@gmail.com",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "71ceb040896c",
+        "name": "DEAN B. SERGIACOMI",
+        "email": "dsergiacomi@comcast.net",
+        "signatureRequestId": null
+      }
+    ],
+    "dropboxRequestDelta": 19,
+    "dropboxPostDelta": 19,
+    "dropbox429Delta": 1,
+    "dropboxRateLimitedPausedMsDelta": 58998,
+    "patriciaIrbySent": true,
+    "remainingP178ReadyCount": 3,
+    "remainingP178ReadyIds": [
+      "27d9e13536b0",
+      "88bb0f06e75e",
+      "1e0fbce8a310"
+    ],
+    "globalPoolLeakDetected": false,
+    "globalLeakCandidateIds": [],
+    "cycleReport": {
+      "sourcePhase": "P154.7",
+      "generatedAt": "2026-07-09T18:50:54.373Z",
+      "dryRun": false,
+      "skippedOverlap": false,
+      "cycleNumber": 1,
+      "metrics": {
+        "cycleNumber": 1,
+        "startedAt": "2026-07-09T18:39:02.809Z",
+        "completedAt": "2026-07-09T18:50:54.373Z",
+        "durationMs": 711564,
+        "candidatesEvaluated": 673,
+        "assigned": 17,
+        "sent": 17,
+        "skipped": 0,
+        "duplicatesPrevented": 30,
+        "errors": 0,
+        "queueRemaining": 91,
+        "dryRun": false
+      },
+      "ingestion": {
+        "newCandidates": 0,
+        "mergedIntoStore": 673,
+        "positionsScanned": 401
+      },
+      "controlledCycle": {
+        "sourcePhase": "P154",
+        "generatedAt": "2026-07-09T18:49:26.414Z",
+        "dryRun": false,
+        "autopilotEnabled": true,
+        "paused": false,
+        "pausedReason": null,
+        "health": {
+          "generatedAt": "2026-07-09T18:49:26.414Z",
+          "overallStatus": "healthy",
+          "healthy": true,
+          "checks": [
+            {
+              "id": "breezy_api",
+              "label": "Breezy API",
+              "status": "healthy",
+              "detail": "Breezy API reachable (264 published jobs)."
+            },
+            {
+              "id": "dropbox_sign_api",
+              "label": "Dropbox Sign API",
+              "status": "healthy",
+              "detail": "DROPBOX_SIGN_API_KEY configured."
+            },
+            {
+              "id": "workflow_store",
+              "label": "Workflow store",
+              "status": "healthy",
+              "detail": "Workflow store readable (680 records)."
+            },
+            {
+              "id": "candidate_ingestion",
+              "label": "Candidate ingestion",
+              "status": "healthy",
+              "detail": "Ingestion store fresh (162 positions scanned)."
+            },
+            {
+              "id": "recruiter_assignment_engine",
+              "label": "Recruiter assignment engine",
+              "status": "healthy",
+              "detail": "10 canonical recruiters configured."
+            },
+            {
+              "id": "webhook_listener",
+              "label": "Webhook listeners",
+              "status": "healthy",
+              "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+            },
+            {
+              "id": "audit_logging",
+              "label": "Audit logging",
+              "status": "healthy",
+              "detail": "Audit stores readable (P145: 500, P151: 500 events)."
+            }
+          ],
+          "abortReason": null
+        },
+        "enabledFeatures": {
+          "p151RecruiterAssignment": true,
+          "p152ImmediatePaperwork": true,
+          "freshIngestionRescue": true,
+          "automaticWorkflowAdvancement": true,
+          "webhookCompletionProcessing": true,
+          "duplicatePrevention": true,
+          "continuousIngestion": true
+        },
+        "limits": {
+          "maxRecruiterAssignmentsPerCycle": 25,
+          "maxPaperworkSendsPerCycle": 17,
+          "stopOnFirstError": true
+        },
+        "cycle": {
+          "candidatesEvaluated": 673,
+          "recruitersAssigned": 17,
+          "paperworkSent": 17,
+          "paperworkSkipped": 0,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "executionTimeMs": 87553,
+          "webhookStatus": "passive listener active; 17 audit events this cycle",
+          "queueRemaining": 91,
+          "stoppedOnError": false,
+          "capReachedAssignments": false,
+          "capReachedSends": true,
+          "sentCandidateIds": [
+            "5e64219daaf9",
+            "71ceb040896c",
+            "6a850de9dc05",
+            "445225a971f7",
+            "86a8d6804b6b",
+            "2419559af1ba",
+            "b32054c06f54",
+            "80d87b758578",
+            "46551846149e",
+            "082c0eec6cff",
+            "cda9067dac4b",
+            "6b40ff3b280a",
+            "1bd395fce633",
+            "91faef15d8fd",
+            "98400c5310f6",
+            "21dc66d94d31",
+            "88340ea1bf94"
+          ]
+        },
+        "dashboard": {
+          "candidatesEvaluated": 673,
+          "recruitersAssigned": 17,
+          "paperworkSent": 17,
+          "paperworkCompleted": 15,
+          "paperworkSkipped": 0,
+          "duplicatesPrevented": 0,
+          "failures": 0,
+          "webhookCompletions": 0,
+          "averageProcessingTimeMs": 87553,
+          "queueDepth": 91,
+          "lastSuccessfulCycleAt": "2026-07-09T18:49:26.414Z"
+        },
+        "safetyFlags": {
+          "breezyWrites": false,
+          "breezyStageMovement": false,
+          "executeBatchCalled": false,
+          "duplicatePreventionActive": true,
+          "auditLoggingEnabled": true
+        },
+        "rollbackRecommendation": "Monitor Dropbox Sign and audit logs for 24h before raising P154_MAX_PAPERWORK_SENDS_PER_CYCLE.",
+        "sentCandidateIds": [
+          "5e64219daaf9",
+          "71ceb040896c",
+          "6a850de9dc05",
+          "445225a971f7",
+          "86a8d6804b6b",
+          "2419559af1ba",
+          "b32054c06f54",
+          "80d87b758578",
+          "46551846149e",
+          "082c0eec6cff",
+          "cda9067dac4b",
+          "6b40ff3b280a",
+          "1bd395fce633",
+          "91faef15d8fd",
+          "98400c5310f6",
+          "21dc66d94d31",
+          "88340ea1bf94"
+        ]
+      },
+      "webhookSync": {
+        "synced": 17,
+        "errors": 0
+      },
+      "stoppedOnError": false,
+      "error": null
+    },
+    "workingTreeStatus": "M src/app/api/recruiting/operations-control-center/control/route.ts\n M src/lib/breezy-api.ts\n M src/lib/candidate-ingestion/merge-candidate-record.ts\n M src/lib/candidate-ingestion/run-ingestion-sync.ts\n M src/lib/candidate-ingestion/types.ts\n M src/lib/p152-immediate-paperwork-policy/execute-immediate-paperwork-policy.ts\n M src/lib/p152-immediate-paperwork-policy/index.ts\n M src/lib/p152-immediate-paperwork-policy/types.ts\n M src/lib/p154-continuous-autonomous-recruiting-runner/run-autonomous-recruiting-cycle.ts\n M src/lib/p154-controlled-production-autopilot-activation/execute-controlled-production-autopilot.ts\n M src/lib/p154-full-candidate-backfill-continuous-processing/execute-backfill-cycle.ts\n M src/lib/p159-operations-control-center/execute-control-action.ts\n M src/lib/p169-autonomous-recruiting-orchestrator/evaluate-cycle-gates.ts\n M src/lib/p171-autonomous-candidate-lifecycle-manager/evaluate-lifecycle-gates.ts\n?? artifacts/breezy-validation-report.json\n?? artifacts/breezy-validation-report.md\n?? artifacts/p174-breezy-sync-validation.json\n?? artifacts/p174-breezy-sync-validation.md\n?? artifacts/p174.1-complete-sync-validation.json\n?? artifacts/p174.1-complete-sync-validation.md\n?? artifacts/p175-breezy-export-import.json\n?? artifacts/p175-breezy-export-import.md\n?? artifacts/p175.1-post-import-automation-readiness.json\n?? artifacts/p175.1-post-import-automation-readiness.md\n?? artifacts/p176-recruiter-assignment-before-paperwork.json\n?? artifacts/p176-recruiter-assignment-before-paperwork.md\n?? artifacts/p176.1-post-assignment-paperwork-validation.json\n?? artifacts/p176.1-post-assignment-paperwork-validation.md\n?? artifacts/p177-questionnaire-gate-diagnosis.json\n?? artifacts/p177-questionnaire-gate-diagnosis.md\n?? artifacts/p177.1-business-workflow-validation.json\n?? artifacts/p177.1-business-workflow-validation.md\n?? artifacts/p178-p1583-workflow-transition.json\n?? artifacts/p178-p1583-workflow-transition.md\n?? artifacts/p179-operator-controlled-send-gate-profile.json\n?? artifacts/p179-operator-controlled-send-gate-profile.md\n?? artifacts/p180-operator-controlled-send-cycle.json\n?? artifacts/p180-operator-controlled-send-cycle.md\n?? artifacts/p181-scoped-operator-paperwork-queue.json\n?? artifacts/p181-scoped-operator-paperwork-queue.md\n?? diagnostics/\n?? scripts/p173-breezy-production-validation.ts\n?? scripts/p174-breezy-sync-validation.ts\n?? scripts/p174.1-complete-sync-validation.ts\n?? scripts/p174.1-rescan-stall-check.ts\n?? scripts/p175-breezy-export-import.ts\n?? scripts/p175.1-post-import-automation-readiness.ts\n?? scripts/p176-recruiter-assignment-before-paperwork.ts\n?? scripts/p176.1-post-assignment-paperwork-validation.ts\n?? scripts/p177-questionnaire-gate-diagnosis.ts\n?? scripts/p179-operator-controlled-send-gate-profile.ts\n?? scripts/p181-scoped-operator-paperwork-queue.ts\n?? scripts/p182-scoped-operator-live-send.ts\n?? src/app/api/recruiting/breezy-export-import/\n?? src/app/api/recruiting/breezy-sync/\n?? src/lib/candidate-ingestion/build-ingestion-scan-queue.test.ts\n?? src/lib/candidate-ingestion/build-ingestion-scan-queue.ts\n?? src/lib/p174-breezy-sync-reliability/\n?? src/lib/p175-breezy-export-import/\n?? src/lib/p175.1-post-import-automation-readiness/\n?? src/lib/p176-recruiter-assignment-before-paperwork/\n?? src/lib/p176.1-post-assignment-paperwork-validation/\n?? src/lib/p177-questionnaire-gate-diagnosis/\n?? src/lib/p179-operator-controlled-send-gate-profile/\n?? src/lib/p181-scoped-operator-paperwork-queue/"
+  },
+  "safetyFlags": {
+    "operatorScopedOnly": true,
+    "breezyWrites": false,
+    "continuousModeRemainedOff": true,
+    "envLocalNotModified": true
+  }
+}

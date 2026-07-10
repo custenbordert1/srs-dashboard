@@ -3,6 +3,17 @@ import {
   signerRoleMatchesEnv,
   signersHaveBlankEmail,
 } from "@/lib/dropbox-sign-debug";
+import {
+  acquireDropboxRequestSlot,
+  getCachedSignatureRequest,
+  getExecutionScopeSignature,
+  parseRateLimitHeaders,
+  pauseDropboxRequestsUntil,
+  recordDropboxApiRequest,
+  rememberExecutionScopeSignature,
+  setCachedSignatureRequest,
+  withDropboxRetry,
+} from "@/lib/dropbox-sign-api";
 
 const DROPBOX_SIGN_API_BASE = "https://api.hellosign.com/v3";
 const DEFAULT_TIMEOUT_MS = 25_000;
@@ -11,13 +22,21 @@ export class DropboxSignError extends Error {
   readonly code: string;
   readonly status?: number;
   readonly details?: unknown;
+  readonly retryAfterSeconds?: number | null;
 
-  constructor(message: string, code: string, status?: number, details?: unknown) {
+  constructor(
+    message: string,
+    code: string,
+    status?: number,
+    details?: unknown,
+    retryAfterSeconds?: number | null,
+  ) {
     super(message);
     this.name = "DropboxSignError";
     this.code = code;
     this.status = status;
     this.details = details;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -101,7 +120,7 @@ function authHeader(apiKey: string): string {
   return `Basic ${token}`;
 }
 
-async function dropboxSignFetch<T>(
+async function dropboxSignFetchOnce<T>(
   path: string,
   init: RequestInit & { timeoutMs?: number } = {},
 ): Promise<T> {
@@ -109,7 +128,11 @@ async function dropboxSignFetch<T>(
   const timeoutMs = init.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const method = (init.method ?? "GET").toUpperCase() === "POST" ? "POST" : "GET";
+  const started = Date.now();
   try {
+    await acquireDropboxRequestSlot();
+
     const headers = new Headers(init.headers);
     headers.set("Authorization", authHeader(config.apiKey));
     if (!headers.has("Content-Type") && init.body) {
@@ -122,6 +145,9 @@ async function dropboxSignFetch<T>(
       signal: controller.signal,
     });
 
+    const rateHeaders = parseRateLimitHeaders(response.headers);
+    const latencyMs = Date.now() - started;
+
     const text = await response.text();
     let parsed: unknown = null;
     if (text) {
@@ -132,6 +158,14 @@ async function dropboxSignFetch<T>(
       }
     }
 
+    recordDropboxApiRequest({
+      method,
+      latencyMs,
+      status: response.status,
+      rateLimitRemaining: rateHeaders.remaining,
+      rateLimitResetUnix: rateHeaders.resetUnix,
+    });
+
     if (!response.ok) {
       const errBody = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
       const apiError =
@@ -140,11 +174,19 @@ async function dropboxSignFetch<T>(
           : typeof errBody.error === "string"
             ? errBody.error
             : response.statusText;
+
+      if (response.status === 429) {
+        const retryMs =
+          (rateHeaders.retryAfterSeconds ?? 60) * 1000;
+        pauseDropboxRequestsUntil(Date.now() + retryMs);
+      }
+
       throw new DropboxSignError(
         apiError || `Dropbox Sign request failed (${response.status})`,
         "api_error",
         response.status,
         parsed,
+        rateHeaders.retryAfterSeconds,
       );
     }
 
@@ -152,8 +194,10 @@ async function dropboxSignFetch<T>(
   } catch (error) {
     if (error instanceof DropboxSignError) throw error;
     if (error instanceof Error && error.name === "AbortError") {
+      recordDropboxApiRequest({ method, latencyMs: Date.now() - started, status: 504 });
       throw new DropboxSignError("Dropbox Sign request timed out.", "timeout", 504);
     }
+    recordDropboxApiRequest({ method, latencyMs: Date.now() - started });
     throw new DropboxSignError(
       error instanceof Error ? error.message : "Dropbox Sign request failed.",
       "network_error",
@@ -161,6 +205,13 @@ async function dropboxSignFetch<T>(
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function dropboxSignFetch<T>(
+  path: string,
+  init: RequestInit & { timeoutMs?: number } = {},
+): Promise<T> {
+  return withDropboxRetry(() => dropboxSignFetchOnce<T>(path, init));
 }
 
 type ApiTemplateListResponse = {
@@ -282,10 +333,21 @@ export async function sendTemplateSignatureRequest(
   if (!summary.signatureRequestId) {
     throw new DropboxSignError("Dropbox Sign did not return a signature request id.", "invalid_response", 502, data);
   }
+  setCachedSignatureRequest(summary);
+  rememberExecutionScopeSignature(summary);
   return summary;
 }
 
 export async function getSignatureRequest(signatureRequestId: string): Promise<DropboxSignRequestSummary> {
+  const scoped = getExecutionScopeSignature(signatureRequestId);
+  if (scoped) return scoped;
+
+  const cached = getCachedSignatureRequest(signatureRequestId);
+  if (cached) {
+    rememberExecutionScopeSignature(cached);
+    return cached;
+  }
+
   const data = await dropboxSignFetch<ApiSignatureRequestResponse>(
     `/signature_request/${encodeURIComponent(signatureRequestId)}`,
   );
@@ -293,5 +355,7 @@ export async function getSignatureRequest(signatureRequestId: string): Promise<D
   if (!summary.signatureRequestId) {
     throw new DropboxSignError("Signature request not found.", "not_found", 404, data);
   }
+  setCachedSignatureRequest(summary);
+  rememberExecutionScopeSignature(summary);
   return summary;
 }

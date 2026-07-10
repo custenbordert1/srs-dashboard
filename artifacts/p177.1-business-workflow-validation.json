@@ -1,0 +1,256 @@
+{
+  "sourcePhase": "P177.1",
+  "generatedAt": "2026-07-09T16:15:00.000Z",
+  "readOnly": true,
+  "verdict": "Review Questionnaire is an implementation artifact for pre-Paperwork-Needed candidates when questionnaire enrichment data is absent — not a hard business gate before paperwork send. The intended post-assignment path is Applied → Assign Recruiter → Paperwork Needed (P158.3) → Send Paperwork, which P157 already supports without requiring questionnaire answers.",
+  "confidenceLevel": "high",
+  "confidenceRationale": [
+    "P157 Send Paperwork rule (action-rules.ts:70-86) does not check questionnaireComplete — only P152 eligibility and workflow stage.",
+    "P158.3 dry-run (2026-07-07) projected 25/25 Send Paperwork after Applied→Paperwork Needed transition with no questionnaire requirement in transition-rules.ts.",
+    "P158.2 diagnosed workflow_state_issue (not missing_questionnaire) as the sole blocker for 25/25 post-assignment candidates.",
+    "P152 BYPASSED_RULES explicitly bypass legacy questionnaire/workflow gates for immediate paperwork policy.",
+    "P169/P171 classify Review Questionnaire as manual-review exception ('Unexpected classification'), not an automation happy path.",
+    "P177 measured 0/25 newest candidates with questionnaire data; missing data defaults available=false (questionnaire-parser.ts:310)."
+  ],
+  "questionnaireDesignIntent": {
+    "requiredForSendPaperworkInP157": false,
+    "requiredForPreTransitionScreening": "soft — blocks Applied-status candidates until enrichment or manual review",
+    "optionalWhenEnriched": true,
+    "accidentalGateFromMissingData": true,
+    "summary": "Questionnaire was designed as OPTIONAL intelligence for grading and tech-readiness screening (P56/P86). P157 treats missing questionnaire (available=false) the same as incomplete questionnaire, routing to Review Questionnaire. Once workflow reaches Paperwork Needed, P157 Send Paperwork fires without questionnaire. Missing enrichment data therefore creates an artificial gate for Applied-status candidates."
+  },
+  "p157NoteOnPaperworkNeeded": "Paperwork Needed is a workflow status, not a P157 decision action. P157 never returns 'Paperwork Needed' as an action. Status is set by P83 advancement, P158.3 post-assignment transition, or recruiter workspace actions (e.g. schedule-interview).",
+  "ruleEvaluationOrder": [
+    "Candidate Duplicate",
+    "Position Closed",
+    "Reject Candidate",
+    "Ready For MEL",
+    "Assign Recruiter",
+    "Send Paperwork",
+    "Follow Up Today",
+    "Wait For Candidate",
+    "Request Missing Documents",
+    "Review Questionnaire",
+    "Escalate To DM",
+    "Manual Review (paperwork blockers)",
+    "Manual Review (Applied/Needs Review/Qualified)",
+    "Manual Review (fallback)"
+  ],
+  "transitions": [
+    {
+      "action": "Assign Recruiter",
+      "sourceFile": "src/lib/p157-recruiter-decision-engine/action-rules.ts",
+      "function": "evaluateP157ActionRule",
+      "lines": "64-67",
+      "conditional": "isUnassignedRecruiter(row.assignedRecruiter)",
+      "introduced": {
+        "commit": "795bbf8",
+        "date": "2026-07-07",
+        "message": "P157 intelligent recruiter decision engine"
+      },
+      "businessIntent": "true_business_requirement — recruiter must be assigned before downstream actions"
+    },
+    {
+      "action": "Send Paperwork",
+      "sourceFile": "src/lib/p157-recruiter-decision-engine/action-rules.ts",
+      "function": "evaluateP157ActionRule",
+      "lines": "70-86",
+      "conditional": "ctx.paperworkEligible && (row.workflowStatus === 'Paperwork Needed' || paperworkStage === 'awaitingRecruiterAction' || paperworkStage === 'approvalQueue')",
+      "questionnaireInCondition": false,
+      "questionnaireInSignalsOnly": "if (ctx.questionnaireComplete) signals.push('Questionnaire complete') — informational only",
+      "introduced": {
+        "commit": "795bbf8",
+        "date": "2026-07-07",
+        "message": "P157 intelligent recruiter decision engine"
+      },
+      "businessIntent": "true_business_requirement — send only when P152 passes and workflow stage permits"
+    },
+    {
+      "action": "Review Questionnaire",
+      "sourceFile": "src/lib/p157-recruiter-decision-engine/action-rules.ts",
+      "function": "evaluateP157ActionRule",
+      "lines": "137-140",
+      "conditional": "!ctx.questionnaireComplete || ctx.questionnaireTechReady === false",
+      "contextMapping": {
+        "sourceFile": "src/lib/p157-recruiter-decision-engine/decision-engine.ts",
+        "function": "buildP157DecisionContext",
+        "lines": "76-77",
+        "mapping": "questionnaireComplete = row.questionnaireIntelligence.available; questionnaireTechReady = row.questionnaireIntelligence.techReady"
+      },
+      "dataDefault": {
+        "sourceFile": "src/lib/candidate-readiness/questionnaire-parser.ts",
+        "function": "buildQuestionnaireIntelligence",
+        "lines": "309-310",
+        "behavior": "if (answers.length === 0) return unavailableQuestionnaire() with available: false"
+      },
+      "introduced": {
+        "commit": "795bbf8",
+        "date": "2026-07-07",
+        "message": "P157 intelligent recruiter decision engine"
+      },
+      "businessIntent": "artificial_workflow_gate when available=false due to missing enrichment; true_business_requirement when techReady===false (failed tech screening)"
+    },
+    {
+      "action": "Manual Review",
+      "sourceFile": "src/lib/p157-recruiter-decision-engine/action-rules.ts",
+      "function": "evaluateP157ActionRule",
+      "lines": "161-170",
+      "conditional": "row.workflowStatus in Applied|Needs Review|Qualified OR applicantVerdict needs-review|incomplete (after questionnaire rule does not match)",
+      "introduced": {
+        "commit": "795bbf8",
+        "date": "2026-07-07"
+      },
+      "businessIntent": "remain_manual_review for ambiguous pipeline stages"
+    },
+    {
+      "status": "Paperwork Needed",
+      "notAP157Action": true,
+      "setBy": [
+        {
+          "sourceFile": "src/lib/p158-post-assignment-workflow-transition/transition-engine.ts",
+          "function": "applyTransitionToWorkflowRecord",
+          "lines": "22-34",
+          "conditional": "P158.3 transition eligibility passes (P152 hard blockers only — no questionnaire check)",
+          "introduced": "P158.3 post-assignment workflow transition"
+        },
+        {
+          "sourceFile": "src/lib/candidate-advancement-engine/apply-candidate-advancements.ts",
+          "function": "apply advancement",
+          "conditional": "P83 shouldAdvance when confidence/approval gates pass"
+        },
+        {
+          "sourceFile": "src/lib/candidate-workspace/advance-workflow-on-complete.ts",
+          "function": "advanceWorkflowOnComplete",
+          "lines": "26-31",
+          "conditional": "schedule-interview workspace action"
+        }
+      ]
+    }
+  ],
+  "codebaseSearch": {
+    "Review Questionnaire": {
+      "p157Definition": "src/lib/p157-recruiter-decision-engine/action-rules.ts:137-140",
+      "p157Label": "src/lib/p157-recruiter-decision-engine/constants.ts:16 — 'Review questionnaire responses'",
+      "p1582FixHint": "src/lib/p158-post-assignment-outcome-diagnosis/recommend-fix.ts:6-7 — missing_questionnaire fix suggests questionnaire request path",
+      "p169Exception": "src/lib/p169-autonomous-recruiting-orchestrator/map-candidate-outcome.ts:11 — grouped with MANUAL_REVIEW_ACTIONS",
+      "p171Exception": "src/lib/p171-autonomous-candidate-lifecycle-manager/map-lifecycle-state.ts:55-56 — category manual_review, reason 'Unexpected classification'"
+    },
+    "Paperwork Needed": {
+      "workflowStatusNotP157Action": true,
+      "p1583Transition": "src/lib/p158-post-assignment-workflow-transition/transition-engine.ts:28",
+      "p152Bypassed": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts:23 — legacy rule bypassed for immediate policy",
+      "p84Requirement": "src/lib/paperwork-eligibility-reconciliation/build-reconciliation.ts:123 — P84 requires persisted P83/P158 advancement"
+    },
+    "questionnaireIntelligence": {
+      "builder": "src/lib/candidate-readiness/questionnaire-parser.ts — buildQuestionnaireIntelligence",
+      "rowAttachment": "src/lib/build-candidate-workflow-row.ts:250,359",
+      "uiPanel": "src/components/recruiting/candidate-workspace/candidate-questionnaire-intelligence-panel.tsx — shows 'Not available from Breezy yet.' when !available"
+    },
+    "questionnaireRequired": {
+      "foundInProductionCode": false,
+      "onlyInP177DiagnosisArtifacts": true,
+      "fastTrackOptional": "src/lib/autonomous-hiring-decision-engine/build-hiring-decision.ts:230 — rules.fastTrack.requireQuestionnaire is configurable, default path holds on missing questionnaire for fast_track only"
+    },
+    "questionnaireAvailable": {
+      "fieldName": "questionnaireIntelligence.available",
+      "typeDefinition": "src/lib/candidate-readiness/types.ts:26"
+    },
+    "Send Paperwork": {
+      "p157": "src/lib/p157-recruiter-decision-engine/action-rules.ts:70-86",
+      "p152HardBlockers": "src/lib/p152-immediate-paperwork-policy/detect-immediate-paperwork-hard-blockers.ts",
+      "p169AutoSend": "src/lib/p169-autonomous-recruiting-orchestrator/map-candidate-outcome.ts:42-43"
+    }
+  },
+  "uiAndDocumentationExpectations": {
+    "recruiterUI": {
+      "p157Panel": "src/components/executive/recruiting-decisions-panel.tsx — displays P157 action per candidate; no hardcoded Applied→Review Questionnaire→Paperwork sequence",
+      "candidateWorkspace": "src/lib/candidate-workspace/resolve-workspace-action.ts — Applied shows 'Contact candidate'; no Review Questionnaire step",
+      "questionnairePanel": "Displays intelligence when available; gracefully handles missing data — does not block UI actions on questionnaire"
+    },
+    "documentedIntendedFlow": {
+      "withQuestionnaireEnrichment": "Applied → Assign Recruiter → (optional Review Questionnaire if tech fails) → Paperwork Needed → Send Paperwork",
+      "postAssignmentAutomation": "Applied → Assign Recruiter → Paperwork Needed (P158.3) → Send Paperwork — documented in P158.2/P158.3 artifacts",
+      "explicitWithoutQuestionnaireStep": "P158.2 safest change and P158.3 dry-run omit Review Questionnaire; transition-rules.ts has no questionnaire gate"
+    },
+    "whichFlowIsCanonical": "Applied → Assign Recruiter → Paperwork Needed → Send Paperwork (P158.2/P158.3). Review Questionnaire is a holding action for Applied candidates lacking enrichment, not a documented mandatory funnel step."
+  },
+  "workflowDiagram": "flowchart TD\n  A[Applied] --> B{Recruiter assigned?}\n  B -->|No| AR[Assign Recruiter]\n  B -->|Yes| C{workflowStatus Paperwork Needed?}\n  C -->|Yes + P152 pass| SP[Send Paperwork]\n  C -->|No| D{questionnaireIntelligence.available?}\n  D -->|No default| RQ[Review Questionnaire]\n  D -->|Yes + techReady false| RQ\n  D -->|Yes + techReady ok| MR[Manual Review / other rules]\n  AR --> P158{P158.3 transition}\n  P158 --> PN[Paperwork Needed status]\n  PN --> SP\n  RQ -.->|does NOT advance status| A\n  style RQ fill:#f9f,stroke:#333\n  style PN fill:#9f9,stroke:#333\n  style SP fill:#9f9,stroke:#333",
+  "contradictions": [
+    {
+      "area": "P158.2 diagnose-blocker vs P158.3 transition",
+      "detail": "diagnose-blocker.ts:131 flags missing_questionnaire, but transition-rules.ts does not check questionnaire — P158.3 bypasses questionnaire entirely"
+    },
+    {
+      "area": "P157 Send Paperwork vs Review Questionnaire",
+      "detail": "Send Paperwork (rule 6) does not require questionnaire; Review Questionnaire (rule 10) blocks Applied candidates before they can reach Paperwork Needed without P158.3"
+    },
+    {
+      "area": "P177 prior artifact",
+      "detail": "p177-questionnaire-gate-diagnosis.json incorrectly listed questionnaireComplete as Send Paperwork requirement — corrected in P177.1: questionnaire gates Review Questionnaire only, not Send Paperwork"
+    }
+  ],
+  "wouldChangingQuestionnaireGateAlterIntendedBehavior": false,
+  "behaviorRestorationExplanation": "Changing Review Questionnaire to treat missing enrichment as non-blocking (or running existing P158.3 transition) restores the flow already validated in P158.3 dry-run and recommended in P158.2. It does not bypass P152 duplicate/email/signature checks. Tech-readiness failures (techReady===false) should remain blocking.",
+  "recommendation": {
+    "primary": "Do not weaken P157 Send Paperwork. Run P158.3 post-assignment workflow transition (already implemented) to advance P152-eligible assigned candidates from Applied to Paperwork Needed, then re-evaluate P157 — matches P158.2/P158.3 evidence.",
+    "secondary": "If P157 Review Questionnaire must change: only demote missing-data case — change conditional from `!questionnaireComplete` to `questionnaireTechReady === false` (treat unavailable as non-blocking, failed tech as blocking).",
+    "doNot": "Do not remove P152 hard blockers or send paperwork in this phase.",
+    "classification": "artificial_workflow_gate for missing data; true_business_requirement for techReady===false"
+  },
+  "smallestCodeChange": {
+    "optionA": {
+      "description": "Enable/run existing P158.3 transition after recruiter assignment (no P157 change)",
+      "files": [
+        "src/lib/p158-post-assignment-workflow-transition/transition-engine.ts",
+        "src/lib/p158-post-assignment-workflow-transition/transition-rules.ts"
+      ],
+      "changeSize": "0 lines — orchestration only; feature already built",
+      "expectedEffect": "21 P152-eligible newest-25 candidates → Paperwork Needed → Send Paperwork per P177 simulation (minus 4 true blockers)"
+    },
+    "optionB": {
+      "description": "Narrow Review Questionnaire gate in P157 action-rules.ts",
+      "file": "src/lib/p157-recruiter-decision-engine/action-rules.ts",
+      "lines": "137-140",
+      "from": "if (!ctx.questionnaireComplete || ctx.questionnaireTechReady === false)",
+      "to": "if (ctx.questionnaireTechReady === false)",
+      "changeSize": "1 conditional line",
+      "expectedEffect": "Applied candidates with missing questionnaire fall through to Manual Review or other rules instead of Review Questionnaire; still need P158.3 for Send Paperwork"
+    },
+    "recommended": "optionA"
+  },
+  "evidenceFromPriorArtifacts": {
+    "p157OriginalCohort": {
+      "assignRecruiter": 79,
+      "reviewQuestionnaire": 7,
+      "sendPaperwork": 2,
+      "note": "Send Paperwork candidates already at Paperwork Needed; Review Questionnaire correlated with missing questionnaire enrichment"
+    },
+    "p1582": {
+      "primaryBlocker": "workflow_state_issue",
+      "count": 25,
+      "classification": "artificial_workflow_gate"
+    },
+    "p1583DryRun": {
+      "projectedSendPaperwork": 25,
+      "transitionEligible": 25,
+      "note": "No questionnaire check in transition; all became Send Paperwork after Paperwork Needed"
+    },
+    "p1761": {
+      "p157AfterAssignment": "17 moved Assign Recruiter → Review Questionnaire",
+      "p157SendPaperwork": 0,
+      "p152Eligible": 21
+    },
+    "p177": {
+      "questionnaireCoverageNewest25": 0,
+      "wouldSendIfFullBypass": 21,
+      "wouldSendIfQuestionnaireBypassOnly": 0,
+      "note": "Questionnaire bypass alone insufficient — workflow stage gate also required"
+    }
+  },
+  "safetyConfirmation": [
+    "Read-only investigation — no code, Breezy, Dropbox, or automation changes",
+    "P152 remains send safety layer regardless of questionnaire gate change",
+    "P158.3 is workflow overlay only — does not send paperwork",
+    "Duplicates (3) and unassigned (1) remain manual per P177"
+  ]
+}

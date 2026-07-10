@@ -1,0 +1,449 @@
+{
+  "sourcePhase": "P107",
+  "generatedAt": "2026-06-30T20:22:11.523Z",
+  "dryRun": false,
+  "cycleOk": true,
+  "skippedOverlap": false,
+  "metrics": {
+    "awaitingSignature": 3,
+    "viewed": 3,
+    "signedToday": 1,
+    "completed": 1,
+    "expired": 0,
+    "declined": 0,
+    "needsReminder": 0,
+    "needsRecruiter": 0,
+    "readyForOnboarding": 0,
+    "averageTimeToViewMs": null,
+    "averageTimeToSignMs": null,
+    "averageViewToSignMs": 4805545,
+    "completionRate": 0.14,
+    "textQueueCount": 0,
+    "emailQueueCount": 0,
+    "recruiterQueueCount": 0,
+    "needsAttentionCount": 0,
+    "activePackets": 7,
+    "syncedThisCycle": 7,
+    "errorsThisCycle": 0
+  },
+  "candidates": [
+    {
+      "candidateId": "6d548b240ab0",
+      "candidateName": "Gary Smigocki",
+      "status": {
+        "candidateId": "6d548b240ab0",
+        "candidateName": "Gary Smigocki",
+        "signatureRequestId": "1edd6efb32d151bd0a1a046a3bb9ec393529e512",
+        "dropboxStatus": "awaiting_signature",
+        "tracking": {
+          "candidateId": "6d548b240ab0",
+          "candidateName": "Gary Smigocki",
+          "signatureRequestId": "1edd6efb32d151bd0a1a046a3bb9ec393529e512",
+          "lastDropboxStatus": "awaiting_signature",
+          "viewedAt": null,
+          "signedAt": null,
+          "completedAt": null,
+          "lastCheckedAt": "2026-06-30T20:22:08.609Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Paperwork Sent",
+          "onboardingStatus": "sent"
+        },
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "sent",
+        "paperworkStatus": "sent",
+        "viewedAt": null,
+        "signedAt": null,
+        "reminderEligible": {
+          "text": false,
+          "email": false,
+          "recruiter": false,
+          "needsAttention": false
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:08.607Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "6d548b240ab0",
+        "candidateName": "Gary Smigocki",
+        "signatureRequestId": "1edd6efb32d151bd0a1a046a3bb9ec393529e512",
+        "dropboxStatus": "awaiting_signature",
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "sent",
+        "viewedAt": null,
+        "signedAt": null,
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent"
+        ]
+      }
+    },
+    {
+      "candidateId": "9f8231817090",
+      "candidateName": "John Sykes",
+      "status": {
+        "candidateId": "9f8231817090",
+        "candidateName": "John Sykes",
+        "signatureRequestId": "0116fec632faa5386c18cddc39035437d7b10b71",
+        "dropboxStatus": "viewed",
+        "tracking": {
+          "candidateId": "9f8231817090",
+          "candidateName": "John Sykes",
+          "signatureRequestId": "0116fec632faa5386c18cddc39035437d7b10b71",
+          "lastDropboxStatus": "viewed",
+          "viewedAt": "2026-06-30T20:22:09.144Z",
+          "signedAt": null,
+          "completedAt": null,
+          "lastCheckedAt": "2026-06-30T20:22:09.151Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Paperwork Sent",
+          "onboardingStatus": "viewed"
+        },
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "viewed",
+        "paperworkStatus": "viewed",
+        "viewedAt": "2026-06-30T20:22:09.144Z",
+        "signedAt": null,
+        "reminderEligible": {
+          "text": true,
+          "email": true,
+          "recruiter": true,
+          "needsAttention": true
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:09.150Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "9f8231817090",
+        "candidateName": "John Sykes",
+        "signatureRequestId": "0116fec632faa5386c18cddc39035437d7b10b71",
+        "dropboxStatus": "viewed",
+        "paperworkStatus": "viewed",
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "viewed",
+        "viewedAt": "2026-06-30T20:22:09.144Z",
+        "signedAt": null,
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent",
+          "Viewed"
+        ]
+      }
+    },
+    {
+      "candidateId": "c0c920caa44f",
+      "candidateName": "Malcolm Cooper",
+      "status": {
+        "candidateId": "c0c920caa44f",
+        "candidateName": "Malcolm Cooper",
+        "signatureRequestId": "2b403b2ea18f0698b5ad1c4d4bdc51a3ca788c1c",
+        "dropboxStatus": "signed",
+        "tracking": {
+          "candidateId": "c0c920caa44f",
+          "candidateName": "Malcolm Cooper",
+          "signatureRequestId": "2b403b2ea18f0698b5ad1c4d4bdc51a3ca788c1c",
+          "lastDropboxStatus": "signed",
+          "viewedAt": "2026-06-30T19:02:04.000Z",
+          "signedAt": "2026-06-30T20:22:09.545Z",
+          "completedAt": "2026-06-30T20:22:09.548Z",
+          "lastCheckedAt": "2026-06-30T20:22:09.554Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Ready for MEL",
+          "onboardingStatus": "ready_for_mel"
+        },
+        "workflowStatus": "Ready for MEL",
+        "onboardingStatus": "ready_for_mel",
+        "paperworkStatus": "signed",
+        "viewedAt": "2026-06-30T19:02:04.000Z",
+        "signedAt": "2026-06-30T20:22:09.545Z",
+        "reminderEligible": {
+          "text": false,
+          "email": false,
+          "recruiter": false,
+          "needsAttention": false
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:09.553Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "c0c920caa44f",
+        "candidateName": "Malcolm Cooper",
+        "signatureRequestId": "2b403b2ea18f0698b5ad1c4d4bdc51a3ca788c1c",
+        "dropboxStatus": "signed",
+        "paperworkStatus": "signed",
+        "workflowStatus": "Ready for MEL",
+        "onboardingStatus": "ready_for_mel",
+        "viewedAt": "2026-06-30T19:02:04.000Z",
+        "signedAt": "2026-06-30T20:22:09.545Z",
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent",
+          "Viewed",
+          "Signed",
+          "Onboarding Started",
+          "Ready For Work"
+        ]
+      }
+    },
+    {
+      "candidateId": "773445c489a7",
+      "candidateName": "Terrel Andrews",
+      "status": {
+        "candidateId": "773445c489a7",
+        "candidateName": "Terrel Andrews",
+        "signatureRequestId": "f9180e35fbdc03c19522a7efee1e39068fe5bd52",
+        "dropboxStatus": "awaiting_signature",
+        "tracking": {
+          "candidateId": "773445c489a7",
+          "candidateName": "Terrel Andrews",
+          "signatureRequestId": "f9180e35fbdc03c19522a7efee1e39068fe5bd52",
+          "lastDropboxStatus": "awaiting_signature",
+          "viewedAt": null,
+          "signedAt": null,
+          "completedAt": null,
+          "lastCheckedAt": "2026-06-30T20:22:10.038Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Paperwork Sent",
+          "onboardingStatus": "sent"
+        },
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "sent",
+        "paperworkStatus": "sent",
+        "viewedAt": null,
+        "signedAt": null,
+        "reminderEligible": {
+          "text": false,
+          "email": false,
+          "recruiter": false,
+          "needsAttention": false
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:10.037Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "773445c489a7",
+        "candidateName": "Terrel Andrews",
+        "signatureRequestId": "f9180e35fbdc03c19522a7efee1e39068fe5bd52",
+        "dropboxStatus": "awaiting_signature",
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "sent",
+        "viewedAt": null,
+        "signedAt": null,
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent"
+        ]
+      }
+    },
+    {
+      "candidateId": "cfcd1b8179ba",
+      "candidateName": "Ryley Umbel",
+      "status": {
+        "candidateId": "cfcd1b8179ba",
+        "candidateName": "Ryley Umbel",
+        "signatureRequestId": "a4ddf042161a6d5f564f588d06765cbb0d43f4fc",
+        "dropboxStatus": "viewed",
+        "tracking": {
+          "candidateId": "cfcd1b8179ba",
+          "candidateName": "Ryley Umbel",
+          "signatureRequestId": "a4ddf042161a6d5f564f588d06765cbb0d43f4fc",
+          "lastDropboxStatus": "viewed",
+          "viewedAt": "2026-06-30T20:22:10.488Z",
+          "signedAt": null,
+          "completedAt": null,
+          "lastCheckedAt": "2026-06-30T20:22:10.496Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Paperwork Sent",
+          "onboardingStatus": "viewed"
+        },
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "viewed",
+        "paperworkStatus": "viewed",
+        "viewedAt": "2026-06-30T20:22:10.488Z",
+        "signedAt": null,
+        "reminderEligible": {
+          "text": true,
+          "email": true,
+          "recruiter": true,
+          "needsAttention": true
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:10.494Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "cfcd1b8179ba",
+        "candidateName": "Ryley Umbel",
+        "signatureRequestId": "a4ddf042161a6d5f564f588d06765cbb0d43f4fc",
+        "dropboxStatus": "viewed",
+        "paperworkStatus": "viewed",
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "viewed",
+        "viewedAt": "2026-06-30T20:22:10.488Z",
+        "signedAt": null,
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent",
+          "Viewed"
+        ]
+      }
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "candidateName": "Lara Gh",
+      "status": {
+        "candidateId": "09c38dd6b79b",
+        "candidateName": "Lara Gh",
+        "signatureRequestId": "9ca6e0bec9fb723e61505dd75efcbabff267eacd",
+        "dropboxStatus": "awaiting_signature",
+        "tracking": {
+          "candidateId": "09c38dd6b79b",
+          "candidateName": "Lara Gh",
+          "signatureRequestId": "9ca6e0bec9fb723e61505dd75efcbabff267eacd",
+          "lastDropboxStatus": "awaiting_signature",
+          "viewedAt": null,
+          "signedAt": null,
+          "completedAt": null,
+          "lastCheckedAt": "2026-06-30T20:22:11.022Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Paperwork Sent",
+          "onboardingStatus": "sent"
+        },
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "sent",
+        "paperworkStatus": "sent",
+        "viewedAt": null,
+        "signedAt": null,
+        "reminderEligible": {
+          "text": false,
+          "email": false,
+          "recruiter": false,
+          "needsAttention": false
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:11.021Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "09c38dd6b79b",
+        "candidateName": "Lara Gh",
+        "signatureRequestId": "9ca6e0bec9fb723e61505dd75efcbabff267eacd",
+        "dropboxStatus": "awaiting_signature",
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "sent",
+        "viewedAt": null,
+        "signedAt": null,
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent"
+        ]
+      }
+    },
+    {
+      "candidateId": "84d51041e750",
+      "candidateName": "Alexandra Ridel",
+      "status": {
+        "candidateId": "84d51041e750",
+        "candidateName": "Alexandra Ridel",
+        "signatureRequestId": "90be7f1a4306985ff4c1f164d189836aa7987725",
+        "dropboxStatus": "viewed",
+        "tracking": {
+          "candidateId": "84d51041e750",
+          "candidateName": "Alexandra Ridel",
+          "signatureRequestId": "90be7f1a4306985ff4c1f164d189836aa7987725",
+          "lastDropboxStatus": "viewed",
+          "viewedAt": "2026-06-30T20:22:11.480Z",
+          "signedAt": null,
+          "completedAt": null,
+          "lastCheckedAt": "2026-06-30T20:22:11.488Z",
+          "reminderCount": 0,
+          "lastReminderSentAt": null,
+          "reminderHistory": [],
+          "needsAttention": false,
+          "workflowStatus": "Paperwork Sent",
+          "onboardingStatus": "viewed"
+        },
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "viewed",
+        "paperworkStatus": "viewed",
+        "viewedAt": "2026-06-30T20:22:11.480Z",
+        "signedAt": null,
+        "reminderEligible": {
+          "text": true,
+          "email": true,
+          "recruiter": true,
+          "needsAttention": true
+        },
+        "auditSnippet": [
+          "2026-06-30T20:22:11.486Z: status_sync"
+        ]
+      },
+      "cycleResult": {
+        "candidateId": "84d51041e750",
+        "candidateName": "Alexandra Ridel",
+        "signatureRequestId": "90be7f1a4306985ff4c1f164d189836aa7987725",
+        "dropboxStatus": "viewed",
+        "paperworkStatus": "viewed",
+        "workflowStatus": "Paperwork Sent",
+        "onboardingStatus": "viewed",
+        "viewedAt": "2026-06-30T20:22:11.480Z",
+        "signedAt": null,
+        "synced": true,
+        "stateChanged": true,
+        "reminderGenerated": null,
+        "error": null,
+        "timeline": [
+          "Paperwork Sent",
+          "Viewed"
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    "P107 — Dropbox Sign live poll; no paperwork resend.",
+    "Live sync — workflow and onboarding updated.",
+    "Reminders queued only — not sent automatically."
+  ]
+}

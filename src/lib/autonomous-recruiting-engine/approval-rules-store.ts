@@ -3,9 +3,11 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { ApprovalRule } from "@/lib/autonomous-recruiting-engine/types";
 import { DEFAULT_APPROVAL_RULES } from "@/lib/autonomous-recruiting-engine/approval-rules";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const RULES_PATH = path.join(STORE_DIR, "autonomous-recruiting-approval-rules.json");
+function rulesPath(): string {
+  return path.join(recruitingDataDir(), "autonomous-recruiting-approval-rules.json");
+}
 
 type ApprovalRulesStoreFile = {
   rules: ApprovalRule[];
@@ -14,7 +16,7 @@ type ApprovalRulesStoreFile = {
 
 async function readRulesFile(): Promise<ApprovalRulesStoreFile> {
   try {
-    const raw = await readFile(RULES_PATH, "utf8");
+    const raw = await readFile(rulesPath(), "utf8");
     const parsed = JSON.parse(raw) as ApprovalRulesStoreFile;
     return {
       rules: Array.isArray(parsed.rules) ? parsed.rules : [],
@@ -26,8 +28,9 @@ async function readRulesFile(): Promise<ApprovalRulesStoreFile> {
 }
 
 async function writeRulesFile(file: ApprovalRulesStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
-  await writeFile(RULES_PATH, JSON.stringify(file, null, 2), "utf8");
+  const storeDir = recruitingDataDir();
+  await safeRecruitingMkdir(storeDir);
+  await writeFile(rulesPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
 export async function listApprovalRules(): Promise<ApprovalRule[]> {

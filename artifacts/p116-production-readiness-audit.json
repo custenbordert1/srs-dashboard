@@ -1,0 +1,319 @@
+{
+  "sourcePhase": "P116",
+  "generatedAt": "2026-07-01T15:00:00.000Z",
+  "mode": "readOnlyAudit",
+  "auditQuestion": "If we enabled live executeOne today, what would still prevent this system from operating safely without manual intervention?",
+  "finalRecommendation": "GO WITH CONDITIONS",
+  "finalRecommendationReason": "Safety layers and dry-run validation are strong, but P109 recruiter mapping approvals are not wired into the P106.3 live classifier/runner, 121 mapping reviews remain pending, and executive or operational gates (P99/P84/operator checklist) are designed to require explicit human sign-off before executeOne. Live executeOne today would bypass the mapping-approval work completed in P113–P114 for closed-ad recovery and would still require manual intervention for the majority of the closed-ad cohort.",
+  "scores": {
+    "architecture": {
+      "score": 72,
+      "rationale": "End-to-end pipeline is traceable and modular (ingestion → classification → mapping → runner → controlled send → Dropbox Sign → audit). Dual mapping engines (P106 closed-ad heuristics vs P108 weighted scoring) and a deliberate split between dry-run approval bridge (P109–P115) and production runner (P106.3) reduce clarity and create integration debt."
+    },
+    "reliability": {
+      "score": 58,
+      "rationale": "State is largely local (.data JSON/JSONL), runner overlap lock is file-based, Breezy sync failures warn but cycles continue, and there is no production-grade observability, failover, or replicated audit storage."
+    },
+    "safety": {
+      "score": 86,
+      "rationale": "Protection order is explicit (already_sent, duplicate_risk, invalid_email override approvals), executeOne is capped at one send per run, executeBatch is blocked in production runner policy, P100 execution locks require executive flags, and dryRun is the default everywhere."
+    },
+    "automation": {
+      "score": 44,
+      "rationale": "Auto-repair handles some P84 operational gates, but closed-ad project mapping still blocks ~305 candidates without P109 approval in runner, 6 REVIEW FIRST bulk groups (30 candidates) need recruiter judgment, and live send requires multi-step executive approval (P97/P99/P84/P101)."
+    },
+    "operationalReadiness": {
+      "score": 51,
+      "rationale": "Executive UI covers mapping, bulk review, checklist, and monitor panels, but backlog is large (121 pending reviews per P110), no production alerting exists, rollback artifacts are local-only, and recruiters cannot rely on bulk SAFE path for borderline groups."
+    },
+    "codeQuality": {
+      "score": 67,
+      "rationale": "625 passing tests and consistent phase-module patterns, but ~50 diagnostic scripts, overlapping mapping logic, temporary debug utilities, and large generated artifacts in-repo signal pre-production cleanup is still needed."
+    },
+    "overallProductionReadiness": {
+      "score": 58,
+      "rationale": "Safe to continue dry-run and controlled pilot executeOne with operator oversight; not safe for unattended production automation until P109→P106 integration, mapping backlog reduction, monitoring, and executive gates are complete."
+    }
+  },
+  "architecture": {
+    "pipeline": [
+      {
+        "step": 1,
+        "name": "Breezy Applicant",
+        "module": "src/lib/breezy-api",
+        "description": "Source of truth for jobs and applicants; read-only in paperwork path.",
+        "dependencies": ["BREEZY_API credentials", "company resolution"]
+      },
+      {
+        "step": 2,
+        "name": "Candidate Ingestion",
+        "module": "src/lib/candidate-ingestion",
+        "description": "scanBreezyPublishedPositionsBatch, merge into ingestion store, workflow backfill, optional automation engine.",
+        "dependencies": ["ingestion store (.data)", "candidate-workflow-store", "Breezy jobs cache"]
+      },
+      {
+        "step": 3,
+        "name": "Paperwork Classification",
+        "module": "src/lib/p106-autonomous-paperwork-engine/classify-paperwork-blocker.ts",
+        "description": "Ordered gate chain: already_sent → terminal → invalid_email → duplicate_risk → project mapping → P83 advancement → resume → P84 eligibility.",
+        "dependencies": ["ScoredCandidateWorkflowRow", "onboarding records", "P100 sent IDs", "jobs maps"]
+      },
+      {
+        "step": 4,
+        "name": "Project Mapping (P108 analysis)",
+        "module": "src/lib/p108-intelligent-project-mapping",
+        "description": "Weighted 0–100 scoring, AUTO_MAP/REVIEW/NO_MATCH; feeds review queue and executive panel.",
+        "dependencies": ["published + closed jobs", "MEL opportunities", "historical patterns"]
+      },
+      {
+        "step": 5,
+        "name": "Closed-Ad Recovery (P106.3 production path)",
+        "module": "src/lib/closed-ad-project-mapping/resolve-closed-ad-project-mapping.ts",
+        "description": "Title/city/state heuristic match to published jobs; high → auto map, medium → project_mapping_review, none → project_not_mappable.",
+        "dependencies": ["published jobs list", "closed jobs map", "does NOT read P109 store"]
+      },
+      {
+        "step": 6,
+        "name": "Approval Bridge (P109–P115)",
+        "module": "src/lib/p109-project-mapping-review",
+        "description": "Local recruiter decisions in .data/p109-project-mapping-review-decisions.json; bulk tools P111–P115; dry-run impact via P110.",
+        "dependencies": ["P108 recommendations", "local filesystem", "not wired to P106 runner"]
+      },
+      {
+        "step": 7,
+        "name": "Runner Selection",
+        "module": "src/lib/autonomous-paperwork-runner/select-candidates-for-runner.ts",
+        "description": "Incremental vs fullReconciliation; checkpointed blocked registry; stale-eligible recovery.",
+        "dependencies": ["runner state", "ingestion store", "workflow bundle"]
+      },
+      {
+        "step": 8,
+        "name": "Runner Execution",
+        "module": "src/lib/autonomous-paperwork-runner/run-autonomous-paperwork-runner.ts",
+        "description": "Optional Breezy sync → P106 engine; file lock prevents overlap; schedule via AUTONOMOUS_PAPERWORK_RUNNER_SCHEDULE_ENABLED.",
+        "dependencies": ["runner-config env flags", "P106 engine"]
+      },
+      {
+        "step": 9,
+        "name": "executeOne",
+        "module": "src/lib/p106-autonomous-paperwork-engine/run-autonomous-paperwork-engine.ts → src/lib/controlled-live-send",
+        "description": "Auto-repair repairable P84 gates, then executeControlledLiveSend with maxSends=1 for executeOne.",
+        "dependencies": ["P97 persistence", "P99 readiness", "P84 feature flags", "P100 locks"]
+      },
+      {
+        "step": 10,
+        "name": "Dropbox Sign",
+        "module": "src/lib/candidate-onboarding-send-queue/execute-onboarding-send.ts",
+        "description": "prepareOnboardingSend → executeOnboardingSend; updates workflow + onboarding status.",
+        "dependencies": ["Dropbox Sign API", "template registry", "onboarding records"]
+      },
+      {
+        "step": 11,
+        "name": "Audit Logging",
+        "module": ".data/p97-approval-audit.jsonl, .data/p100-controlled-live-send-audit.jsonl, runner audit",
+        "description": "Append-only local audit trails for approval persistence and live sends.",
+        "dependencies": ["local disk", "no remote replication"]
+      },
+      {
+        "step": 12,
+        "name": "Ready For Onboarding",
+        "module": "src/lib/candidate-onboarding-engine, workflow transitions",
+        "description": "Paperwork sent → signature tracking → onboarding pipeline reconciliation.",
+        "dependencies": ["Dropbox Sign webhooks", "workflow-onboarding-reconciliation"]
+      }
+    ],
+    "criticalIntegrationGap": {
+      "description": "P109 approved mappings are simulated in P110/P111–P115 but classifyPaperworkBlocker and resolveClosedAdProjectMapping do not load P109 records. Approvals in P113/P114 unlock eligibility only in dry-run overlay, not in live runner path.",
+      "evidence": [
+        "No P109 imports under src/lib/p106-autonomous-paperwork-engine or closed-ad-project-mapping",
+        "P110 artifact: 6 approved mappings, 20 still need recruiter review, 305 notApproved",
+        "P109 approval-bridge documents unapprovedReviewBlocked but runner uses P106 heuristics only"
+      ]
+    }
+  },
+  "safetyReview": {
+    "protections": [
+      { "id": "duplicate_risk", "status": "present", "location": "classify-paperwork-blocker.ts + duplicatePaperworkSendBlockReason", "notes": "Blocks before mapping and send." },
+      { "id": "already_sent", "status": "present", "location": "classify-paperwork-blocker.ts, controlled-live-send, P100 state", "notes": "P100 sentCandidateIds + workflow paperwork status." },
+      { "id": "invalid_email", "status": "present", "location": "validateCohortEmail in classify-paperwork-blocker", "notes": "Checked before mapping." },
+      { "id": "project_not_mappable", "status": "present", "location": "resolve-closed-ad-project-mapping → classify-paperwork-blocker", "notes": "No high-confidence published match." },
+      { "id": "project_mapping_review", "status": "present", "location": "resolve-closed-ad-project-mapping medium confidence", "notes": "Distinct from P108 REVIEW queue; heuristic-based." },
+      { "id": "unpublished_job", "status": "partial", "location": "PaperworkBlockerCategory type + metrics", "notes": "Often surfaced as project_not_mappable rather than explicit unpublished_job category in classifier." },
+      { "id": "audit_logging", "status": "present", "location": "P97/P100 JSONL, runner audit", "notes": "Local only; no centralized SIEM." },
+      { "id": "dryRun_protections", "status": "present", "location": "P106_DEFAULT_MODE, runner mapRunnerModeToEngineMode", "notes": "dryRun/fullReconciliation never maps to executeOne." },
+      { "id": "executeOne_isolation", "status": "present", "location": "run-autonomous-paperwork-engine maxSends=1", "notes": "executeBatch disabled in P106.3 production policy." },
+      { "id": "operator_checklist", "status": "present", "location": "src/lib/live-send-operator-checklist", "notes": "P101 panel + API; manual executive steps." },
+      { "id": "approval_bridge", "status": "partial", "location": "P109 approval-bridge.ts", "notes": "Bridge exists for workflow UI; not consumed by live classifier." },
+      { "id": "local_approval_storage", "status": "present", "location": ".data/p109-project-mapping-review-decisions.json", "notes": "Single-node; not replicated." },
+      { "id": "runner_scheduling", "status": "present", "location": "AUTONOMOUS_PAPERWORK_RUNNER_SCHEDULE_ENABLED", "notes": "Off unless explicitly true." },
+      { "id": "environment_flags", "status": "present", "location": "AUTONOMOUS_PAPERWORK_RUNNER_LIVE_MODE, P84 feature flags", "notes": "Live mode null in all P109–P115 artifacts." }
+    ],
+    "missingOrWeakProtections": [
+      {
+        "id": "p109_runner_integration",
+        "severity": "critical",
+        "description": "Recruiter-approved mappings do not override project_not_mappable / project_mapping_review in live P106 path."
+      },
+      {
+        "id": "production_alerting",
+        "severity": "high",
+        "description": "No automated alerts on send failure, runner errors, or audit anomalies."
+      },
+      {
+        "id": "audit_replication",
+        "severity": "medium",
+        "description": "P97/P100/runner audits are local JSONL without backup or tamper detection."
+      },
+      {
+        "id": "mapping_engine_consistency",
+        "severity": "medium",
+        "description": "P108 intelligent scoring and P106 closed-ad heuristics can disagree; operators may approve in P109 while runner still blocks."
+      },
+      {
+        "id": "overlay_vs_full_eligibility",
+        "severity": "medium",
+        "description": "P110 newly_eligible_via_approval clears mapping gate only; candidates may still fail missing_resume or p84_gate_failed after approval."
+      }
+    ]
+  },
+  "productionBlockers": [
+    {
+      "priority": "Critical",
+      "id": "p109_not_wired_to_runner",
+      "description": "P113/P114 local approvals (6 candidates) do not affect classifyPaperworkBlocker or resolveClosedAdProjectMapping in the live runner.",
+      "riskIfIgnored": "Operators believe approved mappings will send; runner continues blocking project_not_mappable/project_mapping_review for same candidates.",
+      "recommendedSolution": "Integrate resolveApprovedMapping overlay into classify-paperwork-blocker (mirror P110 simulation) behind explicit feature flag; keep protection order.",
+      "estimatedEffort": "3–5 engineering days + regression tests"
+    },
+    {
+      "priority": "Critical",
+      "id": "mapping_review_backlog",
+      "description": "P110: 20 closed-ad candidates need recruiter review; P115: 6 REVIEW FIRST bulk groups affecting 30 candidates; 121 pending per P113 post-approval metrics.",
+      "riskIfIgnored": "Large closed-ad cohort cannot auto-advance; manual triage load remains extreme.",
+      "recommendedSolution": "Complete individual/bulk review for SAFE paths; reject or skip low-confidence groups (e.g. Elko NV per P115); wire approvals to runner after integration.",
+      "estimatedEffort": "1–2 recruiter weeks + ongoing automation"
+    },
+    {
+      "priority": "Critical",
+      "id": "executive_gates_not_cleared",
+      "description": "Live executeOne requires P99 readiness, P97 audit/rollback, P84 liveSend flags, and P101 operator checklist GO.",
+      "riskIfIgnored": "Uncontrolled live send or bypass of executive approval chain.",
+      "recommendedSolution": "Run P101 checklist; complete P99 POST; enable P84 only after dry-run cohort validation.",
+      "estimatedEffort": "1 executive session + validation run"
+    },
+    {
+      "priority": "High",
+      "id": "dual_mapping_engines",
+      "description": "P106 closed-ad title match vs P108 weighted scoring produce different recommendations and confidence.",
+      "riskIfIgnored": "Recruiter confusion, duplicate review work, incorrect bulk approvals.",
+      "recommendedSolution": "Unify on P108 scoring for closed-ad resolution or document authoritative source per gate.",
+      "estimatedEffort": "5–8 engineering days"
+    },
+    {
+      "priority": "High",
+      "id": "no_production_monitoring",
+      "description": "P107 paperwork monitor exists but no paging/alerting on runner failure, send errors, or stale ingestion.",
+      "riskIfIgnored": "Silent failures; candidates stuck without operator awareness.",
+      "recommendedSolution": "Wire monitor metrics to alerting (email/Slack); dashboard SLOs for runner health.",
+      "estimatedEffort": "2–4 engineering days"
+    },
+    {
+      "priority": "High",
+      "id": "local_state_single_node",
+      "description": "Ingestion, P109 approvals, P100 sent state, runner lock all in .data on one host.",
+      "riskIfIgnored": "Data loss or split-brain if multiple instances deploy.",
+      "recommendedSolution": "Document single-runner deployment; plan DB or object-store migration for production.",
+      "estimatedEffort": "1–2 weeks infrastructure"
+    },
+    {
+      "priority": "Medium",
+      "id": "post_mapping_gates",
+      "description": "Approved mappings may still leave candidates blocked on missing_resume, call_first_required, or p84_gate_failed.",
+      "riskIfIgnored": "False expectation that mapping approval equals send-ready.",
+      "recommendedSolution": "Executive UI should show full gate stack post-approval; extend P110 report to surface overlay blockers prominently.",
+      "estimatedEffort": "2–3 engineering days"
+    },
+    {
+      "priority": "Medium",
+      "id": "breezy_sync_dependency",
+      "description": "Runner cycle depends on Breezy ingestion; sync warnings do not halt cycle.",
+      "riskIfIgnored": "Stale job/candidate data leads to wrong mapping or send attempts.",
+      "recommendedSolution": "Hard-fail runner when sync fails in live mode; surface capture health in operator checklist.",
+      "estimatedEffort": "1–2 engineering days"
+    },
+    {
+      "priority": "Low",
+      "id": "experimental_scripts_in_tree",
+      "description": "scripts/p102-execute-one-live-send.ts and many p6x–p10x validation scripts are not production entrypoints.",
+      "riskIfIgnored": "Operator runs wrong script in production.",
+      "recommendedSolution": "Document canonical runbook; move experimental scripts to scripts/experimental/ or archive.",
+      "estimatedEffort": "0.5–1 day"
+    }
+  ],
+  "operationalReadiness": {
+    "recruitersCanOperateRealistically": false,
+    "summary": "UI supports individual and bulk mapping review, but 121 pending items, 6 REVIEW FIRST groups with no splittable SAFE subgroups, and disconnect between approvals and runner blockers make fully autonomous operation unrealistic today.",
+    "areas": {
+      "projectMappingWorkflow": { "status": "PARTIAL", "notes": "P108 panel + P109 workflow panel; large backlog." },
+      "bulkApprovals": { "status": "PARTIAL", "notes": "P111–P114 SAFE path proven for 6 candidates; P115 blocks bulk for 30 borderline candidates." },
+      "individualApprovals": { "status": "COMPLETE", "notes": "P109 store + API functional; local only." },
+      "executiveVisibility": { "status": "PARTIAL", "notes": "Many executive panels; no single production readiness dashboard." },
+      "monitoring": { "status": "NOT_READY", "notes": "P107 monitor dry-run; no production alerting." },
+      "failureRecovery": { "status": "PARTIAL", "notes": "P97 rollback artifacts; manual procedures." },
+      "rollbackPlan": { "status": "PARTIAL", "notes": "P97 rollback JSONL exists; not validated in prod." },
+      "alerting": { "status": "NOT_READY", "notes": "No automated alerts." },
+      "auditTrail": { "status": "PARTIAL", "notes": "P97/P100/runner local JSONL; not replicated." }
+    }
+  },
+  "codeQuality": {
+    "testCount": 625,
+    "testSuites": 141,
+    "findings": [
+      { "category": "duplicate_logic", "severity": "medium", "detail": "Closed-ad mapping (P106) vs intelligent mapping (P108) overlap." },
+      { "category": "experimental_files", "severity": "low", "detail": "scripts/p102-execute-one-live-send.ts untracked; 50+ phase validation scripts." },
+      { "category": "temporary_workarounds", "severity": "low", "detail": "src/lib/dropbox-sign-debug.ts, candidates-client-trace.ts marked temporary." },
+      { "category": "generated_artifacts", "severity": "low", "detail": "Large JSON artifacts (p111–p115) committed for phase validation; consider CI artifacts only." },
+      { "category": "dead_code_risk", "severity": "low", "detail": "Legacy autonomous-paperwork-engine/execution-engine modules parallel P106 path." }
+    ],
+    "cleanupRecommendations": [
+      "Consolidate mapping engines or document single source of truth.",
+      "Archive or namespace experimental scripts.",
+      "Remove temporary debug modules after send flow stable.",
+      "Add P116-style audit script to CI without modifying production code paths."
+    ]
+  },
+  "goLiveChecklist": [
+    { "item": "Environment variables configured (Breezy, Dropbox Sign, runner flags)", "status": "PARTIAL", "notes": ".env.local pattern; production secrets management not audited." },
+    { "item": "Runner schedule enabled", "status": "NOT_READY", "notes": "AUTONOMOUS_PAPERWORK_RUNNER_SCHEDULE_ENABLED=false by default." },
+    { "item": "Live executeOne enabled", "status": "NOT_READY", "notes": "AUTONOMOUS_PAPERWORK_RUNNER_LIVE_MODE unset; P84 liveSend off." },
+    { "item": "Operator checklist approved (P101 GO)", "status": "NOT_READY", "notes": "Requires P97/P99/P100/P84 gates." },
+    { "item": "Mapping approvals complete for target cohort", "status": "NOT_READY", "notes": "6 approved locally; 121+ pending; P109 not wired to runner." },
+    { "item": "P109 → P106 runner integration verified", "status": "NOT_READY", "notes": "Critical gap; dry-run only today." },
+    { "item": "Monitoring enabled", "status": "NOT_READY", "notes": "P107 dry-run monitor only." },
+    { "item": "Rollback plan verified", "status": "PARTIAL", "notes": "P97 rollback artifact path exists." },
+    { "item": "Dropbox Sign validated in target environment", "status": "PARTIAL", "notes": "Tests exist; prod validation not confirmed in audit." },
+    { "item": "Audit logging verified", "status": "PARTIAL", "notes": "P97/P100 paths wired; replication missing." },
+    { "item": "Executive dashboard verified", "status": "PARTIAL", "notes": "Panels present; production readiness view incomplete." },
+    { "item": "Protection order regression tests passing", "status": "COMPLETE", "notes": "625 tests pass including P106/P109/P110/P111–P115." },
+    { "item": "executeBatch disabled in production", "status": "COMPLETE", "notes": "P106.3 policy enforced." },
+    { "item": "REVIEW FIRST bulk groups triaged", "status": "NOT_READY", "notes": "6 groups / 30 candidates per P115." }
+  ],
+  "evidenceArtifacts": {
+    "p110": "artifacts/p110-approved-mapping-integration-dryrun.json",
+    "p113": "artifacts/p113-first-safe-bulk-approval.json",
+    "p114": "artifacts/p114-remaining-safe-bulk-approvals.json",
+    "p115": "artifacts/p115-review-first-risk-breakdown.json",
+    "p112": "artifacts/p112-bulk-approval-impact-validation.json"
+  },
+  "validation": {
+    "npmTest": { "passed": true, "tests": 625, "suites": 141 },
+    "npmBuild": { "passed": true },
+    "codeChanges": false,
+    "notes": "Read-only audit; no production behavior modified."
+  },
+  "warnings": [
+    "P116 — read-only engineering audit after P106–P115.",
+    "P116 — no sends, no Breezy writes, no live mode enabled.",
+    "P116 — findings based on codebase inspection and committed phase artifacts."
+  ]
+}

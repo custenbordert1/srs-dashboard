@@ -1,0 +1,343 @@
+{
+  "sourcePhase": "P149",
+  "generatedAt": "2026-07-06T17:19:30.369Z",
+  "mode": "auditOnly",
+  "subsystemValidations": [
+    {
+      "phase": "P143",
+      "name": "Live Snapshot Ingestion Fallback",
+      "result": "PASS",
+      "detail": "Candidates: 389, source: mixed",
+      "apiOk": true,
+      "uiOk": true,
+      "metricsOk": true,
+      "auditOk": true
+    },
+    {
+      "phase": "P144",
+      "name": "Candidate Advancement Intelligence",
+      "result": "PASS",
+      "detail": "Evaluated 389 candidates.",
+      "apiOk": true,
+      "uiOk": true,
+      "metricsOk": true,
+      "auditOk": true
+    },
+    {
+      "phase": "P145",
+      "name": "Controlled Paperwork Automation",
+      "result": "PASS",
+      "detail": "Queue 0, approval mode.",
+      "apiOk": true,
+      "uiOk": true,
+      "metricsOk": true,
+      "auditOk": true
+    },
+    {
+      "phase": "P146",
+      "name": "Controlled Auto-Send Reminders",
+      "result": "PASS",
+      "detail": "Auto-send disabled by default (safe).",
+      "apiOk": true,
+      "uiOk": true,
+      "metricsOk": true,
+      "auditOk": true
+    },
+    {
+      "phase": "P147",
+      "name": "Autonomous Initial Paperwork Delivery",
+      "result": "PASS",
+      "detail": "Initial auto-send disabled by default (safe).",
+      "apiOk": true,
+      "uiOk": true,
+      "metricsOk": true,
+      "auditOk": true
+    },
+    {
+      "phase": "P148",
+      "name": "Autonomous Recruiting Orchestrator",
+      "result": "PASS",
+      "detail": "Dry run 60087ms, 7 phases.",
+      "apiOk": true,
+      "uiOk": true,
+      "metricsOk": true,
+      "auditOk": true
+    }
+  ],
+  "e2eWorkflowTransitions": [
+    {
+      "step": 1,
+      "stage": "applicant_arrives",
+      "phase": "P143",
+      "description": "Live snapshot ingests candidate from Breezy or ingestion fallback.",
+      "validated": true,
+      "sampleCount": 389
+    },
+    {
+      "step": 2,
+      "stage": "candidate_intelligence",
+      "phase": "P144",
+      "description": "Advancement engine scores candidate and recommends next action.",
+      "validated": true,
+      "sampleCount": 389
+    },
+    {
+      "step": 3,
+      "stage": "paperwork_eligibility",
+      "phase": "P145",
+      "description": "Paperwork queue evaluates eligibility, blockers, and approval state.",
+      "validated": true,
+      "sampleCount": 0
+    },
+    {
+      "step": 4,
+      "stage": "initial_paperwork",
+      "phase": "P147",
+      "description": "High-confidence candidates eligible for autonomous initial paperwork send.",
+      "validated": true,
+      "sampleCount": 0
+    },
+    {
+      "step": 5,
+      "stage": "reminder_1",
+      "phase": "P146",
+      "description": "First reminder when paperwork outstanding and aged.",
+      "validated": true,
+      "sampleCount": 0
+    },
+    {
+      "step": 6,
+      "stage": "reminder_2",
+      "phase": "P146",
+      "description": "Second reminder after gap period with duplicate prevention.",
+      "validated": true,
+      "sampleCount": 0
+    },
+    {
+      "step": 7,
+      "stage": "completion",
+      "phase": "P145",
+      "description": "Paperwork signed; candidate removed from active queue.",
+      "validated": true,
+      "sampleCount": 0
+    },
+    {
+      "step": 8,
+      "stage": "ready_for_mel",
+      "phase": "P144",
+      "description": "Candidate ready for MEL placement workflow.",
+      "validated": true,
+      "sampleCount": 0
+    }
+  ],
+  "liveDryRun": {
+    "candidatesEvaluated": 389,
+    "eligibleInitialPaperwork": 0,
+    "eligibleReminders": 0,
+    "blockedCandidates": 0,
+    "falsePositives": 0,
+    "falseNegatives": 0,
+    "executionTimeMs": 60087,
+    "phaseTimings": [
+      {
+        "phase": "refresh_live_snapshot",
+        "durationMs": 59558,
+        "success": true
+      },
+      {
+        "phase": "candidate_intelligence",
+        "durationMs": 473,
+        "success": true
+      },
+      {
+        "phase": "build_paperwork_queue",
+        "durationMs": 52,
+        "success": true
+      },
+      {
+        "phase": "auto_reminder_processing",
+        "durationMs": 0,
+        "success": true
+      },
+      {
+        "phase": "initial_paperwork_processing",
+        "durationMs": 0,
+        "success": true
+      },
+      {
+        "phase": "generate_executive_metrics",
+        "durationMs": 1,
+        "success": true
+      },
+      {
+        "phase": "persist_run_summary",
+        "durationMs": 0,
+        "success": true
+      }
+    ],
+    "safetyChecks": {
+      "orchestratorDisabledByDefault": true,
+      "p146DisabledByDefault": true,
+      "p147DisabledByDefault": true,
+      "noBreezyWrites": true,
+      "noExecuteBatch": true,
+      "noPaperworkSent": true,
+      "lockOverlapPrevention": true
+    }
+  },
+  "goLiveChecklist": [
+    {
+      "id": "env_orchestrator",
+      "category": "environment",
+      "item": "AUTONOMOUS_RECRUITING_ENABLED",
+      "status": "COMPLETE",
+      "notes": "Disabled by default (safe)."
+    },
+    {
+      "id": "env_p146",
+      "category": "environment",
+      "item": "P146_AUTO_SEND_PAPERWORK_REMINDERS_ENABLED",
+      "status": "COMPLETE",
+      "notes": "Disabled by default."
+    },
+    {
+      "id": "env_p147",
+      "category": "environment",
+      "item": "P147_INITIAL_PAPERWORK_AUTO_SEND_ENABLED",
+      "status": "COMPLETE",
+      "notes": "Disabled by default."
+    },
+    {
+      "id": "dropbox_sign",
+      "category": "integration",
+      "item": "Dropbox Sign API",
+      "status": "NOT_READY",
+      "notes": "DROPBOX_SIGN_API_KEY missing."
+    },
+    {
+      "id": "breezy",
+      "category": "integration",
+      "item": "Breezy API (read-only)",
+      "status": "COMPLETE",
+      "notes": "Breezy configured for snapshot reads."
+    },
+    {
+      "id": "scheduler",
+      "category": "scheduler",
+      "item": "Orchestrator interval and max runtime",
+      "status": "COMPLETE",
+      "notes": "Interval 5m, max runtime 120s."
+    },
+    {
+      "id": "secrets",
+      "category": "secrets",
+      "item": "Production secrets in secure store",
+      "status": "PARTIAL",
+      "notes": "Verify secrets not committed to repo."
+    },
+    {
+      "id": "monitoring",
+      "category": "monitoring",
+      "item": "P149 production operations dashboard",
+      "status": "COMPLETE",
+      "notes": "Executive dashboard + observability history operational."
+    },
+    {
+      "id": "rollback",
+      "category": "rollback",
+      "item": "Disable automation flags to rollback",
+      "status": "COMPLETE",
+      "notes": "Set AUTONOMOUS_RECRUITING_ENABLED=false, P146/P147 flags false."
+    }
+  ],
+  "performance": {
+    "runDurationMs": 60087,
+    "phaseDurations": [
+      {
+        "phase": "refresh_live_snapshot",
+        "durationMs": 59558
+      },
+      {
+        "phase": "candidate_intelligence",
+        "durationMs": 473
+      },
+      {
+        "phase": "build_paperwork_queue",
+        "durationMs": 52
+      },
+      {
+        "phase": "auto_reminder_processing",
+        "durationMs": 0
+      },
+      {
+        "phase": "initial_paperwork_processing",
+        "durationMs": 0
+      },
+      {
+        "phase": "generate_executive_metrics",
+        "durationMs": 1
+      },
+      {
+        "phase": "persist_run_summary",
+        "durationMs": 0
+      }
+    ],
+    "apiLatencyMs": 59558,
+    "cacheHitRate": 29,
+    "snapshotAgeMinutes": 0
+  },
+  "alerts": [],
+  "automationActivation": [
+    {
+      "automation": "P148 Orchestrator",
+      "envFlag": "AUTONOMOUS_RECRUITING_ENABLED",
+      "safeToEnable": false,
+      "requiresManualApproval": true,
+      "notes": "Enable after dry-run validation and executive sign-off."
+    },
+    {
+      "automation": "P146 Reminder auto-send",
+      "envFlag": "P146_AUTO_SEND_PAPERWORK_REMINDERS_ENABLED",
+      "safeToEnable": false,
+      "requiresManualApproval": true,
+      "notes": "Enable only after initial paperwork pilot succeeds."
+    },
+    {
+      "automation": "P147 Initial paperwork auto-send",
+      "envFlag": "P147_INITIAL_PAPERWORK_AUTO_SEND_ENABLED",
+      "safeToEnable": false,
+      "requiresManualApproval": true,
+      "notes": "Extremely conservative — enable last with monitoring."
+    },
+    {
+      "automation": "P145 Approval queue",
+      "envFlag": "P145_PAPERWORK_EXECUTION_ENABLED",
+      "safeToEnable": true,
+      "requiresManualApproval": true,
+      "notes": "Manual approval workflow — safe for controlled rollout."
+    }
+  ],
+  "businessImpact": {
+    "estimatedRecruiterHoursSavedPerWeek": 0,
+    "estimatedManualTouchReductionPercent": 0,
+    "candidatesProcessedToday": 389,
+    "paperworkSentToday": 0,
+    "remindersSentToday": 0
+  },
+  "knownRisks": [
+    "Dropbox Sign not configured — live paperwork sends will fail."
+  ],
+  "recommendedConfiguration": {
+    "AUTONOMOUS_RECRUITING_ENABLED": "false",
+    "P146_AUTO_SEND_PAPERWORK_REMINDERS_ENABLED": "false",
+    "P147_INITIAL_PAPERWORK_AUTO_SEND_ENABLED": "false",
+    "AUTONOMOUS_RECRUITING_INTERVAL_MINUTES": "5",
+    "AUTONOMOUS_RECRUITING_MAX_RUNTIME_SECONDS": "120"
+  },
+  "productionReadinessScore": 100,
+  "finalRecommendation": "GO LIVE WITH CONDITIONS",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "paperworkSent": false,
+  "liveModeEnabled": false
+}

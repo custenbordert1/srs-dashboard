@@ -1,0 +1,285 @@
+{
+  "sourcePhase": "P144",
+  "generatedAt": "2026-07-06T14:50:55.867Z",
+  "productionReadiness": {
+    "recommendation": "READY WITH CONDITIONS",
+    "score": 99,
+    "checks": {
+      "everyCandidateScored": true,
+      "hireProbabilityPresent": true,
+      "nextActionPresent": true,
+      "automationPreviewPopulated": true,
+      "executiveMetricsPresent": true,
+      "apiPartialDegrades": true,
+      "readOnlyConfirmed": true
+    }
+  },
+  "validation": {
+    "topAutomationCandidates": [],
+    "topManualReviewCandidates": [
+      {
+        "candidateId": "20b7653c6612",
+        "candidateName": "Beth chabot",
+        "positionName": "FIELD MERCHANDISER",
+        "projectName": null,
+        "recruiter": "Unassigned",
+        "dm": "Unassigned",
+        "workflowStatus": "Needs Review",
+        "stageAgeDays": 767,
+        "advancementScore": 42,
+        "scoreFactors": {
+          "questionnaireQuality": 8,
+          "resumeQuality": 0,
+          "relevantExperience": 5,
+          "distance": 10,
+          "coverageNeed": 6,
+          "projectPriority": 2,
+          "stageAging": 4,
+          "communicationActivity": 4,
+          "paperworkProgress": 2,
+          "responsiveness": 1
+        },
+        "confidence": 25,
+        "estimatedHireProbability": 10,
+        "nextAction": "Assign Recruiter",
+        "urgency": "critical",
+        "automationEligible": false,
+        "automationExplanation": "Manual review required — automation blocked.",
+        "blockers": [
+          "Missing Resume",
+          "Project Closed",
+          "No Published Job",
+          "Manual Review Required"
+        ],
+        "reason": "Advancement score 42/100. Awaiting recruiter assignment before advancement. Blockers: Missing Resume, Project Closed, No Published Job, Manual Review Required.",
+        "recommendedRecruiterAction": "Assign recruiter owner before next touch",
+        "coverageNeedScore": 55,
+        "automationPreviewApproved": null,
+        "automationPreviewRejected": null
+      },
+      {
+        "candidateId": "e8d0f83be9b5",
+        "candidateName": "robert williams",
+        "positionName": "FIELD MERCHANDISER",
+        "projectName": null,
+        "recruiter": "Unassigned",
+        "dm": "Unassigned",
+        "workflowStatus": "Needs Review",
+        "stageAgeDays": 863,
+        "advancementScore": 42,
+        "scoreFactors": {
+          "questionnaireQuality": 8,
+          "resumeQuality": 0,
+          "relevantExperience": 5,
+          "distance": 10,
+          "coverageNeed": 6,
+          "projectPriority": 2,
+          "stageAging": 4,
+          "communicationActivity": 4,
+          "paperworkProgress": 2,
+          "responsiveness": 1
+        },
+        "confidence": 25,
+        "estimatedHireProbability": 10,
+        "nextAction": "Assign Recruiter",
+        "urgency": "critical",
+        "automationEligible": false,
+        "automationExplanation": "Manual review required — automation blocked.",
+        "blockers": [
+          "Missing Resume",
+          "Project Closed",
+          "No Published Job",
+          "Manual Review Required"
+        ],
+        "reason": "Advancement score 42/100. Awaiting recruiter assignment before advancement. Blockers: Missing Resume, Project Closed, No Published Job, Manual Review Required.",
+        "recommendedRecruiterAction": "Assign recruiter owner before next touch",
+        "coverageNeedScore": 55,
+        "automationPreviewApproved": null,
+        "automationPreviewRejected": null
+      },
+      {
+        "candidateId": "ce3c553c31c7",
+        "candidateName": "Lisa Eirich",
+        "positionName": "FIELD MERCHANDISER",
+        "projectName": null,
+        "recruiter": "Unassigned",
+        "dm": "Unassigned",
+        "workflowStatus": "Needs Review",
+        "stageAgeDays": 884,
+        "advancementScore": 42,
+        "scoreFactors": {
+          "questionnaireQuality": 8,
+          "resumeQuality": 0,
+          "relevantExperience": 5,
+          "distance": 10,
+          "coverageNeed": 6,
+          "projectPriority": 2,
+          "stageAging": 4,
+          "communicationActivity": 4,
+          "paperworkProgress": 2,
+          "responsiveness": 1
+        },
+        "confidence": 25,
+        "estimatedHireProbability": 10,
+        "nextAction": "Assign Recruiter",
+        "urgency": "critical",
+        "automationEligible": false,
+        "automationExplanation": "Manual review required — automation blocked.",
+        "blockers": [
+          "Missing Resume",
+          "Project Closed",
+          "No Published Job",
+          "Manual Review Required"
+        ],
+        "reason": "Advancement score 42/100. Awaiting recruiter assignment before advancement. Blockers: Missing Resume, Project Closed, No Published Job, Manual Review Required.",
+        "recommendedRecruiterAction": "Assign recruiter owner before next touch",
+        "coverageNeedScore": 55,
+        "automationPreviewApproved": null,
+        "automationPreviewRejected": null
+      }
+    ],
+    "averageAdvancementScore": 50,
+    "averageHireProbability": 21,
+    "distributionByRecruiter": [
+      {
+        "recruiter": "Unassigned",
+        "count": 383,
+        "avgScore": 49
+      },
+      {
+        "recruiter": "Taylor",
+        "count": 6,
+        "avgScore": 66
+      }
+    ],
+    "distributionByProject": [
+      {
+        "project": "Unknown",
+        "count": 355,
+        "avgScore": 50
+      },
+      {
+        "project": "Retail Merchandiser - Western PA & WV Area",
+        "count": 5,
+        "avgScore": 46
+      },
+      {
+        "project": "Store Merchandiser – N Little Rock, AR",
+        "count": 4,
+        "avgScore": 66
+      },
+      {
+        "project": "Retail Merchandiser - Metro East Illinois Territory",
+        "count": 2,
+        "avgScore": 45
+      },
+      {
+        "project": "In-Store Merchandiser — Massena, NY",
+        "count": 2,
+        "avgScore": 44
+      },
+      {
+        "project": "Flexible Store Retail Merchandiser Ontario, OR",
+        "count": 2,
+        "avgScore": 45
+      },
+      {
+        "project": "Retail Service Representative – Central Kentucky Market",
+        "count": 1,
+        "avgScore": 45
+      },
+      {
+        "project": "Retail Project Specialist – Greater Atlanta Territory",
+        "count": 1,
+        "avgScore": 45
+      },
+      {
+        "project": "Retail Merchandiser – Savannah Metro North Territory",
+        "count": 1,
+        "avgScore": 45
+      },
+      {
+        "project": "Independent Retail Reset Representative – Dothan Market",
+        "count": 1,
+        "avgScore": 46
+      },
+      {
+        "project": "Retail Merchandiser - Lorain County Area",
+        "count": 1,
+        "avgScore": 45
+      },
+      {
+        "project": "Retail Merchandiser - Cleveland Southwest Area",
+        "count": 1,
+        "avgScore": 45
+      },
+      {
+        "project": "Retail Merchandiser - Vandalia Merchandising Representative",
+        "count": 1,
+        "avgScore": 44
+      },
+      {
+        "project": "Retail Merchandiser - Champaign-Urbana Territory",
+        "count": 1,
+        "avgScore": 45
+      },
+      {
+        "project": "Store Merchandiser Brinkley, AR",
+        "count": 1,
+        "avgScore": 44
+      }
+    ],
+    "pipelineBottlenecks": [
+      "Applied: 361 candidate(s)",
+      "Qualified: 25 candidate(s)",
+      "Needs Review: 3 candidate(s)"
+    ],
+    "largestBlockers": [
+      {
+        "blocker": "Project Closed",
+        "count": 355
+      },
+      {
+        "blocker": "No Published Job",
+        "count": 355
+      },
+      {
+        "blocker": "Missing Resume",
+        "count": 269
+      },
+      {
+        "blocker": "Missing Questionnaire",
+        "count": 32
+      },
+      {
+        "blocker": "Already Contacted",
+        "count": 6
+      },
+      {
+        "blocker": "Manual Review Required",
+        "count": 3
+      }
+    ],
+    "automationEligibleCount": 0
+  },
+  "executive": {
+    "automationCandidatesToday": 0,
+    "readyToAdvance": 0,
+    "manualReviewQueue": 3,
+    "highestProbabilityHires": 0,
+    "highestRiskCandidates": 383,
+    "averageAdvancementScore": 50,
+    "averageHireProbability": 21,
+    "pipelineHealthScore": 48
+  },
+  "automationPreviewQueueCount": 0,
+  "candidatesEvaluated": 389,
+  "partialSync": true,
+  "safetyConfirmation": {
+    "executeBatchCalled": false,
+    "breezyWrites": false,
+    "paperworkSent": false,
+    "liveModeEnabled": false,
+    "previewOnlyQueue": true
+  }
+}

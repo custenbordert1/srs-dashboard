@@ -1,0 +1,260 @@
+{
+  "sourcePhase": "P137",
+  "generatedAt": "2026-07-02T15:55:49.173Z",
+  "mode": "previewOnly",
+  "p136Summary": {
+    "autoApprovedCount": 17,
+    "candidatesEvaluated": 389,
+    "schedulerLastCycleAt": "2026-07-02T15:31:40.351Z",
+    "readinessCount": 0
+  },
+  "autoApprovedCount": 17,
+  "selectedCandidate": {
+    "candidateId": "e72d6aebdb0d",
+    "candidateName": "Erica C Portolese",
+    "email": "gigizen8@gmail.com",
+    "approvalDecision": "AUTO_APPROVED",
+    "approvalScore": 93,
+    "eligibilityStatus": "BLOCKED",
+    "positionTitle": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+    "projectLabel": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+    "mappingSource": "native_published_job",
+    "templateKey": "onboarding_packet",
+    "selectionRank": 1,
+    "selectionReason": "Highest-ranked AUTO_APPROVED candidate by safety score (preview allowlist simulation).",
+    "safetyRankScore": 693,
+    "confirmations": {
+      "validEmail": true,
+      "noDuplicateRisk": true,
+      "noAlreadySent": true,
+      "publishedJobOrApprovedMapping": true,
+      "templateAvailable": true,
+      "cleanAuditHistory": true
+    }
+  },
+  "backupCandidates": [
+    {
+      "candidateId": "9f53ea634daf",
+      "candidateName": "Torrey Allen",
+      "email": "torreyshaeallen@gmail.com",
+      "approvalDecision": "AUTO_APPROVED",
+      "approvalScore": 93,
+      "eligibilityStatus": "BLOCKED",
+      "positionTitle": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+      "projectLabel": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+      "mappingSource": "native_published_job",
+      "templateKey": "onboarding_packet",
+      "selectionRank": 2,
+      "selectionReason": "Backup #1 — safety rank 693.",
+      "safetyRankScore": 693,
+      "confirmations": {
+        "validEmail": true,
+        "noDuplicateRisk": true,
+        "noAlreadySent": true,
+        "publishedJobOrApprovedMapping": true,
+        "templateAvailable": true,
+        "cleanAuditHistory": true
+      }
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "approvalDecision": "AUTO_APPROVED",
+      "approvalScore": 93,
+      "eligibilityStatus": "BLOCKED",
+      "positionTitle": "Store Merchandiser Brinkley, AR (Brinkley, AR)",
+      "projectLabel": "Store Merchandiser Brinkley, AR (Brinkley, AR)",
+      "mappingSource": "native_published_job",
+      "templateKey": "onboarding_packet",
+      "selectionRank": 3,
+      "selectionReason": "Backup #2 — safety rank 693.",
+      "safetyRankScore": 693,
+      "confirmations": {
+        "validEmail": true,
+        "noDuplicateRisk": true,
+        "noAlreadySent": true,
+        "publishedJobOrApprovedMapping": true,
+        "templateAvailable": true,
+        "cleanAuditHistory": true
+      }
+    },
+    {
+      "candidateId": "40764d83ef6d",
+      "candidateName": "Rimah Malley",
+      "email": "rimahmalley@gmail.com",
+      "approvalDecision": "AUTO_APPROVED",
+      "approvalScore": 93,
+      "eligibilityStatus": "WAITING_RECRUITER",
+      "positionTitle": "Retail Merchandiser – Frankfort, IL (Frankfort, IL)",
+      "projectLabel": "Retail Merchandiser – Frankfort, IL (Frankfort, IL)",
+      "mappingSource": "native_published_job",
+      "templateKey": "onboarding_packet",
+      "selectionRank": 4,
+      "selectionReason": "Backup #3 — safety rank 693.",
+      "safetyRankScore": 693,
+      "confirmations": {
+        "validEmail": true,
+        "noDuplicateRisk": true,
+        "noAlreadySent": true,
+        "publishedJobOrApprovedMapping": true,
+        "templateAvailable": true,
+        "cleanAuditHistory": true
+      }
+    }
+  ],
+  "safetyChecklist": {
+    "noBreezyWrites": true,
+    "executeOneOnly": true,
+    "pilotCapOne": true,
+    "operatorGoRequired": true,
+    "confirmationPhraseRequired": true,
+    "liveModeDisabledByDefault": true,
+    "executeBatchForbidden": true
+  },
+  "safetyChecks": [
+    {
+      "id": "pilot_enabled",
+      "label": "Live pilot enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true"
+    },
+    {
+      "id": "live_mode_enabled",
+      "label": "Live mode enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true"
+    },
+    {
+      "id": "operator_go",
+      "label": "Operator GO",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true"
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    },
+    {
+      "id": "dry_run_false",
+      "label": "dryRun is false",
+      "passed": false,
+      "detail": "Execution blocked — dryRun default prevents sends."
+    },
+    {
+      "id": "confirmation_phrase",
+      "label": "Confirmation phrase",
+      "passed": true,
+      "detail": "Not required for preview/dry-run."
+    },
+    {
+      "id": "on_allowlist",
+      "label": "Pilot allowlist",
+      "passed": true,
+      "detail": "Candidate is on pilot allowlist."
+    },
+    {
+      "id": "not_already_sent",
+      "label": "No already_sent record",
+      "passed": true,
+      "detail": "No prior send detected."
+    },
+    {
+      "id": "no_duplicate_risk",
+      "label": "No duplicate_risk",
+      "passed": true,
+      "detail": "Duplicate protection clear."
+    },
+    {
+      "id": "valid_email",
+      "label": "Valid email",
+      "passed": true,
+      "detail": "Email: gigizen8@gmail.com"
+    },
+    {
+      "id": "approved_mapping_or_native_project",
+      "label": "Approved mapping or native project",
+      "passed": true,
+      "detail": "Native published Breezy job match."
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    }
+  ],
+  "sendPacketPreview": {
+    "candidateId": "e72d6aebdb0d",
+    "candidateName": "Erica C Portolese",
+    "candidateEmail": "gigizen8@gmail.com",
+    "jobOrProject": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+    "paperworkTemplate": "onboarding_packet",
+    "approvalScore": 93,
+    "safetyChecks": [
+      {
+        "id": "on_allowlist",
+        "label": "Pilot allowlist",
+        "passed": true,
+        "detail": "Candidate is on pilot allowlist."
+      },
+      {
+        "id": "not_already_sent",
+        "label": "No already_sent record",
+        "passed": true,
+        "detail": "No prior send detected."
+      },
+      {
+        "id": "no_duplicate_risk",
+        "label": "No duplicate_risk",
+        "passed": true,
+        "detail": "Duplicate protection clear."
+      },
+      {
+        "id": "valid_email",
+        "label": "Valid email",
+        "passed": true,
+        "detail": "Email: gigizen8@gmail.com"
+      },
+      {
+        "id": "approved_mapping_or_native_project",
+        "label": "Approved mapping or native project",
+        "passed": true,
+        "detail": "Native published Breezy job match."
+      },
+      {
+        "id": "pilot_cap_available",
+        "label": "Pilot cap available",
+        "passed": true,
+        "detail": "0/1 pilot sends used."
+      },
+      {
+        "id": "approval_score",
+        "label": "Approval score",
+        "passed": true,
+        "detail": "93 (AUTO_APPROVED threshold 90)"
+      }
+    ],
+    "auditDestination": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl"
+  },
+  "auditPath": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl",
+  "exactEnvVarsNeeded": {
+    "AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED": "true",
+    "AUTONOMOUS_PAPERWORK_LIVE_MODE": "true",
+    "AUTONOMOUS_PAPERWORK_OPERATOR_GO": "true",
+    "AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST": "e72d6aebdb0d",
+    "AUTONOMOUS_PAPERWORK_PILOT_MAX_SENDS": "1"
+  },
+  "allowlistCommand": "export AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST=\"e72d6aebdb0d\"",
+  "finalLiveCommand": "npx tsx scripts/p122-controlled-live-paperwork-pilot.ts --execute --confirm \"SEND 1 PAPERWORK PACKET\" --candidate-id e72d6aebdb0d",
+  "confirmationPhrase": "SEND 1 PAPERWORK PACKET",
+  "goNoGo": "GO WITH CONDITIONS",
+  "goNoGoReason": "AUTO_APPROVED candidate selected — enable pilot env vars, operator GO, and confirmation phrase before executeOne.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false,
+  "continuousRunnerEnabled": false
+}

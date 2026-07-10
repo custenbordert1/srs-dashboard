@@ -1,0 +1,250 @@
+{
+  "sourcePhase": "P139",
+  "generatedAt": "2026-07-02T18:38:56.004Z",
+  "mode": "runbookOnly",
+  "operator": "Taylor",
+  "candidate": {
+    "candidateId": "e72d6aebdb0d",
+    "candidateName": "Erica C Portolese",
+    "email": "gigizen8@gmail.com",
+    "phone": "3152506894",
+    "breezyJobOrProject": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+    "dropboxSignTemplate": "Onboarding Packet",
+    "dropboxSignTemplateKey": "onboarding_packet",
+    "approvalScore": 93,
+    "p124ApprovalDecision": "AUTO_APPROVED",
+    "positionId": "dcf114d05f31"
+  },
+  "p137ReadinessStatus": {
+    "goNoGo": "GO WITH CONDITIONS",
+    "goNoGoReason": "AUTO_APPROVED candidate selected — enable pilot env vars, operator GO, and confirmation phrase before executeOne.",
+    "designatedTargetInAutoApprovedCohort": true,
+    "isP137PrimarySelection": false,
+    "safetyRankScore": 693,
+    "confirmations": {
+      "validEmail": true,
+      "noDuplicateRisk": true,
+      "noAlreadySent": true,
+      "publishedJobOrApprovedMapping": true,
+      "templateAvailable": true,
+      "cleanAuditHistory": true
+    }
+  },
+  "p138VerificationStatus": {
+    "overallResult": "FAIL",
+    "goNoGo": "FAIL",
+    "goNoGoReason": "Verification failed — 6 check(s) did not pass.",
+    "pilotLockApplied": false,
+    "note": "Expected before live send — re-run P138 after P122 executeOne completes."
+  },
+  "safetyChecklist": [
+    {
+      "id": "pilot_enabled",
+      "label": "Live pilot enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true"
+    },
+    {
+      "id": "live_mode_enabled",
+      "label": "Live mode enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true"
+    },
+    {
+      "id": "operator_go",
+      "label": "Operator GO",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true"
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    },
+    {
+      "id": "dry_run_false",
+      "label": "dryRun is false",
+      "passed": false,
+      "detail": "Execution blocked — dryRun default prevents sends."
+    },
+    {
+      "id": "confirmation_phrase",
+      "label": "Confirmation phrase",
+      "passed": true,
+      "detail": "Not required for preview/dry-run."
+    },
+    {
+      "id": "on_allowlist",
+      "label": "Pilot allowlist",
+      "passed": true,
+      "detail": "Candidate is on pilot allowlist."
+    },
+    {
+      "id": "not_already_sent",
+      "label": "No already_sent record",
+      "passed": true,
+      "detail": "No prior send detected."
+    },
+    {
+      "id": "no_duplicate_risk",
+      "label": "No duplicate_risk",
+      "passed": true,
+      "detail": "Duplicate protection clear."
+    },
+    {
+      "id": "valid_email",
+      "label": "Valid email",
+      "passed": true,
+      "detail": "Email: landrydistribution@yahoo.com"
+    },
+    {
+      "id": "approved_mapping_or_native_project",
+      "label": "Approved mapping or native project",
+      "passed": true,
+      "detail": "Native published Breezy job match."
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    },
+    {
+      "id": "no_execute_batch",
+      "label": "No executeBatch",
+      "passed": true,
+      "detail": "executeOne only — executeBatch forbidden."
+    },
+    {
+      "id": "no_breezy_writes",
+      "label": "No Breezy writes from automation",
+      "passed": true,
+      "detail": "Taylor verifies in Breezy UI; automation is read-only."
+    },
+    {
+      "id": "pilot_cap_one",
+      "label": "Pilot cap = 1",
+      "passed": true,
+      "detail": "maxSends=1"
+    },
+    {
+      "id": "live_mode_off_by_default",
+      "label": "Live mode disabled by default",
+      "passed": true,
+      "detail": "Live mode off."
+    },
+    {
+      "id": "continuous_mode_off",
+      "label": "Continuous mode disabled",
+      "passed": true,
+      "detail": "Do not enable P125 continuous runner for first pilot."
+    }
+  ],
+  "humanReviewChecklist": [
+    {
+      "id": "correct_candidate",
+      "label": "Correct candidate",
+      "breezyField": "Candidate name",
+      "expectedValue": "Erica C Portolese",
+      "instruction": "Open Erica's Breezy profile and confirm name matches exactly."
+    },
+    {
+      "id": "correct_email",
+      "label": "Correct email",
+      "breezyField": "Email",
+      "expectedValue": "gigizen8@gmail.com",
+      "instruction": "Confirm email on file matches before Dropbox Sign send."
+    },
+    {
+      "id": "correct_job",
+      "label": "Correct job/project",
+      "breezyField": "Position / job",
+      "expectedValue": "In-Store Merchandiser — Massena, NY (Massena, NY)",
+      "instruction": "Confirm candidate is on the published Breezy job shown above."
+    },
+    {
+      "id": "correct_template",
+      "label": "Correct paperwork packet/template",
+      "breezyField": "Paperwork template",
+      "expectedValue": "Onboarding Packet",
+      "instruction": "Confirm paperwork template matches onboarding packet for this pilot."
+    },
+    {
+      "id": "not_already_sent",
+      "label": "Not already sent",
+      "breezyField": "Paperwork status",
+      "expectedValue": "not_sent",
+      "instruction": "Confirm no prior Dropbox Sign request or paperwork-sent status in Breezy."
+    },
+    {
+      "id": "not_duplicate",
+      "label": "Not duplicate",
+      "breezyField": "Duplicate check",
+      "expectedValue": "no duplicate risk",
+      "instruction": "Confirm no duplicate candidate record or prior send for this person."
+    },
+    {
+      "id": "ready_for_paperwork",
+      "label": "Candidate ready for paperwork",
+      "breezyField": "Workflow stage",
+      "expectedValue": "Paperwork Needed / ready",
+      "instruction": "Confirm questionnaire/resume complete and recruiter assigned if required."
+    }
+  ],
+  "terminalCommands": {
+    "enablePilotEnv": [
+      "export AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true",
+      "export AUTONOMOUS_PAPERWORK_LIVE_MODE=true",
+      "export AUTONOMOUS_PAPERWORK_OPERATOR_GO=true",
+      "export AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST=\"e72d6aebdb0d\"",
+      "export AUTONOMOUS_PAPERWORK_PILOT_MAX_SENDS=1"
+    ],
+    "allowlistEricaOnly": "export AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST=\"e72d6aebdb0d\"",
+    "p122LivePilotCommand": "npx tsx scripts/p122-controlled-live-paperwork-pilot.ts --execute --confirm \"SEND 1 PAPERWORK PACKET\" --candidate-id e72d6aebdb0d",
+    "p138VerificationCommand": "npx tsx scripts/p138-first-live-send-verification.ts --candidate-id=e72d6aebdb0d",
+    "disableLiveEnv": [
+      "export AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=false",
+      "export AUTONOMOUS_PAPERWORK_LIVE_MODE=false",
+      "export AUTONOMOUS_PAPERWORK_OPERATOR_GO=false",
+      "export AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST=\"\""
+    ],
+    "pauseSchedulerCommand": "npx tsx -e \"import { pauseScheduler } from './src/lib/p136-autonomous-paperwork-scheduler/scheduler-controls.ts'; pauseScheduler().then((s) => console.log(JSON.stringify({ schedulerMode: s.schedulerMode, schedulerStatus: s.schedulerStatus }, null, 2)))\""
+  },
+  "rollbackInstructions": {
+    "confirmNoSecondSend": [
+      "Run P138 verification — expect overallResult PASS and pilotLockStatus Locked after first send.",
+      "Check pilot registry: `.data/p122-controlled-live-paperwork-pilot-registry.json` — sendCount must be 1.",
+      "Confirm only one audit entry with outcome \"sent\" for e72d6aebdb0d.",
+      "Re-run P122 live command — must NOT send again (pilot cap / duplicate guard)."
+    ],
+    "clearAllowlist": [
+      "export AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST=\"\"",
+      "export AUTONOMOUS_PAPERWORK_OPERATOR_GO=false",
+      "export AUTONOMOUS_PAPERWORK_LIVE_MODE=false",
+      "export AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=false",
+      "P138 safety lock also records required env lockdown — follow artifact recommendations."
+    ],
+    "pauseScheduler": [
+      "Before live send: pause P136 scheduler (command in Terminal Commands section).",
+      "POST /api/autonomous-paperwork-scheduler/pause (executive auth) if dashboard is running.",
+      "Do not start continuous mode or P125 continuous runner for this pilot."
+    ],
+    "verifyDuplicateProtection": [
+      "npx tsx scripts/p138-first-live-send-verification.ts --candidate-id=e72d6aebdb0d",
+      "Expect duplicateVerification.wouldBlockResend=true after successful send.",
+      "grep \"e72d6aebdb0d\" .data/p100-controlled-live-send-state.json — candidate in sentCandidateIds."
+    ],
+    "confirmAuditRecord": [
+      "tail -5 /Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl",
+      "grep \"e72d6aebdb0d\" /Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl — expect outcome \"sent\", mode \"executeOne\".",
+      "Workflow should show actionType=await-signature and paperworkStatus=sent.",
+      "Dropbox Sign signatureRequestId stored on workflow record."
+    ]
+  },
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false,
+  "continuousRunnerEnabled": false
+}

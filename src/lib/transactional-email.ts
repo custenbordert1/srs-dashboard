@@ -1,6 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 export type TransactionalEmailPayload = {
   from: string;
@@ -23,7 +24,7 @@ export type TransactionalEmailResult = {
 
 function emailDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
-  return override ? path.resolve(override) : path.join(process.cwd(), ".data");
+  return override ? path.resolve(override) : recruitingDataDir();
 }
 
 export async function appendTransactionalEmailOutbox(
@@ -32,7 +33,7 @@ export async function appendTransactionalEmailOutbox(
 ): Promise<void> {
   const storeDir = emailDataDir();
   const outboxPath = path.join(storeDir, "transactional-email-outbox.jsonl");
-  await mkdir(storeDir, { recursive: true });
+  await safeRecruitingMkdir(storeDir);
   const row = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),

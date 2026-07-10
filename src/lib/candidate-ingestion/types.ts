@@ -16,6 +16,28 @@ export type CandidateIngestionStoreFile = {
   cycleComplete: boolean;
   chunksThisRun: number;
   updatedAt: string;
+  /** Per-position scan timestamp for freshness rescue (current cycle). */
+  positionScannedAt?: Record<string, string>;
+  lastFreshnessRescueAt?: string | null;
+  /** Rotating offset for freshness rescue across already-scanned positions. */
+  rescueRotationIndex?: number;
+};
+
+export type CandidateIngestionChunkRecord = {
+  chunkNumber: number;
+  positionsQueued: number;
+  positionsScanned: number;
+  positionsSkipped: number;
+  candidatesRetrieved: number;
+  candidatesNew: number;
+  elapsedMs: number;
+  truncated: boolean;
+  positionFetchFailed: number;
+  positionScanTimedOut: number;
+  positionPaginationIncomplete: number;
+  sanitizeRejected: number;
+  warnings: string[];
+  positionIdsScanned: string[];
 };
 
 export type CandidateIngestionSyncResult = {
@@ -37,6 +59,7 @@ export type CandidateIngestionSyncResult = {
   actionsGenerated: number;
   progressionsGenerated: number;
   captureHealth: ApplicantCaptureHealth;
+  chunkRecords?: CandidateIngestionChunkRecord[];
 };
 
 export type ApplicantCaptureHealth = {

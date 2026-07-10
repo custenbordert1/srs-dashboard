@@ -1,0 +1,911 @@
+{
+  "summary": {
+    "generatedAt": "2026-07-08T14:49:42.775Z",
+    "total": 23,
+    "loads_successfully": 16,
+    "loads_degraded_banner": 7,
+    "loads_stale_cache": 0,
+    "infinite_skeleton": 0,
+    "indefinite_hang": 0,
+    "failures": []
+  },
+  "results": [
+    {
+      "name": "Command Center",
+      "url": "/?tab=command-center",
+      "at5s": {
+        "skeletonCount": 11,
+        "ariaBusy": 1,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 14,
+        "bodyTextLength": 1797,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 11,
+        "ariaBusy": 1,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 14,
+        "bodyTextLength": 1797,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 3,
+        "buttonCount": 15,
+        "bodyTextLength": 1903,
+        "hasRetry": true
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Executive Home",
+      "url": "/?tab=executive-home",
+      "at5s": {
+        "skeletonCount": 6,
+        "ariaBusy": 1,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 26,
+        "buttonCount": 32,
+        "bodyTextLength": 5093,
+        "hasRetry": true
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 27,
+        "buttonCount": 37,
+        "bodyTextLength": 5643,
+        "hasRetry": true
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 31,
+        "buttonCount": 37,
+        "bodyTextLength": 6797,
+        "hasRetry": true
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Recruiter Ops",
+      "url": "/?tab=recruiter-command-center",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 6,
+        "buttonCount": 15,
+        "bodyTextLength": 26189,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 6,
+        "buttonCount": 15,
+        "bodyTextLength": 26189,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 6,
+        "buttonCount": 15,
+        "bodyTextLength": 26189,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Recruiter Dashboard",
+      "url": "/?tab=recruiter-dashboard",
+      "at5s": {
+        "skeletonCount": 9,
+        "ariaBusy": 1,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 1,
+        "buttonCount": 13,
+        "bodyTextLength": 927,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 1,
+        "buttonCount": 14,
+        "bodyTextLength": 1070,
+        "hasRetry": true
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 1,
+        "buttonCount": 14,
+        "bodyTextLength": 1070,
+        "hasRetry": true
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Candidates",
+      "url": "/?tab=candidates",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 8,
+        "buttonCount": 71,
+        "bodyTextLength": 5025,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 8,
+        "buttonCount": 71,
+        "bodyTextLength": 5025,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 8,
+        "buttonCount": 71,
+        "bodyTextLength": 5025,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Job Management",
+      "url": "/?tab=job-management",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 520,
+        "bodyTextLength": 30978,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 520,
+        "bodyTextLength": 30978,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 520,
+        "bodyTextLength": 30978,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Approval Queue",
+      "url": "/?tab=approval-queue",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 6,
+        "buttonCount": 18,
+        "bodyTextLength": 1364,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 6,
+        "buttonCount": 18,
+        "bodyTextLength": 1364,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 6,
+        "buttonCount": 18,
+        "bodyTextLength": 1364,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "DM Scorecards",
+      "url": "/?tab=dm-scorecards",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 8,
+        "bodyTextLength": 1713,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 8,
+        "bodyTextLength": 1713,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 2,
+        "buttonCount": 8,
+        "bodyTextLength": 1713,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "MEL Projects",
+      "url": "/?tab=mel-projects",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 3,
+        "buttonCount": 8,
+        "bodyTextLength": 3788,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 3,
+        "buttonCount": 8,
+        "bodyTextLength": 3788,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 3,
+        "buttonCount": 8,
+        "bodyTextLength": 3788,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Workforce (tab)",
+      "url": "/?tab=workforce",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 4,
+        "buttonCount": 13,
+        "bodyTextLength": 1219,
+        "hasRetry": true
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 4,
+        "buttonCount": 13,
+        "bodyTextLength": 1219,
+        "hasRetry": true
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": true,
+        "disabledBadge": false,
+        "headingCount": 4,
+        "buttonCount": 13,
+        "bodyTextLength": 1219,
+        "hasRetry": true
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Data Health",
+      "url": "/?tab=data-health",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 22,
+        "buttonCount": 14,
+        "bodyTextLength": 6784,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 22,
+        "buttonCount": 14,
+        "bodyTextLength": 6784,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 22,
+        "buttonCount": 14,
+        "bodyTextLength": 6784,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Recruiting Intelligence",
+      "url": "/?tab=recruiting-intelligence",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 20,
+        "buttonCount": 20,
+        "bodyTextLength": 4934,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 20,
+        "buttonCount": 20,
+        "bodyTextLength": 4934,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 20,
+        "buttonCount": 20,
+        "bodyTextLength": 4934,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Workforce Intelligence",
+      "url": "/?tab=workforce-intelligence",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 5,
+        "buttonCount": 16,
+        "bodyTextLength": 1603,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 5,
+        "buttonCount": 16,
+        "bodyTextLength": 1603,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 5,
+        "buttonCount": 16,
+        "bodyTextLength": 1603,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Recruiting Autopilot",
+      "url": "/?tab=recruiting-autopilot",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 7,
+        "buttonCount": 18,
+        "bodyTextLength": 5933,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 7,
+        "buttonCount": 18,
+        "bodyTextLength": 5933,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 7,
+        "buttonCount": 18,
+        "bodyTextLength": 5933,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Autopilot Ops (tab)",
+      "url": "/?tab=recruiting-autopilot-ops",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 5,
+        "buttonCount": 20,
+        "bodyTextLength": 1848,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 5,
+        "buttonCount": 20,
+        "bodyTextLength": 1848,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 5,
+        "buttonCount": 20,
+        "bodyTextLength": 1848,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Execution Center",
+      "url": "/?tab=recruiting-execution",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 9,
+        "buttonCount": 23,
+        "bodyTextLength": 4097,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 9,
+        "buttonCount": 23,
+        "bodyTextLength": 4097,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 9,
+        "buttonCount": 23,
+        "bodyTextLength": 4097,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Hiring & Placement",
+      "url": "/?tab=placement-command-center",
+      "at5s": {
+        "skeletonCount": 1,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 1,
+        "buttonCount": 14,
+        "bodyTextLength": 979,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 10,
+        "buttonCount": 16,
+        "bodyTextLength": 3072,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 10,
+        "buttonCount": 16,
+        "bodyTextLength": 3072,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Operations Control Center",
+      "url": "/executive/operations-control-center",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 8,
+        "buttonCount": 9,
+        "bodyTextLength": 2208,
+        "hasRetry": true
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 8,
+        "buttonCount": 9,
+        "bodyTextLength": 2208,
+        "hasRetry": true
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 8,
+        "buttonCount": 9,
+        "bodyTextLength": 2208,
+        "hasRetry": true
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Production Readiness",
+      "url": "/executive/production-readiness",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 8,
+        "buttonCount": 2,
+        "bodyTextLength": 5636,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 8,
+        "buttonCount": 2,
+        "bodyTextLength": 5636,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 8,
+        "buttonCount": 2,
+        "bodyTextLength": 5636,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    },
+    {
+      "name": "Recruiting Priorities",
+      "url": "/executive/recruiting-priorities",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 10,
+        "buttonCount": 3,
+        "bodyTextLength": 17400,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 10,
+        "buttonCount": 3,
+        "bodyTextLength": 17400,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 10,
+        "buttonCount": 3,
+        "bodyTextLength": 17400,
+        "hasRetry": false
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Recruiting Decisions",
+      "url": "/executive/recruiting-decisions",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 13,
+        "buttonCount": 3,
+        "bodyTextLength": 20848,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 13,
+        "buttonCount": 3,
+        "bodyTextLength": 20848,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 13,
+        "buttonCount": 3,
+        "bodyTextLength": 20848,
+        "hasRetry": false
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Recruiter Assignment Center",
+      "url": "/executive/recruiter-assignment-center",
+      "at5s": {
+        "skeletonCount": 5,
+        "ariaBusy": 1,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 1,
+        "buttonCount": 1,
+        "bodyTextLength": 255,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 22,
+        "buttonCount": 7,
+        "bodyTextLength": 17106,
+        "hasRetry": true
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": true,
+        "errorCard": false,
+        "disabledBadge": true,
+        "headingCount": 22,
+        "buttonCount": 7,
+        "bodyTextLength": 17106,
+        "hasRetry": true
+      },
+      "classification": "loads_degraded_banner",
+      "notes": "Degraded/error UI with meaningful content"
+    },
+    {
+      "name": "Autopilot Ops (standalone)",
+      "url": "/executive/recruiting-autopilot-operations",
+      "at5s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 7,
+        "buttonCount": 6,
+        "bodyTextLength": 1197,
+        "hasRetry": false
+      },
+      "at10s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 7,
+        "buttonCount": 6,
+        "bodyTextLength": 1197,
+        "hasRetry": false
+      },
+      "at20s": {
+        "skeletonCount": 0,
+        "ariaBusy": 0,
+        "degradedBanner": false,
+        "errorCard": false,
+        "disabledBadge": false,
+        "headingCount": 7,
+        "buttonCount": 6,
+        "bodyTextLength": 1197,
+        "hasRetry": false
+      },
+      "classification": "loads_successfully",
+      "notes": "Content rendered"
+    }
+  ]
+}

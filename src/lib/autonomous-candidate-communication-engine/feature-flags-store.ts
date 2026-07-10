@@ -5,7 +5,7 @@ import {
   P73_DEFAULT_COMMUNICATION_ENABLED,
   P73_DEFAULT_EXECUTION_MODE,
 } from "@/lib/autonomous-candidate-communication-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p73-candidate-communication-flags.json");
@@ -118,7 +118,7 @@ export async function loadP73FeatureFlags(): Promise<P73FeatureFlags> {
 export async function saveP73FeatureFlags(flags: P73FeatureFlags): Promise<P73FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP73FeatureFlagsFromEnv(saved);
 }

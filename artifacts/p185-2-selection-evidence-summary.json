@@ -1,0 +1,137 @@
+{
+  "generatedAt": "2026-07-10T17:00:27.786Z",
+  "sources": [
+    {
+      "source": "p97_approval_mode_production",
+      "authority": "authoritative",
+      "role": "Executive/operator persisted approval to Paperwork Needed"
+    },
+    {
+      "source": "p83_candidate_workflow_audit",
+      "authority": "authoritative",
+      "role": "Executed send-paperwork advancements only (shouldAdvance=true)"
+    },
+    {
+      "source": "p83_recommendations",
+      "authority": "supporting",
+      "role": "Recommendations without execution — do not authorize alone"
+    },
+    {
+      "source": "p158_workflow_transition_audit",
+      "authority": "authoritative",
+      "role": "Post-assignment production transitions to Paperwork Needed"
+    },
+    {
+      "source": "p181_scoped_operator_paperwork_queue_artifact",
+      "authority": "authoritative",
+      "role": "Operator-scoped paperwork queue membership"
+    },
+    {
+      "source": "onboarding_paperwork_funnel_promotion",
+      "authority": "supporting",
+      "role": "Policy funnel promotions — informational/supporting only"
+    },
+    {
+      "source": "p152_immediate_paperwork_policy",
+      "authority": "informational",
+      "role": "Send-policy gate after selection — not hire selection"
+    },
+    {
+      "source": "p87_hiring_decisions_preview",
+      "authority": "informational",
+      "role": "Preview recommendations only — never authorize"
+    },
+    {
+      "source": "google_recruiting_sheet",
+      "authority": "informational",
+      "role": "Archive/reference — not wired as selection evidence"
+    },
+    {
+      "source": "breezy_workflow_current_stage",
+      "authority": "authoritative",
+      "role": "Exact Selected/Approved/Paperwork Needed stages when present"
+    }
+  ],
+  "counts": {
+    "authoritativeCandidates": 65,
+    "p181": 20,
+    "p83Executed": 19,
+    "p97": 32,
+    "p158": 21
+  },
+  "authoritativeCandidateIds": [
+    "21dc66d94d31",
+    "5e64219daaf9",
+    "445225a971f7",
+    "84d51041e750",
+    "09c38dd6b79b",
+    "91faef15d8fd",
+    "652bc90340b9",
+    "40764d83ef6d",
+    "b484a5e72135",
+    "4eb52a6c7495",
+    "e5124f6a674e",
+    "6b40ff3b280a",
+    "c0c920caa44f",
+    "773445c489a7",
+    "cfcd1b8179ba",
+    "46551846149e",
+    "86a8d6804b6b",
+    "b32054c06f54",
+    "650590ddbe20",
+    "98400c5310f6",
+    "1bd395fce633",
+    "6a850de9dc05",
+    "6d548b240ab0",
+    "71ceb040896c",
+    "88340ea1bf94",
+    "27d9e13536b0",
+    "2419559af1ba",
+    "082c0eec6cff",
+    "88bb0f06e75e",
+    "1e0fbce8a310",
+    "84ec8ad83176",
+    "cda9067dac4b",
+    "80d87b758578",
+    "8ec5f7b7371f",
+    "36f4e45c3d3d",
+    "9f8231817090",
+    "9ef7bf235ee9",
+    "1158b78ee219",
+    "91f84eae7546",
+    "a0e30984a18d",
+    "80da14242a1c",
+    "2f5f144c00c8",
+    "1ec650f8e1d9",
+    "5e290d45974f",
+    "d021d8262ef6",
+    "86ea44c3d95a",
+    "39ddf56edc32",
+    "3fb0c007171d",
+    "68015bc9a375",
+    "0ed8fd3b95f3",
+    "d64647ba8a8e",
+    "b21a84af7c29",
+    "d39f8bc6193e",
+    "fb06444d1348",
+    "2a08788045da",
+    "6931fb8de72c",
+    "334a0e2bcb6c",
+    "86da01f7739b",
+    "9f9d978c7e71",
+    "9cdc414f3b49",
+    "f786bc64011a",
+    "3e98b7afbc0a",
+    "ca747f355c14",
+    "9921cca9ccbd",
+    "a02931877eec"
+  ],
+  "classifications": {
+    "applied_not_selected": 436,
+    "verified_selected_existing_packet": 115,
+    "likely_selected_needs_review": 78,
+    "verified_selected_completed_packet": 17,
+    "verified_selected_new_packet": 25,
+    "blocked_other": 6
+  }
+}

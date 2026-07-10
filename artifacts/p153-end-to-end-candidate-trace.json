@@ -1,0 +1,1540 @@
+{
+  "sourcePhase": "P153",
+  "generatedAt": "2026-07-06T20:16:11.372Z",
+  "targetName": "Taylor Custenborder",
+  "candidate": {
+    "candidateId": "705cdc0e7f30",
+    "positionId": "f8f9afaa12b8",
+    "city": "West Chester",
+    "state": "OH",
+    "email": "custenborder.taylor@gmail.com"
+  },
+  "breezyIngestion": {
+    "Candidate ID": "705cdc0e7f30",
+    "Candidate Name": "Taylor Custenborder",
+    "Position ID": "f8f9afaa12b8",
+    "Position Name": "Retail Display Merchandiser – West Chester, OH",
+    "Original Job Status": "published",
+    "Original Job Breezy Status": "published",
+    "Application Date (creationDate)": "—",
+    "Stage (Breezy)": "Applied",
+    "Email": "custenborder.taylor@gmail.com",
+    "City/State": "West Chester, OH",
+    "Resume detected (parseCandidateApplication)": "true",
+    "Resume text length": "723",
+    "Row hasResume": "true",
+    "Questionnaire detected": "true",
+    "questionnaireIntelligence.available": "true",
+    "questionnaireIntelligence.techReady": "false"
+  },
+  "p83": {
+    "decision": {
+      "candidateId": "705cdc0e7f30",
+      "action": "hold",
+      "reason": "Awaiting recruiter assignment before advancement.",
+      "confidence": 70,
+      "shouldAdvance": false,
+      "shouldPersist": true,
+      "requiresApproval": false
+    },
+    "rules": [
+      {
+        "order": 1,
+        "stage": "P83 Candidate Advancement",
+        "ruleEvaluated": "isScreenStage(row)",
+        "result": "pass",
+        "reason": "Candidate at screen stage.",
+        "blocking": false,
+        "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+        "function": "buildCandidateAdvancementDecision"
+      },
+      {
+        "order": 2,
+        "stage": "P83 Candidate Advancement",
+        "ruleEvaluated": "TERMINAL_STATUSES.has(workflowStatus)",
+        "result": "pass",
+        "reason": "Not terminal.",
+        "blocking": false,
+        "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+        "function": "buildCandidateAdvancementDecision"
+      },
+      {
+        "order": 3,
+        "stage": "P83 Candidate Advancement",
+        "ruleEvaluated": "SKIP_STATUSES.has(workflowStatus)",
+        "result": "pass",
+        "reason": "Not in paperwork funnel.",
+        "blocking": false,
+        "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+        "function": "buildCandidateAdvancementDecision"
+      },
+      {
+        "order": 4,
+        "stage": "P83 Candidate Advancement",
+        "ruleEvaluated": "hasActivePacket(row)",
+        "result": "pass",
+        "reason": "No active packet.",
+        "blocking": false,
+        "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+        "function": "buildCandidateAdvancementDecision"
+      },
+      {
+        "order": 5,
+        "stage": "P83 Candidate Advancement",
+        "ruleEvaluated": "row.paperworkStatus === 'signed'",
+        "result": "pass",
+        "reason": "Not signed.",
+        "blocking": false,
+        "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+        "function": "buildCandidateAdvancementDecision"
+      },
+      {
+        "order": 6,
+        "stage": "P83 Candidate Advancement",
+        "ruleEvaluated": "isUnassignedRecruiter(assignedRecruiter)",
+        "result": "fail",
+        "reason": "Awaiting recruiter.",
+        "blocking": true,
+        "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+        "function": "buildCandidateAdvancementDecision"
+      }
+    ],
+    "blocker": {
+      "order": 6,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "isUnassignedRecruiter(assignedRecruiter)",
+      "result": "fail",
+      "reason": "Awaiting recruiter.",
+      "blocking": true,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    }
+  },
+  "p144": {
+    "advancement": {
+      "candidateId": "705cdc0e7f30",
+      "candidateName": "Taylor Custenborder",
+      "positionName": "Retail Display Merchandiser – West Chester, OH",
+      "projectName": "Retail Display Merchandiser – West Chester, OH",
+      "recruiter": "Unassigned",
+      "dm": "Unassigned",
+      "workflowStatus": "Applied",
+      "stageAgeDays": 0,
+      "advancementScore": 73,
+      "scoreFactors": {
+        "questionnaireQuality": 3,
+        "resumeQuality": 15,
+        "relevantExperience": 13,
+        "distance": 10,
+        "coverageNeed": 7,
+        "projectPriority": 4,
+        "stageAging": 10,
+        "communicationActivity": 4,
+        "paperworkProgress": 2,
+        "responsiveness": 5
+      },
+      "confidence": 63,
+      "estimatedHireProbability": 50,
+      "nextAction": "Assign Recruiter",
+      "urgency": "medium",
+      "automationEligible": false,
+      "automationExplanation": "Blockers present: Missing Questionnaire.",
+      "blockers": [
+        "Missing Questionnaire"
+      ],
+      "reason": "Advancement score 73/100. Awaiting recruiter assignment before advancement. Blockers: Missing Questionnaire.",
+      "recommendedRecruiterAction": "Assign yourself — high-fit candidate has no owner",
+      "coverageNeedScore": 70,
+      "automationPreviewApproved": null,
+      "automationPreviewRejected": null
+    },
+    "rules": [
+      {
+        "order": 7,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "detectBlockers: !hasResume",
+        "result": "pass",
+        "reason": "Resume on file.",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "detectBlockers"
+      },
+      {
+        "order": 8,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "detectBlockers: techReady",
+        "result": "fail",
+        "reason": "Missing Questionnaire",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "detectBlockers"
+      },
+      {
+        "order": 9,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "detectBlockers: duplicate flags",
+        "result": "pass",
+        "reason": "No duplicate flag.",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "detectBlockers"
+      },
+      {
+        "order": 10,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "detectBlockers: distanceMiles > 90",
+        "result": "pass",
+        "reason": "0 mi",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "detectBlockers"
+      },
+      {
+        "order": 11,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "detectBlockers: manual review flag",
+        "result": "pass",
+        "reason": "No manual review flag.",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "detectBlockers"
+      },
+      {
+        "order": 12,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "mapP83Action: dmNeedsAssignment",
+        "result": "fail",
+        "reason": "DM pending (suggested: Mindie Rodriguez)",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "mapP83Action"
+      },
+      {
+        "order": 13,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "mapP83Action: isUnassignedRecruiter",
+        "result": "fail",
+        "reason": "Forces nextAction=Assign Recruiter",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "mapP83Action"
+      },
+      {
+        "order": 14,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "mapP83Action: p83.action mapping",
+        "result": "Assign Recruiter",
+        "reason": "P83 action=hold; mapped nextAction=Assign Recruiter. Awaiting recruiter assignment before advancement.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "mapP83Action"
+      },
+      {
+        "order": 15,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "automationEligibility",
+        "result": "blocked",
+        "reason": "Blockers present: Missing Questionnaire.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "automationEligibility"
+      },
+      {
+        "order": 16,
+        "stage": "P144 Decision Engine",
+        "ruleEvaluated": "estimateConfidence",
+        "result": "63",
+        "reason": "Score 73/100; confidence 63%.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+        "function": "estimateConfidence"
+      }
+    ]
+  },
+  "recruiterAssignment": {
+    "workflow": "Unassigned",
+    "assignmentDecision": {
+      "candidateId": "705cdc0e7f30",
+      "recruiter": "Taylor",
+      "confidence": 63,
+      "reason": "Best match (Taylor) below confidence threshold (63).",
+      "territoryState": "OH",
+      "dmName": "Mindie Rodriguez",
+      "shouldAssign": false
+    },
+    "recruiterEval": {
+      "candidateId": "705cdc0e7f30",
+      "candidateName": "Taylor Custenborder",
+      "cityState": "West Chester, OH",
+      "zip": null,
+      "distanceMiles": 0,
+      "dmTerritory": "Mindie Rodriguez",
+      "recruiterTerritory": "OH",
+      "assignedRecruiter": "Unassigned",
+      "recommendedRecruiter": "Taylor",
+      "assignmentConfidence": 63,
+      "advancementConfidence": 63,
+      "operationalFitScore": 110,
+      "coveragePressure": 70,
+      "duplicateStatus": false,
+      "recommendation": "Manual Review",
+      "autoAssignEligible": false,
+      "reason": "Best match (Taylor) below confidence threshold (63).",
+      "blockers": [],
+      "assignmentReason": "Best match (Taylor) below confidence threshold (63)."
+    },
+    "dmTerritory": "Mindie Rodriguez",
+    "operationalFit": {
+      "jobId": "f8f9afaa12b8",
+      "jobName": "Retail Display Merchandiser – West Chester, OH",
+      "city": "West Chester",
+      "state": "OH",
+      "distanceMiles": 0,
+      "matchScore": 110,
+      "matchReason": "Active published Breezy position, same state (OH), same city (West Chester), 0mi"
+    }
+  },
+  "workflowStore": {
+    "expectedStatus": "Applied",
+    "missingTransitions": [
+      "DM assignment pending — suggested DM Mindie Rodriguez not applied."
+    ]
+  },
+  "p145": {
+    "ready": false,
+    "queueItem": null,
+    "rules": [
+      {
+        "order": 24,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "isArchivedCandidate",
+        "result": "pass",
+        "reason": "Active",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+        "function": "isArchivedCandidate"
+      },
+      {
+        "order": 25,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "isPaperworkComplete",
+        "result": "pass",
+        "reason": "Not complete",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+        "function": "isPaperworkComplete"
+      },
+      {
+        "order": 26,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "email present",
+        "result": "pass",
+        "reason": "custenborder.taylor@gmail.com",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+        "function": "detectExclusionBlockers"
+      },
+      {
+        "order": 27,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "isUnassignedRecruiter",
+        "result": "fail",
+        "reason": "Unassigned Recruiter",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+        "function": "detectExclusionBlockers"
+      },
+      {
+        "order": 28,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: automation_enabled",
+        "result": "pass",
+        "reason": "P84 automation enabled",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 29,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: recruiter_assigned",
+        "result": "fail",
+        "reason": "Awaiting recruiter assignment.",
+        "blocking": true,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 30,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: paperwork_needed",
+        "result": "fail",
+        "reason": "Current status: Applied.",
+        "blocking": true,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 31,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: send_paperwork_action",
+        "result": "fail",
+        "reason": "Current action: none.",
+        "blocking": true,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 32,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: published_job",
+        "result": "pass",
+        "reason": "Active published Breezy position or mapped project",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 33,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: valid_email",
+        "result": "pass",
+        "reason": "Valid candidate email",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 34,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: no_duplicate",
+        "result": "pass",
+        "reason": "No duplicate paperwork packet",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 35,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: not_signed",
+        "result": "pass",
+        "reason": "Not already signed",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 36,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: not_rejected",
+        "result": "pass",
+        "reason": "Candidate not rejected",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 37,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: not_inactive",
+        "result": "pass",
+        "reason": "Candidate active in pipeline",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 38,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "buildPaperworkSendEligibility: template_ready",
+        "result": "pass",
+        "reason": "Dropbox Sign template configured",
+        "blocking": false,
+        "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+        "function": "buildPaperworkSendEligibility"
+      },
+      {
+        "order": 39,
+        "stage": "P145 Paperwork Queue",
+        "ruleEvaluated": "evaluatePaperworkCandidate: in queue",
+        "result": "no",
+        "reason": "Not in paperwork queue.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+        "function": "evaluatePaperworkCandidate"
+      }
+    ]
+  },
+  "p147": {
+    "eligibility": {
+      "eligible": false,
+      "blockedReason": "P144 next action is \"Assign Recruiter\", not Send Paperwork. Confidence 63% below 90% threshold. P144 blockers: Missing Questionnaire. Paperwork queue does not recommend Send Initial Paperwork. Recruiter not assigned. Awaiting recruiter assignment. Current status: Applied. Current action: none.",
+      "duplicatePrevented": false,
+      "validation": {
+        "passed": false,
+        "reasons": [
+          "P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+          "Confidence 63% below 90% threshold.",
+          "P144 blockers: Missing Questionnaire.",
+          "Paperwork queue does not recommend Send Initial Paperwork.",
+          "Recruiter not assigned.",
+          "Awaiting recruiter assignment.",
+          "Current status: Applied.",
+          "Current action: none."
+        ]
+      }
+    },
+    "rules": [
+      {
+        "order": 40,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "advancement.nextAction === 'Send Paperwork'",
+        "result": "fail",
+        "reason": "P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "133-135"
+      },
+      {
+        "order": 41,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "advancement.confidence >= 90",
+        "result": "fail",
+        "reason": "Confidence 63% vs threshold 90%.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "136-138"
+      },
+      {
+        "order": 42,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "P144 blockers",
+        "result": "fail",
+        "reason": "Missing Questionnaire",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "139-144"
+      },
+      {
+        "order": 43,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "P145 queue recommends Send Initial Paperwork",
+        "result": "fail",
+        "reason": "Not in queue.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "146-152"
+      },
+      {
+        "order": 44,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "row.positionId && job exists",
+        "result": "pass",
+        "reason": "Job Retail Display Merchandiser – West Chester, OH (published)",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "172-174"
+      },
+      {
+        "order": 45,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "job.status === 'published'",
+        "result": "pass",
+        "reason": "Position status: published",
+        "blocking": false,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "175-177"
+      },
+      {
+        "order": 46,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "isUnassignedRecruiter(row.assignedRecruiter)",
+        "result": "fail",
+        "reason": "Recruiter not assigned.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "165-167"
+      },
+      {
+        "order": 47,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 48,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "Confidence 63% below 90% threshold.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 49,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "P144 blockers: Missing Questionnaire.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 50,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "Paperwork queue does not recommend Send Initial Paperwork.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 51,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "Recruiter not assigned.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 52,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "Awaiting recruiter assignment.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 53,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "Current status: Applied.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      },
+      {
+        "order": 54,
+        "stage": "P147 Initial Paperwork",
+        "ruleEvaluated": "validation.reasons",
+        "result": "fail",
+        "reason": "Current action: none.",
+        "blocking": true,
+        "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+        "function": "evaluateInitialPaperworkEligibility",
+        "line": "207-210"
+      }
+    ]
+  },
+  "p152": {
+    "eligible": false,
+    "hard": {
+      "blocked": true,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "primaryHardBlocker": "unassigned_recruiter"
+    },
+    "legacy": {
+      "labels": [
+        "workflowStatus is Applied, not Paperwork Needed.",
+        "actionType is none, not send-paperwork.",
+        "dmNeedsAssignment=true forces P144 Assign Recruiter.",
+        "P144 confidence 63% below 90%.",
+        "Awaiting recruiter assignment.",
+        "Current status: Applied.",
+        "Current action: none.",
+        "Not in P145 queue as Send Initial Paperwork.",
+        "P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+        "Confidence 63% below 90% threshold.",
+        "P144 blockers: Missing Questionnaire.",
+        "Paperwork queue does not recommend Send Initial Paperwork.",
+        "Recruiter not assigned."
+      ],
+      "codes": [
+        "workflow_not_paperwork_needed",
+        "action_not_send_paperwork",
+        "dm_needs_assignment",
+        "p144_confidence_threshold",
+        "p145_queue_exclusion",
+        "other"
+      ]
+    },
+    "rules": [
+      {
+        "order": 55,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "isUnassignedRecruiter(row.assignedRecruiter)",
+        "result": "fail",
+        "reason": "Recruiter not assigned.",
+        "blocking": true,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-immediate-paperwork-hard-blockers.ts",
+        "function": "detectImmediatePaperworkHardBlockers",
+        "line": "39-45"
+      },
+      {
+        "order": 56,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): workflowStatus is Applied, not Paperwork Needed.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 57,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): actionType is none, not send-paperwork.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 58,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): dmNeedsAssignment=true forces P144 Assign Recruiter.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 59,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): P144 confidence 63% below 90%.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 60,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Awaiting recruiter assignment.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 61,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Current status: Applied.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 62,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Current action: none.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 63,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Not in P145 queue as Send Initial Paperwork.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 64,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 65,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Confidence 63% below 90% threshold.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 66,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): P144 blockers: Missing Questionnaire.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 67,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Paperwork queue does not recommend Send Initial Paperwork.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      },
+      {
+        "order": 68,
+        "stage": "P152 Immediate Paperwork",
+        "ruleEvaluated": "legacy (bypassed): Recruiter not assigned.",
+        "result": "bypassed",
+        "reason": "P152 bypasses this soft gate.",
+        "blocking": false,
+        "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+        "function": "detectLegacyPaperworkBlockers"
+      }
+    ]
+  },
+  "dropboxSign": {
+    "onboarding": null,
+    "auditEvents": []
+  },
+  "finalVerdict": {
+    "paperworkGenerated": false,
+    "highestPriorityReason": "P152 hard gate [unassigned_recruiter]: Recruiter not assigned."
+  },
+  "allRules": [
+    {
+      "order": 1,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "isScreenStage(row)",
+      "result": "pass",
+      "reason": "Candidate at screen stage.",
+      "blocking": false,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    },
+    {
+      "order": 2,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "TERMINAL_STATUSES.has(workflowStatus)",
+      "result": "pass",
+      "reason": "Not terminal.",
+      "blocking": false,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    },
+    {
+      "order": 3,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "SKIP_STATUSES.has(workflowStatus)",
+      "result": "pass",
+      "reason": "Not in paperwork funnel.",
+      "blocking": false,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    },
+    {
+      "order": 4,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "hasActivePacket(row)",
+      "result": "pass",
+      "reason": "No active packet.",
+      "blocking": false,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    },
+    {
+      "order": 5,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "row.paperworkStatus === 'signed'",
+      "result": "pass",
+      "reason": "Not signed.",
+      "blocking": false,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    },
+    {
+      "order": 6,
+      "stage": "P83 Candidate Advancement",
+      "ruleEvaluated": "isUnassignedRecruiter(assignedRecruiter)",
+      "result": "fail",
+      "reason": "Awaiting recruiter.",
+      "blocking": true,
+      "sourceFile": "src/lib/candidate-advancement-engine/build-advancement-decision.ts",
+      "function": "buildCandidateAdvancementDecision"
+    },
+    {
+      "order": 7,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "detectBlockers: !hasResume",
+      "result": "pass",
+      "reason": "Resume on file.",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "detectBlockers"
+    },
+    {
+      "order": 8,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "detectBlockers: techReady",
+      "result": "fail",
+      "reason": "Missing Questionnaire",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "detectBlockers"
+    },
+    {
+      "order": 9,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "detectBlockers: duplicate flags",
+      "result": "pass",
+      "reason": "No duplicate flag.",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "detectBlockers"
+    },
+    {
+      "order": 10,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "detectBlockers: distanceMiles > 90",
+      "result": "pass",
+      "reason": "0 mi",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "detectBlockers"
+    },
+    {
+      "order": 11,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "detectBlockers: manual review flag",
+      "result": "pass",
+      "reason": "No manual review flag.",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "detectBlockers"
+    },
+    {
+      "order": 12,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "mapP83Action: dmNeedsAssignment",
+      "result": "fail",
+      "reason": "DM pending (suggested: Mindie Rodriguez)",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "mapP83Action"
+    },
+    {
+      "order": 13,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "mapP83Action: isUnassignedRecruiter",
+      "result": "fail",
+      "reason": "Forces nextAction=Assign Recruiter",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "mapP83Action"
+    },
+    {
+      "order": 14,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "mapP83Action: p83.action mapping",
+      "result": "Assign Recruiter",
+      "reason": "P83 action=hold; mapped nextAction=Assign Recruiter. Awaiting recruiter assignment before advancement.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "mapP83Action"
+    },
+    {
+      "order": 15,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "automationEligibility",
+      "result": "blocked",
+      "reason": "Blockers present: Missing Questionnaire.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "automationEligibility"
+    },
+    {
+      "order": 16,
+      "stage": "P144 Decision Engine",
+      "ruleEvaluated": "estimateConfidence",
+      "result": "63",
+      "reason": "Score 73/100; confidence 63%.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/candidate-advancement-engine.ts",
+      "function": "estimateConfidence"
+    },
+    {
+      "order": 17,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "workflow.assignedRecruiter",
+      "result": "unassigned",
+      "reason": "Unassigned",
+      "blocking": true,
+      "sourceFile": "src/lib/candidate-workflow-store.ts",
+      "function": "getCandidateWorkflowBundle"
+    },
+    {
+      "order": 18,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "normalizeStateCode(candidate.state)",
+      "result": "OH",
+      "reason": "State code: OH",
+      "blocking": false,
+      "sourceFile": "src/lib/dm-territory-map.ts",
+      "function": "normalizeStateCode"
+    },
+    {
+      "order": 19,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "getDmForState(stateCode)",
+      "result": "Mindie Rodriguez",
+      "reason": "DM for OH: Mindie Rodriguez",
+      "blocking": false,
+      "sourceFile": "src/lib/dm-territory-map.ts",
+      "function": "getDmForState"
+    },
+    {
+      "order": 20,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "buildRecruiterAssignmentDecision.territoryState",
+      "result": "OH",
+      "reason": "Best match (Taylor) below confidence threshold (63).",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiter-assignment-engine/build-assignment-decision.ts",
+      "function": "buildRecruiterAssignmentDecision"
+    },
+    {
+      "order": 21,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "buildRecruiterAssignmentDecision.shouldAssign",
+      "result": "false",
+      "reason": "Recommended recruiter: Taylor; confidence 63%",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiter-assignment-engine/build-assignment-decision.ts",
+      "function": "buildRecruiterAssignmentDecision"
+    },
+    {
+      "order": 22,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "evaluateRecruiterAssignmentCandidate.recommendation",
+      "result": "Manual Review",
+      "reason": "Best match (Taylor) below confidence threshold (63).",
+      "blocking": true,
+      "sourceFile": "src/lib/p151-autonomous-recruiter-assignment/evaluate-recruiter-assignment-candidate.ts",
+      "function": "evaluateRecruiterAssignmentCandidate"
+    },
+    {
+      "order": 23,
+      "stage": "Recruiter Assignment",
+      "ruleEvaluated": "findNearestActiveOperationalNeed",
+      "result": "110",
+      "reason": "Retail Display Merchandiser – West Chester, OH — undefined",
+      "blocking": false,
+      "sourceFile": "src/lib/candidate-first-paperwork-eligibility/match-active-operational-need.ts",
+      "function": "findNearestActiveOperationalNeed"
+    },
+    {
+      "order": 24,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "isArchivedCandidate",
+      "result": "pass",
+      "reason": "Active",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+      "function": "isArchivedCandidate"
+    },
+    {
+      "order": 25,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "isPaperworkComplete",
+      "result": "pass",
+      "reason": "Not complete",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+      "function": "isPaperworkComplete"
+    },
+    {
+      "order": 26,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "email present",
+      "result": "pass",
+      "reason": "custenborder.taylor@gmail.com",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+      "function": "detectExclusionBlockers"
+    },
+    {
+      "order": 27,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "isUnassignedRecruiter",
+      "result": "fail",
+      "reason": "Unassigned Recruiter",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+      "function": "detectExclusionBlockers"
+    },
+    {
+      "order": 28,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: automation_enabled",
+      "result": "pass",
+      "reason": "P84 automation enabled",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 29,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: recruiter_assigned",
+      "result": "fail",
+      "reason": "Awaiting recruiter assignment.",
+      "blocking": true,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 30,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: paperwork_needed",
+      "result": "fail",
+      "reason": "Current status: Applied.",
+      "blocking": true,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 31,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: send_paperwork_action",
+      "result": "fail",
+      "reason": "Current action: none.",
+      "blocking": true,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 32,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: published_job",
+      "result": "pass",
+      "reason": "Active published Breezy position or mapped project",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 33,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: valid_email",
+      "result": "pass",
+      "reason": "Valid candidate email",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 34,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: no_duplicate",
+      "result": "pass",
+      "reason": "No duplicate paperwork packet",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 35,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: not_signed",
+      "result": "pass",
+      "reason": "Not already signed",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 36,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: not_rejected",
+      "result": "pass",
+      "reason": "Candidate not rejected",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 37,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: not_inactive",
+      "result": "pass",
+      "reason": "Candidate active in pipeline",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 38,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "buildPaperworkSendEligibility: template_ready",
+      "result": "pass",
+      "reason": "Dropbox Sign template configured",
+      "blocking": false,
+      "sourceFile": "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "function": "buildPaperworkSendEligibility"
+    },
+    {
+      "order": 39,
+      "stage": "P145 Paperwork Queue",
+      "ruleEvaluated": "evaluatePaperworkCandidate: in queue",
+      "result": "no",
+      "reason": "Not in paperwork queue.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/paperwork-automation-engine.ts",
+      "function": "evaluatePaperworkCandidate"
+    },
+    {
+      "order": 40,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "advancement.nextAction === 'Send Paperwork'",
+      "result": "fail",
+      "reason": "P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "133-135"
+    },
+    {
+      "order": 41,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "advancement.confidence >= 90",
+      "result": "fail",
+      "reason": "Confidence 63% vs threshold 90%.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "136-138"
+    },
+    {
+      "order": 42,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "P144 blockers",
+      "result": "fail",
+      "reason": "Missing Questionnaire",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "139-144"
+    },
+    {
+      "order": 43,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "P145 queue recommends Send Initial Paperwork",
+      "result": "fail",
+      "reason": "Not in queue.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "146-152"
+    },
+    {
+      "order": 44,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "row.positionId && job exists",
+      "result": "pass",
+      "reason": "Job Retail Display Merchandiser – West Chester, OH (published)",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "172-174"
+    },
+    {
+      "order": 45,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "job.status === 'published'",
+      "result": "pass",
+      "reason": "Position status: published",
+      "blocking": false,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "175-177"
+    },
+    {
+      "order": 46,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "isUnassignedRecruiter(row.assignedRecruiter)",
+      "result": "fail",
+      "reason": "Recruiter not assigned.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "165-167"
+    },
+    {
+      "order": 47,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 48,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "Confidence 63% below 90% threshold.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 49,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "P144 blockers: Missing Questionnaire.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 50,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "Paperwork queue does not recommend Send Initial Paperwork.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 51,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "Recruiter not assigned.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 52,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "Awaiting recruiter assignment.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 53,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "Current status: Applied.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 54,
+      "stage": "P147 Initial Paperwork",
+      "ruleEvaluated": "validation.reasons",
+      "result": "fail",
+      "reason": "Current action: none.",
+      "blocking": true,
+      "sourceFile": "src/lib/recruiting/initial-paperwork-execution-engine.ts",
+      "function": "evaluateInitialPaperworkEligibility",
+      "line": "207-210"
+    },
+    {
+      "order": 55,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "isUnassignedRecruiter(row.assignedRecruiter)",
+      "result": "fail",
+      "reason": "Recruiter not assigned.",
+      "blocking": true,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-immediate-paperwork-hard-blockers.ts",
+      "function": "detectImmediatePaperworkHardBlockers",
+      "line": "39-45"
+    },
+    {
+      "order": 56,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): workflowStatus is Applied, not Paperwork Needed.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 57,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): actionType is none, not send-paperwork.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 58,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): dmNeedsAssignment=true forces P144 Assign Recruiter.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 59,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): P144 confidence 63% below 90%.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 60,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Awaiting recruiter assignment.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 61,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Current status: Applied.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 62,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Current action: none.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 63,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Not in P145 queue as Send Initial Paperwork.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 64,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): P144 next action is \"Assign Recruiter\", not Send Paperwork.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 65,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Confidence 63% below 90% threshold.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 66,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): P144 blockers: Missing Questionnaire.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 67,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Paperwork queue does not recommend Send Initial Paperwork.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    },
+    {
+      "order": 68,
+      "stage": "P152 Immediate Paperwork",
+      "ruleEvaluated": "legacy (bypassed): Recruiter not assigned.",
+      "result": "bypassed",
+      "reason": "P152 bypasses this soft gate.",
+      "blocking": false,
+      "sourceFile": "src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts",
+      "function": "detectLegacyPaperworkBlockers"
+    }
+  ]
+}

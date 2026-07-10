@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { AutonomousRecruitingSnapshot } from "@/lib/autonomous-recruiting-engine/types";
 import type { ExecutionStatus, RecommendationType } from "@/lib/autonomous-recruiting-execution/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function correlationPath(): string {
   return path.join(recruitingDataDir(), "autopilot-execution-correlation.json");
@@ -55,7 +55,7 @@ async function readCorrelationFile(): Promise<CorrelationStoreFile> {
 }
 
 async function writeCorrelationFile(file: CorrelationStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(correlationPath(), JSON.stringify(file, null, 2), "utf8");
 }
 

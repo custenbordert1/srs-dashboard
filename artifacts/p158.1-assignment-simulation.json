@@ -1,0 +1,1415 @@
+{
+  "sourcePhase": "P158.1",
+  "generatedAt": "2026-07-07T16:56:10.310Z",
+  "validation": {
+    "buildPassed": true,
+    "p158TestsPassed": true,
+    "simulationTestsPassed": true,
+    "p157RegressionPassed": true,
+    "p156RegressionPassed": true,
+    "p155RegressionPassed": true,
+    "p154RegressionPassed": true,
+    "readOnlySimulation": true,
+    "noRecruiterAssignmentsPerformed": true,
+    "noBreezyWrites": true,
+    "noWorkflowWrites": true,
+    "simulationOnly": true
+  },
+  "summary": {
+    "candidatesEvaluated": 94,
+    "candidatesAssignedInSimulation": 25,
+    "candidatesRemainingUnassigned": 57,
+    "largestWorkloadIncrease": {
+      "recruiter": "Riley",
+      "delta": 8
+    },
+    "territoryImbalanceScore": 68,
+    "avgRecruiterUtilization": 63,
+    "readyForPaperwork": 0,
+    "manualReview": 25,
+    "followUp": 0,
+    "blocked": 0
+  },
+  "workloadBeforeAfter": [
+    {
+      "recruiter": "Riley",
+      "before": 10,
+      "after": 18,
+      "delta": 8,
+      "utilizationPercent": 90,
+      "queuedInSimulation": 8
+    },
+    {
+      "recruiter": "Casey",
+      "before": 6,
+      "after": 14,
+      "delta": 8,
+      "utilizationPercent": 70,
+      "queuedInSimulation": 8
+    },
+    {
+      "recruiter": "Taylor",
+      "before": 8,
+      "after": 14,
+      "delta": 6,
+      "utilizationPercent": 70,
+      "queuedInSimulation": 6
+    },
+    {
+      "recruiter": "Drew",
+      "before": 5,
+      "after": 7,
+      "delta": 2,
+      "utilizationPercent": 35,
+      "queuedInSimulation": 2
+    },
+    {
+      "recruiter": "Logan",
+      "before": 8,
+      "after": 9,
+      "delta": 1,
+      "utilizationPercent": 45,
+      "queuedInSimulation": 1
+    },
+    {
+      "recruiter": "Jordan",
+      "before": 20,
+      "after": 20,
+      "delta": 0,
+      "utilizationPercent": 100,
+      "queuedInSimulation": 0
+    },
+    {
+      "recruiter": "Sam",
+      "before": 15,
+      "after": 15,
+      "delta": 0,
+      "utilizationPercent": 75,
+      "queuedInSimulation": 0
+    },
+    {
+      "recruiter": "Alex",
+      "before": 14,
+      "after": 14,
+      "delta": 0,
+      "utilizationPercent": 70,
+      "queuedInSimulation": 0
+    },
+    {
+      "recruiter": "Chris",
+      "before": 8,
+      "after": 8,
+      "delta": 0,
+      "utilizationPercent": 40,
+      "queuedInSimulation": 0
+    },
+    {
+      "recruiter": "Morgan",
+      "before": 6,
+      "after": 6,
+      "delta": 0,
+      "utilizationPercent": 30,
+      "queuedInSimulation": 0
+    }
+  ],
+  "territoryBalance": [
+    {
+      "territory": "OH",
+      "dm": "Mindie Rodriguez",
+      "openDemand": 1961,
+      "unassignedBefore": 10,
+      "unassignedAfter": 10,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 90
+    },
+    {
+      "territory": "IN",
+      "dm": "Lori VandeWiele",
+      "openDemand": 1276,
+      "unassignedBefore": 3,
+      "unassignedAfter": 3,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 76
+    },
+    {
+      "territory": "NC",
+      "dm": "Erin Boatright",
+      "openDemand": 2660,
+      "unassignedBefore": 11,
+      "unassignedAfter": 7,
+      "assignedInSimulation": 4,
+      "imbalanceScore": 74
+    },
+    {
+      "territory": "MS",
+      "dm": "Erin Boatright",
+      "openDemand": 2660,
+      "unassignedBefore": 2,
+      "unassignedAfter": 2,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 74
+    },
+    {
+      "territory": "KY",
+      "dm": null,
+      "openDemand": 1434,
+      "unassignedBefore": 1,
+      "unassignedAfter": 1,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 72
+    },
+    {
+      "territory": "MI",
+      "dm": "Trista Thomas",
+      "openDemand": 1391,
+      "unassignedBefore": 1,
+      "unassignedAfter": 1,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 72
+    },
+    {
+      "territory": "NJ",
+      "dm": "Melissa O'Connor",
+      "openDemand": 1580,
+      "unassignedBefore": 1,
+      "unassignedAfter": 1,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 72
+    },
+    {
+      "territory": "IL",
+      "dm": null,
+      "openDemand": 1391,
+      "unassignedBefore": 0,
+      "unassignedAfter": 0,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 70
+    },
+    {
+      "territory": "AL",
+      "dm": null,
+      "openDemand": 2660,
+      "unassignedBefore": 0,
+      "unassignedAfter": 0,
+      "assignedInSimulation": 0,
+      "imbalanceScore": 70
+    },
+    {
+      "territory": "FL",
+      "dm": "Erin Boatright",
+      "openDemand": 2660,
+      "unassignedBefore": 6,
+      "unassignedAfter": 4,
+      "assignedInSimulation": 2,
+      "imbalanceScore": 68
+    },
+    {
+      "territory": "GA",
+      "dm": "Erin Boatright",
+      "openDemand": 2660,
+      "unassignedBefore": 11,
+      "unassignedAfter": 3,
+      "assignedInSimulation": 8,
+      "imbalanceScore": 66
+    },
+    {
+      "territory": "SC",
+      "dm": "Erin Boatright",
+      "openDemand": 2660,
+      "unassignedBefore": 5,
+      "unassignedAfter": 3,
+      "assignedInSimulation": 2,
+      "imbalanceScore": 66
+    },
+    {
+      "territory": "AR",
+      "dm": "Lori VandeWiele",
+      "openDemand": 61,
+      "unassignedBefore": 20,
+      "unassignedAfter": 19,
+      "assignedInSimulation": 1,
+      "imbalanceScore": 64
+    },
+    {
+      "territory": "PA",
+      "dm": "Mindie Rodriguez",
+      "openDemand": 1961,
+      "unassignedBefore": 7,
+      "unassignedAfter": 1,
+      "assignedInSimulation": 6,
+      "imbalanceScore": 62
+    },
+    {
+      "territory": "AZ",
+      "dm": "Shelly Debellis",
+      "openDemand": 2399,
+      "unassignedBefore": 3,
+      "unassignedAfter": 1,
+      "assignedInSimulation": 2,
+      "imbalanceScore": 62
+    }
+  ],
+  "projectedPaperwork": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "blocked_candidates",
+      "message": "5 candidate(s) blocked (duplicate or policy) — will not assign."
+    },
+    {
+      "severity": "info",
+      "code": "manual_review_backlog",
+      "message": "25 candidates need manual review before assignment."
+    },
+    {
+      "severity": "warning",
+      "code": "high_utilization",
+      "message": "Riley utilization would reach 90%."
+    },
+    {
+      "severity": "warning",
+      "code": "high_utilization",
+      "message": "Jordan utilization would reach 100%."
+    },
+    {
+      "severity": "warning",
+      "code": "territory_imbalance",
+      "message": "7 territor(ies) remain imbalanced after simulation."
+    },
+    {
+      "severity": "info",
+      "code": "unassigned_remainder",
+      "message": "57 candidates would remain unassigned after this run."
+    },
+    {
+      "severity": "info",
+      "code": "low_confidence_queue",
+      "message": "19 queued assignment(s) below 65% confidence."
+    }
+  ],
+  "confidenceDistribution": [
+    {
+      "label": "90–100",
+      "min": 90,
+      "max": 100,
+      "count": 0
+    },
+    {
+      "label": "80–89",
+      "min": 80,
+      "max": 89,
+      "count": 0
+    },
+    {
+      "label": "70–79",
+      "min": 70,
+      "max": 79,
+      "count": 9
+    },
+    {
+      "label": "60–69",
+      "min": 60,
+      "max": 69,
+      "count": 43
+    },
+    {
+      "label": "<60",
+      "min": 0,
+      "max": 59,
+      "count": 0
+    }
+  ],
+  "runResult": {
+    "message": "P158.1 simulation complete — 25 candidate(s) would be assigned (no production writes).",
+    "candidatesAssignedInSimulation": 25
+  },
+  "simulation": {
+    "generatedAt": "2026-07-07T16:55:51.755Z",
+    "readOnly": true,
+    "sourcePhase": "P158.1",
+    "simulationOnly": true,
+    "maxAssignmentsApplied": 25,
+    "summary": {
+      "candidatesEvaluated": 94,
+      "candidatesAssignedInSimulation": 25,
+      "candidatesRemainingUnassigned": 57,
+      "largestWorkloadIncrease": {
+        "recruiter": "Riley",
+        "delta": 8
+      },
+      "territoryImbalanceScore": 68,
+      "avgRecruiterUtilization": 63,
+      "readyForPaperwork": 0,
+      "manualReview": 25,
+      "followUp": 0,
+      "blocked": 0
+    },
+    "sections": {
+      "assignmentSimulation": [
+        {
+          "candidateId": "df72b3cdd658",
+          "candidateName": "Leonard Sutton",
+          "email": "leonardsutton575@gmail.com",
+          "state": "PA",
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "position": "Merchandising Specialist – Wilkes Barre, PA",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Taylor",
+          "confidence": 73,
+          "priorityScore": 80,
+          "openDemand": 1961,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: PA",
+            "DM: Mindie Rodriguez",
+            "Best recruiter: Taylor",
+            "1961 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (80)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "1b2b4ad3f876",
+          "candidateName": "Marlene Joyce",
+          "email": "martom9932@verizon.net",
+          "state": "PA",
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "position": "Retail Support Merchandiser – West Mifflin, PA",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Taylor",
+          "confidence": 73,
+          "priorityScore": 79,
+          "openDemand": 1961,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: PA",
+            "DM: Mindie Rodriguez",
+            "Best recruiter: Taylor",
+            "1961 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (79)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "94b37988e89c",
+          "candidateName": "Alexander Ramon Pisieczko",
+          "email": "alexander.pisieczko@gmail.com",
+          "state": "PA",
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "position": "Retail Service Merchandiser – PHILADELPHIA, PA",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Taylor",
+          "confidence": 73,
+          "priorityScore": 79,
+          "openDemand": 1961,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: PA",
+            "DM: Mindie Rodriguez",
+            "Best recruiter: Taylor",
+            "1961 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (79)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "c6a7a62c67f6",
+          "candidateName": "Rodney Morris",
+          "email": "rodneymorris@live.com",
+          "state": "PA",
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "position": "Retail Service Merchandiser – PHILADELPHIA, PA",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Taylor",
+          "confidence": 73,
+          "priorityScore": 77,
+          "openDemand": 1961,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: PA",
+            "DM: Mindie Rodriguez",
+            "Best recruiter: Taylor",
+            "1961 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (77)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "db05da0112e4",
+          "candidateName": "Brian Smith",
+          "email": "nerd0for0life@gmail.com",
+          "state": "PA",
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "position": "Retail Service Merchandiser – PHILADELPHIA, PA",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Taylor",
+          "confidence": 73,
+          "priorityScore": 77,
+          "openDemand": 1961,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: PA",
+            "DM: Mindie Rodriguez",
+            "Best recruiter: Taylor",
+            "1961 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (77)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "f71f2c217365",
+          "candidateName": "Anthony Miraglia",
+          "email": "amiraglia7@outlook.com",
+          "state": "PA",
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "position": "Merchandising Specialist – Wilkes Barre, PA",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Taylor",
+          "confidence": 73,
+          "priorityScore": 77,
+          "openDemand": 1961,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: PA",
+            "DM: Mindie Rodriguez",
+            "Best recruiter: Taylor",
+            "1961 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (77)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "cfd03224d5c8",
+          "candidateName": "Darnell Landry",
+          "email": "landrydistribution@yahoo.com",
+          "state": "AR",
+          "territory": "AR",
+          "dm": "Lori VandeWiele",
+          "position": "Store Merchandiser – N Little Rock, AR",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Logan",
+          "confidence": 73,
+          "priorityScore": 76,
+          "openDemand": 61,
+          "recruiterWorkload": 8,
+          "status": "queued",
+          "reasoning": [
+            "Territory: AR",
+            "DM: Lori VandeWiele",
+            "Best recruiter: Logan",
+            "61 open calls in territory",
+            "Recruiter workload: 8 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "0f090a9b0c1c",
+          "candidateName": "Marie Kirkland",
+          "email": "mariek359@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Flexible Retail Jobs – Valdosta",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "1431794ae541",
+          "candidateName": "Theo Johnson",
+          "email": "t.tyrell84@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Retail Project Specialist – Greater Atlanta Territory",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "1a918c772c38",
+          "candidateName": "Tim Griffin",
+          "email": "timgriffin382@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Flexible Retail Jobs – Valdosta",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "27e5813f1ca4",
+          "candidateName": "Clarence Hendricks",
+          "email": "cjheel40@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Flexible Retail Jobs – Valdosta",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "7b464ecbcc27",
+          "candidateName": "Yasha Thompson",
+          "email": "ladiifendii91@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Flexible Retail Jobs – Valdosta",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "9e0b074108a5",
+          "candidateName": "BRANDON BOYD",
+          "email": "bboyd2343@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Independent Retail Contractor – Locust Grove",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "cc2272dda159",
+          "candidateName": "Lisa Miley",
+          "email": "lltmiley14@icloud.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Flexible Retail Jobs – Valdosta",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "d5e7d1e4c0a5",
+          "candidateName": "Keisha Collins",
+          "email": "keishacollins23@gmail.com",
+          "state": "GA",
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "position": "Independent Retail Contractor – Locust Grove",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Riley",
+          "confidence": 65,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 10,
+          "status": "queued",
+          "reasoning": [
+            "Territory: GA",
+            "DM: Erin Boatright",
+            "Best recruiter: Riley",
+            "2660 open calls in territory",
+            "Recruiter workload: 10 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "7cde8d1835aa",
+          "candidateName": "Cody Bolles",
+          "email": "cxdyprx@gmail.com",
+          "state": "AZ",
+          "territory": "AZ",
+          "dm": "Shelly Debellis",
+          "position": "Continuity In-Store Merchandiser Taylor, AZ",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Drew",
+          "confidence": 64,
+          "priorityScore": 76,
+          "openDemand": 2399,
+          "recruiterWorkload": 5,
+          "status": "queued",
+          "reasoning": [
+            "Territory: AZ",
+            "DM: Shelly Debellis",
+            "Best recruiter: Drew",
+            "2399 open calls in territory",
+            "Recruiter workload: 5 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "b0e7f9b0b1ff",
+          "candidateName": "Abigail D'Angelo",
+          "email": "abigaildangeloh@gmail.com",
+          "state": "AZ",
+          "territory": "AZ",
+          "dm": "Shelly Debellis",
+          "position": "Continuity In-Store Merchandiser Taylor, AZ",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Drew",
+          "confidence": 64,
+          "priorityScore": 76,
+          "openDemand": 2399,
+          "recruiterWorkload": 5,
+          "status": "queued",
+          "reasoning": [
+            "Territory: AZ",
+            "DM: Shelly Debellis",
+            "Best recruiter: Drew",
+            "2399 open calls in territory",
+            "Recruiter workload: 5 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "09d3013f882d",
+          "candidateName": "Derek Burpee",
+          "email": "dereksseoul@gmail.com",
+          "state": "NC",
+          "territory": "NC",
+          "dm": "Erin Boatright",
+          "position": "Retail Merchandiser – Fayetteville Area",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: NC",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "117a36808620",
+          "candidateName": "Stuart Davis",
+          "email": "shiznyee43@gmail.com",
+          "state": "NC",
+          "territory": "NC",
+          "dm": "Erin Boatright",
+          "position": "Retail Merchandiser Needed – Henderson",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: NC",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "2210b6eaef92",
+          "candidateName": "Katie Franklin",
+          "email": "f.katiedid.k89@gmail.com",
+          "state": "NC",
+          "territory": "NC",
+          "dm": "Erin Boatright",
+          "position": "Independent Retail Merchandiser – Taylorsville",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: NC",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "29d7115c30f8",
+          "candidateName": "Hicham Dhibi",
+          "email": "hicham2115@gmail.com",
+          "state": "FL",
+          "territory": "FL",
+          "dm": "Erin Boatright",
+          "position": "Coastal Retail Merchandiser – St. Augustine Area",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: FL",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "39a40a95af5f",
+          "candidateName": "Brittney Thomas",
+          "email": "brittbritt2675@gmail.com",
+          "state": "SC",
+          "territory": "SC",
+          "dm": "Erin Boatright",
+          "position": "Retail Display Specialist – Leesville",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: SC",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "43b865d3468e",
+          "candidateName": "Alexander Gerlad Baker",
+          "email": "199alexanderbaker@sorce.email",
+          "state": "FL",
+          "territory": "FL",
+          "dm": "Erin Boatright",
+          "position": "Retail Merchandiser – Pensacola Area",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: FL",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "5d193d92212c",
+          "candidateName": "LAROYA DAILEY",
+          "email": "laroyawharton@ymail.com",
+          "state": "NC",
+          "territory": "NC",
+          "dm": "Erin Boatright",
+          "position": "Independent Merchandiser – High Point",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: NC",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        },
+        {
+          "candidateId": "5d588fe55a64",
+          "candidateName": "Rashund Joyner -Googe",
+          "email": "rashundjoynergooge@gmail.com",
+          "state": "SC",
+          "territory": "SC",
+          "dm": "Erin Boatright",
+          "position": "Flexible Retail Contractor – Orangeburg",
+          "assignedRecruiter": "Unassigned",
+          "recommendedRecruiter": "Casey",
+          "confidence": 62,
+          "priorityScore": 76,
+          "openDemand": 2660,
+          "recruiterWorkload": 6,
+          "status": "queued",
+          "reasoning": [
+            "Territory: SC",
+            "DM: Erin Boatright",
+            "Best recruiter: Casey",
+            "2660 open calls in territory",
+            "Recruiter workload: 6 candidates",
+            "High P156 priority (76)"
+          ],
+          "skipReason": null,
+          "duplicateRisk": false
+        }
+      ],
+      "workloadImpact": [
+        {
+          "recruiter": "Riley",
+          "before": 10,
+          "after": 18,
+          "delta": 8,
+          "utilizationPercent": 90,
+          "queuedInSimulation": 8
+        },
+        {
+          "recruiter": "Casey",
+          "before": 6,
+          "after": 14,
+          "delta": 8,
+          "utilizationPercent": 70,
+          "queuedInSimulation": 8
+        },
+        {
+          "recruiter": "Taylor",
+          "before": 8,
+          "after": 14,
+          "delta": 6,
+          "utilizationPercent": 70,
+          "queuedInSimulation": 6
+        },
+        {
+          "recruiter": "Drew",
+          "before": 5,
+          "after": 7,
+          "delta": 2,
+          "utilizationPercent": 35,
+          "queuedInSimulation": 2
+        },
+        {
+          "recruiter": "Logan",
+          "before": 8,
+          "after": 9,
+          "delta": 1,
+          "utilizationPercent": 45,
+          "queuedInSimulation": 1
+        },
+        {
+          "recruiter": "Jordan",
+          "before": 20,
+          "after": 20,
+          "delta": 0,
+          "utilizationPercent": 100,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Sam",
+          "before": 15,
+          "after": 15,
+          "delta": 0,
+          "utilizationPercent": 75,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Alex",
+          "before": 14,
+          "after": 14,
+          "delta": 0,
+          "utilizationPercent": 70,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Chris",
+          "before": 8,
+          "after": 8,
+          "delta": 0,
+          "utilizationPercent": 40,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Morgan",
+          "before": 6,
+          "after": 6,
+          "delta": 0,
+          "utilizationPercent": 30,
+          "queuedInSimulation": 0
+        }
+      ],
+      "territoryHeatMap": [
+        {
+          "territory": "OH",
+          "dm": "Mindie Rodriguez",
+          "openDemand": 1961,
+          "unassignedBefore": 10,
+          "unassignedAfter": 10,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 90
+        },
+        {
+          "territory": "IN",
+          "dm": "Lori VandeWiele",
+          "openDemand": 1276,
+          "unassignedBefore": 3,
+          "unassignedAfter": 3,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 76
+        },
+        {
+          "territory": "NC",
+          "dm": "Erin Boatright",
+          "openDemand": 2660,
+          "unassignedBefore": 11,
+          "unassignedAfter": 7,
+          "assignedInSimulation": 4,
+          "imbalanceScore": 74
+        },
+        {
+          "territory": "MS",
+          "dm": "Erin Boatright",
+          "openDemand": 2660,
+          "unassignedBefore": 2,
+          "unassignedAfter": 2,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 74
+        },
+        {
+          "territory": "KY",
+          "dm": null,
+          "openDemand": 1434,
+          "unassignedBefore": 1,
+          "unassignedAfter": 1,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 72
+        },
+        {
+          "territory": "MI",
+          "dm": "Trista Thomas",
+          "openDemand": 1391,
+          "unassignedBefore": 1,
+          "unassignedAfter": 1,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 72
+        },
+        {
+          "territory": "NJ",
+          "dm": "Melissa O'Connor",
+          "openDemand": 1580,
+          "unassignedBefore": 1,
+          "unassignedAfter": 1,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 72
+        },
+        {
+          "territory": "IL",
+          "dm": null,
+          "openDemand": 1391,
+          "unassignedBefore": 0,
+          "unassignedAfter": 0,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 70
+        },
+        {
+          "territory": "AL",
+          "dm": null,
+          "openDemand": 2660,
+          "unassignedBefore": 0,
+          "unassignedAfter": 0,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 70
+        },
+        {
+          "territory": "FL",
+          "dm": "Erin Boatright",
+          "openDemand": 2660,
+          "unassignedBefore": 6,
+          "unassignedAfter": 4,
+          "assignedInSimulation": 2,
+          "imbalanceScore": 68
+        },
+        {
+          "territory": "GA",
+          "dm": "Erin Boatright",
+          "openDemand": 2660,
+          "unassignedBefore": 11,
+          "unassignedAfter": 3,
+          "assignedInSimulation": 8,
+          "imbalanceScore": 66
+        },
+        {
+          "territory": "SC",
+          "dm": "Erin Boatright",
+          "openDemand": 2660,
+          "unassignedBefore": 5,
+          "unassignedAfter": 3,
+          "assignedInSimulation": 2,
+          "imbalanceScore": 66
+        },
+        {
+          "territory": "AR",
+          "dm": "Lori VandeWiele",
+          "openDemand": 61,
+          "unassignedBefore": 20,
+          "unassignedAfter": 19,
+          "assignedInSimulation": 1,
+          "imbalanceScore": 64
+        },
+        {
+          "territory": "PA",
+          "dm": "Mindie Rodriguez",
+          "openDemand": 1961,
+          "unassignedBefore": 7,
+          "unassignedAfter": 1,
+          "assignedInSimulation": 6,
+          "imbalanceScore": 62
+        },
+        {
+          "territory": "AZ",
+          "dm": "Shelly Debellis",
+          "openDemand": 2399,
+          "unassignedBefore": 3,
+          "unassignedAfter": 1,
+          "assignedInSimulation": 2,
+          "imbalanceScore": 62
+        },
+        {
+          "territory": "NH",
+          "dm": "Melissa O'Connor",
+          "openDemand": 0,
+          "unassignedBefore": 1,
+          "unassignedAfter": 1,
+          "assignedInSimulation": 0,
+          "imbalanceScore": 32
+        }
+      ],
+      "beforeAfterComparison": [
+        {
+          "recruiter": "Riley",
+          "before": 10,
+          "after": 18,
+          "delta": 8,
+          "utilizationPercent": 90,
+          "queuedInSimulation": 8
+        },
+        {
+          "recruiter": "Casey",
+          "before": 6,
+          "after": 14,
+          "delta": 8,
+          "utilizationPercent": 70,
+          "queuedInSimulation": 8
+        },
+        {
+          "recruiter": "Taylor",
+          "before": 8,
+          "after": 14,
+          "delta": 6,
+          "utilizationPercent": 70,
+          "queuedInSimulation": 6
+        },
+        {
+          "recruiter": "Drew",
+          "before": 5,
+          "after": 7,
+          "delta": 2,
+          "utilizationPercent": 35,
+          "queuedInSimulation": 2
+        },
+        {
+          "recruiter": "Logan",
+          "before": 8,
+          "after": 9,
+          "delta": 1,
+          "utilizationPercent": 45,
+          "queuedInSimulation": 1
+        },
+        {
+          "recruiter": "Jordan",
+          "before": 20,
+          "after": 20,
+          "delta": 0,
+          "utilizationPercent": 100,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Sam",
+          "before": 15,
+          "after": 15,
+          "delta": 0,
+          "utilizationPercent": 75,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Alex",
+          "before": 14,
+          "after": 14,
+          "delta": 0,
+          "utilizationPercent": 70,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Chris",
+          "before": 8,
+          "after": 8,
+          "delta": 0,
+          "utilizationPercent": 40,
+          "queuedInSimulation": 0
+        },
+        {
+          "recruiter": "Morgan",
+          "before": 6,
+          "after": 6,
+          "delta": 0,
+          "utilizationPercent": 30,
+          "queuedInSimulation": 0
+        }
+      ],
+      "projectedPaperworkQueue": [],
+      "warnings": [
+        {
+          "severity": "warning",
+          "code": "blocked_candidates",
+          "message": "5 candidate(s) blocked (duplicate or policy) — will not assign."
+        },
+        {
+          "severity": "info",
+          "code": "manual_review_backlog",
+          "message": "25 candidates need manual review before assignment."
+        },
+        {
+          "severity": "warning",
+          "code": "high_utilization",
+          "message": "Riley utilization would reach 90%."
+        },
+        {
+          "severity": "warning",
+          "code": "high_utilization",
+          "message": "Jordan utilization would reach 100%."
+        },
+        {
+          "severity": "warning",
+          "code": "territory_imbalance",
+          "message": "7 territor(ies) remain imbalanced after simulation."
+        },
+        {
+          "severity": "info",
+          "code": "unassigned_remainder",
+          "message": "57 candidates would remain unassigned after this run."
+        },
+        {
+          "severity": "info",
+          "code": "low_confidence_queue",
+          "message": "19 queued assignment(s) below 65% confidence."
+        }
+      ],
+      "simulationSummary": {
+        "candidatesEvaluated": 94,
+        "candidatesAssignedInSimulation": 25,
+        "candidatesRemainingUnassigned": 57,
+        "largestWorkloadIncrease": {
+          "recruiter": "Riley",
+          "delta": 8
+        },
+        "territoryImbalanceScore": 68,
+        "avgRecruiterUtilization": 63,
+        "readyForPaperwork": 0,
+        "manualReview": 25,
+        "followUp": 0,
+        "blocked": 0
+      },
+      "confidenceDistribution": [
+        {
+          "label": "90–100",
+          "min": 90,
+          "max": 100,
+          "count": 0
+        },
+        {
+          "label": "80–89",
+          "min": 80,
+          "max": 89,
+          "count": 0
+        },
+        {
+          "label": "70–79",
+          "min": 70,
+          "max": 79,
+          "count": 9
+        },
+        {
+          "label": "60–69",
+          "min": 60,
+          "max": 69,
+          "count": 43
+        },
+        {
+          "label": "<60",
+          "min": 0,
+          "max": 59,
+          "count": 0
+        }
+      ]
+    },
+    "warnings": [
+      "5 candidate(s) blocked (duplicate or policy) — will not assign.",
+      "25 candidates need manual review before assignment.",
+      "Riley utilization would reach 90%.",
+      "Jordan utilization would reach 100%.",
+      "7 territor(ies) remain imbalanced after simulation.",
+      "57 candidates would remain unassigned after this run.",
+      "19 queued assignment(s) below 65% confidence."
+    ]
+  },
+  "warningsFlat": [
+    "5 candidate(s) blocked (duplicate or policy) — will not assign.",
+    "25 candidates need manual review before assignment.",
+    "Riley utilization would reach 90%.",
+    "Jordan utilization would reach 100%.",
+    "7 territor(ies) remain imbalanced after simulation.",
+    "57 candidates would remain unassigned after this run.",
+    "19 queued assignment(s) below 65% confidence."
+  ]
+}

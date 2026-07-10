@@ -6,9 +6,9 @@ import {
   type WorkforceImportSummary,
 } from "@/lib/workforce-intelligence/workforce-roster";
 import path from "node:path";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
-const STORE_DIR = path.join(process.cwd(), ".data");
-const STORE_PATH = path.join(STORE_DIR, "active-reps.json");
+const STORE_PATH = path.join(recruitingDataDir(), "active-reps.json");
 
 /** @deprecated Legacy single-array store — migrated on read. */
 type LegacyActiveRepStoreFile = {
@@ -85,7 +85,8 @@ async function readStore(): Promise<ActiveRepStoreFile> {
 }
 
 async function writeStore(file: ActiveRepStoreFile): Promise<void> {
-  await mkdir(STORE_DIR, { recursive: true });
+  const storeDir = recruitingDataDir();
+  await safeRecruitingMkdir(storeDir);
   await writeFile(STORE_PATH, JSON.stringify(file, null, 2), "utf8");
 }
 

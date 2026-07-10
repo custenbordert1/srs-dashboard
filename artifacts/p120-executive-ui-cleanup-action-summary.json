@@ -1,0 +1,228 @@
+{
+  "sourcePhase": "P120",
+  "generatedAt": "2026-07-01T16:29:35.273Z",
+  "mode": "dryRun",
+  "summary": "P120 executive command summary — NO-GO. Automation NOT LIVE; sends SENDS DISABLED. 375 blocked; 352 recoverable. Top action: Approve Mapping — unlock 32. Removed 3 duplicate panels; 6 section groups collapsed by default.",
+  "duplicatePanelsRemoved": [
+    "ExecutivePaperworkDashboardPanel",
+    "PaperworkUnlockQueuePanel",
+    "BreezyJobPublishReviewPanel"
+  ],
+  "sectionsCollapsed": [
+    "detailed_recovery_categories",
+    "raw_blocker_breakdown",
+    "long_audit_details",
+    "historical_artifacts",
+    "verbose_diagnostics",
+    "advanced_paperwork_panels"
+  ],
+  "sectionsVisibleByDefault": [
+    "executive_command_summary",
+    "top_5_actions",
+    "operations_health",
+    "autonomous_recovery_center"
+  ],
+  "summaryMetrics": {
+    "automationLive": "NOT LIVE",
+    "paperworkSendingAutomatically": "SENDS DISABLED",
+    "goStatus": "NO-GO",
+    "totalBlockedCandidates": 375,
+    "estimatedRecoverableCandidates": 352,
+    "approvedMappingsReady": 6,
+    "pendingMappingReviews": 0,
+    "topRecommendedAction": "Approve Mapping — unlock 32",
+    "humanApprovalRequired": true
+  },
+  "top5Actions": [
+    {
+      "actionId": "Approve Mapping::40e576f67230::REQUIRES_MAPPING_APPROVAL",
+      "actionType": "Approve Mapping",
+      "priority": 4535,
+      "expectedUnlockCount": 32,
+      "estimatedPaperworkIncrease": 32,
+      "estimatedRecruiterMinutes": 67,
+      "businessImpact": "high",
+      "reason": "No published or mappable project found for candidate position. | No published or mappable project found for candidate position. | No published or mappable project found for candidate position.",
+      "candidateIds": [
+        "6f39aaa878b6",
+        "184896b9a3bd",
+        "2e9c4601d867",
+        "e775e48eb044",
+        "ddd0a10df851",
+        "edaf4c9e3eeb",
+        "41994ba5a04d",
+        "0ad801aefc7e",
+        "91555b67e0b7",
+        "fb19e110d5b5",
+        "a329230f9ca6",
+        "e391dbd851fe",
+        "54dc0c7c9e8d",
+        "4d403c923c27",
+        "4bdbebd8a0f2",
+        "ba5cf439eb6a",
+        "0d484a91b0ed",
+        "e473128881f0",
+        "ff2da0591db7",
+        "20b7653c6612",
+        "03ba05533a8d",
+        "bed77a44e0c9",
+        "642f902f60dd",
+        "f03457359151",
+        "e8d0f83be9b5",
+        "bb5386e46e37",
+        "2281fe312b4f",
+        "ce3c553c31c7",
+        "0111b4583cf8",
+        "4177a628c679",
+        "c8e577edd370",
+        "8f1d5775bc05"
+      ],
+      "recoveryCategories": [
+        "REQUIRES_MAPPING_APPROVAL"
+      ],
+      "sourcePhase": "P119",
+      "title": "Approve Mapping",
+      "recommendedOwner": "Taylor (mapping reviewer)",
+      "safetyStatus": "Review bulk safety before approval",
+      "humanApprovalRequired": true
+    },
+    {
+      "actionId": "Approve Mapping::49ccc17bfbae::REQUIRES_MAPPING_APPROVAL",
+      "actionType": "Approve Mapping",
+      "priority": 4433,
+      "expectedUnlockCount": 21,
+      "estimatedPaperworkIncrease": 21,
+      "estimatedRecruiterMinutes": 45,
+      "businessImpact": "high",
+      "reason": "No published or mappable project found for candidate position. | No published or mappable project found for candidate position. | No published or mappable project found for candidate position.",
+      "candidateIds": [
+        "33cb7d7f786c",
+        "a381b6aca0e0",
+        "f1b2325774c4",
+        "06531756ae1a",
+        "621ef8c8480c",
+        "b06d222cb36a",
+        "840c0b858148",
+        "8c035453cf91",
+        "e0bfa38d5e48",
+        "fd05721aa816",
+        "26172067a9fd",
+        "a6ef153915ba",
+        "4b3ca31f4bd2",
+        "148d110d3d03",
+        "4d337a689efa",
+        "ad42c3d2949c",
+        "7c139386c5da",
+        "eb4314d21ee0",
+        "dd1747bfe124",
+        "19a0a6da9f17",
+        "5ef2901144af"
+      ],
+      "recoveryCategories": [
+        "REQUIRES_MAPPING_APPROVAL"
+      ],
+      "sourcePhase": "P119",
+      "title": "Approve Mapping",
+      "recommendedOwner": "Taylor (mapping reviewer)",
+      "safetyStatus": "Review bulk safety before approval",
+      "humanApprovalRequired": true
+    },
+    {
+      "actionId": "Approve Mapping::637309d978f0::REQUIRES_MAPPING_APPROVAL",
+      "actionType": "Approve Mapping",
+      "priority": 4136,
+      "expectedUnlockCount": 10,
+      "estimatedPaperworkIncrease": 10,
+      "estimatedRecruiterMinutes": 23,
+      "businessImpact": "high",
+      "reason": "No published or mappable project found for candidate position. | No published or mappable project found for candidate position. | No published or mappable project found for candidate position.",
+      "candidateIds": [
+        "7e52e998cf11",
+        "faee4e65ed68",
+        "568c39b6f8f4",
+        "ae7235c3de70",
+        "ecd43a716381",
+        "c49e58cec99c",
+        "081d41f9295d",
+        "32f1be2b9068",
+        "92a112b6d1a9",
+        "3d4c70bc0fa8"
+      ],
+      "recoveryCategories": [
+        "REQUIRES_MAPPING_APPROVAL"
+      ],
+      "sourcePhase": "P119",
+      "title": "Approve Mapping",
+      "recommendedOwner": "Taylor (mapping reviewer)",
+      "safetyStatus": "Review bulk safety before approval",
+      "humanApprovalRequired": true
+    },
+    {
+      "actionId": "Approve Mapping::38b6752c9513::REQUIRES_MAPPING_APPROVAL",
+      "actionType": "Approve Mapping",
+      "priority": 4009,
+      "expectedUnlockCount": 8,
+      "estimatedPaperworkIncrease": 8,
+      "estimatedRecruiterMinutes": 19,
+      "businessImpact": "high",
+      "reason": "No published or mappable project found for candidate position. | No published or mappable project found for candidate position. | No published or mappable project found for candidate position.",
+      "candidateIds": [
+        "3e98b7afbc0a",
+        "854fd7c0f321",
+        "da058768b22a",
+        "d19afefd998a",
+        "afa51ec38555",
+        "b11c21a04670",
+        "31d19faf28d2",
+        "931eca90dace"
+      ],
+      "recoveryCategories": [
+        "REQUIRES_MAPPING_APPROVAL"
+      ],
+      "sourcePhase": "P119",
+      "title": "Approve Mapping",
+      "recommendedOwner": "Taylor (mapping reviewer)",
+      "safetyStatus": "Review bulk safety before approval",
+      "humanApprovalRequired": true
+    },
+    {
+      "actionId": "Approve Mapping::2e49bfb03468::REQUIRES_MAPPING_APPROVAL",
+      "actionType": "Approve Mapping",
+      "priority": 3813,
+      "expectedUnlockCount": 6,
+      "estimatedPaperworkIncrease": 6,
+      "estimatedRecruiterMinutes": 15,
+      "businessImpact": "high",
+      "reason": "No published or mappable project found for candidate position. | No published or mappable project found for candidate position. | No published or mappable project found for candidate position.",
+      "candidateIds": [
+        "7830aa5b79b1",
+        "87ea6e6dca24",
+        "77be2be44a6b",
+        "d6cd926f864a",
+        "c6414945087b",
+        "ea49a4e6297b"
+      ],
+      "recoveryCategories": [
+        "REQUIRES_MAPPING_APPROVAL"
+      ],
+      "sourcePhase": "P119",
+      "title": "Approve Mapping",
+      "recommendedOwner": "Taylor (mapping reviewer)",
+      "safetyStatus": "Review bulk safety before approval",
+      "humanApprovalRequired": true
+    }
+  ],
+  "safetyConfirmation": {
+    "noSends": true,
+    "noBreezyWrites": true,
+    "noLiveMode": true,
+    "noRunnerWiring": true,
+    "uiCleanupOnly": true
+  },
+  "warnings": [
+    "P120 — UI cleanup only; no automation behavior changes.",
+    "P120 — no paperwork sends.",
+    "P120 — no Breezy writes.",
+    "P120 — no live mode activation."
+  ]
+}

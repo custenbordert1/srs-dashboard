@@ -75,8 +75,18 @@ export function buildGradeContributors(input: {
     negative.push({ kind: "negative", label: "No merchandising experience detected" });
   }
 
-  const travelConfirmed = badge("travel") || Boolean(questionnaire.availabilityNotes?.trim());
-  if ((resume.available || questionnaire.available) && !travelConfirmed) {
+  const travelConfirmed =
+    badge("travel") ||
+    Boolean(questionnaire.availabilityNotes?.trim()) ||
+    questionnaire.answers.some((entry) => {
+      const haystack = `${entry.question} ${entry.answer}`.toLowerCase();
+      return (
+        haystack.includes("transportation") ||
+        haystack.includes("reliable vehicle") ||
+        haystack.includes("valid driver")
+      );
+    });
+  if (questionnaire.available && !travelConfirmed) {
     negative.push({ kind: "negative", label: "Transportation not confirmed" });
   }
 

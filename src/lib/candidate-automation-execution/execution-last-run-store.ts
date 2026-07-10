@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { CandidateExecutionRunSummary } from "@/lib/candidate-automation-execution/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function summaryPath(): string {
   return path.join(recruitingDataDir(), "candidate-automation-execution-last-run.json");
@@ -26,7 +26,7 @@ async function readSummaryFile(): Promise<SummaryStoreFile> {
 }
 
 async function writeSummaryFile(file: SummaryStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(summaryPath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 

@@ -147,14 +147,9 @@ export function buildCandidateAdvancementDecision(
     });
   }
 
-  if (!hasPublishedJobMatch(row, options.jobsByPositionId)) {
-    return decision(row, {
-      action: "hold",
-      reason: "No published job match — hold until position is active.",
-      confidence: 78,
-      shouldAdvance: false,
-      shouldPersist: true,
-    });
+  const publishedJobMatch = hasPublishedJobMatch(row, options.jobsByPositionId);
+  if (!publishedJobMatch) {
+    // Candidate-first: closed/unpublished original ad does not hard-block advancement evaluation.
   }
 
   if (review.verdict === "disqualified") {
@@ -222,7 +217,9 @@ export function buildCandidateAdvancementDecision(
       });
     }
 
-    const p83Reason = `P83 autonomous advancement — Grade ${review.grade} (${review.confidence} confidence), questionnaire verified, job active.`;
+    const p83Reason = publishedJobMatch
+      ? `P83 autonomous advancement — Grade ${review.grade} (${review.confidence} confidence), questionnaire verified, job active.`
+      : `P83 autonomous advancement — Grade ${review.grade} (${review.confidence} confidence), questionnaire verified; original ad closed — candidate-first path.`;
     const shouldAdvance = !requireApproval;
 
     return decision(row, {

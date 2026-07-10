@@ -1,6 +1,15 @@
 import { auditTerritoryAccess, guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
 import { resolveCandidatesForRead } from "@/lib/candidate-ingestion";
 import { buildExecutiveDashboard } from "@/lib/dm-dashboard/build-executive-dashboard";
+import {
+  runHiringDecisionSimulation,
+  loadP87FeatureFlags,
+} from "@/lib/autonomous-hiring-decision-engine";
+import { buildScoredWorkflowRow } from "@/lib/build-candidate-workflow-row";
+import { filterMtdCandidates } from "@/lib/candidate-ingestion/mtd-candidates";
+import { listIngestedCandidates, readIngestionStore } from "@/lib/candidate-ingestion/ingestion-store";
+import { listAllCandidateOnboardingRecords } from "@/lib/candidate-onboarding-engine/onboarding-record-store";
+import { getCandidateWorkflowBundle } from "@/lib/candidate-workflow-store";
 import { fetchBreezyJobs } from "@/lib/breezy-api";
 import { parseMelOpportunities } from "@/lib/mel-matching/mel-opportunity-parser";
 import { fetchMelProjectsSheet } from "@/lib/mel-projects-sheet";
@@ -69,6 +78,30 @@ export async function GET(request: Request) {
     melOpportunities,
   );
 
+  let hiringDecisionEngine: ReturnType<typeof runHiringDecisionSimulation> | null = null;
+  const p87Flags = await loadP87FeatureFlags();
+  if (p87Flags.enabled) {
+    const [ingestionStore, workflowBundle, onboardingRecords] = await Promise.all([
+      readIngestionStore(),
+      getCandidateWorkflowBundle(),
+      listAllCandidateOnboardingRecords(),
+    ]);
+    const jobsByPositionId = new Map(jobsResult.jobs.map((job) => [job.jobId, job]));
+    const mtdCandidates = filterMtdCandidates(listIngestedCandidates(ingestionStore));
+    const rows = mtdCandidates.map((candidate) =>
+      buildScoredWorkflowRow(candidate, workflowBundle.workflows[candidate.candidateId], {
+        job: jobsByPositionId.get(candidate.positionId),
+      }),
+    );
+    hiringDecisionEngine = runHiringDecisionSimulation({
+      rows,
+      jobsByPositionId,
+      onboardingByCandidateId: new Map(
+        onboardingRecords.map((record) => [record.candidateId, record]),
+      ),
+    });
+  }
+
   logBreezyRouteResult(ROUTE, 200, {
     role: session.role,
     breezyOk: true,
@@ -80,6 +113,27 @@ export async function GET(request: Request) {
     {
       ok: true,
       dashboard,
+      hiringDecisionEngine: hiringDecisionEngine
+        ? {
+            previewMode: true,
+            executiveMetrics: hiringDecisionEngine.executiveMetrics,
+            queueCounts: {
+              fastTrack: hiringDecisionEngine.fastTrackCount,
+              needsReview: hiringDecisionEngine.recruiterReviewCount,
+              hold: hiringDecisionEngine.holdCount,
+              reject: hiringDecisionEngine.rejectCount,
+              missingInformation: hiringDecisionEngine.missingInformationCount,
+            },
+            readinessMetrics: {
+              labels: hiringDecisionEngine.readinessLabels,
+              questionnaireReady: hiringDecisionEngine.questionnaireReadyCount,
+              workflowReady: hiringDecisionEngine.workflowReadyCount,
+              p84SendEligible: hiringDecisionEngine.p84SendEligibleCount,
+              paperworkAlreadySent: hiringDecisionEngine.paperworkAlreadySentCount,
+            },
+            recruiterHoursSaved: hiringDecisionEngine.estimatedRecruiterHoursSaved,
+          }
+        : null,
       meta: {
         partialSync: candidatesResult.truncated ?? false,
         candidatesFromCache,

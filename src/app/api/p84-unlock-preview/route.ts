@@ -1,0 +1,76 @@
+import { guardApiRoute, isGuardFailure } from "@/lib/auth/api-guard";
+import { DEFAULT_P84_FEATURE_FLAGS, loadP84FeatureFlags } from "@/lib/autonomous-paperwork-send-engine/feature-flags-store";
+import { buildP84UnlockPreviewFromStores } from "@/lib/p84-unlock-preview";
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 120;
+
+/**
+ * GET /api/p84-unlock-preview
+ * Preview-only operational recovery plan for P84 eligibility (P89).
+ * No Breezy writes, no workflow writes, no live paperwork sends.
+ */
+export async function GET(request: Request) {
+  const guard = guardApiRoute(request, {
+    allowedRoles: ["executive", "recruiter", "dm"],
+    requireTerritory: true,
+    auditAction: "recruiting_intelligence",
+  });
+  if (isGuardFailure(guard)) return guard;
+
+  const url = new URL(request.url);
+  const mtdOnly = url.searchParams.get("mtdOnly") !== "false";
+  const includePlans = url.searchParams.get("includePlans") !== "false";
+
+  const [report, p84Flags] = await Promise.all([
+    buildP84UnlockPreviewFromStores({ mtdOnly }),
+    loadP84FeatureFlags(),
+  ]);
+
+  return NextResponse.json({
+    ok: true,
+    previewMode: true,
+    liveSend: false,
+    p84Flags: {
+      ...p84Flags,
+      liveSend: false,
+    },
+    defaults: DEFAULT_P84_FEATURE_FLAGS,
+    report: includePlans
+      ? report
+      : {
+          ...report,
+          recoveryPlans: undefined,
+          currentEligible: report.currentEligible.map((p) => ({
+            candidateId: p.candidateId,
+            candidateName: p.candidateName,
+            positionId: p.positionId,
+            expectedP84ResultAfterFixes: p.expectedP84ResultAfterFixes,
+          })),
+          unlockable: report.unlockable.map((p) => ({
+            candidateId: p.candidateId,
+            candidateName: p.candidateName,
+            positionId: p.positionId,
+            requiredFixes: p.requiredFixes,
+            recommendedRecruiter: p.recommendedRecruiter,
+            suggestedDm: p.suggestedDm,
+          })),
+          monitorOnly: report.monitorOnly.map((p) => ({
+            candidateId: p.candidateId,
+            candidateName: p.candidateName,
+          })),
+          notFixable: report.notFixable.map((p) => ({
+            candidateId: p.candidateId,
+            candidateName: p.candidateName,
+            requiredFixes: p.requiredFixes,
+          })),
+        },
+    warnings: [
+      "Preview only — no Breezy publish/update, no workflow writes, no live P84 sends.",
+      p84Flags.liveSend
+        ? "WARNING: P84 liveSend flag is enabled globally but this endpoint never sends."
+        : "P84 liveSend disabled (expected).",
+    ],
+  });
+}

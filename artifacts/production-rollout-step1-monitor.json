@@ -1,0 +1,202 @@
+{
+  "generatedAt": "2026-07-06T18:21:52.181Z",
+  "rolloutStep": 1,
+  "sourcePhase": "P149.2",
+  "configuration": {
+    "orchestratorEnabled": true,
+    "p146Enabled": false,
+    "p147Enabled": false
+  },
+  "safety": {
+    "sendsRemainZero": true,
+    "totalRemindersSent24h": 0,
+    "remindersSent": 0,
+    "initialPaperworkSent": 0,
+    "paperworkSent": false,
+    "breezyWrites": false,
+    "executeBatchCalled": false,
+    "candidateMovement": false
+  },
+  "validation": {
+    "sevenPhasesComplete": true,
+    "candidatesEvaluated": 389,
+    "runHistoryCount": 5,
+    "latestRunPhases": 7
+  },
+  "status": {
+    "sourcePhase": "P148",
+    "generatedAt": "2026-07-06T18:20:50.976Z",
+    "automationStatus": "idle",
+    "enabled": true,
+    "dryRunOnly": false,
+    "lastSuccessfulRun": "2026-07-06T18:16:19.110Z",
+    "currentRun": null,
+    "lastRunDurationMs": 59920,
+    "candidatesEvaluated": 389,
+    "paperworkQueueCount": 0,
+    "remindersSent": 0,
+    "initialPaperworkSent": 0,
+    "blockedCandidates": 0,
+    "failures": [],
+    "warnings": [
+      "Partial sync during bundle build.",
+      "Partial sync during bundle build."
+    ],
+    "nextScheduledRun": "2026-07-06T18:21:19.110Z",
+    "scheduleIntervalMinutes": 5,
+    "alerts": [],
+    "observability": {
+      "phaseTimings": [
+        {
+          "phase": "refresh_live_snapshot",
+          "success": true,
+          "durationMs": 59735
+        },
+        {
+          "phase": "candidate_intelligence",
+          "success": true,
+          "durationMs": 100,
+          "cacheHit": true
+        },
+        {
+          "phase": "build_paperwork_queue",
+          "success": true,
+          "durationMs": 75,
+          "cacheHit": true
+        },
+        {
+          "phase": "auto_reminder_processing",
+          "success": true,
+          "durationMs": 1
+        },
+        {
+          "phase": "initial_paperwork_processing",
+          "success": true,
+          "durationMs": 1
+        },
+        {
+          "phase": "generate_executive_metrics",
+          "success": true,
+          "durationMs": 1
+        },
+        {
+          "phase": "persist_run_summary",
+          "success": true,
+          "durationMs": 0
+        }
+      ],
+      "cacheHitRate": 29,
+      "apiLatencyMs": 59735,
+      "executionCount": 7,
+      "skippedRuns": 0
+    },
+    "breezyWrites": false,
+    "executeBatchCalled": false
+  },
+  "operations": {
+    "sourcePhase": "P149",
+    "generatedAt": "2026-07-06T18:21:52.181Z",
+    "automationStatus": "idle",
+    "orchestratorEnabled": true,
+    "lastRun": "2026-07-06T18:16:19.110Z",
+    "lastSuccessfulRun": "2026-07-06T18:16:19.110Z",
+    "nextRun": "2026-07-06T18:21:19.110Z",
+    "failures": [],
+    "warnings": [
+      "Partial sync during bundle build.",
+      "Partial sync during bundle build."
+    ],
+    "candidatesProcessedToday": 389,
+    "paperworkSentToday": 0,
+    "reminder1Today": 0,
+    "reminder2Today": 0,
+    "blockedCandidates": 0,
+    "automationSuccessPercent": 100,
+    "averagePaperworkTurnaroundHours": 0,
+    "estimatedRecruiterHoursSaved": 0,
+    "alerts": [],
+    "executeBatchCalled": false,
+    "breezyWrites": false
+  },
+  "recentRuns": [
+    {
+      "runId": "72291896-50a6-410f-a914-9818a3ea68bf",
+      "completedAt": "2026-07-06T18:16:19.108Z",
+      "durationMs": 59920,
+      "candidatesEvaluated": 389,
+      "blockedCandidates": 0,
+      "remindersSent": 0,
+      "initialPaperworkSent": 0,
+      "paperworkSent": false,
+      "warnings": [
+        "Partial sync during bundle build.",
+        "Partial sync during bundle build."
+      ],
+      "failures": [],
+      "phases": 7
+    },
+    {
+      "runId": "07497712-96bc-4484-bec3-60c335f203bf",
+      "completedAt": "2026-07-06T17:46:07.825Z",
+      "durationMs": 167712,
+      "candidatesEvaluated": 0,
+      "blockedCandidates": 0,
+      "remindersSent": 0,
+      "initialPaperworkSent": 0,
+      "paperworkSent": false,
+      "warnings": [
+        "Max runtime (120s) exceeded before candidate_intelligence."
+      ],
+      "failures": [],
+      "phases": 1
+    },
+    {
+      "runId": "d108bd87-8680-4d9c-8b80-ba94a90b6bbc",
+      "completedAt": "2026-07-06T17:21:32.944Z",
+      "durationMs": 60087,
+      "candidatesEvaluated": 389,
+      "blockedCandidates": 0,
+      "remindersSent": 0,
+      "initialPaperworkSent": 0,
+      "paperworkSent": false,
+      "warnings": [
+        "Partial sync during bundle build.",
+        "Partial sync during bundle build."
+      ],
+      "failures": [],
+      "phases": 7
+    },
+    {
+      "runId": "b35a1e8a-d85b-4b8e-8371-9ea15287adcf",
+      "completedAt": "2026-07-06T16:51:04.876Z",
+      "durationMs": 60064,
+      "candidatesEvaluated": 389,
+      "blockedCandidates": 0,
+      "remindersSent": 0,
+      "initialPaperworkSent": 0,
+      "paperworkSent": false,
+      "warnings": [
+        "Partial sync during bundle build.",
+        "Partial sync during bundle build."
+      ],
+      "failures": [],
+      "phases": 7
+    },
+    {
+      "runId": "41c36fc8-cde3-4910-a094-61d66d163fa8",
+      "completedAt": "2026-07-06T16:50:04.811Z",
+      "durationMs": 61736,
+      "candidatesEvaluated": 389,
+      "blockedCandidates": 0,
+      "remindersSent": 0,
+      "initialPaperworkSent": 0,
+      "paperworkSent": false,
+      "warnings": [
+        "Partial sync during bundle build.",
+        "Partial sync during bundle build."
+      ],
+      "failures": [],
+      "phases": 7
+    }
+  ]
+}

@@ -1,0 +1,2400 @@
+{
+  "sourcePhase": "P153.7",
+  "generatedAt": "2026-07-06T20:37:26.797Z",
+  "dryRun": true,
+  "threshold": 65,
+  "rootCause": "Legacy engine used a single-recruiter effective pool (stored roster only had Taylor) and global tie-breaking favored the lowest-workload recruiter globally, collapsing 100% of assignments to Taylor. Fixed engine uses DM-aligned territory recruiter pools and deterministic tie-breaks within each territory.",
+  "investigation": {
+    "storedRoster": [
+      "Unassigned",
+      "Recruiting Team",
+      "Taylor"
+    ],
+    "effectiveRoster": [
+      "Alex",
+      "Casey",
+      "Chris",
+      "Drew",
+      "Jordan",
+      "Logan",
+      "Morgan",
+      "Recruiting Team",
+      "Riley",
+      "Sam",
+      "Taylor",
+      "Unassigned"
+    ],
+    "canonicalRecruiters": [
+      "Taylor",
+      "Alex",
+      "Jordan",
+      "Morgan",
+      "Casey",
+      "Riley",
+      "Sam",
+      "Chris",
+      "Drew",
+      "Logan"
+    ],
+    "recruitersByDm": {
+      "Amy Harp": [
+        "Jordan",
+        "Morgan"
+      ],
+      "Mindie Rodriguez": [
+        "Taylor",
+        "Alex"
+      ],
+      "Erin Boatright": [
+        "Casey",
+        "Riley"
+      ],
+      "Lori VandeWiele": [
+        "Sam",
+        "Logan"
+      ],
+      "Melissa O'Connor": [
+        "Chris",
+        "Drew"
+      ],
+      "Shelly Debellis": [
+        "Drew",
+        "Logan"
+      ],
+      "Trista Thomas": [
+        "Alex",
+        "Morgan"
+      ]
+    }
+  },
+  "summary": {
+    "candidatesEvaluated": 419,
+    "eligibleUnassignedPool": 418,
+    "thresholdQualifiedBefore": 418,
+    "thresholdQualifiedWithCurrentOwnership": 0,
+    "thresholdQualifiedAfter": 418,
+    "stillManualReviewAfter": 117,
+    "taylorShareBeforePct": 100,
+    "taylorShareAfterPct": 0,
+    "uniqueRecruitersBefore": 1,
+    "uniqueRecruitersAfter": 9
+  },
+  "before": {
+    "recruiterDistribution": [
+      {
+        "label": "Taylor",
+        "count": 418
+      }
+    ],
+    "dmDistribution": []
+  },
+  "after": {
+    "recruiterDistribution": [
+      {
+        "label": "Alex",
+        "count": 145
+      },
+      {
+        "label": "Logan",
+        "count": 56
+      },
+      {
+        "label": "Drew",
+        "count": 44
+      },
+      {
+        "label": "Morgan",
+        "count": 43
+      },
+      {
+        "label": "Sam",
+        "count": 39
+      },
+      {
+        "label": "Jordan",
+        "count": 30
+      },
+      {
+        "label": "Riley",
+        "count": 22
+      },
+      {
+        "label": "Casey",
+        "count": 20
+      },
+      {
+        "label": "Chris",
+        "count": 19
+      }
+    ],
+    "dmDistribution": [
+      {
+        "label": "Mindie Rodriguez",
+        "count": 127
+      },
+      {
+        "label": "Lori VandeWiele",
+        "count": 76
+      },
+      {
+        "label": "Amy Harp",
+        "count": 56
+      },
+      {
+        "label": "Melissa O'Connor",
+        "count": 45
+      },
+      {
+        "label": "Erin Boatright",
+        "count": 42
+      },
+      {
+        "label": "Shelly Debellis",
+        "count": 37
+      },
+      {
+        "label": "Trista Thomas",
+        "count": 35
+      }
+    ],
+    "assignmentsByState": [
+      {
+        "state": "PA",
+        "count": 94
+      },
+      {
+        "state": "TX",
+        "count": 50
+      },
+      {
+        "state": "AR",
+        "count": 49
+      },
+      {
+        "state": "NY",
+        "count": 27
+      },
+      {
+        "state": "OH",
+        "count": 26
+      },
+      {
+        "state": "NV",
+        "count": 26
+      },
+      {
+        "state": "GA",
+        "count": 17
+      },
+      {
+        "state": "IL",
+        "count": 13
+      },
+      {
+        "state": "KY",
+        "count": 12
+      },
+      {
+        "state": "WA",
+        "count": 11
+      },
+      {
+        "state": "NC",
+        "count": 8
+      },
+      {
+        "state": "AZ",
+        "count": 7
+      },
+      {
+        "state": "OR",
+        "count": 6
+      },
+      {
+        "state": "FL",
+        "count": 6
+      },
+      {
+        "state": "SC",
+        "count": 6
+      },
+      {
+        "state": "WI",
+        "count": 6
+      },
+      {
+        "state": "MA",
+        "count": 5
+      },
+      {
+        "state": "WV",
+        "count": 5
+      },
+      {
+        "state": "TN",
+        "count": 5
+      },
+      {
+        "state": "MI",
+        "count": 5
+      },
+      {
+        "state": "MO",
+        "count": 4
+      },
+      {
+        "state": "LA",
+        "count": 4
+      },
+      {
+        "state": "CT",
+        "count": 4
+      },
+      {
+        "state": "VT",
+        "count": 3
+      },
+      {
+        "state": "IN",
+        "count": 3
+      },
+      {
+        "state": "NJ",
+        "count": 2
+      },
+      {
+        "state": "MD",
+        "count": 2
+      },
+      {
+        "state": "NE",
+        "count": 2
+      },
+      {
+        "state": "NM",
+        "count": 2
+      },
+      {
+        "state": "NH",
+        "count": 2
+      },
+      {
+        "state": "VA",
+        "count": 2
+      },
+      {
+        "state": "AL",
+        "count": 1
+      },
+      {
+        "state": "IA",
+        "count": 1
+      },
+      {
+        "state": "ID",
+        "count": 1
+      },
+      {
+        "state": "CA",
+        "count": 1
+      }
+    ],
+    "assignmentsByTerritory": [
+      {
+        "territory": "PA",
+        "count": 94
+      },
+      {
+        "territory": "TX",
+        "count": 50
+      },
+      {
+        "territory": "AR",
+        "count": 49
+      },
+      {
+        "territory": "NY",
+        "count": 27
+      },
+      {
+        "territory": "OH",
+        "count": 26
+      },
+      {
+        "territory": "NV",
+        "count": 26
+      },
+      {
+        "territory": "GA",
+        "count": 17
+      },
+      {
+        "territory": "IL",
+        "count": 13
+      },
+      {
+        "territory": "KY",
+        "count": 12
+      },
+      {
+        "territory": "WA",
+        "count": 11
+      },
+      {
+        "territory": "NC",
+        "count": 8
+      },
+      {
+        "territory": "AZ",
+        "count": 7
+      },
+      {
+        "territory": "OR",
+        "count": 6
+      },
+      {
+        "territory": "FL",
+        "count": 6
+      },
+      {
+        "territory": "SC",
+        "count": 6
+      },
+      {
+        "territory": "WI",
+        "count": 6
+      },
+      {
+        "territory": "MA",
+        "count": 5
+      },
+      {
+        "territory": "WV",
+        "count": 5
+      },
+      {
+        "territory": "TN",
+        "count": 5
+      },
+      {
+        "territory": "MI",
+        "count": 5
+      },
+      {
+        "territory": "MO",
+        "count": 4
+      },
+      {
+        "territory": "LA",
+        "count": 4
+      },
+      {
+        "territory": "CT",
+        "count": 4
+      },
+      {
+        "territory": "VT",
+        "count": 3
+      },
+      {
+        "territory": "IN",
+        "count": 3
+      },
+      {
+        "territory": "NJ",
+        "count": 2
+      },
+      {
+        "territory": "MD",
+        "count": 2
+      },
+      {
+        "territory": "NE",
+        "count": 2
+      },
+      {
+        "territory": "NM",
+        "count": 2
+      },
+      {
+        "territory": "NH",
+        "count": 2
+      },
+      {
+        "territory": "VA",
+        "count": 2
+      },
+      {
+        "territory": "AL",
+        "count": 1
+      },
+      {
+        "territory": "IA",
+        "count": 1
+      },
+      {
+        "territory": "ID",
+        "count": 1
+      },
+      {
+        "territory": "CA",
+        "count": 1
+      }
+    ]
+  },
+  "confidenceDistribution": {
+    "90-100": 0,
+    "80-89": 0,
+    "70-79": 0,
+    "60-69": 418,
+    "50-59": 0,
+    "below-50": 0
+  },
+  "topManualReviewReasons": [
+    {
+      "reason": "Low operational fit and advancement confidence — manual review before assignment.",
+      "count": 117
+    }
+  ],
+  "pilotCandidateAudit": {
+    "candidateId": "705cdc0e7f30",
+    "candidateName": "Taylor Custenborder",
+    "territoryState": "OH",
+    "before": {
+      "recruiter": "Taylor",
+      "confidence": 65,
+      "shouldAssign": true
+    },
+    "after": {
+      "recruiter": "Alex",
+      "confidence": 65,
+      "shouldAssign": true
+    },
+    "eligibility": {
+      "dmName": "Mindie Rodriguez",
+      "dmPool": [
+        "Taylor",
+        "Alex"
+      ],
+      "eligible": [
+        "Taylor",
+        "Alex"
+      ],
+      "ineligible": [
+        "Casey",
+        "Chris",
+        "Drew",
+        "Jordan",
+        "Logan",
+        "Morgan",
+        "Riley",
+        "Sam"
+      ]
+    },
+    "p151Recommendation": "Assign Recruiter",
+    "p151Reason": "Territory OH (Mindie Rodriguez) — Alex selected by workload balance among 2 eligible recruiters."
+  },
+  "recruiterEligibilityAudit": [
+    {
+      "candidateId": "705cdc0e7f30",
+      "candidateName": "Taylor Custenborder",
+      "territoryState": "OH",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Mindie Rodriguez",
+        "dmPool": [
+          "Taylor",
+          "Alex"
+        ],
+        "eligible": [
+          "Taylor",
+          "Alex"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory OH (Mindie Rodriguez) — Alex selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "acff2383c00f",
+      "candidateName": "Kailie Ray",
+      "territoryState": "KY",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Sam",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Lori VandeWiele",
+        "dmPool": [
+          "Sam",
+          "Logan"
+        ],
+        "eligible": [
+          "Sam",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory KY (Lori VandeWiele) — Sam selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "2929aebfd380",
+      "candidateName": "Bhavin Patel",
+      "territoryState": "GA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Riley",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory GA (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "5ad3fb6b872d",
+      "candidateName": "Billy Joe Romero",
+      "territoryState": "GA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Casey",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Grade D — not recommended for automation."
+    },
+    {
+      "candidateId": "ae4b6160f57c",
+      "candidateName": "Garrett Exum",
+      "territoryState": "AL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Casey",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory AL (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "cfcd1b8179ba",
+      "candidateName": "Ryley Umbel",
+      "territoryState": "PA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Mindie Rodriguez",
+        "dmPool": [
+          "Taylor",
+          "Alex"
+        ],
+        "eligible": [
+          "Taylor",
+          "Alex"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Onboarding record already has an active signature request."
+    },
+    {
+      "candidateId": "ce187a7283ec",
+      "candidateName": "Tyesha Evans",
+      "territoryState": "PA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Mindie Rodriguez",
+        "dmPool": [
+          "Taylor",
+          "Alex"
+        ],
+        "eligible": [
+          "Taylor",
+          "Alex"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory PA (Mindie Rodriguez) — Alex selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "84d51041e750",
+      "candidateName": "Alexandra Ridel",
+      "territoryState": "OH",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Mindie Rodriguez",
+        "dmPool": [
+          "Taylor",
+          "Alex"
+        ],
+        "eligible": [
+          "Taylor",
+          "Alex"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Onboarding record already has an active signature request."
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "candidateName": "Lara Gh",
+      "territoryState": "OH",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Mindie Rodriguez",
+        "dmPool": [
+          "Taylor",
+          "Alex"
+        ],
+        "eligible": [
+          "Taylor",
+          "Alex"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Onboarding record already has an active signature request."
+    },
+    {
+      "candidateId": "aaa55717777d",
+      "candidateName": "Chirumamilla Praneetha",
+      "territoryState": "IL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Morgan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Archived or withdrawn candidate."
+    },
+    {
+      "candidateId": "de52f7096d0f",
+      "candidateName": "James Peters",
+      "territoryState": "IL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory IL (Trista Thomas) — Alex selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "0bc4a331bb26",
+      "candidateName": "Marie Fann",
+      "territoryState": "IL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Morgan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory IL (Trista Thomas) — Morgan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "c87b5e655cc6",
+      "candidateName": "Brittneyrodgers201@gmail.com 6 Rodgers",
+      "territoryState": "IL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory IL (Trista Thomas) — Alex selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "e72d6aebdb0d",
+      "candidateName": "Erica C Portolese",
+      "territoryState": "NY",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Chris",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Melissa O'Connor",
+        "dmPool": [
+          "Chris",
+          "Drew"
+        ],
+        "eligible": [
+          "Chris",
+          "Drew"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NY (Melissa O'Connor) — Chris selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "9f53ea634daf",
+      "candidateName": "Torrey Allen",
+      "territoryState": "NY",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Melissa O'Connor",
+        "dmPool": [
+          "Chris",
+          "Drew"
+        ],
+        "eligible": [
+          "Chris",
+          "Drew"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NY (Melissa O'Connor) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "147205637f24",
+      "candidateName": "Dezire Nelson",
+      "territoryState": "MA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Melissa O'Connor",
+        "dmPool": [
+          "Chris",
+          "Drew"
+        ],
+        "eligible": [
+          "Chris",
+          "Drew"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory MA (Melissa O'Connor) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "candidateName": "Gregory Petties",
+      "territoryState": "AR",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Lori VandeWiele",
+        "dmPool": [
+          "Sam",
+          "Logan"
+        ],
+        "eligible": [
+          "Sam",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory AR (Lori VandeWiele) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "368f371d5fb9",
+      "candidateName": "Lily Driscoll",
+      "territoryState": "IA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Lori VandeWiele",
+        "dmPool": [
+          "Sam",
+          "Logan"
+        ],
+        "eligible": [
+          "Sam",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Archived or withdrawn candidate."
+    },
+    {
+      "candidateId": "30c285e12e4c",
+      "candidateName": "Richard Anthony Orosco",
+      "territoryState": "OR",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Morgan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Grade D — not recommended for automation."
+    },
+    {
+      "candidateId": "ed828f614e1d",
+      "candidateName": "Faith Withem",
+      "territoryState": "OR",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Alex",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory OR (Trista Thomas) — Alex selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "b3619802b554",
+      "candidateName": "Michael Jones",
+      "territoryState": "GA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Riley",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory GA (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "79a9e79ccd07",
+      "candidateName": "Sarah Bixler",
+      "territoryState": "GA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Casey",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory GA (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "40daa40ff82c",
+      "candidateName": "Natoria Taylor",
+      "territoryState": "GA",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Riley",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory GA (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "4e4c1ff3505f",
+      "candidateName": "Mary Matchella Washington",
+      "territoryState": "FL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Casey",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Erin Boatright",
+        "dmPool": [
+          "Casey",
+          "Riley"
+        ],
+        "eligible": [
+          "Casey",
+          "Riley"
+        ],
+        "ineligible": [
+          "Alex",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory FL (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "6d548b240ab0",
+      "candidateName": "Gary Smigocki",
+      "territoryState": "NJ",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Chris",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Melissa O'Connor",
+        "dmPool": [
+          "Chris",
+          "Drew"
+        ],
+        "eligible": [
+          "Chris",
+          "Drew"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Onboarding record already has an active signature request."
+    },
+    {
+      "candidateId": "9cdc414f3b49",
+      "candidateName": "Michele Neely Mackey",
+      "territoryState": "MD",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Chris",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Melissa O'Connor",
+        "dmPool": [
+          "Chris",
+          "Drew"
+        ],
+        "eligible": [
+          "Chris",
+          "Drew"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory MD (Melissa O'Connor) — Chris selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "f786bc64011a",
+      "candidateName": "Anna Mbah",
+      "territoryState": "MD",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Melissa O'Connor",
+        "dmPool": [
+          "Chris",
+          "Drew"
+        ],
+        "eligible": [
+          "Chris",
+          "Drew"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Jordan",
+          "Logan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory MD (Melissa O'Connor) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "40764d83ef6d",
+      "candidateName": "Rimah Malley",
+      "territoryState": "IL",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Morgan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Trista Thomas",
+        "dmPool": [
+          "Alex",
+          "Morgan"
+        ],
+        "eligible": [
+          "Alex",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Casey",
+          "Chris",
+          "Drew",
+          "Jordan",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory IL (Trista Thomas) — Morgan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "6acc0966d96a",
+      "candidateName": "DAWN GARRISON",
+      "territoryState": "NE",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Jordan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Amy Harp",
+        "dmPool": [
+          "Jordan",
+          "Morgan"
+        ],
+        "eligible": [
+          "Jordan",
+          "Morgan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Drew",
+          "Logan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Do Not Assign",
+      "p151Reason": "Archived or withdrawn candidate."
+    },
+    {
+      "candidateId": "33cb7d7f786c",
+      "candidateName": "Rachel Goodwin",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "a381b6aca0e0",
+      "candidateName": "Tove Dalgliesh",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "f1b2325774c4",
+      "candidateName": "Garrett Biehle",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "06531756ae1a",
+      "candidateName": "Pete Romero",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "621ef8c8480c",
+      "candidateName": "Danielle Ike",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "b06d222cb36a",
+      "candidateName": "Cheyenne Bowman",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "840c0b858148",
+      "candidateName": "Eduardo Banuelos",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "8c035453cf91",
+      "candidateName": "Jennifer Lang",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "e0bfa38d5e48",
+      "candidateName": "Kathy Tingle",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "fd05721aa816",
+      "candidateName": "Minette McGibbon",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "26172067a9fd",
+      "candidateName": "Coriann Stevens",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "a6ef153915ba",
+      "candidateName": "Aaron Lester",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "4b3ca31f4bd2",
+      "candidateName": "Nicole Wedlund",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "148d110d3d03",
+      "candidateName": "Amber Bounds-Sanchez",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "4d337a689efa",
+      "candidateName": "John Greising",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "ad42c3d2949c",
+      "candidateName": "Raul Guerrero",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "7c139386c5da",
+      "candidateName": "Katrina Stallings",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "eb4314d21ee0",
+      "candidateName": "Sebastian Mejia",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "dd1747bfe124",
+      "candidateName": "Deatta Starley",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Logan",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "19a0a6da9f17",
+      "candidateName": "Brandi Thompson",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "5ef2901144af",
+      "candidateName": "Sandra Basham",
+      "territoryState": "NV",
+      "before": {
+        "recruiter": "Taylor",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "after": {
+        "recruiter": "Drew",
+        "confidence": 65,
+        "shouldAssign": true
+      },
+      "eligibility": {
+        "dmName": "Shelly Debellis",
+        "dmPool": [
+          "Drew",
+          "Logan"
+        ],
+        "eligible": [
+          "Drew",
+          "Logan"
+        ],
+        "ineligible": [
+          "Alex",
+          "Casey",
+          "Chris",
+          "Jordan",
+          "Morgan",
+          "Riley",
+          "Sam",
+          "Taylor"
+        ]
+      },
+      "p151Recommendation": "Assign Recruiter",
+      "p151Reason": "Territory NV (Shelly Debellis) — Drew selected by workload balance among 2 eligible recruiters."
+    }
+  ],
+  "recommendation": "Fixed algorithm distributes assignments across territory recruiter pools. Safe for dry-run review; keep threshold at 65%."
+}

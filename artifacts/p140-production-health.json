@@ -1,0 +1,177 @@
+{
+  "sourcePhase": "P140",
+  "generatedAt": "2026-07-02T18:44:07.587Z",
+  "mode": "readOnly",
+  "overallHealthScore": 68,
+  "overallResult": "CRITICAL",
+  "componentStatuses": [
+    {
+      "id": "p136_scheduler",
+      "label": "Scheduler heartbeat",
+      "phase": "P136",
+      "status": "Warning",
+      "detail": "Stale heartbeat — last at 2026-07-02T15:31:55.309Z",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "p124_approval_engine",
+      "label": "Approval engine",
+      "phase": "P124",
+      "status": "Healthy",
+      "detail": "389 decisions — 23 AUTO_APPROVED",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "p123_orchestrator",
+      "label": "Orchestrator",
+      "phase": "P123",
+      "status": "Warning",
+      "detail": "goNoGo=NO-GO, queueDepth=0",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "p135_remediation_executor",
+      "label": "Remediation executor",
+      "phase": "P135",
+      "status": "Healthy",
+      "detail": "389 blocked, 6 unlocks estimated (preview)",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "p125_runner",
+      "label": "Production runner",
+      "phase": "P125",
+      "status": "Critical",
+      "detail": "Status stopped, heartbeat stale",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "p126_ops_command_center",
+      "label": "Operations Command Center",
+      "phase": "P126",
+      "status": "Warning",
+      "detail": "Runner health degraded, API latency 4988ms",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "dropbox_sign",
+      "label": "Dropbox Sign connectivity",
+      "phase": "Dropbox",
+      "status": "Critical",
+      "detail": "DROPBOX_SIGN_API_KEY not configured.",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "candidate_sync",
+      "label": "Candidate sync freshness",
+      "phase": "Ingestion",
+      "status": "Healthy",
+      "detail": "Last sync 1306m ago",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "queue_growth",
+      "label": "Queue depth",
+      "phase": "Queue",
+      "status": "Warning",
+      "detail": "Queue depth 0, ready 23",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "retry_queue",
+      "label": "Retry queue",
+      "phase": "Runner",
+      "status": "Healthy",
+      "detail": "0 entries in retry queue",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "duplicate_prevention",
+      "label": "Duplicate prevention",
+      "phase": "Safety",
+      "status": "Healthy",
+      "detail": "0 prevented, 0 tracked sent IDs",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    },
+    {
+      "id": "p138_pilot_lock",
+      "label": "Pilot lock state",
+      "phase": "P138",
+      "status": "Healthy",
+      "detail": "No pilot send — lock not required",
+      "lastCheckedAt": "2026-07-02T18:44:07.587Z"
+    }
+  ],
+  "activeAlerts": [
+    {
+      "id": "stale_heartbeat",
+      "severity": "warning",
+      "title": "Stale scheduler heartbeat",
+      "detail": "Last heartbeat 2026-07-02T15:31:55.309Z.",
+      "componentId": "p136_scheduler"
+    },
+    {
+      "id": "dropbox_unavailable",
+      "severity": "critical",
+      "title": "Dropbox Sign unavailable",
+      "detail": "DROPBOX_SIGN_API_KEY not configured.",
+      "componentId": "dropbox_sign"
+    }
+  ],
+  "metrics": {
+    "at": "2026-07-02T18:44:07.587Z",
+    "candidatesEvaluated": 389,
+    "autoApproved": 23,
+    "humanReview": 10,
+    "blocked": 74,
+    "queueDepth": 0,
+    "averageApprovalScore": 67,
+    "sendReadiness": 0,
+    "retryCount": 0,
+    "schedulerUptimeMs": 0,
+    "apiLatencyMs": 5656,
+    "dropboxConnectivity": "Critical",
+    "staleCandidateData": false,
+    "failedHealthChecks": 6
+  },
+  "historicalMetrics": [
+    {
+      "at": "2026-07-02T18:44:07.587Z",
+      "candidatesEvaluated": 389,
+      "autoApproved": 23,
+      "humanReview": 10,
+      "blocked": 74,
+      "queueDepth": 0,
+      "averageApprovalScore": 67,
+      "sendReadiness": 0,
+      "retryCount": 0,
+      "schedulerUptimeMs": 0,
+      "apiLatencyMs": 5656,
+      "dropboxConnectivity": "Critical",
+      "staleCandidateData": false,
+      "failedHealthChecks": 6
+    }
+  ],
+  "recommendations": [
+    "Stale scheduler heartbeat: Last heartbeat 2026-07-02T15:31:55.309Z.",
+    "Dropbox Sign unavailable: DROPBOX_SIGN_API_KEY not configured."
+  ],
+  "executivePanel": {
+    "overallHealthScore": 68,
+    "overallResult": "CRITICAL",
+    "componentStatusSummary": "6/12 healthy",
+    "activeAlertCount": 2,
+    "systemUptimeMs": 0,
+    "lastSuccessfulCycleAt": "2026-07-01T19:54:25.437Z",
+    "queueDepth": 0,
+    "queueTrend": "unknown",
+    "retryCount": 0,
+    "retryTrend": "unknown",
+    "dropboxHealth": "Critical",
+    "candidateSyncFreshness": "Fresh (1306m)"
+  },
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}

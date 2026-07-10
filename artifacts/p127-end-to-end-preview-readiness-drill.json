@@ -1,0 +1,178 @@
+{
+  "sourcePhase": "P127",
+  "generatedAt": "2026-07-01T19:46:41.241Z",
+  "mode": "previewOnly",
+  "totalCandidatesEvaluated": 382,
+  "autoApproved": 0,
+  "humanApproval": 6,
+  "blocked": 41,
+  "waiting": 304,
+  "rejectedForSafety": 31,
+  "readyForPilot": 0,
+  "pilotRecommendation": null,
+  "safetyGates": [
+    {
+      "id": "pilot_enabled",
+      "label": "Live pilot enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true"
+    },
+    {
+      "id": "live_mode_enabled",
+      "label": "Live mode enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true"
+    },
+    {
+      "id": "operator_go",
+      "label": "Operator GO",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true"
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    },
+    {
+      "id": "dry_run_false",
+      "label": "dryRun is false",
+      "passed": false,
+      "detail": "Execution blocked — dryRun default prevents sends."
+    },
+    {
+      "id": "confirmation_phrase",
+      "label": "Confirmation phrase",
+      "passed": true,
+      "detail": "Not required for preview/dry-run."
+    },
+    {
+      "id": "p122_pilot_enabled",
+      "label": "Live pilot enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true"
+    },
+    {
+      "id": "p122_live_mode_enabled",
+      "label": "Live mode enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true"
+    },
+    {
+      "id": "p122_operator_go",
+      "label": "Operator GO",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true"
+    },
+    {
+      "id": "p122_pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    },
+    {
+      "id": "p122_dry_run_false",
+      "label": "dryRun is false",
+      "passed": false,
+      "detail": "Execution blocked — dryRun default prevents sends."
+    },
+    {
+      "id": "p122_confirmation_phrase",
+      "label": "Confirmation phrase",
+      "passed": true,
+      "detail": "Not required for preview/dry-run."
+    }
+  ],
+  "goNoGo": "GO WITH CONDITIONS",
+  "goNoGoReason": "Preview drill completed — configure pilot allowlist and resolve approval blockers before live send.",
+  "remainingStepsBeforeFirstLiveSend": [
+    "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true.",
+    "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true (only when operator is ready).",
+    "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true after operator review.",
+    "Configure AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST with exactly one candidate ID.",
+    "Resolve blockers until at least one AUTO_APPROVED allowlisted candidate is in send queue.",
+    "Resolve all failed P122/P123 safety gates before executeOne.",
+    "Run P122 controlled live pilot with confirmation phrase SEND 1 PAPERWORK PACKET.",
+    "Execute one candidate via P125 runner one-cycle with live gates enabled.",
+    "Verify Dropbox Sign delivery and audit log in P126 Operations Command Center."
+  ],
+  "drillSteps": [
+    {
+      "id": "candidate_ingestion",
+      "label": "Candidate ingestion",
+      "status": "PASS",
+      "detail": "382 candidate(s) loaded from ingestion pipeline."
+    },
+    {
+      "id": "approval_engine",
+      "label": "Approval engine",
+      "status": "PASS",
+      "detail": "P124 evaluated 382 candidate(s): 0 AUTO_APPROVED."
+    },
+    {
+      "id": "orchestrator_eligibility",
+      "label": "Orchestrator eligibility",
+      "status": "PASS",
+      "detail": "P123 classified 382 candidate(s); 0 eligibility-ready."
+    },
+    {
+      "id": "send_queue_creation",
+      "label": "Send queue creation",
+      "status": "PASS",
+      "detail": "Send queue depth 0; next: none."
+    },
+    {
+      "id": "runner_one_cycle_preview",
+      "label": "Runner one-cycle preview",
+      "status": "PASS",
+      "detail": "P125 one-cycle preview complete; executed=false."
+    },
+    {
+      "id": "operations_command_center",
+      "label": "Operations Command Center",
+      "status": "PASS",
+      "detail": "P126 report generated with 50 candidate summary row(s)."
+    },
+    {
+      "id": "audit_timeline",
+      "label": "Audit timeline",
+      "status": "PASS",
+      "detail": "5 timeline event(s) available (P125 audit + P123 operator timeline)."
+    },
+    {
+      "id": "retry_queue",
+      "label": "Retry queue",
+      "status": "PASS",
+      "detail": "Retry queue depth 0; mechanism operational."
+    },
+    {
+      "id": "duplicate_prevention",
+      "label": "Duplicate prevention",
+      "status": "PASS",
+      "detail": "Duplicate prevention blocks repeat candidate IDs."
+    },
+    {
+      "id": "pilot_allowlist_readiness",
+      "label": "Pilot allowlist readiness",
+      "status": "WARN",
+      "detail": "AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST is empty — required before live send."
+    }
+  ],
+  "validations": {
+    "candidateIngestion": "PASS",
+    "approvalEngine": "PASS",
+    "orchestratorEligibility": "PASS",
+    "sendQueueCreation": "PASS",
+    "runnerOneCyclePreview": "PASS",
+    "operationsCommandCenter": "PASS",
+    "auditTimeline": "PASS",
+    "retryQueue": "PASS",
+    "duplicatePrevention": "PASS",
+    "pilotAllowlistReadiness": "WARN"
+  },
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}

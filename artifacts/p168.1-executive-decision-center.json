@@ -1,0 +1,157 @@
+{
+  "generatedAt": "2026-07-08T18:32:03.501Z",
+  "sourcePhase": "P168.1",
+  "passed": true,
+  "checks": {
+    "decisionScoreInRange": true,
+    "decisionGradePresent": true,
+    "recommendationValid": true,
+    "singleRecommendation": true,
+    "gateChecklistRendered": true,
+    "approveDisabledReasonWhenBlocked": true,
+    "historyArray": true,
+    "usesP159LiveCyclePath": true,
+    "noNewSendImplementation": true,
+    "manualApprovalRequired": true,
+    "continuousModeUnchanged": true,
+    "daemonNotStarted": true,
+    "noPaperworkSent": true,
+    "workflowStoreUnchanged": true,
+    "runnerStoreUnchanged": true,
+    "auditLogUnchanged": true,
+    "dropboxMetricsUnchanged": true
+  },
+  "view": {
+    "sourcePhase": "P168.1",
+    "generatedAt": "2026-07-08T18:32:03.500Z",
+    "systemStatus": {
+      "observationMode": true,
+      "observationModeLabel": "Observation / Manual",
+      "runnerStatus": "blocked",
+      "continuousMode": false,
+      "daemonActive": false,
+      "productionReadinessScore": 0,
+      "decisionScore": 66,
+      "decisionGrade": "Intervention Required",
+      "deferredReconciliationCount": 77,
+      "monitorBudget": 25
+    },
+    "recommendation": {
+      "id": "p168-de188e50-19a3-4fb7-99a6-6366c5a1aeed",
+      "action": "WAIT",
+      "title": "Wait before next batch",
+      "reason": "Scheduler: WAIT_10_MINUTES. Wait 10 minutes before next capped cycle. Projected 10 sends; queue 54 → 44.",
+      "confidence": 82,
+      "expectedSends": 10,
+      "expectedQueueReduction": 10,
+      "projectedDropboxRequests": 20,
+      "estimatedRuntimeMs": 588548,
+      "queueRemaining": 54,
+      "projectedQueueAfterCycle": 44,
+      "schedulerRecommendation": "WAIT_10_MINUTES",
+      "nextRecommendedRunAt": "2026-07-08T18:42:03.486Z"
+    },
+    "blocking": {
+      "checklist": [
+        {
+          "id": "runner_healthy",
+          "label": "Runner healthy",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "dropbox_healthy",
+          "label": "Dropbox healthy",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "duplicate_protection",
+          "label": "Duplicate protection enabled",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "queue_ready",
+          "label": "Queue ready",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "readiness_threshold",
+          "label": "Readiness score above threshold",
+          "pass": false,
+          "detail": "Score 0 ≤ 80"
+        },
+        {
+          "id": "deferred_backlog",
+          "label": "Deferred reconciliation backlog acceptable",
+          "pass": false,
+          "detail": "77 deferred (budget 25/cycle)"
+        },
+        {
+          "id": "processing_lock",
+          "label": "Processing lock clear",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "continuous_disabled",
+          "label": "Continuous mode disabled",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "daemon_stopped",
+          "label": "Daemon stopped",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "last_cycle_success",
+          "label": "Last run completed successfully",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "wait_window",
+          "label": "Minimum wait window satisfied",
+          "pass": true,
+          "detail": null
+        },
+        {
+          "id": "live_env_gate",
+          "label": "Live cycle env gate enabled",
+          "pass": false,
+          "detail": "P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED not true"
+        },
+        {
+          "id": "all_gates",
+          "label": "All approval gates pass",
+          "pass": false,
+          "detail": "Production readiness score 0 is below 80"
+        }
+      ],
+      "nextExpectedApprovalAt": "2026-07-08T18:42:03.486Z",
+      "actionRequiredBeforeApproval": "Score 0 ≤ 80; 77 deferred (budget 25/cycle); P154_CONTROLLED_PRODUCTION_AUTOPILOT_ENABLED not true",
+      "approveDisabledReason": "Current recommendation is wait — approval not available."
+    },
+    "lastExecution": {
+      "at": "2026-07-08T16:30:41.532Z",
+      "paperworkSent": null,
+      "durationMs": null,
+      "dropboxRequests": null,
+      "errors": null,
+      "queueReduction": null,
+      "result": null,
+      "executiveEmail": null
+    },
+    "history": [],
+    "safety": {
+      "continuousModeEnabled": false,
+      "daemonActive": false,
+      "manualApprovalRequired": true
+    },
+    "warnings": []
+  }
+}

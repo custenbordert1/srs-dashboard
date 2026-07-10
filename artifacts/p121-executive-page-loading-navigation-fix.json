@@ -1,0 +1,124 @@
+{
+  "phase": "P121",
+  "title": "Executive Page Loading & Navigation Fix",
+  "generatedAt": "2026-07-01T16:42:36.631Z",
+  "tabsAudited": [
+    {
+      "tabId": "executive-home",
+      "label": "Executive Home",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [
+        "Heavy lazy bundle and command summary fetch without timeout caused long rendering."
+      ],
+      "fixesApplied": [
+        "Lazy tab loading ceiling; command summary uses fetchWithTimeout and loading ceiling."
+      ]
+    },
+    {
+      "tabId": "executive-accountability",
+      "label": "Executive Accountability",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [
+        "Panel could remain on loading skeleton when lazy chunk or API hung."
+      ],
+      "fixesApplied": [
+        "Loading ceiling fallback with source label and retry; API fetch watchdog via shared degraded state."
+      ]
+    },
+    {
+      "tabId": "executive-forecasting",
+      "label": "Executive Forecast",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [
+        "Panel could remain on loading skeleton when lazy chunk or API hung."
+      ],
+      "fixesApplied": [
+        "Loading ceiling fallback with source label and retry; API fetch watchdog via shared degraded state."
+      ]
+    },
+    {
+      "tabId": "pipeline-intelligence",
+      "label": "Pipeline Intelligence",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [
+        "Panel could remain on loading skeleton when lazy chunk or API hung."
+      ],
+      "fixesApplied": [
+        "Loading ceiling fallback with source label and retry; API fetch watchdog via shared degraded state."
+      ]
+    },
+    {
+      "tabId": "workforce-intelligence",
+      "label": "Workforce Intelligence",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [
+        "Nav used external Link to /executive/workforce-intelligence; tab never activated in dashboard."
+      ],
+      "fixesApplied": [
+        "Inline DashboardTabPanel with WorkforceIntelligencePanel; removed external href."
+      ]
+    },
+    {
+      "tabId": "recruiting-autopilot",
+      "label": "Recruiting Autopilot",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [],
+      "fixesApplied": []
+    },
+    {
+      "tabId": "recruiting-autopilot-ops",
+      "label": "Autopilot Ops",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [],
+      "fixesApplied": []
+    },
+    {
+      "tabId": "recruiting-execution",
+      "label": "Execution Center",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [],
+      "fixesApplied": []
+    },
+    {
+      "tabId": "placement-command-center",
+      "label": "Hiring & Placement",
+      "routeMechanism": "dashboard-tab",
+      "issuesFound": [],
+      "fixesApplied": []
+    }
+  ],
+  "issuesFound": [
+    "Heavy lazy bundle and command summary fetch without timeout caused long rendering.",
+    "Panel could remain on loading skeleton when lazy chunk or API hung.",
+    "Nav used external Link to /executive/workforce-intelligence; tab never activated in dashboard."
+  ],
+  "fixesApplied": [
+    "Normalize executive tab URL aliases (executive-forecast, autopilot-ops, execution-center, hiring-placement).",
+    "Inline workforce-intelligence as dashboard tab panel.",
+    "Executive lazy tab loading fallbacks with 5s ceiling and retry.",
+    "Degraded panel states for accountability, forecast, and pipeline intelligence APIs.",
+    "Executive command summary fetch timeout and loading ceiling.",
+    "Lazy tab loading ceiling; command summary uses fetchWithTimeout and loading ceiling.",
+    "Loading ceiling fallback with source label and retry; API fetch watchdog via shared degraded state.",
+    "Inline DashboardTabPanel with WorkforceIntelligencePanel; removed external href."
+  ],
+  "degradedStatesAdded": [
+    "executive-accountability",
+    "executive-forecasting",
+    "pipeline-intelligence",
+    "executive-home",
+    "workforce-intelligence"
+  ],
+  "testsAdded": [
+    "src/lib/p121-executive-page-loading-navigation-fix/p121-executive-page-loading-navigation-fix.test.ts"
+  ],
+  "safetyConfirmation": {
+    "automationBehaviorUnchanged": true,
+    "noPaperworkSends": true,
+    "noBreezyWrites": true,
+    "liveModeUnchanged": true,
+    "executeOneUnchanged": true,
+    "runnerSchedulingUnchanged": true,
+    "p120LayoutPreserved": true
+  }
+}

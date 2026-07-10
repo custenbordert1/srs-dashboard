@@ -1,0 +1,1062 @@
+{
+  "generatedAt": "2026-07-06T20:00:21.304Z",
+  "today": "2026-07-06",
+  "debugToday": {
+    "ok": true,
+    "count": 5,
+    "hits": [
+      {
+        "candidateId": "705cdc0e7f30",
+        "firstName": "Taylor",
+        "lastName": "Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-07-06T19:47:35.990Z",
+        "createdDate": "2026-07-06T19:47:35.990Z",
+        "addedDate": "2026-07-06T19:47:35.990Z",
+        "updatedDate": "2026-07-06T19:47:35.990Z",
+        "addedDateSource": "creation_date",
+        "positionId": "f8f9afaa12b8",
+        "positionName": "Retail Display Merchandiser – West Chester, OH",
+        "city": "West Chester",
+        "state": "OH",
+        "zipCode": "",
+        "resumeText": "Retail Merchandiser @",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Retail Merchandiser @",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "resumeAssets": [
+          {
+            "source": "detail_inline",
+            "fileName": "Retail_Merchandiser_Resume.pdf",
+            "mimeType": null,
+            "url": "https://app.breezy.hr/public/api/v3/company/53335f6ec4a5/position/f8f9afaa12b8/candidate/705cdc0e7f30/resume",
+            "parsedTextPreview": null
+          }
+        ],
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      }
+    ],
+    "positionsScanned": 81,
+    "skipped": {
+      "sanitizeRejected": 0,
+      "missingAppliedDate": 0,
+      "duplicateCandidateId": 0,
+      "outsideDateRange": 0,
+      "positionPaginationIncomplete": 0,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionsNotScanned": 4511
+    }
+  },
+  "debugWeek": {
+    "ok": true,
+    "count": 44,
+    "hits": [
+      {
+        "candidateId": "705cdc0e7f30",
+        "firstName": "Taylor",
+        "lastName": "Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-07-06T19:47:35.990Z",
+        "createdDate": "2026-07-06T19:47:35.990Z",
+        "addedDate": "2026-07-06T19:47:35.990Z",
+        "updatedDate": "2026-07-06T19:47:35.990Z",
+        "addedDateSource": "creation_date",
+        "positionId": "f8f9afaa12b8",
+        "positionName": "Retail Display Merchandiser – West Chester, OH",
+        "city": "West Chester",
+        "state": "OH",
+        "zipCode": "",
+        "resumeText": "Retail Merchandiser @",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Retail Merchandiser @",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "resumeAssets": [
+          {
+            "source": "detail_inline",
+            "fileName": "Retail_Merchandiser_Resume.pdf",
+            "mimeType": null,
+            "url": "https://app.breezy.hr/public/api/v3/company/53335f6ec4a5/position/f8f9afaa12b8/candidate/705cdc0e7f30/resume",
+            "parsedTextPreview": null
+          }
+        ],
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      }
+    ]
+  },
+  "live_preview": {
+    "ok": true,
+    "count": 5,
+    "hits": [],
+    "positionsScanned": 27,
+    "truncated": true,
+    "fetchedAt": "2026-07-06T20:07:00.200Z",
+    "skipped": {
+      "sanitizeRejected": 0,
+      "missingAppliedDate": 0,
+      "duplicateCandidateId": 0,
+      "outsideDateRange": 0,
+      "positionPaginationIncomplete": 0,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionsNotScanned": 167
+    }
+  },
+  "live_fast": {
+    "ok": true,
+    "count": 36,
+    "hits": [
+      {
+        "candidateId": "705cdc0e7f30",
+        "firstName": "Taylor",
+        "lastName": "Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-07-06T19:47:35.990Z",
+        "createdDate": "2026-07-06T19:47:35.990Z",
+        "addedDate": "2026-07-06T19:47:35.990Z",
+        "updatedDate": "2026-07-06T19:47:35.990Z",
+        "addedDateSource": "creation_date",
+        "positionId": "f8f9afaa12b8",
+        "positionName": "Retail Display Merchandiser – West Chester, OH",
+        "city": "West Chester",
+        "state": "OH",
+        "zipCode": "",
+        "resumeText": "Retail Merchandiser @",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Retail Merchandiser @",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "resumeAssets": [
+          {
+            "source": "detail_inline",
+            "fileName": "Retail_Merchandiser_Resume.pdf",
+            "mimeType": null,
+            "url": "https://app.breezy.hr/public/api/v3/company/53335f6ec4a5/position/f8f9afaa12b8/candidate/705cdc0e7f30/resume",
+            "parsedTextPreview": null
+          }
+        ],
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      }
+    ],
+    "positionsScanned": 60,
+    "truncated": false,
+    "fetchedAt": "2026-07-06T20:07:22.812Z",
+    "skipped": {
+      "sanitizeRejected": 0,
+      "missingAppliedDate": 0,
+      "duplicateCandidateId": 0,
+      "outsideDateRange": 0,
+      "positionPaginationIncomplete": 0,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionsNotScanned": 134
+    }
+  },
+  "live_all": {
+    "ok": true,
+    "count": 48,
+    "hits": [
+      {
+        "candidateId": "705cdc0e7f30",
+        "firstName": "Taylor",
+        "lastName": "Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-07-06T19:47:35.990Z",
+        "createdDate": "2026-07-06T19:47:35.990Z",
+        "addedDate": "2026-07-06T19:47:35.990Z",
+        "updatedDate": "2026-07-06T19:47:35.990Z",
+        "addedDateSource": "creation_date",
+        "positionId": "f8f9afaa12b8",
+        "positionName": "Retail Display Merchandiser – West Chester, OH",
+        "city": "West Chester",
+        "state": "OH",
+        "zipCode": "",
+        "resumeText": "Retail Merchandiser @",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Retail Merchandiser @",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "resumeAssets": [
+          {
+            "source": "detail_inline",
+            "fileName": "Retail_Merchandiser_Resume.pdf",
+            "mimeType": null,
+            "url": "https://app.breezy.hr/public/api/v3/company/53335f6ec4a5/position/f8f9afaa12b8/candidate/705cdc0e7f30/resume",
+            "parsedTextPreview": null
+          }
+        ],
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      }
+    ],
+    "positionsScanned": 69,
+    "truncated": true,
+    "fetchedAt": "2026-07-06T20:09:11.590Z",
+    "skipped": {
+      "sanitizeRejected": 0,
+      "missingAppliedDate": 0,
+      "duplicateCandidateId": 0,
+      "outsideDateRange": 0,
+      "positionPaginationIncomplete": 0,
+      "positionFetchFailed": 0,
+      "positionScanTimedOut": 0,
+      "positionsNotScanned": 125
+    }
+  },
+  "ingestionStore": {
+    "usable": true,
+    "candidateCount": 413,
+    "updatedAt": "2026-07-06T19:29:58.327Z",
+    "lastChunkAt": "2026-07-06T19:29:58.326Z",
+    "cycleComplete": false,
+    "checkpointIndex": 69,
+    "publishedPositionsTotal": 194,
+    "scannedPositionIds": 59,
+    "hits": [
+      {
+        "candidateId": "40daa40ff82c",
+        "firstName": "Natoria",
+        "lastName": "Taylor",
+        "email": "natoria17@icloud.com",
+        "phone": "+1 478 246 9365",
+        "source": "Indeed Apply",
+        "stage": "Applied",
+        "appliedDate": "2026-06-14T04:09:25.717Z",
+        "createdDate": "2026-06-14T04:09:25.717Z",
+        "addedDate": "2026-06-14T04:09:25.717Z",
+        "updatedDate": "2026-06-14T04:09:27.194Z",
+        "addedDateSource": "creation_date",
+        "positionId": "19ee4be4bfeb",
+        "positionName": "Retail Merchandiser — Atlanta, GA",
+        "city": "Atlanta",
+        "state": "GA",
+        "zipCode": "",
+        "resumeText": "Manager @ Sea Shells Sports Bar AND Lounge",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Manager @ Sea Shells Sports Bar AND Lounge",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published",
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T22:09:03.544Z"
+      },
+      {
+        "candidateId": "9ebc9df23d93",
+        "firstName": "SHERRI",
+        "lastName": "L TAYLOR",
+        "email": "sltaylor1024@aol.com",
+        "phone": "8036531683",
+        "source": "ziprecruiter",
+        "stage": "Applied",
+        "appliedDate": "2026-06-05T20:17:43.262Z",
+        "createdDate": "2026-06-05T20:17:43.262Z",
+        "addedDate": "2026-06-05T20:17:43.262Z",
+        "updatedDate": "2026-06-05T20:17:44.306Z",
+        "addedDateSource": "creation_date",
+        "positionId": "c03c59145865",
+        "positionName": "Retail Display & Planogram Associate – Columbia, SC",
+        "city": "Columbia",
+        "state": "SC",
+        "zipCode": "",
+        "resumeText": "Retail Merchandise Associate @ Crossmark\nI have extensive customer service experience and I am able to utilize this experience every day. I have been working in my current merchandising position for 9 years and have great relationships with all of my clients. I have solid knowledge in reading planograms and have even been a mentor for new hires.\nTo obtain a position with an established company that will allow me to apply and utilize my skills and provide new and challenging opportunities. My experience will ensure continued stability and professionalism within your company.\nRetail Merchandise Associate Perform in-store merchandising Service activities such as merchandising projects, planogram maintenance, overhead organization and display/signage maintenance designed to enhance the customer experience Execute merchandising Created floor move plans to better execute during the remodel Lead of teams for extensive store remodels in ULTA Beauty locations Build and maintain strong relationships with store associates and provide superior customer service to both internal and external customers Additional responsibilities with this employer Project Coordinator Supervised up to 20 team members Coordinated complete store remodel of a different Walgreens location each week for 4 months Always finished ahead of schedule Worked closely with the store managers at each location Merchandise Execution Associate Perform in-store merchandising Service activities such as merchandising projects, planogram maintenance, overhead organization and display/signage maintenance designed to enhance the customer experience Execute merchandising strategies and ensure product is displayed correctly to drive sales and maximize inventory turns Work in teams with on-site supervision, and provide service to multiple departments in stores Execute approved general bay service, tasking, projects and resets safely, accurately and efficiently. Build and maintain strong relationships with store associates and provide superior customer service to both internal and external customers Owner Operator Purchased and remodeled local restaurant Hired and managed all employees Maintained product inventory Processed payroll Complete management of restaurant Account Billing Specialist Maintained assigned coop account Processed and billed all incoming staking sheets Monitored receivable accounts Handled all account correspondence Ensured proper revenue to accounts Project Coordinator Assisted project manager in all aspects of project Researched and obtained pertinent cell tower, zoning, leasing, and environmental information Created status reports for clients viewing on database Organized conference meetings with clients Managed all meeting minutes Coordinated travel itinerary for project manager Additional assignments for this position: Site Handler Scanned and organized client files for further review Created site information folders for use by site acquisition specialists Routed all call on multi line phone system Coordinated travel arrangements for Senior manager Processed incoming and outgoing mail Processed Fed Ex deliveries Office facilitator Owner Operator Managed daily operations Handled hiring and training of all staff Maintained inventory levels to ensure efficient daily operations Managed and maintained A/P and A/R accounts Customer Service Rep/Billing Specialist Answered front office multi line phones Implemented and maintained network scanning system Coordinated Microsoft training classes for 40 employees Carried out extensive research for resolution for proper billing of patients and insurance companies Generated corrected HCFA claim forms for proper billing Processed data entry of daily cash receipts and deposits Assisted in streamline processes for updating patient demographics",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Retail Merchandise Associate @ Crossmark",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": true,
+        "positionPipelineStatus": "published",
+        "questionnaireAnswers": [
+          {
+            "question": "Screening question",
+            "answer": "I NEED work and I WILL work"
+          },
+          {
+            "question": "Do you use a smart device/phone/tablet?",
+            "answer": "Yes",
+            "normalizedKey": "do you use a smart device phone tablet"
+          },
+          {
+            "question": "Do you know how to go to the internet via your smart device?",
+            "answer": "Yes",
+            "normalizedKey": "do you know how to go to the internet via your smart device"
+          },
+          {
+            "question": "Under which circumstances, if any, is it acceptable not to complete a job or project by the agreed deadline?",
+            "answer": "Under which circumstances, if any, is it acceptable not to complete a job or project by the agreed deadline?",
+            "normalizedKey": "under which circumstances if any is it acceptable not to complete a job or project by the agreed deadline"
+          },
+          {
+            "question": "If I can't complete a job, what should I do?",
+            "answer": "Call or text my District Manager right away.",
+            "normalizedKey": "if i can t complete a job what should i do"
+          },
+          {
+            "question": "What does a deadline mean in merchandising?",
+            "answer": "A firm deadline set by the client that must be followed.",
+            "normalizedKey": "what does a deadline mean in merchandising"
+          },
+          {
+            "question": "If a manager refuses to let me complete a job, what should I do?",
+            "answer": "Get the manager’s name and time, say thank you, then step outside and call or text my District Manager. Give details in the survey comments.",
+            "normalizedKey": "if a manager refuses to let me complete a job what should i do"
+          },
+          {
+            "question": "What is true about working in merchandising.",
+            "answer": "What is true about working in merchandising.",
+            "normalizedKey": "what is true about working in merchandising"
+          },
+          {
+            "question": "I fully understand this is NOT a full- time job and it is NOT part-time work. This is project work (gig work). All merchandisers are on an as needed basis.",
+            "answer": "I full understand the statements above. Count me in!",
+            "normalizedKey": "i fully understand this is not a full time job and it is not part time work this is project work gig work all merchandisers are on an as needed basis"
+          },
+          {
+            "question": "I am 18 years or older",
+            "answer": "Yes",
+            "normalizedKey": "i am 18 years or older"
+          },
+          {
+            "question": "I fully understand that all merchandisers are on an as needed basis when you have work in my area.",
+            "answer": "Yes",
+            "normalizedKey": "i fully understand that all merchandisers are on an as needed basis when you have work in my area"
+          },
+          {
+            "question": "When do our merchandisers work for us?",
+            "answer": "When there is work in my area",
+            "normalizedKey": "when do our merchandisers work for us"
+          },
+          {
+            "question": "What type  of work is this?",
+            "answer": "1099 independent contract work. I'm responsible for my own taxes. None are taken  out.",
+            "normalizedKey": "what type of work is this"
+          },
+          {
+            "question": "Why are you applying with us?",
+            "answer": "I NEED work and I WILL work",
+            "normalizedKey": "why are you applying with us"
+          }
+        ],
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T20:31:45.465Z"
+      },
+      {
+        "candidateId": "c29d743644ad",
+        "firstName": "Thomas",
+        "lastName": "Taylor",
+        "email": "taylor@srsmerchandising.com",
+        "phone": "513-373-6877",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-05-28T14:44:39.428Z",
+        "createdDate": "2026-05-28T14:44:39.428Z",
+        "addedDate": "2026-05-28T14:44:39.428Z",
+        "updatedDate": "2026-05-28T14:44:39.428Z",
+        "addedDateSource": "creation_date",
+        "positionId": "495b4e186c4b",
+        "positionName": "Continuity Merchandiser",
+        "city": "Richmond",
+        "state": "VT",
+        "zipCode": "",
+        "resumeText": "Worked @ undefined",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Worked @ undefined",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      },
+      {
+        "candidateId": "09049d13f466",
+        "firstName": "taylor",
+        "lastName": "custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-05-25T16:56:23.607Z",
+        "createdDate": "2026-05-25T16:56:23.607Z",
+        "addedDate": "2026-05-25T16:56:23.607Z",
+        "updatedDate": "2026-05-25T16:56:23.607Z",
+        "addedDateSource": "creation_date",
+        "positionId": "495b4e186c4b",
+        "positionName": "Continuity Merchandiser",
+        "city": "Richmond",
+        "state": "VT",
+        "zipCode": "",
+        "resumeText": "",
+        "hasResume": false,
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      },
+      {
+        "candidateId": "6f39aaa878b6",
+        "firstName": "Darian",
+        "lastName": "Taylor Jr.",
+        "email": "flaminghotcheetos6599@gmail.com",
+        "phone": "+1 740 346 8015",
+        "source": "Indeed Organic Jobs",
+        "stage": "Applied",
+        "appliedDate": "2026-06-22T03:49:31.208Z",
+        "createdDate": "2026-06-22T03:49:31.208Z",
+        "addedDate": "2026-06-22T03:49:31.208Z",
+        "updatedDate": "2026-06-22T03:49:33.016Z",
+        "addedDateSource": "creation_date",
+        "positionId": "40e576f67230",
+        "positionName": "FIELD MERCHANDISER",
+        "city": "ERIE",
+        "state": "PA",
+        "zipCode": "",
+        "resumeText": "Traveling Merchandiser @ Footprint Solutions",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Traveling Merchandiser @ Footprint Solutions",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published",
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T22:12:01.252Z"
+      },
+      {
+        "candidateId": "42afb0469714",
+        "firstName": "Taylor",
+        "lastName": "Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-05-21T17:50:08.777Z",
+        "createdDate": "2026-05-21T17:50:08.777Z",
+        "addedDate": "2026-05-21T17:50:08.777Z",
+        "updatedDate": "2026-05-21T17:50:08.777Z",
+        "addedDateSource": "creation_date",
+        "positionId": "1e43c6d9791b",
+        "positionName": "Retail Merchandiser (Flexible, Project-Based Work) (Draft)",
+        "city": "Raleigh",
+        "state": "NC",
+        "zipCode": "",
+        "resumeText": "Worked @ undefined",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Worked @ undefined",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      },
+      {
+        "candidateId": "7492888812c6",
+        "firstName": "Darian",
+        "lastName": "Taylor Jr.",
+        "email": "flaminghotcheetos6599@gmail.com",
+        "phone": "+1 740 346 8015",
+        "source": "Indeed Organic Jobs",
+        "stage": "Applied",
+        "appliedDate": "2026-06-22T03:51:32.750Z",
+        "createdDate": "2026-06-22T03:51:32.750Z",
+        "addedDate": "2026-06-22T03:51:32.750Z",
+        "updatedDate": "2026-06-22T03:51:37.097Z",
+        "addedDateSource": "creation_date",
+        "positionId": "a9b72c3277c6",
+        "positionName": "Continuity Merchandiser  SF , Hermitage, PA",
+        "city": "Hermitage",
+        "state": "PA",
+        "zipCode": "",
+        "resumeText": "Traveling Merchandiser @ Footprint Solutions\nTraveling Merchandiser Merchandising I do mystery shops and audit for select locations making sure stores and restaurants are meeting standards. Independent contractors jobs Merchandiser I do small merchandising reset and inventory management at select locations around the country. Merchandiser I do store resets at select locations around the country. Retail Merchandiser I do travel store resets at select locations around the country. Travel Agent Traveling Hippie Care is a Travel Agency that I own. I'm here to give everyone great deals on vacation or work Travel. As an agent I truly want to give you the best experience possible. As my company is growing I appreciate everyone along the way. CBD Representative/Influencer Delivery Driver Prep food for the day and deliver the food as well. Influencer I go to stores to shop for customer and deliver it to them. RGIS Inventory Specialist I count at different stores all there inventory. Wendys Crew Member Cashier And Cook Direct care worker I took care of disabled people. Cleaning and Washing dishes. I'd go to the store and do everything they needed.",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Traveling Merchandiser @ Footprint Solutions",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "Traveling Merchandiser Merchandising I do mystery shops and audit for select locations making sure stores and restaurants are meeting standards. Independent contractors jobs Merchandiser I do small merchandising reset and inventory management at select locations around the country. Merchandiser I do store resets at select locations around the country. Retail Merchandiser I do travel store resets at select locations around the country. Travel Agent Traveling Hippie Care is a Travel Agency that I own. I'm here to give everyone great deals on vacation or work Travel. As an agent I truly want to give you the best experience possible. As my company is growing I appreciate everyone along the way. CBD Representative/Influencer Delivery Driver Prep food for the day and deliver the food as well. Influencer I go to stores to shop for customer and deliver it to them. RGIS Inventory Specialist I count at different stores all there inventory. Wendys Crew Member Cashier And Cook Direct care worker I took care of disabled people. Cleaning and Washing dishes. I'd go to the store and do everything they needed.",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": true,
+        "positionPipelineStatus": "published",
+        "questionnaireAnswers": [
+          {
+            "question": "Screening question",
+            "answer": "I need work and I will work"
+          },
+          {
+            "question": "How many years of professional merchandising experience do you have?",
+            "answer": "6–10 years",
+            "normalizedKey": "how many years of professional merchandising experience do you have"
+          },
+          {
+            "question": "What merchandising or vendor companies have you worked for in the past, or are you currently working for, that are not listed on your resume?",
+            "answer": "Coast To Coast Merchandiser",
+            "normalizedKey": "what merchandising or vendor companies have you worked for in the past or are you currently working for that are not listed on your resume"
+          },
+          {
+            "question": "Please confirm the following contact details so we can reach you if needed:",
+            "answer": "16323",
+            "normalizedKey": "please confirm the following contact details so we can reach you if needed"
+          },
+          {
+            "question": "What types of resets have you completed? (Select all that apply)",
+            "answer": "What types of resets have you completed? (Select all that apply)",
+            "normalizedKey": "what types of resets have you completed select all that apply"
+          },
+          {
+            "question": "Do you own an updated Android smartphone or iPhone that can run apps and access the internet reliably?",
+            "answer": "Yes, iPhone",
+            "normalizedKey": "do you own an updated android smartphone or iphone that can run apps and access the internet reliably"
+          },
+          {
+            "question": "Do you have reliable internet access on your smartphone?",
+            "answer": "Yes",
+            "normalizedKey": "do you have reliable internet access on your smartphone"
+          },
+          {
+            "question": "Are you comfortable installing and using third-party apps, browsers like Google Chrome, and other tools for work?",
+            "answer": "Yes",
+            "normalizedKey": "are you comfortable installing and using third party apps browsers like google chrome and other tools for work"
+          },
+          {
+            "question": "Do you have access to a computer or laptop and a printer in addition to your smartphone?",
+            "answer": "Yes",
+            "normalizedKey": "do you have access to a computer or laptop and a printer in addition to your smartphone"
+          },
+          {
+            "question": "Some projects require submitting 50–100+ photos and detailed surveys from your phone.  Are you comfortable taking and uploading 50–100+ clear, high-quality photos while in-store, and enabling location permissions if required?",
+            "answer": "Yes",
+            "normalizedKey": "some projects require submitting 50 100 photos and detailed surveys from your phone are you comfortable taking and uploading 50 100 clear high quality photos while in store and enabling location permissions if required"
+          },
+          {
+            "question": "All projects are time sensitive and have specific service schedules that vary by project. Do you understand you will need to plan ahead, manage your time independently, and complete each project by its deadline?",
+            "answer": "Yes",
+            "normalizedKey": "all projects are time sensitive and have specific service schedules that vary by project do you understand you will need to plan ahead manage your time independently and complete each project by its deadline"
+          },
+          {
+            "question": "Do you understand you are required to learn new tools and apps and follow new client instructions as needed?",
+            "answer": "Yes",
+            "normalizedKey": "do you understand you are required to learn new tools and apps and follow new client instructions as needed"
+          },
+          {
+            "question": "Do you have reliable transportation, a valid non-expired driver’s license, and are you 18 years of age or older?",
+            "answer": "Yes",
+            "normalizedKey": "do you have reliable transportation a valid non expired driver s license and are you 18 years of age or older"
+          },
+          {
+            "question": "Do you understand you are required to check your email daily and log in to our system regularly during the week to check assignments, updates, and complete all work independently and on time?",
+            "answer": "Yes",
+            "normalizedKey": "do you understand you are required to check your email daily and log in to our system regularly during the week to check assignments updates and complete all work independently and on time"
+          },
+          {
+            "question": "Physical Requirements — Please confirm which apply to you (check all that apply):",
+            "answer": "Physical Requirements — Please confirm which apply to you (check all that apply):",
+            "normalizedKey": "physical requirements please confirm which apply to you check all that apply"
+          },
+          {
+            "question": "I understand this is not full-time work and not part-time work.",
+            "answer": "I fully understand and agree. Count me in!",
+            "normalizedKey": "i understand this is not full time work and not part time work"
+          },
+          {
+            "question": "What type of work is this?",
+            "answer": "1099 independent contract work — I understand I am responsible for my own taxes",
+            "normalizedKey": "what type of work is this"
+          },
+          {
+            "question": "Why are you applying with us?",
+            "answer": "I need work and I will work",
+            "normalizedKey": "why are you applying with us"
+          }
+        ],
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T20:37:55.401Z"
+      }
+    ]
+  },
+  "resolveCandidatesForRead": {
+    "ok": true,
+    "fromIngestionStore": true,
+    "count": 413,
+    "hits": [
+      {
+        "candidateId": "40daa40ff82c",
+        "firstName": "Natoria",
+        "lastName": "Taylor",
+        "email": "natoria17@icloud.com",
+        "phone": "+1 478 246 9365",
+        "source": "Indeed Apply",
+        "stage": "Applied",
+        "appliedDate": "2026-06-14T04:09:25.717Z",
+        "createdDate": "2026-06-14T04:09:25.717Z",
+        "addedDate": "2026-06-14T04:09:25.717Z",
+        "updatedDate": "2026-06-14T04:09:27.194Z",
+        "addedDateSource": "creation_date",
+        "positionId": "19ee4be4bfeb",
+        "positionName": "Retail Merchandiser — Atlanta, GA",
+        "city": "Atlanta",
+        "state": "GA",
+        "zipCode": "",
+        "resumeText": "Manager @ Sea Shells Sports Bar AND Lounge",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Manager @ Sea Shells Sports Bar AND Lounge",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published",
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T22:09:03.544Z"
+      },
+      {
+        "candidateId": "9ebc9df23d93",
+        "firstName": "SHERRI",
+        "lastName": "L TAYLOR",
+        "email": "sltaylor1024@aol.com",
+        "phone": "8036531683",
+        "source": "ziprecruiter",
+        "stage": "Applied",
+        "appliedDate": "2026-06-05T20:17:43.262Z",
+        "createdDate": "2026-06-05T20:17:43.262Z",
+        "addedDate": "2026-06-05T20:17:43.262Z",
+        "updatedDate": "2026-06-05T20:17:44.306Z",
+        "addedDateSource": "creation_date",
+        "positionId": "c03c59145865",
+        "positionName": "Retail Display & Planogram Associate – Columbia, SC",
+        "city": "Columbia",
+        "state": "SC",
+        "zipCode": "",
+        "resumeText": "Retail Merchandise Associate @ Crossmark\nI have extensive customer service experience and I am able to utilize this experience every day. I have been working in my current merchandising position for 9 years and have great relationships with all of my clients. I have solid knowledge in reading planograms and have even been a mentor for new hires.\nTo obtain a position with an established company that will allow me to apply and utilize my skills and provide new and challenging opportunities. My experience will ensure continued stability and professionalism within your company.\nRetail Merchandise Associate Perform in-store merchandising Service activities such as merchandising projects, planogram maintenance, overhead organization and display/signage maintenance designed to enhance the customer experience Execute merchandising Created floor move plans to better execute during the remodel Lead of teams for extensive store remodels in ULTA Beauty locations Build and maintain strong relationships with store associates and provide superior customer service to both internal and external customers Additional responsibilities with this employer Project Coordinator Supervised up to 20 team members Coordinated complete store remodel of a different Walgreens location each week for 4 months Always finished ahead of schedule Worked closely with the store managers at each location Merchandise Execution Associate Perform in-store merchandising Service activities such as merchandising projects, planogram maintenance, overhead organization and display/signage maintenance designed to enhance the customer experience Execute merchandising strategies and ensure product is displayed correctly to drive sales and maximize inventory turns Work in teams with on-site supervision, and provide service to multiple departments in stores Execute approved general bay service, tasking, projects and resets safely, accurately and efficiently. Build and maintain strong relationships with store associates and provide superior customer service to both internal and external customers Owner Operator Purchased and remodeled local restaurant Hired and managed all employees Maintained product inventory Processed payroll Complete management of restaurant Account Billing Specialist Maintained assigned coop account Processed and billed all incoming staking sheets Monitored receivable accounts Handled all account correspondence Ensured proper revenue to accounts Project Coordinator Assisted project manager in all aspects of project Researched and obtained pertinent cell tower, zoning, leasing, and environmental information Created status reports for clients viewing on database Organized conference meetings with clients Managed all meeting minutes Coordinated travel itinerary for project manager Additional assignments for this position: Site Handler Scanned and organized client files for further review Created site information folders for use by site acquisition specialists Routed all call on multi line phone system Coordinated travel arrangements for Senior manager Processed incoming and outgoing mail Processed Fed Ex deliveries Office facilitator Owner Operator Managed daily operations Handled hiring and training of all staff Maintained inventory levels to ensure efficient daily operations Managed and maintained A/P and A/R accounts Customer Service Rep/Billing Specialist Answered front office multi line phones Implemented and maintained network scanning system Coordinated Microsoft training classes for 40 employees Carried out extensive research for resolution for proper billing of patients and insurance companies Generated corrected HCFA claim forms for proper billing Processed data entry of daily cash receipts and deposits Assisted in streamline processes for updating patient demographics",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Retail Merchandise Associate @ Crossmark",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": true,
+        "positionPipelineStatus": "published",
+        "questionnaireAnswers": [
+          {
+            "question": "Screening question",
+            "answer": "I NEED work and I WILL work"
+          },
+          {
+            "question": "Do you use a smart device/phone/tablet?",
+            "answer": "Yes",
+            "normalizedKey": "do you use a smart device phone tablet"
+          },
+          {
+            "question": "Do you know how to go to the internet via your smart device?",
+            "answer": "Yes",
+            "normalizedKey": "do you know how to go to the internet via your smart device"
+          },
+          {
+            "question": "Under which circumstances, if any, is it acceptable not to complete a job or project by the agreed deadline?",
+            "answer": "Under which circumstances, if any, is it acceptable not to complete a job or project by the agreed deadline?",
+            "normalizedKey": "under which circumstances if any is it acceptable not to complete a job or project by the agreed deadline"
+          },
+          {
+            "question": "If I can't complete a job, what should I do?",
+            "answer": "Call or text my District Manager right away.",
+            "normalizedKey": "if i can t complete a job what should i do"
+          },
+          {
+            "question": "What does a deadline mean in merchandising?",
+            "answer": "A firm deadline set by the client that must be followed.",
+            "normalizedKey": "what does a deadline mean in merchandising"
+          },
+          {
+            "question": "If a manager refuses to let me complete a job, what should I do?",
+            "answer": "Get the manager’s name and time, say thank you, then step outside and call or text my District Manager. Give details in the survey comments.",
+            "normalizedKey": "if a manager refuses to let me complete a job what should i do"
+          },
+          {
+            "question": "What is true about working in merchandising.",
+            "answer": "What is true about working in merchandising.",
+            "normalizedKey": "what is true about working in merchandising"
+          },
+          {
+            "question": "I fully understand this is NOT a full- time job and it is NOT part-time work. This is project work (gig work). All merchandisers are on an as needed basis.",
+            "answer": "I full understand the statements above. Count me in!",
+            "normalizedKey": "i fully understand this is not a full time job and it is not part time work this is project work gig work all merchandisers are on an as needed basis"
+          },
+          {
+            "question": "I am 18 years or older",
+            "answer": "Yes",
+            "normalizedKey": "i am 18 years or older"
+          },
+          {
+            "question": "I fully understand that all merchandisers are on an as needed basis when you have work in my area.",
+            "answer": "Yes",
+            "normalizedKey": "i fully understand that all merchandisers are on an as needed basis when you have work in my area"
+          },
+          {
+            "question": "When do our merchandisers work for us?",
+            "answer": "When there is work in my area",
+            "normalizedKey": "when do our merchandisers work for us"
+          },
+          {
+            "question": "What type  of work is this?",
+            "answer": "1099 independent contract work. I'm responsible for my own taxes. None are taken  out.",
+            "normalizedKey": "what type of work is this"
+          },
+          {
+            "question": "Why are you applying with us?",
+            "answer": "I NEED work and I WILL work",
+            "normalizedKey": "why are you applying with us"
+          }
+        ],
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T20:31:45.465Z"
+      },
+      {
+        "candidateId": "c29d743644ad",
+        "firstName": "Thomas",
+        "lastName": "Taylor",
+        "email": "taylor@srsmerchandising.com",
+        "phone": "513-373-6877",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-05-28T14:44:39.428Z",
+        "createdDate": "2026-05-28T14:44:39.428Z",
+        "addedDate": "2026-05-28T14:44:39.428Z",
+        "updatedDate": "2026-05-28T14:44:39.428Z",
+        "addedDateSource": "creation_date",
+        "positionId": "495b4e186c4b",
+        "positionName": "Continuity Merchandiser",
+        "city": "Richmond",
+        "state": "VT",
+        "zipCode": "",
+        "resumeText": "Worked @ undefined",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Worked @ undefined",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      },
+      {
+        "candidateId": "09049d13f466",
+        "firstName": "taylor",
+        "lastName": "custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-05-25T16:56:23.607Z",
+        "createdDate": "2026-05-25T16:56:23.607Z",
+        "addedDate": "2026-05-25T16:56:23.607Z",
+        "updatedDate": "2026-05-25T16:56:23.607Z",
+        "addedDateSource": "creation_date",
+        "positionId": "495b4e186c4b",
+        "positionName": "Continuity Merchandiser",
+        "city": "Richmond",
+        "state": "VT",
+        "zipCode": "",
+        "resumeText": "",
+        "hasResume": false,
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      },
+      {
+        "candidateId": "6f39aaa878b6",
+        "firstName": "Darian",
+        "lastName": "Taylor Jr.",
+        "email": "flaminghotcheetos6599@gmail.com",
+        "phone": "+1 740 346 8015",
+        "source": "Indeed Organic Jobs",
+        "stage": "Applied",
+        "appliedDate": "2026-06-22T03:49:31.208Z",
+        "createdDate": "2026-06-22T03:49:31.208Z",
+        "addedDate": "2026-06-22T03:49:31.208Z",
+        "updatedDate": "2026-06-22T03:49:33.016Z",
+        "addedDateSource": "creation_date",
+        "positionId": "40e576f67230",
+        "positionName": "FIELD MERCHANDISER",
+        "city": "ERIE",
+        "state": "PA",
+        "zipCode": "",
+        "resumeText": "Traveling Merchandiser @ Footprint Solutions",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Traveling Merchandiser @ Footprint Solutions",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published",
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T22:12:01.252Z"
+      },
+      {
+        "candidateId": "42afb0469714",
+        "firstName": "Taylor",
+        "lastName": "Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "phone": "4404656772",
+        "source": "Career Portal",
+        "stage": "Applied",
+        "appliedDate": "2026-05-21T17:50:08.777Z",
+        "createdDate": "2026-05-21T17:50:08.777Z",
+        "addedDate": "2026-05-21T17:50:08.777Z",
+        "updatedDate": "2026-05-21T17:50:08.777Z",
+        "addedDateSource": "creation_date",
+        "positionId": "1e43c6d9791b",
+        "positionName": "Retail Merchandiser (Flexible, Project-Based Work) (Draft)",
+        "city": "Raleigh",
+        "state": "NC",
+        "zipCode": "",
+        "resumeText": "Worked @ undefined",
+        "hasResume": false,
+        "resumeFields": {
+          "headline": "Worked @ undefined",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": false,
+        "positionPipelineStatus": "published"
+      },
+      {
+        "candidateId": "7492888812c6",
+        "firstName": "Darian",
+        "lastName": "Taylor Jr.",
+        "email": "flaminghotcheetos6599@gmail.com",
+        "phone": "+1 740 346 8015",
+        "source": "Indeed Organic Jobs",
+        "stage": "Applied",
+        "appliedDate": "2026-06-22T03:51:32.750Z",
+        "createdDate": "2026-06-22T03:51:32.750Z",
+        "addedDate": "2026-06-22T03:51:32.750Z",
+        "updatedDate": "2026-06-22T03:51:37.097Z",
+        "addedDateSource": "creation_date",
+        "positionId": "a9b72c3277c6",
+        "positionName": "Continuity Merchandiser  SF , Hermitage, PA",
+        "city": "Hermitage",
+        "state": "PA",
+        "zipCode": "",
+        "resumeText": "Traveling Merchandiser @ Footprint Solutions\nTraveling Merchandiser Merchandising I do mystery shops and audit for select locations making sure stores and restaurants are meeting standards. Independent contractors jobs Merchandiser I do small merchandising reset and inventory management at select locations around the country. Merchandiser I do store resets at select locations around the country. Retail Merchandiser I do travel store resets at select locations around the country. Travel Agent Traveling Hippie Care is a Travel Agency that I own. I'm here to give everyone great deals on vacation or work Travel. As an agent I truly want to give you the best experience possible. As my company is growing I appreciate everyone along the way. CBD Representative/Influencer Delivery Driver Prep food for the day and deliver the food as well. Influencer I go to stores to shop for customer and deliver it to them. RGIS Inventory Specialist I count at different stores all there inventory. Wendys Crew Member Cashier And Cook Direct care worker I took care of disabled people. Cleaning and Washing dishes. I'd go to the store and do everything they needed.",
+        "hasResume": true,
+        "resumeFields": {
+          "headline": "Traveling Merchandiser @ Footprint Solutions",
+          "summary": "",
+          "coverLetter": "",
+          "resumeBody": "",
+          "workHistoryText": "Traveling Merchandiser Merchandising I do mystery shops and audit for select locations making sure stores and restaurants are meeting standards. Independent contractors jobs Merchandiser I do small merchandising reset and inventory management at select locations around the country. Merchandiser I do store resets at select locations around the country. Retail Merchandiser I do travel store resets at select locations around the country. Travel Agent Traveling Hippie Care is a Travel Agency that I own. I'm here to give everyone great deals on vacation or work Travel. As an agent I truly want to give you the best experience possible. As my company is growing I appreciate everyone along the way. CBD Representative/Influencer Delivery Driver Prep food for the day and deliver the food as well. Influencer I go to stores to shop for customer and deliver it to them. RGIS Inventory Specialist I count at different stores all there inventory. Wendys Crew Member Cashier And Cook Direct care worker I took care of disabled people. Cleaning and Washing dishes. I'd go to the store and do everything they needed.",
+          "educationText": "",
+          "customAttributesText": "",
+          "tags": []
+        },
+        "hasQuestionnaire": true,
+        "positionPipelineStatus": "published",
+        "questionnaireAnswers": [
+          {
+            "question": "Screening question",
+            "answer": "I need work and I will work"
+          },
+          {
+            "question": "How many years of professional merchandising experience do you have?",
+            "answer": "6–10 years",
+            "normalizedKey": "how many years of professional merchandising experience do you have"
+          },
+          {
+            "question": "What merchandising or vendor companies have you worked for in the past, or are you currently working for, that are not listed on your resume?",
+            "answer": "Coast To Coast Merchandiser",
+            "normalizedKey": "what merchandising or vendor companies have you worked for in the past or are you currently working for that are not listed on your resume"
+          },
+          {
+            "question": "Please confirm the following contact details so we can reach you if needed:",
+            "answer": "16323",
+            "normalizedKey": "please confirm the following contact details so we can reach you if needed"
+          },
+          {
+            "question": "What types of resets have you completed? (Select all that apply)",
+            "answer": "What types of resets have you completed? (Select all that apply)",
+            "normalizedKey": "what types of resets have you completed select all that apply"
+          },
+          {
+            "question": "Do you own an updated Android smartphone or iPhone that can run apps and access the internet reliably?",
+            "answer": "Yes, iPhone",
+            "normalizedKey": "do you own an updated android smartphone or iphone that can run apps and access the internet reliably"
+          },
+          {
+            "question": "Do you have reliable internet access on your smartphone?",
+            "answer": "Yes",
+            "normalizedKey": "do you have reliable internet access on your smartphone"
+          },
+          {
+            "question": "Are you comfortable installing and using third-party apps, browsers like Google Chrome, and other tools for work?",
+            "answer": "Yes",
+            "normalizedKey": "are you comfortable installing and using third party apps browsers like google chrome and other tools for work"
+          },
+          {
+            "question": "Do you have access to a computer or laptop and a printer in addition to your smartphone?",
+            "answer": "Yes",
+            "normalizedKey": "do you have access to a computer or laptop and a printer in addition to your smartphone"
+          },
+          {
+            "question": "Some projects require submitting 50–100+ photos and detailed surveys from your phone.  Are you comfortable taking and uploading 50–100+ clear, high-quality photos while in-store, and enabling location permissions if required?",
+            "answer": "Yes",
+            "normalizedKey": "some projects require submitting 50 100 photos and detailed surveys from your phone are you comfortable taking and uploading 50 100 clear high quality photos while in store and enabling location permissions if required"
+          },
+          {
+            "question": "All projects are time sensitive and have specific service schedules that vary by project. Do you understand you will need to plan ahead, manage your time independently, and complete each project by its deadline?",
+            "answer": "Yes",
+            "normalizedKey": "all projects are time sensitive and have specific service schedules that vary by project do you understand you will need to plan ahead manage your time independently and complete each project by its deadline"
+          },
+          {
+            "question": "Do you understand you are required to learn new tools and apps and follow new client instructions as needed?",
+            "answer": "Yes",
+            "normalizedKey": "do you understand you are required to learn new tools and apps and follow new client instructions as needed"
+          },
+          {
+            "question": "Do you have reliable transportation, a valid non-expired driver’s license, and are you 18 years of age or older?",
+            "answer": "Yes",
+            "normalizedKey": "do you have reliable transportation a valid non expired driver s license and are you 18 years of age or older"
+          },
+          {
+            "question": "Do you understand you are required to check your email daily and log in to our system regularly during the week to check assignments, updates, and complete all work independently and on time?",
+            "answer": "Yes",
+            "normalizedKey": "do you understand you are required to check your email daily and log in to our system regularly during the week to check assignments updates and complete all work independently and on time"
+          },
+          {
+            "question": "Physical Requirements — Please confirm which apply to you (check all that apply):",
+            "answer": "Physical Requirements — Please confirm which apply to you (check all that apply):",
+            "normalizedKey": "physical requirements please confirm which apply to you check all that apply"
+          },
+          {
+            "question": "I understand this is not full-time work and not part-time work.",
+            "answer": "I fully understand and agree. Count me in!",
+            "normalizedKey": "i understand this is not full time work and not part time work"
+          },
+          {
+            "question": "What type of work is this?",
+            "answer": "1099 independent contract work — I understand I am responsible for my own taxes",
+            "normalizedKey": "what type of work is this"
+          },
+          {
+            "question": "Why are you applying with us?",
+            "answer": "I need work and I will work",
+            "normalizedKey": "why are you applying with us"
+          }
+        ],
+        "questionnaireEnrichmentAttemptedAt": "2026-06-29T20:37:55.401Z"
+      }
+    ],
+    "fetchedAt": "2026-07-06T19:29:58.326Z"
+  },
+  "p153Selection": {
+    "nameMatches": [
+      "09049d13f466",
+      "42afb0469714"
+    ],
+    "selectedId": "09049d13f466"
+  },
+  "allIds": [
+    "705cdc0e7f30",
+    "40daa40ff82c",
+    "9ebc9df23d93",
+    "c29d743644ad",
+    "09049d13f466",
+    "6f39aaa878b6",
+    "42afb0469714",
+    "7492888812c6"
+  ]
+}

@@ -6,7 +6,7 @@ import {
   P77_DEFAULT_GOVERNANCE_ENABLED,
   P77_PREVIEW_MODE,
 } from "@/lib/autonomous-approval-governance/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p77-approval-governance-flags.json");
@@ -66,7 +66,7 @@ export async function loadP77FeatureFlags(): Promise<P77FeatureFlags> {
 export async function saveP77FeatureFlags(flags: P77FeatureFlags): Promise<P77FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP77FeatureFlagsFromEnv(saved);
 }

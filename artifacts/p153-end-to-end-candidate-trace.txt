@@ -1,0 +1,342 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[candidate-intelligence] scored {
+  candidateId: '09049d13f466',
+  positionId: '495b4e186c4b',
+  matchPercent: 34,
+  matchLevel: 'no_resume',
+  hasResume: false,
+  distanceMiles: 0,
+  skillTags: [ 'retail_merchandising' ],
+  factors: {
+    experience: 7,
+    travelRadius: 100,
+    responseSpeed: 25,
+    resumeQuality: 8
+  },
+  job: { city: 'Richmond', state: 'VT', hasZip: false }
+}
+================================================================================
+P153 — END-TO-END CANDIDATE TRACE
+Generated: 2026-07-06T19:55:52.389Z
+Target: Taylor Custenborder
+Selected candidate (newest match): taylor (ID: 09049d13f466)
+Note: 2 name matches found; using newest by creationDate.
+  - 09049d13f466 | taylor custenborder | appliedDate=2026-05-25T16:56:23.607Z | Richmond, VT
+  - 42afb0469714 | Taylor Custenborder | appliedDate=2026-05-21T17:50:08.777Z | Raleigh, NC
+================================================================================
+
+## 1. BREEZY INGESTION
+
+Candidate ID: 09049d13f466
+Candidate Name: taylor custenborder
+Position ID: 495b4e186c4b
+Position Name: Continuity Merchandiser
+Original Job Status: closed_or_unpublished
+Original Job Breezy Status: not_in_published_map
+Application Date (creationDate): —
+Stage (Breezy): Applied
+Email: custenborder.taylor@gmail.com
+City/State: Richmond, VT
+Resume detected (parseCandidateApplication): false
+Resume text length: 0
+Row hasResume: false
+Questionnaire detected: false
+questionnaireIntelligence.available: false
+questionnaireIntelligence.techReady: null
+
+## 2. P83 CANDIDATE ADVANCEMENT
+
+[1] P83 Candidate Advancement | isScreenStage(row) | result=pass | blocking=false
+    reason: Candidate at screen stage.
+    source: src/lib/candidate-advancement-engine/build-advancement-decision.ts :: buildCandidateAdvancementDecision()
+[2] P83 Candidate Advancement | TERMINAL_STATUSES.has(workflowStatus) | result=pass | blocking=false
+    reason: Not terminal.
+    source: src/lib/candidate-advancement-engine/build-advancement-decision.ts :: buildCandidateAdvancementDecision()
+[3] P83 Candidate Advancement | SKIP_STATUSES.has(workflowStatus) | result=pass | blocking=false
+    reason: Not in paperwork funnel.
+    source: src/lib/candidate-advancement-engine/build-advancement-decision.ts :: buildCandidateAdvancementDecision()
+[4] P83 Candidate Advancement | hasActivePacket(row) | result=pass | blocking=false
+    reason: No active packet.
+    source: src/lib/candidate-advancement-engine/build-advancement-decision.ts :: buildCandidateAdvancementDecision()
+[5] P83 Candidate Advancement | row.paperworkStatus === 'signed' | result=pass | blocking=false
+    reason: Not signed.
+    source: src/lib/candidate-advancement-engine/build-advancement-decision.ts :: buildCandidateAdvancementDecision()
+[6] P83 Candidate Advancement | isUnassignedRecruiter(assignedRecruiter) | result=fail | blocking=true
+    reason: Awaiting recruiter.
+    source: src/lib/candidate-advancement-engine/build-advancement-decision.ts :: buildCandidateAdvancementDecision()
+
+P83 final recommendation (buildCandidateAdvancementDecision): action=hold
+P83 reason: Awaiting recruiter assignment before advancement.
+P83 requiresApproval: false
+P83 shouldAdvance: false
+P83 exact blocker: isUnassignedRecruiter(assignedRecruiter) — Awaiting recruiter.
+
+## 3. P144 DECISION ENGINE
+
+[7] P144 Decision Engine | detectBlockers: !hasResume | result=fail | blocking=true
+    reason: Missing Resume
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: detectBlockers()
+[8] P144 Decision Engine | detectBlockers: techReady | result=pass | blocking=false
+    reason: techReady=null
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: detectBlockers()
+[9] P144 Decision Engine | detectBlockers: duplicate flags | result=pass | blocking=false
+    reason: No duplicate flag.
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: detectBlockers()
+[10] P144 Decision Engine | detectBlockers: distanceMiles > 90 | result=pass | blocking=false
+    reason: 0 mi
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: detectBlockers()
+[11] P144 Decision Engine | detectBlockers: manual review flag | result=pass | blocking=false
+    reason: No manual review flag.
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: detectBlockers()
+[12] P144 Decision Engine | mapP83Action: dmNeedsAssignment | result=fail | blocking=true
+    reason: DM pending (suggested: Melissa O'Connor)
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: mapP83Action()
+[13] P144 Decision Engine | mapP83Action: isUnassignedRecruiter | result=fail | blocking=true
+    reason: Forces nextAction=Assign Recruiter
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: mapP83Action()
+[14] P144 Decision Engine | mapP83Action: p83.action mapping | result=Assign Recruiter | blocking=true
+    reason: P83 action=hold; mapped nextAction=Assign Recruiter. Awaiting recruiter assignment before advancement.
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: mapP83Action()
+[15] P144 Decision Engine | automationEligibility | result=blocked | blocking=true
+    reason: Blockers present: Missing Resume.
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: automationEligibility()
+[16] P144 Decision Engine | estimateConfidence | result=49 | blocking=true
+    reason: Score 41/100; confidence 49%.
+    source: src/lib/recruiting/candidate-advancement-engine.ts :: estimateConfidence()
+
+P144 next action: Assign Recruiter
+P144 confidence: 49%
+P144 blockers: Missing Resume
+P144 warnings: (none)
+
+## 4. RECRUITER ASSIGNMENT
+
+[17] Recruiter Assignment | workflow.assignedRecruiter | result=unassigned | blocking=true
+    reason: Unassigned
+    source: src/lib/candidate-workflow-store.ts :: getCandidateWorkflowBundle()
+[18] Recruiter Assignment | normalizeStateCode(candidate.state) | result=VT | blocking=false
+    reason: State code: VT
+    source: src/lib/dm-territory-map.ts :: normalizeStateCode()
+[19] Recruiter Assignment | getDmForState(stateCode) | result=Melissa O'Connor | blocking=false
+    reason: DM for VT: Melissa O'Connor
+    source: src/lib/dm-territory-map.ts :: getDmForState()
+[20] Recruiter Assignment | buildRecruiterAssignmentDecision.territoryState | result=VT | blocking=false
+    reason: Best match (Taylor) below confidence threshold (63).
+    source: src/lib/recruiter-assignment-engine/build-assignment-decision.ts :: buildRecruiterAssignmentDecision()
+[21] Recruiter Assignment | buildRecruiterAssignmentDecision.shouldAssign | result=false | blocking=true
+    reason: Recommended recruiter: Taylor; confidence 63%
+    source: src/lib/recruiter-assignment-engine/build-assignment-decision.ts :: buildRecruiterAssignmentDecision()
+[22] Recruiter Assignment | evaluateRecruiterAssignmentCandidate.recommendation | result=Do Not Assign | blocking=true
+    reason: Grade D — not recommended for automation.
+    source: src/lib/p151-autonomous-recruiter-assignment/evaluate-recruiter-assignment-candidate.ts :: evaluateRecruiterAssignmentCandidate()
+[23] Recruiter Assignment | findNearestActiveOperationalNeed | result=none | blocking=true
+    reason: No matching active published job within territory/distance search.
+    source: src/lib/candidate-first-paperwork-eligibility/match-active-operational-need.ts :: findNearestActiveOperationalNeed()
+
+Recruiter assigned in workflow: NO — Unassigned
+Assigned DM (workflow): Unassigned
+Suggested DM: Melissa O'Connor
+Territory match: state=VT → DM=Melissa O'Connor → recommended recruiter=Taylor (63%)
+P151.2 recommendation: Do Not Assign — Grade D — not recommended for automation.
+
+## 5. WORKFLOW STORE
+
+workflowStatus (current): Applied
+workflowStatus (expected): Applied
+actionType: —
+requiredAction: —
+assignedRecruiter: Unassigned
+assignedDM: Unassigned
+paperworkStatus: not_sent
+signatureRequestId: —
+recruiterAssignmentSource: —
+recruiterAssignmentConfidence: —
+
+Missing transitions:
+  - DM assignment pending — suggested DM Melissa O'Connor not applied.
+
+## 6. P145 PAPERWORK QUEUE
+
+[24] P145 Paperwork Queue | isArchivedCandidate | result=pass | blocking=false
+    reason: Active
+    source: src/lib/recruiting/paperwork-automation-engine.ts :: isArchivedCandidate()
+[25] P145 Paperwork Queue | isPaperworkComplete | result=pass | blocking=false
+    reason: Not complete
+    source: src/lib/recruiting/paperwork-automation-engine.ts :: isPaperworkComplete()
+[26] P145 Paperwork Queue | email present | result=pass | blocking=false
+    reason: custenborder.taylor@gmail.com
+    source: src/lib/recruiting/paperwork-automation-engine.ts :: detectExclusionBlockers()
+[27] P145 Paperwork Queue | isUnassignedRecruiter | result=fail | blocking=true
+    reason: Unassigned Recruiter
+    source: src/lib/recruiting/paperwork-automation-engine.ts :: detectExclusionBlockers()
+[28] P145 Paperwork Queue | buildPaperworkSendEligibility: automation_enabled | result=pass | blocking=false
+    reason: P84 automation enabled
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[29] P145 Paperwork Queue | buildPaperworkSendEligibility: recruiter_assigned | result=fail | blocking=true
+    reason: Awaiting recruiter assignment.
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[30] P145 Paperwork Queue | buildPaperworkSendEligibility: paperwork_needed | result=fail | blocking=true
+    reason: Current status: Applied.
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[31] P145 Paperwork Queue | buildPaperworkSendEligibility: send_paperwork_action | result=fail | blocking=true
+    reason: Current action: none.
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[32] P145 Paperwork Queue | buildPaperworkSendEligibility: published_job | result=fail | blocking=true
+    reason: No published job or operational fit for candidate territory.
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[33] P145 Paperwork Queue | buildPaperworkSendEligibility: valid_email | result=pass | blocking=false
+    reason: Valid candidate email
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[34] P145 Paperwork Queue | buildPaperworkSendEligibility: no_duplicate | result=pass | blocking=false
+    reason: No duplicate paperwork packet
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[35] P145 Paperwork Queue | buildPaperworkSendEligibility: not_signed | result=pass | blocking=false
+    reason: Not already signed
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[36] P145 Paperwork Queue | buildPaperworkSendEligibility: not_rejected | result=pass | blocking=false
+    reason: Candidate not rejected
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[37] P145 Paperwork Queue | buildPaperworkSendEligibility: not_inactive | result=pass | blocking=false
+    reason: Candidate active in pipeline
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[38] P145 Paperwork Queue | buildPaperworkSendEligibility: template_ready | result=pass | blocking=false
+    reason: Dropbox Sign template configured
+    source: src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts :: buildPaperworkSendEligibility()
+[39] P145 Paperwork Queue | evaluatePaperworkCandidate: in queue | result=no | blocking=true
+    reason: Not in paperwork queue.
+    source: src/lib/recruiting/paperwork-automation-engine.ts :: evaluatePaperworkCandidate()
+
+P145 ready: NO
+P145 exact failing condition: isUnassignedRecruiter — Unassigned Recruiter
+
+## 7. P147 INITIAL PAPERWORK
+
+[40] P147 Initial Paperwork | advancement.nextAction === 'Send Paperwork' | result=fail | blocking=true
+    reason: P144 next action is "Assign Recruiter", not Send Paperwork.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:133-135 :: evaluateInitialPaperworkEligibility()
+[41] P147 Initial Paperwork | advancement.confidence >= 90 | result=fail | blocking=true
+    reason: Confidence 49% vs threshold 90%.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:136-138 :: evaluateInitialPaperworkEligibility()
+[42] P147 Initial Paperwork | P144 blockers | result=fail | blocking=true
+    reason: Missing Resume
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:139-144 :: evaluateInitialPaperworkEligibility()
+[43] P147 Initial Paperwork | P145 queue recommends Send Initial Paperwork | result=fail | blocking=true
+    reason: Not in queue.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:146-152 :: evaluateInitialPaperworkEligibility()
+[44] P147 Initial Paperwork | row.positionId && job exists | result=fail | blocking=true
+    reason: No open published position.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:172-174 :: evaluateInitialPaperworkEligibility()
+[45] P147 Initial Paperwork | isUnassignedRecruiter(row.assignedRecruiter) | result=fail | blocking=true
+    reason: Recruiter not assigned.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:165-167 :: evaluateInitialPaperworkEligibility()
+[46] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: P144 next action is "Assign Recruiter", not Send Paperwork.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[47] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: Confidence 49% below 90% threshold.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[48] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: P144 blockers: Missing Resume.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[49] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: Paperwork queue does not recommend Send Initial Paperwork.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[50] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: Recruiter not assigned.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[51] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: No open published position.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[52] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: Awaiting recruiter assignment.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[53] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: Current status: Applied.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[54] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: Current action: none.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+[55] P147 Initial Paperwork | validation.reasons | result=fail | blocking=true
+    reason: No published job match for candidate position.
+    source: src/lib/recruiting/initial-paperwork-execution-engine.ts:207-210 :: evaluateInitialPaperworkEligibility()
+
+P147 would send paperwork: NO
+P147 preventing condition: src/lib/recruiting/initial-paperwork-execution-engine.ts:133-135 — if (advancement.nextAction === 'Send Paperwork') { reasons.push("P144 next action is "Assign Recruiter", not Send Paperwork."); }
+P147 blockedReason: P144 next action is "Assign Recruiter", not Send Paperwork. Confidence 49% below 90% threshold. P144 blockers: Missing Resume. Paperwork queue does not recommend Send Initial Paperwork. Recruiter not assigned. No open published position. Awaiting recruiter assignment. Current status: Applied. Current action: none. No published job match for candidate position.
+P147 duplicatePrevented: false
+
+## 8. P152 IMMEDIATE PAPERWORK POLICY
+
+[56] P152 Immediate Paperwork | isUnassignedRecruiter(row.assignedRecruiter) | result=fail | blocking=true
+    reason: Recruiter not assigned.
+    source: src/lib/p152-immediate-paperwork-policy/detect-immediate-paperwork-hard-blockers.ts:39-45 :: detectImmediatePaperworkHardBlockers()
+[57] P152 Immediate Paperwork | legacy (bypassed): workflowStatus is Applied, not Paperwork Needed. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[58] P152 Immediate Paperwork | legacy (bypassed): actionType is none, not send-paperwork. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[59] P152 Immediate Paperwork | legacy (bypassed): dmNeedsAssignment=true forces P144 Assign Recruiter. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[60] P152 Immediate Paperwork | legacy (bypassed): P144 confidence 49% below 90%. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[61] P152 Immediate Paperwork | legacy (bypassed): Missing resume (P144 blocker). | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[62] P152 Immediate Paperwork | legacy (bypassed): Awaiting recruiter assignment. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[63] P152 Immediate Paperwork | legacy (bypassed): Current status: Applied. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[64] P152 Immediate Paperwork | legacy (bypassed): Current action: none. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[65] P152 Immediate Paperwork | legacy (bypassed): No published job or operational fit for candidate territory. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[66] P152 Immediate Paperwork | legacy (bypassed): Not in P145 queue as Send Initial Paperwork. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[67] P152 Immediate Paperwork | legacy (bypassed): P144 next action is "Assign Recruiter", not Send Paperwork. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[68] P152 Immediate Paperwork | legacy (bypassed): Confidence 49% below 90% threshold. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[69] P152 Immediate Paperwork | legacy (bypassed): P144 blockers: Missing Resume. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[70] P152 Immediate Paperwork | legacy (bypassed): Paperwork queue does not recommend Send Initial Paperwork. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[71] P152 Immediate Paperwork | legacy (bypassed): Recruiter not assigned. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[72] P152 Immediate Paperwork | legacy (bypassed): No open published position. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+[73] P152 Immediate Paperwork | legacy (bypassed): No published job match for candidate position. | result=bypassed | blocking=false
+    reason: P152 bypasses this soft gate.
+    source: src/lib/p152-immediate-paperwork-policy/detect-legacy-paperwork-blockers.ts :: detectLegacyPaperworkBlockers()
+
+P152 eligible: NO
+P152 exclusion reason: unassigned_recruiter — Recruiter not assigned.
+
+## 9. DROPBOX SIGN
+
+Onboarding record exists: NO
+Workflow signatureRequestId: —
+Paperwork automation audit events for candidate: 0
+Template generated: NO
+Audit created: NO
+
+## 10. FINAL VERDICT
+
+Paperwork generated: NO
+SINGLE highest-priority reason preventing paperwork generation:
+  P152 hard gate [unassigned_recruiter]: Recruiter not assigned.
+
+Artifact: /Users/tayloecustenborder/Documents/GitHub/srs-dashboard/artifacts/p153-end-to-end-candidate-trace.json

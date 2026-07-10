@@ -4,6 +4,7 @@ import { emptyRecruitingActions } from "@/lib/candidate-recruiting-actions";
 import type { BreezyCandidate } from "@/lib/breezy-api";
 import { buildApplicantCaptureHealth } from "@/lib/candidate-ingestion/build-capture-metrics";
 import {
+  currentMtdDateRange,
   filterCandidatesByQueueScope,
   isHistoricalApplicant,
   isMtdApplicant,
@@ -136,13 +137,14 @@ describe("candidate-ingestion", () => {
   });
 
   it("filters candidate queue scopes", () => {
-    const mtd = mockCandidate("mtd", "2026-06-20T10:00:00.000Z");
+    const range = currentMtdDateRange();
+    const mtd = mockCandidate("mtd", `${range.start}T10:00:00.000Z`);
     const historical = mockCandidate("hist", "2026-05-01T10:00:00.000Z");
     const pool = [mtd, historical];
-    assert.equal(filterCandidatesByQueueScope(pool, "mtd").length, 1);
-    assert.equal(filterCandidatesByQueueScope(pool, "historical").length, 1);
-    assert.equal(filterCandidatesByQueueScope(pool, "all").length, 2);
-    assert.equal(isMtdApplicant(mtd), true);
-    assert.equal(isHistoricalApplicant(historical), true);
+    assert.equal(filterCandidatesByQueueScope(pool, "mtd", range).length, 1);
+    assert.equal(filterCandidatesByQueueScope(pool, "historical", range).length, 1);
+    assert.equal(filterCandidatesByQueueScope(pool, "all", range).length, 2);
+    assert.equal(isMtdApplicant(mtd, range), true);
+    assert.equal(isHistoricalApplicant(historical, range), true);
   });
 });

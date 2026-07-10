@@ -1,6 +1,7 @@
-import { mkdir, appendFile } from "node:fs/promises";
+import { appendFile } from "node:fs/promises";
 import path from "node:path";
 import type { AuthSession, UserRole } from "@/lib/auth/types";
+import { recruitingDataDir, safeRecruitingMkdir, useInMemoryPersistence } from "@/lib/recruiting-data-dir";
 
 export type AuditRole = UserRole | "anonymous";
 
@@ -43,17 +44,24 @@ export type AuditLogEntry = {
   metadata: Record<string, unknown>;
 };
 
-const LOG_DIR = path.join(process.cwd(), ".data");
-const LOG_FILE = path.join(LOG_DIR, "audit-log.jsonl");
+const memoryAuditEntries: AuditLogEntry[] = [];
+
+function auditLogPath(): string {
+  return path.join(recruitingDataDir(), "audit-log.jsonl");
+}
 
 let writeQueue: Promise<void> = Promise.resolve();
 
 function appendEntry(entry: AuditLogEntry): void {
+  if (useInMemoryPersistence()) {
+    memoryAuditEntries.push(entry);
+    return;
+  }
   const line = `${JSON.stringify(entry)}\n`;
   writeQueue = writeQueue
     .then(async () => {
-      await mkdir(LOG_DIR, { recursive: true });
-      await appendFile(LOG_FILE, line, "utf8");
+      await safeRecruitingMkdir(recruitingDataDir());
+      await appendFile(auditLogPath(), line, "utf8");
     })
     .catch((err) => {
       console.warn("[audit-log] write failed", err instanceof Error ? err.message : err);

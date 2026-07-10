@@ -1,0 +1,174 @@
+{
+  "sourcePhase": "P136",
+  "generatedAt": "2026-07-02T15:31:55.309Z",
+  "mode": "previewOnly",
+  "state": {
+    "version": 1,
+    "schedulerStatus": "stopped",
+    "schedulerMode": "stopped",
+    "continuousEnabled": false,
+    "scheduleIntervalMs": 300000,
+    "startedAt": null,
+    "lastHeartbeatAt": "2026-07-02T15:31:55.309Z",
+    "lastCycleAt": "2026-07-02T15:31:40.351Z",
+    "lastSuccessfulCycleAt": null,
+    "nextScheduledCycleAt": null,
+    "processingLock": null,
+    "currentPhase": null,
+    "lastError": "sendQueue is not iterable",
+    "lastCycleDurationMs": 14959,
+    "averageCycleDurationMs": 14959,
+    "cycleCount": 1,
+    "lastCycleMetrics": {
+      "candidatesEvaluated": 389,
+      "autoApproved": 17,
+      "humanReview": 16,
+      "blocked": 74,
+      "remediationsExecuted": 151,
+      "manualActionsRemaining": 44,
+      "approvalsUnlocked": 15,
+      "readinessCount": 0,
+      "estimatedPaperworkCapacity": 0
+    },
+    "uptimeStartedAt": null,
+    "executeBatchCalled": false,
+    "updatedAt": "2026-07-02T15:31:55.309Z"
+  },
+  "heartbeat": {
+    "lastAt": "2026-07-02T15:31:55.309Z",
+    "stale": false,
+    "healthy": true
+  },
+  "runtimeMs": 0,
+  "lastCycle": {
+    "cycleId": "93e0f0c4-aadc-4eec-b363-8780f91762b5",
+    "startedAt": "2026-07-02T15:31:40.350Z",
+    "completedAt": "2026-07-02T15:31:55.309Z",
+    "durationMs": 14959,
+    "mode": "oneCycle",
+    "phasesCompleted": [
+      "refresh_candidate_data",
+      "remediation_executor_preview",
+      "approval_engine",
+      "orchestrator",
+      "build_send_queue"
+    ],
+    "currentPhase": null,
+    "metrics": {
+      "candidatesEvaluated": 389,
+      "autoApproved": 17,
+      "humanReview": 16,
+      "blocked": 74,
+      "remediationsExecuted": 151,
+      "manualActionsRemaining": 44,
+      "approvalsUnlocked": 15,
+      "readinessCount": 0,
+      "estimatedPaperworkCapacity": 0
+    },
+    "executiveSummary": {
+      "headline": "No cycle executed.",
+      "candidatesEvaluated": 0,
+      "autoApproved": 0,
+      "remediationsCompleted": 0,
+      "approvalsUnlocked": 0,
+      "queueSize": 0,
+      "readinessCount": 0,
+      "safetyStatus": "SAFE_PREVIEW",
+      "safetyDetail": "Idle."
+    },
+    "safetyStatus": {
+      "previewOnly": true,
+      "breezyWrites": false,
+      "liveModeEnabled": false,
+      "paperworkSent": false,
+      "executeBatchCalled": false,
+      "p122Unchanged": true,
+      "checks": [
+        {
+          "id": "preview_only",
+          "label": "Preview-only orchestration",
+          "passed": true,
+          "detail": "No live sends."
+        },
+        {
+          "id": "no_breezy_writes",
+          "label": "No Breezy writes",
+          "passed": true,
+          "detail": "Read-only coordination."
+        },
+        {
+          "id": "no_execute_batch",
+          "label": "No executeBatch",
+          "passed": true,
+          "detail": "executeOne path only."
+        },
+        {
+          "id": "p122_unchanged",
+          "label": "P122 logic unchanged",
+          "passed": true,
+          "detail": "Readiness evaluation only."
+        },
+        {
+          "id": "live_mode_off",
+          "label": "Live mode disabled",
+          "passed": true,
+          "detail": "Live mode off."
+        }
+      ]
+    },
+    "skippedOverlap": false,
+    "skippedPaused": false,
+    "error": "sendQueue is not iterable"
+  },
+  "executivePanel": {
+    "schedulerStatus": "stopped",
+    "currentPhase": null,
+    "lastCycleAt": "2026-07-02T15:31:40.351Z",
+    "nextCycleAt": null,
+    "runtimeMs": 0,
+    "heartbeatHealthy": true,
+    "currentQueue": 0,
+    "remediationsCompleted": 151,
+    "estimatedApprovalsUnlocked": 15,
+    "safetyStatus": {
+      "previewOnly": true,
+      "breezyWrites": false,
+      "liveModeEnabled": false,
+      "paperworkSent": false,
+      "executeBatchCalled": false,
+      "p122Unchanged": true,
+      "checks": [
+        {
+          "id": "preview_only",
+          "label": "Preview-only",
+          "passed": true,
+          "detail": "Orchestrates existing preview components."
+        },
+        {
+          "id": "no_breezy_writes",
+          "label": "No Breezy writes",
+          "passed": true,
+          "detail": "Read-only coordination."
+        },
+        {
+          "id": "no_sends",
+          "label": "No paperwork sends",
+          "passed": true,
+          "detail": "P122 execution unchanged."
+        },
+        {
+          "id": "live_mode",
+          "label": "Live mode off",
+          "passed": true,
+          "detail": "Live mode off."
+        }
+      ]
+    }
+  },
+  "goNoGo": "GO WITH CONDITIONS",
+  "goNoGoReason": "Scheduler coordinates preview-only P123/P124/P125/P134/P135 workflow.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}

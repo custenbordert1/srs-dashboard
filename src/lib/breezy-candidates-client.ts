@@ -312,6 +312,8 @@ async function fetchCandidatesFromApi(options: {
   cacheKey: string;
   label: string;
   ttlMs: number;
+  /** Overrides the request URL (used by the P170 ingestion base path). */
+  urlOverride?: string;
 }): Promise<CandidatesTabFetchResult> {
   const cachedOk = getCachedAllowExpired<BreezyCandidatesResult>(options.cacheKey);
   const fallbackFromCache: BreezyCandidatesSuccess | null =
@@ -363,10 +365,12 @@ async function fetchCandidatesFromApi(options: {
       }
     }
 
-    const requestUrl = `${BREEZY_CANDIDATES_SOURCE.apiPath}${buildCandidatesQuery({
-      scan: options.scan,
-      force: forceFetch,
-    })}`;
+    const requestUrl = options.urlOverride
+      ? `${options.urlOverride}${forceFetch ? "?force=true" : ""}`
+      : `${BREEZY_CANDIDATES_SOURCE.apiPath}${buildCandidatesQuery({
+          scan: options.scan,
+          force: forceFetch,
+        })}`;
 
     const parsed = await fetchCachedJson<BreezyCandidatesResult>(
       options.cacheKey,
@@ -580,6 +584,39 @@ export async function fetchCandidatesForTab(options?: {
     label: `candidates-tab-${scan}`,
     ttlMs: ttlForScan(scan),
   });
+}
+
+/**
+ * P170 — durable ingestion store base layer.
+ * The default `/api/breezy/candidates` path (no scan param) returns the durable
+ * ingestion snapshot. Merging it as the base means the displayed list is
+ * "Ingestion Store + Live Preview" rather than preview-only, so candidates whose
+ * position has not yet been reached by the preview scan still appear.
+ */
+export async function fetchIngestedCandidatesBase(options?: {
+  force?: boolean;
+}): Promise<BreezyCandidatesResult> {
+  return fetchCandidatesFromApi({
+    scan: "ingested" as BreezyCandidatesScanMode,
+    force: options?.force,
+    timeoutMs: CANDIDATES_FAST_CLIENT_TIMEOUT_MS,
+    cacheKey: cacheKey(["breezy", "candidates", "tab", "ingested", "v1"]),
+    label: "candidates-tab-ingested",
+    ttlMs: LONG_CLIENT_CACHE_TTL_MS,
+    urlOverride: "/api/breezy/candidates",
+  });
+}
+
+export async function fetchAndMergeIngestionBase(
+  current: BreezyCandidatesSuccess | null,
+): Promise<CandidatesTabFetchResult | null> {
+  const ingested = await fetchIngestedCandidatesBase();
+  if (!ingested.ok || ingested.candidates.length === 0) return null;
+  if (!current || current.candidates.length === 0) {
+    return rememberTabOkSnapshot(ingested);
+  }
+  // Ingestion is the durable base; live preview/fast rows layer on top (fresher).
+  return rememberTabOkSnapshot(mergeCandidatesSnapshots(ingested, current));
 }
 
 export function shouldHydrateFullCandidates(snapshot: BreezyCandidatesSuccess): boolean {

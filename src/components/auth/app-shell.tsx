@@ -64,6 +64,12 @@ export function AppShell({ user, children, title, subtitle }: AppShellProps) {
                 >
                   Workforce Intelligence
                 </Link>
+                <Link
+                  href="/executive/autonomous-operations-command-center"
+                  className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-200 hover:bg-violet-500/20"
+                >
+                  Ops Command Center
+                </Link>
               </>
             ) : null}
             <button

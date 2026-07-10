@@ -1,0 +1,919 @@
+{
+  "sourcePhase": "P177",
+  "generatedAt": "2026-07-09T15:59:29.784Z",
+  "readOnly": true,
+  "findings": {
+    "p157SendPaperworkRequirements": [
+      "P152 paperworkEligible must be true (recruiter assigned, valid email, no duplicate, no active signature, not disqualified)",
+      "workflowStatus === Paperwork Needed OR paperworkStage === awaitingRecruiterAction OR approvalQueue",
+      "questionnaireComplete (questionnaireIntelligence.available) — any Breezy questionnaire answers present",
+      "questionnaireTechReady !== false"
+    ],
+    "questionnaireFieldsChecked": [
+      "merchandisingExperience",
+      "priorVendorExperience",
+      "smartphoneAccess",
+      "internetAccess",
+      "comfortableWithApps",
+      "printerLaptopAccess",
+      "photoUploadComfort",
+      "scheduleUnderstanding",
+      "availabilityNotes",
+      "techReady (derived from smartphone + internet + apps)"
+    ],
+    "exportHasQuestionnaireData": false,
+    "apiStoreQuestionnaireCoverageNewest25": 0,
+    "questionnaireRequiredFor1099Onboarding": "Not strictly required for Dropbox Sign 1099 packet delivery — P152 covers identity, duplicate, signature, and recruiter assignment. Questionnaire supports tech-readiness screening only.",
+    "p152CoversRealPaperworkRisks": true,
+    "p152RiskChecks": [
+      "unassigned_recruiter",
+      "invalid_email",
+      "duplicate_candidate",
+      "active_signature_request",
+      "paperwork_already_sent",
+      "paperwork_already_completed",
+      "disqualified_candidate",
+      "archived_candidate"
+    ]
+  },
+  "summary": {
+    "newest25Count": 25,
+    "reviewQuestionnaireCount": 21,
+    "artificialGateCount": 21,
+    "trueManualReviewCount": 4,
+    "wouldSendIfQuestionnaireBypass": 0,
+    "wouldSendIfFullBypass": 21,
+    "remainManualReview": 4,
+    "projectedDropboxAfterSafestChange": 42
+  },
+  "newest25": [
+    {
+      "rank": 1,
+      "candidateId": "5e64219daaf9",
+      "name": "David Karp",
+      "email": "dmgkarp@gmail.com",
+      "assignedRecruiter": "Logan",
+      "ingestionSource": null,
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": false,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 2,
+      "candidateId": "84ec8ad83176",
+      "name": "april white",
+      "email": "greatdeals0501@gmail.com",
+      "assignedRecruiter": "Casey",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 3,
+      "candidateId": "86a8d6804b6b",
+      "name": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "assignedRecruiter": "Sam",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 4,
+      "candidateId": "80d87b758578",
+      "name": "Liaunda Lang",
+      "email": "capri_lang@yahoo.com",
+      "assignedRecruiter": "Riley",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 5,
+      "candidateId": "cda9067dac4b",
+      "name": "Mista Clark",
+      "email": "mistac6@gmail.com",
+      "assignedRecruiter": "Casey",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 6,
+      "candidateId": "1bd395fce633",
+      "name": "Norah Jones",
+      "email": "norahjones2224@gmail.com",
+      "assignedRecruiter": "Casey",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 7,
+      "candidateId": "2419559af1ba",
+      "name": "Jasmine Barber",
+      "email": "jasmineshanae90@gmail.com",
+      "assignedRecruiter": "Casey",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 8,
+      "candidateId": "88bb0f06e75e",
+      "name": "Terry Bryant",
+      "email": "tjbryant2019@gmail.com",
+      "assignedRecruiter": "Casey",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 9,
+      "candidateId": "21dc66d94d31",
+      "name": "Patrick Berry",
+      "email": "bezothered@gmail.com",
+      "assignedRecruiter": "Drew",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 10,
+      "candidateId": "46551846149e",
+      "name": "Lindsey Aaron",
+      "email": "miayasmommy.la@gmail.com",
+      "assignedRecruiter": "Logan",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 11,
+      "candidateId": "445225a971f7",
+      "name": "Gianna DelGarbino",
+      "email": "giannadelgarbino@gmail.com",
+      "assignedRecruiter": "Taylor",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 12,
+      "candidateId": "91faef15d8fd",
+      "name": "Nykol Tindle",
+      "email": "nykolcooper2@gmail.com",
+      "assignedRecruiter": "Alex",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 13,
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "email": "patricia.irby@aol.com",
+      "assignedRecruiter": "Logan",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 14,
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "email": "darryltwo@hotmail.com",
+      "assignedRecruiter": "Unassigned",
+      "ingestionSource": "merged",
+      "currentP157Action": "Candidate Duplicate",
+      "workflowStatus": "Paperwork Sent",
+      "paperworkStage": "sent",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Recruiter not assigned."
+      ],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "Duplicate candidate",
+      "blockerClassification": "true_business_requirement",
+      "simulatedP157IfQuestionnaireBypass": "Candidate Duplicate",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Candidate Duplicate",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": false
+    },
+    {
+      "rank": 15,
+      "candidateId": "b32054c06f54",
+      "name": "Karen Burkes",
+      "email": "mrskarenburkes@gmail.com",
+      "assignedRecruiter": "Logan",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 16,
+      "candidateId": "6a850de9dc05",
+      "name": "Gabriella Gandy",
+      "email": "gabriellagandy9@gmail.com",
+      "assignedRecruiter": "Casey",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 17,
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "email": "crumplatrese1@gmail.com",
+      "assignedRecruiter": "Unassigned",
+      "ingestionSource": "merged",
+      "currentP157Action": "Assign Recruiter",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Recruiter not assigned."
+      ],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "Recruiter not assigned",
+      "blockerClassification": "safe_to_automate",
+      "simulatedP157IfQuestionnaireBypass": "Assign Recruiter",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Assign Recruiter",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": false
+    },
+    {
+      "rank": 18,
+      "candidateId": "6b40ff3b280a",
+      "name": "Monique Franklin",
+      "email": "franklinmonique392@gmail.com",
+      "assignedRecruiter": "Alex",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 19,
+      "candidateId": "082c0eec6cff",
+      "name": "Lovett Roberts",
+      "email": "teddylove092386@gmail.com",
+      "assignedRecruiter": "Riley",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 20,
+      "candidateId": "1e0fbce8a310",
+      "name": "Tasha Early",
+      "email": "etasha575@gmail.com",
+      "assignedRecruiter": "Riley",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 21,
+      "candidateId": "88340ea1bf94",
+      "name": "Rebekah Hoover",
+      "email": "rrhoover90@gmail.com",
+      "assignedRecruiter": "Logan",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 22,
+      "candidateId": "71ceb040896c",
+      "name": "DEAN B. SERGIACOMI",
+      "email": "dsergiacomi@comcast.net",
+      "assignedRecruiter": "Chris",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 23,
+      "candidateId": "27d9e13536b0",
+      "name": "William Gustafson",
+      "email": "willy93gizmo29pb@gmail.com",
+      "assignedRecruiter": "Riley",
+      "ingestionSource": "merged",
+      "currentP157Action": "Review Questionnaire",
+      "workflowStatus": "Applied",
+      "paperworkStage": null,
+      "p152Eligible": true,
+      "p152Blockers": [],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "No questionnaire answers in ingestion store",
+      "blockerClassification": "artificial_workflow_gate",
+      "simulatedP157IfQuestionnaireBypass": "Manual Review",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Send Paperwork",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": true
+    },
+    {
+      "rank": 24,
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "email": "jrstagen@gmail.com",
+      "assignedRecruiter": "Morgan",
+      "ingestionSource": "merged",
+      "currentP157Action": "Candidate Duplicate",
+      "workflowStatus": "Paperwork Sent",
+      "paperworkStage": "viewed",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "Duplicate candidate",
+      "blockerClassification": "true_business_requirement",
+      "simulatedP157IfQuestionnaireBypass": "Candidate Duplicate",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Candidate Duplicate",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": false
+    },
+    {
+      "rank": 25,
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "email": "custenborder.taylor@gmail.com",
+      "assignedRecruiter": "Taylor",
+      "ingestionSource": "merged",
+      "currentP157Action": "Candidate Duplicate",
+      "workflowStatus": "Signed",
+      "paperworkStage": "signed",
+      "p152Eligible": false,
+      "p152Blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "questionnaireAvailable": false,
+      "questionnaireTechReady": null,
+      "questionnaireAnswerCount": 0,
+      "questionnaireMissingFields": [
+        "Not available from Breezy yet."
+      ],
+      "resumeInExport": true,
+      "questionnaireInExport": false,
+      "questionnaireInApiStore": false,
+      "primaryBlocker": "Duplicate candidate",
+      "blockerClassification": "true_business_requirement",
+      "simulatedP157IfQuestionnaireBypass": "Candidate Duplicate",
+      "simulatedP157IfQuestionnaireAndWorkflowBypass": "Candidate Duplicate",
+      "wouldSendPaperworkIfQuestionnaireBypass": false,
+      "wouldSendPaperworkIfFullBypass": false
+    }
+  ],
+  "wouldMoveToSendPaperwork": [
+    {
+      "candidateId": "5e64219daaf9",
+      "name": "David Karp",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "84ec8ad83176",
+      "name": "april white",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "86a8d6804b6b",
+      "name": "Gregory Petties",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "80d87b758578",
+      "name": "Liaunda Lang",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "cda9067dac4b",
+      "name": "Mista Clark",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "1bd395fce633",
+      "name": "Norah Jones",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "2419559af1ba",
+      "name": "Jasmine Barber",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "88bb0f06e75e",
+      "name": "Terry Bryant",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "21dc66d94d31",
+      "name": "Patrick Berry",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "46551846149e",
+      "name": "Lindsey Aaron",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "445225a971f7",
+      "name": "Gianna DelGarbino",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "91faef15d8fd",
+      "name": "Nykol Tindle",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "b32054c06f54",
+      "name": "Karen Burkes",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "6a850de9dc05",
+      "name": "Gabriella Gandy",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "6b40ff3b280a",
+      "name": "Monique Franklin",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "082c0eec6cff",
+      "name": "Lovett Roberts",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "1e0fbce8a310",
+      "name": "Tasha Early",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "88340ea1bf94",
+      "name": "Rebekah Hoover",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "71ceb040896c",
+      "name": "DEAN B. SERGIACOMI",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    },
+    {
+      "candidateId": "27d9e13536b0",
+      "name": "William Gustafson",
+      "scenario": "questionnaire_bypass + workflow Paperwork Needed"
+    }
+  ],
+  "mustStayManualReview": [
+    {
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "reason": "Recruiter not assigned."
+    },
+    {
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "reason": "Recruiter not assigned."
+    },
+    {
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "reason": "Onboarding record already has an active signature request."
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "reason": "Onboarding record already has an active signature request."
+    }
+  ],
+  "patriciaIrby": {
+    "assignedRecruiter": "Logan",
+    "currentP157Action": "Review Questionnaire",
+    "questionnaireAvailable": false,
+    "questionnaireAnswerCount": 0,
+    "p152Eligible": true,
+    "primaryBlocker": "No questionnaire answers in ingestion store",
+    "blockerClassification": "artificial_workflow_gate",
+    "wouldSendIfQuestionnaireBypass": false,
+    "wouldSendIfFullBypass": true,
+    "explanation": "Patricia has no questionnaire answers in the ingestion store (Breezy export lacks questionnaire columns; API enrichment not run). P152 passes. Questionnaire gate is artificial for export/API-synced candidates without enrichment."
+  },
+  "recommendedSafestChange": {
+    "change": "Treat missing Breezy questionnaire as non-blocking when P152 passes and resume/export identity is present; advance workflow to Paperwork Needed via P158.3 transition (not paperwork send).",
+    "rationale": "0/25 newest candidates have questionnaire data in store. Breezy export has no questionnaire columns. P152 already blocks duplicates, invalid email, active signatures, and disqualified candidates. Questionnaire gate blocks Send Paperwork before workflow stage gate is even evaluated for Applied-status candidates.",
+    "classification": "artificial_workflow_gate",
+    "expectedPaperworkSendCount": 21,
+    "safetyConfirmation": [
+      "P152 would remain the send safety layer",
+      "Duplicate and signature conflicts stay blocked",
+      "No Breezy/Dropbox writes in diagnosis",
+      "Questionnaire enrichment can be async — not a hard prerequisite for 1099 packet delivery"
+    ]
+  },
+  "blockerBreakdown": {
+    "true_business_requirement": 3,
+    "artificial_workflow_gate": 21,
+    "safe_to_automate": 1,
+    "remain_manual_review": 0
+  },
+  "conclusion": "Review Questionnaire is primarily an artificial workflow gate: 0/25 have questionnaire data, export has none, and P152 already covers send risks. Safest path: non-blocking questionnaire for P152-eligible candidates + workflow transition to Paperwork Needed."
+}

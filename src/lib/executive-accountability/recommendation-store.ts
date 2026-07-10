@@ -14,7 +14,7 @@ import type {
   OperationalEvidenceKind,
 } from "@/lib/executive-accountability/types";
 import { createOperationalEvidence } from "@/lib/executive-accountability/action-audit";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function storePath(): string {
   return path.join(recruitingDataDir(), "executive-accountability.json");
@@ -54,7 +54,7 @@ async function readStore(): Promise<ExecutiveAccountabilityStoreFile> {
 }
 
 async function writeStore(file: ExecutiveAccountabilityStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(storePath(), JSON.stringify(file, null, 2), "utf8");
 }
 

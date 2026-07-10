@@ -1,0 +1,200 @@
+{
+  "phase": "P185.2",
+  "generatedAt": "2026-07-10T17:00:27.786Z",
+  "evidenceSourcesInspected": [
+    {
+      "source": "p97_approval_mode_production",
+      "authority": "authoritative",
+      "role": "Executive/operator persisted approval to Paperwork Needed"
+    },
+    {
+      "source": "p83_candidate_workflow_audit",
+      "authority": "authoritative",
+      "role": "Executed send-paperwork advancements only (shouldAdvance=true)"
+    },
+    {
+      "source": "p83_recommendations",
+      "authority": "supporting",
+      "role": "Recommendations without execution — do not authorize alone"
+    },
+    {
+      "source": "p158_workflow_transition_audit",
+      "authority": "authoritative",
+      "role": "Post-assignment production transitions to Paperwork Needed"
+    },
+    {
+      "source": "p181_scoped_operator_paperwork_queue_artifact",
+      "authority": "authoritative",
+      "role": "Operator-scoped paperwork queue membership"
+    },
+    {
+      "source": "onboarding_paperwork_funnel_promotion",
+      "authority": "supporting",
+      "role": "Policy funnel promotions — informational/supporting only"
+    },
+    {
+      "source": "p152_immediate_paperwork_policy",
+      "authority": "informational",
+      "role": "Send-policy gate after selection — not hire selection"
+    },
+    {
+      "source": "p87_hiring_decisions_preview",
+      "authority": "informational",
+      "role": "Preview recommendations only — never authorize"
+    },
+    {
+      "source": "google_recruiting_sheet",
+      "authority": "informational",
+      "role": "Archive/reference — not wired as selection evidence"
+    },
+    {
+      "source": "breezy_workflow_current_stage",
+      "authority": "authoritative",
+      "role": "Exact Selected/Approved/Paperwork Needed stages when present"
+    }
+  ],
+  "counts": {
+    "evaluated": 677,
+    "withAuthoritativeEvidence": 65,
+    "recoveredFromP181": 20,
+    "recoveredFromP83Executed": 19,
+    "recoveredFromP97": 32,
+    "recoveredFromP158": 21,
+    "normalizedToPaperworkNeeded": 25,
+    "eligibleNewPackets": 25,
+    "templateBlocked": 0,
+    "unresolvedSelectedJobs": 0,
+    "needsOperatorConfirmation": 78,
+    "activePackets": 115,
+    "completedPackets": 17,
+    "queueDepth": 25,
+    "duplicatesPrevented": 132
+  },
+  "comparison": {
+    "beforeEligible": 0,
+    "afterEligible": 25,
+    "beforeQueueDepth": 0,
+    "afterQueueDepth": 25
+  },
+  "projection": {
+    "eligibleCount": 25,
+    "maxSendsPerCycle": 10,
+    "maxPerMinute": 4,
+    "maxPerHour": 40,
+    "maxPerDay": 200,
+    "cycleIntervalMinutes": 10,
+    "cyclesRequired": 3,
+    "hoursRequired": 1,
+    "daysRequired": 1,
+    "deferredToNextDay": 0,
+    "projectedCompletionLabel": "~3 cycles / 1 h / 1 day(s) at configured caps",
+    "rateLimitNotes": [
+      "Cadence bottleneck: 3 cycles × 10 min ≈ 0.5 h",
+      "Hourly cap 40/h → ≥ 1 h",
+      "Daily cap 200/day → ≥ 1 day(s); 0 deferred past day 1",
+      "Per-minute cap 4/min and concurrent=2 further smooth bursts within each cycle",
+      "Circuit breaker stops a cycle after 3 failures — failed sends preserve queue for retry"
+    ]
+  },
+  "dryRun": {
+    "evaluated": 677,
+    "eligible": 25,
+    "rejected": 652,
+    "rejectionReasons": [
+      {
+        "reason": "Position is not accepting candidates.",
+        "count": 506
+      },
+      {
+        "reason": "Current status: Applied",
+        "count": 504
+      },
+      {
+        "reason": "Job status: closed",
+        "count": 297
+      },
+      {
+        "reason": "Job not found.",
+        "count": 209
+      },
+      {
+        "reason": "Paperwork already pending or in flight.",
+        "count": 132
+      },
+      {
+        "reason": "Current status: Paperwork Sent",
+        "count": 115
+      },
+      {
+        "reason": "Packet already sent — awaiting signature.",
+        "count": 115
+      },
+      {
+        "reason": "Current status: Signed",
+        "count": 17
+      },
+      {
+        "reason": "Paperwork already completed.",
+        "count": 17
+      },
+      {
+        "reason": "Paperwork already signed.",
+        "count": 17
+      },
+      {
+        "reason": "Current status: Needs Review",
+        "count": 10
+      },
+      {
+        "reason": "Candidate appears archived/withdrawn.",
+        "count": 8
+      },
+      {
+        "reason": "Current status: Not Qualified",
+        "count": 6
+      },
+      {
+        "reason": "Candidate already hired.",
+        "count": 3
+      }
+    ]
+  },
+  "classifications": {
+    "applied_not_selected": 436,
+    "verified_selected_existing_packet": 115,
+    "likely_selected_needs_review": 78,
+    "verified_selected_completed_packet": 17,
+    "verified_selected_new_packet": 25,
+    "blocked_other": 6
+  },
+  "liveReady": false,
+  "liveBlockers": [
+    "P184 remains enabled=false / mode=dry_run (intentional).",
+    "P185_PRODUCTION_AUTOMATION_ENABLED is not set (intentional).",
+    "CRON_SECRET / P185_CRON_SECRET not configured."
+  ],
+  "controlledLimits": {
+    "cadence": "*/10 * * * *",
+    "maxSendsPerCycle": 10,
+    "maxPerMinute": 4,
+    "maxPerHour": 40,
+    "maxPerDay": 200,
+    "concurrentSends": 2,
+    "maxFailuresPerCycle": 3
+  },
+  "activationSteps": [
+    "Review secured operator cohorts A–E and I in .data/p185-2-selected-hire-operator-review-local.json",
+    "Confirm template readiness for any bucket-B candidates",
+    "Resolve jobs for bucket-C selected candidates",
+    "Operator-confirm bucket-D likely-selected candidates if appropriate",
+    "Set CRON_SECRET in deployment (never commit)",
+    "Confirm durable storage + Dropbox Sign",
+    "Re-run P185.2 dry-run; enable P184 dry_run then live only after gates green",
+    "Set P185_PRODUCTION_AUTOMATION_ENABLED=1 last"
+  ],
+  "warnings": [
+    "Live sending remains disabled — no Dropbox Sign sends performed.",
+    "Normalization uses overlay + P184 queue; source Breezy stages not overwritten.",
+    "Applied candidates without authoritative evidence were not advanced."
+  ]
+}

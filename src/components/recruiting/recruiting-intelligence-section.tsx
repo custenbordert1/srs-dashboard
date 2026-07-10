@@ -23,6 +23,13 @@ import { useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { logDashboardFetch } from "@/lib/dashboard-fetch-log";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CandidateIntelligenceSection } from "./candidate-intelligence-section";
+import { CandidateAdvancementIntelligencePanel } from "@/components/executive/candidate-advancement-intelligence-panel";
+import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-approval-queue-panel";
+import { AutoSendPaperworkReminderPanel } from "@/components/executive/auto-send-paperwork-reminder-panel";
+import { InitialPaperworkAutomationPanel } from "@/components/executive/initial-paperwork-automation-panel";
+import { AutonomousOperationsPanel } from "@/components/executive/autonomous-operations-panel";
+import { ProductionOperationsDashboardPanel } from "@/components/executive/production-operations-dashboard-panel";
+import { ControlledPaperworkAutomationPanel } from "@/components/executive/controlled-paperwork-automation-panel";
 import { CriticalMarketsQueueSection } from "./critical-markets-queue-section";
 import { DemandIntelligenceSection } from "./demand-intelligence-section";
 import { ForecastIntelligenceSection } from "./forecast-intelligence-section";
@@ -572,6 +579,43 @@ export function RecruitingIntelligenceSection() {
         summary={<p className="text-sm text-zinc-500">Candidate scoring and fit analysis.</p>}
       >
         <CandidateIntelligenceSection />
+      </DeferredSection>
+
+      <DeferredSection
+        title="Candidate advancement intelligence"
+        summary={
+          <p className="text-sm text-zinc-500">
+            P144 read-only advancement scores, hire probability, and automation preview.
+          </p>
+        }
+      >
+        <CandidateAdvancementIntelligencePanel />
+      </DeferredSection>
+
+      <DeferredSection
+        title="Controlled paperwork automation"
+        summary={
+          <p className="text-sm text-zinc-500">
+            P145 paperwork queue with recruiter approval — no automatic sends.
+          </p>
+        }
+      >
+        <ControlledPaperworkAutomationPanel />
+        <div className="mt-6">
+          <PaperworkApprovalQueuePanel />
+        </div>
+        <div className="mt-6">
+          <AutoSendPaperworkReminderPanel />
+        </div>
+        <div className="mt-6">
+          <InitialPaperworkAutomationPanel />
+        </div>
+        <div className="mt-6">
+          <AutonomousOperationsPanel />
+        </div>
+        <div className="mt-6">
+          <ProductionOperationsDashboardPanel />
+        </div>
       </DeferredSection>
 
       <DeferredSection

@@ -1,6 +1,7 @@
 "use client";
 
 import type { DashboardTabId } from "@/components/recruiting/dashboard-tabs";
+import { createExecutiveTabLoadingFallback } from "@/components/executive/executive-tab-loading-fallback";
 import { TabSkeleton } from "@/components/ui/tab-skeleton";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
@@ -137,7 +138,10 @@ export const LazyExecutiveHomePanel = dynamic(
     import("@/components/executive/executive-home-panel").then((m) => ({
       default: m.ExecutiveHomePanel,
     })),
-  { loading: tabLoading("Loading executive home…"), ssr: false },
+  {
+    loading: createExecutiveTabLoadingFallback("executive-home", "Loading executive home…"),
+    ssr: false,
+  },
 );
 
 export const LazyExecutiveRecruitingForecastPanel = dynamic(
@@ -145,7 +149,13 @@ export const LazyExecutiveRecruitingForecastPanel = dynamic(
     import("@/components/executive/executive-recruiting-forecast-panel").then((m) => ({
       default: m.ExecutiveRecruitingForecastPanel,
     })),
-  { loading: tabLoading("Loading executive forecast…"), ssr: false },
+  {
+    loading: createExecutiveTabLoadingFallback(
+      "executive-forecasting",
+      "Loading executive forecast…",
+    ),
+    ssr: false,
+  },
 );
 
 export const LazyExecutiveAccountabilityPanel = dynamic(
@@ -153,7 +163,13 @@ export const LazyExecutiveAccountabilityPanel = dynamic(
     import("@/components/executive/executive-accountability-panel").then((m) => ({
       default: m.ExecutiveAccountabilityPanel,
     })),
-  { loading: tabLoading("Loading executive accountability…"), ssr: false },
+  {
+    loading: createExecutiveTabLoadingFallback(
+      "executive-accountability",
+      "Loading executive accountability…",
+    ),
+    ssr: false,
+  },
 );
 
 export const LazyPipelineIntelligencePanel = dynamic(
@@ -161,7 +177,27 @@ export const LazyPipelineIntelligencePanel = dynamic(
     import("@/components/recruiting/pipeline-intelligence-panel").then((m) => ({
       default: m.PipelineIntelligencePanel,
     })),
-  { loading: tabLoading("Loading pipeline intelligence…"), ssr: false },
+  {
+    loading: createExecutiveTabLoadingFallback(
+      "pipeline-intelligence",
+      "Loading pipeline intelligence…",
+    ),
+    ssr: false,
+  },
+);
+
+export const LazyWorkforceIntelligencePanel = dynamic(
+  () =>
+    import("@/components/executive/workforce-intelligence-panel").then((m) => ({
+      default: m.WorkforceIntelligencePanel,
+    })),
+  {
+    loading: createExecutiveTabLoadingFallback(
+      "workforce-intelligence",
+      "Loading workforce intelligence…",
+    ),
+    ssr: false,
+  },
 );
 
 export const LazyRecruitingAutopilotPanel = dynamic(
@@ -210,6 +246,22 @@ export const LazyRecruiterCommandCenterPanel = dynamic(
       default: m.RecruiterCommandCenterPanel,
     })),
   { loading: tabLoading("Loading recruiter operations…"), ssr: false },
+);
+
+export const LazyRecruitingExceptionQueuePanel = dynamic(
+  () =>
+    import("@/components/recruiting/recruiting-exception-queue-panel").then((m) => ({
+      default: m.RecruitingExceptionQueuePanel,
+    })),
+  { loading: tabLoading("Loading exception queue…"), ssr: false },
+);
+
+export const LazyLifecycleExceptionQueuePanel = dynamic(
+  () =>
+    import("@/components/recruiting/lifecycle-exception-queue-panel").then((m) => ({
+      default: m.LifecycleExceptionQueuePanel,
+    })),
+  { loading: tabLoading("Loading lifecycle exceptions…"), ssr: false },
 );
 
 type DashboardTabPanelProps = {

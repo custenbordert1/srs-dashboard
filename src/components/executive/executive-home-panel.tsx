@@ -1,12 +1,37 @@
 "use client";
 
+import { ExecutiveSystemStatusBanner } from "@/components/executive/executive-system-status-banner";
 import { AtsHealthCard } from "@/components/executive/ats-health-card";
 import { ExecutiveAccountabilitySummary } from "@/components/executive/executive-accountability-summary";
 import { ExecutiveActionsStrip } from "@/components/executive/executive-actions-strip";
 import { ApplicantCaptureHealthPanel } from "@/components/recruiting/applicant-capture-health-panel";
 import { AutomationHealthPanel } from "@/components/executive/automation-health-panel";
 import { ExecutionHealthPanel } from "@/components/executive/execution-health-panel";
-import { ExecutivePaperworkDashboardPanel } from "@/components/executive/executive-paperwork-dashboard-panel";
+import { ExecutiveCommandSummaryPanel } from "@/components/executive/executive-command-summary-panel";
+import { RecruiterAssignmentPreviewPanel } from "@/components/executive/recruiter-assignment-preview-panel";
+import { P62P83ApprovalPreviewPanel } from "@/components/executive/p62-p83-approval-preview-panel";
+import { P84SendQueuePreviewPanel } from "@/components/executive/p84-send-queue-preview-panel";
+import { ApprovalModeProductionPanel } from "@/components/executive/approval-mode-production-panel";
+import { LiveSendReadinessPanel } from "@/components/executive/live-send-readiness-panel";
+import { ControlledLiveSendPanel } from "@/components/executive/controlled-live-send-panel";
+import { ControlledLivePaperworkPilotPanel } from "@/components/executive/controlled-live-paperwork-pilot-panel";
+import { AutonomousPaperworkOrchestratorOperationsPanel } from "@/components/executive/autonomous-paperwork-orchestrator-operations-panel";
+import { AutonomousPaperworkEnginePanel } from "@/components/executive/autonomous-paperwork-engine-panel";
+import { AutonomousPaperworkSendEnginePanel } from "@/components/executive/autonomous-paperwork-send-engine-panel";
+import { AutonomousRecoveryCenterPanel } from "@/components/executive/autonomous-recovery-center-panel";
+import { AutonomousPaperworkOperationsCenterPanel } from "@/components/executive/autonomous-paperwork-operations-center-panel";
+import { ProductionSchedulerPanel } from "@/components/executive/production-scheduler-panel";
+import { ExecutiveApprovalPanel } from "@/components/executive/executive-approval-panel";
+import { ExecutiveDecisionCenter } from "@/components/executive/executive-decision-center";
+import { ExecutiveReadinessAdvisorPanel } from "@/components/executive/executive-readiness-advisor-panel";
+import { AutonomousRecruiterOperationsPanel } from "@/components/executive/autonomous-recruiter-operations-panel";
+import { AutonomousLifecycleOperationsPanel } from "@/components/executive/autonomous-lifecycle-operations-panel";
+import { AutonomousProductionRunnerPanel } from "@/components/executive/autonomous-production-runner-panel";
+import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
+import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
+import { BulkMappingReviewPanel } from "@/components/executive/bulk-mapping-review-panel";
+import { ProjectMappingReviewWorkflowPanel } from "@/components/executive/project-mapping-review-workflow-panel";
+import { LiveSendOperatorChecklistPanel } from "@/components/executive/live-send-operator-checklist-panel";
 import { OnboardingPipelineExecutiveCard } from "@/components/executive/onboarding-pipeline-executive-card";
 import { AutonomousOnboardingPanel } from "@/components/executive/autonomous-onboarding-panel";
 import { AutonomousPaperworkPanel } from "@/components/executive/autonomous-paperwork-panel";
@@ -23,6 +48,15 @@ import { WorkforcePlacementPanel } from "@/components/executive/workforce-placem
 import { OnboardingHealthPanel } from "@/components/executive/onboarding-health-panel";
 import { RecruiterAutomationReadinessPanel } from "@/components/executive/recruiter-automation-readiness-panel";
 import { PipelineHealthPanel } from "@/components/executive/pipeline-health-panel";
+import { CandidateAdvancementIntelligencePanel } from "@/components/executive/candidate-advancement-intelligence-panel";
+import { AutomationPreviewQueuePanel } from "@/components/executive/automation-preview-queue-panel";
+import { ControlledPaperworkAutomationPanel } from "@/components/executive/controlled-paperwork-automation-panel";
+import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-approval-queue-panel";
+import { AutoSendPaperworkReminderPanel } from "@/components/executive/auto-send-paperwork-reminder-panel";
+import { InitialPaperworkAutomationPanel } from "@/components/executive/initial-paperwork-automation-panel";
+import { AutonomousOperationsPanel } from "@/components/executive/autonomous-operations-panel";
+import { ProductionOperationsDashboardPanel } from "@/components/executive/production-operations-dashboard-panel";
+import { CandidatePipelineAdvancementPanel } from "@/components/executive/candidate-pipeline-advancement-panel";
 import type { ExecutiveDashboardSnapshot, TerritoryRollupRow } from "@/lib/dm-dashboard";
 import { buildExecutiveSnapshotContent } from "@/lib/build-executive-home-snapshot";
 import { sanitizeFriendlyFetchMessage } from "@/lib/friendly-fetch-errors";
@@ -36,6 +70,7 @@ import {
   ExecutiveHero,
   type ExecutiveBriefingHealth,
   ExecutiveCard,
+  CollapsibleSection,
   IconUsers,
   MetricCard,
   type MetricCardStatus,
@@ -221,6 +256,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
 
   return (
     <div className="space-y-12">
+      <ExecutiveSystemStatusBanner />
+
       <ExecutiveHero
         userName={userName}
         snapshot={snapshot}
@@ -228,43 +265,83 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
         lastUpdated={formatTimestamp(lastUpdated)}
       />
 
-      <AICommandCenterPanel />
+      <ExecutiveCommandSummaryPanel />
 
-      <ApplicantCaptureHealthPanel />
+      <ExecutiveDecisionCenter />
 
-      <AutomationHealthPanel />
+      <ExecutiveReadinessAdvisorPanel />
 
-      <ExecutionHealthPanel />
+      <AutonomousRecruiterOperationsPanel />
 
-      <OnboardingHealthPanel />
+      <AutonomousLifecycleOperationsPanel />
 
-      <AutonomousPaperworkPanel />
+      <AutonomousRecoveryCenterPanel />
 
-      <AutonomousPaperworkExecutionPanel />
+      <CollapsibleSection
+        id="legacy-decision-panels"
+        title="Legacy decision panels"
+        subtitle="P118 operations center, P167 scheduler, and P168 approval queue (superseded by Decision Center)"
+        defaultOpen={false}
+      >
+        <div className="space-y-12">
+          <AutonomousPaperworkOperationsCenterPanel />
+          <ProductionSchedulerPanel />
+          <ExecutiveApprovalPanel />
+        </div>
+      </CollapsibleSection>
 
-      <OnboardingPipelineExecutiveCard />
+      <CollapsibleSection
+        id="advanced-platform-intelligence"
+        title="Advanced platform intelligence"
+        subtitle="AI command center, orchestration, governance, and recruiting engines"
+        defaultOpen={false}
+      >
+        <div className="space-y-12">
+          <AICommandCenterPanel />
+          <ApplicantCaptureHealthPanel />
+          <AutomationHealthPanel />
+          <ExecutionHealthPanel />
+          <OnboardingHealthPanel />
+          <AutonomousPaperworkPanel />
+          <AutonomousPaperworkExecutionPanel />
+          <OnboardingPipelineExecutiveCard />
+          <AutonomousOnboardingPanel />
+          <WorkforcePlacementPanel />
+          <ExecutiveDailyBriefPanel />
+          <AutonomousCandidateCommunicationPanel />
+          <AutonomousRecruitingOrchestratorPanel />
+          <AutonomousOperationsCenterPanel />
+          <AutonomousDecisionEnginePanel />
+          <AutonomousApprovalGovernancePanel />
+          <ExecutiveNaturalLanguageQueriesPanel />
+        </div>
+      </CollapsibleSection>
 
-      <AutonomousOnboardingPanel />
-
-      <WorkforcePlacementPanel />
-
-      <ExecutiveDailyBriefPanel />
-
-      <AutonomousCandidateCommunicationPanel />
-
-      <AutonomousRecruitingOrchestratorPanel />
-
-      <AutonomousOperationsCenterPanel />
-
-      <AutonomousDecisionEnginePanel />
-
-      <AutonomousApprovalGovernancePanel />
-
-      <ExecutiveNaturalLanguageQueriesPanel />
-
-      <ExecutivePaperworkDashboardPanel />
-
-      <RecruiterAutomationReadinessPanel />
+      <CollapsibleSection
+        id="paperwork-live-send-diagnostics"
+        title="Paperwork & live-send diagnostics"
+        subtitle="Engine previews, mapping tools, operator checklist, and historical artifacts"
+        defaultOpen={false}
+      >
+        <div className="space-y-12">
+          <RecruiterAssignmentPreviewPanel />
+          <P62P83ApprovalPreviewPanel />
+          <P84SendQueuePreviewPanel />
+          <ApprovalModeProductionPanel />
+          <LiveSendReadinessPanel />
+          <ControlledLiveSendPanel />
+          <ControlledLivePaperworkPilotPanel />
+          <AutonomousPaperworkOrchestratorOperationsPanel />
+          <AutonomousProductionRunnerPanel />
+          <AutonomousPaperworkEnginePanel />
+          <PaperworkMonitorPanel />
+          <ProjectMappingPanel />
+          <ProjectMappingReviewWorkflowPanel />
+          <BulkMappingReviewPanel />
+          <LiveSendOperatorChecklistPanel />
+          <RecruiterAutomationReadinessPanel />
+        </div>
+      </CollapsibleSection>
 
       {candidatesUnavailable && jobsAvailable ? (
         <div
@@ -433,6 +510,26 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AtsHealthCard collapsible />
 
       <PipelineHealthPanel />
+
+      <CandidateAdvancementIntelligencePanel />
+
+      <AutomationPreviewQueuePanel />
+
+      <ControlledPaperworkAutomationPanel />
+
+      <AutonomousPaperworkSendEnginePanel />
+
+      <PaperworkApprovalQueuePanel />
+
+      <AutoSendPaperworkReminderPanel />
+
+      <InitialPaperworkAutomationPanel />
+
+      <AutonomousOperationsPanel />
+
+      <ProductionOperationsDashboardPanel />
+
+      <CandidatePipelineAdvancementPanel />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <TerritoryTable

@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { CandidateAutomationRunRecord } from "@/lib/candidate-automation-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_RUNS = 100;
 
@@ -29,7 +29,7 @@ async function readRunsFile(): Promise<RunsStoreFile> {
 }
 
 async function writeRunsFile(file: RunsStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(runsPath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 

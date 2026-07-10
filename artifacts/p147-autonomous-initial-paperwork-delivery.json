@@ -1,0 +1,30 @@
+{
+  "sourcePhase": "P147",
+  "generatedAt": "2026-07-06T16:39:25.811Z",
+  "productionReadiness": {
+    "recommendation": "READY WITH CONDITIONS",
+    "score": 88,
+    "checks": {
+      "autoSendDisabledByDefault": true,
+      "dryRunWorks": true,
+      "eligibleIdentification": true,
+      "duplicatePrevention": true,
+      "auditLogging": true,
+      "noBreezyWrites": true,
+      "noCandidateMovement": true,
+      "p144Integration": true
+    }
+  },
+  "dryRunEligible": 0,
+  "blockedCandidates": [],
+  "duplicatePreventionCount": 0,
+  "executionTimeMs": 1,
+  "safetyConfirmation": {
+    "executeBatchCalled": false,
+    "breezyWrites": false,
+    "paperworkSent": false,
+    "autoSendEnabled": false
+  },
+  "queueSize": 0,
+  "initialCandidates": 0
+}

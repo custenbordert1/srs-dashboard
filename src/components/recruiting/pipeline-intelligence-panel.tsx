@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ExecutiveApiDegradedState } from "@/components/executive/executive-tab-loading-fallback";
 import { usePipelineIntelligence } from "@/hooks/use-pipeline-intelligence";
 import { EXECUTIVE_PANEL_LOADING_CEILING_MS, useLoadingCeiling } from "@/hooks/use-loading-ceiling";
 import { pipelineQueueHref } from "@/lib/pipeline-intelligence/client";
@@ -71,31 +72,28 @@ export function PipelineIntelligencePanel({ compact = false }: PipelineIntellige
 
   if ((error || loadingCeilingHit) && !data) {
     return (
-      <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-        <p>{error ?? "Pipeline intelligence is still loading. Retry shortly."}</p>
-        <button
-          type="button"
-          onClick={() => refresh()}
-          className="mt-2 rounded-lg border border-amber-400/40 px-3 py-1 text-xs"
-        >
-          Retry
-        </button>
-      </section>
+      <ExecutiveApiDegradedState
+        source="pipeline-intelligence"
+        message={
+          error ??
+          "Pipeline intelligence is still loading. Retry shortly."
+        }
+        onRetry={() => refresh()}
+        retrying={refreshing}
+        timedOut={loadingCeilingHit}
+        showingCachedSnapshot={showingCachedSnapshot}
+      />
     );
   }
 
   if (!data) {
     return (
-      <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-        <p>Pipeline intelligence is still loading. Retry shortly.</p>
-        <button
-          type="button"
-          onClick={() => refresh()}
-          className="mt-2 rounded-lg border border-amber-400/40 px-3 py-1 text-xs"
-        >
-          Retry
-        </button>
-      </section>
+      <ExecutiveApiDegradedState
+        source="pipeline-intelligence"
+        message="Pipeline intelligence is still loading. Retry shortly."
+        onRetry={() => refresh()}
+        retrying={refreshing}
+      />
     );
   }
 

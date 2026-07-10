@@ -1,0 +1,396 @@
+{
+  "sourcePhase": "P112",
+  "generatedAt": "2026-07-01T14:14:58.126Z",
+  "mode": "dryRun",
+  "summary": "10 bulk-approvable groups (36 candidates) simulated. 36 estimated newly eligible, 0 remain blocked. Recommendations: 4 SAFE, 6 REVIEW FIRST, 0 DO NOT APPROVE. First recommended group: Continuity Store Merchandiser – Payson, AZ → Continuity In-Store Merchandiser Payson, AZ. GO: 36 candidate(s) would unlock across 10 simulated bulk approvals (dryRun only).",
+  "goNoGo": "GO",
+  "goNoGoReason": "36 candidate(s) would unlock across 10 simulated bulk approvals (dryRun only).",
+  "metrics": {
+    "totalBulkApprovableGroups": 10,
+    "totalCandidates": 36,
+    "estimatedNewlyEligible": 36,
+    "totalRemainingBlocked": 0,
+    "exclusions": {
+      "alreadySent": 0,
+      "duplicateRisk": 0,
+      "invalidEmail": 0,
+      "other": 0
+    },
+    "recommendations": {
+      "safe": 4,
+      "reviewFirst": 6,
+      "doNotApprove": 0
+    }
+  },
+  "recommendedFirstGroupToApprove": {
+    "groupId": "continuity store merchandiser - payson, az::07c1de432ea6::payson::AZ::high_80_plus::store",
+    "groupName": "Continuity Store Merchandiser – Payson, AZ → Continuity In-Store Merchandiser Payson, AZ",
+    "candidateCount": 2,
+    "newlyEligibleAfterApproval": 2,
+    "safeToApprove": "SAFE",
+    "reason": "Full recovery (2/2) with strong confidence (84%)."
+  },
+  "groupSimulations": [
+    {
+      "groupId": "merchandiser- experienced- elko, nv::692a90f9955d::elko::NV::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser- Experienced- Elko, NV → Retail Merchandiser - Independent Contractor - Elko, NV",
+      "closedPositionTitle": "Merchandiser- Experienced- Elko, NV",
+      "candidateCount": 21,
+      "averageConfidence": 66,
+      "minConfidence": 66,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "692a90f9955d",
+        "title": "Retail Merchandiser - Independent Contractor - Elko, NV",
+        "city": "Elko",
+        "state": "NV"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 21,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "REVIEW FIRST",
+      "riskNotes": [
+        "Minimum confidence 66% is near the bulk-approve threshold.",
+        "Average confidence 66% is borderline for bulk approval."
+      ],
+      "candidateIds": [
+        "33cb7d7f786c",
+        "a381b6aca0e0",
+        "f1b2325774c4",
+        "06531756ae1a",
+        "621ef8c8480c",
+        "b06d222cb36a",
+        "840c0b858148",
+        "8c035453cf91",
+        "e0bfa38d5e48",
+        "fd05721aa816",
+        "26172067a9fd",
+        "a6ef153915ba",
+        "4b3ca31f4bd2",
+        "148d110d3d03",
+        "4d337a689efa",
+        "ad42c3d2949c",
+        "7c139386c5da",
+        "eb4314d21ee0",
+        "dd1747bfe124",
+        "19a0a6da9f17",
+        "5ef2901144af"
+      ]
+    },
+    {
+      "groupId": "merchandiser - experienced::3f1cc8bca5f3::pensacola::FL::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser - Experienced → Retail Merchandiser – Pensacola Area",
+      "closedPositionTitle": "Merchandiser - Experienced",
+      "candidateCount": 3,
+      "averageConfidence": 74,
+      "minConfidence": 74,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "3f1cc8bca5f3",
+        "title": "Retail Merchandiser – Pensacola Area",
+        "city": "Pensacola",
+        "state": "FL"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 3,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "REVIEW FIRST",
+      "riskNotes": [],
+      "candidateIds": [
+        "a02931877eec",
+        "a173310d307e",
+        "9e35710a6382"
+      ]
+    },
+    {
+      "groupId": "continuity store merchandiser - payson, az::07c1de432ea6::payson::AZ::high_80_plus::store",
+      "groupName": "Continuity Store Merchandiser – Payson, AZ → Continuity In-Store Merchandiser Payson, AZ",
+      "closedPositionTitle": "Continuity Store Merchandiser – Payson, AZ",
+      "candidateCount": 2,
+      "averageConfidence": 84,
+      "minConfidence": 84,
+      "confidenceBand": "high_80_plus",
+      "recommendedActivePosition": {
+        "positionId": "07c1de432ea6",
+        "title": "Continuity In-Store Merchandiser Payson, AZ",
+        "city": "Payson",
+        "state": "AZ"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 2,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "SAFE",
+      "riskNotes": [],
+      "candidateIds": [
+        "bfd12572f3e5",
+        "cde8b040e7a4"
+      ]
+    },
+    {
+      "groupId": "continuity merchandiser sf , lake havasu city, az::a707da4f2564::lake havasu city::AZ::high_80_plus::merchandiser",
+      "groupName": "Continuity Merchandiser  SF , Lake Havasu City, AZ → Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+      "closedPositionTitle": "Continuity Merchandiser  SF , Lake Havasu City, AZ",
+      "candidateCount": 2,
+      "averageConfidence": 80,
+      "minConfidence": 80,
+      "confidenceBand": "high_80_plus",
+      "recommendedActivePosition": {
+        "positionId": "a707da4f2564",
+        "title": "Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+        "city": "Lake Havasu City",
+        "state": "AZ"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 2,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "SAFE",
+      "riskNotes": [],
+      "candidateIds": [
+        "8fba13c8cf25",
+        "a364ab16b68e"
+      ]
+    },
+    {
+      "groupId": "retail merchandiser (flexible, project-based work) yerington, nv::e797d1fdd2c3::yerington::NV::approvable_65_79::retail merchandiser (flexible, project",
+      "groupName": "Retail Merchandiser (Flexible, Project-Based Work)  Yerington, NV → Independent Retail Merchandiser - Project-Based Work - Yerington, NV",
+      "closedPositionTitle": "Retail Merchandiser (Flexible, Project-Based Work)  Yerington, NV",
+      "candidateCount": 2,
+      "averageConfidence": 70,
+      "minConfidence": 70,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "e797d1fdd2c3",
+        "title": "Independent Retail Merchandiser - Project-Based Work - Yerington, NV",
+        "city": "Yerington",
+        "state": "NV"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 2,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "REVIEW FIRST",
+      "riskNotes": [],
+      "candidateIds": [
+        "86da01f7739b",
+        "9f9d978c7e71"
+      ]
+    },
+    {
+      "groupId": "retail merchandiser (flexible, project-based work)::604de23a02a7::cincinnati::OH::approvable_65_79::retail merchandiser (flexible, project",
+      "groupName": "Retail Merchandiser (Flexible, Project-Based Work) → Retail Reset Merchandiser – Cincinnati, OH",
+      "closedPositionTitle": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "candidateCount": 2,
+      "averageConfidence": 68,
+      "minConfidence": 68,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "604de23a02a7",
+        "title": "Retail Reset Merchandiser – Cincinnati, OH",
+        "city": "Cincinnati",
+        "state": "OH"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 2,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "REVIEW FIRST",
+      "riskNotes": [
+        "Average confidence 68% is borderline for bulk approval."
+      ],
+      "candidateIds": [
+        "3cd770217fe8",
+        "43b1ff0dacb5"
+      ]
+    },
+    {
+      "groupId": "continuity merchandiser sf , lake havasu city, az (draft)::a707da4f2564::lake havasu city::AZ::high_80_plus::merchandiser",
+      "groupName": "Continuity Merchandiser  SF , Lake Havasu City, AZ (Draft) → Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+      "closedPositionTitle": "Continuity Merchandiser  SF , Lake Havasu City, AZ (Draft)",
+      "candidateCount": 1,
+      "averageConfidence": 80,
+      "minConfidence": 80,
+      "confidenceBand": "high_80_plus",
+      "recommendedActivePosition": {
+        "positionId": "a707da4f2564",
+        "title": "Retail Merchandiser - Weekly Store Visits - Lake Havasu City, AZ",
+        "city": "Lake Havasu City",
+        "state": "AZ"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 1,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "SAFE",
+      "riskNotes": [],
+      "candidateIds": [
+        "7c37beb6ac48"
+      ]
+    },
+    {
+      "groupId": "retail merchandiser (flexible, project-based work) south lake tahoe::93ebc05539b8::south lake tahoe::NV::approvable_65_79::retail merchandiser (flexible, project",
+      "groupName": "Retail Merchandiser (Flexible, Project-Based Work)  South Lake Tahoe → Retail Merchandiser - Local Store Support - South Lake Tahoe, NV",
+      "closedPositionTitle": "Retail Merchandiser (Flexible, Project-Based Work)  South Lake Tahoe",
+      "candidateCount": 1,
+      "averageConfidence": 75,
+      "minConfidence": 75,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "93ebc05539b8",
+        "title": "Retail Merchandiser - Local Store Support - South Lake Tahoe, NV",
+        "city": "South Lake Tahoe",
+        "state": "NV"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 1,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "SAFE",
+      "riskNotes": [],
+      "candidateIds": [
+        "92fa58cc5870"
+      ]
+    },
+    {
+      "groupId": "merchandiser- experienced- perris, ca::8be652ac8518::perris::CA::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser- Experienced- Perris, CA → Retail Merchandiser - Grocery & Retail Projects - Perris, CA",
+      "closedPositionTitle": "Merchandiser- Experienced- Perris, CA",
+      "candidateCount": 1,
+      "averageConfidence": 68,
+      "minConfidence": 68,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "8be652ac8518",
+        "title": "Retail Merchandiser - Grocery & Retail Projects - Perris, CA",
+        "city": "Perris",
+        "state": "CA"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 1,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "REVIEW FIRST",
+      "riskNotes": [
+        "Average confidence 68% is borderline for bulk approval."
+      ],
+      "candidateIds": [
+        "3fbb949f2be4"
+      ]
+    },
+    {
+      "groupId": "merchandiser - experienced::681380669f5c::battle creek::MI::approvable_65_79::merchandiser",
+      "groupName": "Merchandiser - Experienced → Retail Reset Merchandiser – Battle Creek, MI",
+      "closedPositionTitle": "Merchandiser - Experienced",
+      "candidateCount": 1,
+      "averageConfidence": 66,
+      "minConfidence": 66,
+      "confidenceBand": "approvable_65_79",
+      "recommendedActivePosition": {
+        "positionId": "681380669f5c",
+        "title": "Retail Reset Merchandiser – Battle Creek, MI",
+        "city": "Battle Creek",
+        "state": "MI"
+      },
+      "safetyExclusions": {
+        "alreadySent": 0,
+        "duplicateRisk": 0,
+        "invalidEmail": 0,
+        "other": 0,
+        "total": 0
+      },
+      "newlyEligibleAfterApproval": 1,
+      "remainingBlocked": 0,
+      "recoveryRatePercent": 100,
+      "safeToApprove": "REVIEW FIRST",
+      "riskNotes": [
+        "Minimum confidence 66% is near the bulk-approve threshold.",
+        "Average confidence 66% is borderline for bulk approval."
+      ],
+      "candidateIds": [
+        "eb1913e0a9e3"
+      ]
+    }
+  ],
+  "safetyStatus": {
+    "p1063RunnerUnchanged": true,
+    "noBreezyWrites": true,
+    "noLiveSends": true,
+    "noLiveMode": true,
+    "dryRunOnly": true,
+    "noActualApprovalsPersisted": true
+  },
+  "warnings": [
+    "P112 — dryRun simulation only; no approvals persisted.",
+    "P112 — no paperwork sends.",
+    "P112 — no Breezy writes.",
+    "P112 — P106.3 live runner unchanged.",
+    "Mode: dryRun.",
+    "P111 — bulk review tools; local .data only.",
+    "P111 — no Breezy writes, no live sends, no live runner wiring.",
+    "Mode: dryRun.",
+    "P109 — read-only approval bridge; no Breezy writes.",
+    "P109 — no live sends or automatic paperwork.",
+    "P109 — P106.3 runner behavior unchanged.",
+    "Mode: dryRun.",
+    "P108 — read-only analysis; no Breezy writes.",
+    "P108 — no live sends or production mutations.",
+    "Mode: dryRun."
+  ]
+}

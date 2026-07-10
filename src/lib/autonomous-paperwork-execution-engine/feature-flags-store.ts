@@ -5,7 +5,7 @@ import {
   P71_DEFAULT_AUTOMATION_ENABLED,
   P71_DEFAULT_EXECUTION_MODE,
 } from "@/lib/autonomous-paperwork-execution-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function flagsPath(): string {
   return path.join(recruitingDataDir(), "p71-paperwork-execution-flags.json");
@@ -116,7 +116,7 @@ export async function loadP71FeatureFlags(): Promise<P71FeatureFlags> {
 export async function saveP71FeatureFlags(flags: P71FeatureFlags): Promise<P71FeatureFlags> {
   const now = new Date().toISOString();
   const saved = { ...flags, updatedAt: now };
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(flagsPath(), `${JSON.stringify({ flags: saved, updatedAt: now }, null, 2)}\n`, "utf8");
   return resolveP71FeatureFlagsFromEnv(saved);
 }

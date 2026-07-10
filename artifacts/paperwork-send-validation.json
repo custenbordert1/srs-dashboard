@@ -1,0 +1,48 @@
+{
+  "phase": "P184",
+  "generatedAt": "2026-07-10T16:06:40.579Z",
+  "mode": "dry_run",
+  "evaluated": 0,
+  "eligible": [],
+  "rejected": [
+    {
+      "candidateId": "example-1",
+      "candidateName": "Example Rejected",
+      "reasons": [
+        "Email missing."
+      ]
+    }
+  ],
+  "rejectionReasons": [
+    {
+      "reason": "Email missing.",
+      "count": 1,
+      "candidateIds": [
+        "example-1"
+      ]
+    }
+  ],
+  "queueOrder": [],
+  "projectedSends": 0,
+  "estimatedCompletionMinutes": 0,
+  "rateLimitStatus": {
+    "config": {
+      "maxPerMinute": 4,
+      "maxPerHour": 40,
+      "maxPerDay": 200,
+      "concurrentSends": 2
+    },
+    "sentLastMinute": 0,
+    "sentLastHour": 0,
+    "sentLastDay": 0,
+    "inFlight": 0,
+    "limited": false,
+    "limitedBy": [],
+    "nextAvailableAt": null
+  },
+  "warnings": [
+    "Scaffold validation artifact generated without live candidate store (unit tests cover engine behavior).",
+    "Run scripts/p184-autonomous-paperwork-send-engine.ts against a populated .data store for production dry-run.",
+    "Dry run mode — validations only; Dropbox Sign not called."
+  ]
+}

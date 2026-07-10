@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-07-08T15:55:59.903Z",
+  "sourcePhase": "P165",
+  "queue": {
+    "activePackets": 75,
+    "simulatedCycleSends": 10,
+    "priorityCandidateIds": [
+      "d6cd926f864a",
+      "f786bc64011a",
+      "276b822da485",
+      "13e8c31452b5",
+      "f1b2325774c4",
+      "621ef8c8480c",
+      "b06d222cb36a",
+      "840c0b858148",
+      "8c035453cf91",
+      "acff2383c00f"
+    ]
+  },
+  "comparison": {
+    "before": {
+      "postRequests": 10,
+      "getRequests": 150,
+      "totalRequests": 160,
+      "notes": "P164 measured: double GET per packet + full portfolio poll"
+    },
+    "after": {
+      "postRequests": 10,
+      "getRequests": 10,
+      "totalRequests": 20,
+      "deferredHistorical": 65,
+      "duplicateGetsEliminated": true,
+      "notes": "P165: single GET per packet; post-cycle scope polls cycle sends only"
+    }
+  },
+  "reduction": {
+    "estimatedPercent": 87.5,
+    "getRequestReduction": 140,
+    "totalRequestReduction": 140
+  },
+  "targets": {
+    "postRequests": 10,
+    "getRequestsMax": 25,
+    "totalMax": 35,
+    "meetsTarget": true
+  },
+  "readiness": {
+    "periodicAutomaticPaperworkSending": "READY — projected cycle API usage stays under Dropbox Sign limits with P165 optimizations.",
+    "continuousModeRequired": false,
+    "rateLimitRisk": "low"
+  }
+}

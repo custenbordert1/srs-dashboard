@@ -1,0 +1,123 @@
+{
+  "sourcePhase": "P171",
+  "generatedAt": "2026-07-08T20:56:34.936Z",
+  "lifecycleEnabled": false,
+  "console": {
+    "sourcePhase": "P171",
+    "generatedAt": "2026-07-08T20:56:34.935Z",
+    "readOnly": true,
+    "status": "paused",
+    "statusLabel": "Paused",
+    "enabled": false,
+    "paused": false,
+    "lastCycle": {
+      "at": null,
+      "agoLabel": "never",
+      "durationMs": null,
+      "candidatesProcessed": 0,
+      "paperworkSent": 0,
+      "remindersSent": 0,
+      "exceptions": 0,
+      "readyForMel": 0,
+      "waitingSignature": 0
+    },
+    "nextCycle": {
+      "at": null,
+      "inMs": null,
+      "inLabel": "—"
+    },
+    "metrics": {
+      "candidatesProcessedToday": 0,
+      "paperworkAutomaticallySent": 0,
+      "readyForMel": 0,
+      "waitingSignature": 0,
+      "averageCompletionTimeMs": null,
+      "automationSuccessRate": 0,
+      "exceptionRate": 0,
+      "recruiterInterventionsSaved": 0,
+      "discoveryLatencyMs": null,
+      "evaluationLatencyMs": null,
+      "paperworkLatencyMs": null,
+      "signatureLatencyMs": null,
+      "automationPercent": 0,
+      "recruiterInterventionPercent": 0
+    },
+    "stateDistribution": [],
+    "health": {
+      "score": 60,
+      "label": "warning"
+    },
+    "config": {
+      "enabled": false,
+      "paused": false,
+      "cycleIntervalMs": 900000,
+      "minimumConfidence": 80,
+      "maximumRetries": 3,
+      "exceptionThreshold": 25,
+      "maxRemindersPerCandidate": 3,
+      "reminderHours": [
+        24,
+        48,
+        72
+      ],
+      "readinessThreshold": 80,
+      "pauseSchedule": {
+        "pausedUntil": null,
+        "reason": null
+      },
+      "updatedAt": "2026-07-08T20:56:33.623Z"
+    },
+    "recentCycles": [],
+    "warnings": [
+      "Lifecycle manager disabled — set P171_LIFECYCLE_ENABLED=true to enable."
+    ]
+  },
+  "exceptions": {
+    "total": 0,
+    "byCategory": []
+  },
+  "pathCheck": {
+    "usesP170Discovery": true,
+    "usesP157Evaluation": true,
+    "usesP169Gates": true,
+    "usesP159LiveCycle": true,
+    "usesP146Reminders": true,
+    "usesP107SignatureMonitor": true,
+    "noDuplicateSendLogic": true,
+    "noDuplicateReminderLogic": true
+  },
+  "validation": {
+    "passed": true,
+    "checks": {
+      "continuousModeUnchanged": true,
+      "daemonNotStarted": true,
+      "noAutoEnableWhenDisabled": true,
+      "noPaperworkSentUnlessLive": true,
+      "workflowStoreUnchangedUnlessLive": true,
+      "runnerStoreUnchangedUnlessLive": true,
+      "auditUnchangedUnlessLive": true,
+      "dropboxUnchangedUnlessLive": true,
+      "lifecycleStoreWritable": true,
+      "usesExistingPath": true
+    }
+  },
+  "safety": {
+    "continuousModeBefore": false,
+    "continuousModeAfter": false,
+    "daemonNotStarted": true
+  },
+  "checks": {
+    "consoleRendered": true,
+    "statusPresent": true,
+    "healthScoreInRange": true,
+    "exceptionQueueReadable": true,
+    "usesP159Path": true,
+    "usesP157Evaluation": true,
+    "usesP146Reminders": true,
+    "usesP107Monitor": true,
+    "noDuplicateSendLogic": true,
+    "noDuplicateReminderLogic": true,
+    "notAutoEnabled": true,
+    "validationPassed": true
+  }
+}

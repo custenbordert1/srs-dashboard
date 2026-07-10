@@ -1,0 +1,1356 @@
+{
+  "sourcePhase": "P129",
+  "generatedAt": "2026-07-01T20:04:35.469Z",
+  "mode": "previewOnly",
+  "policy": {
+    "readonly": true,
+    "autoApproveThreshold": 90,
+    "humanApprovalThreshold": 70,
+    "waitingThreshold": 50,
+    "requirePublishedJob": true,
+    "requireValidEmail": true,
+    "requireNoDuplicateRisk": true,
+    "requireNoAlreadySent": true,
+    "requireTemplate": true,
+    "requireApprovedMappingOrNativeProject": true
+  },
+  "summary": {
+    "totalCandidatesEvaluated": 382,
+    "autoApprovedCount": 0,
+    "nearReadyCount": 47,
+    "scoreThreshold": 90
+  },
+  "nearReadyCandidates": [
+    {
+      "candidateId": "92fa58cc5870",
+      "candidateName": "Tyree nicole Gilley",
+      "email": "tyreenicolegilley932@gmail.com",
+      "approvalScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "missingRequirements": [
+        "Questionnaire / resume complete",
+        "Recruiter assigned",
+        "Mapping confidence at 75% (auto threshold 80%)",
+        "7 more approval score points needed (current 83, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "exactBlockerPreventingAutoApproved": "Approval score 83 is below AUTO_APPROVED threshold 90.",
+      "blockerCategory": "policy_issue",
+      "mappingConfidence": 75,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": true,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+      ]
+    },
+    {
+      "candidateId": "7c37beb6ac48",
+      "candidateName": "Angelique Cowan",
+      "email": "angelcowan12345@gmail.com",
+      "approvalScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "missingRequirements": [
+        "Questionnaire / resume complete",
+        "Recruiter assigned",
+        "7 more approval score points needed (current 83, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "exactBlockerPreventingAutoApproved": "Approval score 83 is below AUTO_APPROVED threshold 90.",
+      "blockerCategory": "policy_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": true,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+      ]
+    },
+    {
+      "candidateId": "a364ab16b68e",
+      "candidateName": "Kaelin Prusa",
+      "email": "kaelinem@gmail.com",
+      "approvalScore": 83,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 7,
+      "missingRequirements": [
+        "Questionnaire / resume complete",
+        "Recruiter assigned",
+        "7 more approval score points needed (current 83, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "exactBlockerPreventingAutoApproved": "Approval score 83 is below AUTO_APPROVED threshold 90.",
+      "blockerCategory": "policy_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": true,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+      ]
+    },
+    {
+      "candidateId": "cde8b040e7a4",
+      "candidateName": "Marshall Woods",
+      "email": "marshallbw19701@outlook.com",
+      "approvalScore": 82,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 8,
+      "missingRequirements": [
+        "Questionnaire / resume complete",
+        "Recruiter assigned",
+        "8 more approval score points needed (current 82, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "exactBlockerPreventingAutoApproved": "Approval score 82 is below AUTO_APPROVED threshold 90.",
+      "blockerCategory": "policy_issue",
+      "mappingConfidence": 84,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": true,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+      ]
+    },
+    {
+      "candidateId": "bfd12572f3e5",
+      "candidateName": "Taryn Richardson",
+      "email": "tarynrichardson816@gmail.com",
+      "approvalScore": 81,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 9,
+      "missingRequirements": [
+        "Questionnaire / resume complete",
+        "Recruiter assigned",
+        "9 more approval score points needed (current 81, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "exactBlockerPreventingAutoApproved": "Approval score 81 is below AUTO_APPROVED threshold 90.",
+      "blockerCategory": "policy_issue",
+      "mappingConfidence": 84,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": true,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+      ]
+    },
+    {
+      "candidateId": "8fba13c8cf25",
+      "candidateName": "Katherine Duke",
+      "email": "dukekt928@yahoo.com",
+      "approvalScore": 80,
+      "currentDecision": "NEEDS_HUMAN_APPROVAL",
+      "scoreGapToAutoApprove": 10,
+      "missingRequirements": [
+        "Questionnaire / resume complete",
+        "Recruiter assigned",
+        "10 more approval score points needed (current 80, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Candidate is recoverable but not safe for autonomous send"
+      ],
+      "exactBlockerPreventingAutoApproved": "Approval score 80 is below AUTO_APPROVED threshold 90.",
+      "blockerCategory": "policy_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": true,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+      ]
+    },
+    {
+      "candidateId": "9cdc414f3b49",
+      "candidateName": "Michele Neely Mackey",
+      "email": "michelemackey@verizon.net",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "f786bc64011a",
+      "candidateName": "Anna Mbah",
+      "email": "jossyen3@mailmessage.co",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "86da01f7739b",
+      "candidateName": "Aaleah MacRoberts",
+      "email": "bshraderluvsjenna@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "9f9d978c7e71",
+      "candidateName": "Elizabeth Dorantes",
+      "email": "doranteselizabeth7878@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "334a0e2bcb6c",
+      "candidateName": "Ronald Van Heest",
+      "email": "rronster@aol.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "0957e544ac35",
+      "candidateName": "Cherokee Smith",
+      "email": "smithcherokee25@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "6ed1875bcd15",
+      "candidateName": "Erika Lynnsey Afton",
+      "email": "erikaafton91@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "e759c9d49bf8",
+      "candidateName": "Natasha Sharber",
+      "email": "mickeyunc2007@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "9921cca9ccbd",
+      "candidateName": "Kristin Wright",
+      "email": "kristinwilson93@yahoo.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "8ec5f7b7371f",
+      "candidateName": "Rhonna Eastman",
+      "email": "eastmanrhonna1980@outlook.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "36f4e45c3d3d",
+      "candidateName": "Stephanie Rae Gilham",
+      "email": "sgilham87@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "9ef7bf235ee9",
+      "candidateName": "Shaimeik Bell",
+      "email": "lilmeik34@icloud.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "c11707fe5c35",
+      "candidateName": "Ashley Martin",
+      "email": "ashley.martin215@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "1158b78ee219",
+      "candidateName": "John Klier",
+      "email": "snackpshr@aol.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "91f84eae7546",
+      "candidateName": "Jessica Walls",
+      "email": "jessicawalls2025@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "1ec650f8e1d9",
+      "candidateName": "kaiir bazemore",
+      "email": "morejah032@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "d021d8262ef6",
+      "candidateName": "Jenifer Yost",
+      "email": "yostjenifer1973@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "86ea44c3d95a",
+      "candidateName": "Steven Leroy Langston",
+      "email": "slangston@mindspring.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "a02931877eec",
+      "candidateName": "Cynthia Spikings",
+      "email": "cynde88@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "b1740d65c661",
+      "candidateName": "Dominque Barksdale",
+      "email": "zymara1415@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "911157c289ae",
+      "candidateName": "Clearence Hayes",
+      "email": "hayesclarence839@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "8d0a9d872b68",
+      "candidateName": "Destaney Stevens",
+      "email": "destaneystevens@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "3fb0c007171d",
+      "candidateName": "Emily Howard",
+      "email": "corbinemily@icloud.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "68015bc9a375",
+      "candidateName": "Tammie Bowers",
+      "email": "tajbowers7@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "0ed8fd3b95f3",
+      "candidateName": "Jennifer L Wolbach",
+      "email": "jlwolbach@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "b21a84af7c29",
+      "candidateName": "Brittany Musgrave",
+      "email": "brittanychurch444@gmail.com",
+      "approvalScore": 73,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 17,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "17 more approval score points needed (current 73, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "13fbb0f37a68",
+      "candidateName": "Tariah Hardy",
+      "email": "tariah.monea@icloud.com",
+      "approvalScore": 72,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 18,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "18 more approval score points needed (current 72, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "2f5f144c00c8",
+      "candidateName": "Brandi bratcher",
+      "email": "brandynelson977@gmail.com",
+      "approvalScore": 72,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 18,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "18 more approval score points needed (current 72, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "39ddf56edc32",
+      "candidateName": "Terri Calvert",
+      "email": "terri.hasty@gmail.com",
+      "approvalScore": 72,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 18,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "18 more approval score points needed (current 72, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "4b54714e9aa9",
+      "candidateName": "Thomas Coleman",
+      "email": "kakaeyam59@gmail.com",
+      "approvalScore": 72,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 18,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "18 more approval score points needed (current 72, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "de921c6e199b",
+      "candidateName": "Jackie Hewitt",
+      "email": "jackiehewittjr80@gmail.com",
+      "approvalScore": 72,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 18,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "18 more approval score points needed (current 72, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "570d0e5c132e",
+      "candidateName": "Kimberly Applegarth",
+      "email": "applegarthkimberly41@gmail.com",
+      "approvalScore": 72,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 18,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "18 more approval score points needed (current 72, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "d65e154f9c69",
+      "candidateName": "Connie Cheryl Munn",
+      "email": "cmunn28@yahoo.com",
+      "approvalScore": 71,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 19,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "19 more approval score points needed (current 71, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "a0e30984a18d",
+      "candidateName": "joshua nicholas",
+      "email": "jnicks1985@atomicmail.io",
+      "approvalScore": 71,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 19,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "19 more approval score points needed (current 71, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "7492888812c6",
+      "candidateName": "Darian Taylor Jr.",
+      "email": "flaminghotcheetos6599@gmail.com",
+      "approvalScore": 71,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 19,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "19 more approval score points needed (current 71, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "9f3d9246a0c9",
+      "candidateName": "Ricarunia Harris",
+      "email": "ricarunia03@icloud.com",
+      "approvalScore": 70,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 20,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "20 more approval score points needed (current 70, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "39ddfcf9c54e",
+      "candidateName": "Elizabeth Torrence",
+      "email": "bethtorrence27@hotmail.com",
+      "approvalScore": 70,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 20,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "20 more approval score points needed (current 70, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "3f9d1b44cf80",
+      "candidateName": "Payton Terry",
+      "email": "paytonterry5@gmail.com",
+      "approvalScore": 70,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 20,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "20 more approval score points needed (current 70, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "d39f8bc6193e",
+      "candidateName": "Steven Robbins",
+      "email": "kingcolerobbins@gmail.com",
+      "approvalScore": 70,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 20,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "20 more approval score points needed (current 70, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "2a08788045da",
+      "candidateName": "Erin Henry",
+      "email": "erinohenry@gmail.com",
+      "approvalScore": 70,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 20,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "20 more approval score points needed (current 70, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    },
+    {
+      "candidateId": "fb097ec4a1d6",
+      "candidateName": "Rashekee Grimes",
+      "email": "dabigrg@hotmail.com",
+      "approvalScore": 70,
+      "currentDecision": "BLOCKED",
+      "scoreGapToAutoApprove": 20,
+      "missingRequirements": [
+        "Published native job or approved P109 mapping that qualifies",
+        "Recruiter assigned",
+        "20 more approval score points needed (current 70, threshold 90)"
+      ],
+      "failedSafetyChecks": [],
+      "humanReviewReasons": [
+        "Requires published job or approved mapping"
+      ],
+      "exactBlockerPreventingAutoApproved": "Missing approved mapping or native active project.",
+      "blockerCategory": "mapping_issue",
+      "mappingConfidence": 80,
+      "nativePublishedJob": false,
+      "approvedMappingQualifies": false,
+      "eligibilityStatus": "NO_PROJECT",
+      "remediationSteps": [
+        "Publish a native Breezy job for the candidate's position OR complete P109 mapping review approval.",
+        "Re-run P110 approved-mapping dry-run to confirm overlay eligibility."
+      ]
+    }
+  ],
+  "topBlockers": [
+    {
+      "reason": "Missing approved mapping or native active project.",
+      "count": 41,
+      "category": "mapping_issue"
+    },
+    {
+      "reason": "Approval score 83 is below AUTO_APPROVED threshold 90.",
+      "count": 3,
+      "category": "policy_issue"
+    },
+    {
+      "reason": "Approval score 82 is below AUTO_APPROVED threshold 90.",
+      "count": 1,
+      "category": "policy_issue"
+    },
+    {
+      "reason": "Approval score 81 is below AUTO_APPROVED threshold 90.",
+      "count": 1,
+      "category": "policy_issue"
+    },
+    {
+      "reason": "Approval score 80 is below AUTO_APPROVED threshold 90.",
+      "count": 1,
+      "category": "policy_issue"
+    }
+  ],
+  "policyFindings": {
+    "isPolicyTooStrict": false,
+    "scoreOnlyBlockedCount": 5,
+    "demotedDespiteHighScoreCount": 0,
+    "wouldAutoApproveAtThreshold80": 6,
+    "primaryPolicyFriction": [
+      "autoApproveThreshold=90",
+      "mapping confidence < 80% demotes AUTO_APPROVED to NEEDS_HUMAN_APPROVAL",
+      "READY_AFTER_APPROVAL requires human sign-off",
+      "requireApprovedMappingOrNativeProject=true"
+    ],
+    "conclusion": "Zero AUTO_APPROVED is primarily a mapping/project data issue, not threshold alone."
+  },
+  "dataQualityFindings": {
+    "missingEmailCount": 0,
+    "missingTemplateCount": 0,
+    "missingQuestionnaireCount": 6,
+    "unassignedRecruiterCount": 47,
+    "primaryDataGaps": [
+      "6 near-ready missing questionnaire",
+      "47 near-ready without recruiter",
+      "41 near-ready blocked by mapping/project"
+    ],
+    "conclusion": "Candidate project/mapping linkage is the dominant data quality gap for near-ready cohort."
+  },
+  "safestPathToFirstAutoApproved": {
+    "candidateId": "92fa58cc5870",
+    "candidateName": "Tyree nicole Gilley",
+    "currentScore": 83,
+    "steps": [
+      "Improve candidate data completeness to gain 7+ approval score points, OR review whether autoApproveThreshold=90 is appropriate for pilot."
+    ],
+    "estimatedEffort": "medium"
+  },
+  "goNoGo": "NO-GO",
+  "goNoGoReason": "Majority of near-ready candidates blocked by mapping/project gaps — fix data before policy changes.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}

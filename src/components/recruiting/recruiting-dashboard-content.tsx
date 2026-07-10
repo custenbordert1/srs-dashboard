@@ -31,16 +31,17 @@ import {
   LazyPlacementCommandCenterPanel,
   LazyApprovalQueueCommandCenterPanel,
   LazyRecruiterCommandCenterPanel,
+  LazyRecruitingExceptionQueuePanel,
+  LazyLifecycleExceptionQueuePanel,
+  LazyWorkforceIntelligencePanel,
 } from "./dashboard-tab-panels";
 import { RecruitingTabSourceBanner } from "./recruiting-tab-source-banner";
 import {
   DashboardTabNav,
   type DashboardTabId,
 } from "./dashboard-tabs";
-import {
-  getDefaultDashboardTab,
-  isDashboardTabId,
-} from "@/lib/recruiting-tab-groups";
+import { normalizeDashboardTabParam } from "@/lib/p121-executive-page-loading-navigation-fix";
+import { getDefaultDashboardTab } from "@/lib/recruiting-tab-groups";
 import type { UserRole } from "@/lib/auth/types";
 import { NewHireMetrics } from "./new-hire-metrics";
 import { RecruitingTrendsChart } from "./recruiting-trends-chart";
@@ -95,8 +96,8 @@ export function RecruitingDashboardContent({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const tab = new URLSearchParams(window.location.search).get("tab");
-    if (!tab || !isDashboardTabId(tab)) return;
+    const tab = normalizeDashboardTabParam(new URLSearchParams(window.location.search).get("tab"));
+    if (!tab) return;
     setActiveTab(tab);
   }, []);
 
@@ -127,6 +128,8 @@ export function RecruitingDashboardContent({
 
         <DashboardTabPanel tabId="recruiter-command-center" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="recruiter-command-center">
+            <LazyRecruitingExceptionQueuePanel />
+            <LazyLifecycleExceptionQueuePanel />
             <LazyRecruiterCommandCenterPanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
@@ -225,6 +228,12 @@ export function RecruitingDashboardContent({
         <DashboardTabPanel tabId="pipeline-intelligence" activeTab={activeTab}>
           <TabPanelWithSourceBanner tabId="pipeline-intelligence">
             <LazyPipelineIntelligencePanel />
+          </TabPanelWithSourceBanner>
+        </DashboardTabPanel>
+
+        <DashboardTabPanel tabId="workforce-intelligence" activeTab={activeTab}>
+          <TabPanelWithSourceBanner tabId="workforce-intelligence">
+            <LazyWorkforceIntelligencePanel />
           </TabPanelWithSourceBanner>
         </DashboardTabPanel>
 

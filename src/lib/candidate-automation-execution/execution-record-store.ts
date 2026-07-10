@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { CandidateExecutionRecord } from "@/lib/candidate-automation-execution/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_RECORDS = 500;
 
@@ -29,7 +29,7 @@ async function readRecordsFile(): Promise<RecordsStoreFile> {
 }
 
 async function writeRecordsFile(file: RecordsStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(recordsPath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 

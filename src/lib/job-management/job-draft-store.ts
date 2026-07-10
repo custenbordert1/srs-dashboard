@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
 import type { JobDraft, JobPushAuditEntry } from "@/lib/job-management/job-draft-types";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 function draftsPath(): string {
   return path.join(recruitingDataDir(), "job-drafts.json");
@@ -31,7 +31,7 @@ async function readDrafts(): Promise<JobDraftStoreFile> {
 }
 
 async function writeDrafts(file: JobDraftStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(draftsPath(), JSON.stringify(file, null, 2), "utf8");
 }
 
@@ -134,6 +134,6 @@ export async function deleteJobDraft(id: string): Promise<boolean> {
 }
 
 export async function appendJobPushAudit(entry: JobPushAuditEntry): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await appendFile(pushAuditPath(), `${JSON.stringify(entry)}\n`, "utf8");
 }

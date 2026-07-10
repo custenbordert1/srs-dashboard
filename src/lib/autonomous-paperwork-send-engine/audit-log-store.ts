@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { PaperworkSendAuditEvent } from "@/lib/autonomous-paperwork-send-engine/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_AUDIT_EVENTS = 500;
 
@@ -30,7 +30,7 @@ export async function appendPaperworkSendAuditEvent(
   const existing = await loadPaperworkSendAuditLog();
   const events = [event, ...existing].slice(0, MAX_AUDIT_EVENTS);
   const now = new Date().toISOString();
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(auditPath(), `${JSON.stringify({ events, updatedAt: now }, null, 2)}\n`, "utf8");
   return events;
 }

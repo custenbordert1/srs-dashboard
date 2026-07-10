@@ -1,0 +1,234 @@
+{
+  "sourcePhase": "P128",
+  "generatedAt": "2026-07-01T19:54:25.605Z",
+  "mode": "previewOnly",
+  "p127Summary": {
+    "totalCandidatesEvaluated": 382,
+    "autoApproved": 0,
+    "humanApproval": 6,
+    "blocked": 41
+  },
+  "selectedCandidate": {
+    "candidateId": "92fa58cc5870",
+    "candidateName": "Tyree nicole Gilley",
+    "email": "tyreenicolegilley932@gmail.com",
+    "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+    "approvalScore": 83,
+    "eligibilityStatus": "NO_PROJECT",
+    "positionTitle": "93ebc05539b8",
+    "projectLabel": "93ebc05539b8",
+    "mappingSource": "approved_mapping",
+    "templateKey": "onboarding_packet",
+    "selectionRank": 613,
+    "selectionReason": "Highest-ranked candidate closest to AUTO_APPROVED (preview allowlist simulation).",
+    "confirmations": {
+      "validEmail": true,
+      "noDuplicateRisk": true,
+      "noAlreadySent": true,
+      "publishedJobOrApprovedMapping": false,
+      "templateAvailable": true
+    }
+  },
+  "backupCandidates": [
+    {
+      "candidateId": "7c37beb6ac48",
+      "candidateName": "Angelique Cowan",
+      "email": "angelcowan12345@gmail.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 83,
+      "eligibilityStatus": "NO_PROJECT",
+      "positionTitle": "a707da4f2564",
+      "projectLabel": "a707da4f2564",
+      "mappingSource": "approved_mapping",
+      "templateKey": "onboarding_packet",
+      "selectionRank": 613,
+      "selectionReason": "Backup #1 — rank 613.",
+      "confirmations": {
+        "validEmail": true,
+        "noDuplicateRisk": true,
+        "noAlreadySent": true,
+        "publishedJobOrApprovedMapping": false,
+        "templateAvailable": true
+      }
+    },
+    {
+      "candidateId": "a364ab16b68e",
+      "candidateName": "Kaelin Prusa",
+      "email": "kaelinem@gmail.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 83,
+      "eligibilityStatus": "NO_PROJECT",
+      "positionTitle": "a707da4f2564",
+      "projectLabel": "a707da4f2564",
+      "mappingSource": "approved_mapping",
+      "templateKey": "onboarding_packet",
+      "selectionRank": 613,
+      "selectionReason": "Backup #2 — rank 613.",
+      "confirmations": {
+        "validEmail": true,
+        "noDuplicateRisk": true,
+        "noAlreadySent": true,
+        "publishedJobOrApprovedMapping": false,
+        "templateAvailable": true
+      }
+    },
+    {
+      "candidateId": "cde8b040e7a4",
+      "candidateName": "Marshall Woods",
+      "email": "marshallbw19701@outlook.com",
+      "approvalDecision": "NEEDS_HUMAN_APPROVAL",
+      "approvalScore": 82,
+      "eligibilityStatus": "NO_PROJECT",
+      "positionTitle": "07c1de432ea6",
+      "projectLabel": "07c1de432ea6",
+      "mappingSource": "approved_mapping",
+      "templateKey": "onboarding_packet",
+      "selectionRank": 612,
+      "selectionReason": "Backup #3 — rank 612.",
+      "confirmations": {
+        "validEmail": true,
+        "noDuplicateRisk": true,
+        "noAlreadySent": true,
+        "publishedJobOrApprovedMapping": false,
+        "templateAvailable": true
+      }
+    }
+  ],
+  "safetyChecks": [
+    {
+      "id": "pilot_enabled",
+      "label": "Live pilot enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true"
+    },
+    {
+      "id": "live_mode_enabled",
+      "label": "Live mode enabled",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_LIVE_MODE=true"
+    },
+    {
+      "id": "operator_go",
+      "label": "Operator GO",
+      "passed": false,
+      "detail": "Set AUTONOMOUS_PAPERWORK_OPERATOR_GO=true"
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    },
+    {
+      "id": "dry_run_false",
+      "label": "dryRun is false",
+      "passed": false,
+      "detail": "Execution blocked — dryRun default prevents sends."
+    },
+    {
+      "id": "confirmation_phrase",
+      "label": "Confirmation phrase",
+      "passed": true,
+      "detail": "Not required for preview/dry-run."
+    },
+    {
+      "id": "on_allowlist",
+      "label": "Pilot allowlist",
+      "passed": true,
+      "detail": "Candidate is on pilot allowlist."
+    },
+    {
+      "id": "not_already_sent",
+      "label": "No already_sent record",
+      "passed": true,
+      "detail": "No prior send detected."
+    },
+    {
+      "id": "no_duplicate_risk",
+      "label": "No duplicate_risk",
+      "passed": true,
+      "detail": "Duplicate protection clear."
+    },
+    {
+      "id": "valid_email",
+      "label": "Valid email",
+      "passed": true,
+      "detail": "Email: tyreenicolegilley932@gmail.com"
+    },
+    {
+      "id": "approved_mapping_or_native_project",
+      "label": "Approved mapping or native project",
+      "passed": false,
+      "detail": "Requires native published job or approved mapping."
+    },
+    {
+      "id": "pilot_cap_available",
+      "label": "Pilot cap available",
+      "passed": true,
+      "detail": "0/1 pilot sends used."
+    }
+  ],
+  "sendPacketPreview": {
+    "candidateId": "92fa58cc5870",
+    "candidateName": "Tyree nicole Gilley",
+    "candidateEmail": "tyreenicolegilley932@gmail.com",
+    "jobOrProject": "93ebc05539b8",
+    "paperworkTemplate": "onboarding_packet",
+    "safetyChecks": [
+      {
+        "id": "on_allowlist",
+        "label": "Pilot allowlist",
+        "passed": true,
+        "detail": "Candidate is on pilot allowlist."
+      },
+      {
+        "id": "not_already_sent",
+        "label": "No already_sent record",
+        "passed": true,
+        "detail": "No prior send detected."
+      },
+      {
+        "id": "no_duplicate_risk",
+        "label": "No duplicate_risk",
+        "passed": true,
+        "detail": "Duplicate protection clear."
+      },
+      {
+        "id": "valid_email",
+        "label": "Valid email",
+        "passed": true,
+        "detail": "Email: tyreenicolegilley932@gmail.com"
+      },
+      {
+        "id": "approved_mapping_or_native_project",
+        "label": "Approved mapping or native project",
+        "passed": false,
+        "detail": "Requires native published job or approved mapping."
+      },
+      {
+        "id": "pilot_cap_available",
+        "label": "Pilot cap available",
+        "passed": true,
+        "detail": "0/1 pilot sends used."
+      }
+    ],
+    "auditDestination": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl"
+  },
+  "auditPath": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl",
+  "exactEnvVarsNeeded": {
+    "AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED": "true",
+    "AUTONOMOUS_PAPERWORK_LIVE_MODE": "true",
+    "AUTONOMOUS_PAPERWORK_OPERATOR_GO": "true",
+    "AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST": "92fa58cc5870",
+    "AUTONOMOUS_PAPERWORK_PILOT_MAX_SENDS": "1"
+  },
+  "allowlistCommand": "export AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST=\"92fa58cc5870\"",
+  "finalLiveCommand": "npx tsx scripts/p122-controlled-live-paperwork-pilot.ts --execute --confirm \"SEND 1 PAPERWORK PACKET\" --candidate-id 92fa58cc5870",
+  "goNoGo": "NO-GO",
+  "goNoGoReason": "Selected candidate fails one or more candidate-level safety checks.",
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false,
+  "continuousRunnerEnabled": false
+}

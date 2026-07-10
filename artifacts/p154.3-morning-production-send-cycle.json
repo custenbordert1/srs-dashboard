@@ -1,0 +1,278 @@
+{
+  "sourcePhase": "P154.3",
+  "generatedAt": "2026-07-07T12:16:55.248Z",
+  "health": {
+    "generatedAt": "2026-07-07T12:16:55.248Z",
+    "overallStatus": "healthy",
+    "healthy": true,
+    "checks": [
+      {
+        "id": "breezy_api",
+        "label": "Breezy API",
+        "status": "healthy",
+        "detail": "Breezy API reachable (194 published jobs)."
+      },
+      {
+        "id": "dropbox_sign_api",
+        "label": "Dropbox Sign API",
+        "status": "healthy",
+        "detail": "DROPBOX_SIGN_API_KEY configured."
+      },
+      {
+        "id": "workflow_store",
+        "label": "Workflow store",
+        "status": "healthy",
+        "detail": "Workflow store readable (487 records)."
+      },
+      {
+        "id": "candidate_ingestion",
+        "label": "Candidate ingestion",
+        "status": "healthy",
+        "detail": "Ingestion store fresh (159 positions scanned)."
+      },
+      {
+        "id": "recruiter_assignment_engine",
+        "label": "Recruiter assignment engine",
+        "status": "healthy",
+        "detail": "10 canonical recruiters configured."
+      },
+      {
+        "id": "webhook_listener",
+        "label": "Webhook listeners",
+        "status": "healthy",
+        "detail": "Dropbox Sign webhook route registered at /api/dropbox-sign/webhook (passive listener)."
+      },
+      {
+        "id": "audit_logging",
+        "label": "Audit logging",
+        "status": "healthy",
+        "detail": "Audit stores readable (P145: 41, P151: 106 events)."
+      }
+    ],
+    "abortReason": null
+  },
+  "ingestion": {
+    "ok": true,
+    "totalCandidates": 491,
+    "newCandidates": 9,
+    "positionsScannedThisRun": 17,
+    "cycleComplete": true,
+    "error": null
+  },
+  "preSendAudit": {
+    "yesterdaySendCount": 10,
+    "yesterdaySendEvents": [
+      {
+        "candidateId": "147205637f24",
+        "candidateName": "Dezire Nelson",
+        "at": "2026-07-06T20:55:02.117Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "87ea6e6dca24",
+        "candidateName": "Deborah Thomas",
+        "at": "2026-07-06T20:55:00.794Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "6acc0966d96a",
+        "candidateName": "DAWN GARRISON",
+        "at": "2026-07-06T20:55:00.057Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "05a9c4c35ece",
+        "candidateName": "David Gonzalez",
+        "at": "2026-07-06T20:54:59.259Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "aaa55717777d",
+        "candidateName": "Chirumamilla Praneetha",
+        "at": "2026-07-06T20:54:58.440Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "a4792ee6051e",
+        "candidateName": "Charles Kennedy",
+        "at": "2026-07-06T20:54:57.724Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "5eaf40cd58c1",
+        "candidateName": "Catherine Henry",
+        "at": "2026-07-06T20:54:57.006Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "c87b5e655cc6",
+        "candidateName": "Brittneyrodgers201@gmail.com 6 Rodgers",
+        "at": "2026-07-06T20:54:56.290Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "2929aebfd380",
+        "candidateName": "Bhavin Patel",
+        "at": "2026-07-06T20:54:55.512Z",
+        "signatureRequestId": null
+      },
+      {
+        "candidateId": "524e8ac69b59",
+        "candidateName": "Antwon Scott",
+        "at": "2026-07-06T20:54:54.083Z",
+        "signatureRequestId": null
+      }
+    ],
+    "activeSignatures": 41,
+    "completedSignatures": 1,
+    "duplicateChecks": [
+      {
+        "candidateId": "147205637f24",
+        "candidateName": "Dezire Nelson",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "5f8f54daa6e1df06ae6a42b9c115e619ca178738"
+      },
+      {
+        "candidateId": "87ea6e6dca24",
+        "candidateName": "Deborah Thomas",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "6cb8cc83675d110a33a38415c09fb87c3d6bac97"
+      },
+      {
+        "candidateId": "6acc0966d96a",
+        "candidateName": "DAWN GARRISON",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "80e8bcd3bc29b0dc22a60d2d505c7cefb736484d"
+      },
+      {
+        "candidateId": "05a9c4c35ece",
+        "candidateName": "David Gonzalez",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "d867c3802c5330a0aa896e2d144bb8adea10ba96"
+      },
+      {
+        "candidateId": "aaa55717777d",
+        "candidateName": "Chirumamilla Praneetha",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "fc2ac195ab744ef4e7c3fdca9068f8bcb915547e"
+      },
+      {
+        "candidateId": "a4792ee6051e",
+        "candidateName": "Charles Kennedy",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "9397bd3ed135ae2dc08ddc859d733859b8dda7d2"
+      },
+      {
+        "candidateId": "5eaf40cd58c1",
+        "candidateName": "Catherine Henry",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "d504a1addf5937d832b398b04e720a1a5ef0fef3"
+      },
+      {
+        "candidateId": "c87b5e655cc6",
+        "candidateName": "Brittneyrodgers201@gmail.com 6 Rodgers",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "65caf73838626e601f33039cd26710ac77024581"
+      },
+      {
+        "candidateId": "2929aebfd380",
+        "candidateName": "Bhavin Patel",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "4d353aae663ca50ed94538fea5971c55b572e41d"
+      },
+      {
+        "candidateId": "524e8ac69b59",
+        "candidateName": "Antwon Scott",
+        "wouldBlock": true,
+        "reason": "Packet already sent — awaiting signature.",
+        "paperworkStatus": "sent",
+        "signatureRequestId": "07f1e085566a52ac8cb402503269399374c6201a"
+      }
+    ],
+    "allYesterdayWouldBeBlocked": true
+  },
+  "cycle": {
+    "dryRun": false,
+    "autopilotEnabled": true,
+    "paused": false,
+    "candidatesEvaluated": 491,
+    "recruitersAssigned": 25,
+    "paperworkSent": 10,
+    "paperworkSkipped": 0,
+    "duplicatesPrevented": 0,
+    "failures": 0,
+    "queueRemaining": 71,
+    "executionTimeMs": 25339,
+    "stoppedOnError": false,
+    "capReachedAssignments": true,
+    "capReachedSends": true
+  },
+  "dashboard": {
+    "candidatesEvaluated": 491,
+    "recruitersAssigned": 25,
+    "paperworkSent": 10,
+    "paperworkCompleted": 1,
+    "paperworkSkipped": 0,
+    "duplicatesPrevented": 0,
+    "failures": 0,
+    "webhookCompletions": 0,
+    "averageProcessingTimeMs": 25339,
+    "queueDepth": 71,
+    "lastSuccessfulCycleAt": "2026-07-07T12:18:58.402Z"
+  },
+  "rollbackRecommendation": "Monitor Dropbox Sign and audit logs for 24h before raising P154_MAX_PAPERWORK_SENDS_PER_CYCLE.",
+  "autopilotState": {
+    "version": "P154.1",
+    "autopilotStatus": "active",
+    "paused": false,
+    "pausedReason": null,
+    "enabledFeatures": {
+      "p151RecruiterAssignment": true,
+      "p152ImmediatePaperwork": true,
+      "freshIngestionRescue": true,
+      "automaticWorkflowAdvancement": true,
+      "webhookCompletionProcessing": true,
+      "duplicatePrevention": true,
+      "continuousIngestion": true
+    },
+    "limits": {
+      "maxRecruiterAssignmentsPerCycle": 25,
+      "maxPaperworkSendsPerCycle": 10
+    },
+    "dashboard": {
+      "candidatesEvaluated": 491,
+      "recruitersAssigned": 25,
+      "paperworkSent": 10,
+      "paperworkCompleted": 1,
+      "paperworkSkipped": 0,
+      "duplicatesPrevented": 0,
+      "failures": 0,
+      "webhookCompletions": 0,
+      "averageProcessingTimeMs": 25339,
+      "queueDepth": 71,
+      "lastSuccessfulCycleAt": "2026-07-07T12:18:58.402Z"
+    },
+    "lastCycleAt": "2026-07-07T12:18:58.402Z",
+    "lastSuccessfulCycleAt": "2026-07-07T12:18:58.402Z",
+    "lastError": null,
+    "updatedAt": "2026-07-07T12:19:23.749Z"
+  }
+}

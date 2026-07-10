@@ -5,7 +5,7 @@ import type {
   OnboardingSendAttemptLog,
   OnboardingSendQueueWorkerState,
 } from "@/lib/candidate-onboarding-send-queue/types";
-import { recruitingDataDir } from "@/lib/recruiting-data-dir";
+import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
 
 const MAX_ATTEMPT_LOGS = 2_000;
 
@@ -44,7 +44,7 @@ async function readStateFile(): Promise<StateStoreFile> {
 }
 
 async function writeStateFile(file: StateStoreFile): Promise<void> {
-  await mkdir(recruitingDataDir(), { recursive: true });
+  await safeRecruitingMkdir();
   await writeFile(statePath(), `${JSON.stringify(file, null, 2)}\n`, "utf8");
 }
 

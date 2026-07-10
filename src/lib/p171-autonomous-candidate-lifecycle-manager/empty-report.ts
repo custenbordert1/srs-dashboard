@@ -1,0 +1,60 @@
+import type { P171LifecycleConsole } from "@/lib/p171-autonomous-candidate-lifecycle-manager/types";
+import { P171_SOURCE_PHASE } from "@/lib/p171-autonomous-candidate-lifecycle-manager/types";
+
+export function emptyP171LifecycleConsole(): P171LifecycleConsole {
+  const now = new Date().toISOString();
+  return {
+    sourcePhase: P171_SOURCE_PHASE,
+    generatedAt: now,
+    readOnly: true,
+    status: "paused",
+    statusLabel: "Paused",
+    enabled: false,
+    paused: true,
+    lastCycle: {
+      at: null,
+      agoLabel: "never",
+      durationMs: null,
+      candidatesProcessed: 0,
+      paperworkSent: 0,
+      remindersSent: 0,
+      exceptions: 0,
+      readyForMel: 0,
+      waitingSignature: 0,
+    },
+    nextCycle: { at: null, inMs: null, inLabel: "—" },
+    metrics: {
+      candidatesProcessedToday: 0,
+      paperworkAutomaticallySent: 0,
+      readyForMel: 0,
+      waitingSignature: 0,
+      averageCompletionTimeMs: null,
+      automationSuccessRate: 0,
+      exceptionRate: 0,
+      recruiterInterventionsSaved: 0,
+      discoveryLatencyMs: null,
+      evaluationLatencyMs: null,
+      paperworkLatencyMs: null,
+      signatureLatencyMs: null,
+      automationPercent: 0,
+      recruiterInterventionPercent: 0,
+    },
+    stateDistribution: [],
+    health: { score: 0, label: "critical" },
+    config: {
+      enabled: false,
+      paused: true,
+      cycleIntervalMs: 15 * 60_000,
+      minimumConfidence: 80,
+      maximumRetries: 3,
+      exceptionThreshold: 25,
+      maxRemindersPerCandidate: 3,
+      reminderHours: [24, 48, 72],
+      readinessThreshold: 80,
+      pauseSchedule: { pausedUntil: null, reason: null },
+      updatedAt: now,
+    },
+    recentCycles: [],
+    warnings: ["Degraded empty lifecycle console"],
+  };
+}

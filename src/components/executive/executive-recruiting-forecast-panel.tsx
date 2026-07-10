@@ -17,6 +17,7 @@ import type {
   ProjectRiskLevel,
   RecommendationPriority,
 } from "@/lib/executive-recruiting-forecast";
+import { ExecutiveApiDegradedState } from "@/components/executive/executive-tab-loading-fallback";
 import { TabSkeleton } from "@/components/ui/tab-skeleton";
 import { useLoadingCeiling, EXECUTIVE_PANEL_LOADING_CEILING_MS } from "@/hooks/use-loading-ceiling";
 
@@ -109,16 +110,12 @@ export function ExecutiveRecruitingForecastPanel() {
   if (loading && !snapshot) {
     if (loadingCeilingHit) {
       return (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-6 text-sm text-amber-100">
-          <p>Forecast data is taking longer than expected.</p>
-          <button
-            type="button"
-            onClick={() => refresh()}
-            className="mt-3 rounded-lg border border-amber-400/40 px-3 py-1.5 text-xs font-medium hover:bg-amber-500/20"
-          >
-            Retry
-          </button>
-        </div>
+        <ExecutiveApiDegradedState
+          source="executive-forecasting"
+          message="Forecast data is taking longer than expected."
+          onRetry={() => refresh()}
+          timedOut
+        />
       );
     }
     return <TabSkeleton message="Loading executive recruiting forecast…" cards={4} rows={4} />;
@@ -126,16 +123,13 @@ export function ExecutiveRecruitingForecastPanel() {
 
   if (error && !snapshot) {
     return (
-      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-6 text-sm text-amber-100">
-        <p>{error}</p>
-        <button
-          type="button"
-          onClick={() => refresh()}
-          className="mt-3 rounded-lg border border-amber-400/40 px-3 py-1.5 text-xs font-medium hover:bg-amber-500/20"
-        >
-          Retry
-        </button>
-      </div>
+      <ExecutiveApiDegradedState
+        source="executive-forecasting"
+        message={error}
+        onRetry={() => refresh()}
+        timedOut={timedOut}
+        showingCachedSnapshot={showingCachedSnapshot}
+      />
     );
   }
 

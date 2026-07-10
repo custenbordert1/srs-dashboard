@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-07-10T17:00:27.786Z",
+  "ready": 677,
+  "blocked": 0,
+  "byMethod": {
+    "default_onboarding_packet": 677
+  },
+  "blockedCandidateIds": []
+}

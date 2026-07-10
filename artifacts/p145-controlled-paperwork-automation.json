@@ -1,0 +1,49 @@
+{
+  "sourcePhase": "P145",
+  "generatedAt": "2026-07-06T15:14:46.017Z",
+  "productionReadiness": {
+    "recommendation": "READY WITH CONDITIONS",
+    "score": 65,
+    "checks": {
+      "queueGenerated": true,
+      "approvalQueueOperational": true,
+      "executiveMetricsPresent": true,
+      "auditLoggingEnabled": true,
+      "noAutomaticExecution": true,
+      "duplicateCooldownEnforced": true,
+      "readOnlyExecutionConfirmed": true
+    }
+  },
+  "validation": {
+    "outstandingPaperworkCount": 0,
+    "initialPaperworkCount": 0,
+    "reminder1Count": 0,
+    "reminder2Count": 0,
+    "manualReviewCount": 0,
+    "averagePaperworkAgeHours": 0,
+    "averageResponseTimeHours": 0,
+    "topProjectsByOutstanding": [],
+    "topRecruitersByWorkload": []
+  },
+  "executive": {
+    "outstandingPaperwork": 0,
+    "readyToSend": 0,
+    "readyForReminder": 0,
+    "waitingOnCandidate": 0,
+    "manualReviewRequired": 0,
+    "averageDaysWaiting": 0,
+    "recruitersWithLargestQueue": [],
+    "projectsWithMostOutstanding": []
+  },
+  "approvalQueueCount": 0,
+  "outstandingPaperwork": 0,
+  "partialSync": true,
+  "safetyConfirmation": {
+    "executeBatchCalled": false,
+    "breezyWrites": false,
+    "paperworkSent": false,
+    "liveModeEnabled": false,
+    "executionEnabled": false,
+    "approvalRequired": true
+  }
+}

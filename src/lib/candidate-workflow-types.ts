@@ -123,7 +123,20 @@ export type CandidateWorkflowBundle = {
   updatedAt: string;
 };
 
-export const DEFAULT_RECRUITER_ROSTER = ["Unassigned", "Taylor", "Recruiting Team"] as const;
+export const DEFAULT_RECRUITER_ROSTER = [
+  "Unassigned",
+  "Taylor",
+  "Alex",
+  "Jordan",
+  "Morgan",
+  "Casey",
+  "Riley",
+  "Sam",
+  "Chris",
+  "Drew",
+  "Logan",
+  "Recruiting Team",
+] as const;
 export const DEFAULT_DM_ROSTER = ["Unassigned", "Field Ops"] as const;
 
 export function defaultRecruiterRosters(): RecruiterRosters {

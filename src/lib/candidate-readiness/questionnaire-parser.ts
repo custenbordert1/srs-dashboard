@@ -44,8 +44,169 @@ const QUESTION_KEY_MAP: Array<{ key: keyof Omit<CandidateQuestionnaireIntelligen
   { key: "printerLaptopAccess", patterns: ["printer", "laptop", "computer access", "home office"] },
   { key: "photoUploadComfort", patterns: ["photo", "upload", "camera", "picture"] },
   { key: "scheduleUnderstanding", patterns: ["schedule", "deadline", "availability window", "understand the schedule"] },
-  { key: "availabilityNotes", patterns: ["availability", "hours available", "when can you work", "days available"] },
+  {
+    key: "availabilityNotes",
+    patterns: [
+      "availability",
+      "hours available",
+      "when can you work",
+      "days available",
+      "transportation",
+      "reliable transportation",
+      "own a vehicle",
+      "valid driver",
+      "driver license",
+      "travel",
+    ],
+  },
 ];
+
+function mergeQuestionnaireAnswerSets(
+  ...sets: CandidateQuestionnaireAnswer[][]
+): CandidateQuestionnaireAnswer[] {
+  const seen = new Map<string, CandidateQuestionnaireAnswer>();
+  for (const set of sets) {
+    for (const answer of set) {
+      const key = answer.normalizedKey || (answer.question ? normalizeKey(answer.question) : "");
+      if (!key && !answer.answer.trim()) continue;
+      const existing = seen.get(key || `answer:${seen.size}`);
+      if (existing && !answer.answer.trim() && existing.answer.trim()) continue;
+      seen.set(key || `answer:${seen.size}`, answer);
+    }
+  }
+  return [...seen.values()];
+}
+
+function extractQuestionText(record: Record<string, unknown>): string {
+  return (
+    stringFromUnknown(record.text) ||
+    stringFromUnknown(record.question) ||
+    stringFromUnknown(record.title) ||
+    stringFromUnknown(record.name) ||
+    stringFromUnknown(record.label) ||
+    stringFromUnknown(record.prompt)
+  );
+}
+
+function extractCheckboxAnswer(record: Record<string, unknown>): string {
+  const responses = record.responses;
+  const options = record.options;
+  if (!Array.isArray(responses) || !Array.isArray(options)) return "";
+
+  const selected: string[] = [];
+  for (let index = 0; index < Math.min(responses.length, options.length); index += 1) {
+    if (responses[index] !== true) continue;
+    const option = asRecord(options[index]);
+    const label =
+      (option && (stringFromUnknown(option.text) || stringFromUnknown(option.label) || stringFromUnknown(option.name))) ||
+      "";
+    if (label) selected.push(label);
+  }
+  return selected.join(", ");
+}
+
+function extractAnswerText(record: Record<string, unknown>): string {
+  const checkboxAnswer = extractCheckboxAnswer(record);
+  if (checkboxAnswer) return checkboxAnswer;
+
+  return (
+    stringFromUnknown(record.answer) ||
+    stringFromUnknown(record.value) ||
+    stringFromUnknown(record.response) ||
+    stringFromUnknown(record.text_value) ||
+    stringFromUnknown(record.selected)
+  );
+}
+
+function extractAnswersFromQuestionRecords(records: unknown[]): CandidateQuestionnaireAnswer[] {
+  const answers: CandidateQuestionnaireAnswer[] = [];
+  for (const entry of records) {
+    const record = asRecord(entry);
+    if (!record) continue;
+    const question = extractQuestionText(record);
+    const answer = extractAnswerText(record);
+    if (!question && !answer) continue;
+    answers.push({
+      question: question || "Question",
+      answer: answer || "",
+      normalizedKey: question ? normalizeKey(question) : undefined,
+    });
+  }
+  return answers;
+}
+
+function collectQuestionRecordsFromQuestionnaire(record: Record<string, unknown>): unknown[] {
+  const records: unknown[] = [];
+  const sections = record.sections;
+  if (Array.isArray(sections)) {
+    for (const section of sections) {
+      const sectionRecord = asRecord(section);
+      if (!sectionRecord) continue;
+      const questions = sectionRecord.questions;
+      if (Array.isArray(questions)) records.push(...questions);
+    }
+  }
+  for (const key of ["questions", "responses", "answers", "items", "fields"]) {
+    const section = record[key];
+    if (Array.isArray(section)) records.push(...section);
+  }
+  return records;
+}
+
+/** Parse Breezy `/candidate/:id/questionnaires` payload into normalized answers. */
+export function extractQuestionnaireAnswersFromBreezyQuestionnaires(
+  data: unknown,
+): CandidateQuestionnaireAnswer[] {
+  if (!Array.isArray(data)) return [];
+  const answers: CandidateQuestionnaireAnswer[] = [];
+  for (const questionnaire of data) {
+    const record = asRecord(questionnaire);
+    if (!record) continue;
+    answers.push(...extractAnswersFromQuestionRecords(collectQuestionRecordsFromQuestionnaire(record)));
+  }
+  return answers;
+}
+
+/** Parse Breezy `/candidate/:id/custom-fields` payload into normalized answers. */
+export function extractQuestionnaireAnswersFromBreezyCustomFields(
+  data: unknown,
+): CandidateQuestionnaireAnswer[] {
+  if (!Array.isArray(data)) return [];
+  return extractAnswersFromQuestionRecords(
+    data.map((entry) => {
+      const record = asRecord(entry);
+      if (!record) return entry;
+      return {
+        name: record.name ?? record.label ?? record.question ?? record.title,
+        value: record.value ?? record.answer ?? record.response ?? record.text,
+      };
+    }),
+  );
+}
+
+/** Combine questionnaire answers from Breezy detail, questionnaires, and custom-fields payloads. */
+export function buildQuestionnaireAnswersFromEnrichmentPayload(payload: {
+  detail?: Record<string, unknown> | null;
+  questionnaires?: unknown;
+  customFields?: unknown;
+}): CandidateQuestionnaireAnswer[] {
+  const fromDetail = payload.detail ? extractQuestionnaireAnswersFromRaw(payload.detail) : [];
+  const fromQuestionnaires = extractQuestionnaireAnswersFromBreezyQuestionnaires(payload.questionnaires);
+  const fromCustomFields = extractQuestionnaireAnswersFromBreezyCustomFields(payload.customFields);
+  return mergeQuestionnaireAnswerSets(fromDetail, fromQuestionnaires, fromCustomFields);
+}
+
+export function applyQuestionnaireAnswersToCandidate(
+  candidate: BreezyCandidate,
+  answers: CandidateQuestionnaireAnswer[],
+): BreezyCandidate {
+  if (answers.length === 0) return candidate;
+  return {
+    ...candidate,
+    questionnaireAnswers: answers,
+    hasQuestionnaire: true,
+  };
+}
 
 /** Extract normalized questionnaire answers from raw Breezy payload at sync time. */
 export function extractQuestionnaireAnswersFromRaw(
@@ -58,8 +219,11 @@ export function extractQuestionnaireAnswersFromRaw(
     for (const entry of customAttributes) {
       const record = asRecord(entry);
       if (!record) continue;
-      const question = stringFromUnknown(record.name) || stringFromUnknown(record.label) || stringFromUnknown(record.question);
-      const answer = stringFromUnknown(record.value) || stringFromUnknown(record.answer);
+      const question =
+        extractQuestionText(record) ||
+        stringFromUnknown(record.name) ||
+        stringFromUnknown(record.label);
+      const answer = extractAnswerText(record) || stringFromUnknown(record.value);
       if (!question && !answer) continue;
       answers.push({
         question: question || "Custom attribute",
@@ -69,27 +233,14 @@ export function extractQuestionnaireAnswersFromRaw(
     }
   }
 
-  const screeningQuestions = raw.screening_questions ?? raw.questionnaire ?? raw.application_questions;
+  const questionnaireDetail = raw.questionnaire;
+  if (Array.isArray(questionnaireDetail)) {
+    answers.push(...extractAnswersFromQuestionRecords(questionnaireDetail));
+  }
+
+  const screeningQuestions = raw.screening_questions ?? raw.application_questions;
   if (Array.isArray(screeningQuestions)) {
-    for (const entry of screeningQuestions) {
-      const record = asRecord(entry);
-      if (!record) continue;
-      const question =
-        stringFromUnknown(record.question) ||
-        stringFromUnknown(record.name) ||
-        stringFromUnknown(record.label) ||
-        stringFromUnknown(record.title);
-      const answer =
-        stringFromUnknown(record.answer) ||
-        stringFromUnknown(record.value) ||
-        stringFromUnknown(record.response);
-      if (!question && !answer) continue;
-      answers.push({
-        question: question || "Screening question",
-        answer: answer || "",
-        normalizedKey: question ? normalizeKey(question) : undefined,
-      });
-    }
+    answers.push(...extractAnswersFromQuestionRecords(screeningQuestions));
   }
 
   return answers;

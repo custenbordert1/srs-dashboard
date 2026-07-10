@@ -1,0 +1,71 @@
+{
+  "sourcePhase": "P138",
+  "generatedAt": "2026-07-02T16:09:03.619Z",
+  "mode": "observeOnly",
+  "candidate": {
+    "candidateId": "unknown",
+    "candidateName": "—",
+    "email": "",
+    "signatureRequestId": null,
+    "sentAt": null
+  },
+  "verificationChecklist": [
+    {
+      "id": "pilot_send_recorded",
+      "label": "Pilot send recorded in registry",
+      "passed": false,
+      "detail": "No pilot send found — executeOne has not completed successfully."
+    }
+  ],
+  "auditVerification": {
+    "found": false,
+    "outcome": null,
+    "mode": null,
+    "at": null,
+    "auditPath": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/p100-controlled-live-send-audit.jsonl"
+  },
+  "duplicateVerification": {
+    "inP100SentState": false,
+    "inPilotRegistry": false,
+    "pilotCapExhausted": false,
+    "wouldBlockResend": false,
+    "detail": "No pilot send to verify."
+  },
+  "safetyLockStatus": {
+    "applied": false,
+    "pilotComplete": false,
+    "livePilotDisabled": false,
+    "operatorGoCleared": false,
+    "allowlistCleared": false,
+    "executeOneBlocked": false,
+    "lockedAt": null,
+    "lockedCandidateId": null,
+    "requiredEnvLockdown": {
+      "AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED": "false",
+      "AUTONOMOUS_PAPERWORK_LIVE_MODE": "false",
+      "AUTONOMOUS_PAPERWORK_OPERATOR_GO": "false",
+      "AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST": "",
+      "AUTONOMOUS_PAPERWORK_PILOT_MAX_SENDS": "1"
+    }
+  },
+  "overallResult": "FAIL",
+  "goNoGo": "FAIL",
+  "goNoGoReason": "No successful executeOne send found in pilot registry.",
+  "recommendations": [
+    "Complete P122 executeOne send before running P138 verification.",
+    "Ensure pilot registry records the sent candidate."
+  ],
+  "executivePanel": {
+    "pilotCandidate": "—",
+    "signatureRequestId": null,
+    "timestamp": null,
+    "auditStatus": "No send recorded",
+    "duplicateProtection": "Not engaged",
+    "pilotLockStatus": "Unlocked",
+    "overallResult": "FAIL"
+  },
+  "executeBatchCalled": false,
+  "breezyWrites": false,
+  "liveModeEnabled": false,
+  "paperworkSent": false
+}

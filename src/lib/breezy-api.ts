@@ -20,7 +20,19 @@ import {
   logFirstCandidateKeys,
 } from "@/lib/candidates-debug";
 import { logBreezyCandidatesExtract } from "@/lib/breezy-candidates-ops-log";
-import { extractQuestionnaireAnswersFromRaw } from "@/lib/candidate-readiness/questionnaire-parser";
+import {
+  applyQuestionnaireAnswersToCandidate,
+  buildQuestionnaireAnswersFromEnrichmentPayload,
+  extractQuestionnaireAnswersFromRaw,
+} from "@/lib/candidate-readiness/questionnaire-parser";
+import {
+  extractResumeAssetsFromDocumentsPayload,
+  extractResumeAssetsFromRaw,
+  extractResumeAssetsFromResumeEndpointPayload,
+  mergeResumeTextWithAssets,
+  resolveCandidateHasResume,
+  type BreezyResumeAsset,
+} from "@/lib/recruiting-intelligence/resume-assets";
 import {
   extractResumeFieldsFromRaw,
   extractZipFromRaw,
@@ -29,12 +41,12 @@ import type { CandidateQuestionnaireAnswer } from "@/lib/candidate-readiness/typ
 
 const BREEZY_API_BASE = "https://api.breezy.hr/v3";
 const BREEZY_REQUEST_TIMEOUT_MS = 15_000;
-const BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS = 15_000;
+export const BREEZY_CANDIDATE_REQUEST_TIMEOUT_MS = 15_000;
 /** Server scan budget — keep below route maxDuration (120s). */
-const BREEZY_CANDIDATE_SCAN_BUDGET_MS = 115_000;
-const BREEZY_GET_MAX_ATTEMPTS = 5;
+export const BREEZY_CANDIDATE_SCAN_BUDGET_MS = 115_000;
+export const BREEZY_GET_MAX_ATTEMPTS = 5;
 const BREEZY_GET_RETRY_BASE_MS = 900;
-const BREEZY_MAX_REQUESTS_PER_MINUTE = 40;
+export const BREEZY_MAX_REQUESTS_PER_MINUTE = 40;
 const breezyRequestTimestamps: number[] = [];
 const BREEZY_CACHE_TTL_MS = 60_000;
 /** Ok candidate snapshots — longer TTL for tab warm + reuse across dashboard opens. */
@@ -141,13 +153,21 @@ export type BreezyCandidate = {
   hasResume: boolean;
   /** Raw resume field fragments retained for scoring diagnostics. */
   resumeFields?: BreezyCandidateResumeFields;
+  /** Resume file metadata discovered via Breezy documents/resume endpoints or inline payload. */
+  resumeAssets?: BreezyResumeAsset[];
   /** Normalized questionnaire answers from Breezy custom attributes / screening questions. */
   questionnaireAnswers?: CandidateQuestionnaireAnswer[];
   /** True when at least one questionnaire answer was extracted from Breezy. */
   hasQuestionnaire?: boolean;
+  /** ISO timestamp when questionnaire enrichment was last attempted via Breezy detail APIs. */
+  questionnaireEnrichmentAttemptedAt?: string;
   score?: number;
   /** Breezy position pipeline state when fetched (published, closed, archived, …). */
   positionPipelineStatus?: string;
+  /** Platform ingestion provenance (API sync, export import, or both). */
+  ingestionSource?: "breezy_api" | "breezy_export" | "merged";
+  /** True when Breezy candidate _id was not available from export import. */
+  breezyCandidateIdUnavailable?: boolean;
 };
 
 export type BreezyJobsSuccess = {
@@ -584,6 +604,7 @@ function sanitizeCandidate(
   const fallbackName = splitName(stringField(record, ["name", "full_name"]));
   const dates = extractBreezyAddedDate(record);
   const resumeFields = extractResumeFieldsFromRaw(record);
+  const inlineResumeAssets = extractResumeAssetsFromRaw(record);
   const questionnaireAnswers = extractQuestionnaireAnswersFromRaw(record);
   const zipCode = extractZipFromRaw(record);
   const resumeParts = [
@@ -596,8 +617,15 @@ function sanitizeCandidate(
     resumeFields?.customAttributesText,
     resumeFields?.tags?.join(" "),
   ].filter(Boolean);
-  const resumeText = resumeParts.join("\n").trim();
-  const hasResume = resumeText.length >= 80 || (resumeText.length >= 40 && resumeParts.length >= 2);
+  const resumeText = mergeResumeTextWithAssets({
+    resumeText: resumeParts.join("\n").trim(),
+    resumeAssets: inlineResumeAssets,
+  });
+  const hasResume = resolveCandidateHasResume({
+    resumeText,
+    resumeFields,
+    resumeAssets: inlineResumeAssets,
+  });
 
   return {
     candidateId,
@@ -638,6 +666,7 @@ function sanitizeCandidate(
     resumeText,
     hasResume,
     resumeFields,
+    resumeAssets: inlineResumeAssets.length > 0 ? inlineResumeAssets : undefined,
     questionnaireAnswers: questionnaireAnswers.length > 0 ? questionnaireAnswers : undefined,
     hasQuestionnaire: questionnaireAnswers.length > 0,
     score: numberField(record, ["score", "rating"]),
@@ -710,6 +739,10 @@ function markBreezyRateLimitHit(): void {
 
 export function wasBreezyRateLimitHit(): boolean {
   return breezyRateLimitHitFlag;
+}
+
+export function resetBreezyRateLimitHit(): void {
+  resetBreezyRateLimitFlag();
 }
 
 function isRetryableBreezyError(error: string): boolean {
@@ -904,11 +937,22 @@ export function sortPublishedJobsByRecentUpdated(jobs: BreezyJob[]): BreezyJob[]
     });
 }
 
-/** Preview scan: applicantCount DESC, then updated_at DESC (unknown counts sort last). */
-export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] {
+const RECENT_JOB_ACTIVITY_MS = 48 * 60 * 60 * 1000;
+
+/**
+ * P174 — Prioritize positions with recent activity, then applicant volume, then recency.
+ * Used by preview, fast, full, and durable ingestion sync.
+ */
+export function sortPublishedJobsForApplicantPriority(jobs: BreezyJob[]): BreezyJob[] {
+  const now = Date.now();
   return [...jobs]
     .filter((job) => job.jobId)
     .sort((a, b) => {
+      const aRecent =
+        (parseJobUpdatedDate(a)?.getTime() ?? 0) >= now - RECENT_JOB_ACTIVITY_MS ? 1 : 0;
+      const bRecent =
+        (parseJobUpdatedDate(b)?.getTime() ?? 0) >= now - RECENT_JOB_ACTIVITY_MS ? 1 : 0;
+      if (bRecent !== aRecent) return bRecent - aRecent;
       const countB = b.candidateCount ?? -1;
       const countA = a.candidateCount ?? -1;
       if (countB !== countA) return countB - countA;
@@ -916,6 +960,11 @@ export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] 
       const ta = parseJobUpdatedDate(a)?.getTime() ?? 0;
       return tb - ta;
     });
+}
+
+/** Preview scan: applicant priority (alias for P174 unified ordering). */
+export function sortPublishedJobsForPreviewScan(jobs: BreezyJob[]): BreezyJob[] {
+  return sortPublishedJobsForApplicantPriority(jobs);
 }
 
 export function countPreviewJobApplicantBuckets(jobs: BreezyJob[]): {
@@ -1055,6 +1104,110 @@ async function fetchBreezyJobsUncached(state = "published"): Promise<BreezyJobsR
     companyName,
     state,
     locationDiagnostics: buildBreezyJobLocationDiagnostics(jobs),
+  };
+}
+
+const BREEZY_POSITION_FETCH_CONCURRENCY = 5;
+
+export type BreezyPositionFetchSuccess = {
+  ok: true;
+  found: true;
+  job: BreezyJob;
+  positionId: string;
+  fetchedAt: string;
+  companyId: string;
+};
+
+export type BreezyPositionNotFound = {
+  ok: true;
+  found: false;
+  positionId: string;
+  fetchedAt: string;
+  companyId: string;
+};
+
+export type BreezyPositionFetchResult = BreezyPositionFetchSuccess | BreezyPositionNotFound | BreezyApiFailure;
+
+function isBreezyPositionNotFoundFailure(error: string): boolean {
+  const lower = error.toLowerCase();
+  return lower.includes("http 404") || lower.includes("not found");
+}
+
+/** Read-only GET for a single Breezy position by id or friendly_id. */
+export async function fetchBreezyPositionById(positionId: string): Promise<BreezyPositionFetchResult> {
+  ensureBreezyConfigLoaded();
+  const trimmed = positionId.trim();
+  if (!trimmed) {
+    return {
+      ok: false,
+      error: "positionId is required",
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+  if (!getBreezyApiKeySync()) return missingApiKeyFailure();
+
+  const companyResult = await resolveBreezyCompany();
+  if (!companyResult.ok) return companyResult;
+
+  const { companyId } = companyResult;
+  const path = `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(trimmed)}`;
+  const result = await breezyGetWithRetry<RawBreezyPosition>(path);
+  const fetchedAt = result.ok ? new Date().toISOString() : result.fetchedAt;
+
+  if (!result.ok) {
+    if (isBreezyPositionNotFoundFailure(result.error)) {
+      return { ok: true, found: false, positionId: trimmed, fetchedAt, companyId };
+    }
+    return result;
+  }
+
+  const job = sanitizeJob(result.data);
+  if (!job) {
+    return { ok: true, found: false, positionId: trimmed, fetchedAt, companyId };
+  }
+
+  return { ok: true, found: true, job, positionId: trimmed, fetchedAt, companyId };
+}
+
+/** Batch read-only position fetches for unlock-queue reconciliation (GET only). */
+export async function fetchBreezyPositionsByIds(positionIds: string[]): Promise<{
+  ok: true;
+  byPositionId: Map<string, BreezyPositionFetchResult>;
+  found: number;
+  notFound: number;
+  fetchErrors: number;
+  fetchedAt: string;
+}> {
+  const unique = [...new Set(positionIds.map((id) => id.trim()).filter(Boolean))];
+  const byPositionId = new Map<string, BreezyPositionFetchResult>();
+  let found = 0;
+  let notFound = 0;
+  let fetchErrors = 0;
+
+  for (let offset = 0; offset < unique.length; offset += BREEZY_POSITION_FETCH_CONCURRENCY) {
+    const batch = unique.slice(offset, offset + BREEZY_POSITION_FETCH_CONCURRENCY);
+    const results = await Promise.all(batch.map((id) => fetchBreezyPositionById(id)));
+    for (let index = 0; index < batch.length; index += 1) {
+      const id = batch[index]!;
+      const result = results[index]!;
+      byPositionId.set(id, result);
+      if (!result.ok) {
+        fetchErrors += 1;
+      } else if (result.found) {
+        found += 1;
+      } else {
+        notFound += 1;
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    byPositionId,
+    found,
+    notFound,
+    fetchErrors,
+    fetchedAt: new Date().toISOString(),
   };
 }
 
@@ -2136,11 +2289,28 @@ export async function scanBreezyPublishedPositionsBatch(input: {
   maxRuntimeMs?: number;
   maxPagesPerPosition?: number;
 }): Promise<BreezyPositionScanBatchResult> {
+  return scanBreezyPositionsBatch({
+    ...input,
+    pipelineState: "published",
+  });
+}
+
+/** Scan an explicit slice of positions for any Breezy job pipeline state. */
+export async function scanBreezyPositionsBatch(input: {
+  companyId: string;
+  positions: BreezyJob[];
+  pipelineState: BreezyPositionPipelineState;
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+  filterToDateRange?: boolean;
+  maxRuntimeMs?: number;
+  maxPagesPerPosition?: number;
+}): Promise<BreezyPositionScanBatchResult> {
   const deadlineMs = Date.now() + (input.maxRuntimeMs ?? BREEZY_CANDIDATE_SCAN_BUDGET_MS);
   const batch = await scanPositionsBatch({
     companyId: input.companyId,
     positions: input.positions,
-    pipelineState: "published",
+    pipelineState: input.pipelineState,
     pageSize: CANDIDATES_PAGE_SIZE,
     maxPages: input.maxPagesPerPosition ?? MAX_CANDIDATE_PAGES_PER_POSITION,
     deadlineMs,
@@ -2526,10 +2696,7 @@ async function fetchBreezyCandidatesUncachedCore(options: {
   if (!jobsResult.ok) return jobsResult;
 
   const publishedJobs = jobsResult.jobs.map((position) => ({ ...position, status: jobState }));
-  const sortedPositions =
-    options.scanMode === "preview"
-      ? sortPublishedJobsForPreviewScan(publishedJobs)
-      : sortPublishedJobsByRecentUpdated(publishedJobs);
+  const sortedPositions = sortPublishedJobsForApplicantPriority(publishedJobs);
   const totalAvailable = sortedPositions.length;
   const scanMode = options.scanMode;
 
@@ -2832,4 +2999,156 @@ export function getCandidatesByPosition(
   options?: { pageSize?: number; maxPages?: number },
 ): Promise<BreezyCandidatesResult> {
   return fetchBreezyCandidates({ positionId, ...options });
+}
+
+export type BreezyCandidateEnrichmentPayload = {
+  detail: Record<string, unknown> | null;
+  questionnaires: unknown;
+  customFields: unknown;
+  documents: unknown;
+  resume: unknown;
+};
+
+function buildBreezyCandidateDetailPath(
+  companyId: string,
+  positionId: string,
+  candidateId: string,
+  suffix = "",
+): string {
+  const base = `/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(positionId)}/candidate/${encodeURIComponent(candidateId)}`;
+  return suffix ? `${base}/${suffix}` : base;
+}
+
+/** Fetch per-candidate Breezy detail payloads used for questionnaire enrichment. */
+export async function fetchBreezyCandidateEnrichmentPayload(input: {
+  companyId: string;
+  positionId: string;
+  candidateId: string;
+}): Promise<{ ok: true; payload: BreezyCandidateEnrichmentPayload } | BreezyApiFailure> {
+  const { companyId, positionId, candidateId } = input;
+  const detailPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId);
+  const questionnairesPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "questionnaires");
+  const customFieldsPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "custom-fields");
+  const documentsPath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "documents");
+  const resumePath = buildBreezyCandidateDetailPath(companyId, positionId, candidateId, "resume");
+
+  const detailResult = await breezyGetWithRetry<unknown>(detailPath);
+  if (!detailResult.ok) return detailResult;
+
+  const [questionnairesResult, customFieldsResult, documentsResult, resumeResult] = await Promise.all([
+    breezyGetWithRetry<unknown>(questionnairesPath),
+    breezyGetWithRetry<unknown>(customFieldsPath),
+    breezyGetWithRetry<unknown>(documentsPath),
+    breezyGetWithRetry<unknown>(resumePath),
+  ]);
+
+  if (!questionnairesResult.ok) return questionnairesResult;
+  if (!customFieldsResult.ok) return customFieldsResult;
+
+  const detailRecord = asRecord(detailResult.data);
+
+  return {
+    ok: true,
+    payload: {
+      detail: detailRecord,
+      questionnaires: questionnairesResult.data,
+      customFields: customFieldsResult.data,
+      documents: documentsResult.ok ? documentsResult.data : null,
+      resume: resumeResult.ok ? resumeResult.data : null,
+    },
+  };
+}
+
+export function enrichBreezyCandidateWithQuestionnairePayload(
+  candidate: BreezyCandidate,
+  payload: BreezyCandidateEnrichmentPayload,
+): BreezyCandidate {
+  const answers = buildQuestionnaireAnswersFromEnrichmentPayload(payload);
+  const documentAssets = extractResumeAssetsFromDocumentsPayload(payload.documents);
+  const resumeEndpoint = extractResumeAssetsFromResumeEndpointPayload(payload.resume);
+  const detailAssets = payload.detail ? extractResumeAssetsFromRaw(payload.detail) : [];
+  const resumeAssets = [...documentAssets, ...resumeEndpoint.assets, ...detailAssets];
+  const uniqueAssets = resumeAssets.filter(
+    (asset, index, all) =>
+      all.findIndex(
+        (entry) =>
+          entry.source === asset.source &&
+          entry.fileName === asset.fileName &&
+          entry.url === asset.url &&
+          entry.parsedTextPreview === asset.parsedTextPreview,
+      ) === index,
+  );
+
+  let enriched = answers.length > 0 ? applyQuestionnaireAnswersToCandidate(candidate, answers) : candidate;
+
+  if (uniqueAssets.length > 0) {
+    const mergedResumeText = mergeResumeTextWithAssets({
+      resumeText: enriched.resumeText,
+      resumeAssets: uniqueAssets,
+      supplementalParsedText: resumeEndpoint.parsedText,
+    });
+    enriched = {
+      ...enriched,
+      resumeAssets: uniqueAssets,
+      resumeText: mergedResumeText,
+      hasResume: resolveCandidateHasResume({
+        resumeText: mergedResumeText,
+        resumeFields: enriched.resumeFields,
+        resumeAssets: uniqueAssets,
+        legacyHasResume: enriched.hasResume,
+      }),
+    };
+  }
+
+  if (!payload.detail) return enriched;
+
+  const detailSanitized = sanitizeCandidate(
+    { ...payload.detail, position_id: candidate.positionId } as RawBreezyCandidate,
+    {
+      jobId: candidate.positionId,
+      name: candidate.positionName,
+      city: candidate.city,
+      state: candidate.state,
+      status: candidate.positionPipelineStatus || "published",
+    },
+  );
+
+  if (!detailSanitized) return enriched;
+
+  const mergedAssets = [...(enriched.resumeAssets ?? []), ...(detailSanitized.resumeAssets ?? [])].filter(
+    (asset, index, all) =>
+      all.findIndex(
+        (entry) =>
+          entry.source === asset.source &&
+          entry.fileName === asset.fileName &&
+          entry.url === asset.url &&
+          entry.parsedTextPreview === asset.parsedTextPreview,
+      ) === index,
+  );
+  const mergedResumeText = mergeResumeTextWithAssets({
+    resumeText:
+      detailSanitized.resumeText.length > enriched.resumeText.length
+        ? detailSanitized.resumeText
+        : enriched.resumeText,
+    resumeAssets: mergedAssets,
+    supplementalParsedText: resumeEndpoint.parsedText,
+  });
+
+  return {
+    ...enriched,
+    resumeText: mergedResumeText,
+    hasResume: resolveCandidateHasResume({
+      resumeText: mergedResumeText,
+      resumeFields: detailSanitized.resumeFields ?? enriched.resumeFields,
+      resumeAssets: mergedAssets,
+      legacyHasResume: enriched.hasResume || detailSanitized.hasResume,
+    }),
+    resumeFields: detailSanitized.resumeFields ?? enriched.resumeFields,
+    resumeAssets: mergedAssets.length > 0 ? mergedAssets : enriched.resumeAssets,
+    questionnaireAnswers:
+      enriched.questionnaireAnswers && enriched.questionnaireAnswers.length > 0
+        ? enriched.questionnaireAnswers
+        : detailSanitized.questionnaireAnswers,
+    hasQuestionnaire: enriched.hasQuestionnaire || detailSanitized.hasQuestionnaire,
+  };
 }

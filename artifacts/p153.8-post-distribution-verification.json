@@ -1,0 +1,139 @@
+{
+  "sourcePhase": "P153.8",
+  "generatedAt": "2026-07-06T20:40:32.371Z",
+  "dryRun": true,
+  "liveSendPerformed": false,
+  "target": {
+    "candidateId": "705cdc0e7f30",
+    "name": "Taylor Custenborder",
+    "email": "custenborder.taylor@gmail.com",
+    "positionId": "f8f9afaa12b8",
+    "positionName": "Retail Display Merchandiser – West Chester, OH"
+  },
+  "p151": {
+    "recommendation": "Assign Recruiter",
+    "recommendedRecruiter": "Alex",
+    "recommendedDm": "Mindie Rodriguez",
+    "territoryState": "OH",
+    "confidence": 65,
+    "confidenceThreshold": 65,
+    "confidenceAcceptable": true,
+    "shouldAssign": true,
+    "reason": "Territory OH (Mindie Rodriguez) — Alex selected by workload balance among 2 eligible recruiters.",
+    "recruiterEvalReason": "Territory OH (Mindie Rodriguez) — Alex selected by workload balance among 2 eligible recruiters.",
+    "autoAssignEligible": true
+  },
+  "assignmentApplied": {
+    "applied": true,
+    "recruiter": "Alex",
+    "dm": "Mindie Rodriguez",
+    "skipReason": null
+  },
+  "summary": {
+    "recruiterAssigned": true,
+    "assignedRecruiter": "Alex",
+    "dmAssigned": true,
+    "assignedDm": "Mindie Rodriguez",
+    "workflowStatus": "Applied",
+    "paperworkQueueStatus": "not in queue",
+    "p152Eligible": true,
+    "projectedSend": true,
+    "pipelineFullyOperational": false
+  },
+  "stages": {
+    "p83": {
+      "action": "call-first",
+      "shouldAdvance": false,
+      "requiresApproval": false,
+      "reason": "Verification needed before paperwork: technology readiness."
+    },
+    "p144": {
+      "nextAction": "Call Candidate",
+      "confidence": 64,
+      "automationEligible": false,
+      "blockers": [
+        "Missing Questionnaire",
+        "Already Contacted"
+      ],
+      "warnings": []
+    },
+    "p145": {
+      "inQueue": false,
+      "recommendedAction": null,
+      "reason": null,
+      "ready": false
+    },
+    "p147": {
+      "eligible": false,
+      "blockedReason": "P144 next action is \"Call Candidate\", not Send Paperwork. Confidence 64% below 90% threshold. P144 blockers: Missing Questionnaire, Already Contacted. Paperwork queue does not recommend Send Initial Paperwork. Current status: Applied. Current action: screen-candidate.",
+      "validationReasons": [
+        "P144 next action is \"Call Candidate\", not Send Paperwork.",
+        "Confidence 64% below 90% threshold.",
+        "P144 blockers: Missing Questionnaire, Already Contacted.",
+        "Paperwork queue does not recommend Send Initial Paperwork.",
+        "Current status: Applied.",
+        "Current action: screen-candidate."
+      ],
+      "confidenceThreshold": 90
+    },
+    "p152": {
+      "eligible": true,
+      "projectedSend": true,
+      "dryRunRow": {
+        "candidateId": "705cdc0e7f30",
+        "candidateName": "Taylor Custenborder",
+        "email": "custenborder.taylor@gmail.com",
+        "recruiter": "Alex",
+        "workflowStatus": "Applied",
+        "paperworkStatus": "not_sent",
+        "eligible": true,
+        "hardBlockers": [],
+        "primaryHardBlocker": null,
+        "legacyBlockersBypassed": [
+          "workflowStatus is Applied, not Paperwork Needed.",
+          "actionType is screen-candidate, not send-paperwork.",
+          "P144 confidence 64% below 90%.",
+          "Recent contact cooldown (P144).",
+          "Current status: Applied.",
+          "Current action: screen-candidate.",
+          "Not in P145 queue as Send Initial Paperwork.",
+          "P144 next action is \"Call Candidate\", not Send Paperwork.",
+          "Confidence 64% below 90% threshold.",
+          "P144 blockers: Missing Questionnaire, Already Contacted.",
+          "Paperwork queue does not recommend Send Initial Paperwork."
+        ],
+        "projectedSend": true
+      },
+      "hardBlockers": [],
+      "legacyBypassed": [
+        "P83 requireApproval=true (human approval before shouldAdvance)",
+        "workflowStatus must be Paperwork Needed",
+        "actionType must be send-paperwork",
+        "P144/P147 confidence threshold (90%)",
+        "Missing resume / incomplete applicant review verdict",
+        "Manual review workflow flag (Needs Review)",
+        "dmNeedsAssignment / P144 mapP83Action Assign Recruiter override",
+        "Published job / operational fit requirement",
+        "P145 communication cooldown (Already Contacted)",
+        "P145 queue membership requirement"
+      ],
+      "p152Enabled": false,
+      "p99LiveSend": false
+    }
+  },
+  "remainingBlockers": [
+    "P144 next action is \"Call Candidate\", not Send Paperwork. Confidence 64% below 90% threshold. P144 blockers: Missing Questionnaire, Already Contacted. Paperwork queue does not recommend Send Initial Paperwork. Current status: Applied. Current action: screen-candidate.",
+    "P145: not in paperwork queue",
+    "P152_IMMEDIATE_PAPERWORK_ENABLED=false (live send disabled)",
+    "P99_LIVE_SEND=false (live send disabled)"
+  ],
+  "operationalBlockers": [
+    "P144 next action is \"Call Candidate\", not Send Paperwork. Confidence 64% below 90% threshold. P144 blockers: Missing Questionnaire, Already Contacted. Paperwork queue does not recommend Send Initial Paperwork. Current status: Applied. Current action: screen-candidate.",
+    "P145: not in paperwork queue"
+  ],
+  "liveSendBlockers": [
+    "P152_IMMEDIATE_PAPERWORK_ENABLED=false (live send disabled)",
+    "P99_LIVE_SEND=false (live send disabled)"
+  ],
+  "verdict": "Pipeline not fully clear. Operational blockers: P144 next action is \"Call Candidate\", not Send Paperwork. Confidence 64% below 90% threshold. P144 blockers: Missing Questionnaire, Already Contacted. Paperwork queue does not recommend Send Initial Paperwork. Current status: Applied. Current action: screen-candidate.; P145: not in paperwork queue"
+}

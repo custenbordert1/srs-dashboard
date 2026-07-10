@@ -1,0 +1,993 @@
+{
+  "sourcePhase": "P176",
+  "generatedAt": "2026-07-09T15:48:54.288Z",
+  "dryRun": false,
+  "readOnlyPaperwork": true,
+  "noBreezyWrites": true,
+  "noDropboxWrites": true,
+  "summary": {
+    "newest25Count": 25,
+    "recruitersAssigned": 17,
+    "stillBlockedCount": 4,
+    "duplicateBlockedCount": 2,
+    "paperworkEligibleBefore": 4,
+    "paperworkEligibleAfter": 21,
+    "newlyPaperworkEligible": 17,
+    "expectedPaperworkSendCount": 0,
+    "dropboxApiProjection": {
+      "postRequests": 0,
+      "getRequests": 0,
+      "totalRequests": 0,
+      "withinBudget": true,
+      "budgetCeiling": 35
+    },
+    "noDuplicatePaperworkRisk": true,
+    "paperworkSent": false
+  },
+  "before": [
+    {
+      "rank": 1,
+      "candidateId": "5e64219daaf9",
+      "name": "David Karp",
+      "email": "dmgkarp@gmail.com",
+      "appliedAt": "2026-07-09T14:02:32.804Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 2,
+      "candidateId": "84ec8ad83176",
+      "name": "april white",
+      "email": "greatdeals0501@gmail.com",
+      "appliedAt": "2026-07-09T09:08:30.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 3,
+      "candidateId": "86a8d6804b6b",
+      "name": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "appliedAt": "2026-07-09T04:05:41.394Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 4,
+      "candidateId": "80d87b758578",
+      "name": "Liaunda Lang",
+      "email": "capri_lang@yahoo.com",
+      "appliedAt": "2026-07-09T02:08:38.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 5,
+      "candidateId": "cda9067dac4b",
+      "name": "Mista Clark",
+      "email": "mistac6@gmail.com",
+      "appliedAt": "2026-07-08T21:07:40.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 6,
+      "candidateId": "1bd395fce633",
+      "name": "Norah Jones",
+      "email": "norahjones2224@gmail.com",
+      "appliedAt": "2026-07-08T20:07:57.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 7,
+      "candidateId": "2419559af1ba",
+      "name": "Jasmine Barber",
+      "email": "jasmineshanae90@gmail.com",
+      "appliedAt": "2026-07-08T19:07:44.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 8,
+      "candidateId": "88bb0f06e75e",
+      "name": "Terry Bryant",
+      "email": "tjbryant2019@gmail.com",
+      "appliedAt": "2026-07-08T17:07:58.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 9,
+      "candidateId": "21dc66d94d31",
+      "name": "Patrick Berry",
+      "email": "bezothered@gmail.com",
+      "appliedAt": "2026-07-08T14:07:21.000Z",
+      "assignedRecruiter": "Drew",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 10,
+      "candidateId": "46551846149e",
+      "name": "Lindsey Aaron",
+      "email": "miayasmommy.la@gmail.com",
+      "appliedAt": "2026-07-08T04:07:21.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 11,
+      "candidateId": "445225a971f7",
+      "name": "Gianna DelGarbino",
+      "email": "giannadelgarbino@gmail.com",
+      "appliedAt": "2026-07-08T01:07:12.000Z",
+      "assignedRecruiter": "Taylor",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 12,
+      "candidateId": "91faef15d8fd",
+      "name": "Nykol Tindle",
+      "email": "nykolcooper2@gmail.com",
+      "appliedAt": "2026-07-07T23:08:05.000Z",
+      "assignedRecruiter": "Alex",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 13,
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "email": "patricia.irby@aol.com",
+      "appliedAt": "2026-07-07T21:07:27.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 14,
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "email": "darryltwo@hotmail.com",
+      "appliedAt": "2026-07-07T19:08:27.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Candidate Duplicate",
+      "p157Confidence": 96,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 15,
+      "candidateId": "b32054c06f54",
+      "name": "Karen Burkes",
+      "email": "mrskarenburkes@gmail.com",
+      "appliedAt": "2026-07-07T17:08:07.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 16,
+      "candidateId": "6a850de9dc05",
+      "name": "Gabriella Gandy",
+      "email": "gabriellagandy9@gmail.com",
+      "appliedAt": "2026-07-07T16:08:39.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 17,
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "email": "crumplatrese1@gmail.com",
+      "appliedAt": "2026-07-07T11:07:15.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 18,
+      "candidateId": "6b40ff3b280a",
+      "name": "Monique Franklin",
+      "email": "franklinmonique392@gmail.com",
+      "appliedAt": "2026-07-07T10:08:29.000Z",
+      "assignedRecruiter": "Alex",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 19,
+      "candidateId": "082c0eec6cff",
+      "name": "Lovett Roberts",
+      "email": "teddylove092386@gmail.com",
+      "appliedAt": "2026-07-07T10:07:00.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 20,
+      "candidateId": "1e0fbce8a310",
+      "name": "Tasha Early",
+      "email": "etasha575@gmail.com",
+      "appliedAt": "2026-07-07T08:07:56.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 21,
+      "candidateId": "88340ea1bf94",
+      "name": "Rebekah Hoover",
+      "email": "rrhoover90@gmail.com",
+      "appliedAt": "2026-07-07T01:07:00.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 95,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 22,
+      "candidateId": "71ceb040896c",
+      "name": "DEAN B. SERGIACOMI",
+      "email": "dsergiacomi@comcast.net",
+      "appliedAt": "2026-07-06T21:07:25.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 95,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 23,
+      "candidateId": "27d9e13536b0",
+      "name": "William Gustafson",
+      "email": "willy93gizmo29pb@gmail.com",
+      "appliedAt": "2026-07-06T20:08:13.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 95,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 24,
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "email": "jrstagen@gmail.com",
+      "appliedAt": "2026-07-06T20:08:02.000Z",
+      "assignedRecruiter": "Morgan",
+      "p157Recommendation": "Candidate Duplicate",
+      "p157Confidence": 98,
+      "paperworkEligible": false,
+      "blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "duplicateBlocked": true,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 25,
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "email": "custenborder.taylor@gmail.com",
+      "appliedAt": "2026-07-06T19:08:39.000Z",
+      "assignedRecruiter": "Taylor",
+      "p157Recommendation": "Candidate Duplicate",
+      "p157Confidence": 98,
+      "paperworkEligible": false,
+      "blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "duplicateBlocked": true,
+      "assignedInThisRun": false
+    }
+  ],
+  "after": [
+    {
+      "rank": 1,
+      "candidateId": "5e64219daaf9",
+      "name": "David Karp",
+      "email": "dmgkarp@gmail.com",
+      "appliedAt": "2026-07-09T14:02:32.804Z",
+      "assignedRecruiter": "Logan",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 2,
+      "candidateId": "84ec8ad83176",
+      "name": "april white",
+      "email": "greatdeals0501@gmail.com",
+      "appliedAt": "2026-07-09T09:08:30.000Z",
+      "assignedRecruiter": "Casey",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 3,
+      "candidateId": "86a8d6804b6b",
+      "name": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "appliedAt": "2026-07-09T04:05:41.394Z",
+      "assignedRecruiter": "Sam",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 4,
+      "candidateId": "80d87b758578",
+      "name": "Liaunda Lang",
+      "email": "capri_lang@yahoo.com",
+      "appliedAt": "2026-07-09T02:08:38.000Z",
+      "assignedRecruiter": "Riley",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 5,
+      "candidateId": "cda9067dac4b",
+      "name": "Mista Clark",
+      "email": "mistac6@gmail.com",
+      "appliedAt": "2026-07-08T21:07:40.000Z",
+      "assignedRecruiter": "Casey",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 6,
+      "candidateId": "1bd395fce633",
+      "name": "Norah Jones",
+      "email": "norahjones2224@gmail.com",
+      "appliedAt": "2026-07-08T20:07:57.000Z",
+      "assignedRecruiter": "Casey",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 7,
+      "candidateId": "2419559af1ba",
+      "name": "Jasmine Barber",
+      "email": "jasmineshanae90@gmail.com",
+      "appliedAt": "2026-07-08T19:07:44.000Z",
+      "assignedRecruiter": "Casey",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 8,
+      "candidateId": "88bb0f06e75e",
+      "name": "Terry Bryant",
+      "email": "tjbryant2019@gmail.com",
+      "appliedAt": "2026-07-08T17:07:58.000Z",
+      "assignedRecruiter": "Casey",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 9,
+      "candidateId": "21dc66d94d31",
+      "name": "Patrick Berry",
+      "email": "bezothered@gmail.com",
+      "appliedAt": "2026-07-08T14:07:21.000Z",
+      "assignedRecruiter": "Drew",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 10,
+      "candidateId": "46551846149e",
+      "name": "Lindsey Aaron",
+      "email": "miayasmommy.la@gmail.com",
+      "appliedAt": "2026-07-08T04:07:21.000Z",
+      "assignedRecruiter": "Logan",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 11,
+      "candidateId": "445225a971f7",
+      "name": "Gianna DelGarbino",
+      "email": "giannadelgarbino@gmail.com",
+      "appliedAt": "2026-07-08T01:07:12.000Z",
+      "assignedRecruiter": "Taylor",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 12,
+      "candidateId": "91faef15d8fd",
+      "name": "Nykol Tindle",
+      "email": "nykolcooper2@gmail.com",
+      "appliedAt": "2026-07-07T23:08:05.000Z",
+      "assignedRecruiter": "Alex",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 13,
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "email": "patricia.irby@aol.com",
+      "appliedAt": "2026-07-07T21:07:27.000Z",
+      "assignedRecruiter": "Logan",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 14,
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "email": "darryltwo@hotmail.com",
+      "appliedAt": "2026-07-07T19:08:27.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Candidate Duplicate",
+      "p157Confidence": 96,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 15,
+      "candidateId": "b32054c06f54",
+      "name": "Karen Burkes",
+      "email": "mrskarenburkes@gmail.com",
+      "appliedAt": "2026-07-07T17:08:07.000Z",
+      "assignedRecruiter": "Logan",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 16,
+      "candidateId": "6a850de9dc05",
+      "name": "Gabriella Gandy",
+      "email": "gabriellagandy9@gmail.com",
+      "appliedAt": "2026-07-07T16:08:39.000Z",
+      "assignedRecruiter": "Casey",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 17,
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "email": "crumplatrese1@gmail.com",
+      "appliedAt": "2026-07-07T11:07:15.000Z",
+      "assignedRecruiter": "Unassigned",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": false,
+      "blockers": [
+        "Recruiter not assigned."
+      ],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 18,
+      "candidateId": "6b40ff3b280a",
+      "name": "Monique Franklin",
+      "email": "franklinmonique392@gmail.com",
+      "appliedAt": "2026-07-07T10:08:29.000Z",
+      "assignedRecruiter": "Alex",
+      "p157Recommendation": "Review Questionnaire",
+      "p157Confidence": 76,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 19,
+      "candidateId": "082c0eec6cff",
+      "name": "Lovett Roberts",
+      "email": "teddylove092386@gmail.com",
+      "appliedAt": "2026-07-07T10:07:00.000Z",
+      "assignedRecruiter": "Riley",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 20,
+      "candidateId": "1e0fbce8a310",
+      "name": "Tasha Early",
+      "email": "etasha575@gmail.com",
+      "appliedAt": "2026-07-07T08:07:56.000Z",
+      "assignedRecruiter": "Riley",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 93,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 21,
+      "candidateId": "88340ea1bf94",
+      "name": "Rebekah Hoover",
+      "email": "rrhoover90@gmail.com",
+      "appliedAt": "2026-07-07T01:07:00.000Z",
+      "assignedRecruiter": "Logan",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 95,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 22,
+      "candidateId": "71ceb040896c",
+      "name": "DEAN B. SERGIACOMI",
+      "email": "dsergiacomi@comcast.net",
+      "appliedAt": "2026-07-06T21:07:25.000Z",
+      "assignedRecruiter": "Chris",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 95,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 23,
+      "candidateId": "27d9e13536b0",
+      "name": "William Gustafson",
+      "email": "willy93gizmo29pb@gmail.com",
+      "appliedAt": "2026-07-06T20:08:13.000Z",
+      "assignedRecruiter": "Riley",
+      "p157Recommendation": "Assign Recruiter",
+      "p157Confidence": 95,
+      "paperworkEligible": true,
+      "blockers": [],
+      "duplicateBlocked": false,
+      "assignedInThisRun": true
+    },
+    {
+      "rank": 24,
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "email": "jrstagen@gmail.com",
+      "appliedAt": "2026-07-06T20:08:02.000Z",
+      "assignedRecruiter": "Morgan",
+      "p157Recommendation": "Candidate Duplicate",
+      "p157Confidence": 98,
+      "paperworkEligible": false,
+      "blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "duplicateBlocked": true,
+      "assignedInThisRun": false
+    },
+    {
+      "rank": 25,
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "email": "custenborder.taylor@gmail.com",
+      "appliedAt": "2026-07-06T19:08:39.000Z",
+      "assignedRecruiter": "Taylor",
+      "p157Recommendation": "Candidate Duplicate",
+      "p157Confidence": 98,
+      "paperworkEligible": false,
+      "blockers": [
+        "Onboarding record already has an active signature request."
+      ],
+      "duplicateBlocked": true,
+      "assignedInThisRun": false
+    }
+  ],
+  "assignments": [
+    {
+      "candidateId": "5e64219daaf9",
+      "name": "David Karp",
+      "email": "dmgkarp@gmail.com",
+      "recruiter": "Logan",
+      "confidence": 65,
+      "reason": "Territory AZ (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "84ec8ad83176",
+      "name": "april white",
+      "email": "greatdeals0501@gmail.com",
+      "recruiter": "Casey",
+      "confidence": 65,
+      "reason": "Territory AL (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "86a8d6804b6b",
+      "name": "Gregory Petties",
+      "email": "shreddedsteel49@gmail.com",
+      "recruiter": "Sam",
+      "confidence": 65,
+      "reason": "Territory AR (Lori VandeWiele) — Sam selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "80d87b758578",
+      "name": "Liaunda Lang",
+      "email": "capri_lang@yahoo.com",
+      "recruiter": "Riley",
+      "confidence": 65,
+      "reason": "Territory GA (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "cda9067dac4b",
+      "name": "Mista Clark",
+      "email": "mistac6@gmail.com",
+      "recruiter": "Casey",
+      "confidence": 65,
+      "reason": "Territory AL (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "1bd395fce633",
+      "name": "Norah Jones",
+      "email": "norahjones2224@gmail.com",
+      "recruiter": "Casey",
+      "confidence": 65,
+      "reason": "Territory MS (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "2419559af1ba",
+      "name": "Jasmine Barber",
+      "email": "jasmineshanae90@gmail.com",
+      "recruiter": "Casey",
+      "confidence": 65,
+      "reason": "Territory NC (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "88bb0f06e75e",
+      "name": "Terry Bryant",
+      "email": "tjbryant2019@gmail.com",
+      "recruiter": "Casey",
+      "confidence": 65,
+      "reason": "Territory SC (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "21dc66d94d31",
+      "name": "Patrick Berry",
+      "email": "bezothered@gmail.com",
+      "recruiter": "Drew",
+      "confidence": 65,
+      "reason": "Recruiter already assigned: Drew.",
+      "skippedReason": "P157 blocks assignment: Review Questionnaire P152 already eligible — recruiter assignment not required for paperwork gate."
+    },
+    {
+      "candidateId": "46551846149e",
+      "name": "Lindsey Aaron",
+      "email": "miayasmommy.la@gmail.com",
+      "recruiter": "Logan",
+      "confidence": 65,
+      "reason": "Territory AR (Lori VandeWiele) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "445225a971f7",
+      "name": "Gianna DelGarbino",
+      "email": "giannadelgarbino@gmail.com",
+      "recruiter": "Taylor",
+      "confidence": 65,
+      "reason": "Recruiter already assigned: Taylor.",
+      "skippedReason": "P157 blocks assignment: Review Questionnaire P152 already eligible — recruiter assignment not required for paperwork gate."
+    },
+    {
+      "candidateId": "91faef15d8fd",
+      "name": "Nykol Tindle",
+      "email": "nykolcooper2@gmail.com",
+      "recruiter": "Alex",
+      "confidence": 65,
+      "reason": "Recruiter already assigned: Alex.",
+      "skippedReason": "P157 blocks assignment: Review Questionnaire P152 already eligible — recruiter assignment not required for paperwork gate."
+    },
+    {
+      "candidateId": "98400c5310f6",
+      "name": "Patricia Irby",
+      "email": "patricia.irby@aol.com",
+      "recruiter": "Logan",
+      "confidence": 65,
+      "reason": "Territory AZ (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "26bbea1bc09f",
+      "name": "Darryl T. Williams",
+      "email": "darryltwo@hotmail.com",
+      "recruiter": "Chris",
+      "confidence": 65,
+      "reason": "Onboarding record already has an active signature request.",
+      "skippedReason": "Onboarding record already has an active signature request. P157 blocks assignment: Candidate Duplicate"
+    },
+    {
+      "candidateId": "b32054c06f54",
+      "name": "Karen Burkes",
+      "email": "mrskarenburkes@gmail.com",
+      "recruiter": "Logan",
+      "confidence": 65,
+      "reason": "Territory AR (Lori VandeWiele) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "6a850de9dc05",
+      "name": "Gabriella Gandy",
+      "email": "gabriellagandy9@gmail.com",
+      "recruiter": "Casey",
+      "confidence": 65,
+      "reason": "Territory MS (Erin Boatright) — Casey selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "81c4ebb9ea9a",
+      "name": "Latrese Crump",
+      "email": "crumplatrese1@gmail.com",
+      "recruiter": "Morgan",
+      "confidence": 55,
+      "reason": "Best territory match (Morgan) below confidence threshold (55).",
+      "skippedReason": "Manual Review: Best territory match (Morgan) below confidence threshold (55)."
+    },
+    {
+      "candidateId": "6b40ff3b280a",
+      "name": "Monique Franklin",
+      "email": "franklinmonique392@gmail.com",
+      "recruiter": "Alex",
+      "confidence": 65,
+      "reason": "Recruiter already assigned: Alex.",
+      "skippedReason": "P157 blocks assignment: Review Questionnaire P152 already eligible — recruiter assignment not required for paperwork gate."
+    },
+    {
+      "candidateId": "082c0eec6cff",
+      "name": "Lovett Roberts",
+      "email": "teddylove092386@gmail.com",
+      "recruiter": "Riley",
+      "confidence": 65,
+      "reason": "Territory GA (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "1e0fbce8a310",
+      "name": "Tasha Early",
+      "email": "etasha575@gmail.com",
+      "recruiter": "Riley",
+      "confidence": 65,
+      "reason": "Territory SC (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "88340ea1bf94",
+      "name": "Rebekah Hoover",
+      "email": "rrhoover90@gmail.com",
+      "recruiter": "Logan",
+      "confidence": 65,
+      "reason": "Territory AZ (Shelly Debellis) — Logan selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "71ceb040896c",
+      "name": "DEAN B. SERGIACOMI",
+      "email": "dsergiacomi@comcast.net",
+      "recruiter": "Chris",
+      "confidence": 65,
+      "reason": "Territory NJ (Melissa O'Connor) — Chris selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "27d9e13536b0",
+      "name": "William Gustafson",
+      "email": "willy93gizmo29pb@gmail.com",
+      "recruiter": "Riley",
+      "confidence": 65,
+      "reason": "Territory FL (Erin Boatright) — Riley selected by workload balance among 2 eligible recruiters."
+    },
+    {
+      "candidateId": "94f3eb998444",
+      "name": "June Ann Stagen",
+      "email": "jrstagen@gmail.com",
+      "recruiter": "Morgan",
+      "confidence": 65,
+      "reason": "Onboarding record already has an active signature request.",
+      "skippedReason": "Onboarding record already has an active signature request. P157 blocks assignment: Candidate Duplicate Onboarding record already has an active signature request. Duplicate paperwork risk."
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "name": "Taylor Custenborder",
+      "email": "custenborder.taylor@gmail.com",
+      "recruiter": "Taylor",
+      "confidence": 65,
+      "reason": "Onboarding record already has an active signature request.",
+      "skippedReason": "Onboarding record already has an active signature request. P157 blocks assignment: Candidate Duplicate Onboarding record already has an active signature request. Duplicate paperwork risk."
+    }
+  ],
+  "rollbackPath": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/.data/rollback/p176-workflow-dd0ec4bb-b4bf-4998-a1c8-f79510fea8e0.json",
+  "conclusion": "Assigned 17 recruiters locally. 17 newest candidates became paperwork eligible without sending paperwork."
+}

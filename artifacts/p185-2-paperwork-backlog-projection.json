@@ -1,0 +1,20 @@
+{
+  "eligibleCount": 25,
+  "maxSendsPerCycle": 10,
+  "maxPerMinute": 4,
+  "maxPerHour": 40,
+  "maxPerDay": 200,
+  "cycleIntervalMinutes": 10,
+  "cyclesRequired": 3,
+  "hoursRequired": 1,
+  "daysRequired": 1,
+  "deferredToNextDay": 0,
+  "projectedCompletionLabel": "~3 cycles / 1 h / 1 day(s) at configured caps",
+  "rateLimitNotes": [
+    "Cadence bottleneck: 3 cycles × 10 min ≈ 0.5 h",
+    "Hourly cap 40/h → ≥ 1 h",
+    "Daily cap 200/day → ≥ 1 day(s); 0 deferred past day 1",
+    "Per-minute cap 4/min and concurrent=2 further smooth bursts within each cycle",
+    "Circuit breaker stops a cycle after 3 failures — failed sends preserve queue for retry"
+  ]
+}
