@@ -1,0 +1,652 @@
+{
+  "phase": "P185.6",
+  "generatedAt": "2026-07-10T19:49:43.423Z",
+  "rolloutId": "p1853-20260710-b419512d",
+  "totalExecutionTimeMs": 837028,
+  "totalExecutionTimeHuman": "837s",
+  "concurrency": 1,
+  "maxSendsPerCycle": 1,
+  "aborted": false,
+  "abortReason": null,
+  "preflight": {
+    "canaryPassed": true,
+    "backlogRemainingBefore": 20,
+    "queueBefore": {
+      "queued": 20,
+      "sent": 5,
+      "unresolved": 0
+    },
+    "storage": {
+      "adapter": "postgres",
+      "provider": "neon_postgres",
+      "durable": true,
+      "healthy": true
+    }
+  },
+  "results": {
+    "candidatesAttempted": 20,
+    "confirmedSent": 20,
+    "failed": 0,
+    "duplicateConflicts": 0,
+    "unresolvedOperations": 0,
+    "queueDepthBefore": 20,
+    "queueDepthAfter": 0,
+    "sentStatusBefore": 5,
+    "sentStatusAfter": 25
+  },
+  "dropboxSignConfirmationSummary": {
+    "confirmedSent": 20,
+    "confirmed_sent": 20,
+    "sentUnverified": 0,
+    "failedAttempts": 0,
+    "attempts": [
+      {
+        "candidateId": "9ef7bf235ee9",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:33:58.810Z",
+        "envelopeIdHash": "20f3b9c1429b",
+        "error": null
+      },
+      {
+        "candidateId": "1158b78ee219",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:42:18.561Z",
+        "envelopeIdHash": "83c4f9db66f1",
+        "error": null
+      },
+      {
+        "candidateId": "91f84eae7546",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:42:40.365Z",
+        "envelopeIdHash": "f05e3fcb5fc4",
+        "error": null
+      },
+      {
+        "candidateId": "1ec650f8e1d9",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:43:01.939Z",
+        "envelopeIdHash": "09cf07f42778",
+        "error": null
+      },
+      {
+        "candidateId": "5e290d45974f",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:43:29.849Z",
+        "envelopeIdHash": "48611e53170f",
+        "error": null
+      },
+      {
+        "candidateId": "d021d8262ef6",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:43:51.535Z",
+        "envelopeIdHash": "b6d8026fe4a1",
+        "error": null
+      },
+      {
+        "candidateId": "86ea44c3d95a",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:44:12.840Z",
+        "envelopeIdHash": "b8bc5cf20938",
+        "error": null
+      },
+      {
+        "candidateId": "39ddf56edc32",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:44:39.352Z",
+        "envelopeIdHash": "1b52a9c68801",
+        "error": null
+      },
+      {
+        "candidateId": "3fb0c007171d",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:45:00.531Z",
+        "envelopeIdHash": "233ade311858",
+        "error": null
+      },
+      {
+        "candidateId": "68015bc9a375",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:45:21.900Z",
+        "envelopeIdHash": "2767514855ff",
+        "error": null
+      },
+      {
+        "candidateId": "0ed8fd3b95f3",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:45:48.301Z",
+        "envelopeIdHash": "630578414235",
+        "error": null
+      },
+      {
+        "candidateId": "d39f8bc6193e",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:46:10.550Z",
+        "envelopeIdHash": "b7f8b732e829",
+        "error": null
+      },
+      {
+        "candidateId": "fb06444d1348",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:46:32.050Z",
+        "envelopeIdHash": "bda848bb4d9b",
+        "error": null
+      },
+      {
+        "candidateId": "6931fb8de72c",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:47:00.288Z",
+        "envelopeIdHash": "1d77a2476a90",
+        "error": null
+      },
+      {
+        "candidateId": "334a0e2bcb6c",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:47:21.805Z",
+        "envelopeIdHash": "aa534a7dedad",
+        "error": null
+      },
+      {
+        "candidateId": "86da01f7739b",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:47:43.469Z",
+        "envelopeIdHash": "b49ada68071f",
+        "error": null
+      },
+      {
+        "candidateId": "9f9d978c7e71",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:48:09.323Z",
+        "envelopeIdHash": "aa350a0bd88f",
+        "error": null
+      },
+      {
+        "candidateId": "9cdc414f3b49",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:48:30.792Z",
+        "envelopeIdHash": "cfc558c2b96c",
+        "error": null
+      },
+      {
+        "candidateId": "ca747f355c14",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:48:53.303Z",
+        "envelopeIdHash": "e9f26a1da8f1",
+        "error": null
+      },
+      {
+        "candidateId": "9921cca9ccbd",
+        "state": "confirmed_sent",
+        "ok": true,
+        "attemptedAt": "2026-07-10T19:49:21.783Z",
+        "envelopeIdHash": "6278a334b4a2",
+        "error": null
+      }
+    ]
+  },
+  "storageHealthAfter": {
+    "adapter": "postgres",
+    "provider": "neon_postgres",
+    "durable": true,
+    "healthy": true
+  },
+  "finalP184Mode": "dry_run",
+  "finalP184Enabled": true,
+  "rolloutPhase": "backlog_complete",
+  "backlogAfter": {
+    "cycle": 47,
+    "failed": 0,
+    "attempted": 20,
+    "confirmed": 20,
+    "remaining": 0,
+    "sentUnverified": 0
+  },
+  "frozenCohortOnly": {
+    "noAdditionalCandidatesProcessed": true,
+    "outsideFrozenIds": [],
+    "reprocessedCanaryIds": [],
+    "processedCount": 20,
+    "frozenCohortSize": 25
+  },
+  "continuousAutomationEnabled": false,
+  "cronEnabled": false,
+  "autonomousRecruitingEnabled": false,
+  "cycleResults": [
+    {
+      "index": 1,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 18,
+      "attempts": [
+        {
+          "candidateId": "1158b78ee219",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:42:18.561Z",
+          "ok": true,
+          "envelopeIdHash": "83c4f9db66f1",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 17,
+      "attempts": [
+        {
+          "candidateId": "91f84eae7546",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:42:40.365Z",
+          "ok": true,
+          "envelopeIdHash": "f05e3fcb5fc4",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 16,
+      "attempts": [
+        {
+          "candidateId": "1ec650f8e1d9",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:43:01.939Z",
+          "ok": true,
+          "envelopeIdHash": "09cf07f42778",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 15,
+      "attempts": [
+        {
+          "candidateId": "5e290d45974f",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:43:29.849Z",
+          "ok": true,
+          "envelopeIdHash": "48611e53170f",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 14,
+      "attempts": [
+        {
+          "candidateId": "d021d8262ef6",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:43:51.535Z",
+          "ok": true,
+          "envelopeIdHash": "b6d8026fe4a1",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 13,
+      "attempts": [
+        {
+          "candidateId": "86ea44c3d95a",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:44:12.840Z",
+          "ok": true,
+          "envelopeIdHash": "b8bc5cf20938",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 12,
+      "attempts": [
+        {
+          "candidateId": "39ddf56edc32",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:44:39.352Z",
+          "ok": true,
+          "envelopeIdHash": "1b52a9c68801",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 11,
+      "attempts": [
+        {
+          "candidateId": "3fb0c007171d",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:45:00.531Z",
+          "ok": true,
+          "envelopeIdHash": "233ade311858",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 10,
+      "attempts": [
+        {
+          "candidateId": "68015bc9a375",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:45:21.900Z",
+          "ok": true,
+          "envelopeIdHash": "2767514855ff",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 9,
+      "attempts": [
+        {
+          "candidateId": "0ed8fd3b95f3",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:45:48.301Z",
+          "ok": true,
+          "envelopeIdHash": "630578414235",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 8,
+      "attempts": [
+        {
+          "candidateId": "d39f8bc6193e",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:46:10.550Z",
+          "ok": true,
+          "envelopeIdHash": "b7f8b732e829",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 7,
+      "attempts": [
+        {
+          "candidateId": "fb06444d1348",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:46:32.050Z",
+          "ok": true,
+          "envelopeIdHash": "bda848bb4d9b",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 6,
+      "attempts": [
+        {
+          "candidateId": "6931fb8de72c",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:47:00.288Z",
+          "ok": true,
+          "envelopeIdHash": "1d77a2476a90",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 5,
+      "attempts": [
+        {
+          "candidateId": "334a0e2bcb6c",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:47:21.805Z",
+          "ok": true,
+          "envelopeIdHash": "aa534a7dedad",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 4,
+      "attempts": [
+        {
+          "candidateId": "86da01f7739b",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:47:43.469Z",
+          "ok": true,
+          "envelopeIdHash": "b49ada68071f",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 3,
+      "attempts": [
+        {
+          "candidateId": "9f9d978c7e71",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:48:09.323Z",
+          "ok": true,
+          "envelopeIdHash": "aa350a0bd88f",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 2,
+      "attempts": [
+        {
+          "candidateId": "9cdc414f3b49",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:48:30.792Z",
+          "ok": true,
+          "envelopeIdHash": "cfc558c2b96c",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 1,
+      "attempts": [
+        {
+          "candidateId": "ca747f355c14",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:48:53.303Z",
+          "ok": true,
+          "envelopeIdHash": "e9f26a1da8f1",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "executed": true,
+      "skippedReason": null,
+      "attempted": 1,
+      "confirmed": 1,
+      "failed": 0,
+      "remaining": 0,
+      "attempts": [
+        {
+          "candidateId": "9921cca9ccbd",
+          "cycle": "backlog",
+          "attemptedAt": "2026-07-10T19:49:21.783Z",
+          "ok": true,
+          "envelopeIdHash": "6278a334b4a2",
+          "state": "confirmed_sent",
+          "error": null,
+          "permanent": false,
+          "transient": false
+        }
+      ]
+    }
+  ]
+}
