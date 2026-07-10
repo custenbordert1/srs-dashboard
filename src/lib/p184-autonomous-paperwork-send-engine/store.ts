@@ -8,6 +8,11 @@ import {
   type P184QueueItem,
 } from "@/lib/p184-autonomous-paperwork-send-engine/types";
 import { pruneSendTimestamps } from "@/lib/p184-autonomous-paperwork-send-engine/rateLimiter";
+import {
+  loadP184FromDurable,
+  saveP184ToDurable,
+  shouldUseP1855DurableBackend,
+} from "@/lib/p185-5-vercel-durable-storage/bridges";
 
 function statePath(): string {
   return path.join(recruitingDataDir(), "p184-autonomous-paperwork-send-state.json");
@@ -49,6 +54,11 @@ function normalizeState(raw: Partial<P184EngineStateFile> | null | undefined): P
 }
 
 export async function loadP184EngineState(): Promise<P184EngineStateFile> {
+  if (shouldUseP1855DurableBackend()) {
+    const state = await loadP184FromDurable();
+    memoryState = state;
+    return structuredClone(state);
+  }
   if (memoryState) return structuredClone(memoryState);
   try {
     const raw = await readFile(statePath(), "utf8");
@@ -63,6 +73,11 @@ export async function loadP184EngineState(): Promise<P184EngineStateFile> {
 }
 
 export async function saveP184EngineState(state: P184EngineStateFile): Promise<P184EngineStateFile> {
+  if (shouldUseP1855DurableBackend()) {
+    const next = await saveP184ToDurable(state);
+    memoryState = next;
+    return structuredClone(next);
+  }
   const next: P184EngineStateFile = {
     ...state,
     updatedAt: new Date().toISOString(),

@@ -11,8 +11,20 @@ import {
   emptyP185RunnerState,
   type P185RunnerStateFile,
 } from "@/lib/p185-production-paperwork-automation-runner/types";
+import {
+  casSaveP185ToDurable,
+  loadP185FromDurable,
+  saveP185ToDurable,
+  shouldUseP1855DurableBackend,
+} from "@/lib/p185-5-vercel-durable-storage/bridges";
+import { isP1855DurableConfigured, redactProviderName, resolveDatabaseUrl } from "@/lib/p185-5-vercel-durable-storage/sqlClient";
 
-export type P185StorageAdapterName = "local_filesystem" | "durable_volume" | "ephemeral_tmp" | "in_memory";
+export type P185StorageAdapterName =
+  | "local_filesystem"
+  | "durable_volume"
+  | "ephemeral_tmp"
+  | "in_memory"
+  | "postgres";
 
 export type P185StorageHealth = {
   adapter: P185StorageAdapterName;
@@ -20,6 +32,7 @@ export type P185StorageHealth = {
   healthy: boolean;
   detail: string;
   dataDir: string;
+  provider?: string;
 };
 
 const STATE_FILE = "p185-production-paperwork-automation-state.json";
@@ -125,6 +138,22 @@ function classifyAdapter(dir: string): P185StorageHealth {
 }
 
 export function getP185StorageHealth(): P185StorageHealth {
+  if (isP1855DurableConfigured() && !forceEphemeralForTests) {
+    const url = resolveDatabaseUrl();
+    const provider = url
+      ? /vercel/i.test(url)
+        ? "vercel_postgres"
+        : "neon_postgres"
+      : "pglite_local";
+    return {
+      adapter: "postgres",
+      durable: true,
+      healthy: true,
+      detail: "External Postgres durable adapter (Neon / Vercel Postgres / PGlite).",
+      dataDir: "postgres://redacted",
+      provider: redactProviderName(provider),
+    };
+  }
   return classifyAdapter(p185DataDir());
 }
 
@@ -158,6 +187,11 @@ async function atomicWriteJson(filePath: string, value: unknown): Promise<void> 
 }
 
 export async function loadP185RunnerState(): Promise<P185RunnerStateFile> {
+  if (shouldUseP1855DurableBackend() && !forceEphemeralForTests) {
+    const state = await loadP185FromDurable();
+    memoryState = state;
+    return structuredClone(state);
+  }
   if (memoryState && (useInMemoryPersistence() || forceEphemeralForTests)) {
     return structuredClone(memoryState);
   }
@@ -200,6 +234,11 @@ async function maybeMigrateFromP184(): Promise<P185RunnerStateFile | null> {
 }
 
 export async function saveP185RunnerState(state: P185RunnerStateFile): Promise<P185RunnerStateFile> {
+  if (shouldUseP1855DurableBackend() && !forceEphemeralForTests) {
+    const next = await saveP185ToDurable(state);
+    memoryState = next;
+    return structuredClone(next);
+  }
   const next: P185RunnerStateFile = {
     ...state,
     schemaVersion: 1,
@@ -229,6 +268,16 @@ export async function casUpdateP185RunnerState(
   expectedVersion: number,
   mutator: (state: P185RunnerStateFile) => P185RunnerStateFile | null,
 ): Promise<P185RunnerStateFile | null> {
+  if (shouldUseP1855DurableBackend() && !forceEphemeralForTests) {
+    const current = await loadP185RunnerState();
+    if (current.recordVersion !== expectedVersion) return null;
+    const mutated = mutator(structuredClone(current));
+    if (!mutated) return null;
+    mutated.recordVersion = expectedVersion;
+    const saved = await casSaveP185ToDurable(expectedVersion, mutated);
+    if (saved) memoryState = saved;
+    return saved ? structuredClone(saved) : null;
+  }
   const current = await loadP185RunnerState();
   if (current.recordVersion !== expectedVersion) return null;
   const mutated = mutator(structuredClone(current));

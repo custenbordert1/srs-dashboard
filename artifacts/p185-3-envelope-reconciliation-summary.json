@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-10T17:28:02.354Z",
+  "generatedAt": "2026-07-10T19:20:32.331Z",
   "rolloutId": "p1853-20260710-b419512d",
   "byState": {
     "prepared": 0,
     "send_requested": 0,
     "sent_unverified": 0,
-    "confirmed_sent": 0,
+    "confirmed_sent": 5,
     "viewed": 0,
     "signed": 0,
     "declined": 0,

@@ -5,6 +5,11 @@ import {
   emptyP1853State,
   type P1853RolloutStateFile,
 } from "@/lib/p185-3-controlled-live-paperwork-rollout/types";
+import {
+  loadP1853FromDurable,
+  saveP1853ToDurable,
+  shouldUseP1855DurableBackend,
+} from "@/lib/p185-5-vercel-durable-storage/bridges";
 
 const STATE_FILE = "p185-3-controlled-live-paperwork-rollout-state.json";
 
@@ -19,6 +24,11 @@ export function resetP1853StateMemoryForTests(): void {
 }
 
 export async function loadP1853State(): Promise<P1853RolloutStateFile> {
+  if (shouldUseP1855DurableBackend()) {
+    const state = await loadP1853FromDurable();
+    memory = state;
+    return structuredClone(state);
+  }
   if (memory) return structuredClone(memory);
   try {
     const raw = await readFile(statePath(), "utf8");
@@ -31,6 +41,11 @@ export async function loadP1853State(): Promise<P1853RolloutStateFile> {
 }
 
 export async function saveP1853State(state: P1853RolloutStateFile): Promise<P1853RolloutStateFile> {
+  if (shouldUseP1855DurableBackend()) {
+    const next = await saveP1853ToDurable(state);
+    memory = next;
+    return structuredClone(next);
+  }
   const next: P1853RolloutStateFile = {
     ...state,
     schemaVersion: 1,

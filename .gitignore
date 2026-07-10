@@ -10,3 +10,7 @@
 .turbo/
 coverage/
 *.tsbuildinfo
+
+# P185.5 local PGlite durable store
+.p1855-pglite/
+.vercel
