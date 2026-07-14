@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-07-13T19:21:47.237Z",
+  "scanned": 684,
+  "resolved": 0,
+  "unresolved": 684,
+  "ambiguous": 0,
+  "note": "Validation pass had no Breezy/owner enrichments — expect unresolved≈scanned unless persisted recruiter set",
+  "sampleUnresolved": [
+    {
+      "candidateId": "1b3a2f…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "5da2f2…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "272690…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "f700c2…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "c5b232…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "afa412…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "570d0e…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "1b909b…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "cbc938…",
+      "detail": "No recruiter signals — operator review required"
+    },
+    {
+      "candidateId": "faec52…",
+      "detail": "No recruiter signals — operator review required"
+    }
+  ],
+  "sampleAmbiguous": [],
+  "productionWrites": 0
+}

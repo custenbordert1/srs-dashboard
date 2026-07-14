@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-07-13T19:21:47.237Z",
+  "predictedEligibleCount": 3,
+  "predictedEligibleIds": [
+    "1b3a2f14b63c",
+    "5da2f2141b96",
+    "27269078a5b9"
+  ],
+  "p187AuthorityEnabled": false,
+  "operatorApprovalOccurred": false,
+  "note": "Forecast uses dry-run simulated recommendations with synthetic recruiter/job enrichment — not production writes",
+  "p187CanaryExecuted": false,
+  "authorityFlagsEnabled": false
+}

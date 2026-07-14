@@ -200,6 +200,7 @@ const WORKFLOW_STATUS_STYLES: Record<CandidateWorkflowStatus, string> = {
   "Needs Review": "bg-sky-500/15 text-sky-200 ring-1 ring-sky-500/30",
   Qualified: "bg-teal-500/15 text-teal-200 ring-1 ring-teal-500/30",
   "Not Qualified": "bg-zinc-500/15 text-zinc-300 ring-1 ring-zinc-500/30",
+  "Operator Approved": "bg-indigo-500/15 text-indigo-200 ring-1 ring-indigo-500/30",
   "Paperwork Needed": "bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30",
   "Paperwork Sent": "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30",
   Signed: "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30",

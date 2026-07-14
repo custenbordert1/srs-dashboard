@@ -1,0 +1,71 @@
+{
+  "ok": true,
+  "sourcePhase": "P188.6",
+  "checkedAt": "2026-07-13T20:46:49.123Z",
+  "priorCanary": {
+    "cohortId": "p188.5-canary-c5c917a526",
+    "expected": 10,
+    "stillNamed": 10,
+    "ledgerPresent": 10,
+    "clobberedIds": []
+  },
+  "gates": [
+    {
+      "id": "prior_canary_loaded",
+      "ok": true,
+      "detail": "Loaded p188.5-canary-c5c917a526 (10)"
+    },
+    {
+      "id": "prior_canary_still_named",
+      "ok": true,
+      "detail": "stillNamed=10/10 clobbered=0"
+    },
+    {
+      "id": "prior_canary_ledger_present",
+      "ok": true,
+      "detail": "ledgerPresent=10/10"
+    },
+    {
+      "id": "restore_flag_off_before_auth",
+      "ok": true,
+      "detail": "P188_OWNERSHIP_RESTORE_EXECUTION=false"
+    },
+    {
+      "id": "ownership_ledger_healthy",
+      "ok": true,
+      "detail": "Append-only ledger healthy (memory/jsonl); enable P188_OWNERSHIP_LEDGER_SQL=1 for Neon/PGlite"
+    },
+    {
+      "id": "storage_backend",
+      "ok": true,
+      "detail": "Neon/Postgres URL configured (SQL ledger opt-in)"
+    },
+    {
+      "id": "unresolved_ownership_ops",
+      "ok": true,
+      "detail": "0 unresolved ownership operations"
+    },
+    {
+      "id": "p184_dry_run",
+      "ok": true,
+      "detail": "P184 dry_run"
+    },
+    {
+      "id": "p187_flags_off",
+      "ok": true,
+      "detail": "P187 off"
+    },
+    {
+      "id": "continuous_automation_disabled",
+      "ok": true,
+      "detail": "Automation disabled"
+    },
+    {
+      "id": "prior_tests",
+      "ok": true,
+      "detail": "Prior tests assumed/verified pass"
+    }
+  ],
+  "abortReasons": [],
+  "priorTestExitCode": 0
+}

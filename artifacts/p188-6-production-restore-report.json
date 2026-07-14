@@ -1,0 +1,533 @@
+{
+  "sourcePhase": "P188.6",
+  "authorization": {
+    "actor": "operator:p188.6-prompt",
+    "authorizedAt": "2026-07-13T20:46:50.488Z",
+    "cohortId": "p188.6-batch-30436ad77c",
+    "fingerprint": "cc847fd13b0a3d65561cca82",
+    "maxRecruiterWrites": 50,
+    "maxLedgerEvents": 50,
+    "expiresAt": "2026-07-14T00:46:49.134Z",
+    "scope": "fifty_candidate_recruiter_ownership_restore_only"
+  },
+  "execution": {
+    "cohortId": "p188.6-batch-30436ad77c",
+    "fingerprint": "cc847fd13b0a3d65561cca82",
+    "attempted": 50,
+    "restored": 50,
+    "failed": 0,
+    "staleConflicts": 0,
+    "ledgerEventsWritten": 50,
+    "stoppedEarly": false,
+    "stopReason": null,
+    "attempts": [
+      {
+        "candidateId": "8d0a…2b68",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-1e6cc729-8546-4b93-84d3-d7d11e1aa61c",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "d3c7…8523",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-8b82bae7-0beb-4eb5-9f3c-381fd9a96e45",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "8249…d538",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-981d084d-308a-49b6-b040-4b229269773d",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "fc9f…5e36",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-cc386ee4-764c-4259-9b1b-82061cadab60",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "fe26…d3f7",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-c753d053-3a29-410e-ab6f-1e3cf6ef6599",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "2969…3a25",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Alex",
+        "ledgerEventId": "own-4987664f-e228-4d7e-992d-5f0e913b1a71",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "6a89…f999",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-91ebc16c-e213-45af-b2ce-33365815f50b",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "bb5d…8f10",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-1b11db2f-365e-4d34-8687-5d6ee17bef70",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "4076…ef6d",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Morgan",
+        "ledgerEventId": "own-7eb1f509-9460-4cdb-91b7-9f64016eecc4",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "b484…2135",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Morgan",
+        "ledgerEventId": "own-4af66f63-d297-4f47-888f-0ca00bc4596f",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "0bc4…bb26",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Alex",
+        "ledgerEventId": "own-6572d7f2-f71c-4afe-97ca-b0f044ed7191",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "ce18…83ec",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Alex",
+        "ledgerEventId": "own-03a82f0c-a1ca-475c-8819-6e496f591eea",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "613a…e518",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Chris",
+        "ledgerEventId": "own-0c39d5ba-0689-44ef-a388-0e85bc0cb4ae",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "3e1a…5fc3",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-080c3e39-7790-4ded-802a-f2f17c3a5dd1",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "c9f5…9a06",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-a918edba-7392-49ef-9483-9287a0703941",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "69b6…1d37",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-324dcd06-9d08-4b1d-93c2-a9fe234a6e0e",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "48b2…8baf",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-cd8cd36b-0f0d-4751-b71e-b610f955424b",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "bee3…dd26",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-93e84926-301e-408e-85f9-500b16cb1406",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "efc3…e39e",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-14a03dbb-a2f3-4cb8-9154-1a467678f547",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "c2fe…b8c6",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-fd94cd79-f4ae-4c65-95c5-7128cd15f594",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "f2a4…cd78",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-f1bd8a99-2139-460e-a65f-0eca8806bf7a",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "6459…bd46",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-51a67379-e632-4384-a5fd-164de764cf8a",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "81c4…ea9a",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Alex",
+        "ledgerEventId": "own-b8c7bc13-8076-4f71-b33f-bcae0337671e",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "6505…be20",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-b44979a8-0860-4cc9-9d19-cf720014b21e",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "9f53…4daf",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Drew",
+        "ledgerEventId": "own-8e720bd6-d72b-40c6-8f64-67cd3fbb6404",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "8d2f…38ca",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-7680eb80-ed0a-4505-92f2-6ee5656aa99a",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "70a0…d849",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-4891a5d3-2683-498f-95b1-62db31bd2e35",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "2e44…2732",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-b7bedc9b-b8b4-44c5-b1ce-36d5361e428d",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "6557…2bc4",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Casey",
+        "ledgerEventId": "own-0cd273a1-ddd0-4d8c-81bb-112343a9bbf8",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "f0a3…4951",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Chris",
+        "ledgerEventId": "own-e183466e-a7d2-403b-928b-67b505b91b30",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "77d8…4eb9",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Sam",
+        "ledgerEventId": "own-0b969bb2-5f6f-4e2b-8b47-b64ef167f09f",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "957d…bbc2",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Sam",
+        "ledgerEventId": "own-b5437ed7-f157-49b8-ae97-1eb7fc2351e9",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "f34a…4e14",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Sam",
+        "ledgerEventId": "own-61609db5-b634-4fab-9047-be2fb1fe1b58",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "368f…5fb9",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-294f6854-479a-4a34-8dd5-34a642788fc4",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "3d9b…c350",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Sam",
+        "ledgerEventId": "own-feb7da0e-a7ab-43f9-802e-f07439e73bbe",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "8a97…38d9",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-32ee7000-1bfe-4413-9203-04d072f9417c",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "2ee5…5ade",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Sam",
+        "ledgerEventId": "own-2088c253-e3f1-4b3d-a06f-a0e144582579",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "8555…c619",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-094ea9b5-4a0e-4a40-93f3-5dc22e4bde6d",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "dfb1…7da7",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-c17a9b8e-1dc3-4248-98c4-308a2c612d22",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "fe84…f694",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-e9e39977-81fd-4fe2-98c9-824abed8e154",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "30c2…2e4c",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Alex",
+        "ledgerEventId": "own-02dc0c46-d9ef-4fb0-882d-53b6f0c684a9",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "d229…960d",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Casey",
+        "ledgerEventId": "own-c981328b-3657-4df5-9ce1-79f4dcba5329",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "b0e7…b1ff",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-38972fb6-96e3-4786-ac03-8a16a1baf824",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "7cde…35aa",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-0c09a617-c0b2-4358-9595-71816cfbe633",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "a658…28a1",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-e026b340-c04e-4166-ae50-51e6fcffe76a",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "011d…ef64",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Casey",
+        "ledgerEventId": "own-e4310127-6226-4d08-9f30-ad9daf6ed307",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "2210…ef92",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-94d54904-4ff0-40ee-884d-979a93c0b897",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "2bb8…4ecc",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Casey",
+        "ledgerEventId": "own-ac957324-1ac8-4f66-837a-fa21d9a1ff32",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "64ba…c9c9",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-f54ca11b-05bb-415d-88fe-3cfa19162ebd",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "fe15…d2a7",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Riley",
+        "ledgerEventId": "own-a36933c1-1049-4697-98f4-e8a1cbdd7c50",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      }
+    ],
+    "lifecycleWrites": 0,
+    "recommendations": 0,
+    "approvals": 0,
+    "paperworkSends": 0,
+    "melWrites": 0,
+    "recruiterWrites": 50,
+    "subBatchesCompleted": 5
+  }
+}

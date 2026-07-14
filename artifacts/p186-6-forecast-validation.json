@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-07-13T15:09:45.220Z",
+  "forecastCount": 6,
+  "forecasts": [
+    {
+      "metric": "expected_paperwork_sends",
+      "expectedValue": 1,
+      "confidence": 0.54,
+      "insufficientData": false,
+      "warning": null
+    },
+    {
+      "metric": "expected_signatures",
+      "expectedValue": 3,
+      "confidence": 0.54,
+      "insufficientData": false,
+      "warning": null
+    },
+    {
+      "metric": "expected_onboarding_completions",
+      "expectedValue": 1,
+      "confidence": 0.54,
+      "insufficientData": false,
+      "warning": null
+    },
+    {
+      "metric": "expected_ready_for_mel",
+      "expectedValue": 2,
+      "confidence": 0.54,
+      "insufficientData": false,
+      "warning": null
+    },
+    {
+      "metric": "expected_mel_export_review_volume",
+      "expectedValue": 2,
+      "confidence": 0.54,
+      "insufficientData": false,
+      "warning": null
+    },
+    {
+      "metric": "estimated_backlog_clearance_days",
+      "expectedValue": 2.5,
+      "confidence": 0.54,
+      "insufficientData": false,
+      "warning": null
+    }
+  ]
+}

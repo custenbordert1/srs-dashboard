@@ -1,0 +1,146 @@
+{
+  "phase": "P186.1",
+  "generatedAt": "2026-07-13T13:47:18.830Z",
+  "mode": "shadow_only",
+  "storageProvider": "pglite_local",
+  "isolation": {
+    "paperworkSendDisabled": true,
+    "continuousAutomationDisabled": true,
+    "p184P185Unmodified": true,
+    "productionQueuesUntouched": true
+  },
+  "synthetic": {
+    "evaluated": 9,
+    "matches": 9,
+    "mismatches": 0,
+    "duplicateTransitions": 0,
+    "invalidTransitions": 0,
+    "missingTransitions": 0,
+    "impossibleTransitions": 0,
+    "findings": [
+      {
+        "candidateId": "syn-applied",
+        "kind": "match",
+        "productionDerivedState": "APPLIED",
+        "shadowState": "APPLIED",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-review",
+        "kind": "match",
+        "productionDerivedState": "RECRUITER_REVIEW",
+        "shadowState": "RECRUITER_REVIEW",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-recommend",
+        "kind": "match",
+        "productionDerivedState": "HIRING_RECOMMENDATION",
+        "shadowState": "HIRING_RECOMMENDATION",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-paperwork-needed",
+        "kind": "match",
+        "productionDerivedState": "PAPERWORK_NEEDED",
+        "shadowState": "PAPERWORK_NEEDED",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-sent",
+        "kind": "match",
+        "productionDerivedState": "PAPERWORK_SENT",
+        "shadowState": "PAPERWORK_SENT",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-viewed",
+        "kind": "match",
+        "productionDerivedState": "VIEWED",
+        "shadowState": "VIEWED",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-signed",
+        "kind": "match",
+        "productionDerivedState": "SIGNED",
+        "shadowState": "SIGNED",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-mel",
+        "kind": "match",
+        "productionDerivedState": "READY_FOR_MEL",
+        "shadowState": "READY_FOR_MEL",
+        "detail": "Shadow seeded to production-derived state."
+      },
+      {
+        "candidateId": "syn-exported",
+        "kind": "match",
+        "productionDerivedState": "EXPORTED",
+        "shadowState": "EXPORTED",
+        "detail": "Shadow seeded to production-derived state."
+      }
+    ],
+    "projectedAt": "2026-07-13T13:47:16.944Z"
+  },
+  "productionObserve": {
+    "note": "Observed 50 workflow records read-only (no writes).",
+    "used": true,
+    "result": {
+      "evaluated": 50,
+      "matches": 50,
+      "mismatches": 0,
+      "duplicateTransitions": 0,
+      "invalidTransitions": 0,
+      "missingTransitions": 0,
+      "impossibleTransitions": 0,
+      "projectedAt": "2026-07-13T13:47:17.715Z",
+      "findingKinds": {
+        "match": 50
+      }
+    }
+  },
+  "health": {
+    "phase": "P186.1",
+    "generatedAt": "2026-07-13T13:47:18.830Z",
+    "schemaVersion": 1,
+    "storage": {
+      "provider": "pglite_local",
+      "healthy": true,
+      "durable": true
+    },
+    "countsByState": {
+      "READY_FOR_MEL": 1,
+      "PAPERWORK_NEEDED": 1,
+      "SIGNED": 2,
+      "RECRUITER_REVIEW": 2,
+      "PAPERWORK_SENT": 20,
+      "APPLIED": 26,
+      "BLOCKED": 1,
+      "VIEWED": 4,
+      "HIRING_RECOMMENDATION": 1,
+      "EXPORTED": 1
+    },
+    "auditCount": 221,
+    "shadow": {
+      "lastProjectedAt": "2026-07-13T13:47:17.000Z",
+      "matches": 50,
+      "mismatches": 0,
+      "duplicateTransitions": 0,
+      "invalidTransitions": 0,
+      "missingTransitions": 0,
+      "impossibleTransitions": 0,
+      "matchRate": 1
+    },
+    "isolation": {
+      "paperworkSendDisabled": true,
+      "continuousAutomationDisabled": true,
+      "liveModeNotEnabledByP186": true,
+      "p184P185Unmodified": true
+    },
+    "readyForP186_2": true,
+    "blockers": [],
+    "warnings": []
+  }
+}

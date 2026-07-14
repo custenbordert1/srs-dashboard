@@ -5,7 +5,32 @@ import {
   type DirectDepositStatus,
 } from "@/lib/direct-deposit-types";
 
-export type RecruiterAssignmentSource = "auto" | "manual";
+export type RecruiterAssignmentSource =
+  | "auto"
+  | "manual"
+  | "operator_restore"
+  | "operator_confirmed_historical_restore"
+  | "production_assignment"
+  | "internal_assignment"
+  | "breezy_import"
+  | "territory_default";
+
+const RECRUITER_ASSIGNMENT_SOURCES = new Set<string>([
+  "auto",
+  "manual",
+  "operator_restore",
+  "operator_confirmed_historical_restore",
+  "production_assignment",
+  "internal_assignment",
+  "breezy_import",
+  "territory_default",
+]);
+
+export function isRecruiterAssignmentSource(
+  value: unknown,
+): value is RecruiterAssignmentSource {
+  return typeof value === "string" && RECRUITER_ASSIGNMENT_SOURCES.has(value);
+}
 
 export type RecruiterActionType =
   | "assign-recruiter"
@@ -29,6 +54,7 @@ export type CandidateWorkflowStatus =
   | "Needs Review"
   | "Qualified"
   | "Not Qualified"
+  | "Operator Approved"
   | "Paperwork Needed"
   | "Paperwork Sent"
   | "Signed"
@@ -87,6 +113,8 @@ export type CandidateWorkflowRecord = {
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
   recruiterAssignedAt?: string | null;
+  /** Optimistic concurrency version for recruiter ownership (P188.4). */
+  recruiterOwnershipVersion?: number;
   requiredAction?: string | null;
   actionType?: RecruiterActionType | null;
   actionPriority?: RecruiterActionPriority | null;
@@ -210,10 +238,9 @@ export function normalizeWorkflowRecord(
       typeof raw.directDepositLastHrBccAddress === "string"
         ? raw.directDepositLastHrBccAddress
         : null,
-    recruiterAssignmentSource:
-      raw.recruiterAssignmentSource === "auto" || raw.recruiterAssignmentSource === "manual"
-        ? raw.recruiterAssignmentSource
-        : null,
+    recruiterAssignmentSource: isRecruiterAssignmentSource(raw.recruiterAssignmentSource)
+      ? raw.recruiterAssignmentSource
+      : null,
     recruiterAssignmentReason:
       typeof raw.recruiterAssignmentReason === "string" ? raw.recruiterAssignmentReason : null,
     recruiterAssignmentConfidence:
@@ -222,6 +249,12 @@ export function normalizeWorkflowRecord(
         ? Math.max(0, Math.min(100, Math.round(raw.recruiterAssignmentConfidence)))
         : null,
     recruiterAssignedAt: typeof raw.recruiterAssignedAt === "string" ? raw.recruiterAssignedAt : null,
+    recruiterOwnershipVersion:
+      typeof raw.recruiterOwnershipVersion === "number" &&
+      Number.isFinite(raw.recruiterOwnershipVersion) &&
+      raw.recruiterOwnershipVersion >= 0
+        ? Math.floor(raw.recruiterOwnershipVersion)
+        : 0,
     requiredAction: typeof raw.requiredAction === "string" ? raw.requiredAction : null,
     actionType: normalizeRecruiterActionType(raw.actionType),
     actionPriority: normalizeRecruiterActionPriority(raw.actionPriority),
@@ -300,6 +333,7 @@ export const CANDIDATE_WORKFLOW_STATUSES: CandidateWorkflowStatus[] = [
   "Needs Review",
   "Qualified",
   "Not Qualified",
+  "Operator Approved",
   "Paperwork Needed",
   "Paperwork Sent",
   "Signed",
@@ -316,6 +350,7 @@ export function nextActionForWorkflowStatus(status: CandidateWorkflowStatus): st
     "Needs Review": "Review candidate fit",
     Qualified: "Prepare paperwork",
     "Not Qualified": "No action",
+    "Operator Approved": "Await Paperwork Needed authorization",
     "Paperwork Needed": "Send onboarding paperwork",
     "Paperwork Sent": "Wait for signature",
     Signed: "Verify signed paperwork",

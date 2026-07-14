@@ -1,0 +1,268 @@
+{
+  "sourcePhase": "P188.2",
+  "scannedAt": "2026-07-13T19:39:30.796Z",
+  "recordsScanned": 684,
+  "counts": {
+    "resolved": 0,
+    "ambiguous": 0,
+    "unresolved": 684,
+    "conflicting": 0,
+    "stale": 0
+  },
+  "resolved": [],
+  "ambiguous": [],
+  "unresolved": [
+    {
+      "candidateId": "1b3a2f14b63c",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "5da2f2141b96",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "27269078a5b9",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "f700c2780f03",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "c5b23216837a",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "afa4123cd361",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "570d0e5c132e",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "1b909bd699ec",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "cbc9380411b2",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "faec52c5e4c9",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "305e367a07a8",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "520ae00e6673",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "de921c6e199b",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "968499ef4533",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "911157c289ae",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "8d0a9d872b68",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "fd299c767d14",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "d3c7baa38523",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "8249cd92d538",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "ba880e29ff1e",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "554fe2251478",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "64ac200f117e",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "a23e30953307",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "854fd7c0f321",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "8c035453cf91",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "f1b2325774c4",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "840c0b858148",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "621ef8c8480c",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "b06d222cb36a",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "6acc0966d96a",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "e2399d01283c",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "21dc66d94d31",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "fc9fe75e5e36",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "fe26ac4bd3f7",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "2969a7a83a25",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "c3b611496cfd",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "5e64219daaf9",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "445225a971f7",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "6a891047f999",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "bb5d94088f10",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "84d51041e750",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "c70e4a31b050",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "92181f9de45c",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "91faef15d8fd",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "189e89cd8493",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "652bc90340b9",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "40764d83ef6d",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    },
+    {
+      "candidateId": "b484a5e72135",
+      "detail": "No authoritative recruiter signals",
+      "operatorActionRequired": "Provide operator-confirmed recruiter mapping"
+    }
+  ],
+  "unresolvedTotal": 684,
+  "productionWrites": 0
+}

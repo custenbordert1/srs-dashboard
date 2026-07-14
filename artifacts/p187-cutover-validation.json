@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-07-13T17:36:59.140Z",
+  "transition": "Hiring Recommendation→Operator Approved",
+  "dryRun": {
+    "ok": true,
+    "status": "dry_run_complete",
+    "candidatesEvaluated": 3,
+    "candidatesTransitioned": 3,
+    "productionWritesAttempted": 0,
+    "paperworkSendsAttempted": 0,
+    "melExportsAttempted": 0,
+    "dropboxSignChanges": 0,
+    "advancedBeyondOperatorApproved": 0,
+    "stopReason": null
+  },
+  "reconciliation": {
+    "generatedAt": "2026-07-13T17:36:59.139Z",
+    "candidatesEvaluated": 3,
+    "candidatesTransitioned": 3,
+    "matches": 3,
+    "mismatches": 0,
+    "duplicateTransitions": 0,
+    "skippedTransitions": 0,
+    "invalidStateChanges": 0,
+    "auditGaps": 0,
+    "findings": [
+      {
+        "kind": "match",
+        "candidateId": "canary-1",
+        "detail": "Legacy/P186 agree on OPERATOR_APPROVED",
+        "severity": "info"
+      },
+      {
+        "kind": "match",
+        "candidateId": "canary-2",
+        "detail": "Legacy/P186 agree on OPERATOR_APPROVED",
+        "severity": "info"
+      },
+      {
+        "kind": "match",
+        "candidateId": "canary-3",
+        "detail": "Legacy/P186 agree on OPERATOR_APPROVED",
+        "severity": "info"
+      }
+    ],
+    "successRate": 1
+  },
+  "productionExecution": {
+    "attempted": false,
+    "refused": true,
+    "detail": "Production canary execution disabled (P187_EXECUTE_PRODUCTION_CANARY off)"
+  }
+}

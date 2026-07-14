@@ -78,6 +78,16 @@ export async function handleDropboxSignWebhookEvent(
       source: "dropbox_sign_webhook",
       eventType,
     });
+    // P186.2 shadow observe — never fails production webhook handling
+    void import("@/lib/p186-2-event-adapters")
+      .then(({ observeDropboxSignWebhookSafe }) =>
+        observeDropboxSignWebhookSafe({
+          candidateId,
+          eventType,
+          signatureRequestId,
+        }),
+      )
+      .catch(() => undefined);
     return { handled: true, eventType, signatureRequestId, candidateId, workflow };
   }
 
@@ -110,6 +120,16 @@ export async function handleDropboxSignWebhookEvent(
       source: "dropbox_sign_webhook",
       eventType: ddResult.emailSent ? `${eventType}:dd_sent` : eventType,
     });
+    // P186.2 shadow observe — never fails production webhook handling
+    void import("@/lib/p186-2-event-adapters")
+      .then(({ observeDropboxSignWebhookSafe }) =>
+        observeDropboxSignWebhookSafe({
+          candidateId,
+          eventType,
+          signatureRequestId,
+        }),
+      )
+      .catch(() => undefined);
     return { handled: true, eventType, signatureRequestId, candidateId, workflow };
   }
 

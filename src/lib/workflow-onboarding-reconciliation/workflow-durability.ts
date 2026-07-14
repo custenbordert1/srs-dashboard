@@ -1,10 +1,10 @@
-import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import type { OnboardingPacketStatus } from "@/lib/candidate-onboarding-engine/types";
 import type {
   CandidateWorkflowRecord,
   CandidateWorkflowStatus,
   PaperworkStatus,
 } from "@/lib/candidate-workflow-types";
+import { decideOwnershipWrite } from "@/lib/p188-4-recruiter-ownership-durability/precedence";
 
 /** Workflow stages that must not be downgraded by ingestion/automation. */
 export const ADVANCED_WORKFLOW_STATUSES = new Set<CandidateWorkflowStatus>([
@@ -50,14 +50,19 @@ const ONBOARDING_STATUS_RANK: Record<OnboardingPacketStatus, number> = {
 export function resolveAssignedRecruiter(
   incoming: string | undefined,
   existing: CandidateWorkflowRecord | undefined,
+  options?: {
+    incomingSource?: CandidateWorkflowRecord["recruiterAssignmentSource"];
+    allowForceOverwrite?: boolean;
+  },
 ): string {
-  const trimmed = incoming?.trim();
-  if (!trimmed || isUnassignedRecruiter(trimmed)) {
-    const prior = existing?.assignedRecruiter?.trim();
-    if (prior && !isUnassignedRecruiter(prior)) return prior;
-    return prior || "Unassigned";
-  }
-  return trimmed;
+  const decision = decideOwnershipWrite({
+    incomingRecruiter: incoming,
+    incomingSource: options?.incomingSource ?? null,
+    existingRecruiter: existing?.assignedRecruiter,
+    existingSource: existing?.recruiterAssignmentSource,
+    allowForceOverwrite: options?.allowForceOverwrite,
+  });
+  return decision.recruiter;
 }
 
 export function isWorkflowStatusRegression(

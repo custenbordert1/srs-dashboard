@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-07-13T15:09:45.220Z",
+  "sourcePhase": "P186.6",
+  "funnelCountsByStage": {
+    "APPLIED": 1,
+    "RECRUITER_REVIEW": 1,
+    "HIRING_RECOMMENDATION": 1,
+    "OPERATOR_APPROVED": 1,
+    "PAPERWORK_NEEDED": 1,
+    "PAPERWORK_SENT": 2,
+    "PAPERWORK_VIEWED": 1,
+    "PAPERWORK_SIGNED": 1,
+    "ONBOARDING_COMPLETE": 1,
+    "READY_FOR_MEL": 1,
+    "MEL_EXPORT_REVIEW": 1,
+    "EXPORTED": 1
+  },
+  "conversionRates": {
+    "application_to_review": 100,
+    "review_to_recommendation": 100,
+    "recommendation_to_approval": 100,
+    "approval_to_paperwork": 100,
+    "paperwork_sent_to_viewed": 50,
+    "viewed_to_signed": 100,
+    "signed_to_onboarding_complete": 100,
+    "onboarding_complete_to_ready_for_mel": 100,
+    "ready_for_mel_to_exported": 100
+  },
+  "agingDistribution": {
+    "healthy": 1,
+    "warning": 10,
+    "overdue": 1,
+    "critical": 2
+  },
+  "productionWritesAttempted": 0,
+  "melWritesAttempted": 0,
+  "paperworkSendsAttempted": 0
+}

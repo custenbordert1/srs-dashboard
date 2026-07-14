@@ -1,0 +1,894 @@
+{
+  "sourcePhase": "P188.7",
+  "challengedAt": "2026-07-13T20:51:41.992Z",
+  "newBatchSize": 50,
+  "priorRestoredSize": 60,
+  "newBatchPreserved": 50,
+  "priorRestoredPreserved": 60,
+  "clobbered": 0,
+  "totalNamedProtectedExpected": 110,
+  "totalNamedProtectedActual": 110,
+  "unrelatedFieldChanges": 0,
+  "details": [
+    {
+      "candidateId": "bcdf…7758",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "5955…1641",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "e2d4…d33a",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "6c55…8468",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "5cc1…1e3d",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "7dbe…ed26",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "5d19…212c",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "117a…8620",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "09d3…882d",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9481…63c1",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "ab38…91b9",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "34ff…3d73",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "7b46…cc27",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "cc22…a159",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1a91…2c38",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "0f09…0c1c",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "27e5…1ca4",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "5d58…5a64",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "4750…c118",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "b179…6202",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "e91d…6c12",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "39a4…af5f",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "e60e…9b15",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "82f9…a1f1",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "d5e7…c0a5",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9e0b…08a5",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2384…0d11",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1428…ad79",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "98b1…4845",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1431…e541",
+      "cohort": "p1887_batch",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "bf13…b503",
+      "cohort": "p1887_batch",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "306c…ae56",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "695e…42ea",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "63d1…1cbc",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "cb04…53eb",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1572…7aae",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "e9bf…e815",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "837b…4bee",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "4784…1fc0",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "3686…975c",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2256…8dcc",
+      "cohort": "p1887_batch",
+      "before": "Jordan",
+      "afterChallenge": "Jordan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "02e0…a238",
+      "cohort": "p1887_batch",
+      "before": "Drew",
+      "afterChallenge": "Drew",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "25ea…cf07",
+      "cohort": "p1887_batch",
+      "before": "Morgan",
+      "afterChallenge": "Morgan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "765b…4a40",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "7818…84aa",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "3a7e…3ddf",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "62f3…d535",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "d641…e3b9",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "fe6f…125f",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "69f9…eb46",
+      "cohort": "p1887_batch",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1b3a…b63c",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "5da2…1b96",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2726…a5b9",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "f700…0f03",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "570d…132e",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1b90…99ec",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "520a…6673",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "de92…199b",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9684…4533",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9111…89ae",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "8d0a…2b68",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "d3c7…8523",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "8249…d538",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "fc9f…5e36",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "fe26…d3f7",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2969…3a25",
+      "cohort": "prior_restored",
+      "before": "Alex",
+      "afterChallenge": "Alex",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "6a89…f999",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "bb5d…8f10",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "4076…ef6d",
+      "cohort": "prior_restored",
+      "before": "Morgan",
+      "afterChallenge": "Morgan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "b484…2135",
+      "cohort": "prior_restored",
+      "before": "Morgan",
+      "afterChallenge": "Morgan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "0bc4…bb26",
+      "cohort": "prior_restored",
+      "before": "Alex",
+      "afterChallenge": "Alex",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "ce18…83ec",
+      "cohort": "prior_restored",
+      "before": "Alex",
+      "afterChallenge": "Alex",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "613a…e518",
+      "cohort": "prior_restored",
+      "before": "Chris",
+      "afterChallenge": "Chris",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "3e1a…5fc3",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "c9f5…9a06",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "69b6…1d37",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "48b2…8baf",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "bee3…dd26",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "efc3…e39e",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "c2fe…b8c6",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "f2a4…cd78",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "6459…bd46",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "81c4…ea9a",
+      "cohort": "prior_restored",
+      "before": "Alex",
+      "afterChallenge": "Alex",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "6505…be20",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9f53…4daf",
+      "cohort": "prior_restored",
+      "before": "Drew",
+      "afterChallenge": "Drew",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "8d2f…38ca",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "70a0…d849",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2e44…2732",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "6557…2bc4",
+      "cohort": "prior_restored",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "f0a3…4951",
+      "cohort": "prior_restored",
+      "before": "Chris",
+      "afterChallenge": "Chris",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "77d8…4eb9",
+      "cohort": "prior_restored",
+      "before": "Sam",
+      "afterChallenge": "Sam",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "957d…bbc2",
+      "cohort": "prior_restored",
+      "before": "Sam",
+      "afterChallenge": "Sam",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "f34a…4e14",
+      "cohort": "prior_restored",
+      "before": "Sam",
+      "afterChallenge": "Sam",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "368f…5fb9",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "3d9b…c350",
+      "cohort": "prior_restored",
+      "before": "Sam",
+      "afterChallenge": "Sam",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "8a97…38d9",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2ee5…5ade",
+      "cohort": "prior_restored",
+      "before": "Sam",
+      "afterChallenge": "Sam",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "8555…c619",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "dfb1…7da7",
+      "cohort": "prior_restored",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "fe84…f694",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "30c2…2e4c",
+      "cohort": "prior_restored",
+      "before": "Alex",
+      "afterChallenge": "Alex",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "d229…960d",
+      "cohort": "prior_restored",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "b0e7…b1ff",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "7cde…35aa",
+      "cohort": "prior_restored",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "a658…28a1",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "011d…ef64",
+      "cohort": "prior_restored",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2210…ef92",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2bb8…4ecc",
+      "cohort": "prior_restored",
+      "before": "Casey",
+      "afterChallenge": "Casey",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "64ba…c9c9",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "fe15…d2a7",
+      "cohort": "prior_restored",
+      "before": "Riley",
+      "afterChallenge": "Riley",
+      "preserved": true,
+      "unrelatedChanges": []
+    }
+  ]
+}

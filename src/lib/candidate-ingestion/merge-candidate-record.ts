@@ -34,6 +34,10 @@ export function mergeCandidateRecord(
       existing.breezyCandidateIdUnavailable === false
         ? false
         : incoming.breezyCandidateIdUnavailable ?? existing.breezyCandidateIdUnavailable,
+    ownershipSignals:
+      incoming.ownershipSignals?.preferredName
+        ? incoming.ownershipSignals
+        : existing.ownershipSignals ?? incoming.ownershipSignals,
     questionnaireAnswers,
     hasQuestionnaire: Boolean(questionnaireAnswers?.length) || existing.hasQuestionnaire || incoming.hasQuestionnaire,
     questionnaireEnrichmentAttemptedAt:

@@ -1,0 +1,55 @@
+{
+  "ok": true,
+  "testMode": false,
+  "dryRun": {
+    "evaluated": 0,
+    "eligible": 0,
+    "duplicateRisks": 0,
+    "unresolvedOperations": 0,
+    "templatesReady": true,
+    "predictedRealSends": 0
+  },
+  "productionModeConfirmed": true,
+  "gates": [
+    {
+      "id": "dropbox_configured",
+      "ok": true,
+      "detail": "configured"
+    },
+    {
+      "id": "test_mode_false",
+      "ok": true,
+      "detail": "test_mode=false confirmed"
+    },
+    {
+      "id": "storage_healthy",
+      "ok": true,
+      "detail": "External Postgres durable adapter (Neon / Vercel Postgres / PGlite)."
+    },
+    {
+      "id": "neon_or_durable",
+      "ok": true,
+      "detail": "DATABASE_URL present"
+    },
+    {
+      "id": "circuit_closed",
+      "ok": true,
+      "detail": "closed"
+    },
+    {
+      "id": "kill_switch_off",
+      "ok": true,
+      "detail": "off"
+    },
+    {
+      "id": "p184_rate_limits",
+      "ok": true,
+      "detail": "{\"maxPerDay\":200,\"maxPerHour\":40,\"maxPerMinute\":4,\"concurrentSends\":2}"
+    },
+    {
+      "id": "dry_scan_completed",
+      "ok": true,
+      "detail": "evaluated=0 eligible=0 predicted=0"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "ok": true,
+  "sourcePhase": "P188.7",
+  "checkedAt": "2026-07-13T20:51:39.223Z",
+  "priorRestored": {
+    "expected": 60,
+    "stillNamed": 60,
+    "ledgerPresent": 60,
+    "clobberedIds": []
+  },
+  "gates": [
+    {
+      "id": "prior_cohorts_loaded",
+      "ok": true,
+      "detail": "canary=10 batch6=50"
+    },
+    {
+      "id": "prior_60_still_named",
+      "ok": true,
+      "detail": "stillNamed=60/60 clobbered=0"
+    },
+    {
+      "id": "prior_60_ledger_present",
+      "ok": true,
+      "detail": "ledgerPresent=60/60"
+    },
+    {
+      "id": "restore_flag_off_before_auth",
+      "ok": true,
+      "detail": "P188_OWNERSHIP_RESTORE_EXECUTION=false"
+    },
+    {
+      "id": "ownership_ledger_healthy",
+      "ok": true,
+      "detail": "Append-only ledger healthy (memory/jsonl); enable P188_OWNERSHIP_LEDGER_SQL=1 for Neon/PGlite"
+    },
+    {
+      "id": "storage_backend",
+      "ok": true,
+      "detail": "Neon/Postgres URL configured"
+    },
+    {
+      "id": "unresolved_ownership_ops",
+      "ok": true,
+      "detail": "0 unresolved ownership operations"
+    },
+    {
+      "id": "p184_dry_run",
+      "ok": true,
+      "detail": "P184 dry_run"
+    },
+    {
+      "id": "p187_flags_off",
+      "ok": true,
+      "detail": "P187 off"
+    },
+    {
+      "id": "continuous_automation_disabled",
+      "ok": true,
+      "detail": "Automation disabled"
+    },
+    {
+      "id": "no_active_downstream_ops",
+      "ok": true,
+      "detail": "No recommendation/approval/paperwork/MEL ops in restore path"
+    },
+    {
+      "id": "prior_tests",
+      "ok": true,
+      "detail": "Prior tests assumed/verified pass"
+    }
+  ],
+  "abortReasons": [],
+  "priorTestExitCode": 0
+}

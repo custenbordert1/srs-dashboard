@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-07-13T14:05:49.626Z",
+  "sourcePhase": "P186.3",
+  "roles": {
+    "executive": {
+      "canViewApprovalQueue": true,
+      "canApprove": true,
+      "canBulkHold": true,
+      "canViewOnly": false
+    },
+    "operator": {
+      "canViewApprovalQueue": true,
+      "canApprove": true,
+      "canBulkHold": true,
+      "canViewOnly": false
+    },
+    "recruiter": {
+      "canViewApprovalQueue": false,
+      "canApprove": false,
+      "canBulkHold": false,
+      "canViewOnly": true
+    },
+    "dm": {
+      "canViewApprovalQueue": true,
+      "canApprove": false,
+      "canBulkHold": true,
+      "canViewOnly": true
+    },
+    "read_only_viewer": {
+      "canViewApprovalQueue": true,
+      "canApprove": false,
+      "canBulkHold": false,
+      "canViewOnly": true
+    }
+  },
+  "notes": [
+    "Read-only viewer: view/filter only",
+    "Recruiter: own-queue visibility + notes/return-for-info",
+    "DM: territory queues + hold/return",
+    "Operator/Executive: approval + bulk + conflict review",
+    "No role may send paperwork via P186"
+  ]
+}

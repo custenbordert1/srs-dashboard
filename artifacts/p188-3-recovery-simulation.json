@@ -1,0 +1,934 @@
+{
+  "sourcePhase": "P188.3",
+  "scannedAt": "2026-07-13T19:52:34.604Z",
+  "reconstructionPerformed": false,
+  "historical": {
+    "performed": false,
+    "potentialReconstructableFromAudit": 377,
+    "linesScanned": 1138729,
+    "rapidWipeCount": 2444,
+    "recruiterHistogram": {
+      "Alex": 21,
+      "Riley": 40,
+      "Morgan": 13,
+      "Drew": 16,
+      "Logan": 35,
+      "Taylor": 126,
+      "Casey": 38,
+      "Chris": 12,
+      "Jordan": 48,
+      "Sam": 28
+    },
+    "note": "Reconstruction not performed. Counts reflect last named auto_assign/manual evidence in audit for current cohort only."
+  },
+  "simulationCounts": {
+    "automatically_recoverable": 0,
+    "operator_confirmation_required": 364,
+    "impossible_to_recover": 307,
+    "conflicting": 13,
+    "stale": 0
+  },
+  "sampleRows": [
+    {
+      "candidateId": "1b3a2f14b63c",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.562Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "5da2f2141b96",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.563Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "27269078a5b9",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.565Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "f700c2780f03",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-06T20:54:52.544Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c5b23216837a",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-06T20:54:52.616Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "afa4123cd361",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-07T12:19:09.171Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "570d0e5c132e",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.654Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "1b909bd699ec",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.656Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "cbc9380411b2",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "faec52c5e4c9",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "305e367a07a8",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "520ae00e6673",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.648Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "de921c6e199b",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.650Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "968499ef4533",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.651Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "911157c289ae",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.652Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "8d0a9d872b68",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.653Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "fd299c767d14",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "d3c7baa38523",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-25T20:53:04.410Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "8249cd92d538",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-25T20:53:04.416Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "ba880e29ff1e",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "554fe2251478",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "64ac200f117e",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "a23e30953307",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "854fd7c0f321",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T16:41:05.478Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "8c035453cf91",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:23.574Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "f1b2325774c4",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:23.103Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "840c0b858148",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:23.481Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "621ef8c8480c",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:23.291Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "b06d222cb36a",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:23.386Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "6acc0966d96a",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Jordan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:25.655Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": false
+    },
+    {
+      "candidateId": "e2399d01283c",
+      "bucket": "impossible_to_recover",
+      "proposedRecruiter": null,
+      "evidenceSource": null,
+      "evidenceAt": null,
+      "detail": "No historical named assignment, manual assign, or usable simulation evidence",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "21dc66d94d31",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Drew",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.122Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "fc9fe75e5e36",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.151Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "fe26ac4bd3f7",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.156Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "2969a7a83a25",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.157Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c3b611496cfd",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.159Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "5e64219daaf9",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.160Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "445225a971f7",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.162Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "6a891047f999",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.164Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "bb5d94088f10",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.166Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "84d51041e750",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:21.041Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c70e4a31b050",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.167Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "09c38dd6b79b",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:21.050Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "92181f9de45c",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.169Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "705cdc0e7f30",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.170Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "91faef15d8fd",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.171Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "189e89cd8493",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.176Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "652bc90340b9",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.178Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "40764d83ef6d",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:14.643Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "b484a5e72135",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.179Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "aaa55717777d",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:21.058Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "0bc4a331bb26",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:14.717Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c87b5e655cc6",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:21.066Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "94f3eb998444",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.181Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "4eb52a6c7495",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.182Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "e5124f6a674e",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.184Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "6b40ff3b280a",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.186Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "a498d752b5bb",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.188Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "de52f7096d0f",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Morgan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:21.075Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "1b2b4ad3f876",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.189Z",
+      "detail": "Conflict Alex (audit) vs Taylor (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c6a7a62c67f6",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.191Z",
+      "detail": "Conflict Alex (audit) vs Taylor (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "db05da0112e4",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.193Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "94b37988e89c",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.201Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "598e1b950e29",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:14.793Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c0c920caa44f",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.716Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "773445c489a7",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.737Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "cfcd1b8179ba",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:25.617Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "ce187a7283ec",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T17:38:14.866Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "3594ca74d198",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.202Z",
+      "detail": "Conflict Alex (audit) vs Taylor (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "f71f2c217365",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.204Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "df72b3cdd658",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.206Z",
+      "detail": "Conflict Alex (audit) vs Taylor (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "613ae10be518",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Chris",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.208Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "ec0b5c34690e",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.210Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "3e1a34625fc3",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.212Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c9f5bb769a06",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.214Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "4496378a887d",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.216Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "edc9df960855",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.226Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "9c8555abfbc7",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.228Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "0f843baa6e92",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.230Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "cfd03224d5c8",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.233Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "9990aa40f960",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-06T20:54:51.609Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "46551846149e",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.235Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "f8bc83d66e0d",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.237Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "69b657731d37",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.241Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "2fb0a404c249",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.243Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "86a8d6804b6b",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Sam",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.246Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "3e2ad2d9bb3f",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.248Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "b32054c06f54",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.251Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "6defa435252d",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.253Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "d2d1526ef7eb",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.255Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "09efbe00aac9",
+      "bucket": "conflicting",
+      "proposedRecruiter": null,
+      "evidenceSource": "audit:auto_assign_recruiter|p158_sim",
+      "evidenceAt": "2026-07-09T20:16:00.258Z",
+      "detail": "Conflict Sam (audit) vs Logan (P158 sim)",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "48b2ee908baf",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.260Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "bee316e7dd26",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.262Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "efc3700be39e",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.265Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "c2fe3a21b8c6",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.267Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "f2a43e50cd78",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Logan",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.269Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "645974cfbd46",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.714Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "81c4ebb9ea9a",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Alex",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-09T20:16:00.272Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "650590ddbe20",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Taylor",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-06-29T19:40:05.711Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    },
+    {
+      "candidateId": "e72d6aebdb0d",
+      "bucket": "operator_confirmation_required",
+      "proposedRecruiter": "Drew",
+      "evidenceSource": "audit:auto_assign_recruiter",
+      "evidenceAt": "2026-07-08T15:32:25.640Z",
+      "detail": "Last auto_assign_recruiter exists in audit but was wiped from durable store — confirm before restore",
+      "jobResolved": true
+    }
+  ],
+  "note": "Simulation only — no reconstruction writes performed."
+}

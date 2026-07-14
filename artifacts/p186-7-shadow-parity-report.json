@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-07-13T16:27:41.479Z",
+  "note": "Planning fixture / read-only observation shape — not a production cutover sample",
+  "candidatesEvaluated": 100,
+  "matches": 97,
+  "mismatches": 3,
+  "missingShadowRecords": 0,
+  "impossibleTransitions": 0,
+  "staleEvents": 0,
+  "duplicateWriterEvents": 0,
+  "sourceLagMs": 1200,
+  "auditGaps": 0,
+  "ownershipConflicts": 0,
+  "matchRate": 0.97,
+  "criticalMismatches": 0,
+  "passesThreshold": true
+}

@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-07-13T19:21:47.237Z",
+  "workflowRecordsScanned": 684,
+  "candidatesReadyForRecommendation": 0,
+  "candidatesBlocked": 514,
+  "queueCounts": {
+    "ready_for_recruiter_review": 0,
+    "ready_to_recommend": 0,
+    "recommendation_blocked": 514,
+    "recruiter_unresolved": 520,
+    "job_unresolved": 520,
+    "hold_conflict": 0,
+    "already_recommended": 0,
+    "already_approved": 0,
+    "paperwork_already_active": 164,
+    "historical_lifecycle_bypass": 139
+  },
+  "simulatedSuccessfulRecommendations": 3,
+  "productionWrites": 0,
+  "approvals": 0,
+  "paperworkSends": 0,
+  "melWrites": 0
+}

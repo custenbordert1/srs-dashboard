@@ -1,0 +1,9 @@
+{
+  "sourcePhase": "P188.4",
+  "projectedBothResolved": 209,
+  "projectedRecommendationReady": 182,
+  "projectedP187Eligible": 182,
+  "bypassExcluded": 139,
+  "simulationOnly": true,
+  "p187AuthorityEnabled": false
+}

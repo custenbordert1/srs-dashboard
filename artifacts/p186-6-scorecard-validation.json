@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-07-13T15:09:45.220Z",
+  "recruiterScorecardsGenerated": 2,
+  "dmScorecardsGenerated": 1,
+  "recruiters": [
+    {
+      "owner": "R1",
+      "sampleSize": 13,
+      "ranked": true,
+      "insufficientSample": false
+    },
+    {
+      "owner": "R2",
+      "sampleSize": 1,
+      "ranked": false,
+      "insufficientSample": true
+    }
+  ],
+  "dms": [
+    {
+      "owner": "DM1",
+      "sampleSize": 14,
+      "ranked": true
+    }
+  ]
+}

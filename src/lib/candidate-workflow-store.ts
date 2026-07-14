@@ -30,13 +30,30 @@ import {
 } from "@/lib/candidate-workflow-types";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import {
-  resolveAssignedRecruiter,
   resolvePaperworkStatus,
   resolveWorkflowStatus,
 } from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
+import { decideOwnershipWrite } from "@/lib/p188-4-recruiter-ownership-durability/precedence";
+import {
+  assertOwnershipCas,
+  mergeWorkflowMapsForDurableWrite,
+} from "@/lib/p188-4-recruiter-ownership-durability/ownershipMerge";
+import { appendOwnershipLedgerEvent } from "@/lib/p188-4-recruiter-ownership-durability/ledgerStore";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
+
+/** Serialize workflow store mutations to prevent lost updates (P188.4). */
+let workflowStoreWriteChain: Promise<void> = Promise.resolve();
+
+function withWorkflowStoreLock<T>(fn: () => Promise<T>): Promise<T> {
+  const run = workflowStoreWriteChain.then(fn, fn);
+  workflowStoreWriteChain = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
 
 function workflowDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
@@ -61,6 +78,14 @@ export type CandidateWorkflowAuditEntry = {
   byUserId?: string;
   metadata?: Record<string, string | boolean | number>;
 };
+
+export class OwnershipConcurrencyError extends Error {
+  readonly code = "OWNERSHIP_CONCURRENCY_CONFLICT";
+  constructor(message: string) {
+    super(message);
+    this.name = "OwnershipConcurrencyError";
+  }
+}
 
 function sortedRoster(values: string[], anchor = "Unassigned"): string[] {
   const trimmed = values.map((v) => v.trim()).filter(Boolean);
@@ -142,7 +167,19 @@ async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
 async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
   const { storeDir, storePath } = storePaths();
   await safeRecruitingMkdir(storeDir);
-  await writeFile(storePath, JSON.stringify(file, null, 2), "utf8");
+  const disk = await readStoreFile();
+  const merged: CandidateWorkflowStoreFile = {
+    version: 2,
+    rosters: {
+      recruiters: sortedRoster(
+        file.rosters?.recruiters?.length ? file.rosters.recruiters : disk.rosters.recruiters,
+      ),
+      dms: sortedRoster(file.rosters?.dms?.length ? file.rosters.dms : disk.rosters.dms),
+    },
+    workflows: mergeWorkflowMapsForDurableWrite(disk.workflows, file.workflows),
+    updatedAt: file.updatedAt ?? new Date().toISOString(),
+  };
+  await writeFile(storePath, JSON.stringify(merged, null, 2), "utf8");
 }
 
 export async function appendCandidateWorkflowAudit(entry: CandidateWorkflowAuditEntry): Promise<void> {
@@ -247,17 +284,49 @@ export async function upsertCandidateWorkflow(input: {
   forceWorkflowStatus?: boolean;
   /** When true, allow paperworkStatus to regress from sent/viewed/signed. */
   forcePaperworkStatus?: boolean;
+  /** P188.4 optimistic concurrency — fail closed on mismatch. */
+  expectedOwnershipVersion?: number | null;
+  expectedRecruiter?: string | null;
+  /** Allow explicit overwrite of sticky higher-priority owners (manual/operator). */
+  allowForceOverwrite?: boolean;
+  /** Skip ownership ledger append (tests / pure metadata updates). */
+  skipOwnershipLedger?: boolean;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
+  return withWorkflowStoreLock(() => upsertCandidateWorkflowUnlocked(input));
+}
+
+async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCandidateWorkflow>[0]): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
   const file = await readStoreFile();
   const existing = file.workflows[input.candidateId];
+
+  const cas = assertOwnershipCas({
+    existing,
+    expectedOwnershipVersion: input.expectedOwnershipVersion,
+    expectedRecruiter: input.expectedRecruiter,
+  });
+  if (!cas.ok) {
+    throw new OwnershipConcurrencyError(cas.detail);
+  }
+
   const workflowStatus = resolveWorkflowStatus(
     input.workflowStatus,
     existing,
     input.forceWorkflowStatus ?? false,
   );
-  const assignedRecruiter = resolveAssignedRecruiter(input.assignedRecruiter, existing);
+  const ownershipDecision = decideOwnershipWrite({
+    incomingRecruiter: input.assignedRecruiter,
+    incomingSource: input.recruiterAssignmentSource,
+    existingRecruiter: existing?.assignedRecruiter,
+    existingSource: existing?.recruiterAssignmentSource,
+    allowForceOverwrite:
+      input.allowForceOverwrite === true ||
+      input.recruiterAssignmentSource === "manual" ||
+      input.recruiterAssignmentSource === "operator_restore" ||
+      input.recruiterAssignmentSource === "operator_confirmed_historical_restore",
+  });
+  const assignedRecruiter = ownershipDecision.recruiter;
   const assignedDM = input.assignedDM?.trim() || existing?.assignedDM || "Unassigned";
   const notes = input.note?.trim()
     ? [input.note.trim(), ...(existing?.notes ?? [])].slice(0, 25)
@@ -336,26 +405,38 @@ export async function upsertCandidateWorkflow(input: {
     input.directDepositLastHrBccAddress !== undefined
       ? input.directDepositLastHrBccAddress
       : (existing?.directDepositLastHrBccAddress ?? null);
-  const recruiterAssignmentSource =
-    input.recruiterAssignmentSource !== undefined
-      ? input.recruiterAssignmentSource
-      : (existing?.recruiterAssignmentSource ?? null);
+  const recruiterAssignmentSource = ownershipDecision.applied
+    ? ((ownershipDecision.source as RecruiterAssignmentSource | null) ??
+      input.recruiterAssignmentSource ??
+      existing?.recruiterAssignmentSource ??
+      null)
+    : (existing?.recruiterAssignmentSource ??
+      (ownershipDecision.source as RecruiterAssignmentSource | null) ??
+      null);
   const recruiterAssignmentReason =
-    input.recruiterAssignmentReason !== undefined
+    ownershipDecision.applied && input.recruiterAssignmentReason !== undefined
       ? input.recruiterAssignmentReason
-      : (existing?.recruiterAssignmentReason ?? null);
+      : ownershipDecision.applied
+        ? (input.recruiterAssignmentReason ?? existing?.recruiterAssignmentReason ?? null)
+        : (existing?.recruiterAssignmentReason ?? null);
   const recruiterAssignmentConfidence =
-    input.recruiterAssignmentConfidence !== undefined
+    ownershipDecision.applied && input.recruiterAssignmentConfidence !== undefined
       ? input.recruiterAssignmentConfidence
-      : (existing?.recruiterAssignmentConfidence ?? null);
-  const recruiterAssignedAt =
-    input.assignedRecruiter?.trim() &&
-    existing?.assignedRecruiter !== assignedRecruiter &&
-    (input.recruiterAssignmentSource === "auto" || input.recruiterAssignmentSource === "manual")
-      ? now
-      : input.recruiterAssignmentSource !== undefined && input.recruiterAssignmentSource !== existing?.recruiterAssignmentSource
-        ? now
-        : (existing?.recruiterAssignedAt ?? null);
+      : ownershipDecision.applied
+        ? (input.recruiterAssignmentConfidence ?? existing?.recruiterAssignmentConfidence ?? null)
+        : (existing?.recruiterAssignmentConfidence ?? null);
+  const ownershipChanged =
+    Boolean(existing?.assignedRecruiter) && existing!.assignedRecruiter !== assignedRecruiter
+      ? true
+      : !existing && assignedRecruiter !== "Unassigned"
+        ? true
+        : (existing?.assignedRecruiter ?? "Unassigned") !== assignedRecruiter;
+  const recruiterAssignedAt = ownershipChanged
+    ? now
+    : (existing?.recruiterAssignedAt ?? null);
+  const recruiterOwnershipVersion = ownershipChanged
+    ? (existing?.recruiterOwnershipVersion ?? 0) + 1
+    : (existing?.recruiterOwnershipVersion ?? 0);
 
   const requiredAction =
     input.requiredAction !== undefined ? input.requiredAction : (existing?.requiredAction ?? null);
@@ -398,7 +479,7 @@ export async function upsertCandidateWorkflow(input: {
     history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
   }
   if (input.assignedRecruiter?.trim() && existing?.assignedRecruiter !== assignedRecruiter) {
-    if (input.recruiterAssignmentSource === "auto") {
+    if (ownershipDecision.applied && recruiterAssignmentSource === "auto") {
       history.unshift(
         event(
           "assignment",
@@ -406,8 +487,16 @@ export async function upsertCandidateWorkflow(input: {
           now,
         ),
       );
-    } else {
+    } else if (ownershipDecision.applied) {
       history.unshift(event("assignment", `Assigned recruiter changed to ${assignedRecruiter}.`, now));
+    } else {
+      history.unshift(
+        event(
+          "assignment",
+          `Ownership write blocked (${ownershipDecision.reason}); retained ${assignedRecruiter}.`,
+          now,
+        ),
+      );
     }
   }
   if (
@@ -493,6 +582,7 @@ export async function upsertCandidateWorkflow(input: {
     recruiterAssignmentReason,
     recruiterAssignmentConfidence,
     recruiterAssignedAt,
+    recruiterOwnershipVersion,
     requiredAction,
     actionType,
     actionPriority,
@@ -512,6 +602,38 @@ export async function upsertCandidateWorkflow(input: {
   file.updatedAt = now;
   await writeStoreFile(file);
 
+  if (
+    ownershipChanged &&
+    ownershipDecision.applied &&
+    !input.skipOwnershipLedger &&
+    assignedRecruiter !== (existing?.assignedRecruiter ?? "Unassigned")
+  ) {
+    const correlationId = randomUUID();
+    const idempotencyKey = `own:${input.candidateId}:${recruiterOwnershipVersion}:${assignedRecruiter}`;
+    await appendOwnershipLedgerEvent({
+      candidateId: input.candidateId,
+      previousRecruiter: existing?.assignedRecruiter ?? null,
+      newRecruiter: assignedRecruiter,
+      source: ownershipDecision.source ?? "unassigned",
+      actor: input.audit?.byUserId ?? "system",
+      actorRole:
+        ownershipDecision.source === "manual" ||
+        ownershipDecision.source === "operator_restore" ||
+        ownershipDecision.source === "operator_confirmed_historical_restore"
+          ? "operator"
+          : "system",
+      reason: input.recruiterAssignmentReason ?? ownershipDecision.reason,
+      correlationId,
+      idempotencyKey,
+      workflowVersion: recruiterOwnershipVersion,
+      confidence: recruiterAssignmentConfidence,
+      evidenceReference: input.audit?.action ?? null,
+      rollbackReference: existing
+        ? `rollback:${input.candidateId}:v${existing.recruiterOwnershipVersion ?? 0}`
+        : null,
+    });
+  }
+
   if (input.audit) {
     await appendCandidateWorkflowAudit({
       id: randomUUID(),
@@ -523,6 +645,18 @@ export async function upsertCandidateWorkflow(input: {
       metadata: input.audit.metadata,
     });
   }
+
+  // P186.2 shadow dual-write observe — production store remains authoritative.
+  // Failures are swallowed; never blocks workflow upsert.
+  void import("@/lib/p186-2-event-adapters")
+    .then(({ observeWorkflowUpsertSafe }) =>
+      observeWorkflowUpsertSafe({
+        candidateId: input.candidateId,
+        workflowStatus: record.workflowStatus,
+        paperworkStatus: record.paperworkStatus,
+      }),
+    )
+    .catch(() => undefined);
 
   return record;
 }

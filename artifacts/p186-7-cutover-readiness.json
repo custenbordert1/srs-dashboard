@@ -1,0 +1,212 @@
+{
+  "generatedAt": "2026-07-13T16:27:41.479Z",
+  "currentStage": "stage_1_read_only_enablement",
+  "maxImplementedStage": "stage_1_read_only_enablement",
+  "stage2BlockedWithoutAuthorization": true,
+  "flags": {
+    "cutoverDashboard": false,
+    "writerFreezeControls": false,
+    "transitionCanaryFramework": false,
+    "rollbackControls": false,
+    "lifecycleAuthorityByTransitionGroup": false,
+    "reconcilerScheduler": false
+  },
+  "gates": {
+    "ok": false,
+    "gates": [
+      {
+        "gateId": "shadow_match_rate",
+        "ok": true,
+        "detail": "matchRate=0.97 threshold=0.95"
+      },
+      {
+        "gateId": "zero_critical_mismatches",
+        "ok": true,
+        "detail": "criticalMismatches=0"
+      },
+      {
+        "gateId": "zero_unresolved_operations",
+        "ok": true,
+        "detail": "unresolved=0"
+      },
+      {
+        "gateId": "no_duplicate_writer_writes",
+        "ok": true,
+        "detail": "duplicateWrites=0"
+      },
+      {
+        "gateId": "neon_healthy",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "schema_healthy",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "event_ingestion_healthy",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "reconciler_healthy",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "workflow_adapter_healthy",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "audit_persistence_healthy",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "rollback_tested",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "operator_dashboard_reviewed",
+        "ok": false,
+        "detail": "false"
+      },
+      {
+        "gateId": "executive_dashboard_reviewed",
+        "ok": false,
+        "detail": "false"
+      },
+      {
+        "gateId": "p184_p185_isolation",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "paperwork_dry_run",
+        "ok": true,
+        "detail": "true"
+      },
+      {
+        "gateId": "automatic_mel_export_disabled",
+        "ok": true,
+        "detail": "true"
+      }
+    ],
+    "readyForStage2Canary": false
+  },
+  "freezeOrder": [
+    "p1547-continuous-recruiting-runner",
+    "p169-recruiting-orchestrator",
+    "p171-lifecycle-manager",
+    "p1061-autonomous-paperwork-runner",
+    "p136-paperwork-scheduler",
+    "p125-production-runner",
+    "p106-autonomous-paperwork-engine",
+    "p183-final-scoped-operator-send"
+  ],
+  "freezeReady": [],
+  "freezeBlocked": [
+    {
+      "writerId": "p1547-continuous-recruiting-runner",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p169-recruiting-orchestrator",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p171-lifecycle-manager",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p1061-autonomous-paperwork-runner",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p136-paperwork-scheduler",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p125-production-runner",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p106-autonomous-paperwork-engine",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    },
+    {
+      "writerId": "p183-final-scoped-operator-send",
+      "reasons": [
+        "Replacement path unhealthy",
+        "Replacement path missing shadow parity",
+        "1 unresolved operations",
+        "Audit history incomplete",
+        "Rollback flag missing",
+        "Monitoring inactive",
+        "Operator approval not recorded"
+      ]
+    }
+  ],
+  "writersActuallyDisabled": 0,
+  "p186Authoritative": false,
+  "recommendation": "First controlled production canary (future): Hiring Recommendation→Operator Approved on a max-5 immutable cohort after all gates pass and explicit operator authorization."
+}

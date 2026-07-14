@@ -26,6 +26,13 @@ import { ExecutiveDecisionCenter } from "@/components/executive/executive-decisi
 import { ExecutiveReadinessAdvisorPanel } from "@/components/executive/executive-readiness-advisor-panel";
 import { AutonomousRecruiterOperationsPanel } from "@/components/executive/autonomous-recruiter-operations-panel";
 import { AutonomousLifecycleOperationsPanel } from "@/components/executive/autonomous-lifecycle-operations-panel";
+import { P186OperatorLifecyclePanel } from "@/components/executive/p186-operator-lifecycle-panel";
+import { P186ConflictDashboardPanel } from "@/components/executive/p186-conflict-dashboard-panel";
+import { P186PostSignMelPanel } from "@/components/executive/p186-post-sign-mel-panel";
+import { P186ExecutiveIntelligencePanel } from "@/components/executive/p186-executive-intelligence-panel";
+import { P186CutoverDashboardPanel } from "@/components/executive/p186-cutover-dashboard-panel";
+import { P187CutoverStatusPanel } from "@/components/executive/p187-cutover-status-panel";
+import { P188RecommendHirePanel } from "@/components/executive/p188-recommend-hire-panel";
 import { AutonomousProductionRunnerPanel } from "@/components/executive/autonomous-production-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
@@ -274,6 +281,20 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <AutonomousRecruiterOperationsPanel />
 
       <AutonomousLifecycleOperationsPanel />
+
+      <P186OperatorLifecyclePanel />
+
+      <P186ConflictDashboardPanel />
+
+      <P186PostSignMelPanel />
+
+      <P186ExecutiveIntelligencePanel />
+
+      <P186CutoverDashboardPanel />
+
+      <P187CutoverStatusPanel />
+
+      <P188RecommendHirePanel />
 
       <AutonomousRecoveryCenterPanel />
 

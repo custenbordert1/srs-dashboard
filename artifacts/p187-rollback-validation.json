@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-07-13T17:36:59.140Z",
+  "ok": true,
+  "executed": false,
+  "restoredLegacyOwnership": true,
+  "auditPreserved": true,
+  "dataLoss": false,
+  "duplicateWorkflowEntries": false,
+  "paperworkSends": 0,
+  "melExports": 0,
+  "candidatesRestored": [
+    "canary-1",
+    "canary-2",
+    "canary-3"
+  ],
+  "safetyOk": true,
+  "detail": "Rollback ready — ownership restoration planned without data loss"
+}

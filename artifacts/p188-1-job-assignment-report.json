@@ -1,0 +1,8 @@
+{
+  "generatedAt": "2026-07-13T19:21:47.237Z",
+  "scanned": 684,
+  "resolved": 0,
+  "unresolved": 684,
+  "note": "Validation pass had empty job catalog — unresolved expected until Breezy/position enrichments provided",
+  "productionWrites": 0
+}
