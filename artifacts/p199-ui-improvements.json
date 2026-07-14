@@ -1,0 +1,84 @@
+{
+  "phase": "P199",
+  "generatedAt": "2026-07-14T19:45:00.000Z",
+  "scope": "UI/UX only — candidate queue filters + condensed Candidate Workspace",
+  "didNotModify": [
+    "P192 production runner",
+    "P193 automation logic",
+    "P194/P195/P196 metrics",
+    "Dropbox integration",
+    "Reminder engine",
+    "AI qualification",
+    "MEL integration APIs"
+  ],
+  "queueFilters": {
+    "state": "multi-select dropdown from loaded candidate.state values",
+    "daysSinceApplied": ["Today", "1 Day", "2 Days", "3–5 Days", "6–10 Days", "10+ Days"],
+    "sort": [
+      "Newest Applied",
+      "Oldest Applied",
+      "Highest AI Score",
+      "Lowest AI Score",
+      "Nearest Jobs",
+      "Confidence"
+    ],
+    "combined": true,
+    "clientSideOnly": true,
+    "sessionPersistenceKey": "p199-candidate-queue-filters",
+    "persistsOnRefresh": ["states", "daysSinceApplied", "sort", "headerColumn", "headerDirection"]
+  },
+  "queueTable": {
+    "sortableHeaders": ["State", "City", "Applied", "Age", "Owner", "Confidence", "Nearby Jobs"],
+    "columns": [
+      "Checkbox",
+      "Name",
+      "State",
+      "City",
+      "Applied",
+      "Age",
+      "Owner",
+      "Confidence",
+      "Nearby Jobs",
+      "Action"
+    ]
+  },
+  "workspace": {
+    "primaryActionsNearTop": [
+      "Open Breezy",
+      "Resume",
+      "Questionnaire",
+      "Send Paperwork (or Paperwork Status/Viewed/Signed when already sent)",
+      "Refresh Status"
+    ],
+    "automationCollapsedByDefault": true,
+    "notesBelowAutomation": true,
+    "quickSummaryFields": [
+      "AI Recommendation",
+      "Confidence",
+      "Nearby Jobs",
+      "Experience",
+      "Distance",
+      "Availability"
+    ],
+    "milestoneTimeline": [
+      "Applied",
+      "AI Reviewed",
+      "Paperwork Sent",
+      "Viewed",
+      "Signed",
+      "Ready for Assignment"
+    ]
+  },
+  "modules": {
+    "lib": "src/lib/p199-candidate-queue-ux/",
+    "filtersBar": "src/components/recruiting/candidate-queue-filters-bar.tsx",
+    "workspace": "src/components/recruiting/candidate-workspace/candidate-workspace.tsx",
+    "queueHost": "src/components/recruiting/candidates-section.tsx"
+  },
+  "tests": {
+    "unit": "src/lib/p199-candidate-queue-ux/__tests__/p199-candidate-queue-ux.test.ts",
+    "passed": 5
+  },
+  "apiChanges": false,
+  "productionLogicChanges": false
+}

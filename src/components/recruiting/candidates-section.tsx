@@ -125,14 +125,12 @@ import { CandidateExcelExportControls } from "@/components/recruiting/candidate-
 import { RecruiterInbox } from "@/components/recruiting/recruiter-inbox";
 import { CandidateDiscoveryPanel } from "@/components/recruiting/candidate-discovery-panel";
 import { CandidatesAdminDiagnostics } from "@/components/recruiting/candidates-admin-diagnostics";
-import { ACTION_PRIORITY_STYLES } from "@/lib/recruiter-action-engine/action-sort";
 import { progressionBadgeStyle } from "@/lib/candidate-progression-engine/progression-sort";
 import {
   buildRecruiterInboxSections,
   computeRecruiterAgingBucket,
   queueParamToInboxSection,
   RECRUITER_AGING_BUCKET_LABELS,
-  sortByRecruiterInboxPriority,
   type RecruiterAgingBucket,
   type RecruiterInboxSectionId,
 } from "@/lib/recruiter-action-queue-filters";
@@ -154,6 +152,17 @@ import {
 } from "@/lib/recruiter-sync-status-copy";
 import { RecentDdBackfillQueue } from "@/components/recruiting/recent-dd-backfill-queue";
 import { CandidateRowPrimaryActionBar } from "@/components/recruiting/candidate-row-primary-action";
+import { CandidateQueueFiltersBar } from "@/components/recruiting/candidate-queue-filters-bar";
+import {
+  applyP199QueueFilterAndSort,
+  confidenceForQueueRow,
+  loadP199QueueFiltersFromSession,
+  P199_DEFAULT_FILTER_STATE,
+  resolveSortFromHeader,
+  saveP199QueueFiltersToSession,
+  type P199QueueFilterState,
+  type P199SortableColumn,
+} from "@/lib/p199-candidate-queue-ux";
 import {
   stickyCheckboxCellClass,
   stickyCheckboxHeaderClass,
@@ -489,6 +498,9 @@ export function CandidatesSection() {
   const [positionFilter, setPositionFilter] = useState(ALL);
   const [cityFilter, setCityFilter] = useState(ALL);
   const [stateFilter, setStateFilter] = useState(ALL);
+  const [queueFilters, setQueueFilters] = useState<P199QueueFilterState>(() =>
+    typeof window === "undefined" ? { ...P199_DEFAULT_FILTER_STATE } : loadP199QueueFiltersFromSession(),
+  );
   const [workflowFilter, setWorkflowFilter] = useState(ALL);
   const [matchFilter, setMatchFilter] = useState(ALL);
   const [intelligenceFilter, setIntelligenceFilter] = useState(ALL);
@@ -948,6 +960,10 @@ export function CandidatesSection() {
     return () => window.clearTimeout(id);
   }, [loadBundle]);
 
+  useEffect(() => {
+    saveP199QueueFiltersToSession(queueFilters);
+  }, [queueFilters]);
+
   // P170 — merge the durable ingestion store as a base layer so the displayed
   // list is "Ingestion Store + Live Preview" rather than preview-only. This runs
   // once after mount and never removes freshly loaded preview/fast rows.
@@ -1206,8 +1222,11 @@ export function CandidatesSection() {
   const sourceOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.source)), [candidates]);
   const stageOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.stage)), [candidates]);
   const positionOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.positionName)), [candidates]);
-  const cityOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.city)), [candidates]);
-  const stateOptions = useMemo(() => sortedUnique(candidates.map((candidate) => candidate.state)), [candidates]);
+  const stateOptions = useMemo(
+    () =>
+      sortedUnique(candidates.map((candidate) => candidate.state.trim().toUpperCase())).filter(Boolean),
+    [candidates],
+  );
 
   const searchIndex = useMemo(() => {
     const index = new Map<string, string>();
@@ -1284,7 +1303,19 @@ export function CandidatesSection() {
       return true;
     });
 
-    const sorted = sortByRecruiterInboxPriority(rows, actingRecruiter);
+    const withP199Fields = rows.map((candidate) => ({
+      ...candidate,
+      confidence: confidenceForQueueRow({
+        actionConfidence: candidate.actionConfidence,
+        recruiterAssignmentConfidence: candidate.recruiterAssignmentConfidence,
+        progressionConfidence: candidate.progressionConfidence,
+        aiNumericScore: candidate.aiNumericScore,
+      }),
+      nearbyJobCount: candidate.distanceMiles != null ? 1 : 0,
+      distanceMiles: candidate.distanceMiles ?? null,
+    }));
+
+    const sorted = applyP199QueueFilterAndSort(withP199Fields, queueFilters);
     logCandidatesClientTrace("table_render_state", {
       tableRowsCommittedToState: sorted.length,
       hasRenderableCandidateRows,
@@ -1296,6 +1327,9 @@ export function CandidatesSection() {
         positionFilter,
         cityFilter,
         stateFilter,
+        queueStates: queueFilters.states,
+        daysSinceApplied: queueFilters.daysSinceApplied,
+        queueSort: queueFilters.sort,
         workflowFilter,
         matchFilter,
         intelligenceFilter,
@@ -1325,6 +1359,7 @@ export function CandidatesSection() {
     intelligenceFilter,
     matchFilter,
     positionFilter,
+    queueFilters,
     searchIndex,
     sourceFilter,
     stageFilter,
@@ -1953,8 +1988,17 @@ export function CandidatesSection() {
     (candidate: ScoredCandidateWorkflowRow) => {
       const appliedDays = daysSince(candidate.appliedDate);
       const rowSelected = selectedCandidateId === candidate.candidateId;
-      const location = [candidate.city, candidate.state].filter(Boolean).join(", ") || "—";
       const urgencyClass = tableRowUrgencyClass(candidate);
+      const confidence = confidenceForQueueRow({
+        actionConfidence: candidate.actionConfidence,
+        recruiterAssignmentConfidence: candidate.recruiterAssignmentConfidence,
+        progressionConfidence: candidate.progressionConfidence,
+        aiNumericScore: candidate.aiNumericScore,
+      });
+      const nearbyLabel =
+        candidate.distanceMiles != null
+          ? `${candidate.distanceMiles.toFixed(0)} mi`
+          : "—";
       return (
         <tr
           key={candidate.candidateId}
@@ -2021,27 +2065,18 @@ export function CandidatesSection() {
                 ) : null}
               </div>
             </td>
-            <td className={`${tdClass} truncate text-zinc-400`}>{location}</td>
+            <td className={`${tdClass} truncate text-zinc-400`}>{candidate.state || "—"}</td>
+            <td className={`${tdClass} truncate text-zinc-400`}>{candidate.city || "—"}</td>
+            <td className={`${tdClass} tabular-nums text-zinc-400`}>{formatDate(candidate.appliedDate)}</td>
             <td className={`${tdClass} tabular-nums text-zinc-400`}>{formatDays(appliedDays)}</td>
-            <td className={tdClass}>
-              <div className="flex min-w-0 items-center gap-1.5">
-                <div
-                  className="truncate text-sm font-medium text-teal-50/95"
-                  title={candidate.actionReason ?? candidate.nextActionNeeded}
-                >
-                  {candidate.nextActionNeeded}
-                </div>
-                {candidate.actionPriority ? (
-                  <span
-                    className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${ACTION_PRIORITY_STYLES[candidate.actionPriority]}`}
-                  >
-                    {candidate.actionPriority}
-                  </span>
-                ) : null}
-              </div>
-            </td>
             <td className={`${tdClass} truncate text-zinc-400`}>
               {candidate.assignedRecruiter?.trim() || "Unassigned"}
+            </td>
+            <td className={`${tdClass} tabular-nums text-zinc-400`}>
+              {confidence !== null ? Math.round(confidence) : "—"}
+            </td>
+            <td className={`${tdClass} tabular-nums text-zinc-400`} title={nearbyLabel}>
+              {nearbyLabel}
             </td>
             <td className={tdClass} onClick={(event) => event.stopPropagation()}>
               <CandidateRowPrimaryActionBar
@@ -2103,6 +2138,19 @@ export function CandidatesSection() {
       toggleSelectCandidate,
     ],
   );
+
+  const onQueueHeaderSort = useCallback((column: P199SortableColumn) => {
+    setQueueFilters((prev) => {
+      const same = prev.headerColumn === column;
+      const direction = same && prev.headerDirection === "desc" ? "asc" : "desc";
+      return {
+        ...prev,
+        headerColumn: column,
+        headerDirection: direction,
+        sort: resolveSortFromHeader(column, direction),
+      };
+    });
+  }, []);
 
   if (loadingBundle && !hasRenderableCandidateRows) {
     return (
@@ -2173,15 +2221,24 @@ export function CandidatesSection() {
     onboardingConfigured &&
     !paperworkTemplates.some((t) => t.key === "onboarding_packet" && t.configured);
 
+  const sortableThClass = (column: P199SortableColumn) => {
+    const active = queueFilters.headerColumn === column;
+    const arrow = active ? (queueFilters.headerDirection === "asc" ? " ↑" : " ↓") : "";
+    return { className: `${thClass} cursor-pointer select-none hover:text-zinc-300`, arrow };
+  };
+
   const candidateTableHeader = (
     <>
       <colgroup>
-        <col className="w-[56px]" />
-        <col className="w-[22%]" />
-        <col className="w-[14%]" />
+        <col className="w-[48px]" />
+        <col className="w-[18%]" />
+        <col className="w-[6%]" />
+        <col className="w-[10%]" />
+        <col className="w-[10%]" />
+        <col className="w-[6%]" />
+        <col className="w-[10%]" />
         <col className="w-[8%]" />
-        <col className="w-[24%]" />
-        <col className="w-[12%]" />
+        <col className="w-[8%]" />
         <col className="w-[14%]" />
       </colgroup>
       <thead className="border-b border-zinc-800/60">
@@ -2196,10 +2253,31 @@ export function CandidatesSection() {
             />
           </th>
           <th className={stickyIdentityHeaderClass(thClass)}>Name</th>
-          <th className={thClass}>Location</th>
-          <th className={thClass}>Age</th>
-          <th className={thClass}>Next action</th>
-          <th className={thClass}>Owner</th>
+          {(
+            [
+              ["state", "State"],
+              ["city", "City"],
+              ["applied", "Applied"],
+              ["age", "Age"],
+              ["owner", "Owner"],
+              ["confidence", "Confidence"],
+              ["nearby", "Nearby Jobs"],
+            ] as const
+          ).map(([column, label]) => {
+            const { className, arrow } = sortableThClass(column);
+            return (
+              <th key={column} className={className}>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-0.5 uppercase tracking-wider"
+                  onClick={() => onQueueHeaderSort(column)}
+                >
+                  {label}
+                  {arrow}
+                </button>
+              </th>
+            );
+          })}
           <th className={thClass}>Action</th>
         </tr>
       </thead>
@@ -2340,6 +2418,12 @@ export function CandidatesSection() {
           </select>
         </div>
       </details>
+      <CandidateQueueFiltersBar
+        stateOptions={stateOptions}
+        filters={queueFilters}
+        onChange={setQueueFilters}
+        resultCount={databaseFiltered.length}
+      />
     </>
   );
 
@@ -2406,7 +2490,7 @@ export function CandidatesSection() {
         onScrollToSectionHandled={() => setScrollToInboxSection(null)}
         renderRow={renderCandidateRow}
         tableHeader={candidateTableHeader}
-        colSpan={7}
+        colSpan={10}
         databaseRows={databaseFiltered}
         search={search}
         onSearchChange={setSearch}
@@ -2537,6 +2621,13 @@ export function CandidatesSection() {
         }
         paperworkSending={paperworkSendingId === selectedCandidate?.candidateId}
         workspaceBusy={workspaceBusy}
+        breezyCompanyId={breezySnapshot?.companyId ?? null}
+        breezyPositionId={
+          breezySnapshot?.candidates.find((c) => c.candidateId === selectedCandidate?.candidateId)
+            ?.positionId ?? selectedCandidate?.positionId ?? null
+        }
+        nearbyJobCount={selectedDrawerRow?.matchedOpportunities.length ?? 0}
+        nearestDistanceMiles={selectedCandidate?.distanceMiles ?? null}
         onAddNote={(note) => {
           if (!selectedCandidate) return;
           updateWorkflow(selectedCandidate, selectedCandidate.workflowStatus, { note });
