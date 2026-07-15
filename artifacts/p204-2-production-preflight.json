@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-07-15T20:03:43.477Z",
+  "sourcePhase": "P204.2",
+  "cohortId": "p204-1-807bd648",
+  "fingerprint": "c18a84f889e6bb453c30b0d0",
+  "recommendationCount": 20,
+  "candidateIdsMatch": true,
+  "workflowVersions": [
+    {
+      "redactedCandidateId": "f1abf23a4842",
+      "evidenceFingerprint": "d0c7a519336613f71daed04f",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "25014390b5cf",
+      "evidenceFingerprint": "32cf0f4a2fbb823d02406994",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "7bac85e81822",
+      "evidenceFingerprint": "1d0099610a7c3bc79dcc2550",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "9e9014fdbf65",
+      "evidenceFingerprint": "08a360bad41c6c088a603fa8",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "6b5511892bb2",
+      "evidenceFingerprint": "1078e2455ce9b2578b610d43",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "7534175120b6",
+      "evidenceFingerprint": "88443b600fa57cb1183a218b",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "9b4a0c15712b",
+      "evidenceFingerprint": "f6f411a4683179148087e10a",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "fa337c0e5489",
+      "evidenceFingerprint": "2c6120d80f1783030df905f0",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "1e8c90ecfa29",
+      "evidenceFingerprint": "58da7e5873aa5d7ea3463d17",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "d78a5dc279ae",
+      "evidenceFingerprint": "4cc90ef5ec8cd7d6f26707ed",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "d044e7490882",
+      "evidenceFingerprint": "a60347cbb7a10e95e70f58b1",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "8cd125086e3e",
+      "evidenceFingerprint": "41b02da4adebf05864c55572",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "89ad4f09e9fd",
+      "evidenceFingerprint": "f0d358d2010e6fd60a8edb39",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "6edd0001ce9d",
+      "evidenceFingerprint": "214eeb78c7fdfc596b8a5f55",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "326d0f957ef1",
+      "evidenceFingerprint": "32234aeede7c0ca6f74a59cc",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "fcb34d3e2985",
+      "evidenceFingerprint": "1d4978f3f175a56fd88741c5",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "950f2dc9a040",
+      "evidenceFingerprint": "dabcac6f08acd5daa7fe640d",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "50d84b0ff17c",
+      "evidenceFingerprint": "89e7a5133cf3d624713ece14",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "702b11e4cf12",
+      "evidenceFingerprint": "c8fc6b66f2de5ef04ca81204",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    },
+    {
+      "redactedCandidateId": "b932323148d8",
+      "evidenceFingerprint": "e8ea2b2ca1d7020e4d809007",
+      "engineVersion": "p204.1.0",
+      "scoringVersion": "p204+p193.4-calibrated",
+      "workflowStatusAtWrite": "Applied",
+      "currentStage": "Applied"
+    }
+  ],
+  "authorizationScope": {
+    "operatorDecision": true,
+    "decisionAudit": true,
+    "recommendationOutcomeStatus": true,
+    "lifecycleWrites": false,
+    "paperworkNeeded": false,
+    "rejectionStatus": false,
+    "dropbox": false,
+    "mel": false,
+    "continuousAutomation": false
+  },
+  "ready": true
+}

@@ -1,0 +1,187 @@
+{
+  "generatedAt": "2026-07-15T19:54:10.904Z",
+  "sourcePhase": "P204.1",
+  "engineVersion": "p204.1.0",
+  "scoringVersion": "p204+p193.4-calibrated",
+  "appliedScanned": 568,
+  "eligibleAdvance": 43,
+  "eligibleReview": 240,
+  "eligibleReject": 6,
+  "selectedAdvance": 10,
+  "selectedReview": 5,
+  "selectedReject": 5,
+  "skippedSample": [
+    {
+      "candidateId": "645974cfbd46",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "9f53ea634daf",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "b6c71dd117e9",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "9e0b074108a5",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "22072d81bbfd",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "306c846cae56",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "6a9d9f381f4b",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "de6b617005bc",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "e35daa080803",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "93ed8d6462f1",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "41af2a5c403f",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "a0565b62fab8",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "d687908550dd",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "08b5395deb89",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "2c540d056e8a",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "e0539ca735cd",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "cac29b9fee5d",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "4941b9b509e0",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "ee7fd5ba0701",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "4c7164c47dd6",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "4913468e47f8",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "d38bdedbe621",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "79c6d23037e5",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "ea6c8dfa6ddf",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "1192a9507dfc",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "8cbf5e51e28a",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "8641c2b77d16",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "1ccb1436512e",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "f654a432d699",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "1ef962620088",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "0538a9a5b234",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "01b045dff49e",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "695e07a842ea",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "af14554fa256",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "e74fa2653d11",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "d8a6c28b4746",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "674895974d1e",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "ebae8921f2c7",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "9740bf067fed",
+      "reason": "duplicate_conflict"
+    },
+    {
+      "candidateId": "63d1708f1cbc",
+      "reason": "duplicate_conflict"
+    }
+  ],
+  "authorizationScope": {
+    "recommendationMetadata": true,
+    "recommendationAudit": true,
+    "operatorReviewQueue": true,
+    "lifecycleWrites": false,
+    "paperworkNeeded": false,
+    "rejectionStatus": false,
+    "dropbox": false,
+    "mel": false,
+    "continuousAutomation": false
+  },
+  "readyToFreeze": true
+}
