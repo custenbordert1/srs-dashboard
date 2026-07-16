@@ -50,7 +50,7 @@ export async function runP204QualificationSimulation(options?: {
 
   const decisions: P204QualificationDecision[] = [];
   for (const candidate of candidates) {
-    const row = buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], { job: null });
+    const row = buildScoredWorkflowRow(candidate, workflows[candidate.candidateId], { job: undefined });
     if (row.workflowStatus === "Applied") {
       decisions.push(evaluateP204Qualification({ row, emailCounts }));
       continue;

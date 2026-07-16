@@ -189,7 +189,7 @@ export async function executeP2042OperatorReviewPilot(input: {
               fingerprint: loaded.fingerprint,
               decision: record.decision,
               decidedOutcome: record.decidedOutcome,
-              overrideReason: record.overrideReason,
+              overrideReason: record.overrideReason ?? "",
               recommendationOutcomeStatus: record.decidedOutcome,
             },
           },

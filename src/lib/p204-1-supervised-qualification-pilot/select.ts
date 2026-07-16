@@ -96,7 +96,7 @@ export function selectP2041PilotCohort(input: {
       continue;
     }
 
-    const row = buildScoredWorkflowRow(candidate, workflow, { job: null });
+    const row = buildScoredWorkflowRow(candidate, workflow, { job: undefined });
     const decision = evaluateP204Qualification({ row, emailCounts });
     const label = toRecommendationLabel(decision.recommendation);
 

@@ -33,6 +33,7 @@ import { P186ExecutiveIntelligencePanel } from "@/components/executive/p186-exec
 import { P186CutoverDashboardPanel } from "@/components/executive/p186-cutover-dashboard-panel";
 import { P187CutoverStatusPanel } from "@/components/executive/p187-cutover-status-panel";
 import { P188RecommendHirePanel } from "@/components/executive/p188-recommend-hire-panel";
+import { P207AutonomousReadinessPanel } from "@/components/executive/p207-autonomous-readiness-panel";
 import { AutonomousProductionRunnerPanel } from "@/components/executive/autonomous-production-runner-panel";
 import { PaperworkMonitorPanel } from "@/components/executive/paperwork-monitor-panel";
 import { ProjectMappingPanel } from "@/components/executive/project-mapping-panel";
@@ -295,6 +296,8 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <P187CutoverStatusPanel />
 
       <P188RecommendHirePanel />
+
+      <P207AutonomousReadinessPanel />
 
       <AutonomousRecoveryCenterPanel />
 

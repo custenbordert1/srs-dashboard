@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-07-16T14:28:16.918Z",
+  "matched": true,
+  "authoritativeTotal": 847,
+  "dashboardTotal": 847,
+  "countMismatches": [],
+  "refreshLatencyMs": 3,
+  "missingData": [],
+  "stageCounts": {
+    "Applied": 559,
+    "Needs Review": 17,
+    "Paperwork Needed": 18,
+    "Paperwork Sent": 230,
+    "Signed": 17,
+    "Ready for MEL": 0,
+    "Rejected": 6,
+    "Historical": 0
+  },
+  "safety": {
+    "lifecycleWrites": false,
+    "paperworkNeededCreates": false,
+    "dropboxSends": false,
+    "p192Starts": false,
+    "automationEnabled": false,
+    "melWrites": false
+  }
+}

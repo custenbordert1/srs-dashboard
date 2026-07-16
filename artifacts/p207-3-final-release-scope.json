@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-07-16T15:25:00.000Z",
+  "phase": "P207.3",
+  "suggestedPrTitle": "P207 Autonomous Readiness Dashboard and Operational Alerts",
+  "include": {
+    "p207": [
+      "src/lib/p207-autonomous-readiness-dashboard/**",
+      "src/app/api/recruiting/p207-autonomous-readiness/route.ts",
+      "src/components/executive/p207-autonomous-readiness-panel.tsx",
+      "src/components/executive/executive-home-panel.tsx (panel wire-in)",
+      "scripts/p207-generate-artifacts.ts",
+      "scripts/p207-1-generate-artifacts.ts",
+      "package.json (p207 scripts / test glob)",
+      "artifacts/p207-*.json",
+      "artifacts/p207-*.md",
+      "artifacts/p207-1-*.json",
+      "artifacts/p207-1-*.md"
+    ],
+    "p207_2": [
+      "src/lib/candidate-ingestion/merge-candidate-record.ts"
+    ],
+    "p207_3_typing_only": [
+      "src/lib/p201-3-controlled-paperwork-needed-pilot/gates.ts",
+      "src/lib/p201-3-controlled-paperwork-needed-pilot/select.ts",
+      "src/lib/p204-1-supervised-qualification-pilot/select.ts",
+      "src/lib/p204-ai-candidate-qualification/simulate.ts",
+      "src/lib/p204-2-controlled-recommendation-approval/execute.ts",
+      "src/lib/p205-controlled-lifecycle-action-pilot/execute.ts",
+      "src/lib/p205-controlled-lifecycle-action-pilot/gates.ts",
+      "src/lib/p205-controlled-lifecycle-action-pilot/types.ts",
+      "src/lib/p206-supervised-paperwork-send-pilot/preflight.ts",
+      "src/lib/p206-supervised-paperwork-send-pilot/select.ts",
+      "artifacts/p207-3-*"
+    ]
+  },
+  "exclude": [
+    "unrelated P185–P200 WIP artifacts/scripts not required for P207",
+    ".data/",
+    ".env*",
+    "Dropbox response payloads",
+    "candidate PII",
+    "*.log",
+    "*.tsbuildinfo",
+    ".next/"
+  ],
+  "gitHygiene": {
+    "dataDirGitignored": true,
+    "secrets": false,
+    "apiKeys": false,
+    "signingUrls": false,
+    "candidateEmailsInArtifacts": false,
+    "temporaryArtifacts": false
+  }
+}
