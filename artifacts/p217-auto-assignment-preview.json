@@ -1,0 +1,4881 @@
+{
+  "phase": "P217",
+  "generatedAt": "2026-07-17T18:34:22.224Z",
+  "previewOnly": true,
+  "candidatesAutomaticallyAssignable": 373,
+  "rule": "Current DM is Unassigned AND Applied Position lookup succeeds AND Position.Location is authoritative AND territory maps to a DM AND no explicit manual-review gate.",
+  "byExpectedDm": {
+    "Lori VandeWiele": 68,
+    "Mindie Rodriguez": 72,
+    "Trista Thomas": 31,
+    "Melissa O'Connor": 46,
+    "Shelly Debellis": 26,
+    "Erin Boatright": 73,
+    "Amy Harp": 57
+  },
+  "candidates": [
+    {
+      "redactedCandidateId": "34a2c43bd4bb",
+      "positionLocation": {
+        "city": "Ames",
+        "state": "IA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IA",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "5c06eab9a941",
+      "positionLocation": {
+        "city": "Sheffield Village",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "edc949c5a5df",
+      "positionLocation": {
+        "city": "Cleveland",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "ae03e1e35e21",
+      "positionLocation": {
+        "city": "Frankfort",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "91c6e5ab24cf",
+      "positionLocation": {
+        "city": "Vandalia",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "92977ba157c2",
+      "positionLocation": {
+        "city": "Belleville",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "d268ba55b519",
+      "positionLocation": {
+        "city": "Belleville",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "9c9fad766777",
+      "positionLocation": {
+        "city": "Mahomet",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "bcdb2f3b8278",
+      "positionLocation": {
+        "city": "Washington",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "af2d8abf7d3b",
+      "positionLocation": {
+        "city": "Washington",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "76d89feb631e",
+      "positionLocation": {
+        "city": "Washington",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "143ded8685fc",
+      "positionLocation": {
+        "city": "Washington",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "979d69c05246",
+      "positionLocation": {
+        "city": "Washington",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "27a79eb00229",
+      "positionLocation": {
+        "city": "Brinkley",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "db23d4e9badf",
+      "positionLocation": {
+        "city": "Houghton Lake",
+        "state": "MI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MI",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "f4fa994c56ce",
+      "positionLocation": {
+        "city": "Dunkirk",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "79a37a2bb6b6",
+      "positionLocation": {
+        "city": "Massena",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "1e21eb620ed6",
+      "positionLocation": {
+        "city": "Massena",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "641de94b5708",
+      "positionLocation": {
+        "city": "Show Low",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "bf8bfd0df484",
+      "positionLocation": {
+        "city": "Hattiesburg",
+        "state": "MS",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MS",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "892fe6886f98",
+      "positionLocation": {
+        "city": "Woodbury",
+        "state": "NJ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NJ",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "f76ee26c26db",
+      "positionLocation": {
+        "city": "Woodbury",
+        "state": "NJ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NJ",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "44a250909097",
+      "positionLocation": {
+        "city": "Perris",
+        "state": "CA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "CA",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "4e10fbc94015",
+      "positionLocation": {
+        "city": "Evansville",
+        "state": "IN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "197528839075",
+      "positionLocation": {
+        "city": "Campbellsville",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "f87ed2863236",
+      "positionLocation": {
+        "city": "Campbellsville",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "acb4185ca076",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "TN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "3c14a98e796d",
+      "positionLocation": {
+        "city": "St. Augustine",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5ff1a2b60a5d",
+      "positionLocation": {
+        "city": "Ontario",
+        "state": "OR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OR",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "a8870d1e662e",
+      "positionLocation": {
+        "city": "Ontario",
+        "state": "OR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OR",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "8c76aa0bd0a6",
+      "positionLocation": {
+        "city": "Burgaw",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "78905f1b7c00",
+      "positionLocation": {
+        "city": "Mansfield",
+        "state": "LA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "LA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "568297d605a3",
+      "positionLocation": {
+        "city": "Oviedo",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "388142b66065",
+      "positionLocation": {
+        "city": "Taylorsville",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "c23243aef56d",
+      "positionLocation": {
+        "city": "Raeford",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5bf2e87b446b",
+      "positionLocation": {
+        "city": "Pembroke",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "1f0e9b78acf7",
+      "positionLocation": {
+        "city": "Lumberton",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "61b4f6ab59f1",
+      "positionLocation": {
+        "city": "Fayetteville",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "c661ff9d14c3",
+      "positionLocation": {
+        "city": "Fayetteville",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "c9492fc28930",
+      "positionLocation": {
+        "city": "Valdosta",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "2e11169c6feb",
+      "positionLocation": {
+        "city": "Manning",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "efdbcbde50e7",
+      "positionLocation": {
+        "city": "Manning",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "a357c0441cc8",
+      "positionLocation": {
+        "city": "Lake Wylie",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "7b8e95888f4d",
+      "positionLocation": {
+        "city": "Chester",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "f7c610202d9c",
+      "positionLocation": {
+        "city": "Attalla",
+        "state": "AL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "24504a9b8e44",
+      "positionLocation": {
+        "city": "Atlanta",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "f49dbccab502",
+      "positionLocation": {
+        "city": "Locust Grove",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5e5a5db64a50",
+      "positionLocation": {
+        "city": "Rincon",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "f16725255bcc",
+      "positionLocation": {
+        "city": "Dothan",
+        "state": "AL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "8f31cf46484b",
+      "positionLocation": {
+        "city": "Dothan",
+        "state": "AL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "bad318ddc28c",
+      "positionLocation": {
+        "city": "Northfield",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "9f5eeb709060",
+      "positionLocation": {
+        "city": "West Richfield",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "570c4f30e216",
+      "positionLocation": {
+        "city": "West Richfield",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "fdafdfbb3fc7",
+      "positionLocation": {
+        "city": "West Richfield",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "0f489d691485",
+      "positionLocation": {
+        "city": "West Richfield",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "71e502ce7a34",
+      "positionLocation": {
+        "city": "Princeton",
+        "state": "WV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WV",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "e98b0c9a02ae",
+      "positionLocation": {
+        "city": "Princeton",
+        "state": "WV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WV",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "3dee4d49a332",
+      "positionLocation": {
+        "city": "Princeton",
+        "state": "WV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WV",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "1baf95620308",
+      "positionLocation": {
+        "city": "Princeton",
+        "state": "WV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WV",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "ce16d1e7bc0c",
+      "positionLocation": {
+        "city": "Princeton",
+        "state": "WV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WV",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "bff2df363d55",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "520b4ec4aab2",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "67f8f523dc16",
+      "positionLocation": {
+        "city": "Sugar Land",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "e5256d42ee8a",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "2e20fb52ecad",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "341119f711d2",
+      "positionLocation": {
+        "city": "Belle Vernon",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "afaf3d1cdb65",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "f90d15df9967",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "7f75931357ba",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "3dc1ba28a122",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "642ca56a2983",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "6317210497a5",
+      "positionLocation": {
+        "city": "Cincinnati",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "91e6a7112810",
+      "positionLocation": {
+        "city": "Cincinnati",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "3a01d8df73f3",
+      "positionLocation": {
+        "city": "Mechanicsburg",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "3e9857472d98",
+      "positionLocation": {
+        "city": "Mechanicsburg",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Needed",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "a0350cf40b0c",
+      "positionLocation": {
+        "city": "Mechanicsburg",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "af1bd5b4e9f4",
+      "positionLocation": {
+        "city": "Mechanicsburg",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "836af0afaf98",
+      "positionLocation": {
+        "city": "State College",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "cd87f8da12fd",
+      "positionLocation": {
+        "city": "Butler",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "86b2f79ded90",
+      "positionLocation": {
+        "city": "Camp Hill",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "7922821e4402",
+      "positionLocation": {
+        "city": "Dickson City",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "1d2e57115d8d",
+      "positionLocation": {
+        "city": "Dickson City",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "34a4ef6dad89",
+      "positionLocation": {
+        "city": "Dickson City",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "7a5c49e2321b",
+      "positionLocation": {
+        "city": "Dickson City",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "2ea341f95aa5",
+      "positionLocation": {
+        "city": "Williamsport",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "60094d4c8b29",
+      "positionLocation": {
+        "city": "Williamsport",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "16602d9e4c78",
+      "positionLocation": {
+        "city": "Williamsport",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "6daec90c521d",
+      "positionLocation": {
+        "city": "Loganville",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "c0de111a535d",
+      "positionLocation": {
+        "city": "Loganville",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "62e83deb4145",
+      "positionLocation": {
+        "city": "Philidelphia",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "b8d6e528105d",
+      "positionLocation": {
+        "city": "Philidelphia",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "d26d9859078b",
+      "positionLocation": {
+        "city": "Richland",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "bc37d19fbac9",
+      "positionLocation": {
+        "city": "Sherman",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "1b4b2713c749",
+      "positionLocation": {
+        "city": "Richland",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "ce55273d14eb",
+      "positionLocation": {
+        "city": "Sherman",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "665136a6dcee",
+      "positionLocation": {
+        "city": "Peoria",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "f22e3f109bd0",
+      "positionLocation": {
+        "city": "Peoria",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "8d426b916204",
+      "positionLocation": {
+        "city": "Peoria",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "26c500edfb65",
+      "positionLocation": {
+        "city": "Saginaw",
+        "state": "MI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MI",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "9d799b1c7a7b",
+      "positionLocation": {
+        "city": "Saginaw",
+        "state": "MI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MI",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "1e88940e398e",
+      "positionLocation": {
+        "city": "Saginaw",
+        "state": "MI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MI",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "e776d30f3522",
+      "positionLocation": {
+        "city": "Killeen",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "18f363a87f1c",
+      "positionLocation": {
+        "city": "Killeen",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "2affc979111a",
+      "positionLocation": {
+        "city": "Killeen",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "1dbbeb192dce",
+      "positionLocation": {
+        "city": "Killeen",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "b1216fa993ac",
+      "positionLocation": {
+        "city": "Killeen",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Needed",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "4a90cb513934",
+      "positionLocation": {
+        "city": "Killeen",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "2f0988efa7be",
+      "positionLocation": {
+        "city": "Waco",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "6d8ef431f13e",
+      "positionLocation": {
+        "city": "Waco",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "531cf6dd37dc",
+      "positionLocation": {
+        "city": "Longview",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "73d33b64abd0",
+      "positionLocation": {
+        "city": "Longview",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "fd01499c31e3",
+      "positionLocation": {
+        "city": "Tyler",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "c3d33712f468",
+      "positionLocation": {
+        "city": "Tyler",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "05021d2527f1",
+      "positionLocation": {
+        "city": "Tyler",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "12d1a1da27e1",
+      "positionLocation": {
+        "city": "Tyler",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "2226732e8d71",
+      "positionLocation": {
+        "city": "Beaumont",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "faf416915c7f",
+      "positionLocation": {
+        "city": "Beaumont",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "a5b280314213",
+      "positionLocation": {
+        "city": "Beaumont",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "3693ebae6431",
+      "positionLocation": {
+        "city": "Beaumont",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "efc46331f644",
+      "positionLocation": {
+        "city": "Albany",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "fbdbb6b4d887",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "3065e1120ea4",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "1075f9804d73",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "d99453cbd10b",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "0d98c32ce822",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "201eecf8ec68",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "cc81aa10d3b9",
+      "positionLocation": {
+        "city": "New York City",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "2e642ae48b3b",
+      "positionLocation": {
+        "city": "Ogdensburg",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "c2376933711c",
+      "positionLocation": {
+        "city": "Ogdensburg",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "8d67af9bbc02",
+      "positionLocation": {
+        "city": "Missouri City",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "e6ef53d2385d",
+      "positionLocation": {
+        "city": "Missouri City",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "01e2ddd24091",
+      "positionLocation": {
+        "city": "TWIN FALLS",
+        "state": "ID",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "ID",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "aa18f8e4f4e2",
+      "positionLocation": {
+        "city": "Norwalk",
+        "state": "CT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "CT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "26ec16285d92",
+      "positionLocation": {
+        "city": "Paterson",
+        "state": "NJ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NJ",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "006e6dae6823",
+      "positionLocation": {
+        "city": "Binghamton",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "d50968b9f8fa",
+      "positionLocation": {
+        "city": "Binghamton",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "f3b09f5e6eac",
+      "positionLocation": {
+        "city": "Binghamton",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "3e394d112187",
+      "positionLocation": {
+        "city": "McKinney",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "b5b880da14ed",
+      "positionLocation": {
+        "city": "McKinney",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "1848fbc41863",
+      "positionLocation": {
+        "city": "Kearney",
+        "state": "NE",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NE",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "8082df1a7575",
+      "positionLocation": {
+        "city": "Kennewick",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "e8df4c501628",
+      "positionLocation": {
+        "city": "Kennewick",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "2c30d4e6ad63",
+      "positionLocation": {
+        "city": "Kennewick",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "61af633b1d1b",
+      "positionLocation": {
+        "city": "Dayton",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "cff1f3ee4e1e",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "f4ba22ffed35",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Needed",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "positionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MO",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Needed",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "bf6c048c9f1c",
+      "positionLocation": {
+        "city": "Milwaukee",
+        "state": "WI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WI",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "daa55b8740c3",
+      "positionLocation": {
+        "city": "Milwaukee",
+        "state": "WI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WI",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "377483dd17b2",
+      "positionLocation": {
+        "city": "Milwaukee",
+        "state": "WI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WI",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "0c89ccb3a481",
+      "positionLocation": {
+        "city": "Milwaukee",
+        "state": "WI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WI",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "91bcb4b2e9f0",
+      "positionLocation": {
+        "city": "Milwaukee",
+        "state": "WI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WI",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "5ae643549705",
+      "positionLocation": {
+        "city": "Milwaukee",
+        "state": "WI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WI",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "3fd2006e5630",
+      "positionLocation": {
+        "city": "Rensselaer",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "ba0b87b3a017",
+      "positionLocation": {
+        "city": "Provincetown",
+        "state": "MA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MA",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "afdaf41cb285",
+      "positionLocation": {
+        "city": "Westfield",
+        "state": "MA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MA",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "cb9a2344965f",
+      "positionLocation": {
+        "city": "Sturbridge",
+        "state": "MA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MA",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "121af2a832a1",
+      "positionLocation": {
+        "city": "West Haven",
+        "state": "CT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "CT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "481f9ba140e8",
+      "positionLocation": {
+        "city": "East Haven",
+        "state": "CT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "CT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "25fac37f1bda",
+      "positionLocation": {
+        "city": "Glastonbury",
+        "state": "CT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "CT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "5ca3d0b846c6",
+      "positionLocation": {
+        "city": "Glens Falls",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "ec839371ea45",
+      "positionLocation": {
+        "city": "Amsterdam",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "c5d131cd134a",
+      "positionLocation": {
+        "city": "Amsterdam",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "66bdc5b7eb04",
+      "positionLocation": {
+        "city": "Amsterdam",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "0ee326f91d5d",
+      "positionLocation": {
+        "city": "Niskayuna",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "9091398d6d40",
+      "positionLocation": {
+        "city": "Mclean",
+        "state": "VA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "VA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "4e82f5a2c1dd",
+      "positionLocation": {
+        "city": "Bremerton",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "a0c351f2a777",
+      "positionLocation": {
+        "city": "Belfair",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "3e8d67354e02",
+      "positionLocation": {
+        "city": "Sequim",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "e1afe8e11d8f",
+      "positionLocation": {
+        "city": "Sequim",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "1ac14d31c0c0",
+      "positionLocation": {
+        "city": "Sequim",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "e0a5bdf5c104",
+      "positionLocation": {
+        "city": "Hershey",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "23e38c4c0945",
+      "positionLocation": {
+        "city": "Perris",
+        "state": "CA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "CA",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "0422a2422113",
+      "positionLocation": {
+        "city": "Reno",
+        "state": "NV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NV",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "256d1ea385e3",
+      "positionLocation": {
+        "city": "Reno",
+        "state": "NV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NV",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "6d7292816a6a",
+      "positionLocation": {
+        "city": "Yerington",
+        "state": "NV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NV",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "dfc97c5c6ec4",
+      "positionLocation": {
+        "city": "Yerington",
+        "state": "NV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NV",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "7bb05bf35f6a",
+      "positionLocation": {
+        "city": "South Lake Tahoe",
+        "state": "NV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NV",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "a4f19f7deeef",
+      "positionLocation": {
+        "city": "Show Low",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "3b4e2f20f367",
+      "positionLocation": {
+        "city": "Show Low",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "11be4cddaeee",
+      "positionLocation": {
+        "city": "Elko",
+        "state": "NV",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NV",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "fee685fe5e6c",
+      "positionLocation": {
+        "city": "Richmond",
+        "state": "VT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "VT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "61e0cd6a02aa",
+      "positionLocation": {
+        "city": "Richmond",
+        "state": "VT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "VT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "ae7ca235f9e1",
+      "positionLocation": {
+        "city": "Londonderry",
+        "state": "VT",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "VT",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "570d3c817ada",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "098a7808e3f2",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "d0674cd93918",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "9d9a5ee067be",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "4685c7c361cd",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "a89d7d61c6a4",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "c583be1a11a0",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "b404391404ee",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "e43ceb6ab860",
+      "positionLocation": {
+        "city": "The Woodlands",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "e31c160f0d90",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "MD",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MD",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "b0b33fbd6bad",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "MD",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MD",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "ad48298de4da",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "TN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "c2ee12a59715",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "TN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "ce33d96b3f0a",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "TN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "33898524ac5e",
+      "positionLocation": {
+        "city": "Barnwell",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "1f2a9e576fd9",
+      "positionLocation": {
+        "city": "Barnwell",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "ee021002e141",
+      "positionLocation": {
+        "city": "Barnwell",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "746b1507e054",
+      "positionLocation": {
+        "city": "Barnwell",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "4450d0acac67",
+      "positionLocation": {
+        "city": "Barnwell",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "ef27c4d282dd",
+      "positionLocation": {
+        "city": "Hermitage",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "30b4256f66ce",
+      "positionLocation": {
+        "city": "Hermitage",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "b969fc9001df",
+      "positionLocation": {
+        "city": "Hermitage",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "575d22faaf7f",
+      "positionLocation": {
+        "city": "Hermitage",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "d6cb8f77714e",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "7eb605673874",
+      "positionLocation": {
+        "city": "ERIE",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "1444c0ead79a",
+      "positionLocation": {
+        "city": "ERIE",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "3a06b2ddd1f5",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "6af9136037a1",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "174b028e6dd8",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "06b0e9281799",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "2e954c8770a4",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "a6d898dd37cc",
+      "positionLocation": {
+        "city": "Erie",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "2510daf086b7",
+      "positionLocation": {
+        "city": "Jamestown",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "9c01b86efa6f",
+      "positionLocation": {
+        "city": "Jamestown",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "5a535ab3d856",
+      "positionLocation": {
+        "city": "Jamestown",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "5aa4ec739a51",
+      "positionLocation": {
+        "city": "Falconer",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "14f8e1df868b",
+      "positionLocation": {
+        "city": "Falconer",
+        "state": "NY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NY",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "bf76d317b68f",
+      "positionLocation": {
+        "city": "Edgewood",
+        "state": "NM",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NM",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "876efb1f14d5",
+      "positionLocation": {
+        "city": "Edgewood",
+        "state": "NM",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NM",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "1141d57a4845",
+      "positionLocation": {
+        "city": "Laconia",
+        "state": "NH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NH",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "3e6d9a8dfcd3",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "8bea437f69ee",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "b4bdb44d8371",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5f8c2cfb3c13",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "c6ceab9b5e99",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "ab255fb701a7",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "ab800b9d84e4",
+      "positionLocation": {
+        "city": "Raleigh",
+        "state": "NC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "NC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "ad52cb83a62c",
+      "positionLocation": {
+        "city": "Caruthersville",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MO",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "3f4ae7884754",
+      "positionLocation": {
+        "city": "Caruthersville",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MO",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "154361c636c2",
+      "positionLocation": {
+        "city": "Caruthersville",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MO",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "a9ad00f1eafa",
+      "positionLocation": {
+        "city": "Battle Creek",
+        "state": "MI",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MI",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "17f4458a2fac",
+      "positionLocation": {
+        "city": "Worcester",
+        "state": "MA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MA",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "a85dc63ae7c8",
+      "positionLocation": {
+        "city": "Dorchester",
+        "state": "MA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MA",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "47ff92d06d27",
+      "positionLocation": {
+        "city": "Winchester",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "8ba3df154dd7",
+      "positionLocation": {
+        "city": "Winchester",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "c3886c8190f7",
+      "positionLocation": {
+        "city": "Winchester",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "cc0ba05a51b2",
+      "positionLocation": {
+        "city": "Richmond",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "270165e258b7",
+      "positionLocation": {
+        "city": "Athens",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "cb6d468f287d",
+      "positionLocation": {
+        "city": "Athens",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "798529b98376",
+      "positionLocation": {
+        "city": "Atlanta",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "10ca94da832f",
+      "positionLocation": {
+        "city": "Vero Beach",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "984a4dc8bae6",
+      "positionLocation": {
+        "city": "Punta Gorda",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "166e94266b6c",
+      "positionLocation": {
+        "city": "Punta Gorda",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "cdd2d1672501",
+      "positionLocation": {
+        "city": "Pensacola",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "b602f5b17515",
+      "positionLocation": {
+        "city": "Destin",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "dc30559b9dc0",
+      "positionLocation": {
+        "city": "Pensacola",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "59952ccda43d",
+      "positionLocation": {
+        "city": "Payson",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "ddd11b7755fd",
+      "positionLocation": {
+        "city": "Payson",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "013a2656c233",
+      "positionLocation": {
+        "city": "Lake Havasu City",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "97c204d04687",
+      "positionLocation": {
+        "city": "Lake Havasu City",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "0943991441c8",
+      "positionLocation": {
+        "city": "Lake Havasu City",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "1264e41dcd34",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "88aff8bb36bb",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "1ec91de5e8c2",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "47977391ef39",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "6b97cd0cb20f",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "044b4d52a8c9",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "78eba0865c8b",
+      "positionLocation": {
+        "city": "Wynne",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "e8a68b642c30",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "ccc8d34a5c35",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "ee24bc1a2192",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "2372ee672079",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "5a38db6f0bc1",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "1aa714f028be",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "a04315e00617",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "fe86b1bedbe2",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "e4be832e3dd0",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "720930a42be0",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "af5a52a04bc7",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "18f2e2ec4907",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "255e0ebaa976",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "09ff92a5e94d",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "1efb09c4748d",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "700068738d66",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "e0eab1f25a46",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "b3b9e7f6bcd4",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "53f77988ed4f",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "19e376cbe36c",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "d37ff114d55d",
+      "positionLocation": {
+        "city": "Scottsdale",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "73c485c860d8",
+      "positionLocation": {
+        "city": "Vincennes",
+        "state": "IN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "21ba02a0cab8",
+      "positionLocation": {
+        "city": "Phoenix",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "9ec12e1c8748",
+      "positionLocation": {
+        "city": "Scottsdale",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "fb9fb518d2ef",
+      "positionLocation": {
+        "city": "Phoenix",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "23b1457a8abc",
+      "positionLocation": {
+        "city": "PITTSBURGH",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Needs Review",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "a9131bdf968b",
+      "positionLocation": {
+        "city": "Cleveland",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "2a1807044c00",
+      "positionLocation": {
+        "city": "Vandalia",
+        "state": "IL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IL",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "d96de6cdbd5d",
+      "positionLocation": {
+        "city": "LaGrange",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "471d124abcd0",
+      "positionLocation": {
+        "city": "LaGrange",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "21a0f7d4a04c",
+      "positionLocation": {
+        "city": "LaGrange",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "99c193b67173",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "4deed319f16c",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "6c80bc81992d",
+      "positionLocation": {
+        "city": "Bethlehem",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "153ab70fc639",
+      "positionLocation": {
+        "city": "Bethlehem",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "3b3ef898a66b",
+      "positionLocation": {
+        "city": "Pasadena",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "d552e57a2cff",
+      "positionLocation": {
+        "city": "Pasadena",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "bd4980f107c2",
+      "positionLocation": {
+        "city": "Pasadena",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "1b6166b4112b",
+      "positionLocation": {
+        "city": "Pasadena",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "611d481266fb",
+      "positionLocation": {
+        "city": "Pasadena",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "460aba3adc40",
+      "positionLocation": {
+        "city": "Sugar Land",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "0d47bb20f17e",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "0a5e16d15968",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "526b867a5fbc",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "ad705666707b",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "5fbb207b4533",
+      "positionLocation": {
+        "city": "Houston",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "d3fd44b92d88",
+      "positionLocation": {
+        "city": "Amherst",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "031edcf4c4ab",
+      "positionLocation": {
+        "city": "Warrenton",
+        "state": "OR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OR",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "da3fde29ae76",
+      "positionLocation": {
+        "city": "Biggs Junction",
+        "state": "OR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OR",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "480d0d79061c",
+      "positionLocation": {
+        "city": "Biggs Junction",
+        "state": "OR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OR",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "157611de7960",
+      "positionLocation": {
+        "city": "Stanfield",
+        "state": "OR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OR",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "7df8ef67dc79",
+      "positionLocation": {
+        "city": "BoiserCity",
+        "state": "LA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "LA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "2f9906f720a4",
+      "positionLocation": {
+        "city": "BoiserCity",
+        "state": "LA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "LA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "d3bc522bf889",
+      "positionLocation": {
+        "city": "BoiserCity",
+        "state": "LA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "LA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "d7fab3819c65",
+      "positionLocation": {
+        "city": "South Side Flats",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "1b8a88f8eb2b",
+      "positionLocation": {
+        "city": "South Side Flats",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "dfca7cb6ca79",
+      "positionLocation": {
+        "city": "South Side Flats",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "feeed282571b",
+      "positionLocation": {
+        "city": "South Side Flats",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "c75203e51418",
+      "positionLocation": {
+        "city": "Vienna",
+        "state": "VA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "VA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "ca422ac3c010",
+      "positionLocation": {
+        "city": "Moses Lake",
+        "state": "WA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "WA",
+      "expectedDm": "Trista Thomas",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Trista Thomas; no write performed"
+    },
+    {
+      "redactedCandidateId": "440e563d781e",
+      "positionLocation": {
+        "city": "Oakland",
+        "state": "TN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "b77cc59fa220",
+      "positionLocation": {
+        "city": "Owensboro",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "953c4c8c5ee8",
+      "positionLocation": {
+        "city": "Owensboro",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Signed",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "aaa90d0bfc1a",
+      "positionLocation": {
+        "city": "Owensboro",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "b8638393f725",
+      "positionLocation": {
+        "city": "Legrange",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "179222a18b08",
+      "positionLocation": {
+        "city": "Philidelphia",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "e9356330aea2",
+      "positionLocation": {
+        "city": "Philidelphia",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "71f170a03c89",
+      "positionLocation": {
+        "city": "Troy",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "d93c9209ff5a",
+      "positionLocation": {
+        "city": "Sherman",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "1e5b768bfdb7",
+      "positionLocation": {
+        "city": "Richmond",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "84b39b4182cb",
+      "positionLocation": {
+        "city": "Richmond",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "afe9aa3f1f54",
+      "positionLocation": {
+        "city": "Georgetown",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "d885f716d9a1",
+      "positionLocation": {
+        "city": "Georgetown",
+        "state": "KY",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "KY",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "ecb41f233ccb",
+      "positionLocation": {
+        "city": "Charlestown",
+        "state": "IN",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "IN",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "7976c1de79a5",
+      "positionLocation": {
+        "city": "Townsend",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "1add7ab453e7",
+      "positionLocation": {
+        "city": "Harlem",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "31c57ab5a0b0",
+      "positionLocation": {
+        "city": "Harlem",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "bc4c715bfafc",
+      "positionLocation": {
+        "city": "Harlem",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "44556c0df2f1",
+      "positionLocation": {
+        "city": "Dawsonville",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "638a8c9edd72",
+      "positionLocation": {
+        "city": "Cumming",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "10d03bb5519e",
+      "positionLocation": {
+        "city": "Atlanta",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "699c12c28d40",
+      "positionLocation": {
+        "city": "Atlanta",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5a6bd1332798",
+      "positionLocation": {
+        "city": "Atlanta",
+        "state": "GA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "GA",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5fe36b1268e9",
+      "positionLocation": {
+        "city": "Pensacola",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "d24daceda0ca",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "4e38d1418cd2",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "dff0b6b08016",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "1f2fbdbdd0a8",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "13b7c24b1d10",
+      "positionLocation": {
+        "city": "Pine Bluff",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "c3baf62ae894",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "ab9c621e45d4",
+      "positionLocation": {
+        "city": "Osceola",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "34d3d58214ef",
+      "positionLocation": {
+        "city": "Newport",
+        "state": "AR",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AR",
+      "expectedDm": "Lori VandeWiele",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Lori VandeWiele; no write performed"
+    },
+    {
+      "redactedCandidateId": "c9d30e67ecac",
+      "positionLocation": {
+        "city": "JOHNSTOWN",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "80a5dca0440b",
+      "positionLocation": {
+        "city": "MEDIA",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "e7b6c30d1d87",
+      "positionLocation": {
+        "city": "CONWAY",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "b6486f988dc8",
+      "positionLocation": {
+        "city": "Sumter",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "a8567513d452",
+      "positionLocation": {
+        "city": "Columbia",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "5f8e7d36cd53",
+      "positionLocation": {
+        "city": "BABCOCK RANCH",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Paperwork Sent",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "f76b6471761f",
+      "positionLocation": {
+        "city": "PEMBROKE PINES",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "892f76751b78",
+      "positionLocation": {
+        "city": "Phoenix",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "a931e5790cae",
+      "positionLocation": {
+        "city": "El Paso",
+        "state": "TX",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "TX",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Amy Harp; no write performed"
+    },
+    {
+      "redactedCandidateId": "2c70fb06895b",
+      "positionLocation": {
+        "city": "Kane",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    },
+    {
+      "redactedCandidateId": "8d1e83c5b1b8",
+      "positionLocation": {
+        "city": "CAYCE",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "de36a7010172",
+      "positionLocation": {
+        "city": "Sumter",
+        "state": "SC",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "SC",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "2c4c33638941",
+      "positionLocation": {
+        "city": "BABCOCK RANCH",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "9cd14ec4de3a",
+      "positionLocation": {
+        "city": "Tequesta",
+        "state": "FL",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "FL",
+      "expectedDm": "Erin Boatright",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Erin Boatright; no write performed"
+    },
+    {
+      "redactedCandidateId": "42808ab6e76a",
+      "positionLocation": {
+        "city": "Phoenix",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "6a9a055d6386",
+      "positionLocation": {
+        "city": "Gilbert",
+        "state": "AZ",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "AZ",
+      "expectedDm": "Shelly Debellis",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Shelly Debellis; no write performed"
+    },
+    {
+      "redactedCandidateId": "244a20cc5a45",
+      "positionLocation": {
+        "city": "Taunton",
+        "state": "MA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MA",
+      "expectedDm": "Melissa O'Connor",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Melissa O'Connor; no write performed"
+    },
+    {
+      "redactedCandidateId": "d7680ebb2be6",
+      "positionLocation": {
+        "city": "Washington",
+        "state": "PA",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "PA",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "workflowStage": "Applied",
+      "previewAction": "Would assign Mindie Rodriguez; no write performed"
+    }
+  ],
+  "targetCandidatesAutomaticallyAssignable": 2,
+  "safety": {
+    "readOnly": true,
+    "p217WorkflowWrites": 0,
+    "workflowChanges": 0,
+    "stageMovements": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "dropboxWrites": 0,
+    "targetWorkflowFieldsUnchanged": true,
+    "workflowsFileUnchanged": false,
+    "concurrentExternalWorkflowStoreActivityObserved": true,
+    "ingestionFileUnchanged": true
+  }
+}

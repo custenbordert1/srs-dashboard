@@ -1,0 +1,117 @@
+{
+  "phase": "P217",
+  "generatedAt": "2026-07-17T18:34:22.224Z",
+  "activeScope": "All candidate workflow records except terminal Not Qualified records",
+  "totalActiveCandidates": 857,
+  "totalAssignedDm": 256,
+  "totalUnassignedDm": 601,
+  "unassignedByStage": {
+    "Paperwork Sent": 172,
+    "Signed": 15,
+    "Applied": 402,
+    "Paperwork Needed": 4,
+    "Needs Review": 8
+  },
+  "unassignedByTerritory": {
+    "IA": 1,
+    "OH": 16,
+    "IL": 9,
+    "PA": 49,
+    "AR": 40,
+    "MI": 5,
+    "NY": 27,
+    "AZ": 15,
+    "MS": 1,
+    "NJ": 3,
+    "CA": 2,
+    "IN": 3,
+    "KY": 13,
+    "TN": 5,
+    "FL": 13,
+    "OR": 6,
+    "NC": 14,
+    "LA": 4,
+    "GA": 22,
+    "SC": 16,
+    "AL": 3,
+    "Unknown": 228,
+    "WV": 5,
+    "TX": 52,
+    "WA": 11,
+    "ID": 1,
+    "CT": 4,
+    "NE": 1,
+    "MO": 4,
+    "WI": 6,
+    "MA": 6,
+    "VA": 2,
+    "NV": 6,
+    "VT": 3,
+    "MD": 2,
+    "NM": 2,
+    "NH": 1
+  },
+  "unassignedByRecruiter": {
+    "Unassigned": 601
+  },
+  "automaticallyAssignable": 373,
+  "rootCauseDistribution": {
+    "Assignment Engine Failure": 373,
+    "Territory Missing": 228
+  },
+  "targetBlockedCandidates": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "appliedPosition": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "currentAssignedDm": "Unassigned",
+      "assignedRecruiter": "Unassigned",
+      "workflowStage": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "rootCause": "Assignment Engine Failure"
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "appliedPosition": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "expectedTerritory": "MO",
+      "expectedDm": "Amy Harp",
+      "currentAssignedDm": "Unassigned",
+      "assignedRecruiter": "Unassigned",
+      "workflowStage": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "rootCause": "Assignment Engine Failure"
+    }
+  ],
+  "positionLookups": {
+    "requestedUniquePositions": 185,
+    "found": 185,
+    "notFound": 0,
+    "catalogErrors": [
+      "archived: The operation was aborted due to timeout"
+    ]
+  },
+  "safety": {
+    "readOnly": true,
+    "p217WorkflowWrites": 0,
+    "workflowChanges": 0,
+    "stageMovements": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "dropboxWrites": 0,
+    "targetWorkflowFieldsUnchanged": true,
+    "workflowsFileUnchanged": false,
+    "concurrentExternalWorkflowStoreActivityObserved": true,
+    "ingestionFileUnchanged": true
+  }
+}

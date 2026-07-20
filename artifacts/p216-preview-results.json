@@ -1,0 +1,48 @@
+{
+  "phase": "P216",
+  "generatedAt": "2026-07-17T18:15:59.893Z",
+  "p214PreviewMode": "no-freeze",
+  "p214Eligibility": {
+    "totalApplicantsReviewed": 859,
+    "eligibleAndUnsent": 0,
+    "proposedTestCohortSize": 0,
+    "blockedByNonGeographicPosting": 0,
+    "blockedByDmAssignment": 2,
+    "blockedByCoverage": 0,
+    "classificationCounts": {
+      "previously_sent_workflow": 367,
+      "missing_contact_info": 417,
+      "stage_not_authorized": 24,
+      "viewed": 26,
+      "prior_cohort_member": 3,
+      "signed": 18,
+      "pending_envelope": 1,
+      "blocked_dm_unassigned": 2,
+      "unsent_but_blocked": 2,
+      "duplicate_identity": 1
+    }
+  },
+  "freshBlockedByReason": {
+    "coverage_no_active_work": 0,
+    "coverage_over_60_miles": 0,
+    "coverage_manual_review_40_60": 0,
+    "coverage_unknown": 0,
+    "dm_unassigned": 2,
+    "dm_wrong": 0,
+    "non_geographic_posting": 0
+  },
+  "futureP214TestBatchWouldContainCandidates": false,
+  "bothP215CandidatesNowEligible": false,
+  "safety": {
+    "previewOnly": true,
+    "paperworkSent": 0,
+    "dropboxWrites": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "workflowStageChanges": 0,
+    "cohortFrozen": false,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true,
+    "frozenCohortFileUnchanged": true
+  }
+}

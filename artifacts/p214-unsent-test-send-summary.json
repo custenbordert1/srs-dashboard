@@ -1,0 +1,38 @@
+{
+  "phase": "P214",
+  "state": "reconciled",
+  "generatedAt": "2026-07-17T17:31:28.831Z",
+  "cohortId": "p214-e2b9e254d439",
+  "statement": "P214 will send up to 20 Dropbox Sign test-mode envelopes. These envelopes are not legally binding and do not count as production paperwork.",
+  "preflight": {
+    "ok": false,
+    "failures": [
+      "Frozen cohort is empty — nothing to send"
+    ]
+  },
+  "attempts": [],
+  "summary": {
+    "attempted": 0,
+    "confirmed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "duplicatePrevented": 0,
+    "existingEnvelopeDiscovered": 0,
+    "viewed": 0,
+    "signedOrComplete": 0,
+    "requestIdsPresent": 0,
+    "testModeVerifiedCount": 0,
+    "candidatesOutsideCohortTouched": 0
+  },
+  "reconciledAt": "2026-07-17T17:32:52.937Z",
+  "monitoring": {
+    "cohortSize": 0,
+    "viewed": 0,
+    "signedOrComplete": 0,
+    "testModeVerifiedEnvelopes": 0,
+    "membersWithExactlyOneNewTestEnvelope": 0,
+    "candidatesOutsideCohortTouched": 0,
+    "melWrites": 0,
+    "entries": []
+  }
+}

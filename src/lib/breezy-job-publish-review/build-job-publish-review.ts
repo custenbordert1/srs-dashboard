@@ -1,5 +1,4 @@
 import type { BreezyJob } from "@/lib/breezy-api";
-import { parseLocationFromJobName } from "@/lib/breezy-job-location";
 import { resolveDmName } from "@/lib/dm-territory-map";
 import type { P84UnlockRecoveryPlan } from "@/lib/p84-unlock-preview/types";
 import {
@@ -28,12 +27,12 @@ function inferJobFromCandidates(
 ): Pick<BreezyJob, "jobId" | "name" | "city" | "state" | "status" | "updatedDate"> {
   const plan = plans.find((p) => p.positionId === positionId);
   const name = plan?.positionName ?? "Unknown position";
-  const parsed = parseLocationFromJobName(name);
+  // P216 — never invent city/state from the position title.
   return {
     jobId: positionId,
     name,
-    city: parsed.city,
-    state: (parsed.state || plan?.dmTerritory) ?? "",
+    city: "",
+    state: plan?.dmTerritory ?? "",
     status: "unknown",
     updatedDate: "",
   };

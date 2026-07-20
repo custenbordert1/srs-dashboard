@@ -1,0 +1,32 @@
+{
+  "phase": "P215",
+  "generatedAt": "2026-07-17T18:02:51.349Z",
+  "blockedCandidatesAudited": 2,
+  "rootCauseCounts": {
+    "POSITION_LOCATION_PRESENT": 2
+  },
+  "p214Correct": 0,
+  "p214Incorrect": 2,
+  "incorrectExplanations": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "rootCause": "POSITION_LOCATION_PRESENT",
+      "explanation": "Automation parsed the position title instead of resolving Position.Location. The applied Breezy position carries a valid location (Columbus, OH); classifying it as NON_GEOGRAPHIC_POSTING was wrong."
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "rootCause": "POSITION_LOCATION_PRESENT",
+      "explanation": "Automation parsed the position title instead of resolving Position.Location. The applied Breezy position carries a valid location (Kansas City, MO); classifying it as NON_GEOGRAPHIC_POSTING was wrong."
+    }
+  ],
+  "safety": {
+    "readOnly": true,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "dropboxWrites": 0,
+    "workflowStageChanges": 0,
+    "paperworkActions": 0,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true
+  }
+}

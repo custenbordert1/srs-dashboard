@@ -1,0 +1,64 @@
+{
+  "phase": "P215",
+  "generatedAt": "2026-07-17T18:02:51.349Z",
+  "scanScope": "published (active) Breezy positions",
+  "totalPositions": 278,
+  "withValidLocation": 278,
+  "withoutLocation": 0,
+  "flexiblePostings": 24,
+  "nationalPostings": 0,
+  "missingCity": 0,
+  "missingState": 0,
+  "locationSourceDistribution": {
+    "location.city+location.state": 278
+  },
+  "positionsWhoseLocationComesOnlyFromTitle": 0,
+  "titleParsingSites": [
+    {
+      "file": "src/lib/breezy-job-location.ts",
+      "function": "normalizeBreezyJobLocation (job_name fallback, ~lines 309–315)",
+      "reason": "Last-resort fallback parses the position title when location/address/region fields are empty.",
+      "suggestedReplacement": "Keep as diagnostics-only: the result is already tagged locationSource='job_name' — downstream gates must treat that tag as low-confidence instead of equal to Position.Location."
+    },
+    {
+      "file": "scripts/p214-run-unsent-test-batch.ts",
+      "function": "phasePreview (parseLocationFromJobName on ingestion positionName)",
+      "reason": "P214 derived posting geography from the stored position title and never resolved the applied Breezy Position object.",
+      "suggestedReplacement": "Resolve candidate.positionId via fetchBreezyPositionById and use Position.Location (job.city/job.state, locationSource != 'job_name'); fall back to title parsing only as explicit low-confidence evidence."
+    },
+    {
+      "file": "scripts/p209-run-coverage-audit.ts",
+      "function": "main (parseLocationFromJobName fallback for applied job location)",
+      "reason": "Coverage audit parses the position name when the Breezy jobs catalog lacks the position (e.g. closed positions missing from the published list).",
+      "suggestedReplacement": "Fetch the specific position by id (fetchBreezyPositionById works for closed positions) before falling back to the title."
+    },
+    {
+      "file": "src/lib/p210-recruiting-intelligence/posting-quality.ts",
+      "function": "buildPostingQuality (parseLocationFromJobName on p.name)",
+      "reason": "Posting-quality scoring judges geography from the title.",
+      "suggestedReplacement": "Use the position's normalized city/state + locationSource from the jobs snapshot; score 'title parseable' separately from 'has Position.Location'."
+    },
+    {
+      "file": "src/lib/breezy-job-status-reconciliation/build-job-status-reconciliation.ts",
+      "function": "buildJobStatusReconciliation (parseLocationFromJobName)",
+      "reason": "Reconciliation compares title-derived location with stored fields.",
+      "suggestedReplacement": "Compare against Position.Location fields; keep title parse only to flag title/location drift."
+    },
+    {
+      "file": "src/lib/breezy-job-publish-review/build-job-publish-review.ts",
+      "function": "buildJobPublishReview (parseLocationFromJobName)",
+      "reason": "Publish review derives expected location from the draft title.",
+      "suggestedReplacement": "Validate the draft's location block directly and require city+state before publish, instead of accepting a parseable title."
+    }
+  ],
+  "safety": {
+    "readOnly": true,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "dropboxWrites": 0,
+    "workflowStageChanges": 0,
+    "paperworkActions": 0,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true
+  }
+}

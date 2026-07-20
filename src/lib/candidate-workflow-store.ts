@@ -1,4 +1,5 @@
-import { readFile, writeFile, appendFile } from "node:fs/promises";
+import { access, readFile, writeFile, appendFile, rename } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
 import {
   applyRecruitingActionToggle,
   completeFollowUpActions,
@@ -42,6 +43,22 @@ import { appendOwnershipLedgerEvent } from "@/lib/p188-4-recruiter-ownership-dur
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
+import {
+  buildProductionRecruiterSelectorOptions,
+  isDemoRecruiterName,
+  readInactiveRecruitersFromEnv,
+  readProductionRecruiterDirectoryFromEnv,
+} from "@/lib/production-recruiter-directory";
+import { isDmUnassigned } from "@/lib/candidate-dm-suggest";
+
+function normalizeRecruiterRoster(recruiters: readonly string[] | undefined): string[] {
+  return buildProductionRecruiterSelectorOptions({
+    directory: readProductionRecruiterDirectoryFromEnv(),
+    roster: recruiters?.length ? recruiters : defaultRecruiterRosters().recruiters,
+    inactive: readInactiveRecruitersFromEnv(),
+    includeRecruitingTeam: true,
+  });
+}
 
 /** Serialize workflow store mutations to prevent lost updates (P188.4). */
 let workflowStoreWriteChain: Promise<void> = Promise.resolve();
@@ -120,9 +137,7 @@ function normalizeStoreFile(parsed: unknown): CandidateWorkflowStoreFile {
       version: 2,
       workflows: normalizeWorkflowsMap(file.workflows ?? {}),
       rosters: {
-        recruiters: sortedRoster(
-          file.rosters?.recruiters?.length ? file.rosters.recruiters : defaultRecruiterRosters().recruiters,
-        ),
+        recruiters: normalizeRecruiterRoster(file.rosters?.recruiters),
         dms: sortedRoster(
           file.rosters?.dms?.length ? file.rosters.dms : defaultRecruiterRosters().dms,
           "Unassigned",
@@ -151,10 +166,13 @@ function normalizeStoreFile(parsed: unknown): CandidateWorkflowStoreFile {
 
 async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
   const { storePath } = storePaths();
+  let missing = false;
   try {
-    const raw = await readFile(storePath, "utf8");
-    return normalizeStoreFile(JSON.parse(raw) as unknown);
+    await access(storePath, fsConstants.F_OK);
   } catch {
+    missing = true;
+  }
+  if (missing) {
     return {
       version: 2,
       workflows: {},
@@ -162,6 +180,24 @@ async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
       updatedAt: new Date().toISOString(),
     };
   }
+
+  // Retry parse under concurrent writers. Never treat a mid-write/truncated
+  // JSON as an empty store — that previously wiped hundreds of records.
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    try {
+      const raw = await readFile(storePath, "utf8");
+      return normalizeStoreFile(JSON.parse(raw) as unknown);
+    } catch (err) {
+      lastErr = err;
+      await new Promise((r) => setTimeout(r, 20 * (attempt + 1)));
+    }
+  }
+  throw new Error(
+    `Failed to read candidate-workflows store after retries: ${
+      lastErr instanceof Error ? lastErr.message : String(lastErr)
+    }`,
+  );
 }
 
 async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
@@ -171,7 +207,7 @@ async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
   const merged: CandidateWorkflowStoreFile = {
     version: 2,
     rosters: {
-      recruiters: sortedRoster(
+      recruiters: normalizeRecruiterRoster(
         file.rosters?.recruiters?.length ? file.rosters.recruiters : disk.rosters.recruiters,
       ),
       dms: sortedRoster(file.rosters?.dms?.length ? file.rosters.dms : disk.rosters.dms),
@@ -179,7 +215,10 @@ async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
     workflows: mergeWorkflowMapsForDurableWrite(disk.workflows, file.workflows),
     updatedAt: file.updatedAt ?? new Date().toISOString(),
   };
-  await writeFile(storePath, JSON.stringify(merged, null, 2), "utf8");
+  // Atomic replace so concurrent readers never observe truncated JSON.
+  const tmpPath = `${storePath}.${process.pid}.${Date.now()}.tmp`;
+  await writeFile(tmpPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
+  await rename(tmpPath, storePath);
 }
 
 export async function appendCandidateWorkflowAudit(entry: CandidateWorkflowAuditEntry): Promise<void> {
@@ -210,7 +249,7 @@ export async function saveRecruiterRosters(rosters: RecruiterRosters): Promise<R
   const file = await readStoreFile();
   const now = new Date().toISOString();
   file.rosters = {
-    recruiters: sortedRoster(rosters.recruiters),
+    recruiters: normalizeRecruiterRoster(rosters.recruiters),
     dms: sortedRoster(rosters.dms),
   };
   file.updatedAt = now;
@@ -220,9 +259,9 @@ export async function saveRecruiterRosters(rosters: RecruiterRosters): Promise<R
 
 export async function addRecruiterToServerRoster(name: string): Promise<RecruiterRosters> {
   const trimmed = name.trim();
-  if (!trimmed) return getRecruiterRosters();
+  if (!trimmed || isDemoRecruiterName(trimmed)) return getRecruiterRosters();
   const file = await readStoreFile();
-  file.rosters.recruiters = sortedRoster([...file.rosters.recruiters, trimmed]);
+  file.rosters.recruiters = normalizeRecruiterRoster([...file.rosters.recruiters, trimmed]);
   file.updatedAt = new Date().toISOString();
   await writeStoreFile(file);
   return file.rosters;
@@ -294,6 +333,182 @@ export async function upsertCandidateWorkflow(input: {
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
   return withWorkflowStoreLock(() => upsertCandidateWorkflowUnlocked(input));
+}
+
+export type AssignCandidateDmIfUnassignedResult =
+  | {
+      assigned: true;
+      reason: "assigned";
+      record: CandidateWorkflowRecord;
+    }
+  | {
+      assigned: false;
+      reason: "workflow_missing" | "already_assigned" | "invalid_expected_dm";
+      record: CandidateWorkflowRecord | null;
+    };
+
+/**
+ * P218 live-mode persistence primitive.
+ *
+ * The read/check/write occurs inside the workflow-store mutation chain and
+ * fails closed if a named DM is already present. It never changes stage,
+ * paperwork, recruiter, or lifecycle fields.
+ */
+export async function assignCandidateDmIfUnassigned(input: {
+  candidateId: string;
+  expectedDm: string;
+  approvedBy: string;
+  positionId: string;
+  territory: string;
+}): Promise<AssignCandidateDmIfUnassignedResult> {
+  return withWorkflowStoreLock(async () => {
+    const expectedDm = input.expectedDm.trim();
+    if (isDmUnassigned(expectedDm)) {
+      return { assigned: false, reason: "invalid_expected_dm", record: null };
+    }
+
+    const file = await readStoreFile();
+    const existing = file.workflows[input.candidateId];
+    if (!existing) {
+      return { assigned: false, reason: "workflow_missing", record: null };
+    }
+    if (!isDmUnassigned(existing.assignedDM)) {
+      return { assigned: false, reason: "already_assigned", record: existing };
+    }
+
+    const record = await upsertCandidateWorkflowUnlocked({
+      candidateId: input.candidateId,
+      assignedDM: expectedDm,
+      audit: {
+        action: "p218_auto_assign_dm",
+        byUserId: input.approvedBy,
+        metadata: {
+          previousAssignedDM: existing.assignedDM,
+          assignedDM: expectedDm,
+          positionId: input.positionId,
+          territory: input.territory,
+          mode: "live",
+        },
+      },
+    });
+    return { assigned: true, reason: "assigned", record };
+  });
+}
+
+export type TransitionCandidateToPaperworkNeededResult =
+  | {
+      transitioned: true;
+      reason: "transitioned" | "already_at_target_affirmed";
+      previousStage: string;
+      newStage: "Paperwork Needed";
+      record: CandidateWorkflowRecord;
+    }
+  | {
+      transitioned: false;
+      reason:
+        | "workflow_missing"
+        | "dm_mismatch"
+        | "beyond_paperwork_needed"
+        | "send_path_active";
+      previousStage: string | null;
+      newStage: null;
+      record: CandidateWorkflowRecord | null;
+    };
+
+/**
+ * P220 live-mode persistence primitive.
+ *
+ * Stage-only write to "Paperwork Needed". Never sends Dropbox Sign, never
+ * creates signature requests, never touches assignedDM, recruiter, notes,
+ * paperworkStatus, or any external integration.
+ */
+export async function transitionCandidateToPaperworkNeeded(input: {
+  candidateId: string;
+  expectedDm: string;
+  approvedBy: string;
+}): Promise<TransitionCandidateToPaperworkNeededResult> {
+  return withWorkflowStoreLock(async () => {
+    const file = await readStoreFile();
+    const existing = file.workflows[input.candidateId];
+    if (!existing) {
+      return {
+        transitioned: false,
+        reason: "workflow_missing",
+        previousStage: null,
+        newStage: null,
+        record: null,
+      };
+    }
+
+    const previousStage = existing.workflowStatus;
+    if (String(existing.assignedDM ?? "").trim() !== input.expectedDm.trim()) {
+      return {
+        transitioned: false,
+        reason: "dm_mismatch",
+        previousStage,
+        newStage: null,
+        record: existing,
+      };
+    }
+
+    const beyond = new Set([
+      "Paperwork Sent",
+      "Signed",
+      "Awaiting DD Verification",
+      "Ready for MEL",
+      "Loaded in MEL",
+      "Training Needed",
+      "Active Rep",
+    ]);
+    if (beyond.has(previousStage)) {
+      return {
+        transitioned: false,
+        reason: "beyond_paperwork_needed",
+        previousStage,
+        newStage: null,
+        record: existing,
+      };
+    }
+
+    if (
+      existing.paperworkStatus !== "not_sent" ||
+      Boolean(existing.signatureRequestId?.trim())
+    ) {
+      return {
+        transitioned: false,
+        reason: "send_path_active",
+        previousStage,
+        newStage: null,
+        record: existing,
+      };
+    }
+
+    const alreadyAtTarget = previousStage === "Paperwork Needed";
+    const record = await upsertCandidateWorkflowUnlocked({
+      candidateId: input.candidateId,
+      workflowStatus: "Paperwork Needed",
+      forceWorkflowStatus: true,
+      audit: {
+        action: "p220_paperwork_needed_transition",
+        byUserId: input.approvedBy,
+        metadata: {
+          previousStage,
+          newStage: "Paperwork Needed",
+          assignedDM: existing.assignedDM,
+          mode: "live",
+          affirmed: alreadyAtTarget,
+        },
+      },
+    });
+
+    return {
+      transitioned: true,
+      reason: alreadyAtTarget ? "already_at_target_affirmed" : "transitioned",
+      previousStage,
+      newStage: "Paperwork Needed",
+      record,
+    };
+  });
 }
 
 async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCandidateWorkflow>[0]): Promise<CandidateWorkflowRecord> {

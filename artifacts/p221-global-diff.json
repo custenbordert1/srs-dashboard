@@ -1,0 +1,29 @@
+{
+  "phase": "P221",
+  "generatedAt": "2026-07-20T14:29:22.053Z",
+  "targetRecordsChanged": 2,
+  "nonTargetRecordsChanged": 0,
+  "recordsAdded": 0,
+  "recordsRemoved": 0,
+  "targetRedactedIds": [
+    "3d272f69061a",
+    "c0d00937ae31"
+  ],
+  "nonTargetRedactedIds": [],
+  "dropboxSignRequestsCreated": 2,
+  "safety": {
+    "candidatesWritten": 2,
+    "otherCandidatesWritten": 0,
+    "workflowChangesOutsideTarget": 0,
+    "dropboxSignRequestsCreated": 2,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "recruiterChanges": 0,
+    "assignedDmChanges": 0,
+    "notesChanges": 0,
+    "reminderEmails": 0,
+    "reminderJobs": 0,
+    "advancedBeyondPaperworkSent": 0,
+    "testMode": true
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "phase": "P215",
+  "generatedAt": "2026-07-17T18:02:51.349Z",
+  "scope": {
+    "source": "artifacts/p214-blocked-candidates-summary.json",
+    "p214Blockers": [
+      "blocked_non_geographic_posting (NON_GEOGRAPHIC_POSTING / MISSING_JOB_LOCATION)"
+    ],
+    "blockedCandidatesAudited": 2
+  },
+  "resolutions": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "emailHash": "169944358020b517",
+      "breezyCandidateIdRedacted": "3d272f69061a",
+      "workflowStatus": "Paperwork Needed",
+      "appliedPositionId": "73048dbe5519",
+      "appliedPositionName": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "appliedPositionStatus": "closed",
+      "appliedPositionType": "Contract",
+      "appliedPositionLocation": {
+        "name": "Columbus, OH",
+        "city": "Columbus",
+        "state": "OH",
+        "country": "US",
+        "isRemote": false,
+        "latitude": null,
+        "longitude": null
+      },
+      "normalizedLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "positionTags": null,
+      "positionDepartment": null,
+      "positionCustomFields": null,
+      "hiringTeam": {
+        "allUsers": 0,
+        "allAdmins": 0
+      },
+      "positionCreatedDate": "2026-04-08T17:46:05.094Z",
+      "pipelineId": "default",
+      "candidateStage": "Applied",
+      "candidateCreatedDate": "2026-04-13T14:11:05.317Z",
+      "positionLocationExists": true,
+      "titleKind": "flexible",
+      "rootCause": "POSITION_LOCATION_PRESENT",
+      "p214Blocker": "NON_GEOGRAPHIC_POSTING (blocked_non_geographic_posting)",
+      "p214Correct": false,
+      "p214Explanation": "Automation parsed the position title instead of resolving Position.Location. The applied Breezy position carries a valid location (Columbus, OH); classifying it as NON_GEOGRAPHIC_POSTING was wrong."
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "emailHash": "1d56f3d610829cb0",
+      "breezyCandidateIdRedacted": "c0d00937ae31",
+      "workflowStatus": "Paperwork Needed",
+      "appliedPositionId": "f2ca3cdaeee8",
+      "appliedPositionName": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "appliedPositionStatus": "closed",
+      "appliedPositionType": "Contract",
+      "appliedPositionLocation": {
+        "name": "Kansas City, MO",
+        "city": "Kansas City",
+        "state": "MO",
+        "country": "US",
+        "isRemote": false,
+        "latitude": null,
+        "longitude": null
+      },
+      "normalizedLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "positionTags": null,
+      "positionDepartment": null,
+      "positionCustomFields": null,
+      "hiringTeam": {
+        "allUsers": 0,
+        "allAdmins": 0
+      },
+      "positionCreatedDate": "2026-04-08T17:40:46.691Z",
+      "pipelineId": "default",
+      "candidateStage": "Applied",
+      "candidateCreatedDate": "2026-04-10T21:37:45.323Z",
+      "positionLocationExists": true,
+      "titleKind": "flexible",
+      "rootCause": "POSITION_LOCATION_PRESENT",
+      "p214Blocker": "NON_GEOGRAPHIC_POSTING (blocked_non_geographic_posting)",
+      "p214Correct": false,
+      "p214Explanation": "Automation parsed the position title instead of resolving Position.Location. The applied Breezy position carries a valid location (Kansas City, MO); classifying it as NON_GEOGRAPHIC_POSTING was wrong."
+    }
+  ],
+  "safety": {
+    "readOnly": true,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "dropboxWrites": 0,
+    "workflowStageChanges": 0,
+    "paperworkActions": 0,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true
+  }
+}

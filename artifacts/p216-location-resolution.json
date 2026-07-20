@@ -1,0 +1,56 @@
+{
+  "phase": "P216",
+  "generatedAt": "2026-07-17T18:15:59.893Z",
+  "hierarchy": [
+    "Candidate Applied Position ID",
+    "Breezy Position.Location",
+    "Candidate Home Location",
+    "Market",
+    "Territory",
+    "DM",
+    "Coverage Gate"
+  ],
+  "titleParsingPolicy": "diagnostic_only (locationSource=job_name); never for gates",
+  "resolutions": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "appliedPositionId": "73048dbe5519",
+      "positionName": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "locationSource": "location.city+location.state",
+      "authoritative": true,
+      "city": "Columbus",
+      "state": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "dmResolvedCorrectly": true
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "appliedPositionId": "f2ca3cdaeee8",
+      "positionName": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "locationSource": "location.city+location.state",
+      "authoritative": true,
+      "city": "Kansas City",
+      "state": "MO",
+      "expectedDm": "Amy Harp",
+      "dmResolvedCorrectly": true
+    }
+  ],
+  "activePositionAuthority": {
+    "total": 278,
+    "authoritative": 278,
+    "titleOnly": 0,
+    "missing": 0
+  },
+  "safety": {
+    "previewOnly": true,
+    "paperworkSent": 0,
+    "dropboxWrites": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "workflowStageChanges": 0,
+    "cohortFrozen": false,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true,
+    "frozenCohortFileUnchanged": true
+  }
+}

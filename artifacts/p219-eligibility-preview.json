@@ -1,0 +1,56 @@
+{
+  "phase": "P219",
+  "generatedAt": "2026-07-17T19:43:50.497Z",
+  "previewOnly": true,
+  "freeze": false,
+  "send": false,
+  "candidates": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "nearestWork": "Columbus, OH",
+      "distanceMiles": 0,
+      "coverageTier": "tier1_0_20",
+      "assignedDm": "Mindie Rodriguez",
+      "expectedDm": "Mindie Rodriguez",
+      "blockersBefore": [
+        "blocked_dm_unassigned"
+      ],
+      "blockersAfter": [],
+      "eligible": true,
+      "remainingBlockers": [],
+      "wouldPassEveryGate": true
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "nearestWork": "MERRIAM, KS",
+      "distanceMiles": 8.3,
+      "coverageTier": "tier1_0_20",
+      "assignedDm": "Amy Harp",
+      "expectedDm": "Amy Harp",
+      "blockersBefore": [
+        "blocked_dm_unassigned"
+      ],
+      "blockersAfter": [],
+      "eligible": true,
+      "remainingBlockers": [],
+      "wouldPassEveryGate": true
+    }
+  ],
+  "summary": {
+    "candidates": 2,
+    "wouldPassEveryGate": 2,
+    "stillBlocked": 0
+  }
+}
