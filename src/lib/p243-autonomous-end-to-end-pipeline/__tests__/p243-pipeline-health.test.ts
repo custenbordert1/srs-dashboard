@@ -19,6 +19,7 @@ function stubCandidate(
   return {
     redactedCandidateId: overrides.candidateId.slice(0, 8),
     name: "Test Candidate",
+    email: null,
     positionId: "pos-1",
     appliedAt: "2026-07-01T00:00:00.000Z",
     outcome: "human_review",
@@ -50,6 +51,8 @@ function stubReport(
     dryRun: true,
     executionMode: "dry_run",
     useLLMEnhancement: false,
+    forceAutoAdvanceEnabled: false,
+    forcedAutoAdvanceCount: 0,
     batchId: "batch-before",
     ceoTraceId: "ceo-before",
     pulled: overrides.candidates.length,

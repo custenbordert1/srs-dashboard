@@ -217,11 +217,8 @@ export function buildP242CorrectedThroughput(input: {
       `healthScore actual=${corrected.healthScore} expected=${P242_EXPECTED.healthScore}`,
     );
   }
-  if (corrected.goNoGo !== P242_EXPECTED.goNoGo && corrected.goNoGo !== "CONDITIONAL-GO") {
-    // CONDITIONAL-GO maps to GO_WITH_CONDITIONS above; still flag unexpected GO/NO-GO.
-    if (String(corrected.goNoGo) !== "GO_WITH_CONDITIONS") {
-      variances.push(`goNoGo actual=${corrected.goNoGo} expected=${P242_EXPECTED.goNoGo}`);
-    }
+  if (corrected.goNoGo !== P242_EXPECTED.goNoGo) {
+    variances.push(`goNoGo actual=${corrected.goNoGo} expected=${P242_EXPECTED.goNoGo}`);
   }
   if (corrected.proxyCohortSize !== P242_EXPECTED.proxyCohortSize) {
     variances.push(

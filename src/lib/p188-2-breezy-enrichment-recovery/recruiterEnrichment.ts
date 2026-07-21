@@ -34,13 +34,7 @@ export function resolveRecruiterEnrichment(
   const candidateId = workflow.candidateId;
   const breezy = bundle.breezyCandidatesById[candidateId];
   const audit = bundle.executedAssignmentByCandidate[candidateId];
-  const territoryKey = (
-    breezy?.state ||
-    workflow.meta?.recruiterAssignmentTrace?.decisionId ||
-    ""
-  )
-    .toString()
-    .trim();
+  const territoryKey = (breezy?.state || "").toString().trim();
   const territoryRecruiter =
     territoryKey && bundle.territoryRecruiterUnique
       ? bundle.territoryRecruiterUnique[territoryKey] ?? null

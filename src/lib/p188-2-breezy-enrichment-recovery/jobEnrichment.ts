@@ -82,7 +82,7 @@ export function resolveJobEnrichment(
     });
   }
 
-  const friendly = breezy?.meta?.friendlyId as string | undefined;
+  const friendly = (breezy as { friendlyId?: string } | undefined)?.friendlyId;
   // Try positionName as friendly-style id match against catalog friendlyId
   for (const j of catalog) {
     if (j.friendlyId && friendly && norm(j.friendlyId) === norm(friendly)) {

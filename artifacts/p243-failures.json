@@ -1,0 +1,24 @@
+[
+  {
+    "candidateId": "cbbd99a1d55e",
+    "name": "melissa lloyd",
+    "email": "melissalloyd501@gmail.com",
+    "storeLabel": "BABCOCK RANCH, FL",
+    "storeNumber": "6268",
+    "project": "Trends Five Below Week 1 Tier 1 Service",
+    "distanceTier": "tier1_0_20",
+    "idempotencyKey": "P243-open-store-bulk-paperwork-queue:cbbd99a1d55e:b4ee901bfd73",
+    "batchIndex": 2,
+    "attempted": true,
+    "confirmed": false,
+    "failed": true,
+    "deferred": false,
+    "deferReason": null,
+    "failureClass": "candidate",
+    "failureReason": "unconfirmed outcome=missing",
+    "signatureRequestId": null,
+    "paperworkStatusAfter": "not_sent",
+    "workflowStageAfter": "Paperwork Needed",
+    "skipReason": null
+  }
+]

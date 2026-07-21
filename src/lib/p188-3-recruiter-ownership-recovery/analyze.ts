@@ -224,7 +224,6 @@ export async function runP1883OwnershipAnalysis(options?: {
       reviewCompleted:
         wf.workflowStatus === "Needs Review" ||
         wf.workflowStatus === "Qualified" ||
-        wf.workflowStatus === "Recruiter Review" ||
         Boolean(wf.lastActionAt),
       nowMs,
       expectedProductionRecordVersion: undefined,

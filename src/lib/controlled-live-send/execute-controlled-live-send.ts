@@ -271,6 +271,12 @@ export async function executeControlledLiveSend(input: {
   candidateId?: string;
   byUserId?: string;
   mtdOnly?: boolean;
+  /**
+   * When true with executeOne, allow send despite P84 ineligible status
+   * (e.g. Applied/screen-candidate) if a templateKey is available.
+   * Used by P243 forceAutoAdvance / open-stores canary.
+   */
+  forceReadyToSend?: boolean;
   sendDeps?: ExecuteOnboardingSendDeps;
 }): Promise<ControlledLiveSendResult> {
   const mode = input.mode ?? "dryRun";
@@ -363,7 +369,10 @@ export async function executeControlledLiveSend(input: {
       jobsByPositionId: context.jobsByPositionId,
     });
 
-    if (!p84.eligible || !p84.templateKey) {
+    const forceReadyToSend = input.forceReadyToSend === true && mode === "executeOne";
+    const p84Ok = (p84.eligible && Boolean(p84.templateKey)) || (forceReadyToSend && Boolean(p84.templateKey));
+
+    if (!p84Ok) {
       const entry: ControlledLiveSendExecutionEntry = {
         id: newP100ExecutionId(),
         at: new Date().toISOString(),
@@ -380,6 +389,8 @@ export async function executeControlledLiveSend(input: {
       await appendP100Audit(entry);
       continue;
     }
+
+    const templateKey = p84.templateKey ?? "onboarding_packet";
 
     if (mode === "dryRun") {
       const entry: ControlledLiveSendExecutionEntry = {
@@ -400,7 +411,7 @@ export async function executeControlledLiveSend(input: {
 
     const prepared = await prepareOnboardingSend({
       candidateId,
-      templateKey: p84.templateKey,
+      templateKey,
       actionType: row.actionType ?? undefined,
     });
 
@@ -408,7 +419,9 @@ export async function executeControlledLiveSend(input: {
     await transitionOnboardingRecordStatus({
       onboardingId: prepared.onboardingId,
       status: "sending",
-      detail: "P100 controlled live send started",
+      detail: forceReadyToSend
+        ? "P100 controlled live send started (forceReadyToSend)"
+        : "P100 controlled live send started",
       now: sendingAt,
       patch: { lastSendAttemptAt: sendingAt },
     });
@@ -419,7 +432,7 @@ export async function executeControlledLiveSend(input: {
         candidateId,
         candidateName,
         candidateEmail: row.email ?? "",
-        templateKey: p84.templateKey,
+        templateKey,
         byUserId: input.byUserId,
         recordWorkflowFailureOnError: false,
         inFlightOnboardingId: prepared.onboardingId,

@@ -151,7 +151,14 @@ export function assertExecutionLocksPass(locks: ControlledLiveSendLock[], mode: 
       return ["p99_readiness_approved", "rollback_artifact_present", "audit_log_present"].includes(lock.id);
     }
     if (mode === "executeOne") {
-      return lock.id !== "confirmation_phrase_verified" && lock.id !== "candidate_count_confirmed";
+      // Cohort-wide "no blocked candidates" is for executeBatch / full P97 sends.
+      // executeOne applies per-candidate P84 gates below; open-stores/P243 canaries
+      // must not be blocked by unrelated cohort members still marked blocked.
+      return (
+        lock.id !== "confirmation_phrase_verified" &&
+        lock.id !== "candidate_count_confirmed" &&
+        lock.id !== "no_blocked_candidates"
+      );
     }
     return true;
   });
@@ -159,7 +166,7 @@ export function assertExecutionLocksPass(locks: ControlledLiveSendLock[], mode: 
   const failed = required.filter((lock) => !lock.satisfied);
   if (failed.length > 0) {
     throw new Error(
-      `Controlled live send blocked: ${failed.map((lock) => lock.label).join("; ")}.`,
+      `Controlled live send blocked: ${failed.map((lock) => `${lock.label} (${lock.detail})`).join("; ")}.`,
     );
   }
 }

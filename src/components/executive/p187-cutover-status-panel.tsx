@@ -83,7 +83,7 @@ export function P187CutoverStatusPanel() {
           <LastUpdatedBadge at={dashboard.generatedAt} />
           <StatusBadge tone="neutral">{dashboard.canaryStatus}</StatusBadge>
           <StatusBadge tone={dashboard.rollbackReadiness ? "success" : "warning"}>
-            rollback {dashboard.rollbackReadiness ? "ready" : "blocked"}
+            {`rollback ${dashboard.rollbackReadiness ? "ready" : "blocked"}`}
           </StatusBadge>
           <StatusBadge tone="success">prod canary: not executed</StatusBadge>
           <button

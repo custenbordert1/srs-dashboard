@@ -47,7 +47,11 @@ export type {
 
 export type DecisionAction = import("@/lib/candidate-evaluation-orchestrator").DecisionOutcome;
 
-import type { P204QualificationDecision, P204Recommendation } from "@/lib/p204-ai-candidate-qualification/types";
+import type {
+  P204QualificationDecision,
+  P204ReasonCode,
+  P204Recommendation,
+} from "@/lib/p204-ai-candidate-qualification/types";
 import { orchestrate } from "@/lib/candidate-evaluation-orchestrator";
 
 /**
@@ -110,7 +114,7 @@ export async function orchestrateEvaluationBatch(input: {
           : recommendation === "reject"
             ? 25
             : 60,
-      reasonCodes: [...(c.reasonCodes ?? [])],
+      reasonCodes: [...(c.reasonCodes ?? [])] as P204ReasonCode[],
       evidence: [`preview signal path for ${c.candidateName ?? c.candidateId}`],
       recommendedNextAction:
         recommendation === "advance_paperwork_needed"

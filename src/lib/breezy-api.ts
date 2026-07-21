@@ -173,6 +173,11 @@ export type BreezyCandidate = {
    * Workflow store remains source of truth for assignedRecruiter.
    */
   ownershipSignals?: BreezyOwnershipSignals;
+  /**
+   * P223+ — how the candidate entered the dashboard list.
+   * `workflow_restored` marks operationally active rows unioned from workflow store.
+   */
+  listMembershipSource?: "ingestion" | "workflow_restored";
 };
 
 export type BreezyOwnershipSignals = {

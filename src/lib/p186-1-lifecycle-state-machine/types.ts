@@ -121,6 +121,7 @@ export type P186ValidationResult = {
     | "duplicate_event"
     | "noop_same_state"
     | "impossible_regression"
+    | "impossible_transition"
     | "missing_candidate"
     | "cas_conflict"
     | "blocked_without_reason";

@@ -192,12 +192,14 @@ export function P186OperatorLifecyclePanel() {
 
   const items = useMemo(() => {
     if (!dashboard) return [] as P1863CandidateQueueItem[];
-    let list = dashboard.items;
-    if (selectedQueue !== "all") list = list.filter((i) => i.queueId === selectedQueue);
+    let list: P1863CandidateQueueItem[] = dashboard.items;
+    if (selectedQueue !== "all") {
+      list = list.filter((i: P1863CandidateQueueItem) => i.queueId === selectedQueue);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (i) =>
+        (i: P1863CandidateQueueItem) =>
           i.displayName.toLowerCase().includes(q) ||
           i.candidateId.toLowerCase().includes(q) ||
           (i.recruiter ?? "").toLowerCase().includes(q),

@@ -13,6 +13,7 @@ import type {
   P186IngestResult,
   P186NormalizedLifecycleEvent,
 } from "@/lib/p186-2-event-adapters/types";
+import { createSqlClient } from "@/lib/p185-5-vercel-durable-storage/sqlClient";
 import type { SqlClient } from "@/lib/p185-5-vercel-durable-storage/types";
 
 export type ProductionStateReader = (candidateId: string) => Promise<{
@@ -292,7 +293,7 @@ export class ShadowDualWriteIngestor {
   }
 
   private async findByIdempotency(key: string): Promise<boolean> {
-    const db = this.client ?? (await import("@/lib/p185-5-vercel-durable-storage/sqlClient").then((m) => m.createSqlClient()));
+    const db = this.client ?? (await createSqlClient());
     await applyP1862Migrations(db);
     const result = await db.query(
       `SELECT 1 FROM p186_event_inbox WHERE idempotency_key = $1 OR event_id = $1 LIMIT 1`,
@@ -306,7 +307,7 @@ export class ShadowDualWriteIngestor {
     disposition: string,
     detail: string,
   ): Promise<void> {
-    const db = this.client ?? (await import("@/lib/p185-5-vercel-durable-storage/sqlClient").then((m) => m.createSqlClient()));
+    const db = this.client ?? (await createSqlClient());
     await applyP1862Migrations(db);
     await db.query(
       `INSERT INTO p186_event_inbox (
@@ -342,7 +343,7 @@ export class ShadowDualWriteIngestor {
     shadowAfter: string | null;
     detail: string;
   }): Promise<void> {
-    const db = this.client ?? (await import("@/lib/p185-5-vercel-durable-storage/sqlClient").then((m) => m.createSqlClient()));
+    const db = this.client ?? (await createSqlClient());
     await applyP1862Migrations(db);
     await db.query(
       `INSERT INTO p186_ingest_comparisons (

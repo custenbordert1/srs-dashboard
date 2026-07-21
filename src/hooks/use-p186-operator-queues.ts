@@ -1,10 +1,10 @@
 "use client";
 
+import type { P1863DashboardSnapshot } from "@/lib/p186-3-operator-lifecycle-queues/dashboard";
 import type {
   P1863ActionResult,
   P1863BulkPreview,
   P1863CandidateDetail,
-  P1863DashboardSnapshot,
   P1863OperatorAction,
 } from "@/lib/p186-3-operator-lifecycle-queues/types";
 import { useCallback, useEffect, useState } from "react";

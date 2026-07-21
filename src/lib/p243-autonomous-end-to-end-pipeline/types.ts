@@ -37,6 +37,17 @@ export type AutonomousCycleOptions = {
    * backward compatibility — treated as an alias of forceFreshReset.
    */
   forceFreshData?: boolean;
+  /**
+   * Dangerous: treat P204 `human_review` as `auto_advance` for paperwork send.
+   * Requires dryRun=false + confirmLive=true. Still respects canary, idempotency,
+   * already-sent, state-machine, and Dropbox preflight. Default false.
+   */
+  forceAutoAdvance?: boolean;
+  /**
+   * P122 confirmation phrase required by P123 safety gates for live execute.
+   * Open-stores / CLI auto-inject `SEND 1 PAPERWORK PACKET` when --live --confirm-live.
+   */
+  confirmationPhrase?: string;
 };
 
 export type AutonomousCandidateOutcome =
@@ -54,6 +65,8 @@ export type AutonomousCandidateResult = {
   candidateId: string;
   redactedCandidateId: string;
   name: string;
+  /** Candidate email when available from workflow/ingestion (may be null). */
+  email: string | null;
   positionId: string | null;
   appliedAt: string | null;
   outcome: AutonomousCandidateOutcome;
@@ -66,6 +79,11 @@ export type AutonomousCandidateResult = {
   skipReason: string | null;
   error: string | null;
   ceoTraceId: string | null;
+  /**
+   * True when this candidate was originally human_review but forceAutoAdvance
+   * overrode the decision to auto_advance for paperwork.
+   */
+  forcedAutoAdvance?: boolean;
 };
 
 export type P243PreflightCheck = {
@@ -86,6 +104,10 @@ export type AutonomousCycleReport = {
   dryRun: boolean;
   executionMode: P243ExecutionMode;
   useLLMEnhancement: boolean;
+  /** True when forceAutoAdvance was active for this cycle (live + confirmLive). */
+  forceAutoAdvanceEnabled: boolean;
+  /** Count of human_review decisions overridden to auto_advance. */
+  forcedAutoAdvanceCount: number;
   batchId: string;
   ceoTraceId: string;
   pulled: number;

@@ -1,7 +1,12 @@
 import { loadPilotConfig } from "@/lib/p122-controlled-live-paperwork-pilot/pilot-config";
+import { P122_CONFIRMATION_PHRASE } from "@/lib/p122-controlled-live-paperwork-pilot/types";
 import { readDropboxSignConfig } from "@/lib/dropbox-sign";
 import { probeP185StorageConnectivity } from "@/lib/p185-production-paperwork-automation-runner";
 import type { P243PreflightCheck } from "@/lib/p243-autonomous-end-to-end-pipeline/types";
+import {
+  LIVE_PILOT_ENV_EXPORT_BLOCK,
+  inspectLivePilotEnv,
+} from "@/lib/p122-controlled-live-paperwork-pilot/live-pilot-env";
 
 /**
  * Live-mode preflight checklist. Dry-run always passes with informational checks
@@ -13,6 +18,7 @@ export async function runP243Preflight(input: {
   confirmLive: boolean;
   fullLive: boolean;
   canaryLimit: number;
+  confirmationPhrase?: string;
 }): Promise<{ ok: boolean; checks: P243PreflightCheck[]; executionBlockedReason: string | null }> {
   const checks: P243PreflightCheck[] = [];
 
@@ -57,18 +63,46 @@ export async function runP243Preflight(input: {
   }
 
   const pilot = loadPilotConfig();
+  const pilotEnv = inspectLivePilotEnv();
   checks.push({
     id: "paperwork_pilot",
     ok: true,
-    message: `P122 pilot allowlist size=${pilot.allowlist.length} liveMode=${pilot.liveModeEnabled} pilotEnabled=${pilot.pilotEnabled} (P123 still enforces gates)`,
+    message: `P122 pilot allowlist size=${pilot.allowlist.length} liveMode=${pilot.liveModeEnabled} pilotEnabled=${pilot.pilotEnabled} operatorGo=${pilot.operatorGo} (P123 still enforces gates)`,
   });
 
-  if (!input.dryRun && pilot.liveModeEnabled !== true) {
+  if (!input.dryRun) {
     checks.push({
-      id: "pilot_live_mode_flag",
+      id: "pilot_live_env",
+      ok: pilotEnv.ok,
+      message: pilotEnv.ok
+        ? "Pilot env OK: LIVE_PILOT_ENABLED + LIVE_MODE + OPERATOR_GO are true"
+        : `Missing pilot env: ${pilotEnv.missing.join(", ")}. Export:\n${LIVE_PILOT_ENV_EXPORT_BLOCK}`,
+    });
+  } else {
+    checks.push({
+      id: "pilot_live_env",
       ok: true,
+      message: pilotEnv.ok
+        ? "Pilot env present (informational in dry-run)"
+        : `Pilot env not set (informational in dry-run): ${pilotEnv.missing.join(", ") || "n/a"}`,
+    });
+  }
+
+  const phrase = input.confirmationPhrase?.trim();
+  if (!input.dryRun) {
+    checks.push({
+      id: "confirmation_phrase",
+      ok: phrase === P122_CONFIRMATION_PHRASE,
       message:
-        "AUTONOMOUS_PAPERWORK_LIVE_MODE is not true — informational; P123/execute path still gates sends",
+        phrase === P122_CONFIRMATION_PHRASE
+          ? `Confirmation phrase verified: ${P122_CONFIRMATION_PHRASE}`
+          : `Live execute requires confirmationPhrase="${P122_CONFIRMATION_PHRASE}" (open-stores auto-injects with --live --confirm-live)`,
+    });
+  } else {
+    checks.push({
+      id: "confirmation_phrase",
+      ok: true,
+      message: "N/A (dry-run)",
     });
   }
 

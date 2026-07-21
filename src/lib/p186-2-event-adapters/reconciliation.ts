@@ -3,6 +3,7 @@ import { deriveExpectedLifecycleState } from "@/lib/p186-1-lifecycle-state-machi
 import { readP1862Flags } from "@/lib/p186-2-event-adapters/flags";
 import { applyP1862Migrations } from "@/lib/p186-2-event-adapters/migrate";
 import type { P186ReconciliationFinding } from "@/lib/p186-2-event-adapters/types";
+import { createSqlClient } from "@/lib/p185-5-vercel-durable-storage/sqlClient";
 import type { SqlClient } from "@/lib/p185-5-vercel-durable-storage/types";
 
 export type ReconciliationCohortRow = {
@@ -129,18 +130,16 @@ export async function runShadowReconciliation(input: {
     byKind[f.kind] = (byKind[f.kind] ?? 0) + 1;
   }
 
-  const client =
-    input.client ??
-    (await import("@/lib/p185-5-vercel-durable-storage/sqlClient").then((m) =>
-      m.createSqlClient(),
-    ));
+  const client = input.client ?? (await createSqlClient());
   await applyP1862Migrations(client);
   const runInsert = await client.query(
     `INSERT INTO p186_reconciliation_runs (run_at, evaluated, findings, payload)
      VALUES ($1::timestamptz,$2,$3,$4::jsonb) RETURNING id`,
     [runAt, input.cohort.length, findings.length, JSON.stringify({ byKind })],
   );
-  const runId = runInsert.rows[0]?.id ?? null;
+  const rawRunId = runInsert.rows[0]?.id;
+  const runId =
+    typeof rawRunId === "number" || typeof rawRunId === "string" ? rawRunId : null;
   for (const f of findings) {
     await client.query(
       `INSERT INTO p186_reconciliation_findings (

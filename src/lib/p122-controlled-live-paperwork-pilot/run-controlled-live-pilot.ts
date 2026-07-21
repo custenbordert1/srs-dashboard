@@ -16,6 +16,13 @@ export type RunControlledLivePaperworkPilotInput = {
   confirmationPhrase?: string;
   candidateId?: string;
   byUserId?: string;
+  /** Optional pilot config override (e.g. P243 seeds allowlist for the target). */
+  config?: ReturnType<typeof loadPilotConfig>;
+  /**
+   * Allow execute when safetyChecks pass even if status !== ready_to_send
+   * (e.g. call_first_required). Hard gates in safetyChecks still apply.
+   */
+  forceReadyToSend?: boolean;
   sendDeps?: ExecuteOnboardingSendDeps;
   executeLiveSend?: typeof executeControlledLiveSend;
   reportOverride?: ControlledLivePaperworkPilotReport;
@@ -58,7 +65,15 @@ export async function runControlledLivePaperworkPilot(
   input: RunControlledLivePaperworkPilotInput = {},
 ): Promise<RunControlledLivePaperworkPilotResult> {
   const dryRun = input.dryRun !== false;
-  const config = loadPilotConfig();
+  const baseConfig = input.config ?? loadPilotConfig();
+  // Explicit candidateId (P243 canary / open-stores) must be on the allowlist for this send.
+  const config =
+    input.candidateId && !baseConfig.allowlist.includes(input.candidateId)
+      ? {
+          ...baseConfig,
+          allowlist: [...baseConfig.allowlist, input.candidateId],
+        }
+      : baseConfig;
   const executeLiveSend = input.executeLiveSend ?? executeControlledLiveSend;
 
   const report =
@@ -73,12 +88,34 @@ export async function runControlledLivePaperworkPilot(
   const target =
     report.allowlistedCandidates.find((entry) =>
       input.candidateId ? entry.candidateId === input.candidateId : entry.status === "ready_to_send",
-    ) ?? null;
+    ) ??
+    (input.candidateId
+      ? report.evaluatedCandidates.find((entry) => entry.candidateId === input.candidateId) ?? null
+      : null);
+
+  const forceReadyToSend = input.forceReadyToSend === true;
+  const requiredSafetyIds = [
+    "on_allowlist",
+    "not_already_sent",
+    "no_duplicate_risk",
+    "valid_email",
+    "approved_mapping_or_native_project",
+    "pilot_cap_available",
+  ] as const;
+  const safetyChecksPass = Boolean(
+    target &&
+      target.email &&
+      target.baselineBlocker !== "missing_candidate_match" &&
+      requiredSafetyIds.every((id) =>
+        target.safetyChecks.some((check) => check.id === id && check.passed),
+      ),
+  );
 
   const sendPacketPreview = target
     ? buildPilotSendPacketPreview({
         candidate: target,
         auditDestination: report.auditRecordPath,
+        forceReadyToSend: forceReadyToSend && safetyChecksPass,
       })
     : report.sendPacketPreview;
 
@@ -96,14 +133,29 @@ export async function runControlledLivePaperworkPilot(
     };
   }
 
-  if (report.goNoGo !== "GO" || !target || !sendPacketPreview) {
+  const readyEnough =
+    target &&
+    (target.status === "ready_to_send" || (forceReadyToSend && safetyChecksPass)) &&
+    sendPacketPreview;
+
+  if (report.goNoGo !== "GO" || !readyEnough) {
+    const reason =
+      report.goNoGo !== "GO"
+        ? report.goNoGoReason
+        : !target
+          ? `No allowlisted pilot target for candidateId=${input.candidateId ?? "none"} (allowlist size=${config.allowlist.length}).`
+          : target.status !== "ready_to_send" && !(forceReadyToSend && safetyChecksPass)
+            ? `Pilot candidate blocked: ${target.blockingReasons.join(" ") || target.baselineBlocker || "not ready_to_send"}`
+            : !sendPacketPreview
+              ? "Send packet preview missing."
+              : "Pilot execute blocked.";
     return {
       report,
       sendPacketPreview,
       sendResult: buildNotExecutedResult(
-        target?.candidateId ?? null,
+        target?.candidateId ?? input.candidateId ?? null,
         target?.candidateName ?? null,
-        report.goNoGoReason,
+        reason,
       ),
       executedMode: "none",
       executeBatchCalled: false,
@@ -116,6 +168,7 @@ export async function runControlledLivePaperworkPilot(
     candidateId: target.candidateId,
     byUserId: input.byUserId ?? "p122-controlled-live-paperwork-pilot",
     mtdOnly: false,
+    forceReadyToSend,
     sendDeps: input.sendDeps,
   });
 

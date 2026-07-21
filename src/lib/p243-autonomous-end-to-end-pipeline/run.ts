@@ -34,6 +34,9 @@ import type {
 } from "@/lib/p243-autonomous-end-to-end-pipeline/types";
 import { P243_SCHEMA_VERSION, P243_SOURCE_PHASE } from "@/lib/p243-autonomous-end-to-end-pipeline/types";
 import type { CandidateWorkflowRecord } from "@/lib/candidate-workflow-types";
+import { P122_CONFIRMATION_PHRASE } from "@/lib/p122-controlled-live-paperwork-pilot/types";
+import { ensurePilotMaxSendsForCanary } from "@/lib/p122-controlled-live-paperwork-pilot/live-pilot-env";
+import { loadPilotSendRegistry } from "@/lib/p122-controlled-live-paperwork-pilot/pilot-store";
 
 const DEFAULT_CANARY_LIMIT = 3;
 const HIGH_REVIEW_QUEUE_PCT = 50;
@@ -55,6 +58,32 @@ function resolveExecutionMode(input: {
 }): P243ExecutionMode {
   if (!input.liveExecute || input.dryRun) return "dry_run";
   return input.fullLive ? "full_live" : "canary_live";
+}
+
+/**
+ * P122 allowlist is empty by default; P243 live canary already selected this
+ * candidate via confirmLive + canary. Temporarily include them so P123/P124
+ * approval + pilot report can evaluate the targeted send.
+ */
+async function withPilotAllowlistForCandidate<T>(
+  candidateId: string,
+  fn: () => Promise<T>,
+): Promise<{ result: T; seeded: boolean }> {
+  const prev = process.env.AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST;
+  const existing = (prev ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const seeded = !existing.includes(candidateId);
+  if (seeded) {
+    process.env.AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST = [...existing, candidateId].join(",");
+  }
+  try {
+    return { result: await fn(), seeded };
+  } finally {
+    if (prev === undefined) delete process.env.AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST;
+    else process.env.AUTONOMOUS_PAPERWORK_PILOT_ALLOWLIST = prev;
+  }
 }
 
 function tallyFailureReasons(
@@ -113,6 +142,8 @@ function emptyCandidateResult(input: {
     firstName?: string;
     lastName?: string;
     name?: string;
+    email?: string | null;
+    onboardingContactEmail?: string | null;
     positionId?: string | null;
     appliedDate?: string | null;
     creationDate?: string | null;
@@ -125,10 +156,13 @@ function emptyCandidateResult(input: {
   confidence?: number | null;
   error?: string | null;
 }): AutonomousCandidateResult {
+  const email =
+    String(input.row.email ?? input.row.onboardingContactEmail ?? "").trim() || null;
   return {
     candidateId: input.row.candidateId,
     redactedCandidateId: redact(input.row.candidateId),
     name: displayName(input.row),
+    email,
     positionId: input.row.positionId ?? null,
     appliedAt: input.row.appliedDate ?? input.row.creationDate ?? input.row.createdDate ?? null,
     outcome: input.outcome,
@@ -161,15 +195,27 @@ export async function runAutonomousRecruitingCycle(
   const fullLive = options.fullLive === true;
   const canaryLimit = Math.max(1, Math.min(options.canaryLimit ?? DEFAULT_CANARY_LIMIT, 25));
   const confirmLive = options.confirmLive === true;
+  const forceAutoAdvanceRequested = options.forceAutoAdvance === true;
+  const confirmationPhrase =
+    options.confirmationPhrase?.trim() ||
+    (!dryRunRequested && confirmLive ? P122_CONFIRMATION_PHRASE : undefined);
   const started = Date.now();
   const notes: string[] = [];
   const skipReasonSamples: string[] = [];
+
+  if (forceAutoAdvanceRequested && (dryRunRequested || !confirmLive)) {
+    throw new Error(
+      "forceAutoAdvance requires dryRun=false and confirmLive=true (refusing to start). " +
+        "Use --live --confirm-live --force-auto-advance together.",
+    );
+  }
 
   const preflight = await runP243Preflight({
     dryRun: dryRunRequested,
     confirmLive,
     fullLive,
     canaryLimit,
+    confirmationPhrase,
   });
 
   let dryRun = dryRunRequested;
@@ -187,6 +233,15 @@ export async function runAutonomousRecruitingCycle(
     liveExecute = false;
   }
 
+  // Only active when live execute path is truly on (never in dry-run fallback).
+  const forceAutoAdvanceEnabled = forceAutoAdvanceRequested && liveExecute && !dryRun;
+  if (forceAutoAdvanceRequested && !forceAutoAdvanceEnabled) {
+    throw new Error(
+      "forceAutoAdvance could not activate (live execute blocked by preflight). " +
+        "Refusing to continue rather than silently ignoring the override.",
+    );
+  }
+
   const executionMode = resolveExecutionMode({ dryRun, liveExecute, fullLive });
   notes.push(
     dryRun
@@ -195,6 +250,15 @@ export async function runAutonomousRecruitingCycle(
         ? "FULL LIVE — canary cap disabled; Dropbox execute still gated by P123 + testMode."
         : `CANARY LIVE — at most ${canaryLimit} auto_advance paperwork send(s) this cycle.`,
   );
+  if (forceAutoAdvanceEnabled) {
+    notes.push("FORCE AUTO-ADVANCE OVERRIDE ENABLED - HUMAN REVIEW BYPASSED");
+  }
+  if (liveExecute && confirmationPhrase) {
+    notes.push(`P122 confirmationPhrase supplied for live execute (${confirmationPhrase}).`);
+    const registry = await loadPilotSendRegistry();
+    const maxSends = ensurePilotMaxSendsForCanary(registry.sendCount + canaryLimit);
+    notes.push(maxSends.message);
+  }
 
   let idempotency = await loadP243IdempotencyStore();
 
@@ -364,6 +428,7 @@ export async function runAutonomousRecruitingCycle(
   let autoAdvance = 0;
   let humanReview = 0;
   let autoReject = 0;
+  let forcedAutoAdvanceCount = 0;
 
   for (const row of rowsForCeo) {
     const decision = decisionById.get(row.candidateId);
@@ -437,14 +502,28 @@ export async function runAutonomousRecruitingCycle(
         continue;
       }
 
-      const plannedTasks = tasksByCandidate.get(row.candidateId) ?? 0;
+      const plannedTasksBase = tasksByCandidate.get(row.candidateId) ?? 0;
+      let effectiveOutcome = decision.outcome;
+      let forcedAutoAdvance = false;
+      if (forceAutoAdvanceEnabled && decision.outcome === "human_review") {
+        effectiveOutcome = "auto_advance";
+        forcedAutoAdvance = true;
+        forcedAutoAdvanceCount += 1;
+        notes.push(
+          `FORCE AUTO-ADVANCE: ${redact(row.candidateId)} human_review→auto_advance` +
+            (decision.p204Recommendation ? ` (was ${decision.p204Recommendation})` : ""),
+        );
+      }
+
+      // CEO may not queue paperwork for human_review; force-advance still needs a send slot.
+      const plannedTasks = Math.max(plannedTasksBase, forcedAutoAdvance ? 1 : 0);
       let paperworkExecuted = false;
       let breezyStageUpdatePlanned = false;
       let breezyStageUpdated = false;
-      let outcome: AutonomousCandidateResult["outcome"] = decision.outcome;
-      let skipReason: string | null = null;
+      let outcome: AutonomousCandidateResult["outcome"] = effectiveOutcome;
+      let skipReason: string | null = forcedAutoAdvance ? "forced_auto_advance" : null;
 
-      if (decision.outcome === "auto_advance") {
+      if (effectiveOutcome === "auto_advance") {
         autoAdvance += 1;
         paperworkPlanned += plannedTasks;
         breezyStageUpdatePlanned = true;
@@ -456,19 +535,33 @@ export async function runAutonomousRecruitingCycle(
         if (canaryBlocked) {
           skippedCanaryCap += 1;
           outcome = "skipped_canary_cap";
-          skipReason = `canary_cap:${canaryLimit}`;
+          skipReason = forcedAutoAdvance
+            ? `forced_auto_advance+canary_cap:${canaryLimit}`
+            : `canary_cap:${canaryLimit}`;
           skipReasonSamples.push(skipReason);
           notes.push(
             `Canary cap reached (${canaryLimit}); skipped live send for ${redact(row.candidateId)}.`,
           );
         } else if (liveExecute) {
-          const cycle = await runPaperworkCycle({
-            dryRun: false,
-            execute: true,
-            candidateId: row.candidateId,
-            cycleId: `${batchId}:${row.candidateId}`,
-            byUserId: options.byUserId ?? "p243-autonomous-cycle",
-          });
+          const { result: cycle, seeded } = await withPilotAllowlistForCandidate(
+            row.candidateId,
+            () =>
+              runPaperworkCycle({
+                dryRun: false,
+                execute: true,
+                candidateId: row.candidateId,
+                cycleId: `${batchId}:${row.candidateId}`,
+                byUserId: options.byUserId ?? "p243-autonomous-cycle",
+                confirmationPhrase:
+                  confirmationPhrase ?? P122_CONFIRMATION_PHRASE,
+                forceReadyToSend: forceAutoAdvanceEnabled,
+              }),
+          );
+          if (seeded) {
+            notes.push(
+              `P122 allowlist: temporarily seeded ${redact(row.candidateId)} for canary live send.`,
+            );
+          }
           const sent =
             cycle.report.execution?.executed === true &&
             cycle.report.execution?.outcome === "sent";
@@ -480,16 +573,17 @@ export async function runAutonomousRecruitingCycle(
             throw new Error(cycle.report.execution.error);
           }
           notes.push(
-            `Live paperwork cycle for ${redact(row.candidateId)}: outcome=${cycle.report.execution?.outcome ?? "unknown"}`,
+            `Live paperwork cycle for ${redact(row.candidateId)}: outcome=${cycle.report.execution?.outcome ?? "unknown"}` +
+              (forcedAutoAdvance ? " [forced_auto_advance]" : ""),
           );
         } else {
           notes.push(
             `Dry-run: planned ${plannedTasks} paperwork task(s) for ${redact(row.candidateId)} (P123/Dropbox not invoked).`,
           );
         }
-      } else if (decision.outcome === "human_review") {
+      } else if (effectiveOutcome === "human_review") {
         humanReview += 1;
-      } else if (decision.outcome === "auto_reject") {
+      } else if (effectiveOutcome === "auto_reject") {
         autoReject += 1;
       }
 
@@ -497,6 +591,7 @@ export async function runAutonomousRecruitingCycle(
         candidateId: row.candidateId,
         redactedCandidateId: redact(row.candidateId),
         name: displayName(row),
+        email,
         positionId: row.positionId ?? null,
         appliedAt: row.appliedDate ?? row.createdDate ?? null,
         outcome,
@@ -509,6 +604,7 @@ export async function runAutonomousRecruitingCycle(
         skipReason,
         error: null,
         ceoTraceId: ceo.traceId,
+        forcedAutoAdvance,
       };
       candidates.push(result);
 
@@ -572,6 +668,9 @@ export async function runAutonomousRecruitingCycle(
     executionMode,
     preflightOk: preflight.ok || dryRun,
   });
+  if (forceAutoAdvanceEnabled) {
+    warnings.unshift("FORCE AUTO-ADVANCE OVERRIDE ENABLED - HUMAN REVIEW BYPASSED");
+  }
 
   const report: AutonomousCycleReport = {
     sourcePhase: P243_SOURCE_PHASE,
@@ -580,6 +679,8 @@ export async function runAutonomousRecruitingCycle(
     dryRun,
     executionMode,
     useLLMEnhancement,
+    forceAutoAdvanceEnabled,
+    forcedAutoAdvanceCount,
     batchId,
     ceoTraceId: ceo.traceId,
     pulled: pulled.pulled,

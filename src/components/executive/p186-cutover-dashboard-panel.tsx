@@ -119,7 +119,7 @@ export function P186CutoverDashboardPanel() {
           P184/P185 isolation
         </StatusBadge>
         <StatusBadge tone="success">rollback plans ready</StatusBadge>
-        <StatusBadge tone="neutral">max stage: {dashboard.maxImplementedStage}</StatusBadge>
+        <StatusBadge tone="neutral">{`max stage: ${dashboard.maxImplementedStage}`}</StatusBadge>
       </div>
 
       {dashboard.freezeBlocked.length > 0 ? (

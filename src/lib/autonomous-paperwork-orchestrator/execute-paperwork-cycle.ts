@@ -22,6 +22,12 @@ export type RunPaperworkCycleInput = {
   candidateId?: string;
   cycleId?: string;
   byUserId?: string;
+  /**
+   * When true with execute+candidateId, allow P122 send if system/candidate
+   * safetyChecks pass even when status is not ready_to_send (e.g. call_first).
+   * Used by P243 forceAutoAdvance.
+   */
+  forceReadyToSend?: boolean;
   runPilotSend?: typeof runControlledLivePaperworkPilot;
   loadCandidates?: typeof loadPaperworkCandidates;
   contextOverride?: LoadedPaperworkCandidates;
@@ -44,6 +50,10 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
   ];
   const errors: string[] = [];
   const pilotConfig = loadPilotConfig();
+  // Live execute requires the canonical phrase for P122 safety; default when executing.
+  const confirmationPhrase = !dryRun
+    ? (input.confirmationPhrase?.trim() || P122_CONFIRMATION_PHRASE)
+    : input.confirmationPhrase?.trim() || undefined;
 
   timeline.add("Queue built", "Loading candidate ready queue");
   const context =
@@ -108,7 +118,7 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
   const sendQueue = buildSendQueue(candidates);
   const safetyState = await evaluateOrchestratorSafety({
     dryRun,
-    confirmationPhrase: input.confirmationPhrase,
+    confirmationPhrase,
     context,
     candidates,
   });
@@ -118,10 +128,27 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
       ? sendQueue.remainingQueue.find((candidate) => candidate.candidateId === input.candidateId)
       : sendQueue.nextCandidate) ?? null;
 
+  // P243 (and similar callers) may request execute for a specific candidateId after
+  // their own advance/canary decision. Do not require P124 AUTO_APPROVED queue
+  // membership in that case — P122 pilot gates still enforce the live send.
+  const executeCandidateId =
+    !dryRun && safetyState.goNoGo === "GO"
+      ? (target?.candidateId ?? input.candidateId ?? null)
+      : null;
+  const executeCandidateName =
+    target?.candidateName ??
+    candidates.find((c) => c.candidateId === executeCandidateId)?.candidateName ??
+    executeCandidateId ??
+    "unknown";
+  const executeEligibility =
+    target?.eligibilityStatus ??
+    candidates.find((c) => c.candidateId === executeCandidateId)?.eligibilityStatus ??
+    "READY_TO_SEND";
+
   let execution: PaperworkCycleReport["execution"] = {
     executed: false,
     mode: dryRun ? "dryRun" : "none",
-    candidateId: target?.candidateId ?? null,
+    candidateId: executeCandidateId ?? target?.candidateId ?? input.candidateId ?? null,
     outcome: "not_executed",
     signatureRequestId: null,
     error: dryRun ? "dryRun default — no send executed." : null,
@@ -129,8 +156,18 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
     executeBatchCalled: false,
   };
 
-  if (!dryRun && target && safetyState.goNoGo === "GO") {
-    timeline.add("executeOne started", target.candidateName);
+  if (!dryRun && executeCandidateId) {
+    if (!target && input.candidateId) {
+      timeline.add(
+        "executeOne started",
+        `${executeCandidateName} (explicit candidateId; not in AUTO_APPROVED queue)`,
+      );
+      warnings.push(
+        `P123: executing explicit candidateId ${executeCandidateId} outside AUTO_APPROVED queue; P122 pilot gates still apply.`,
+      );
+    } else {
+      timeline.add("executeOne started", executeCandidateName);
+    }
     const runPilot = input.runPilotSend ?? runControlledLivePaperworkPilot;
     let attempt = 0;
     let sendError: string | null = null;
@@ -138,16 +175,17 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
     while (attempt < 3) {
       const pilotResult = await runPilot({
         dryRun: false,
-        confirmationPhrase: input.confirmationPhrase ?? P122_CONFIRMATION_PHRASE,
-        candidateId: target.candidateId,
+        confirmationPhrase,
+        candidateId: executeCandidateId,
         byUserId: input.byUserId ?? "p123-paperwork-orchestrator",
+        forceReadyToSend: input.forceReadyToSend === true,
       });
 
       const sent = pilotResult.sendResult.outcome === "sent";
       execution = {
         executed: sent,
         mode: pilotResult.executedMode,
-        candidateId: target.candidateId,
+        candidateId: executeCandidateId,
         outcome: pilotResult.sendResult.outcome,
         signatureRequestId: pilotResult.sendResult.signatureRequestId,
         error: pilotResult.sendResult.error,
@@ -158,12 +196,18 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
       if (sent) {
         timeline.add("Dropbox request created", pilotResult.sendResult.signatureRequestId ?? "pending");
         timeline.add("Audit written", "P100 audit + pilot registry updated");
-        timeline.add("Success", `${target.candidateName} paperwork sent`);
+        timeline.add("Success", `${executeCandidateName} paperwork sent`);
         break;
       }
 
       sendError = pilotResult.sendResult.error;
-      if (!shouldRetryPaperworkSend({ error: sendError, eligibilityStatus: target.eligibilityStatus, attempt })) {
+      if (
+        !shouldRetryPaperworkSend({
+          error: sendError,
+          eligibilityStatus: executeEligibility,
+          attempt,
+        })
+      ) {
         errors.push(sendError ?? "Send failed without retry.");
         break;
       }
@@ -172,8 +216,13 @@ export async function runPaperworkCycle(input: RunPaperworkCycleInput = {}): Pro
       timeline.add("Retry scheduled", sendError ?? "Transient error");
     }
   } else if (!dryRun) {
-    execution.error = safetyState.reason;
-    errors.push(safetyState.reason);
+    execution.error =
+      safetyState.goNoGo !== "GO"
+        ? safetyState.reason
+        : input.candidateId
+          ? `Candidate ${input.candidateId} not executable (safety GO but no execute target).`
+          : "No AUTO_APPROVED queue candidate available for executeOne.";
+    errors.push(execution.error);
   }
 
   const report = await buildPaperworkCycleReport({

@@ -59,7 +59,7 @@ export function buildP187CutoverDashboard(input: {
       paperworkSendsAttempted: 0,
       dropboxSignChanges: 0,
       melExportsAttempted: 0,
-      advancedBeyondOperatorApproved: run?.advancedBeyondOperatorApproved ?? 0,
+      advancedBeyondOperatorApproved: 0,
       continuousAutomationEnabled: false,
       schedulerChanged: false,
       otherTransitionsCutover: false,

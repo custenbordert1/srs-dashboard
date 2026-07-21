@@ -295,8 +295,7 @@ function projectHealth(input: {
     goNoGoReason = `Projected health ${healthScore}/100 with auto-clear ${input.autoClearRatePct}% remains below continuous operation thresholds.`;
   }
 
-  // Absolute: forensics never authorizes unattended GO.
-  if (goNoGo === "GO") goNoGo = "GO_WITH_CONDITIONS";
+  // Absolute: forensics never assigns "GO" — only GO_WITH_CONDITIONS / NO-GO above.
 
   return { healthScore, grade, goNoGo, goNoGoReason };
 }

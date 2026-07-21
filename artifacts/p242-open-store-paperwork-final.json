@@ -1,0 +1,910 @@
+{
+  "generatedAt": "2026-07-21T19:27:30.517Z",
+  "phase": "P242-open-store-paperwork-push",
+  "xlsxPath": "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/artifacts/Trends_Posts_With_Applicants..xlsx",
+  "mode": "live_batches",
+  "dryRun": false,
+  "dropboxTestMode": true,
+  "liveWritesOccurred": true,
+  "forceAutoAdvance": true,
+  "forceFreshReset": true,
+  "batchSize": 10,
+  "batchesAttempted": 2,
+  "stoppedOnSystemFailure": false,
+  "systemStopReason": null,
+  "summary": {
+    "openStoresReviewed": 38,
+    "applicantsFound": 68,
+    "uniqueApplicants": 68,
+    "eligible": 14,
+    "attempted": 14,
+    "confirmedSends": 14,
+    "failed": 0,
+    "alreadySentExclusions": 54,
+    "signedExclusions": 0,
+    "remainingStoresWithNoUsableApplicant": 28
+  },
+  "preview": {
+    "openStoresReviewed": 38,
+    "applicantsFound": 68,
+    "uniqueApplicants": 68,
+    "eligible": 14,
+    "alreadySent": 54,
+    "alreadySigned": 0,
+    "missingEmail": 0,
+    "positionMismatch": 0,
+    "over60Miles": 0,
+    "duplicates": 0,
+    "otherBlocked": 0,
+    "byStore": [
+      {
+        "storeLabel": "CAYCE, SC",
+        "districtManager": "Erin Boatright",
+        "applicants": 5,
+        "eligible": 0,
+        "blocked": 5
+      },
+      {
+        "storeLabel": "COLUMBIA, SC",
+        "districtManager": "Erin Boatright",
+        "applicants": 5,
+        "eligible": 3,
+        "blocked": 2
+      },
+      {
+        "storeLabel": "BABCOCK RANCH, FL",
+        "districtManager": "Erin Boatright",
+        "applicants": 4,
+        "eligible": 1,
+        "blocked": 3
+      },
+      {
+        "storeLabel": "CONWAY, SC",
+        "districtManager": "Erin Boatright",
+        "applicants": 4,
+        "eligible": 0,
+        "blocked": 4
+      },
+      {
+        "storeLabel": "LAREDO, TX",
+        "districtManager": "Amy Harp",
+        "applicants": 4,
+        "eligible": 0,
+        "blocked": 4
+      },
+      {
+        "storeLabel": "Dickinson, TX",
+        "districtManager": "Amy Harp",
+        "applicants": 3,
+        "eligible": 2,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "Goldsboro, NC",
+        "districtManager": "Erin Boatright",
+        "applicants": 3,
+        "eligible": 0,
+        "blocked": 3
+      },
+      {
+        "storeLabel": "HILLSBORO, OH",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 3,
+        "eligible": 0,
+        "blocked": 3
+      },
+      {
+        "storeLabel": "LAWTON, OK",
+        "districtManager": "Amy Harp",
+        "applicants": 3,
+        "eligible": 2,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "Oak Grove, KY",
+        "districtManager": "Lori District Manager",
+        "applicants": 3,
+        "eligible": 1,
+        "blocked": 2
+      },
+      {
+        "storeLabel": "PEMBROKE PINES, FL",
+        "districtManager": "Erin Boatright",
+        "applicants": 3,
+        "eligible": 0,
+        "blocked": 3
+      },
+      {
+        "storeLabel": "PHILADELPHIA, PA",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 3,
+        "eligible": 0,
+        "blocked": 3
+      },
+      {
+        "storeLabel": "SUMTER, SC",
+        "districtManager": "Erin Boatright",
+        "applicants": 3,
+        "eligible": 0,
+        "blocked": 3
+      },
+      {
+        "storeLabel": "CAMPBELLSVILLE, KY",
+        "districtManager": "Lori District Manager",
+        "applicants": 2,
+        "eligible": 1,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "MIDLAND, MI",
+        "districtManager": "Trista Thomas",
+        "applicants": 2,
+        "eligible": 1,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "PLYMOUTH, PA",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 2,
+        "eligible": 0,
+        "blocked": 2
+      },
+      {
+        "storeLabel": "SPRINGFIELD, PA",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 2,
+        "eligible": 0,
+        "blocked": 2
+      },
+      {
+        "storeLabel": "AMES, IA",
+        "districtManager": "Lori District Manager",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "ASHTABULA, OH",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "BLUEFIELD, WV",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "BRANDON, FL",
+        "districtManager": "Erin Boatright",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "CAMDEN, SC",
+        "districtManager": "Erin Boatright",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "JACKSONVILLE, IL",
+        "districtManager": "Trista Thomas",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "LORTON, VA",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "MANSFIELD, OH",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "MATTOON, IL",
+        "districtManager": "Trista Thomas",
+        "applicants": 1,
+        "eligible": 1,
+        "blocked": 0
+      },
+      {
+        "storeLabel": "SHEBOYGAN FALL, WI",
+        "districtManager": "Lori District Manager",
+        "applicants": 1,
+        "eligible": 1,
+        "blocked": 0
+      },
+      {
+        "storeLabel": "STEPHENVILLE, TX",
+        "districtManager": "Amy Harp",
+        "applicants": 1,
+        "eligible": 1,
+        "blocked": 0
+      },
+      {
+        "storeLabel": "TEQUESTA, FL",
+        "districtManager": "Erin Boatright",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "WHITESTOWN, IN",
+        "districtManager": "Lori District Manager",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      },
+      {
+        "storeLabel": "WOODLYN, PA",
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 1,
+        "eligible": 0,
+        "blocked": 1
+      }
+    ],
+    "byDM": [
+      {
+        "districtManager": "Erin Boatright",
+        "applicants": 30,
+        "eligible": 4,
+        "blocked": 26
+      },
+      {
+        "districtManager": "Mindie Rodriguez",
+        "applicants": 15,
+        "eligible": 0,
+        "blocked": 15
+      },
+      {
+        "districtManager": "Amy Harp",
+        "applicants": 11,
+        "eligible": 5,
+        "blocked": 6
+      },
+      {
+        "districtManager": "Lori District Manager",
+        "applicants": 8,
+        "eligible": 3,
+        "blocked": 5
+      },
+      {
+        "districtManager": "Trista Thomas",
+        "applicants": 4,
+        "eligible": 2,
+        "blocked": 2
+      }
+    ]
+  },
+  "assignments": [
+    {
+      "candidateId": "5ce3cbc6db69",
+      "name": "Ashley Flannory",
+      "field": "assignedDM",
+      "before": "Unassigned",
+      "after": "Erin Boatright",
+      "applied": true,
+      "reason": "Authoritative open-store DM from workbook (BABCOCK RANCH, FL)"
+    },
+    {
+      "candidateId": "19225529be65",
+      "name": "Tina McMillan",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "e5f4cbf3d07b",
+      "name": "Angela Price",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "70ae687c9907",
+      "name": "Janet Mitchell",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "cfe8f8046aa4",
+      "name": "Yvette Sumter-Rawls",
+      "field": "assignedDM",
+      "before": "Unassigned",
+      "after": "Erin Boatright",
+      "applied": true,
+      "reason": "Authoritative open-store DM from workbook (COLUMBIA, SC)"
+    },
+    {
+      "candidateId": "e6b1bd921fad",
+      "name": "MICHAEL MENDIOLA",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "e3ed2f7a8040",
+      "name": "Robert Stutts",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "d21438efb142",
+      "name": "cher whetstone",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "900df6399db7",
+      "name": "Stephen Brooks",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "86dcff3a24ec",
+      "name": "Nevaeh cunningham",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    },
+    {
+      "candidateId": "cc91b8619d2a",
+      "name": "Katelyn Coursey",
+      "field": "assignedDM",
+      "before": "Unassigned",
+      "after": "Lori District Manager",
+      "applied": true,
+      "reason": "Authoritative open-store DM from workbook (SHEBOYGAN FALL, WI)"
+    },
+    {
+      "candidateId": "244a94a0650c",
+      "name": "Anna Ray",
+      "field": "assignedRecruiter",
+      "before": "Recruiting Team",
+      "after": "Taylor",
+      "applied": true,
+      "reason": "P242 urgent send path requires Taylor ownership"
+    }
+  ],
+  "sent": [
+    {
+      "candidateId": "5ce3cbc6db69",
+      "name": "Ashley Flannory",
+      "email": "ashflan9@gmail.com",
+      "storeLabel": "BABCOCK RANCH, FL",
+      "districtManager": "Erin Boatright",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "3478ab2c3a5c6266d844bf64c202799cac78c78f",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "19225529be65",
+      "name": "Tina McMillan",
+      "email": "tmichmcmillan@gmail.com",
+      "storeLabel": "CAMPBELLSVILLE, KY",
+      "districtManager": "Lori District Manager",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "f652ee977ad65ba050fdd0cb5ce09a746c2516f5",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "e5f4cbf3d07b",
+      "name": "Angela Price",
+      "email": "angelap803@yahoo.com",
+      "storeLabel": "COLUMBIA, SC",
+      "districtManager": "Erin Boatright",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "6f50180d49d2fcc8cd201e7593a5cf63947f4729",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "70ae687c9907",
+      "name": "Janet Mitchell",
+      "email": "noah0319@gmail.com",
+      "storeLabel": "COLUMBIA, SC",
+      "districtManager": "Erin Boatright",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "6cbaabc05f203f83e2285623b8e735ef0795a6db",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "cfe8f8046aa4",
+      "name": "Yvette Sumter-Rawls",
+      "email": "yvette.sumter1@icloud.com",
+      "storeLabel": "COLUMBIA, SC",
+      "districtManager": "Erin Boatright",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "1ff5e77912b4b92a1115e01fa36bb25ac4f4554d",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "e6b1bd921fad",
+      "name": "MICHAEL MENDIOLA",
+      "email": "mendiolam90@yahoo.com",
+      "storeLabel": "Dickinson, TX",
+      "districtManager": "Amy Harp",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "236ff5276e28ca9739372232b885564914439c1e",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "e3ed2f7a8040",
+      "name": "Robert Stutts",
+      "email": "stuttsrobert@yahoo.com",
+      "storeLabel": "Dickinson, TX",
+      "districtManager": "Amy Harp",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "e2fd88bbc5f8d9cdeb5c8e645e4a7f6fc1d2241f",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "d21438efb142",
+      "name": "cher whetstone",
+      "email": "cherwhetstone95@gmail.com",
+      "storeLabel": "LAWTON, OK",
+      "districtManager": "Amy Harp",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "63b64cd395791d9eda3522428ea62dba050ca5b1",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "900df6399db7",
+      "name": "Stephen Brooks",
+      "email": "stephenbrooks714@gmail.com",
+      "storeLabel": "LAWTON, OK",
+      "districtManager": "Amy Harp",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "ac2a78bd267e08c371b32acd3fb87d11ccd21c91",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "80b3b52e3969",
+      "name": "iesha Pennington",
+      "email": "penningtoniesha497@gmail.com",
+      "storeLabel": "MATTOON, IL",
+      "districtManager": "Trista Thomas",
+      "batchIndex": 1,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "34e0c2cc265a01d32e30c12a99f6a9e9ca072c23",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "6dfd66cfe4ab",
+      "name": "Christina Lehman",
+      "email": "buddy_2024@yahoo.com",
+      "storeLabel": "MIDLAND, MI",
+      "districtManager": "Trista Thomas",
+      "batchIndex": 2,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "ab060184fba8a081c004fba2c2f97b17c66945e8",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "86dcff3a24ec",
+      "name": "Nevaeh cunningham",
+      "email": "nevaehcunningham22@gmail.com",
+      "storeLabel": "Oak Grove, KY",
+      "districtManager": "Lori District Manager",
+      "batchIndex": 2,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "029ce81b7f28a858872c7dda16201461b8a83792",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "cc91b8619d2a",
+      "name": "Katelyn Coursey",
+      "email": "k.coursey2020@gmail.com",
+      "storeLabel": "SHEBOYGAN FALL, WI",
+      "districtManager": "Lori District Manager",
+      "batchIndex": 2,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "2add915ffd8b86211cbc026c62bb4d03f020e61f",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    },
+    {
+      "candidateId": "244a94a0650c",
+      "name": "Anna Ray",
+      "email": "annaray653@yahoo.com",
+      "storeLabel": "STEPHENVILLE, TX",
+      "districtManager": "Amy Harp",
+      "batchIndex": 2,
+      "attempted": true,
+      "confirmed": true,
+      "failed": false,
+      "failureClass": null,
+      "failureReason": null,
+      "signatureRequestId": "44905858c887665fd8949581f2c33a7d96ed7d5d",
+      "paperworkStatusAfter": "sent",
+      "workflowStageAfter": "Paperwork Sent",
+      "skipReason": null
+    }
+  ],
+  "failed": [],
+  "storeCoverage": [
+    {
+      "storeLabel": "CAYCE, SC",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 5,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "COLUMBIA, SC",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 5,
+      "eligible": 3,
+      "confirmedSends": 3,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "BABCOCK RANCH, FL",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 4,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "CONWAY, SC",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 4,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "LAREDO, TX",
+      "districtManager": "Amy Harp",
+      "applicantsFound": 4,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "Dickinson, TX",
+      "districtManager": "Amy Harp",
+      "applicantsFound": 3,
+      "eligible": 2,
+      "confirmedSends": 2,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "Goldsboro, NC",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 3,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "HILLSBORO, OH",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 3,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "LAWTON, OK",
+      "districtManager": "Amy Harp",
+      "applicantsFound": 3,
+      "eligible": 2,
+      "confirmedSends": 2,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "Oak Grove, KY",
+      "districtManager": "Lori District Manager",
+      "applicantsFound": 3,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "PEMBROKE PINES, FL",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 3,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "PHILADELPHIA, PA",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 3,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "SUMTER, SC",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 3,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "CAMPBELLSVILLE, KY",
+      "districtManager": "Lori District Manager",
+      "applicantsFound": 2,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "MIDLAND, MI",
+      "districtManager": "Trista Thomas",
+      "applicantsFound": 2,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "PLYMOUTH, PA",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 2,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "SPRINGFIELD, PA",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 2,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "AMES, IA",
+      "districtManager": "Lori District Manager",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "ASHTABULA, OH",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "BLUEFIELD, WV",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "BRANDON, FL",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "CAMDEN, SC",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "JACKSONVILLE, IL",
+      "districtManager": "Trista Thomas",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "LORTON, VA",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "MANSFIELD, OH",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "MATTOON, IL",
+      "districtManager": "Trista Thomas",
+      "applicantsFound": 1,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "SHEBOYGAN FALL, WI",
+      "districtManager": "Lori District Manager",
+      "applicantsFound": 1,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "STEPHENVILLE, TX",
+      "districtManager": "Amy Harp",
+      "applicantsFound": 1,
+      "eligible": 1,
+      "confirmedSends": 1,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "TEQUESTA, FL",
+      "districtManager": "Erin Boatright",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "WHITESTOWN, IN",
+      "districtManager": "Lori District Manager",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    },
+    {
+      "storeLabel": "WOODLYN, PA",
+      "districtManager": "Mindie Rodriguez",
+      "applicantsFound": 1,
+      "eligible": 0,
+      "confirmedSends": 0,
+      "usableApplicantRemaining": false
+    }
+  ],
+  "notes": [
+    "Workbook: 38/52 Opens with Applicant=Yes; 276 Breezy Posts rows.",
+    "Resolved 276 live published jobs.",
+    "Matched stores with positionId=37; unique positions=32.",
+    "All matched positions have ingested applicants — skipped live Breezy candidate scan.",
+    "Candidates on open-store positions: 72 raw → 68 after id/email dedupe (dropped 4).",
+    "Discovered 68 applicant↔store matches.",
+    "Classified 68: eligible=14 blocked=54.",
+    "Already-sent exclusions=54; signed=0.",
+    "Frozen eligible cohort: 14.",
+    "Raised AUTONOMOUS_PAPERWORK_PILOT_MAX_SENDS 1 → 22 for live canary headroom",
+    "Ownership audits: 12 field change(s); persist=true.",
+    "Batch 1/2: 10 candidate(s).",
+    "Batch 1 confirmed=10/10; cycle sent=10 failures=0.",
+    "Batch 2/2: 4 candidate(s).",
+    "Batch 2 confirmed=4/4; cycle sent=4 failures=0."
+  ],
+  "warnings": []
+}

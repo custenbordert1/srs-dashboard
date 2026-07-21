@@ -294,10 +294,7 @@ export function buildP240PipelineHealth(input: {
       "Do not enable live autonomous sends. Continue dry-run only; fix dominant blockers (especially qualification / P65.6 grade gates and 40–60 mi review) and re-run P240.";
   }
 
-  // Absolute safety: this phase never authorizes live unattended without operator ask.
-  if (goNoGo === "GO") {
-    goNoGo = "CONDITIONAL-GO";
-  }
+  // Absolute safety: this phase never assigns "GO" — only CONDITIONAL-GO / NO-GO above.
 
   return {
     phase: P240_PHASE,

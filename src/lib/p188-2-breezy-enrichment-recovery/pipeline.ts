@@ -335,7 +335,6 @@ export function runP1882EnrichmentPipeline(input: {
       reviewCompleted:
         wf.workflowStatus === "Needs Review" ||
         wf.workflowStatus === "Qualified" ||
-        wf.workflowStatus === "Recruiter Review" ||
         Boolean(wf.lastActionAt),
       nowMs,
       // Treat bypass historical records as blocked for recommend path
@@ -403,7 +402,7 @@ export function runP1882EnrichmentPipeline(input: {
       }
       stillBlocked += 1;
     } else if (
-      ["Applied", "Needs Review", "Qualified", "Recruiter Review"].includes(
+      ["Applied", "Needs Review", "Qualified"].includes(
         wf.workflowStatus ?? "",
       )
     ) {
