@@ -1,0 +1,39 @@
+{
+  "phase": "P242",
+  "generatedAt": "2026-07-21T14:46:53.849Z",
+  "mode": "read_only_dry_run",
+  "allPassed": true,
+  "cases": [
+    {
+      "caseId": "live_active_packet_blocks",
+      "description": "Live current-state evaluation still blocks active paperwork packets",
+      "passed": true,
+      "detail": "canPromote=false via active_packet / already_sent protection"
+    },
+    {
+      "caseId": "live_already_sent_protected_skip",
+      "description": "P240 non-replay path still returns protected_skip for already-sent",
+      "passed": true,
+      "detail": "replayAsFreshNew=false → already_sent_or_signed"
+    },
+    {
+      "caseId": "replay_no_source_mutation",
+      "description": "Replay evaluation does not alter underlying candidate workflow",
+      "passed": true,
+      "detail": "workflow object deep-equal before/after simulate"
+    },
+    {
+      "caseId": "p65_action_type_gate_intact",
+      "description": "Live P65.6 still rejects send-paperwork / await-signature actionType",
+      "passed": true,
+      "detail": "canPromoteToPaperworkFunnel still false for stale actionType on live row"
+    },
+    {
+      "caseId": "p65_active_packet_predicate_intact",
+      "description": "Live P65.6 active_packet / signed / duplicate-send protection unchanged",
+      "passed": true,
+      "detail": "hasActivePacket + signed checks still enforce never-resend"
+    }
+  ],
+  "note": "Live P65.6 canPromoteToPaperworkFunnel predicates unchanged; only P240 replay reset expanded."
+}

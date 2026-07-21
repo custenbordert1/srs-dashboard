@@ -1,0 +1,37 @@
+{
+  "phase": "P241",
+  "generatedAt": "2026-07-21T14:33:17.170Z",
+  "baseline": {
+    "proxyCohortSize": 17,
+    "wouldSendCount": 5,
+    "blockedCount": 12,
+    "autoClearRatePct": 29.4,
+    "estimatedDailyThroughputToSent": 5.1,
+    "healthScore": 66,
+    "goNoGo": "NO-GO"
+  },
+  "projectedAfterRecoverableFixes": {
+    "recoverableQualificationFailures": 8,
+    "wouldSendDelta": 8,
+    "wouldSendCount": 13,
+    "blockedCount": 4,
+    "autoClearRatePct": 76.5,
+    "estimatedDailyThroughputToSent": 13.3,
+    "estimatedDailyArrivalRate": 17.4,
+    "healthScore": 83,
+    "grade": "B",
+    "goNoGo": "GO_WITH_CONDITIONS",
+    "goNoGoReason": "Projected pipeline is decision-complete with improved auto-clear, but remaining blockers (distance review / data quality) prevent full GO.",
+    "remainingBottlenecks": [
+      "manual_review_40_60 (2, 50%)",
+      "duplicate_identity (1, 25%)",
+      "missing_phone (1, 25%)"
+    ]
+  },
+  "assumptions": [
+    "Recovery = clear stale actionType/requiredAction on P240 replayAsFreshNew only (simulation measurement fix).",
+    "Does not mutate live candidates, re-send paperwork, or bypass active-packet / never-resend rules.",
+    "Proximity/DM gates re-evaluated with same P240 opportunity + position authority inputs.",
+    "Non-qualification P240 blockers (manual_review_40_60, duplicate_identity, missing_phone) remain."
+  ]
+}

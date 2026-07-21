@@ -1,0 +1,53 @@
+{
+  "phase": "P240",
+  "generatedAt": "2026-07-21T13:43:33.417Z",
+  "healthScore": 66,
+  "grade": "D",
+  "factors": [
+    {
+      "name": "auto_clear_rate",
+      "score": 29.4,
+      "weight": 0.35,
+      "note": "29.4% of simulated new arrivals would reach Paperwork Sent"
+    },
+    {
+      "name": "explicit_blockers",
+      "score": 100,
+      "weight": 0.2,
+      "note": "Every blocked candidate has blocker code + next action + queue location"
+    },
+    {
+      "name": "never_resend_protection",
+      "score": 100,
+      "weight": 0.15,
+      "note": "Prior-batch and already-sent/signed candidates are protected skips"
+    },
+    {
+      "name": "ingestion_coverage",
+      "score": 90,
+      "weight": 0.15,
+      "note": "244 arrivals in 14d (~17.4/day)"
+    },
+    {
+      "name": "bottleneck_concentration",
+      "score": 50,
+      "weight": 0.15,
+      "note": "Top blocker: qualification_gate_failed (66.7%)"
+    }
+  ],
+  "remainingBottlenecks": [
+    "qualification_gate_failed (8, 66.7%)",
+    "manual_review_40_60 (2, 16.7%)",
+    "duplicate_identity (1, 8.3%)",
+    "missing_phone (1, 8.3%)"
+  ],
+  "goNoGo": "NO-GO",
+  "goNoGoReason": "Health score 66/100 with auto-clear 29.4% is below the threshold for continuous unattended operation (need ≥70 health and stronger auto-clear). Dominant bottleneck: qualification_gate_failed.",
+  "liveModeRecommendation": "Do not enable live autonomous sends. Continue dry-run only; fix dominant blockers (especially qualification / P65.6 grade gates and 40–60 mi review) and re-run P240.",
+  "dryRunConfirmed": true,
+  "durableWrites": 0,
+  "dropboxSignCalls": 0,
+  "stageChanges": 0,
+  "recruiterOwnershipChanges": 0,
+  "dmAssignmentChanges": 0
+}

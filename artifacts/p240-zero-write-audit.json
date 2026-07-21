@@ -1,0 +1,24 @@
+{
+  "phase": "P240",
+  "mode": "dry_run_only",
+  "generatedAt": "2026-07-21T13:43:33.438Z",
+  "before": {
+    ".data/candidate-workflows.json": "fedc3de9501123b661c68c2fc344fd81acdb67788dab776d15756cacfe1f77e2",
+    ".data/candidate-ingestion.json": "58e681c10ef7046e3826d0477652d4e05623f721a8ba0a6b9a918a94800dfc8c",
+    ".data/p226-candidate-recovery-store.json": "040fcac9b9ca2d76165ce3b32c3e060ca1e8a807ba2018c51139fac161d5f2e2",
+    ".data/p230-routing-recovery-store.json": "59151c2ba5a67db6c1bfe8b00428ae45d55da2f373aff112b337a3a10c47fe4b"
+  },
+  "after": {
+    ".data/candidate-workflows.json": "fedc3de9501123b661c68c2fc344fd81acdb67788dab776d15756cacfe1f77e2",
+    ".data/candidate-ingestion.json": "58e681c10ef7046e3826d0477652d4e05623f721a8ba0a6b9a918a94800dfc8c",
+    ".data/p226-candidate-recovery-store.json": "040fcac9b9ca2d76165ce3b32c3e060ca1e8a807ba2018c51139fac161d5f2e2",
+    ".data/p230-routing-recovery-store.json": "59151c2ba5a67db6c1bfe8b00428ae45d55da2f373aff112b337a3a10c47fe4b"
+  },
+  "unchanged": true,
+  "durablePaths": [
+    ".data/candidate-workflows.json",
+    ".data/candidate-ingestion.json",
+    ".data/p226-candidate-recovery-store.json",
+    ".data/p230-routing-recovery-store.json"
+  ]
+}
