@@ -1,0 +1,99 @@
+import { loadPilotConfig } from "@/lib/p122-controlled-live-paperwork-pilot/pilot-config";
+import { readDropboxSignConfig } from "@/lib/dropbox-sign";
+import type { P243PreflightCheck } from "@/lib/p243-autonomous-end-to-end-pipeline/types";
+
+/**
+ * Live-mode preflight checklist. Dry-run always passes with informational checks.
+ * Dropbox config / testMode only block live execute.
+ */
+export function runP243Preflight(input: {
+  dryRun: boolean;
+  confirmLive: boolean;
+  fullLive: boolean;
+  canaryLimit: number;
+}): { ok: boolean; checks: P243PreflightCheck[]; executionBlockedReason: string | null } {
+  const checks: P243PreflightCheck[] = [];
+
+  checks.push({
+    id: "mode",
+    ok: true,
+    message: input.dryRun
+      ? "Dry-run mode — no Dropbox/Breezy writes"
+      : input.fullLive
+        ? `Full live requested (canaryLimit ignored; confirmLive=${input.confirmLive})`
+        : `Canary live (max ${input.canaryLimit} sends); confirmLive=${input.confirmLive}`,
+  });
+
+  const dropbox = readDropboxSignConfig();
+  const dropboxConfigured = Boolean(dropbox);
+  checks.push({
+    id: "dropbox_config",
+    ok: input.dryRun ? true : dropboxConfigured,
+    message: dropbox
+      ? `Dropbox Sign configured (testMode=${dropbox.testMode})`
+      : input.dryRun
+        ? "Dropbox Sign not configured (informational in dry-run)"
+        : "Dropbox Sign not configured (API key missing)",
+  });
+
+  if (!input.dryRun && dropbox && dropbox.testMode !== true) {
+    checks.push({
+      id: "dropbox_test_mode",
+      ok: false,
+      message: "Live P243 requires Dropbox testMode=true until production-mode is separately authorized",
+    });
+  } else {
+    checks.push({
+      id: "dropbox_test_mode",
+      ok: true,
+      message: dropbox
+        ? `Dropbox testMode=${dropbox.testMode}`
+        : input.dryRun
+          ? "N/A (dry-run)"
+          : "Dropbox testMode check skipped (config missing)",
+    });
+  }
+
+  const pilot = loadPilotConfig();
+  checks.push({
+    id: "paperwork_pilot",
+    ok: true,
+    message: `P122 pilot allowlist size=${pilot.allowlist.length} liveMode=${pilot.liveModeEnabled} pilotEnabled=${pilot.pilotEnabled} (P123 still enforces gates)`,
+  });
+
+  if (!input.dryRun && pilot.liveModeEnabled !== true) {
+    checks.push({
+      id: "pilot_live_mode_flag",
+      ok: true,
+      message:
+        "AUTONOMOUS_PAPERWORK_LIVE_MODE is not true — informational; P123/execute path still gates sends",
+    });
+  }
+
+  checks.push({
+    id: "onboarding_template",
+    ok: true,
+    message: "Onboarding template key expected: onboarding_packet (resolved at send time)",
+  });
+
+  if (!input.dryRun && !input.confirmLive) {
+    checks.push({
+      id: "confirm_live",
+      ok: false,
+      message: "Live execute requires confirmLive=true",
+    });
+  } else {
+    checks.push({
+      id: "confirm_live",
+      ok: true,
+      message: input.dryRun ? "N/A (dry-run)" : "confirmLive acknowledged",
+    });
+  }
+
+  const blocking = checks.filter((c) => !c.ok);
+  return {
+    ok: blocking.length === 0,
+    checks,
+    executionBlockedReason: blocking[0]?.message ?? null,
+  };
+}

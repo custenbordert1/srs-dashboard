@@ -76,6 +76,51 @@ export function useRecruitingAutopilotOperations() {
   const [actionBusy, setActionBusy] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [evaluationPreview, setEvaluationPreview] = useState<{
+    evaluated: number;
+    autoAdvance: number;
+    humanReview: number;
+    autoReject: number;
+    paperworkTasksPlanned: number;
+    averageLatencyMs: number;
+    traceId?: string;
+    batchId?: string;
+    auditCount?: number;
+    timelineLength?: number;
+    llmEnhancementsApplied?: number;
+  } | null>(null);
+  const [cycleReport, setCycleReport] = useState<{
+    pulled: number;
+    scored: number;
+    autoAdvance: number;
+    humanReview: number;
+    autoReject: number;
+    paperworkPlanned: number;
+    paperworkSent: number;
+    failures: number;
+    ceoTraceId: string;
+    batchId: string;
+    dryRun: boolean;
+    executionMode?: string;
+    successRatePct?: number;
+    advanceRatePct?: number;
+    skippedIdempotent?: number;
+    skippedAlreadySent?: number;
+    skippedStateMachine?: number;
+    skippedCanaryCap?: number;
+    warnings?: string[];
+    freshResetApplied?: number;
+    ingestion?: {
+      source: string;
+      webhookHits: number;
+      pollHits: number;
+      deduped: number;
+    };
+  } | null>(null);
+  const [cycleBusy, setCycleBusy] = useState(false);
+  const [cycleError, setCycleError] = useState<string | null>(null);
+  const [evaluationPreviewBusy, setEvaluationPreviewBusy] = useState(false);
+  const [evaluationPreviewError, setEvaluationPreviewError] = useState<string | null>(null);
 
   const mountedRef = useRef(true);
   const generationRef = useRef(0);
@@ -280,6 +325,165 @@ export function useRecruitingAutopilotOperations() {
     [refresh],
   );
 
+  /**
+   * Dry-run multi-lane evaluation preview (ARE engine).
+   * Never writes workflows / Dropbox — POST /api/recruiting/evaluation-preview only.
+   */
+  const runEvaluationPreview = useCallback(
+    async (
+      candidates: Array<{
+        candidateId: string;
+        candidateName: string;
+        email?: string | null;
+        phone?: string | null;
+        positionId?: string | null;
+        positionName?: string | null;
+        workflowStatus: string;
+        paperworkStatus?: string | null;
+        signatureRequestId?: string | null;
+        nearestJobMiles?: number | null;
+        reasonCodes?: string[];
+        components?: Record<string, number | boolean | null>;
+      }>,
+    ) => {
+      setEvaluationPreviewBusy(true);
+      setEvaluationPreviewError(null);
+      try {
+        const res = await fetchWithTimeout("/api/recruiting/evaluation-preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ candidates }),
+          timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          error?: string;
+          result?: {
+            evaluated: number;
+            autoAdvance: number;
+            humanReview: number;
+            autoReject: number;
+            paperworkTasksPlanned: number;
+            averageLatencyMs: number;
+            traceId?: string;
+            batchId?: string;
+            auditCount?: number;
+            timelineLength?: number;
+            llmEnhancementsApplied?: number;
+          };
+        };
+        if (!res.ok || !data.ok || !data.result) {
+          throw new Error(data.error ?? "Evaluation preview failed");
+        }
+        setEvaluationPreview({
+          evaluated: data.result.evaluated,
+          autoAdvance: data.result.autoAdvance,
+          humanReview: data.result.humanReview,
+          autoReject: data.result.autoReject,
+          paperworkTasksPlanned: data.result.paperworkTasksPlanned,
+          averageLatencyMs: data.result.averageLatencyMs,
+          traceId: data.result.traceId,
+          batchId: data.result.batchId,
+          auditCount: data.result.auditCount,
+          timelineLength: data.result.timelineLength,
+          llmEnhancementsApplied: data.result.llmEnhancementsApplied ?? 0,
+        });
+      } catch (error) {
+        if (!isAbortError(error)) {
+          setEvaluationPreviewError(
+            friendlyFetchMessageFromError(error, "autopilot") ?? "Evaluation preview failed",
+          );
+        }
+      } finally {
+        setEvaluationPreviewBusy(false);
+      }
+    },
+    [],
+  );
+
+  const runFullAutonomousCycle = useCallback(
+    async (input?: {
+      limit?: number;
+      dryRun?: boolean;
+      confirmLive?: boolean;
+      canaryLimit?: number;
+      fullLive?: boolean;
+      forceFreshReset?: boolean;
+    }) => {
+      setCycleBusy(true);
+      setCycleError(null);
+      const dryRun = input?.dryRun !== false;
+      try {
+        const res = await fetchWithTimeout("/api/recruiting/autonomous-cycle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dryRun,
+            limit: input?.limit ?? 25,
+            confirmLive: dryRun ? undefined : input?.confirmLive === true,
+            canaryLimit: input?.canaryLimit ?? 3,
+            fullLive: dryRun ? undefined : input?.fullLive === true,
+            forceFreshReset: input?.forceFreshReset === true,
+          }),
+          timeoutMs: HEAVY_REQUEST_TIMEOUT_MS,
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          error?: string;
+          report?: {
+            pulled: number;
+            scored: number;
+            autoAdvance: number;
+            humanReview: number;
+            autoReject: number;
+            paperworkPlanned: number;
+            paperworkSent: number;
+            failures: number;
+            ceoTraceId: string;
+            batchId: string;
+            dryRun: boolean;
+            executionMode?: string;
+            successRatePct?: number;
+            advanceRatePct?: number;
+            skippedIdempotent?: number;
+            skippedAlreadySent?: number;
+            skippedStateMachine?: number;
+            skippedCanaryCap?: number;
+            warnings?: string[];
+            freshResetApplied?: number;
+            ingestion?: {
+              source: string;
+              webhookHits: number;
+              pollHits: number;
+              deduped: number;
+            };
+          };
+        };
+        if (!res.ok || !data.ok || !data.report) {
+          throw new Error(data.error ?? "Autonomous cycle failed");
+        }
+        setCycleReport(data.report);
+        const mode = data.report.dryRun
+          ? "DRY-RUN"
+          : data.report.executionMode === "full_live"
+            ? "FULL-LIVE"
+            : "CANARY-LIVE";
+        setActionMessage(
+          `P243 ${mode} complete — pulled ${data.report.pulled}, advance ${data.report.autoAdvance}, review ${data.report.humanReview}, sent ${data.report.paperworkSent}, Fresh Reset Applied ${data.report.freshResetApplied ?? 0}, success ${data.report.successRatePct ?? "—"}%.`,
+        );
+      } catch (error) {
+        if (!isAbortError(error)) {
+          setCycleError(
+            friendlyFetchMessageFromError(error, "autopilot") ?? "Autonomous cycle failed",
+          );
+        }
+      } finally {
+        setCycleBusy(false);
+      }
+    },
+    [],
+  );
+
   return {
     dashboard,
     recentSends,
@@ -293,7 +497,15 @@ export function useRecruitingAutopilotOperations() {
     actionBusy,
     actionMessage,
     actionError,
+    evaluationPreview,
+    evaluationPreviewBusy,
+    evaluationPreviewError,
+    cycleReport,
+    cycleBusy,
+    cycleError,
     refresh,
     postControl,
+    runEvaluationPreview,
+    runFullAutonomousCycle,
   };
 }
