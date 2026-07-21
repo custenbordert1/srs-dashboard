@@ -19,6 +19,16 @@ import {
 } from "@/lib/p185-5-vercel-durable-storage/bridges";
 import { isP1855DurableConfigured, redactProviderName, resolveDatabaseUrl } from "@/lib/p185-5-vercel-durable-storage/sqlClient";
 
+/**
+ * Storage adapter selection (Option A — Neon/Postgres preferred):
+ *
+ * 1. **postgres** — when P185.5 is configured via `P185_DATABASE_URL` /
+ *    `DATABASE_URL` / `POSTGRES_URL` / `NEON_DATABASE_URL`, or local
+ *    `P185_PGLITE_DATA_DIR`. Used by P184 / P185 / P185.3 durable bridges.
+ * 2. **durable_volume** / **local_filesystem** — FS fallback for laptop
+ *    canaries when Postgres is not configured (not durable on Vercel).
+ * 3. **ephemeral_tmp** / **in_memory** — fail-closed for live sends.
+ */
 export type P185StorageAdapterName =
   | "local_filesystem"
   | "durable_volume"
@@ -32,6 +42,17 @@ export type P185StorageHealth = {
   healthy: boolean;
   detail: string;
   dataDir: string;
+  provider?: string;
+};
+
+export type P185StorageConnectivityProbe = {
+  adapter: P185StorageAdapterName;
+  durable: boolean;
+  /** True when P185.5 Postgres/PGlite env is present (preferred path). */
+  configuredPostgres: boolean;
+  /** Live DB probe result; null when using FS fallback (not probed). */
+  connectivityOk: boolean | null;
+  detail: string;
   provider?: string;
 };
 
@@ -138,6 +159,7 @@ function classifyAdapter(dir: string): P185StorageHealth {
 }
 
 export function getP185StorageHealth(): P185StorageHealth {
+  // Prefer Neon / Vercel Postgres / PGlite whenever P185.5 env is configured.
   if (isP1855DurableConfigured() && !forceEphemeralForTests) {
     const url = resolveDatabaseUrl();
     const provider = url
@@ -155,6 +177,37 @@ export function getP185StorageHealth(): P185StorageHealth {
     };
   }
   return classifyAdapter(p185DataDir());
+}
+
+/**
+ * Lightweight connectivity probe for preflight / operator dashboards.
+ * When Postgres is selected, runs `SELECT 1` via the P185.5 adapter.
+ * FS fallbacks return `connectivityOk: null` (not a DB probe).
+ */
+export async function probeP185StorageConnectivity(): Promise<P185StorageConnectivityProbe> {
+  const health = getP185StorageHealth();
+  if (health.adapter === "postgres") {
+    const { healthCheck } = await import("@/lib/p185-5-vercel-durable-storage/adapter");
+    const probe = await healthCheck();
+    return {
+      adapter: "postgres",
+      durable: true,
+      configuredPostgres: true,
+      connectivityOk: probe.ok,
+      detail: probe.ok
+        ? `Postgres durable adapter OK (${health.provider ?? "postgres"}). ${probe.detail}`
+        : `Postgres configured but connectivity failed: ${probe.detail}`,
+      provider: health.provider,
+    };
+  }
+  return {
+    adapter: health.adapter,
+    durable: health.durable,
+    configuredPostgres: false,
+    connectivityOk: null,
+    detail: `Using ${health.adapter} FS fallback (Neon/Postgres not configured). ${health.detail}`,
+    provider: health.provider,
+  };
 }
 
 function normalizeState(raw: Partial<P185RunnerStateFile> | null | undefined): P185RunnerStateFile {

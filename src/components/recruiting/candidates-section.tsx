@@ -960,6 +960,29 @@ export function CandidatesSection() {
     return () => window.clearTimeout(id);
   }, [loadBundle]);
 
+  // P170 — merge the durable ingestion store as a base layer so the displayed
+  // list is "Ingestion Store + Live Preview" rather than preview-only. This runs
+  // once after mount and never removes freshly loaded preview/fast rows.
+  useEffect(() => {
+    let cancelled = false;
+    const id = window.setTimeout(() => {
+      void fetchAndMergeIngestionBase(breezySnapshotRef.current)
+        .then((merged) => {
+          if (cancelled || !merged || !merged.ok || merged.candidates.length === 0) return;
+          const priorCount = breezySnapshotRef.current?.candidates.length ?? 0;
+          if (merged.candidates.length < priorCount) return;
+          commitCandidatesSuccess(merged);
+        })
+        .catch(() => {
+          /* ingestion base is best-effort; preview/fast still render */
+        });
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+    };
+  }, [commitCandidatesSuccess]);
+
   useEffect(() => {
     saveP199QueueFiltersToSession(queueFilters);
   }, [queueFilters]);

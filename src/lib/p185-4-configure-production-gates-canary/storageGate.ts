@@ -21,8 +21,10 @@ function productionStorageConfirmed(): boolean {
 }
 
 /**
- * External Postgres (Neon / Vercel Postgres) is the preferred Vercel-durable path.
- * Local filesystem alone is not enough. Confirmation env is never auto-set.
+ * Production live-send gate (Option A):
+ * - Preferred: Neon / Vercel Postgres (`adapter === "postgres"`) via P185.5.
+ * - Local filesystem alone is not enough on Vercel.
+ * - `P185_PRODUCTION_STORAGE_CONFIRMED` is never auto-set — operator only.
  */
 export function evaluateProductionStorageGate(input?: {
   storage?: ReturnType<typeof getP185StorageHealth>;

@@ -1,17 +1,19 @@
 import { loadPilotConfig } from "@/lib/p122-controlled-live-paperwork-pilot/pilot-config";
 import { readDropboxSignConfig } from "@/lib/dropbox-sign";
+import { probeP185StorageConnectivity } from "@/lib/p185-production-paperwork-automation-runner";
 import type { P243PreflightCheck } from "@/lib/p243-autonomous-end-to-end-pipeline/types";
 
 /**
- * Live-mode preflight checklist. Dry-run always passes with informational checks.
- * Dropbox config / testMode only block live execute.
+ * Live-mode preflight checklist. Dry-run always passes with informational checks
+ * (including storage warnings). Dropbox / confirmLive / storage soft-fail only
+ * block live execute (caller falls back to dry-run planning).
  */
-export function runP243Preflight(input: {
+export async function runP243Preflight(input: {
   dryRun: boolean;
   confirmLive: boolean;
   fullLive: boolean;
   canaryLimit: number;
-}): { ok: boolean; checks: P243PreflightCheck[]; executionBlockedReason: string | null } {
+}): Promise<{ ok: boolean; checks: P243PreflightCheck[]; executionBlockedReason: string | null }> {
   const checks: P243PreflightCheck[] = [];
 
   checks.push({
@@ -87,6 +89,32 @@ export function runP243Preflight(input: {
       id: "confirm_live",
       ok: true,
       message: input.dryRun ? "N/A (dry-run)" : "confirmLive acknowledged",
+    });
+  }
+
+  // Option A: Neon/Postgres (P185.5) is the preferred durable path for P184/P185/P243.
+  const storage = await probeP185StorageConnectivity();
+  if (input.dryRun) {
+    // Never hard-block dry-run — surface FS fallback or connectivity issues as warnings.
+    checks.push({
+      id: "durable_storage",
+      ok: true,
+      message: storage.configuredPostgres
+        ? storage.connectivityOk
+          ? storage.detail
+          : `WARNING: ${storage.detail} — dry-run continues; fix Neon connectivity before live`
+        : `WARNING: Neon/Postgres (P185.5) not configured — ${storage.detail}`,
+    });
+  } else {
+    const liveStorageOk = storage.configuredPostgres && storage.connectivityOk === true;
+    checks.push({
+      id: "durable_storage",
+      ok: liveStorageOk,
+      message: liveStorageOk
+        ? storage.detail
+        : storage.configuredPostgres
+          ? `Live soft-fail: ${storage.detail}`
+          : `Live soft-fail: Neon/Postgres (P185.5) required for live. Set P185_DATABASE_URL / DATABASE_URL / POSTGRES_URL. Currently adapter=${storage.adapter}.`,
     });
   }
 

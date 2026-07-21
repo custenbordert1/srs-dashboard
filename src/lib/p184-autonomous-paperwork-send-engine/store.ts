@@ -14,6 +14,11 @@ import {
   shouldUseP1855DurableBackend,
 } from "@/lib/p185-5-vercel-durable-storage/bridges";
 
+/**
+ * Persistence: Neon/Postgres via P185.5 when configured (`shouldUseP1855DurableBackend`),
+ * otherwise local JSON under the recruiting data dir (dev / FS fallback).
+ */
+
 function statePath(): string {
   return path.join(recruitingDataDir(), "p184-autonomous-paperwork-send-state.json");
 }

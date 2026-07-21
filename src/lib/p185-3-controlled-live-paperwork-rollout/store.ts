@@ -11,6 +11,10 @@ import {
   shouldUseP1855DurableBackend,
 } from "@/lib/p185-5-vercel-durable-storage/bridges";
 
+/**
+ * Persistence: Neon/Postgres via P185.5 when configured; otherwise local JSON FS fallback.
+ */
+
 const STATE_FILE = "p185-3-controlled-live-paperwork-rollout-state.json";
 
 function statePath(): string {

@@ -126,8 +126,8 @@ describe("p243-autonomous-end-to-end-pipeline", () => {
     assert.ok(candidates.some((c) => c.candidateId === "3"));
   });
 
-  it("preflight passes dry-run and requires confirmLive for live", () => {
-    const dry = runP243Preflight({
+  it("preflight passes dry-run and requires confirmLive for live", async () => {
+    const dry = await runP243Preflight({
       dryRun: true,
       confirmLive: false,
       fullLive: false,
@@ -135,8 +135,15 @@ describe("p243-autonomous-end-to-end-pipeline", () => {
     });
     assert.equal(dry.ok, true);
     assert.ok(dry.checks.some((c) => c.id === "mode"));
+    const storageDry = dry.checks.find((c) => c.id === "durable_storage");
+    assert.ok(storageDry);
+    assert.equal(storageDry?.ok, true);
+    assert.ok(
+      storageDry?.message.includes("WARNING") || storageDry?.message.includes("Postgres"),
+      "dry-run storage check should warn or confirm adapter",
+    );
 
-    const liveNoConfirm = runP243Preflight({
+    const liveNoConfirm = await runP243Preflight({
       dryRun: false,
       confirmLive: false,
       fullLive: false,
@@ -146,6 +153,8 @@ describe("p243-autonomous-end-to-end-pipeline", () => {
     const confirmCheck = liveNoConfirm.checks.find((c) => c.id === "confirm_live");
     assert.equal(confirmCheck?.ok, false);
     assert.ok(confirmCheck?.message.includes("confirmLive"));
+    const storageLive = liveNoConfirm.checks.find((c) => c.id === "durable_storage");
+    assert.ok(storageLive);
   });
 
   it("exposes forceFreshReset on AutonomousCycleOptions (forceFreshData alias)", () => {

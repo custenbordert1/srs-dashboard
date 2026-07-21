@@ -165,7 +165,7 @@ export async function runAutonomousRecruitingCycle(
   const notes: string[] = [];
   const skipReasonSamples: string[] = [];
 
-  const preflight = runP243Preflight({
+  const preflight = await runP243Preflight({
     dryRun: dryRunRequested,
     confirmLive,
     fullLive,
