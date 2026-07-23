@@ -1,0 +1,64 @@
+{
+  "phase": "P249-daily-ops-mission",
+  "generatedAt": "2026-07-23T13:54:54.149Z",
+  "opsDate": "2026-07-23",
+  "source": {
+    "p242Preview": true,
+    "p246Preview": true,
+    "workflowStore": true,
+    "reminderStorePresent": false
+  },
+  "counts": {
+    "eligibleForInitialPaperwork": 1,
+    "alreadySent": 496,
+    "outstandingDropboxSignatures": 310,
+    "reminderEligibleTotal": 180,
+    "reminder1": 180,
+    "reminder2": 0,
+    "reminder3": 0,
+    "reminder4": 0,
+    "viewedButNotSigned": 139,
+    "signed": 78,
+    "readyForMel": 18,
+    "paperworkNeededWorkflow": 8,
+    "paperworkSentWorkflow": 496
+  },
+  "blockedByReason": [
+    {
+      "reason": "initial:already_sent",
+      "count": 68,
+      "automaticFix": true,
+      "manualAction": "None — correctly excluded"
+    },
+    {
+      "reason": "reminder:invalid_email",
+      "count": 101,
+      "automaticFix": false,
+      "manualAction": "Clean invalid emails in Breezy / workflow before reminding"
+    },
+    {
+      "reason": "reminder:missing_signature_request",
+      "count": 103,
+      "automaticFix": false,
+      "manualAction": "Reconcile missing Dropbox signatureRequestId or resend initial packet"
+    },
+    {
+      "reason": "reminder:cooldown_not_met",
+      "count": 52,
+      "automaticFix": true,
+      "manualAction": "Wait for cadence window — no operator action"
+    },
+    {
+      "reason": "reminder:signed_or_completed",
+      "count": 78,
+      "automaticFix": true,
+      "manualAction": "None — advance toward MEL verification"
+    },
+    {
+      "reason": "reminder:status_conflicts",
+      "count": 88,
+      "automaticFix": true,
+      "manualAction": "Re-run P246 with --apply-safe-corrections when authorized"
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+import {
+  P250_OPS_DATE,
+  P250_PHASE,
+  type P250ControlledLaunchPlan,
+} from "@/lib/p250-go-live-preparation/types";
+
+export function buildP250ControlledLaunchPlan(input: {
+  decision: "GO" | "NO-GO" | "CONDITIONAL-GO";
+  prerequisiteBlockers: string[];
+  initialPaperwork: number;
+  reminder1Batch: number;
+  readyForMel: number;
+  openStoreSafeCapacity: number | null;
+}): P250ControlledLaunchPlan {
+  const initial = Math.max(0, input.initialPaperwork);
+  const reminders = Math.max(0, input.reminder1Batch);
+  const canary = Math.min(3, reminders);
+  const remainingReminders = Math.max(0, reminders - canary);
+
+  return {
+    phase: P250_PHASE,
+    generatedAt: new Date().toISOString(),
+    opsDate: P250_OPS_DATE,
+    recommendation: input.decision,
+    prerequisiteBlockers: input.prerequisiteBlockers,
+    volumes: {
+      testEmail: 1,
+      initialPaperwork: initial,
+      reminder1Batch: reminders,
+      readyForMel: input.readyForMel,
+      openStoreSafeCapacity: input.openStoreSafeCapacity,
+    },
+    steps: [
+      {
+        order: 0,
+        stage: "prerequisites",
+        action: "Resolve all Resend / env blockers; re-run P250 until decision=GO",
+        count: input.prerequisiteBlockers.length,
+        command: "npx tsx scripts/p250-run-go-live-preparation.ts",
+        verify: [
+          "readinessOverall PASS or WARN with failCount=0",
+          "modes.resendReady=true",
+          "go-nogo decision is GO",
+        ],
+        rollback: ["Do not proceed to any --live command until GO"],
+        stopConditions: ["Any FAIL blocker remains"],
+        risk: "high",
+      },
+      {
+        order: 1,
+        stage: "test_email",
+        action: "Send single Resend test/canary email (P248 canary-only first recipient path)",
+        count: 1,
+        command:
+          "npx tsx scripts/p248-run-resend-live-reminder-campaign.ts --live --confirm-live --canary-only",
+        verify: [
+          "Resend dashboard shows delivered/accepted message for canary recipient(s)",
+          "Artifact / console: canaryConfirmed ≥ 1, dropboxPacketsResent=false",
+          "No Dropbox signature requests created",
+        ],
+        rollback: [
+          "Do not run --continue-full",
+          "If auth/domain failure: revert DIRECT_DEPOSIT_EMAIL_MODE to log until fixed",
+          "Leave reminder store as-is (idempotency keys protect re-send)",
+        ],
+        stopConditions: [
+          "readyForLive=false",
+          "stopReason set (auth, domain, rate limit)",
+          "canaryConfirmed=0 with failures",
+        ],
+        risk: "medium",
+      },
+      {
+        order: 2,
+        stage: "verify_test_email",
+        action: "Operator verifies inbox content, From, Reply-To, and links",
+        count: 1,
+        command: null,
+        verify: [
+          `From is recruiting sender (approved: recruiting@strategicretailsolutions.com)`,
+          "No Dropbox packet re-created",
+          "Candidate still outstanding in Dropbox after canary",
+        ],
+        rollback: ["Abort launch; keep mode=log until copy/domain corrected"],
+        stopConditions: ["Wrong From domain", "Broken signing link", "Unexpected Dropbox write"],
+        risk: "low",
+      },
+      {
+        order: 3,
+        stage: "initial_paperwork",
+        action: "Send initial open-store paperwork (eligible count from P249)",
+        count: initial,
+        command:
+          "export AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true AUTONOMOUS_PAPERWORK_LIVE_MODE=true AUTONOMOUS_PAPERWORK_OPERATOR_GO=true; npx tsx scripts/p243-run-open-store-bulk-paperwork-queue.ts --live --confirm-live",
+        verify: [
+          `Eligible would-send count remains ${initial} after fresh preview`,
+          "Dropbox Sign shows new signature request for the candidate",
+          `Safe capacity respected (P249 safeCapacity=${input.openStoreSafeCapacity ?? "n/a"})`,
+          "Confirm intentional DROPBOX_SIGN_TEST_MODE before execute",
+        ],
+        rollback: [
+          "Stop further P243 live runs",
+          "Cancel/void the test signature request in Dropbox Sign if packet was unwanted",
+          "Do not flip testMode to production while quota=0",
+        ],
+        stopConditions: [
+          "testMode unexpectedly false with production quota=0",
+          "Capacity gate trip",
+          "Breezy/Dropbox API errors",
+        ],
+        risk: "high",
+      },
+      {
+        order: 4,
+        stage: "verify_dropbox",
+        action: "Verify Dropbox packet created and status probe readable",
+        count: initial,
+        command: null,
+        verify: [
+          "Signature request id stored on workflow / packet",
+          "Signer email matches candidate",
+          "Status probe returns outstanding (not signed yet)",
+        ],
+        rollback: [
+          "Do not start Reminder 1 batch until packet verified",
+          "Reconcile missing signatureRequestId before any reminder chase",
+        ],
+        stopConditions: ["Packet missing", "Email mismatch", "Vendor quota error on create"],
+        risk: "medium",
+      },
+      {
+        order: 5,
+        stage: "reminder1_batch",
+        action: "Send Reminder 1 cohort (after canary success)",
+        count: remainingReminders > 0 ? reminders : reminders,
+        command:
+          remainingReminders > 0
+            ? "npx tsx scripts/p248-run-resend-live-reminder-campaign.ts --live --confirm-live --continue-full"
+            : "npx tsx scripts/p248-run-resend-live-reminder-campaign.ts --live --confirm-live --canary-only",
+        verify: [
+          `Target Reminder 1 eligible ≈ ${reminders} (P249 dry-run)`,
+          "Batch size 25 with 1500ms pause",
+          "dropboxPacketsResent=false throughout",
+          "Idempotent skips for already-reminded keys",
+        ],
+        rollback: [
+          "Interrupt process (Ctrl+C) — in-flight batch finishes current send only",
+          "Do not re-run --continue-full until stopReason reviewed",
+          "Idempotency keys prevent duplicate reminder numbers for same packet",
+        ],
+        stopConditions: [
+          "stopCampaign / stopReason (auth, domain, 429, persistence)",
+          "Unexpected Dropbox writes",
+          "Spike in unexplained provider errors",
+        ],
+        risk: "medium",
+      },
+      {
+        order: 6,
+        stage: "monitor",
+        action: "Monitor delivery, bounces, and Dropbox outstanding counts",
+        count: null,
+        command: "npx tsx scripts/p249-run-daily-ops-mission.ts",
+        verify: [
+          "Resend bounce/complaint rate acceptable",
+          "Outstanding signatures trend down or stable",
+          "No unintended Breezy/MEL writes",
+        ],
+        rollback: [
+          "Freeze further campaigns (do not pass --live)",
+          "Set DIRECT_DEPOSIT_EMAIL_MODE=log if emergency halt needed",
+        ],
+        stopConditions: ["Elevated bounce rate", "Resend account lock", "Dropbox API outage"],
+        risk: "low",
+      },
+      {
+        order: 7,
+        stage: "refresh",
+        action: "Refresh Dropbox statuses and eligibility (read-only / preview)",
+        count: null,
+        command:
+          "npx tsx scripts/p246-run-outstanding-paperwork-reminders.ts",
+        verify: [
+          "Signed-before-send exclusions increase as candidates complete",
+          "Cooldown and idempotent skips remain correct",
+        ],
+        rollback: ["Do not apply-safe-corrections without operator review"],
+        stopConditions: ["Mass status probe failures"],
+        risk: "low",
+      },
+      {
+        order: 8,
+        stage: "advance_signed",
+        action: "Advance verified signed candidates toward Ready for MEL (manual/authorized)",
+        count: input.readyForMel,
+        command: null,
+        verify: [
+          `~${input.readyForMel} candidates in Ready for MEL / verify-signed queues (P249)`,
+          "Signature complete in Dropbox before MEL load",
+          "No automatic MEL API writes from this launch plan",
+        ],
+        rollback: [
+          "Do not load MEL for incomplete signatures",
+          "Revert workflow status only via authorized operator tooling",
+        ],
+        stopConditions: ["Unsigned packet marked Ready for MEL", "MEL write attempted without approval"],
+        risk: "medium",
+      },
+    ],
+    monitoring: [
+      "Resend dashboard: delivered / bounced / complained",
+      "Dropbox Sign: new requests, completions, quota",
+      "P249 ops dashboard: reminder buckets, Ready for MEL, blocked manual counts",
+      "Reminder store idempotency growth under .data/",
+      "Application logs for stopCampaign reasons",
+    ],
+    explicitApprovalRequired: true,
+    noLiveExecutionInP250: true,
+  };
+}

@@ -1,0 +1,195 @@
+{
+  "phase": "P249-daily-ops-mission",
+  "generatedAt": "2026-07-23T13:56:21.244Z",
+  "opsDate": "2026-07-23",
+  "mode": "read_only",
+  "overall": "FAIL",
+  "checklist": [
+    {
+      "id": "resend_api_key",
+      "category": "resend",
+      "label": "RESEND_API_KEY present",
+      "status": "FAIL",
+      "detail": "Missing from runtime environment",
+      "automaticFix": false,
+      "manualAction": "Add RESEND_API_KEY to .env.local from https://resend.com/api-keys"
+    },
+    {
+      "id": "email_mode",
+      "category": "resend",
+      "label": "DIRECT_DEPOSIT_EMAIL_MODE=resend",
+      "status": "FAIL",
+      "detail": "Current mode: log",
+      "automaticFix": false,
+      "manualAction": "Set DIRECT_DEPOSIT_EMAIL_MODE=resend in .env.local"
+    },
+    {
+      "id": "sender_from",
+      "category": "resend",
+      "label": "Recruiting From address",
+      "status": "FAIL",
+      "detail": "Resolved From: humanresource@srsmerchandising.com",
+      "automaticFix": false,
+      "manualAction": "Set SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com"
+    },
+    {
+      "id": "sender_domain",
+      "category": "resend",
+      "label": "Sender domain verification",
+      "status": "FAIL",
+      "detail": "Skipped — RESEND_API_KEY unavailable",
+      "automaticFix": false,
+      "manualAction": "Verify From domain in Resend dashboard"
+    },
+    {
+      "id": "spf_dkim",
+      "category": "resend",
+      "label": "SPF (public DNS)",
+      "status": "WARN",
+      "detail": "SPF TXT found for srsmerchandising.com; DKIM not verified without RESEND_API_KEY",
+      "automaticFix": false,
+      "manualAction": "Configure RESEND_API_KEY and verify domain SPF/DKIM in Resend before live email."
+    },
+    {
+      "id": "resend_secrets_safe",
+      "category": "resend",
+      "label": "RESEND_API_KEY not committed",
+      "status": "PASS",
+      "detail": "Key not found in tracked env example files",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "dropbox_api_key",
+      "category": "env",
+      "label": "DROPBOX_SIGN_API_KEY",
+      "status": "PASS",
+      "detail": "Present: DROPBOX_SIGN_API_KEY",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "breezy_api_key",
+      "category": "env",
+      "label": "BREEZY_API_KEY",
+      "status": "PASS",
+      "detail": "Present: BREEZY_API_KEY",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "database_url",
+      "category": "env",
+      "label": "Database URL (Neon/Postgres)",
+      "status": "PASS",
+      "detail": "Present: DATABASE_URL",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "session_secret",
+      "category": "env",
+      "label": "SESSION_SECRET",
+      "status": "PASS",
+      "detail": "Present: SESSION_SECRET",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "dropbox_connectivity",
+      "category": "dropbox",
+      "label": "Dropbox Sign connectivity (read-only)",
+      "status": "WARN",
+      "detail": "Vendor blocked: production quota=0 (software ready=false) (apiStatus=ok, config=misconfigured)",
+      "automaticFix": false,
+      "manualAction": "Production Dropbox quota is 0 — reminder status probes OK; live production packet sends blocked unless testMode is intentionally used"
+    },
+    {
+      "id": "dropbox_test_mode",
+      "category": "dropbox",
+      "label": "Dropbox testMode",
+      "status": "PASS",
+      "detail": "testMode=true (explicit env DROPBOX_SIGN_TEST_MODE=true)",
+      "automaticFix": false,
+      "manualAction": "Confirm intentional test vs production mode before live packet sends"
+    },
+    {
+      "id": "breezy_connectivity",
+      "category": "breezy",
+      "label": "Breezy connectivity (read-only)",
+      "status": "PASS",
+      "detail": "Company=SRS Merchandising; probes ok=4/4",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "database_connectivity",
+      "category": "database",
+      "label": "Database / Neon connectivity",
+      "status": "PASS",
+      "detail": "Postgres durable adapter OK (neon_postgres). Database connectivity OK.",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "feature_flags_pilot",
+      "category": "flags",
+      "label": "Live pilot feature flags",
+      "status": "WARN",
+      "detail": "Not set for live paperwork: AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED, AUTONOMOUS_PAPERWORK_LIVE_MODE, AUTONOMOUS_PAPERWORK_OPERATOR_GO",
+      "automaticFix": false,
+      "manualAction": "Export AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED / LIVE_MODE / OPERATOR_GO before live sends"
+    },
+    {
+      "id": "flag_p151_enabled",
+      "category": "flags",
+      "label": "P151_ENABLED",
+      "status": "WARN",
+      "detail": "unset/false (informational)",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "flag_p184_enabled",
+      "category": "flags",
+      "label": "P184_ENABLED",
+      "status": "WARN",
+      "detail": "unset/false (informational)",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "flag_p185_enabled",
+      "category": "flags",
+      "label": "P185_ENABLED",
+      "status": "WARN",
+      "detail": "unset/false (informational)",
+      "automaticFix": false,
+      "manualAction": null
+    },
+    {
+      "id": "flag_p186_ready_for_mel_review_actions",
+      "category": "flags",
+      "label": "P186_READY_FOR_MEL_REVIEW_ACTIONS",
+      "status": "WARN",
+      "detail": "unset/false (informational)",
+      "automaticFix": false,
+      "manualAction": null
+    }
+  ],
+  "passCount": 8,
+  "failCount": 4,
+  "warnCount": 7,
+  "blockers": [
+    "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+    "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends.",
+    "Sender domain verification: Skipped — RESEND_API_KEY unavailable"
+  ],
+  "modes": {
+    "emailMode": "log",
+    "dropboxTestMode": true,
+    "resendReady": false,
+    "pilotLiveEnvOk": false
+  }
+}

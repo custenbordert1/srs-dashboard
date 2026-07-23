@@ -1,0 +1,70 @@
+{
+  "phase": "P249-daily-ops-mission",
+  "generatedAt": "2026-07-23T13:56:21.245Z",
+  "opsDate": "2026-07-23",
+  "recommendation": "NO-GO",
+  "steps": [
+    {
+      "order": 1,
+      "action": "Fix Resend configuration blockers",
+      "count": 6,
+      "command": null,
+      "risk": "high",
+      "notes": "Set RESEND_API_KEY, DIRECT_DEPOSIT_EMAIL_MODE=resend, SRS_RECRUITING_FROM_EMAIL; verify domain"
+    },
+    {
+      "order": 2,
+      "action": "Re-run P249 / P248 config check (read-only)",
+      "count": null,
+      "command": "npx tsx scripts/p249-run-daily-ops-mission.ts",
+      "risk": "low",
+      "notes": "Confirm readyForLive=true before any --live flags"
+    },
+    {
+      "order": 3,
+      "action": "P246 reminder canary (3) after Resend ready",
+      "count": 3,
+      "command": "npx tsx scripts/p248-run-resend-live-reminder-campaign.ts --live --confirm-live --canary-only",
+      "risk": "medium",
+      "notes": "Does NOT resend Dropbox packets; transactional email only"
+    },
+    {
+      "order": 4,
+      "action": "P246/P248 remaining Reminder 1 cohort",
+      "count": 177,
+      "command": "npx tsx scripts/p248-run-resend-live-reminder-campaign.ts --live --confirm-live --continue-full",
+      "risk": "medium",
+      "notes": "Batch size 25 with pause; est. 20 minutes"
+    },
+    {
+      "order": 5,
+      "action": "Initial open-store paperwork canary (Dropbox testMode)",
+      "count": 1,
+      "command": "export AUTONOMOUS_PAPERWORK_LIVE_PILOT_ENABLED=true AUTONOMOUS_PAPERWORK_LIVE_MODE=true AUTONOMOUS_PAPERWORK_OPERATOR_GO=true; npx tsx scripts/p243-run-open-store-bulk-paperwork-queue.ts --live --confirm-live",
+      "risk": "high",
+      "notes": "Safe capacity=19; confirm testMode intent"
+    },
+    {
+      "order": 6,
+      "action": "Advance signed → Ready for MEL (manual/authorized)",
+      "count": 18,
+      "command": null,
+      "risk": "medium",
+      "notes": "No automatic MEL writes in this mission — verify signatures then load MEL"
+    }
+  ],
+  "throughputEstimate": {
+    "initialSendsPerHour": 19,
+    "remindersPerHour": 250,
+    "estimatedMinutesForReminders": 20,
+    "estimatedMinutesForInitialSends": 3
+  },
+  "operationalRisks": [
+    "Dropbox testMode=true — packets may be test envelopes until production mode authorized",
+    "Live reminder email blocked until Resend is configured",
+    "101 invalid emails will bounce if forced",
+    "103 packets missing signatureRequestId",
+    "Never pass --live without --confirm-live",
+    "Do not enable apply-safe-corrections until operator reviews reconciliation conflicts"
+  ]
+}

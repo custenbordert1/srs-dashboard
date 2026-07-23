@@ -1,0 +1,17 @@
+{
+  "phase": "P249-daily-ops-mission",
+  "generatedAt": "2026-07-23T13:56:21.245Z",
+  "opsDate": "2026-07-23",
+  "decision": "NO-GO",
+  "pipelineHealthScore": 38,
+  "eligibleFirstTimePaperwork": 1,
+  "eligibleReminders": 180,
+  "expectedReadyForMelToday": 18,
+  "blockers": [
+    "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+    "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends.",
+    "Sender domain verification: Skipped — RESEND_API_KEY unavailable"
+  ],
+  "justification": "NO-GO for live execution today: Resend/live email is not configured (4 blocker(s)). Dropbox status probes and Breezy reads succeed; 180 reminders and 1 initial send(s) are queued for after config. Production Dropbox quota is 0 — initial packet sends only via intentional testMode until quota restored."
+}
