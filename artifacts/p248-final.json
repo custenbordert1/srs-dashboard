@@ -1,0 +1,69 @@
+{
+  "phase": "P248-resend-live-reminder-campaign",
+  "generatedAt": "2026-07-21T21:04:39.471Z",
+  "totals": {
+    "resendConfigurationStatus": "blocked",
+    "senderDomainVerificationStatus": null,
+    "fromAddressUsed": "recruiting@strategicretailsolutions.com",
+    "replyToAddressUsed": "recruiting@strategicretailsolutions.com",
+    "candidatesEvaluated": 517,
+    "dropboxVerified": 414,
+    "eligibleReminder1": 144,
+    "frozenCohortCount": 144,
+    "canaryAttempted": 0,
+    "canaryConfirmed": 0,
+    "fullCampaignAttempted": 0,
+    "fullCampaignConfirmed": 0,
+    "signedBeforeSendSkips": 0,
+    "recentlyRemindedSkips": 101,
+    "invalidEmailSkips": 101,
+    "dropboxVerificationFailures": 0,
+    "resendDeliveryFailures": 0,
+    "duplicateRemindersPrevented": 0,
+    "finalReminderHistoryCount": 0,
+    "dropboxPacketsResent": false,
+    "liveWritesOccurred": false
+  },
+  "dispositions": {
+    "eligible": 144,
+    "missing_signature_request": 103,
+    "signed_or_completed": 66,
+    "cooldown_not_met": 101,
+    "duplicate_candidate": 2,
+    "invalid_email": 101
+  },
+  "dispositionSum": 517,
+  "dispositionReconciles": true,
+  "blockers": [
+    "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+    "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends."
+  ],
+  "stopReason": "Preview/freeze only — pass --live --confirm-live to send",
+  "stoppedBeforeLive": true,
+  "filesModified": [
+    "src/lib/p248-resend-live-reminder-campaign/*",
+    "scripts/p248-run-resend-live-reminder-campaign.ts",
+    "src/lib/p246-outstanding-paperwork-reminders/send.ts"
+  ],
+  "artifactsCreated": [
+    "artifacts/p248-resend-configuration-check.md",
+    "artifacts/p248-live-preview.md",
+    "artifacts/p248-live-preview.json",
+    "artifacts/p248-frozen-reminder-cohort.json",
+    "artifacts/p248-canary-results.json",
+    "artifacts/p248-reminders-confirmed.json",
+    "artifacts/p248-reminder-skips.json",
+    "artifacts/p248-reminder-failures.json",
+    "artifacts/p248-invalid-email-cleanup.json",
+    "artifacts/p248-missing-signature-request-cleanup.json",
+    "artifacts/p248-final.md",
+    "artifacts/p248-final.json"
+  ],
+  "priorPreviewComparison": {
+    "priorEligibleReminder1": 144,
+    "currentEligibleReminder1": 144,
+    "signedOrCompletedCurrent": 66,
+    "note": "Refreshed Dropbox preview matched prior eligible Reminder 1 count (144); no net change detected in aggregate signed/eligible totals versus prior P246 preview."
+  }
+}

@@ -61,6 +61,7 @@ import { AutomationPreviewQueuePanel } from "@/components/executive/automation-p
 import { ControlledPaperworkAutomationPanel } from "@/components/executive/controlled-paperwork-automation-panel";
 import { PaperworkApprovalQueuePanel } from "@/components/executive/paperwork-approval-queue-panel";
 import { AutoSendPaperworkReminderPanel } from "@/components/executive/auto-send-paperwork-reminder-panel";
+import { P246OutstandingPaperworkRemindersPanel } from "@/components/executive/p246-outstanding-paperwork-reminders-panel";
 import { InitialPaperworkAutomationPanel } from "@/components/executive/initial-paperwork-automation-panel";
 import { AutonomousOperationsPanel } from "@/components/executive/autonomous-operations-panel";
 import { ProductionOperationsDashboardPanel } from "@/components/executive/production-operations-dashboard-panel";
@@ -546,6 +547,7 @@ export function ExecutiveHomePanel({ userName }: { userName?: string | null }) {
       <PaperworkApprovalQueuePanel />
 
       <AutoSendPaperworkReminderPanel />
+      <P246OutstandingPaperworkRemindersPanel />
 
       <InitialPaperworkAutomationPanel />
 

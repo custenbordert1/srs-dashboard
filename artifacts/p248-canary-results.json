@@ -1,0 +1,46 @@
+{
+  "phase": "P248-resend-live-reminder-campaign",
+  "generatedAt": "2026-07-21T21:05:25.625Z",
+  "attempted": 0,
+  "confirmed": 0,
+  "ok": false,
+  "skipped": true,
+  "reason": "Preview/freeze only — pass --live --confirm-live to send",
+  "blockers": [
+    "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+    "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends."
+  ],
+  "canaryCandidateIds": [
+    "b0e7f9b0b1ff",
+    "f67ee5c98c21",
+    "a3df6cfa4a15"
+  ],
+  "canarySample": [
+    {
+      "candidateId": "b0e7f9b0b1ff",
+      "candidateName": "Abigail D'Angelo",
+      "breezyPosition": "Continuity In-Store Merchandiser Taylor, AZ",
+      "dropboxLiveStatus": "viewed",
+      "idempotencyKey": "b0e7f9b0b1ff:e660e8e32ffbcc5a3f9c522776e82d38603d112f:1"
+    },
+    {
+      "candidateId": "f67ee5c98c21",
+      "candidateName": "Jamie Bogden",
+      "breezyPosition": "Experienced Retail Merchandiser – Conroe, TX",
+      "dropboxLiveStatus": "pending",
+      "idempotencyKey": "f67ee5c98c21:555e9dd6c79ef64fe3769d82ad5fb8ed89ea535f:1"
+    },
+    {
+      "candidateId": "a3df6cfa4a15",
+      "candidateName": "Ruth Valdez",
+      "breezyPosition": "Experienced Retail Merchandiser – El Paso, TX",
+      "dropboxLiveStatus": "pending",
+      "idempotencyKey": "a3df6cfa4a15:15e3965a1487cab9ff2ac6605c5373808ed0e5ed:1"
+    }
+  ],
+  "dropboxPacketsResent": false,
+  "sent": [],
+  "skips": [],
+  "failures": []
+}

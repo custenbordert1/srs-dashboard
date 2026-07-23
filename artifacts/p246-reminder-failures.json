@@ -1,0 +1,15 @@
+{
+  "phase": "P246-outstanding-paperwork-reminders",
+  "generatedAt": "2026-07-21T20:53:17.531Z",
+  "mode": "preview",
+  "count": 0,
+  "mailBlocker": "DIRECT_DEPOSIT_EMAIL_MODE is not 'resend' (currently log/outbox only); RESEND_API_KEY is not configured",
+  "liveDeliveryReady": false,
+  "stopReason": null,
+  "requiredForLiveDelivery": [
+    "Set RESEND_API_KEY in .env.local",
+    "Set DIRECT_DEPOSIT_EMAIL_MODE=resend",
+    "Re-run: npx tsx scripts/p246-run-outstanding-paperwork-reminders.ts --live --confirm-live"
+  ],
+  "failures": []
+}
