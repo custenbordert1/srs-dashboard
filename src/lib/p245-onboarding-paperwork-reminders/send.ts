@@ -36,6 +36,7 @@ function isTransientDeliveryError(error: string | undefined): boolean {
 async function sendOnce(input: {
   row: P245CandidateEvaluation;
   mail: P245MailCapability;
+  requireLiveDelivery: boolean;
 }): Promise<{ ok: boolean; status: P245DeliveryStatus; messageId?: string; error?: string }> {
   const content = buildP245ReminderEmail({ firstName: input.row.firstName });
   const result = await sendTransactionalEmail(
@@ -54,6 +55,7 @@ async function sendOnce(input: {
       signatureRequestId: input.row.signatureRequestId,
       packetStatus: input.row.packetStatus,
     },
+    { requireLiveDelivery: input.requireLiveDelivery },
   );
 
   if (!result.ok) {
@@ -84,11 +86,19 @@ export async function sendP245ReminderBatch(input: {
     const batch = input.eligible.slice(i, i + batchSize);
     for (const row of batch) {
       const timestamp = new Date().toISOString();
-      let attempt = await sendOnce({ row, mail: input.mail });
+      let attempt = await sendOnce({
+        row,
+        mail: input.mail,
+        requireLiveDelivery: input.requireLiveDelivery,
+      });
 
       if (!attempt.ok && isTransientDeliveryError(attempt.error)) {
         await sleep(750);
-        attempt = await sendOnce({ row, mail: input.mail });
+        attempt = await sendOnce({
+          row,
+          mail: input.mail,
+          requireLiveDelivery: input.requireLiveDelivery,
+        });
       }
 
       const countAfter = (store.byCandidateId[row.candidateId]?.reminderCount ?? row.reminderCount) + 1;

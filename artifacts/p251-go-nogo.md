@@ -1,0 +1,55 @@
+# P251 — GO / NO-GO
+
+**Ops date:** 2026-07-23
+**Generated:** 2026-07-23T14:43:44.172Z
+**Decision:** **NO-GO**
+
+## 1. Remaining blockers
+
+- RESEND_API_KEY: Missing from runtime — Resend cannot authenticate; live email blocked
+- DIRECT_DEPOSIT_EMAIL_MODE: Current mode is 'log' — sendTransactionalEmail only logs to outbox
+- SRS_RECRUITING_FROM_EMAIL: Resolved From falls back to HR (humanresource@srsmerchandising.com) — unsafe for recruiting reminders
+- RESEND_API_KEY: Sender domain verification skipped — RESEND_API_KEY unavailable
+
+## 2. Configuration changes required
+
+- RESEND_API_KEY=<api key from https://resend.com/api-keys> (never commit)  (.env.local)
+- DIRECT_DEPOSIT_EMAIL_MODE=resend  (.env.local)
+- SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com  (.env.local)
+- SRS_RECRUITING_REPLY_TO_EMAIL=recruiting@strategicretailsolutions.com  (.env.local)
+- Domain must show status=verified in Resend for the From domain  (Resend dashboard + .env.local)
+
+## 3. Code changes required
+
+_None outstanding_ (remediation already applied in this mission):
+
+- Shared production mail validator (`src/lib/production-mail-config.ts`) with Preview vs Production diagnostics
+- Startup + `/api/health/env` surface mail capability state (no secret values)
+- `sendTransactionalEmail` requireLiveDelivery refuses silent log/outbox success
+- P245/P246/P146 live paths pass requireLiveDelivery when live delivery is required
+- `resolveP245MailCapability` requires SRS_RECRUITING_FROM_EMAIL for canLiveDeliver (no HR fallback as ready)
+- Documented RESEND / recruiting From vars in `.env.example` and `.env.local.example`
+
+## 4. Expected throughput
+
+| Metric | Value |
+| --- | ---: |
+| Initial paperwork sends | 1 |
+| Reminder 1 sends | 180 |
+| Open-store safe capacity | 19 |
+
+## 5. Estimated Ready for MEL today
+
+18
+
+## 6. Expected recruiter time savings
+
+~9.1 hours (from P249/P250 ops dashboard)
+
+## 7. Final GO / NO-GO
+
+**NO-GO**
+
+NO-GO: 4 blocker(s) remain — primarily Resend/live email configuration. Code remediation for fail-fast mail paths is in place; operator must set secrets/config. Highest impact: RESEND_API_KEY: Missing from runtime — Resend cannot authenticate; live email blocked
+
+**Highest-impact blocker:** RESEND_API_KEY: Missing from runtime — Resend cannot authenticate; live email blocked

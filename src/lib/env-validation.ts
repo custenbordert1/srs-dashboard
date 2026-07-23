@@ -1,7 +1,23 @@
 import { loadConfigSync } from "@/lib/config";
+import {
+  assessMailCapabilityState,
+  formatProductionConfigDiagnostics,
+  getDeploymentTier,
+  validateProductionConfig,
+  type DeploymentTier,
+  type MailCapabilityState,
+  type ProductionConfigValidation,
+} from "@/lib/production-mail-config";
 
 export type { BreezyFailureKind } from "@/lib/breezy-error-ui";
 export { classifyBreezyError } from "@/lib/breezy-error-ui";
+export type { DeploymentTier, MailCapabilityState, ProductionConfigValidation };
+export {
+  assessMailCapabilityState,
+  assertLiveMailReadyForSend,
+  getDeploymentTier,
+  validateProductionConfig,
+} from "@/lib/production-mail-config";
 
 export type EnvVarGroup =
   | "auth"
@@ -10,7 +26,8 @@ export type EnvVarGroup =
   | "mel"
   | "hellosign"
   | "geocoding"
-  | "feature_flags";
+  | "feature_flags"
+  | "mail";
 
 /** Platform areas that depend on specific env vars (for startup logs and restoration). */
 export type EnvFeature =
@@ -21,7 +38,8 @@ export type EnvFeature =
   | "mel_projects"
   | "recruiting_sheet_archive"
   | "hellosign"
-  | "geocoding";
+  | "geocoding"
+  | "transactional_email";
 
 export type EnvVarDefinition = {
   name: string;
@@ -112,6 +130,18 @@ export const FEATURE_ENV_REQUIREMENTS: Record<
     label: "Geocoding",
     requiredVars: [],
     optionalVars: ["GEOCODING_ENABLED"],
+  },
+  transactional_email: {
+    label: "Transactional email (Resend)",
+    requiredVars: [],
+    optionalVars: [
+      "RESEND_API_KEY",
+      "DIRECT_DEPOSIT_EMAIL_MODE",
+      "SRS_RECRUITING_FROM_EMAIL",
+      "SRS_RECRUITING_REPLY_TO_EMAIL",
+      "DIRECT_DEPOSIT_FROM",
+      "DIRECT_DEPOSIT_REPLY_TO",
+    ],
   },
 };
 
@@ -283,6 +313,58 @@ export const ENV_VAR_DEFINITIONS: EnvVarDefinition[] = [
     example: "",
     usedBy: ["login_auth"],
   },
+  {
+    name: "RESEND_API_KEY",
+    group: "mail",
+    required: false,
+    description:
+      "Resend API key for live transactional email. Required when DIRECT_DEPOSIT_EMAIL_MODE=resend. Never commit real keys.",
+    example: "",
+    usedBy: ["transactional_email"],
+    rejectPlaceholders: true,
+  },
+  {
+    name: "DIRECT_DEPOSIT_EMAIL_MODE",
+    group: "mail",
+    required: false,
+    description:
+      "Transactional email transport: log (outbox only) or resend (live). Production live reminders require resend.",
+    example: "log",
+    usedBy: ["transactional_email"],
+  },
+  {
+    name: "SRS_RECRUITING_FROM_EMAIL",
+    group: "mail",
+    required: false,
+    description:
+      "From address for recruiting / paperwork reminder emails. Do not leave unset (avoids HR DIRECT_DEPOSIT_FROM fallback).",
+    example: "recruiting@strategicretailsolutions.com",
+    usedBy: ["transactional_email"],
+  },
+  {
+    name: "SRS_RECRUITING_REPLY_TO_EMAIL",
+    group: "mail",
+    required: false,
+    description: "Reply-To for recruiting / paperwork reminder emails.",
+    example: "recruiting@strategicretailsolutions.com",
+    usedBy: ["transactional_email"],
+  },
+  {
+    name: "DIRECT_DEPOSIT_FROM",
+    group: "mail",
+    required: false,
+    description: "From address for post-signature direct-deposit HR follow-up (not recruiting reminders).",
+    example: "humanresource@srsmerchandising.com",
+    usedBy: ["transactional_email"],
+  },
+  {
+    name: "DIRECT_DEPOSIT_REPLY_TO",
+    group: "mail",
+    required: false,
+    description: "Reply-To for direct-deposit HR follow-up emails.",
+    example: "humanresource@srsmerchandising.com",
+    usedBy: ["transactional_email"],
+  },
 ];
 
 function readRawEnv(name: string): string {
@@ -367,6 +449,7 @@ export function getFeatureReadiness(): { feature: EnvFeature; label: string; rea
   const sessionReady = isSessionConfigured();
   const melDef = ENV_VAR_DEFINITIONS.find((d) => d.name === "GOOGLE_MEL_PROJECTS_SHEET_ID")!;
   const melReady = isEnvConfigured(melDef);
+  const mail = assessMailCapabilityState();
 
   return [
     {
@@ -399,59 +482,105 @@ export function getFeatureReadiness(): { feature: EnvFeature; label: string; rea
       ready: melReady,
       missing: melReady ? [] : ["GOOGLE_MEL_PROJECTS_SHEET_ID"],
     },
+    {
+      feature: "transactional_email",
+      label: FEATURE_ENV_REQUIREMENTS.transactional_email.label,
+      ready: mail.canLiveDeliver,
+      missing: mail.canLiveDeliver
+        ? []
+        : [
+            ...(!mail.hasResendApiKey ? ["RESEND_API_KEY"] : []),
+            ...(mail.mode !== "resend" ? ["DIRECT_DEPOSIT_EMAIL_MODE=resend"] : []),
+            ...(!mail.recruitingFromSet ? ["SRS_RECRUITING_FROM_EMAIL"] : []),
+          ],
+    },
   ];
 }
 
 export function logStartupEnvValidation(): void {
   const report = validateEnv();
   const features = getFeatureReadiness();
+  const tier = getDeploymentTier();
+  const productionConfig = validateProductionConfig();
   const lines: string[] = [];
+
+  console.info(
+    `[env] Deployment tier: ${tier} (VERCEL_ENV=${process.env.VERCEL_ENV ?? "unset"}, NODE_ENV=${process.env.NODE_ENV ?? "unset"})`,
+  );
 
   if (report.ok) {
     console.info("[env] ✓ All required environment variables are configured.");
     console.info(
       "[env] Feature readiness:",
-      Object.fromEntries(features.map((f) => [FEATURE_ENV_REQUIREMENTS[f.feature].label, "ready"])),
+      Object.fromEntries(
+        features.map((f) => [
+          FEATURE_ENV_REQUIREMENTS[f.feature].label,
+          f.ready ? "ready" : `needs ${f.missing.join(", ")}`,
+        ]),
+      ),
     );
-    return;
-  }
-
-  lines.push("");
-  lines.push("══════════════════════════════════════════════════════════════");
-  lines.push("[env] Development environment — missing variables");
-  lines.push("══════════════════════════════════════════════════════════════");
-  lines.push("");
-  lines.push("Paste these from your old Mac into .env.local, then restart npm run dev:");
-  lines.push("");
-
-  for (const status of report.missingRequired) {
-    const def = ENV_VAR_DEFINITIONS.find((d) => d.name === status.name);
-    const featuresForVar = def?.usedBy
-      .map((f) => FEATURE_ENV_REQUIREMENTS[f].label)
-      .join(", ");
-    lines.push(`  ✗ ${status.name}`);
-    lines.push(`      System: ${def?.group ?? status.group}`);
-    if (featuresForVar) lines.push(`      Powers: ${featuresForVar}`);
-    lines.push(`      ${status.description}`);
+  } else {
     lines.push("");
-  }
-
-  lines.push("Feature status:");
-  for (const row of features) {
-    const label = FEATURE_ENV_REQUIREMENTS[row.feature].label;
-    if (row.ready) {
-      lines.push(`  ✓ ${label}`);
-    } else {
-      lines.push(`  ✗ ${label} — needs: ${row.missing.join(", ")}`);
+    lines.push("══════════════════════════════════════════════════════════════");
+    lines.push(
+      tier === "production" || tier === "preview"
+        ? `[env] ${tier.toUpperCase()} — missing required variables`
+        : "[env] Development environment — missing variables",
+    );
+    lines.push("══════════════════════════════════════════════════════════════");
+    lines.push("");
+    if (tier === "development") {
+      lines.push("Paste these from your old Mac into .env.local, then restart npm run dev:");
+      lines.push("");
     }
+
+    for (const status of report.missingRequired) {
+      const def = ENV_VAR_DEFINITIONS.find((d) => d.name === status.name);
+      const featuresForVar = def?.usedBy
+        .map((f) => FEATURE_ENV_REQUIREMENTS[f].label)
+        .join(", ");
+      lines.push(`  ✗ ${status.name}`);
+      lines.push(`      System: ${def?.group ?? status.group}`);
+      if (featuresForVar) lines.push(`      Powers: ${featuresForVar}`);
+      lines.push(`      ${status.description}`);
+      lines.push("");
+    }
+
+    lines.push("Feature status:");
+    for (const row of features) {
+      const label = FEATURE_ENV_REQUIREMENTS[row.feature].label;
+      if (row.ready) {
+        lines.push(`  ✓ ${label}`);
+      } else {
+        lines.push(`  ✗ ${label} — needs: ${row.missing.join(", ")}`);
+      }
+    }
+
+    lines.push("");
+    lines.push(report.setupHint);
+    lines.push("══════════════════════════════════════════════════════════════");
+    lines.push("");
+
+    console.error(lines.join("\n"));
   }
 
-  lines.push("");
-  lines.push(report.setupHint);
-  lines.push("══════════════════════════════════════════════════════════════");
-  lines.push("");
-
-  console.error(lines.join("\n"));
+  // Always surface mail capability — never silently assume live email works.
+  const mailDiag = formatProductionConfigDiagnostics(productionConfig);
+  if (productionConfig.okForLiveEmail) {
+    console.info(mailDiag);
+  } else if (tier === "production") {
+    console.error(mailDiag);
+    console.error(
+      "[env] PRODUCTION mail blockers — live Resend sends will fail fast until remediated. Dashboard core features may still run.",
+    );
+  } else if (tier === "preview") {
+    console.warn(mailDiag);
+    console.warn(
+      "[env] Preview: live email not ready — reminder/paperwork live paths will refuse silent outbox success.",
+    );
+  } else {
+    console.info(mailDiag);
+  }
 }
 
 export function breezyConfigErrorMessage(): string {

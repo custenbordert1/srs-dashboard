@@ -1,0 +1,97 @@
+{
+  "phase": "P251-production-readiness-remediation",
+  "generatedAt": "2026-07-23T14:43:44.171Z",
+  "opsDate": "2026-07-23",
+  "mode": "read_only",
+  "tasks": [
+    {
+      "id": "config-resend-before-resend-batch",
+      "action": "retry",
+      "priority": "P0",
+      "title": "Configure Resend before any live resend / reminder batch",
+      "count": 180,
+      "detail": "180 Reminder 1 and initial sends are queued but live delivery is blocked until RESEND_API_KEY + DIRECT_DEPOSIT_EMAIL_MODE=resend + SRS_RECRUITING_FROM_EMAIL.",
+      "command": null,
+      "blockedByMail": true
+    },
+    {
+      "id": "resend-reminder-1-batch",
+      "action": "resend",
+      "priority": "P0",
+      "title": "Send Reminder 1 cohort (after mail GO)",
+      "count": 180,
+      "detail": "Zero-write dry-run already sized this batch. Execute only after P251/P250 GO with --live --confirm-live.",
+      "command": "npx tsx scripts/p248-run-resend-live-reminder-campaign.ts  # after mail config + explicit approval",
+      "blockedByMail": true
+    },
+    {
+      "id": "retry-initial-paperwork",
+      "action": "retry",
+      "priority": "P1",
+      "title": "Retry eligible initial paperwork send",
+      "count": 1,
+      "detail": "1 open-store eligible packet. Production Dropbox quota may still be 0 — keep DROPBOX_SIGN_TEST_MODE intentional until quota restored.",
+      "command": "npx tsx scripts/p243-run-open-store-bulk-paperwork-queue.ts  # dry-run first; live only after flags + approval",
+      "blockedByMail": false
+    },
+    {
+      "id": "reconcile-missing-signature-request",
+      "action": "reconcile",
+      "priority": "P1",
+      "title": "Reconcile packets missing signatureRequestId",
+      "count": 103,
+      "detail": "Cannot remind without Dropbox signature request id — reconcile store or resend initial packet.",
+      "command": "npx tsx scripts/p244-run-open-store-reconciliation.ts",
+      "blockedByMail": false
+    },
+    {
+      "id": "manual-review-invalid-emails",
+      "action": "manual_review",
+      "priority": "P1",
+      "title": "Clean invalid emails in Breezy / workflow",
+      "count": 101,
+      "detail": "Excluded from reminders until addresses are fixed in Breezy.",
+      "command": null,
+      "blockedByMail": false
+    },
+    {
+      "id": "reconcile-status-conflicts",
+      "action": "reconcile",
+      "priority": "P2",
+      "title": "Apply safe status corrections when authorized",
+      "count": 88,
+      "detail": "Do not enable P246 --apply-safe-corrections until operator reviews reconciliation conflicts.",
+      "command": "npx tsx scripts/p246-run-outstanding-paperwork-reminders.ts  # preview only until authorized",
+      "blockedByMail": false
+    },
+    {
+      "id": "duplicate-cleanup",
+      "action": "duplicate_cleanup",
+      "priority": "P2",
+      "title": "Review duplicate candidate detections from dry-run",
+      "count": 6,
+      "detail": "Dry-run detected duplicates; confirm idempotency keys / store hygiene before live reminder batch.",
+      "command": null,
+      "blockedByMail": false
+    },
+    {
+      "id": "manual-review-ready-for-mel",
+      "action": "manual_review",
+      "priority": "P1",
+      "title": "Advance Ready-for-MEL candidates (no MEL writes from this mission)",
+      "count": 18,
+      "detail": "Candidates classified ready for MEL verification — recruiter review only; P251 does not write MEL.",
+      "command": null,
+      "blockedByMail": false
+    }
+  ],
+  "sourceArtifacts": [
+    "p249-operations-dashboard.json",
+    "p249-outstanding-paperwork-analysis.json",
+    "p249-dry-run-report.json",
+    "p249-go-nogo.json",
+    "p249-live-execution-plan.json",
+    "p250-blockers-and-remediation.json",
+    "p250-go-nogo.json"
+  ]
+}

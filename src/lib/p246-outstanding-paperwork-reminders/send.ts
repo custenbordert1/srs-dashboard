@@ -56,6 +56,7 @@ async function sendOnce(input: {
   mail: P246MailCapability;
   reminderNumber: P246ReminderNumber;
   idempotencyKey: string;
+  requireLiveDelivery: boolean;
 }): Promise<{ ok: boolean; status: P246DeliveryStatus; messageId?: string; error?: string }> {
   const content = buildP245ReminderEmail({ firstName: input.row.firstName });
   const result = await sendTransactionalEmail(
@@ -76,6 +77,7 @@ async function sendOnce(input: {
       idempotencyKey: input.idempotencyKey,
       dropboxLiveStatus: input.row.dropboxLiveStatus,
     },
+    { requireLiveDelivery: input.requireLiveDelivery },
   );
 
   if (!result.ok) {
@@ -247,10 +249,22 @@ export async function sendP246ReminderBatch(input: {
         continue;
       }
 
-      let attempt = await sendOnce({ row, mail: input.mail, reminderNumber, idempotencyKey });
+      let attempt = await sendOnce({
+        row,
+        mail: input.mail,
+        reminderNumber,
+        idempotencyKey,
+        requireLiveDelivery: input.requireLiveDelivery,
+      });
       if (!attempt.ok && isTransientDeliveryError(attempt.error)) {
         await sleep(750);
-        attempt = await sendOnce({ row, mail: input.mail, reminderNumber, idempotencyKey });
+        attempt = await sendOnce({
+          row,
+          mail: input.mail,
+          reminderNumber,
+          idempotencyKey,
+          requireLiveDelivery: input.requireLiveDelivery,
+        });
       }
 
       const record: P246ReminderSendRecord = {

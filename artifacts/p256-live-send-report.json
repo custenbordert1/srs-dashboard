@@ -1,0 +1,160 @@
+{
+  "phase": "P256-controlled-live-recovered-send",
+  "opsDate": "2026-07-23",
+  "generatedAt": "2026-07-23T17:54:38.337Z",
+  "mode": "aborted",
+  "productionModeConfirmed": true,
+  "testMode": false,
+  "aborted": true,
+  "abortReason": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode.",
+  "authorizedTargets": [
+    {
+      "candidateId": "c9f5bb769a06",
+      "name": "Sadio Mustafa",
+      "email": "kaibusinessminded@gmail.com",
+      "positionId": "cfd52392ca92",
+      "city": "N Little Rock",
+      "state": "AR",
+      "source": "artifacts/p255-recovery-report.json"
+    },
+    {
+      "candidateId": "cbbd99a1d55e",
+      "name": "melissa lloyd",
+      "email": "melissalloyd501@gmail.com",
+      "positionId": "b4ee901bfd73",
+      "city": "BABCOCK RANCH",
+      "state": "FL",
+      "source": "artifacts/p255-recovery-report.json"
+    }
+  ],
+  "refresh": {
+    "targets": 2,
+    "breezyHits": 2,
+    "breezyMisses": 0,
+    "ingestionWrites": 2,
+    "notes": [
+      "Preserved durable location for c9f5bb769a06: N Little Rock, AR (Breezy list omitted address)",
+      "Breezy refresh OK: Sadio Mustafa (c9f5bb769a06) via position cfd52392ca92",
+      "Preserved durable location for cbbd99a1d55e: BABCOCK RANCH, FL (Breezy list omitted address)",
+      "Breezy refresh OK: melissa lloyd (cbbd99a1d55e) via position b4ee901bfd73",
+      "Ingestion durable writes=2",
+      "Published jobs loaded=274",
+      "Opportunity geocode points=259"
+    ]
+  },
+  "preflight": {
+    "ok": false,
+    "aborted": true,
+    "blockers": [
+      "Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+    ],
+    "testMode": false,
+    "productionModeConfirmed": true,
+    "apiKeyPresent": true,
+    "templateConfigured": true,
+    "accountQuotaRemaining": 0,
+    "rateLimitRemaining": 99,
+    "livePilotEnvOk": true,
+    "confirmationPhraseOk": true,
+    "detail": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+  },
+  "quotaBefore": {
+    "accountQuotaRemaining": 0,
+    "rateLimitRemaining": 99,
+    "probedAt": "2026-07-23T17:54:38.710Z",
+    "error": "Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+  },
+  "quotaAfter": {
+    "accountQuotaRemaining": 0,
+    "rateLimitRemaining": 98,
+    "probedAt": "2026-07-23T17:54:44.479Z",
+    "error": null
+  },
+  "counts": {
+    "evaluated": 2,
+    "eligible": 0,
+    "sent": 0,
+    "skipped": 2,
+    "failures": 0,
+    "alreadySent": 0,
+    "alreadySigned": 0,
+    "gateFailed": 0
+  },
+  "candidates": [
+    {
+      "candidateId": "c9f5bb769a06",
+      "name": "Sadio Mustafa",
+      "email": "kaibusinessminded@gmail.com",
+      "location": "N Little Rock, AR",
+      "recruiter": "Taylor",
+      "districtManager": "Lori VandeWiele",
+      "workflowStatus": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "nearestMiles": 5.9,
+      "coverageKnown": true,
+      "eligible": false,
+      "blockers": [],
+      "result": "skipped_quota_abort",
+      "signatureRequestId": null,
+      "sentAt": null,
+      "error": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode.",
+      "refreshedFromBreezy": true,
+      "positionId": "cfd52392ca92"
+    },
+    {
+      "candidateId": "cbbd99a1d55e",
+      "name": "melissa lloyd",
+      "email": "melissalloyd501@gmail.com",
+      "location": "BABCOCK RANCH, FL",
+      "recruiter": "Taylor",
+      "districtManager": "Erin Boatright",
+      "workflowStatus": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "nearestMiles": 0,
+      "coverageKnown": true,
+      "eligible": false,
+      "blockers": [],
+      "result": "skipped_quota_abort",
+      "signatureRequestId": null,
+      "sentAt": null,
+      "error": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode.",
+      "refreshedFromBreezy": true,
+      "positionId": "b4ee901bfd73"
+    }
+  ],
+  "integrity": {
+    "verified": true,
+    "createdRequestIds": [],
+    "verifiedRequestIds": [],
+    "missingRequestIds": [],
+    "workflowMismatches": [],
+    "duplicatePacketsDetected": 0,
+    "detail": "Integrity OK — verified 0/0 Dropbox request(s)."
+  },
+  "auditTrail": [
+    {
+      "at": "2026-07-23T17:54:44.472Z",
+      "action": "abort_preflight",
+      "candidateId": null,
+      "detail": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+    }
+  ],
+  "artifacts": [
+    "artifacts/p256-live-send-report.json",
+    "artifacts/p256-live-send-report.md"
+  ],
+  "safety": {
+    "liveModeAuthorized": true,
+    "productionDropboxOnly": true,
+    "testModeForbidden": true,
+    "onlyAuthorizedCandidates": true,
+    "noBulkSends": true,
+    "noRetriesOnFailure": true,
+    "simulatedSends": 0,
+    "reminderEmailsSent": 0,
+    "melWrites": 0,
+    "breezyStageWrites": 0,
+    "duplicateCreatingRetries": 0,
+    "unauthorizedAttempts": 0
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "phase": "P252-production-email-validation",
+  "generatedAt": "2026-07-23T14:49:49.537Z",
+  "opsDate": "2026-07-23",
+  "runtimeConfig": {
+    "tier": "development",
+    "vercelEnv": null,
+    "nodeEnv": null,
+    "mail": {
+      "mode": "log",
+      "modeExplicit": true,
+      "hasResendApiKey": false,
+      "resendKeyLength": 0,
+      "recruitingFromSet": false,
+      "recruitingReplyToSet": false,
+      "resolvedFrom": "humanresource@srsmerchandising.com",
+      "resolvedReplyTo": "humanresource@srsmerchandising.com",
+      "fromFallsBackToHr": true,
+      "canLiveDeliver": false,
+      "blockers": [
+        "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' for live email (currently 'log')",
+        "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+        "SRS_RECRUITING_FROM_EMAIL unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR)"
+      ],
+      "warnings": [
+        "SRS_RECRUITING_REPLY_TO_EMAIL unset — reply-to falls back to From / DIRECT_DEPOSIT_REPLY_TO"
+      ]
+    },
+    "issues": [
+      {
+        "id": "resend_api_key",
+        "severity": "FAIL",
+        "variable": "RESEND_API_KEY",
+        "file": ".env.local",
+        "why": "Missing from runtime — Resend cannot authenticate; live email blocked",
+        "expectedFormat": "RESEND_API_KEY=<api key from https://resend.com/api-keys> (never commit)",
+        "fixType": "config_only",
+        "remediation": [
+          "Open https://resend.com/api-keys and create/copy a key for the SRS Resend account",
+          "Add to `.env.local` (do not commit): `RESEND_API_KEY=<paste key>`",
+          "Leave placeholder empty in `.env.local.example` / `.env.example` documentation only",
+          "Restart Node/tsx / Next.js so the process loads the new env"
+        ]
+      },
+      {
+        "id": "email_mode",
+        "severity": "FAIL",
+        "variable": "DIRECT_DEPOSIT_EMAIL_MODE",
+        "file": ".env.local",
+        "why": "Current mode is 'log' — sendTransactionalEmail only logs to outbox",
+        "expectedFormat": "DIRECT_DEPOSIT_EMAIL_MODE=resend",
+        "fixType": "config_only",
+        "remediation": [
+          "In `.env.local` set: `DIRECT_DEPOSIT_EMAIL_MODE=resend`",
+          "Do not use `log` or `outbox` for live reminder delivery"
+        ]
+      },
+      {
+        "id": "sender_from",
+        "severity": "FAIL",
+        "variable": "SRS_RECRUITING_FROM_EMAIL",
+        "file": ".env.local",
+        "why": "Resolved From falls back to HR (humanresource@srsmerchandising.com) — unsafe for recruiting reminders",
+        "expectedFormat": "SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com",
+        "fixType": "config_only",
+        "remediation": [
+          "In `.env.local` set: `SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com`",
+          "Confirm the mailbox is on a Resend-verified domain"
+        ]
+      },
+      {
+        "id": "sender_reply_to",
+        "severity": "WARN",
+        "variable": "SRS_RECRUITING_REPLY_TO_EMAIL",
+        "file": ".env.local",
+        "why": "Reply-To not explicitly set for recruiting reminders",
+        "expectedFormat": "SRS_RECRUITING_REPLY_TO_EMAIL=recruiting@strategicretailsolutions.com",
+        "fixType": "config_only",
+        "remediation": [
+          "In `.env.local` set: `SRS_RECRUITING_REPLY_TO_EMAIL=recruiting@strategicretailsolutions.com`"
+        ]
+      },
+      {
+        "id": "sender_domain",
+        "severity": "FAIL",
+        "variable": "RESEND_API_KEY",
+        "file": "Resend dashboard + .env.local",
+        "why": "Sender domain verification skipped — RESEND_API_KEY unavailable",
+        "expectedFormat": "Domain must show status=verified in Resend for the From domain",
+        "fixType": "vendor",
+        "remediation": [
+          "Set RESEND_API_KEY first (required to probe domains)",
+          "In Resend → Domains: verify strategicretailsolutions.com (SPF/DKIM/DMARC)",
+          "Re-run `npx tsx scripts/p252-run-production-email-validation.ts`"
+        ]
+      }
+    ],
+    "failCount": 4,
+    "warnCount": 1,
+    "okForLiveEmail": false,
+    "humanSummary": [
+      "Deployment tier: development (VERCEL_ENV=unset, NODE_ENV=unset)",
+      "Mail mode: log",
+      "RESEND_API_KEY: MISSING",
+      "Recruiting From: UNSET → resolved humanresource@srsmerchandising.com",
+      "Live email capability: BLOCKED",
+      "  FAIL: DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' for live email (currently 'log')",
+      "  FAIL: RESEND_API_KEY is missing from the runtime environment (.env.local)",
+      "  FAIL: SRS_RECRUITING_FROM_EMAIL unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR)",
+      "  WARN: SRS_RECRUITING_REPLY_TO_EMAIL unset — reply-to falls back to From / DIRECT_DEPOSIT_REPLY_TO"
+    ]
+  },
+  "resendProbe": {
+    "attempted": false,
+    "authenticated": null,
+    "httpStatus": null,
+    "domain": "srsmerchandising.com",
+    "domainStatus": null,
+    "domainVerified": null,
+    "fromAuthorized": null,
+    "quotaAvailable": null,
+    "quotaDetail": "Skipped — RESEND_API_KEY unavailable",
+    "detail": "Resend probe skipped — API key missing",
+    "blockers": [
+      "RESEND_API_KEY is missing from the runtime environment (.env.local)"
+    ]
+  },
+  "liveDelivery": {
+    "attempted": false,
+    "skippedReason": "Skipped — production email is not fully configured (okForLiveEmail=false)",
+    "recipientEnvVar": null,
+    "recipientRedacted": null,
+    "subject": "SRS Recruiting Production Validation",
+    "sent": false,
+    "messageId": null,
+    "provider": null,
+    "error": null,
+    "bodyMeta": null
+  },
+  "pipeline": {
+    "p245MailCanLiveDeliver": false,
+    "p246MailCanLiveDeliver": false,
+    "p249ReadinessOverall": "FAIL",
+    "p249ResendReady": false,
+    "transactionalRequireLiveDeliveryPresent": true,
+    "startupOkForLiveEmail": false,
+    "failFastEnabled": true,
+    "unitTests": {
+      "attempted": true,
+      "command": "node --import tsx --test src/lib/direct-deposit-email-config.test.ts src/lib/transactional-email-outbox.test.ts",
+      "passed": false,
+      "detail": "PASS — direct-deposit-email-config + transactional-email-outbox"
+    },
+    "notes": [
+      "Zero workflow stage changes in P252",
+      "P245/P246/P249 re-checked read-only; no candidate paperwork resend",
+      "P249 readiness overall=FAIL"
+    ],
+    "blockers": [
+      "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+      "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+      "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends.",
+      "Sender domain verification: Skipped — RESEND_API_KEY unavailable"
+    ]
+  },
+  "capacity": {
+    "initialSendsReady": 1,
+    "remindersReady": 180,
+    "dailyThroughputInitialPerHour": 19,
+    "dailyThroughputRemindersPerHour": 250,
+    "estimatedMinutesForReminders": 20,
+    "estimatedMinutesForInitialSends": 3,
+    "projectedCompletionSummary": "Projected completion after live mail GO: ~20 min for Reminder 1 cohort (180); ~3 min for initial open-store sends (1).",
+    "recruiterHoursSaved": 9.1,
+    "readyForMel": 18,
+    "sourceArtifacts": [
+      "p249-outstanding-paperwork-analysis.json",
+      "p249-dry-run-report.json",
+      "p249-live-execution-plan.json",
+      "p249-operations-dashboard.json"
+    ]
+  },
+  "goNoGo": {
+    "phase": "P252-production-email-validation",
+    "generatedAt": "2026-07-23T14:49:49.537Z",
+    "opsDate": "2026-07-23",
+    "decision": "NO-GO",
+    "remainingBlockers": [
+      "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+      "RESEND_API_KEY: Missing from runtime — Resend cannot authenticate; live email blocked",
+      "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' for live email (currently 'log')",
+      "DIRECT_DEPOSIT_EMAIL_MODE: Current mode is 'log' — sendTransactionalEmail only logs to outbox",
+      "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+      "SRS_RECRUITING_FROM_EMAIL unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR)",
+      "SRS_RECRUITING_FROM_EMAIL: Resolved From falls back to HR (humanresource@srsmerchandising.com) — unsafe for recruiting reminders",
+      "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends.",
+      "RESEND_API_KEY: Sender domain verification skipped — RESEND_API_KEY unavailable",
+      "Sender domain verification: Skipped — RESEND_API_KEY unavailable"
+    ],
+    "configurationChangesRequired": [
+      "RESEND_API_KEY=<api key from https://resend.com/api-keys> (never commit)  (.env.local)",
+      "DIRECT_DEPOSIT_EMAIL_MODE=resend  (.env.local)",
+      "SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com  (.env.local)",
+      "SRS_RECRUITING_REPLY_TO_EMAIL=recruiting@strategicretailsolutions.com  (.env.local)",
+      "Domain must show status=verified in Resend for the From domain  (Resend dashboard + .env.local)",
+      "SRS_INTERNAL_TEST_EMAIL=<internal-ops@your-domain>  (.env.local — required for P252 live validation send)"
+    ],
+    "codeChangesRequired": [],
+    "expectedThroughput": {
+      "initialPaperworkSends": 1,
+      "reminder1Sends": 180,
+      "openStoreSafeCapacity": 19
+    },
+    "estimatedReadyForMelToday": 18,
+    "expectedRecruiterTimeSavingsHours": 9.1,
+    "highestImpactBlocker": "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "liveTestEmailSent": false,
+    "liveTestEmailRecipientRedacted": null,
+    "justification": "NO-GO: 10 blocker(s) remain. Highest impact: RESEND_API_KEY is missing from the runtime environment (.env.local). Do not enable live reminder campaigns until Resend + recruiting From are configured and P252 re-run confirms delivery."
+  },
+  "safety": {
+    "secretsNeverPrinted": true,
+    "candidateEmailsNeverTargeted": true,
+    "paperworkNeverResent": true,
+    "workflowStagesUnmodified": true,
+    "dbCandidateUpdates": 0,
+    "simulatedSuccess": false
+  },
+  "artifacts": [
+    "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/artifacts/p252-production-validation.json",
+    "/Users/tayloecustenborder/Documents/GitHub/srs-dashboard/artifacts/p252-production-validation.md"
+  ]
+}

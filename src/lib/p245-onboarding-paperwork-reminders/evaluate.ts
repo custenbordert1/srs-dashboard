@@ -95,6 +95,7 @@ export function accumulateP245Metrics(
 export function resolveP245MailCapability(): P245MailCapability {
   const mode = getTransactionalEmailMode();
   const hasResendKey = Boolean(process.env.RESEND_API_KEY?.trim());
+  const recruitingFromSet = Boolean(process.env.SRS_RECRUITING_FROM_EMAIL?.trim());
   const from =
     process.env.SRS_RECRUITING_FROM_EMAIL?.trim() ||
     process.env.DIRECT_DEPOSIT_FROM?.trim() ||
@@ -104,7 +105,8 @@ export function resolveP245MailCapability(): P245MailCapability {
     process.env.SRS_RECRUITING_REPLY_TO_EMAIL?.trim() ||
     process.env.DIRECT_DEPOSIT_REPLY_TO?.trim() ||
     from;
-  const canLiveDeliver = mode === "resend" && hasResendKey;
+  // Live delivery requires explicit recruiting From — do not treat HR fallback as ready.
+  const canLiveDeliver = mode === "resend" && hasResendKey && recruitingFromSet;
   let blocker: string | null = null;
   if (!canLiveDeliver) {
     const parts: string[] = [];
@@ -113,6 +115,11 @@ export function resolveP245MailCapability(): P245MailCapability {
     }
     if (!hasResendKey) {
       parts.push("RESEND_API_KEY is not configured");
+    }
+    if (!recruitingFromSet) {
+      parts.push(
+        "SRS_RECRUITING_FROM_EMAIL is not configured (refusing HR DIRECT_DEPOSIT_FROM fallback for live)",
+      );
     }
     blocker = parts.join("; ");
   }

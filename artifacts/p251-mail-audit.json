@@ -1,0 +1,108 @@
+{
+  "tier": "development",
+  "vercelEnv": null,
+  "nodeEnv": null,
+  "mail": {
+    "mode": "log",
+    "modeExplicit": true,
+    "hasResendApiKey": false,
+    "resendKeyLength": 0,
+    "recruitingFromSet": false,
+    "recruitingReplyToSet": false,
+    "resolvedFrom": "humanresource@srsmerchandising.com",
+    "resolvedReplyTo": "humanresource@srsmerchandising.com",
+    "fromFallsBackToHr": true,
+    "canLiveDeliver": false,
+    "blockers": [
+      "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' for live email (currently 'log')",
+      "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+      "SRS_RECRUITING_FROM_EMAIL unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR)"
+    ],
+    "warnings": [
+      "SRS_RECRUITING_REPLY_TO_EMAIL unset — reply-to falls back to From / DIRECT_DEPOSIT_REPLY_TO"
+    ]
+  },
+  "issues": [
+    {
+      "id": "resend_api_key",
+      "severity": "FAIL",
+      "variable": "RESEND_API_KEY",
+      "file": ".env.local",
+      "why": "Missing from runtime — Resend cannot authenticate; live email blocked",
+      "expectedFormat": "RESEND_API_KEY=<api key from https://resend.com/api-keys> (never commit)",
+      "fixType": "config_only",
+      "remediation": [
+        "Open https://resend.com/api-keys and create/copy a key for the SRS Resend account",
+        "Add to `.env.local` (do not commit): `RESEND_API_KEY=<paste key>`",
+        "Leave placeholder empty in `.env.local.example` / `.env.example` documentation only",
+        "Restart Node/tsx / Next.js so the process loads the new env"
+      ]
+    },
+    {
+      "id": "email_mode",
+      "severity": "FAIL",
+      "variable": "DIRECT_DEPOSIT_EMAIL_MODE",
+      "file": ".env.local",
+      "why": "Current mode is 'log' — sendTransactionalEmail only logs to outbox",
+      "expectedFormat": "DIRECT_DEPOSIT_EMAIL_MODE=resend",
+      "fixType": "config_only",
+      "remediation": [
+        "In `.env.local` set: `DIRECT_DEPOSIT_EMAIL_MODE=resend`",
+        "Do not use `log` or `outbox` for live reminder delivery"
+      ]
+    },
+    {
+      "id": "sender_from",
+      "severity": "FAIL",
+      "variable": "SRS_RECRUITING_FROM_EMAIL",
+      "file": ".env.local",
+      "why": "Resolved From falls back to HR (humanresource@srsmerchandising.com) — unsafe for recruiting reminders",
+      "expectedFormat": "SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com",
+      "fixType": "config_only",
+      "remediation": [
+        "In `.env.local` set: `SRS_RECRUITING_FROM_EMAIL=recruiting@strategicretailsolutions.com`",
+        "Confirm the mailbox is on a Resend-verified domain"
+      ]
+    },
+    {
+      "id": "sender_reply_to",
+      "severity": "WARN",
+      "variable": "SRS_RECRUITING_REPLY_TO_EMAIL",
+      "file": ".env.local",
+      "why": "Reply-To not explicitly set for recruiting reminders",
+      "expectedFormat": "SRS_RECRUITING_REPLY_TO_EMAIL=recruiting@strategicretailsolutions.com",
+      "fixType": "config_only",
+      "remediation": [
+        "In `.env.local` set: `SRS_RECRUITING_REPLY_TO_EMAIL=recruiting@strategicretailsolutions.com`"
+      ]
+    },
+    {
+      "id": "sender_domain",
+      "severity": "FAIL",
+      "variable": "RESEND_API_KEY",
+      "file": "Resend dashboard + .env.local",
+      "why": "Sender domain verification skipped — RESEND_API_KEY unavailable",
+      "expectedFormat": "Domain must show status=verified in Resend for the From domain",
+      "fixType": "vendor",
+      "remediation": [
+        "Set RESEND_API_KEY first (required to probe domains)",
+        "In Resend → Domains: verify strategicretailsolutions.com (SPF/DKIM/DMARC)",
+        "Re-run `npx tsx scripts/p251-run-production-readiness-remediation.ts`"
+      ]
+    }
+  ],
+  "failCount": 4,
+  "warnCount": 1,
+  "okForLiveEmail": false,
+  "humanSummary": [
+    "Deployment tier: development (VERCEL_ENV=unset, NODE_ENV=unset)",
+    "Mail mode: log",
+    "RESEND_API_KEY: MISSING",
+    "Recruiting From: UNSET → resolved humanresource@srsmerchandising.com",
+    "Live email capability: BLOCKED",
+    "  FAIL: DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' for live email (currently 'log')",
+    "  FAIL: RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "  FAIL: SRS_RECRUITING_FROM_EMAIL unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR)",
+    "  WARN: SRS_RECRUITING_REPLY_TO_EMAIL unset — reply-to falls back to From / DIRECT_DEPOSIT_REPLY_TO"
+  ]
+}

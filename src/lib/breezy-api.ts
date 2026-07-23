@@ -1274,8 +1274,8 @@ export async function fetchBreezyPositionsByIds(positionIds: string[]): Promise<
   };
 }
 
-function parseCandidateAppliedDate(raw: string): Date | null {
-  const trimmed = raw.trim();
+function parseCandidateAppliedDate(raw: string | null | undefined): Date | null {
+  const trimmed = String(raw ?? "").trim();
   if (!trimmed) return null;
   if (/^\d{10,13}$/.test(trimmed)) {
     const numeric = Number(trimmed);
