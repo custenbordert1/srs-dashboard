@@ -34,7 +34,7 @@ import {
   resolvePaperworkStatus,
   resolveWorkflowStatus,
 } from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
-import { decideOwnershipWrite } from "@/lib/p188-4-recruiter-ownership-durability/precedence";
+import { decideOwnershipWrite, formatOwnershipConflictActivity } from "@/lib/p188-4-recruiter-ownership-durability/precedence";
 import {
   assertOwnershipCas,
   mergeWorkflowMapsForDurableWrite,
@@ -307,6 +307,10 @@ export async function upsertCandidateWorkflow(input: {
   recruiterAssignmentSource?: RecruiterAssignmentSource | null;
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
+  recruiterAssignedBy?: string | null;
+  recruiterConfirmationStatus?: import("@/lib/candidate-workflow-types").OwnershipConfirmationStatus | null;
+  dmAssignmentSource?: import("@/lib/candidate-workflow-types").DmAssignmentSource | null;
+  dmAssignedBy?: string | null;
   requiredAction?: string | null;
   actionType?: RecruiterActionType | null;
   actionPriority?: RecruiterActionPriority | null;
@@ -379,6 +383,8 @@ export async function assignCandidateDmIfUnassigned(input: {
     const record = await upsertCandidateWorkflowUnlocked({
       candidateId: input.candidateId,
       assignedDM: expectedDm,
+      dmAssignmentSource: "auto",
+      dmAssignedBy: input.approvedBy,
       audit: {
         action: "p218_auto_assign_dm",
         byUserId: input.approvedBy,
@@ -535,6 +541,13 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
     incomingSource: input.recruiterAssignmentSource,
     existingRecruiter: existing?.assignedRecruiter,
     existingSource: existing?.recruiterAssignmentSource,
+    incomingAssignedAt: now,
+    existingAssignedAt: existing?.recruiterAssignedAt,
+    incomingOwnershipVersion:
+      input.assignedRecruiter !== undefined
+        ? (existing?.recruiterOwnershipVersion ?? 0) + 1
+        : existing?.recruiterOwnershipVersion,
+    existingOwnershipVersion: existing?.recruiterOwnershipVersion,
     allowForceOverwrite:
       input.allowForceOverwrite === true ||
       input.recruiterAssignmentSource === "manual" ||
@@ -542,7 +555,21 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
       input.recruiterAssignmentSource === "operator_confirmed_historical_restore",
   });
   const assignedRecruiter = ownershipDecision.recruiter;
-  const assignedDM = input.assignedDM?.trim() || existing?.assignedDM || "Unassigned";
+  const dmIncoming = input.assignedDM?.trim();
+  const dmChanging =
+    Boolean(dmIncoming) && dmIncoming !== (existing?.assignedDM?.trim() || "Unassigned");
+  const assignedDM = dmIncoming || existing?.assignedDM || "Unassigned";
+  const dmAssignmentSource = dmChanging
+    ? (input.dmAssignmentSource ??
+      (input.audit?.byUserId ? ("manual" as const) : existing?.dmAssignmentSource ?? null))
+    : (existing?.dmAssignmentSource ?? null);
+  const dmAssignedAt = dmChanging ? now : (existing?.dmAssignedAt ?? null);
+  const dmAssignedBy = dmChanging
+    ? (input.dmAssignedBy ?? input.audit?.byUserId ?? existing?.dmAssignedBy ?? null)
+    : (existing?.dmAssignedBy ?? null);
+  const dmOwnershipVersion = dmChanging
+    ? (existing?.dmOwnershipVersion ?? 0) + 1
+    : (existing?.dmOwnershipVersion ?? 0);
   const notes = input.note?.trim()
     ? [input.note.trim(), ...(existing?.notes ?? [])].slice(0, 25)
     : (existing?.notes ?? []);
@@ -652,6 +679,25 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
   const recruiterOwnershipVersion = ownershipChanged
     ? (existing?.recruiterOwnershipVersion ?? 0) + 1
     : (existing?.recruiterOwnershipVersion ?? 0);
+  const recruiterAssignedBy = ownershipChanged
+    ? (input.recruiterAssignedBy ??
+      input.audit?.byUserId ??
+      existing?.recruiterAssignedBy ??
+      null)
+    : (existing?.recruiterAssignedBy ?? null);
+  const recruiterConfirmationStatus = ownershipChanged
+    ? (input.recruiterConfirmationStatus ??
+      (recruiterAssignmentSource === "manual" ||
+      recruiterAssignmentSource === "operator_restore" ||
+      recruiterAssignmentSource === "operator_confirmed_historical_restore"
+        ? ("confirmed" as const)
+        : recruiterAssignmentSource === "production_assignment" ||
+            recruiterAssignmentSource === "internal_assignment"
+          ? ("approved_auto" as const)
+          : recruiterAssignmentSource
+            ? ("inferred" as const)
+            : ("unassigned" as const)))
+    : (existing?.recruiterConfirmationStatus ?? null);
 
   const requiredAction =
     input.requiredAction !== undefined ? input.requiredAction : (existing?.requiredAction ?? null);
@@ -690,9 +736,6 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
   if (input.note?.trim()) {
     history.unshift(event("note", `Note added: ${input.note.trim()}`, now));
   }
-  if (input.assignedDM?.trim() && existing?.assignedDM !== assignedDM) {
-    history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
-  }
   if (input.assignedRecruiter?.trim() && existing?.assignedRecruiter !== assignedRecruiter) {
     if (ownershipDecision.applied && recruiterAssignmentSource === "auto") {
       history.unshift(
@@ -703,16 +746,39 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
         ),
       );
     } else if (ownershipDecision.applied) {
-      history.unshift(event("assignment", `Assigned recruiter changed to ${assignedRecruiter}.`, now));
+      const by = recruiterAssignedBy ? ` by ${recruiterAssignedBy}` : "";
+      history.unshift(
+        event(
+          "assignment",
+          `Assigned recruiter changed to ${assignedRecruiter} (Operator${by}).`,
+          now,
+        ),
+      );
     } else {
       history.unshift(
         event(
           "assignment",
-          `Ownership write blocked (${ownershipDecision.reason}); retained ${assignedRecruiter}.`,
+          formatOwnershipConflictActivity({
+            attemptedRecruiter: input.assignedRecruiter.trim(),
+            attemptedSource: input.recruiterAssignmentSource,
+            existingRecruiter: assignedRecruiter,
+            existingSource: existing?.recruiterAssignmentSource,
+            attemptedAt: now,
+            existingAt: existing?.recruiterAssignedAt,
+            reason: ownershipDecision.reason,
+          }),
           now,
         ),
       );
     }
+  }
+  if (dmChanging) {
+    const by = dmAssignedBy ? ` by ${dmAssignedBy}` : "";
+    history.unshift(
+      event("assignment", `Assigned DM changed to ${assignedDM} (Operator${by}).`, now),
+    );
+  } else if (input.assignedDM?.trim() && existing?.assignedDM !== assignedDM) {
+    history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
   }
   if (
     input.recruitingActions &&
@@ -797,7 +863,13 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
     recruiterAssignmentReason,
     recruiterAssignmentConfidence,
     recruiterAssignedAt,
+    recruiterAssignedBy,
+    recruiterConfirmationStatus,
     recruiterOwnershipVersion,
+    dmAssignmentSource,
+    dmAssignedAt,
+    dmAssignedBy,
+    dmOwnershipVersion,
     requiredAction,
     actionType,
     actionPriority,
@@ -873,7 +945,9 @@ async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCa
     )
     .catch(() => undefined);
 
-  return record;
+  // Return post-merge durable record so API/UI never diverge from disk (P262).
+  const persisted = await readStoreFile();
+  return persisted.workflows[input.candidateId] ?? record;
 }
 
 export async function toggleCandidateRecruitingAction(input: {

@@ -102,6 +102,8 @@ export type ScoredCandidateWorkflowRow = BreezyCandidate & {
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
   recruiterAssignedAt?: string | null;
+  recruiterAssignedBy?: string | null;
+  recruiterConfirmationStatus?: import("@/lib/candidate-workflow-types").OwnershipConfirmationStatus | null;
   requiredAction?: string | null;
   actionType?: RecruiterActionType | null;
   actionPriority?: RecruiterActionPriority | null;
@@ -253,6 +255,8 @@ export function buildBaselineWorkflowRow(
     recruiterAssignmentReason: local?.recruiterAssignmentReason ?? null,
     recruiterAssignmentConfidence: local?.recruiterAssignmentConfidence ?? null,
     recruiterAssignedAt: local?.recruiterAssignedAt ?? null,
+    recruiterAssignedBy: local?.recruiterAssignedBy ?? null,
+    recruiterConfirmationStatus: local?.recruiterConfirmationStatus ?? null,
     requiredAction: local?.requiredAction ?? null,
     actionType: local?.actionType ?? null,
     actionPriority: local?.actionPriority ?? null,
@@ -362,6 +366,8 @@ export function buildScoredWorkflowRow(
     recruiterAssignmentReason: local?.recruiterAssignmentReason ?? null,
     recruiterAssignmentConfidence: local?.recruiterAssignmentConfidence ?? null,
     recruiterAssignedAt: local?.recruiterAssignedAt ?? null,
+    recruiterAssignedBy: local?.recruiterAssignedBy ?? null,
+    recruiterConfirmationStatus: local?.recruiterConfirmationStatus ?? null,
     requiredAction: local?.requiredAction ?? null,
     actionType: local?.actionType ?? null,
     actionPriority: local?.actionPriority ?? null,

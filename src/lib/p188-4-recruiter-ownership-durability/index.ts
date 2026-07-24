@@ -10,6 +10,9 @@ export {
   decideOwnershipWrite,
   normalizeOwnershipSource,
   ownershipPriority,
+  ownershipPrecedenceBand,
+  compareOwnershipFreshness,
+  formatOwnershipConflictActivity,
   OWNERSHIP_SOURCE_PRIORITY,
 } from "@/lib/p188-4-recruiter-ownership-durability/precedence";
 export {
@@ -21,6 +24,8 @@ export {
 } from "@/lib/p188-4-recruiter-ownership-durability/ledgerStore";
 export {
   mergeOwnershipSticky,
+  mergeOwnershipStickyDetailed,
+  mergeDmOwnershipSticky,
   mergeWorkflowMapsForDurableWrite,
   assertOwnershipCas,
 } from "@/lib/p188-4-recruiter-ownership-durability/ownershipMerge";

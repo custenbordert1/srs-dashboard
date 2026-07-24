@@ -201,6 +201,9 @@ export function CandidateQueueRow({
                   source={row.recruiterAssignmentSource}
                   reason={row.recruiterAssignmentReason}
                   confidence={row.recruiterAssignmentConfidence}
+                  assignedAt={row.recruiterAssignedAt}
+                  assignedBy={row.recruiterAssignedBy}
+                  confirmationStatus={row.recruiterConfirmationStatus}
                   compact
                 />
               </>

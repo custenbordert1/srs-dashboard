@@ -1,0 +1,46 @@
+{
+  "phase": "P257",
+  "title": "Job Command Center Foundation",
+  "generatedAt": "2026-07-23T18:20:00.000Z",
+  "readOnly": true,
+  "status": "implemented",
+  "entryPoint": "/?tab=job-management → View",
+  "tabs": ["overview", "applicants", "pipeline", "activity"],
+  "metricCards": [
+    "applicants",
+    "qualified",
+    "paperworkNeeded",
+    "paperworkSent",
+    "signed",
+    "readyForMel",
+    "averageDistanceMiles"
+  ],
+  "sources": {
+    "jobHeader": "JobManagementRow / Breezy catalog",
+    "applicants": "Breezy candidates filtered by positionId (API position_id + tab cache)",
+    "workflowStatuses": "GET /api/candidates/workflows overlay or derived Breezy stage",
+    "averageDistance": "distanceMilesForCandidateToJob / explicit distanceMiles",
+    "activity": "workflow history + paperwork timestamps + catalog sync"
+  },
+  "files": [
+    "src/components/recruiting/job-command-center-panel.tsx",
+    "src/components/recruiting/job-management-section.tsx",
+    "src/lib/p257-job-command-center/",
+    "artifacts/p257-job-command-center-report.md"
+  ],
+  "tests": {
+    "command": "node --import tsx --test src/lib/p257-job-command-center/*.test.ts",
+    "passed": 6,
+    "failed": 0
+  },
+  "screenshots": {
+    "captured": false,
+    "reason": "localhost:3000 redirects to /login (auth required)",
+    "manualTargets": [
+      "artifacts/p257-overview.png",
+      "artifacts/p257-applicants.png",
+      "artifacts/p257-pipeline.png",
+      "artifacts/p257-activity.png"
+    ]
+  }
+}

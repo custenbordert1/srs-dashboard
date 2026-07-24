@@ -166,6 +166,41 @@ describe("P188.4 recruiter ownership durability", () => {
     assert.equal(d.applied, false);
   });
 
+  it("equal-priority newer confirmed write wins over stale disk", () => {
+    const merged = mergeOwnershipSticky(
+      wf({
+        candidateId: "c-new",
+        assignedRecruiter: "Old Manual",
+        recruiterAssignmentSource: "manual",
+        recruiterAssignedAt: "2026-07-23T10:00:00.000Z",
+        recruiterOwnershipVersion: 1,
+      }),
+      wf({
+        candidateId: "c-new",
+        assignedRecruiter: "New Manual",
+        recruiterAssignmentSource: "manual",
+        recruiterAssignedAt: "2026-07-23T12:00:00.000Z",
+        recruiterOwnershipVersion: 2,
+      }),
+    );
+    assert.equal(merged.assignedRecruiter, "New Manual");
+  });
+
+  it("equal-priority stale incoming cannot overwrite newer disk", () => {
+    const d = decideOwnershipWrite({
+      incomingRecruiter: "Stale",
+      incomingSource: "manual",
+      existingRecruiter: "Fresh",
+      existingSource: "manual",
+      incomingAssignedAt: "2026-07-23T08:00:00.000Z",
+      existingAssignedAt: "2026-07-23T12:00:00.000Z",
+      incomingOwnershipVersion: 1,
+      existingOwnershipVersion: 2,
+    });
+    assert.equal(d.recruiter, "Fresh");
+    assert.equal(d.conflictClass, "stale_assignment");
+  });
+
   it("stale restore and canary package preview", () => {
     const items: P1884RestorePreviewItem[] = [
       {

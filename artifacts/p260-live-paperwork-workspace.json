@@ -1,0 +1,99 @@
+{
+  "phase": "P260-live-paperwork-workspace",
+  "generatedAt": "2026-07-23T19:30:00.000Z",
+  "apiPath": "/api/recruiting/job-command-center/send-paperwork",
+  "confirmationPhrase": "I reviewed this candidate and authorize one production Dropbox Sign paperwork packet.",
+  "source": "Job Command Center",
+  "verdicts": {
+    "p259SignedInOperationsUi": {
+      "verdict": "NO-GO",
+      "blocker": "login",
+      "detail": "Authenticated operator verification blocked: /login returns Next.js runtime error overlay (HTTP 500). Session cannot be established. No screenshots invented. P259 Operations code wiring reviewed — no critical break found that would stop P260."
+    },
+    "p260ProductionImplementation": {
+      "verdict": "GO",
+      "detail": "Thin Job Command Center adapter implemented: preview → typed confirm → pre-send refresh → production eligibility → quota fail-closed → executeOnboardingSend (production-only) → post-send Dropbox verify. Paperwork Sent only after Dropbox success. Reuses P243 idempotency store; one candidate at a time."
+    },
+    "actualLiveCandidateSend": {
+      "verdict": "NO-GO",
+      "blocker": "dropbox_production_quota_zero",
+      "detail": "Production Dropbox Sign api_signature_requests_left=0. Fail-closed abort. No live candidate packet authorized."
+    }
+  },
+  "quota": {
+    "accountQuotaRemaining": 0,
+    "testMode": false,
+    "productionModeConfirmed": true,
+    "apiKeyPresent": true,
+    "probedWithEnvLocal": true,
+    "detail": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+  },
+  "writes": {
+    "dropboxPacketsCreated": 0,
+    "workflowPaperworkSentWrites": 0,
+    "liveCandidateSends": 0
+  },
+  "safety": {
+    "failClosedOnQuotaZero": true,
+    "oneCandidateAtATime": true,
+    "bulkForbidden": true,
+    "noAutoScheduledReminderResend": true,
+    "noEligibilityBypassForActiveViewedSigned": true,
+    "typedConfirmReasons": [
+      "distance_40_60",
+      "prior_expired_packet",
+      "manually_recovered",
+      "nonstandard_override"
+    ],
+    "paperworkSentOnlyAfterDropboxSuccess": true,
+    "postSendDropboxReread": true
+  },
+  "tests": {
+    "command": "node --import tsx --test src/lib/p260-live-paperwork-workspace/*.test.ts src/lib/p259-candidate-operations/*.test.ts",
+    "passed": 28,
+    "failed": 0,
+    "p260Passed": 16,
+    "p259Passed": 12,
+    "coverage": [
+      "quota_0_fail_closed",
+      "missing_credentials",
+      "active_viewed_signed_packets",
+      "missing_identity_email_template",
+      "distance_40_60_typed_confirm",
+      "double_click_in_flight",
+      "durable_idempotency",
+      "timeout_reconcile_no_paperwork_sent",
+      "cancel_no_write",
+      "mocked_success_verify_path"
+    ]
+  },
+  "failClosedProbe": {
+    "candidateId": "p260-failclosed-probe-not-a-real-candidate",
+    "mode": "send",
+    "ok": false,
+    "aborted": true,
+    "writes": {
+      "dropboxPacketCreated": false,
+      "workflowPaperworkSent": false
+    },
+    "quota": 0,
+    "detail": "ABORTED — Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode.",
+    "packetsCreated": 0
+  },
+  "files": [
+    "src/lib/p260-live-paperwork-workspace/",
+    "src/app/api/recruiting/job-command-center/send-paperwork/route.ts",
+    "src/components/recruiting/job-command-center-panel.tsx",
+    "src/components/recruiting/candidate-operations-confirm-modal.tsx",
+    "src/components/recruiting/hiring-workspace-paperwork-preview.tsx",
+    "src/lib/p259-candidate-operations/",
+    "src/lib/p258-hiring-workspace/types.ts",
+    "package.json",
+    "artifacts/p260-live-paperwork-workspace-report.md",
+    "artifacts/p260-live-paperwork-workspace.json"
+  ],
+  "blockers": [
+    "login_page_runtime_error_blocks_p259_signed_in_verification",
+    "dropbox_production_quota_0_blocks_live_candidate_send"
+  ]
+}

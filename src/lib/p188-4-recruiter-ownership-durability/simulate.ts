@@ -126,7 +126,7 @@ export function simulateOwnershipDurability(): {
     });
   }
 
-  // equal priority conflict
+  // equal priority conflict — tied freshness fails closed
   {
     const d = decideOwnershipWrite({
       incomingRecruiter: "Alex",
@@ -138,6 +138,51 @@ export function simulateOwnershipDurability(): {
     if (ok) conflictsSurfaced += 1;
     scenarios.push({
       name: "conflicting historical assignments",
+      ok,
+      detail: d.reason,
+    });
+  }
+
+  // equal-priority newer confirmed write wins (P262)
+  {
+    const d = decideOwnershipWrite({
+      incomingRecruiter: "Jordan",
+      incomingSource: "manual",
+      existingRecruiter: "Taylor",
+      existingSource: "manual",
+      incomingAssignedAt: "2026-07-23T12:00:00.000Z",
+      existingAssignedAt: "2026-07-23T11:00:00.000Z",
+      incomingOwnershipVersion: 3,
+      existingOwnershipVersion: 2,
+    });
+    const ok = d.applied && d.recruiter === "Jordan";
+    if (ok) assignmentsPreserved += 1;
+    scenarios.push({
+      name: "equal-priority newer confirmed write applied",
+      ok,
+      detail: d.reason,
+    });
+  }
+
+  // equal-priority stale cannot overwrite newer confirmed (P262)
+  {
+    const d = decideOwnershipWrite({
+      incomingRecruiter: "Alex",
+      incomingSource: "manual",
+      existingRecruiter: "Taylor",
+      existingSource: "manual",
+      incomingAssignedAt: "2026-07-23T10:00:00.000Z",
+      existingAssignedAt: "2026-07-23T12:00:00.000Z",
+      incomingOwnershipVersion: 2,
+      existingOwnershipVersion: 3,
+    });
+    const ok = d.blocked && d.recruiter === "Taylor" && d.conflictClass === "stale_assignment";
+    if (ok) {
+      clobbersPrevented += 1;
+      conflictsSurfaced += 1;
+    }
+    scenarios.push({
+      name: "equal-priority stale cannot overwrite newer confirmed",
       ok,
       detail: d.reason,
     });

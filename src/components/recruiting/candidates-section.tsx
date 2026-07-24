@@ -2061,6 +2061,9 @@ export function CandidatesSection() {
                     source={candidate.recruiterAssignmentSource}
                     reason={candidate.recruiterAssignmentReason}
                     confidence={candidate.recruiterAssignmentConfidence}
+                    assignedAt={candidate.recruiterAssignedAt}
+                    assignedBy={candidate.recruiterAssignedBy}
+                    confirmationStatus={candidate.recruiterConfirmationStatus}
                     compact
                   />
                 ) : null}

@@ -167,6 +167,10 @@ export async function POST(request: Request) {
     typeof input.assignedRecruiter === "string" &&
     input.assignedRecruiter.trim() &&
     input.assignedRecruiter.trim() !== (existingWorkflow?.assignedRecruiter ?? "Unassigned");
+  const manualDmAssignment =
+    typeof input.assignedDM === "string" &&
+    input.assignedDM.trim() &&
+    input.assignedDM.trim() !== (existingWorkflow?.assignedDM ?? "Unassigned");
 
   const workflow = await upsertCandidateWorkflow({
     candidateId,
@@ -180,6 +184,10 @@ export async function POST(request: Request) {
     recruiterAssignmentSource: manualRecruiterAssignment ? "manual" : undefined,
     recruiterAssignmentReason: manualRecruiterAssignment ? "Manually assigned by recruiter." : undefined,
     recruiterAssignmentConfidence: manualRecruiterAssignment ? null : undefined,
+    recruiterAssignedBy: manualRecruiterAssignment ? session.userId : undefined,
+    recruiterConfirmationStatus: manualRecruiterAssignment ? "confirmed" : undefined,
+    dmAssignmentSource: manualDmAssignment ? "manual" : undefined,
+    dmAssignedBy: manualDmAssignment ? session.userId : undefined,
     audit: {
       action: assignedRecruiter ? "assign_recruiter" : assignedDM ? "assign_dm" : "upsert_workflow",
       byUserId: session.userId,

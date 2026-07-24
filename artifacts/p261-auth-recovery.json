@@ -1,0 +1,169 @@
+{
+  "phase": "P261",
+  "title": "Authentication Recovery & Signed-In Job Command Center Validation",
+  "generatedAt": "2026-07-23T19:37:00.000Z",
+  "runtime": {
+    "scope": "local",
+    "url": "http://localhost:3000",
+    "next": "16.2.6",
+    "bundler": "turbopack"
+  },
+  "verdicts": {
+    "authentication": "GO",
+    "p259SignedInOperationsUi": "GO",
+    "p260SignedInPaperworkWorkflow": "GO",
+    "actualLiveSendWhileQuotaZero": "NO-GO"
+  },
+  "rootCause": {
+    "category": "server_client_component_misuse",
+    "summary": "Client Job Command Center imported eligibility that pulled onboarding-send-packet-sync Node fs stores into the browser graph; Turbopack compilation error poisoned all routes including /login.",
+    "notCause": [
+      "SESSION_SECRET missing",
+      "Neon Auth",
+      "middleware redirect loop",
+      "cookie parsing",
+      "database connection for login page"
+    ],
+    "failingModule": "src/lib/candidate-onboarding-engine/onboarding-record-store.ts",
+    "error": "the chunking context (unknown) does not support external modules (request: node:fs/promises)",
+    "importChain": [
+      "src/components/recruiting/job-command-center-panel.tsx",
+      "src/lib/p258-hiring-workspace/applicants.ts",
+      "src/lib/p258-hiring-workspace/eligibility.ts",
+      "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "src/lib/onboarding-send-packet-sync.ts",
+      "src/lib/candidate-onboarding-engine/onboarding-record-store.ts"
+    ]
+  },
+  "fix": {
+    "files": [
+      "src/lib/onboarding-send-packet-duplicate.ts",
+      "src/lib/onboarding-send-packet-sync.ts",
+      "src/lib/autonomous-paperwork-send-engine/build-paperwork-send-eligibility.ts",
+      "src/lib/auth/p261-auth-recovery.test.ts",
+      "package.json"
+    ],
+    "eligibilityRulesChanged": false,
+    "quotaLogicChanged": false,
+    "packetLogicChanged": false
+  },
+  "loginBefore": {
+    "httpStatus": 500,
+    "formRendered": false
+  },
+  "loginAfter": {
+    "httpStatus": 200,
+    "formRendered": true,
+    "invalidLogin": { "httpStatus": 401, "sessionCookieSet": false },
+    "validLogin": {
+      "httpStatus": 200,
+      "role": "executive",
+      "redirect": "/",
+      "cookie": {
+        "name": "srs_session",
+        "httpOnly": true,
+        "sameSite": "lax",
+        "secureInProduction": true
+      }
+    },
+    "protectedWithoutAuth": { "httpStatus": 307, "location": "/login?next=%2F" },
+    "protectedWithAuth": { "httpStatus": 200 },
+    "invalidCookie": { "httpStatus": 307, "location": "/login?next=%2F" },
+    "redirectLoop": false,
+    "browserLoginSucceeded": true
+  },
+  "envPresence": {
+    "local": {
+      "SESSION_SECRET": "PRESENT",
+      "BREEZY_API_KEY": "PRESENT",
+      "DATABASE_URL": "PRESENT",
+      "DROPBOX_SIGN_API_KEY": "PRESENT",
+      "DROPBOX_SIGN_TEST_MODE": "MISSING",
+      "DM_DEFAULT_PASSWORD": "MISSING"
+    },
+    "vercelPreview": {
+      "SESSION_SECRET": "PRESENT",
+      "BREEZY_API_KEY": "PRESENT",
+      "DATABASE_URL": "PRESENT",
+      "CRON_SECRET": "PRESENT"
+    },
+    "vercelProduction": {
+      "SESSION_SECRET": "PRESENT",
+      "BREEZY_API_KEY": "PRESENT",
+      "DATABASE_URL": "PRESENT",
+      "CRON_SECRET": "PRESENT"
+    },
+    "redeployed": false,
+    "deployAuthorized": false
+  },
+  "p259SignedIn": {
+    "jobManagementLoaded": true,
+    "jobCommandCenterOpened": true,
+    "operationsTabLoaded": true,
+    "job": {
+      "breezyJobId": "df0014216e94",
+      "title": "Experienced Retail Merchandiser – Conroe, TX",
+      "applicants": 4
+    },
+    "filtersPresent": true,
+    "reviewDrawerOpened": true,
+    "eligibilityDisplayed": true,
+    "hiringScoreDisplayed": true,
+    "openBreezyPresent": true,
+    "openDropboxPresent": true,
+    "confirmedWrites": {
+      "candidateId": "22072d81bbfd",
+      "assignRecruiter": true,
+      "assignDm": true,
+      "moveStage": true,
+      "restored": true,
+      "restoreMethod": "durable_file_after_equal_priority_ownership_merge_block"
+    }
+  },
+  "p260SignedIn": {
+    "uiPreviewOpened": true,
+    "eligibilityBlockedShown": true,
+    "cancelledWithoutSend": true,
+    "preflight": {
+      "accountQuotaRemaining": 0,
+      "testMode": false,
+      "productionModeConfirmed": true,
+      "apiKeyPresent": true,
+      "aborted": true
+    },
+    "apiPreview": {
+      "ok": true,
+      "canSend": false,
+      "quota": 0
+    },
+    "apiSend": {
+      "httpStatus": 409,
+      "ok": false,
+      "aborted": true,
+      "signatureRequestId": null,
+      "packetsCreated": 0
+    },
+    "workflowPaperworkSentWritesFromBlockedSend": 0,
+    "testModeUsedAsSubstitute": false
+  },
+  "tests": {
+    "command": "NODE_ENV=development node --import tsx --test src/lib/auth/p261-auth-recovery.test.ts src/lib/p259-candidate-operations/p259-candidate-operations.test.ts src/lib/p260-live-paperwork-workspace/p260-live-paperwork-workspace.test.ts src/lib/onboarding-send-packet-sync.test.ts src/lib/proxy-public-paths.test.ts",
+    "passed": 43,
+    "failed": 0
+  },
+  "screenshots": [
+    "artifacts/p261-operations-applicants.png",
+    "artifacts/p261-job-management-sorted.png"
+  ],
+  "writesPerformed": {
+    "dropboxPacketsCreated": 0,
+    "paperworkSentFromBlockedSend": 0,
+    "reversibleWorkflowWrites": 3,
+    "restored": true
+  },
+  "outstandingBlockers": [
+    "Dropbox production quota is 0 — live send remains NO-GO",
+    "Preview/Production not redeployed (no deploy authorization)",
+    "Equal-priority ownership merge blocks API restore of same-priority manual recruiter (disk restore used)"
+  ]
+}

@@ -2,7 +2,7 @@ import type { BreezyJob } from "@/lib/breezy-api";
 import type { ScoredCandidateWorkflowRow } from "@/lib/build-candidate-workflow-row";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
 import type { CandidateOnboardingRecord } from "@/lib/candidate-onboarding-engine/types";
-import { duplicatePaperworkSendBlockReason } from "@/lib/onboarding-send-packet-sync";
+import { duplicatePaperworkSendBlockReason } from "@/lib/onboarding-send-packet-duplicate";
 import {
   isOnboardingTemplateKey,
   type OnboardingTemplateKey,

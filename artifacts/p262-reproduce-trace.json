@@ -1,0 +1,54 @@
+{
+  "phase": "P262",
+  "generatedAt": "2026-07-23T19:50:10.963Z",
+  "reproduce": {
+    "candidateIdRedacted": "p262-rep***********",
+    "method": "in_memory_merge_race",
+    "hardCodedProductionId": false,
+    "paperworkSends": 0,
+    "dropboxPackets": 0
+  },
+  "rootCause": {
+    "note": "Before P262, decideOwnershipWrite at equal priority always preserved existing (disk), so writeStoreFile mergeOwnershipSticky(disk=prior, incoming=operator) reverted the confirmed operator write."
+  },
+  "steps": [
+    {
+      "step": "baseline_prior_manual",
+      "recruiter": "Recruiting Team",
+      "dm": "Field Ops",
+      "source": "manual",
+      "precedenceBand": "Confirmed operator",
+      "assignedAt": "2026-07-23T10:00:00.000Z",
+      "version": 2
+    },
+    {
+      "step": "operator_confirmed_assign_merge",
+      "incoming": "P262 Repro Recruiter",
+      "incomingPriority": "manual",
+      "resultRecruiter": "P262 Repro Recruiter",
+      "resultDm": "P262 Repro DM",
+      "resultSource": "manual",
+      "resultBy": "operator-repro",
+      "resultAt": "2026-07-23T12:00:00.000Z",
+      "stuck": true
+    },
+    {
+      "step": "stale_concurrent_full_file_rewrite",
+      "attempted": "Recruiting Team",
+      "resultRecruiter": "P262 Repro Recruiter",
+      "resultDm": "P262 Repro DM",
+      "conflictActivity": "Ownership conflict retained P262 Repro Recruiter (Confirmed operator at 2026-07-23T12:00:00.000Z); rejected Recruiting Team (Confirmed operator at 2026-07-23T10:00:00.000Z). Equal-priority stale manual cannot overwrite newer confirmed write",
+      "preservedConfirmed": true
+    },
+    {
+      "step": "breezy_ingestion_sync",
+      "blocked": true,
+      "retained": "P262 Repro Recruiter",
+      "reason": "Lower-priority breezy_import cannot overwrite manual"
+    }
+  ],
+  "conflictResolution": {
+    "equalPriority": "newer ownershipVersion / recruiterAssignedAt wins; stale rejected with Activity",
+    "lowerPriority": "never overwrites confirmed operator"
+  }
+}

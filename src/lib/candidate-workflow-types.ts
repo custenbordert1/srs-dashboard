@@ -15,6 +15,15 @@ export type RecruiterAssignmentSource =
   | "breezy_import"
   | "territory_default";
 
+/** DM assignment source — mirrors recruiter durability bands (P262). */
+export type DmAssignmentSource =
+  | "manual"
+  | "auto"
+  | "operator_restore"
+  | "territory_default";
+
+export type OwnershipConfirmationStatus = "confirmed" | "approved_auto" | "inferred" | "unassigned";
+
 const RECRUITER_ASSIGNMENT_SOURCES = new Set<string>([
   "auto",
   "manual",
@@ -26,10 +35,32 @@ const RECRUITER_ASSIGNMENT_SOURCES = new Set<string>([
   "territory_default",
 ]);
 
+const DM_ASSIGNMENT_SOURCES = new Set<string>([
+  "manual",
+  "auto",
+  "operator_restore",
+  "territory_default",
+]);
+
 export function isRecruiterAssignmentSource(
   value: unknown,
 ): value is RecruiterAssignmentSource {
   return typeof value === "string" && RECRUITER_ASSIGNMENT_SOURCES.has(value);
+}
+
+export function isDmAssignmentSource(value: unknown): value is DmAssignmentSource {
+  return typeof value === "string" && DM_ASSIGNMENT_SOURCES.has(value);
+}
+
+export function isOwnershipConfirmationStatus(
+  value: unknown,
+): value is OwnershipConfirmationStatus {
+  return (
+    value === "confirmed" ||
+    value === "approved_auto" ||
+    value === "inferred" ||
+    value === "unassigned"
+  );
 }
 
 export type RecruiterActionType =
@@ -113,8 +144,17 @@ export type CandidateWorkflowRecord = {
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
   recruiterAssignedAt?: string | null;
+  /** Operator / system identity for the durable ownership write (P262). */
+  recruiterAssignedBy?: string | null;
+  /** Confirmation band for ownership durability (P262). */
+  recruiterConfirmationStatus?: OwnershipConfirmationStatus | null;
   /** Optimistic concurrency version for recruiter ownership (P188.4). */
   recruiterOwnershipVersion?: number;
+  /** DM ownership durability metadata (P262). */
+  dmAssignmentSource?: DmAssignmentSource | null;
+  dmAssignedAt?: string | null;
+  dmAssignedBy?: string | null;
+  dmOwnershipVersion?: number;
   requiredAction?: string | null;
   actionType?: RecruiterActionType | null;
   actionPriority?: RecruiterActionPriority | null;
@@ -249,11 +289,24 @@ export function normalizeWorkflowRecord(
         ? Math.max(0, Math.min(100, Math.round(raw.recruiterAssignmentConfidence)))
         : null,
     recruiterAssignedAt: typeof raw.recruiterAssignedAt === "string" ? raw.recruiterAssignedAt : null,
+    recruiterAssignedBy: typeof raw.recruiterAssignedBy === "string" ? raw.recruiterAssignedBy : null,
+    recruiterConfirmationStatus: isOwnershipConfirmationStatus(raw.recruiterConfirmationStatus)
+      ? raw.recruiterConfirmationStatus
+      : null,
     recruiterOwnershipVersion:
       typeof raw.recruiterOwnershipVersion === "number" &&
       Number.isFinite(raw.recruiterOwnershipVersion) &&
       raw.recruiterOwnershipVersion >= 0
         ? Math.floor(raw.recruiterOwnershipVersion)
+        : 0,
+    dmAssignmentSource: isDmAssignmentSource(raw.dmAssignmentSource) ? raw.dmAssignmentSource : null,
+    dmAssignedAt: typeof raw.dmAssignedAt === "string" ? raw.dmAssignedAt : null,
+    dmAssignedBy: typeof raw.dmAssignedBy === "string" ? raw.dmAssignedBy : null,
+    dmOwnershipVersion:
+      typeof raw.dmOwnershipVersion === "number" &&
+      Number.isFinite(raw.dmOwnershipVersion) &&
+      raw.dmOwnershipVersion >= 0
+        ? Math.floor(raw.dmOwnershipVersion)
         : 0,
     requiredAction: typeof raw.requiredAction === "string" ? raw.requiredAction : null,
     actionType: normalizeRecruiterActionType(raw.actionType),
