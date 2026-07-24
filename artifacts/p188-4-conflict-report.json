@@ -1,0 +1,84 @@
+{
+  "sourcePhase": "P188.4",
+  "conflicting": 13,
+  "items": [
+    {
+      "redactedCandidateId": "1b2b…f876",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Alex via auto_assign_recruiter at 2026-07-09T20:16:00.189Z"
+    },
+    {
+      "redactedCandidateId": "c6a7…67f6",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Alex via auto_assign_recruiter at 2026-07-09T20:16:00.191Z"
+    },
+    {
+      "redactedCandidateId": "3594…d198",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Alex via auto_assign_recruiter at 2026-07-09T20:16:00.202Z"
+    },
+    {
+      "redactedCandidateId": "df72…d658",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Alex via auto_assign_recruiter at 2026-07-09T20:16:00.206Z"
+    },
+    {
+      "redactedCandidateId": "ec0b…690e",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.210Z"
+    },
+    {
+      "redactedCandidateId": "4496…887d",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.216Z"
+    },
+    {
+      "redactedCandidateId": "0f84…6e92",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.230Z"
+    },
+    {
+      "redactedCandidateId": "f8bc…6e0d",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.237Z"
+    },
+    {
+      "redactedCandidateId": "2fb0…c249",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.243Z"
+    },
+    {
+      "redactedCandidateId": "3e2a…bb3f",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.248Z"
+    },
+    {
+      "redactedCandidateId": "6def…252d",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.253Z"
+    },
+    {
+      "redactedCandidateId": "d2d1…f7eb",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.255Z"
+    },
+    {
+      "redactedCandidateId": "09ef…aac9",
+      "classification": "conflicting_history",
+      "proposedRecruiter": null,
+      "detail": "Last named Sam via auto_assign_recruiter at 2026-07-09T20:16:00.258Z"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "phase": "P251-production-readiness-remediation",
+  "generatedAt": "2026-07-23T14:43:44.171Z",
+  "opsDate": "2026-07-23",
+  "mode": "zero_write_simulation",
+  "zeroWritesConfirmed": true,
+  "liveEmailsSent": 0,
+  "dropboxWrites": 0,
+  "melWrites": 0,
+  "breezyWrites": 0,
+  "mailReady": false,
+  "resendReady": false,
+  "launchSequenceSimulated": [
+    "Verify Resend env (RESEND_API_KEY, DIRECT_DEPOSIT_EMAIL_MODE=resend, SRS_RECRUITING_FROM_EMAIL)",
+    "Re-run production config validator / P251 until mail READY",
+    "Canary: 1–3 test reminder emails to operator inboxes (not executed this run)",
+    "Reminder 1 batch simulation: 180 candidates (dry-run volumes reused)",
+    "Initial paperwork simulation: 1 eligible (Dropbox testMode / quota gates apply)",
+    "Ready-for-MEL review: 18 (no MEL writes)",
+    "Halt conditions: Resend auth failure, unexplained provider errors, Dropbox quota surprises"
+  ],
+  "volumes": {
+    "initialPaperworkSends": 1,
+    "reminder1Sends": 180,
+    "readyForMel": 18,
+    "openStoreSafeCapacity": 19
+  },
+  "reusedDryRun": true,
+  "readinessOverall": "FAIL",
+  "notes": [
+    "Workbook: 38/52 Opens with Applicant=Yes; 276 Breezy Posts rows.",
+    "Resolved 274 live published jobs.",
+    "Matched stores with positionId=37; unique positions=32.",
+    "All matched positions have ingested applicants — skipped live Breezy candidate scan.",
+    "Candidates on open-store positions: 73 raw → 69 after id/email dedupe (dropped 4).",
+    "Discovered 69 applicant↔store matches.",
+    "Classified 69: eligible=1 blocked=68.",
+    "Already-sent exclusions=68; signed=0.",
+    "P249 dry-run zeroWritesConfirmed=true",
+    "P250 prior decision=NO-GO",
+    "Deployment tier=development",
+    "P251 did not execute --live / --confirm-live"
+  ],
+  "warnings": [
+    "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' for live email (currently 'log')",
+    "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "SRS_RECRUITING_FROM_EMAIL unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR)",
+    "SRS_RECRUITING_REPLY_TO_EMAIL unset — reply-to falls back to From / DIRECT_DEPOSIT_REPLY_TO",
+    "DIRECT_DEPOSIT_EMAIL_MODE is not 'resend' (currently log/outbox only); RESEND_API_KEY is not configured",
+    "RESEND_API_KEY is missing from the runtime environment (.env.local)",
+    "DIRECT_DEPOSIT_EMAIL_MODE must be 'resend' (currently 'log')",
+    "SRS_RECRUITING_FROM_EMAIL is unset; resolver falls back to DIRECT_DEPOSIT_FROM (HR). Set SRS_RECRUITING_FROM_EMAIL to the approved recruiting sender before live reminder sends.",
+    "RESEND_API_KEY present: Missing from runtime environment",
+    "DIRECT_DEPOSIT_EMAIL_MODE=resend: Current mode: log"
+  ]
+}

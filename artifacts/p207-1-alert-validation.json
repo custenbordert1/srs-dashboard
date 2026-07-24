@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-07-16T14:39:20.734Z",
+  "activeCount": 4,
+  "resolvedCount": 0,
+  "bySeverity": {
+    "critical": 1,
+    "warning": 3,
+    "informational": 0
+  },
+  "activeAlerts": [
+    {
+      "id": "p207-6935d149ec72e7a2ab5b44ab",
+      "severity": "critical",
+      "title": "Dropbox quota exhausted with send-ready candidates",
+      "affectedCount": 18,
+      "subsystem": "dropbox",
+      "firstObservedAt": "2026-07-16T14:38:53.797Z",
+      "lastObservedAt": "2026-07-16T14:39:20.734Z",
+      "recommendedAction": "Restore Dropbox API quota with the vendor. Do not start P192. Re-run P206 only after quota > 0.",
+      "supportingMetric": "quota=0; sendReady=18",
+      "sampleAffectedIds": [
+        "c9f5bb…9a06",
+        "3e2ad2…bb3f",
+        "bee316…dd26",
+        "70a002…d849",
+        "fe842d…f694"
+      ]
+    },
+    {
+      "id": "p207-02aeb4f4e9d22bfde5862742",
+      "severity": "warning",
+      "title": "Questionnaire capture degradation",
+      "affectedCount": 49,
+      "subsystem": "ai_qualification",
+      "firstObservedAt": "2026-07-16T14:38:53.797Z",
+      "lastObservedAt": "2026-07-16T14:39:20.734Z",
+      "recommendedAction": "Prioritize questionnaire capture recovery before expanding AI approvals.",
+      "supportingMetric": "questionnaireCoveragePct=51.3",
+      "sampleAffectedIds": [
+        "c9f5bb…9a06",
+        "3e2ad2…bb3f",
+        "bee316…dd26",
+        "70a002…d849",
+        "fe842d…f694"
+      ]
+    },
+    {
+      "id": "p207-768c2788b42b1c39f811cc2c",
+      "severity": "warning",
+      "title": "Ready for MEL backlog",
+      "affectedCount": 17,
+      "subsystem": "ready_for_mel",
+      "firstObservedAt": "2026-07-16T14:38:53.797Z",
+      "lastObservedAt": "2026-07-16T14:39:20.734Z",
+      "recommendedAction": "Review signed → MEL readiness path (read-only; no MEL writes).",
+      "supportingMetric": "signed=17; readyForMel=0",
+      "sampleAffectedIds": [
+        "c9f5bb…9a06",
+        "3e2ad2…bb3f",
+        "bee316…dd26",
+        "70a002…d849",
+        "fe842d…f694"
+      ]
+    },
+    {
+      "id": "p207-acd94bd0c530a1122a2921c6",
+      "severity": "warning",
+      "title": "Paperwork Sent aging",
+      "affectedCount": 230,
+      "subsystem": "paperwork_queue",
+      "firstObservedAt": "2026-07-16T14:38:53.797Z",
+      "lastObservedAt": "2026-07-16T14:39:20.734Z",
+      "recommendedAction": "Monitor signature follow-up; do not auto-resend in this phase.",
+      "supportingMetric": "awaitingSignature=230",
+      "sampleAffectedIds": [
+        "c9f5bb…9a06",
+        "3e2ad2…bb3f",
+        "bee316…dd26",
+        "70a002…d849",
+        "fe842d…f694"
+      ]
+    }
+  ],
+  "dedupeVerified": true
+}

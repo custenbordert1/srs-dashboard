@@ -1,0 +1,27 @@
+{
+  "phase": "P220",
+  "generatedAt": "2026-07-20T14:02:36.440Z",
+  "targetRecordsChanged": 2,
+  "nonTargetRecordsChanged": 0,
+  "recordsAdded": 0,
+  "recordsRemoved": 0,
+  "targetRedactedIds": [
+    "3d272f69061a",
+    "c0d00937ae31"
+  ],
+  "nonTargetRedactedIds": [],
+  "safety": {
+    "candidatesWritten": 2,
+    "otherCandidatesWritten": 0,
+    "workflowChangesOutsideTarget": 0,
+    "dropboxRequests": 0,
+    "signatureRequestsCreated": 0,
+    "paperworkSent": 0,
+    "emailsSent": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "recruiterChanges": 0,
+    "notesChanges": 0,
+    "advancedBeyondPaperworkNeeded": 0
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-07-15T19:48:52.713Z",
+  "sourcePhase": "P204",
+  "averageConfidence": 50.8,
+  "confidenceDistribution": {
+    "90-100": 0,
+    "80-89": 2,
+    "70-79": 121,
+    "60-69": 104,
+    "50-59": 11,
+    "0-49": 330
+  },
+  "falsePositiveReview": {
+    "count": 0,
+    "pctOfReviews": 0,
+    "definition": "Needs Recruiter Review with confidence≥85, Qualified/high calibrated signal, and no fraud/dup/disqualify codes (over-cautious review)"
+  },
+  "topReasonCodes": [
+    {
+      "code": "historical_applicant",
+      "count": 432
+    },
+    {
+      "code": "territory_fit",
+      "count": 425
+    },
+    {
+      "code": "nearby_work_available",
+      "count": 423
+    },
+    {
+      "code": "hard_gate_fail_closed_to_review",
+      "count": 333
+    },
+    {
+      "code": "low_confidence",
+      "count": 331
+    },
+    {
+      "code": "missing_questionnaire",
+      "count": 331
+    },
+    {
+      "code": "duplicate_suspect",
+      "count": 279
+    },
+    {
+      "code": "available_and_transport_ready",
+      "count": 233
+    },
+    {
+      "code": "missing_resume",
+      "count": 223
+    },
+    {
+      "code": "insufficient_enriched_signals",
+      "count": 210
+    },
+    {
+      "code": "strong_questionnaire",
+      "count": 194
+    },
+    {
+      "code": "borderline_confidence",
+      "count": 186
+    },
+    {
+      "code": "high_qualification_confidence",
+      "count": 43
+    },
+    {
+      "code": "calibrated_request_more_info",
+      "count": 41
+    },
+    {
+      "code": "calibrated_qualified",
+      "count": 33
+    }
+  ],
+  "byRecommendationAverages": {
+    "advance": 77.8,
+    "review": 48.4,
+    "reject": 58.3
+  },
+  "componentAverages": {
+    "p193": 34.4,
+    "p1934": 57.2,
+    "readiness": 61.3,
+    "resume": 35.3,
+    "questionnaire": 49.4
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "phase": "P242",
+  "generatedAt": "2026-07-21T14:46:53.849Z",
+  "baselineP240": {
+    "wouldSendCount": 5,
+    "blockedCount": 12,
+    "autoClearRatePct": 29.4,
+    "estimatedDailyThroughputToSent": 5.1,
+    "healthScore": 66,
+    "goNoGo": "NO-GO",
+    "qualificationGateFailed": 8
+  },
+  "corrected": {
+    "proxyCohortSize": 17,
+    "wouldSendCount": 13,
+    "blockedCount": 4,
+    "autoClearRatePct": 76.5,
+    "estimatedDailyArrivalRate": 17.4,
+    "estimatedDailyThroughputToSent": 13.3,
+    "healthScore": 83,
+    "grade": "B",
+    "goNoGo": "GO_WITH_CONDITIONS",
+    "goNoGoReason": "Pipeline decision tree is complete and never silent-fails, but auto-clear rate / bottlenecks are not yet strong enough for fully unattended live sends.",
+    "bottleneckBreakdown": [
+      {
+        "blocker": "manual_review_40_60",
+        "count": 2,
+        "pct": 50
+      },
+      {
+        "blocker": "duplicate_identity",
+        "count": 1,
+        "pct": 25
+      },
+      {
+        "blocker": "missing_phone",
+        "count": 1,
+        "pct": 25
+      }
+    ]
+  },
+  "expectedFromP241": {
+    "wouldSendCount": 13,
+    "proxyCohortSize": 17,
+    "autoClearRatePct": 76.5,
+    "estimatedDailyThroughputToSent": 13.3,
+    "healthScore": 83,
+    "goNoGo": "GO_WITH_CONDITIONS",
+    "remainingBlockers": [
+      "manual_review_40_60",
+      "duplicate_identity",
+      "missing_phone"
+    ],
+    "p241RecoverableCount": 8
+  },
+  "matchesExpected": true,
+  "variances": [],
+  "throughput": {
+    "phase": "P240",
+    "generatedAt": "2026-07-21T14:46:53.849Z",
+    "lookbackDays": 14,
+    "simulationHorizonHours": 24,
+    "arrivalsLast14Days": 244,
+    "estimatedDailyArrivalRate": 17.4,
+    "projectedArrivalsNext24h": 17,
+    "proxyCohortSize": 17,
+    "wouldReachPnCount": 13,
+    "wouldSendCount": 13,
+    "blockedCount": 4,
+    "protectedSkipCount": 0,
+    "autoClearRatePct": 76.5,
+    "estimatedDailyThroughputToPn": 13.3,
+    "estimatedDailyThroughputToSent": 13.3,
+    "averageMinutesAppliedToPaperwork": 50,
+    "averageHoursAppliedToPaperwork": 0.83,
+    "bottleneckBreakdown": [
+      {
+        "blocker": "manual_review_40_60",
+        "count": 2,
+        "pct": 50
+      },
+      {
+        "blocker": "duplicate_identity",
+        "count": 1,
+        "pct": 25
+      },
+      {
+        "blocker": "missing_phone",
+        "count": 1,
+        "pct": 25
+      }
+    ]
+  },
+  "health": {
+    "phase": "P240",
+    "generatedAt": "2026-07-21T14:46:53.849Z",
+    "healthScore": 83,
+    "grade": "B",
+    "factors": [
+      {
+        "name": "auto_clear_rate",
+        "score": 76.5,
+        "weight": 0.35,
+        "note": "76.5% of simulated new arrivals would reach Paperwork Sent"
+      },
+      {
+        "name": "explicit_blockers",
+        "score": 100,
+        "weight": 0.2,
+        "note": "Every blocked candidate has blocker code + next action + queue location"
+      },
+      {
+        "name": "never_resend_protection",
+        "score": 100,
+        "weight": 0.15,
+        "note": "Prior-batch and already-sent/signed candidates are protected skips"
+      },
+      {
+        "name": "ingestion_coverage",
+        "score": 90,
+        "weight": 0.15,
+        "note": "244 arrivals in 14d (~17.4/day)"
+      },
+      {
+        "name": "bottleneck_concentration",
+        "score": 50,
+        "weight": 0.15,
+        "note": "Top blocker: manual_review_40_60 (50%)"
+      }
+    ],
+    "remainingBottlenecks": [
+      "manual_review_40_60 (2, 50%)",
+      "duplicate_identity (1, 25%)",
+      "missing_phone (1, 25%)"
+    ],
+    "goNoGo": "CONDITIONAL-GO",
+    "goNoGoReason": "Pipeline decision tree is complete and never silent-fails, but auto-clear rate / bottlenecks are not yet strong enough for fully unattended live sends.",
+    "liveModeRecommendation": "Keep dry-run continuous monitoring. Remediate top blockers (distance / DM / recruiter resolution) before raising send autonomy. Prefer newest-first supervised batches until auto-clear ≥70%.",
+    "dryRunConfirmed": true,
+    "durableWrites": 0,
+    "dropboxSignCalls": 0,
+    "stageChanges": 0,
+    "recruiterOwnershipChanges": 0,
+    "dmAssignmentChanges": 0
+  }
+}

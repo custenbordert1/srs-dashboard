@@ -1,0 +1,48 @@
+{
+  "phase": "P218",
+  "generatedAt": "2026-07-17T18:46:16.325Z",
+  "mode": "preview",
+  "candidatesEvaluated": 871,
+  "alreadyAssigned": 256,
+  "wouldAssign": 385,
+  "unableToAssign": 230,
+  "assigned": 0,
+  "skippedRace": 0,
+  "reasonDistribution": {
+    "assignable": 385,
+    "already_assigned": 256,
+    "manual_assignment_protected": 0,
+    "inactive_candidate": 0,
+    "archived_candidate": 2,
+    "position_id_missing": 228,
+    "position_lookup_failed": 0,
+    "position_location_missing": 0,
+    "position_location_not_authoritative": 0,
+    "territory_unknown": 0,
+    "dm_lookup_failed": 0,
+    "multiple_dms_possible": 0,
+    "concurrent_assignment_detected": 0
+  },
+  "catalog": {
+    "positionsLoaded": 36638,
+    "errors": []
+  },
+  "newlyEligibleAfterSimulatedAssignment": 2,
+  "paperworkCandidatesStillBlocked": 0,
+  "safety": {
+    "mode": "preview",
+    "previewOnly": true,
+    "liveOperatorApprovalProvided": false,
+    "approvedBy": null,
+    "workflowWrites": 0,
+    "workflowStageChanges": 0,
+    "paperworkSent": 0,
+    "dropboxWrites": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "evaluatedWorkflowFieldsUnchanged": true,
+    "workflowsFileUnchanged": true,
+    "concurrentExternalWorkflowStoreActivityObserved": false,
+    "ingestionFileUnchanged": true
+  }
+}

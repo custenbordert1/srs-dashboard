@@ -4,8 +4,12 @@ import type { PilotCandidateEvaluation, PilotSendPacketPreview } from "@/lib/p12
 export function buildPilotSendPacketPreview(input: {
   candidate: PilotCandidateEvaluation;
   auditDestination?: string;
+  /** Build preview even when status is blocked (caller still enforces safety). */
+  forceReadyToSend?: boolean;
 }): PilotSendPacketPreview | null {
-  if (input.candidate.status !== "ready_to_send") return null;
+  if (input.candidate.status !== "ready_to_send" && input.forceReadyToSend !== true) {
+    return null;
+  }
 
   return {
     candidateId: input.candidate.candidateId,

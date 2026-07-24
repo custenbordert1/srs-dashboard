@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-07-13T15:02:26.349Z",
+  "sourcePhase": "P186.5",
+  "findings": [
+    {
+      "candidateId": "val-conflict",
+      "kind": "signed_but_production_paperwork_sent",
+      "severity": "critical",
+      "detail": "Signed envelope but production still Paperwork Sent",
+      "recommendedAction": "Investigate via authorized production path — do not auto-repair"
+    }
+  ],
+  "findingCount": 1,
+  "productionRepairs": 0,
+  "shadowMatches": 3,
+  "shadowMismatches": 1
+}

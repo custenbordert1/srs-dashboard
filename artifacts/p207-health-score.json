@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-07-16T14:28:16.918Z",
+  "overallScore": 58,
+  "overallTone": "critical",
+  "subsystems": [
+    {
+      "id": "ai_qualification",
+      "label": "AI Qualification",
+      "score": 59,
+      "tone": "critical",
+      "detail": "10 AI/operator-approved signals"
+    },
+    {
+      "id": "lifecycle",
+      "label": "Lifecycle",
+      "score": 98,
+      "tone": "healthy",
+      "detail": "18 Paperwork Needed · 17 Needs Review"
+    },
+    {
+      "id": "paperwork_queue",
+      "label": "Paperwork Queue",
+      "score": 51,
+      "tone": "critical",
+      "detail": "18 send-ready · 18 waiting"
+    },
+    {
+      "id": "dropbox",
+      "label": "Dropbox",
+      "score": 25,
+      "tone": "critical",
+      "detail": "Vendor blocked: production quota=0 (software ready=true)"
+    },
+    {
+      "id": "status_sync",
+      "label": "Status Sync",
+      "score": 75,
+      "tone": "warning",
+      "detail": "API ok"
+    },
+    {
+      "id": "ready_for_mel",
+      "label": "Ready for MEL",
+      "score": 40,
+      "tone": "critical",
+      "detail": "0 ready · 17 signed"
+    }
+  ],
+  "dropbox": {
+    "softwareReady": true,
+    "vendorBlocked": true,
+    "productionQuota": 0,
+    "configurationStatus": "vendor_blocked",
+    "detail": "Vendor blocked: production quota=0 (software ready=true)"
+  },
+  "largestBlocker": "Dropbox production quota (vendor blocked)",
+  "immediateSendReady": 18,
+  "autonomousReadiness": "Software ready · Vendor blocked (Dropbox quota)"
+}

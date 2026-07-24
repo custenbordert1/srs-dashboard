@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-07-16T14:28:16.918Z",
+  "ifDropboxRestoredNow": {
+    "expectedSends": 18,
+    "expectedSignatures": 10,
+    "expectedReadyForMel": 9
+  },
+  "next24h": {
+    "expectedSends": 7,
+    "expectedSignatures": 38,
+    "expectedReadyForMel": 41
+  },
+  "next7d": {
+    "expectedSends": 18,
+    "expectedSignatures": 136,
+    "expectedReadyForMel": 131
+  },
+  "assumptions": [
+    "No lifecycle or Dropbox writes performed by this forecast.",
+    "Signature conversion assumed at 55% of sends.",
+    "Ready-for-MEL conversion assumed at 85% of signatures.",
+    "Dropbox currently vendor-blocked (quota≤0); restored-now unlocks send-ready PN cohort.",
+    "18 candidates currently in Paperwork Needed; 18 counted send-ready."
+  ],
+  "immediateSendReady": 18,
+  "paperworkNeeded": 18
+}

@@ -1,0 +1,109 @@
+{
+  "phase": "P219",
+  "generatedAt": "2026-07-17T19:43:50.497Z",
+  "approvedBy": "Taylor Custenborder",
+  "mode": "live",
+  "selection": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "expectedCity": "Columbus",
+      "expectedState": "OH",
+      "expectedDm": "Mindie Rodriguez",
+      "expectedPositionId": "73048dbe5519",
+      "previewMatched": true,
+      "previewAction": "would_assign",
+      "previewPositionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      }
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "expectedCity": "Kansas City",
+      "expectedState": "MO",
+      "expectedDm": "Amy Harp",
+      "expectedPositionId": "f2ca3cdaeee8",
+      "previewMatched": true,
+      "previewAction": "would_assign",
+      "previewPositionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      }
+    }
+  ],
+  "writes": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "assigned": true,
+      "reason": "assigned",
+      "expectedDm": "Mindie Rodriguez"
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "assigned": true,
+      "reason": "assigned",
+      "expectedDm": "Amy Harp"
+    }
+  ],
+  "readBack": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "expectedDm": "Mindie Rodriguez",
+      "assignedDmAfter": "Mindie Rodriguez",
+      "workflowStatusBefore": "Paperwork Needed",
+      "workflowStatusAfter": "Paperwork Needed",
+      "paperworkStatusBefore": "not_sent",
+      "paperworkStatusAfter": "not_sent",
+      "assignedRecruiterBefore": "Unassigned",
+      "assignedRecruiterAfter": "Unassigned",
+      "changedFields": [
+        "assignedDM",
+        "lastActionAt",
+        "nextActionNeeded",
+        "history",
+        "updatedAt"
+      ],
+      "ok": true
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "expectedDm": "Amy Harp",
+      "assignedDmAfter": "Amy Harp",
+      "workflowStatusBefore": "Paperwork Needed",
+      "workflowStatusAfter": "Paperwork Needed",
+      "paperworkStatusBefore": "not_sent",
+      "paperworkStatusAfter": "not_sent",
+      "assignedRecruiterBefore": "Unassigned",
+      "assignedRecruiterAfter": "Unassigned",
+      "changedFields": [
+        "assignedDM",
+        "lastActionAt",
+        "nextActionNeeded",
+        "history",
+        "updatedAt"
+      ],
+      "ok": true
+    }
+  ],
+  "globalDiff": {
+    "targetRecordsChanged": 2,
+    "nonTargetRecordsChanged": 0,
+    "recordsAdded": 0,
+    "recordsRemoved": 0
+  },
+  "safety": {
+    "candidatesWritten": 2,
+    "otherCandidatesWritten": 0,
+    "workflowChangesOutsideTarget": 0,
+    "dropboxRequests": 0,
+    "paperworkNeededTransitions": 0,
+    "paperworkSent": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "workflowStageChanges": 0,
+    "cohortFrozen": false,
+    "envelopesCreated": 0
+  }
+}

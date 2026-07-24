@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-07-16T14:39:20.734Z",
+  "phase": "P207.1",
+  "validationMatched": true,
+  "authoritativeTotal": 847,
+  "dashboardTotal": 847,
+  "countMismatches": [],
+  "stageCounts": {
+    "Applied": 559,
+    "Needs Review": 17,
+    "Paperwork Needed": 18,
+    "Paperwork Sent": 230,
+    "Signed": 17,
+    "Ready for MEL": 0,
+    "Rejected": 6,
+    "Historical": 0
+  },
+  "immediateSendReady": 18,
+  "freshness": {
+    "generatedAt": "2026-07-16T14:39:20.734Z",
+    "observedAt": "2026-07-16T14:39:20.734Z",
+    "ageMs": 0,
+    "state": "Live"
+  },
+  "dropboxRecoveryState": "Vendor Blocked",
+  "timestampParity": {
+    "snapshotGeneratedAt": "2026-07-16T14:39:20.734Z",
+    "freshnessGeneratedAt": "2026-07-16T14:39:20.734Z",
+    "matched": true
+  },
+  "safety": {
+    "lifecycleWrites": false,
+    "paperworkNeededCreates": false,
+    "dropboxSends": false,
+    "p192Starts": false,
+    "automationEnabled": false,
+    "melWrites": false,
+    "p206AutoRerun": false
+  },
+  "recommendation": "ready after minor cleanup"
+}

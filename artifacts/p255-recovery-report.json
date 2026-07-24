@@ -1,0 +1,230 @@
+{
+  "phase": "P255-recover-eligible-candidates",
+  "opsDate": "2026-07-23",
+  "generatedAt": "2026-07-23T17:41:56.748Z",
+  "mode": "recovery_apply",
+  "sourceArtifact": "artifacts/p254-eligibility-forensics.json",
+  "persist": true,
+  "totals": {
+    "targeted": 3,
+    "repaired": 3,
+    "nowEligible": 2,
+    "stillBlocked": 1,
+    "fieldChangesApplied": 8
+  },
+  "candidates": [
+    {
+      "candidateId": "bee316e7dd26",
+      "name": "DeAnn Echols-Parker",
+      "email": "deannparker88@gmail.com",
+      "blockersBefore": [
+        "missing_phone",
+        "coverage_blocked"
+      ],
+      "blockersAfter": [
+        "manual_review_40_60",
+        "distance_blocked"
+      ],
+      "repaired": true,
+      "nowEligible": false,
+      "stillBlocked": true,
+      "stillBlockedReasons": [
+        "manual_review_40_60",
+        "distance_blocked"
+      ],
+      "eligibilityResultBefore": "coverage_blocked",
+      "eligibilityResultAfter": "distance_blocked",
+      "nearestMilesAfter": 57.6,
+      "coverageKnownAfter": true,
+      "fieldAudits": [
+        {
+          "field": "phone",
+          "before": "",
+          "after": "+1 870 260 6572",
+          "source": "breezy",
+          "applied": true,
+          "reason": "Backfilled usable phone (durable was empty at P254)"
+        },
+        {
+          "field": "city",
+          "before": "",
+          "after": "Caddo Valley",
+          "source": "p226_recovery_store",
+          "applied": true,
+          "reason": "Backfilled city for coverage geocode (empty at P254)"
+        },
+        {
+          "field": "state",
+          "before": "",
+          "after": "AR",
+          "source": "p226_recovery_store",
+          "applied": true,
+          "reason": "Backfilled state for coverage geocode (empty at P254)"
+        }
+      ],
+      "notes": [
+        "Breezy live hit via position 8561a483ff19"
+      ]
+    },
+    {
+      "candidateId": "c9f5bb769a06",
+      "name": "Sadio Mustafa",
+      "email": "kaibusinessminded@gmail.com",
+      "blockersBefore": [
+        "missing_phone",
+        "coverage_blocked"
+      ],
+      "blockersAfter": [],
+      "repaired": true,
+      "nowEligible": true,
+      "stillBlocked": false,
+      "stillBlockedReasons": [],
+      "eligibilityResultBefore": "coverage_blocked",
+      "eligibilityResultAfter": "eligible_pending_send",
+      "nearestMilesAfter": 5.9,
+      "coverageKnownAfter": true,
+      "fieldAudits": [
+        {
+          "field": "phone",
+          "before": "",
+          "after": "+1 501 272 9601",
+          "source": "breezy",
+          "applied": true,
+          "reason": "Backfilled usable phone (durable was empty at P254)"
+        },
+        {
+          "field": "city",
+          "before": "",
+          "after": "N Little Rock",
+          "source": "p226_recovery_store",
+          "applied": true,
+          "reason": "Backfilled city for coverage geocode (empty at P254)"
+        },
+        {
+          "field": "state",
+          "before": "",
+          "after": "AR",
+          "source": "p226_recovery_store",
+          "applied": true,
+          "reason": "Backfilled state for coverage geocode (empty at P254)"
+        }
+      ],
+      "notes": [
+        "Breezy live hit via position cfd52392ca92"
+      ]
+    },
+    {
+      "candidateId": "cbbd99a1d55e",
+      "name": "melissa lloyd",
+      "email": "melissalloyd501@gmail.com",
+      "blockersBefore": [
+        "missing_recruiter",
+        "missing_dm"
+      ],
+      "blockersAfter": [],
+      "repaired": true,
+      "nowEligible": true,
+      "stillBlocked": false,
+      "stillBlockedReasons": [],
+      "eligibilityResultBefore": "missing_recruiter",
+      "eligibilityResultAfter": "eligible_pending_send",
+      "nearestMilesAfter": 0,
+      "coverageKnownAfter": true,
+      "fieldAudits": [
+        {
+          "field": "assignedRecruiter",
+          "before": "Unassigned",
+          "after": "Taylor",
+          "source": "workflow_db",
+          "applied": true,
+          "reason": "Assigned Taylor when recruiter was Unassigned"
+        },
+        {
+          "field": "assignedDM",
+          "before": "Unassigned",
+          "after": "Erin Boatright",
+          "source": "p216_position_location_territory_routing",
+          "applied": true,
+          "reason": "Assigned DM from position location territory routing"
+        }
+      ],
+      "notes": [
+        "Breezy live hit via position b4ee901bfd73",
+        "DM resolved via P216: Erin Boatright (state=FL, city=BABCOCK RANCH)"
+      ]
+    }
+  ],
+  "eligibilityRowsAfter": [
+    {
+      "candidateId": "cbbd99a1d55e",
+      "name": "melissa lloyd",
+      "location": "BABCOCK RANCH, FL",
+      "recruiter": "Taylor",
+      "districtManager": "Erin Boatright",
+      "workflowStatus": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "nearestMiles": 0,
+      "coverageKnown": true,
+      "eligible": true,
+      "blockers": [],
+      "result": "eligible_pending_send",
+      "signatureRequestId": null,
+      "sentAt": null,
+      "error": null
+    },
+    {
+      "candidateId": "c9f5bb769a06",
+      "name": "Sadio Mustafa",
+      "location": "N Little Rock, AR",
+      "recruiter": "Taylor",
+      "districtManager": "Lori VandeWiele",
+      "workflowStatus": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "nearestMiles": 5.9,
+      "coverageKnown": true,
+      "eligible": true,
+      "blockers": [],
+      "result": "eligible_pending_send",
+      "signatureRequestId": null,
+      "sentAt": null,
+      "error": null
+    },
+    {
+      "candidateId": "bee316e7dd26",
+      "name": "DeAnn Echols-Parker",
+      "location": "Caddo Valley, AR",
+      "recruiter": "Recruiting Team",
+      "districtManager": "Lori VandeWiele",
+      "workflowStatus": "Paperwork Needed",
+      "paperworkStatus": "not_sent",
+      "nearestMiles": 57.6,
+      "coverageKnown": true,
+      "eligible": false,
+      "blockers": [
+        "manual_review_40_60",
+        "distance_blocked"
+      ],
+      "result": "distance_blocked",
+      "signatureRequestId": null,
+      "sentAt": null,
+      "error": null
+    }
+  ],
+  "safety": {
+    "paperworkSends": 0,
+    "dropboxWrites": 0,
+    "breezyWrites": 0,
+    "melWrites": 0,
+    "workflowWrites": 1,
+    "ingestionWrites": 2
+  },
+  "notes": [
+    "Loaded 3 auto-recoverable candidate(s) from artifacts/p254-eligibility-forensics.json",
+    "Published Breezy jobs loaded=274",
+    "Opportunity geocode points=259"
+  ],
+  "artifacts": [
+    "artifacts/p255-recovery-report.json",
+    "artifacts/p255-recovery-report.md"
+  ]
+}

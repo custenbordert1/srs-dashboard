@@ -1,0 +1,135 @@
+{
+  "generatedAt": "2026-07-15T19:54:10.904Z",
+  "pairs": [
+    {
+      "redactedCandidateId": "b932323148d8",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "702b11e4cf12",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "50d84b0ff17c",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "950f2dc9a040",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "fcb34d3e2985",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "326d0f957ef1",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "6edd0001ce9d",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "89ad4f09e9fd",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "8cd125086e3e",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "d044e7490882",
+      "ai": "Advance",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "d78a5dc279ae",
+      "ai": "Needs Recruiter Review",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "1e8c90ecfa29",
+      "ai": "Needs Recruiter Review",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "fa337c0e5489",
+      "ai": "Needs Recruiter Review",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "9b4a0c15712b",
+      "ai": "Needs Recruiter Review",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "7534175120b6",
+      "ai": "Needs Recruiter Review",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "6b5511892bb2",
+      "ai": "Reject",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "9e9014fdbf65",
+      "ai": "Reject",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "7bac85e81822",
+      "ai": "Reject",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "25014390b5cf",
+      "ai": "Reject",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    },
+    {
+      "redactedCandidateId": "f1abf23a4842",
+      "ai": "Reject",
+      "historical": null,
+      "classification": "insufficient_evidence"
+    }
+  ],
+  "counts": {
+    "exact_agreement": 0,
+    "partial_agreement": 0,
+    "disagreement": 0,
+    "ai_more_conservative": 0,
+    "ai_more_aggressive": 0,
+    "insufficient_evidence": 20
+  },
+  "historicalAgreementRate": 0,
+  "exactAgreementRate": 0
+}

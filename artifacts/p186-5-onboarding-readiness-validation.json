@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-07-13T15:02:26.349Z",
+  "sourcePhase": "P186.5",
+  "readOnly": true,
+  "signedEnvelopesEvaluated": 6,
+  "classifications": {
+    "paperwork_signed_complete": 1,
+    "paperwork_signed_missing_documents": 1,
+    "paperwork_signed_conflicting_state": 1,
+    "ready_for_mel_review": 1,
+    "already_exported": 1,
+    "mel_export_blocked": 1
+  },
+  "completeOnboardingRecords": 1,
+  "missingDocumentCases": 1,
+  "conflictingCases": 1,
+  "readyForMelCandidates": 1,
+  "blockedCandidates": 1,
+  "alreadyExportedCandidates": 1,
+  "productionWritesAttempted": 0,
+  "melWritesAttempted": 0,
+  "paperworkSendsAttempted": 0
+}

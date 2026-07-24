@@ -17,8 +17,12 @@ import { CandidateQuestionnaireIntelligencePanel } from "@/components/recruiting
 import { CandidateRecruiterActionPanel } from "@/components/recruiting/candidate-workspace/candidate-recruiter-action-panel";
 import { CandidateProgressionPanel } from "@/components/recruiting/candidate-workspace/candidate-progression-panel";
 import { CandidateResumeIntelligencePanel } from "@/components/recruiting/candidate-workspace/candidate-resume-intelligence-panel";
-import { CandidateSummary } from "@/components/recruiting/candidate-workspace/candidate-summary";
 import { CandidateTimeline } from "@/components/recruiting/candidate-workspace/candidate-timeline";
+import { CandidateWorkspaceMilestoneTimeline } from "@/components/recruiting/candidate-workspace/candidate-workspace-milestone-timeline";
+import { CandidateWorkspacePrimaryActions } from "@/components/recruiting/candidate-workspace/candidate-workspace-primary-actions";
+import { CandidateWorkspaceQuickSummary } from "@/components/recruiting/candidate-workspace/candidate-workspace-quick-summary";
+import { P193CandidateDetailPanel } from "@/components/recruiting/p193-candidate-detail-panel";
+import { projectLegacyRowToStatusViewModel } from "@/lib/p193-simplified-autonomous-lifecycle/client-projection";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import type { SendPaperworkBlockReason } from "@/lib/onboarding-send-eligibility";
 import {
@@ -30,8 +34,9 @@ import {
 } from "@/lib/candidate-workspace";
 import { formatCandidateDisplayName } from "@/lib/candidate-display-name";
 import { isUnassignedRecruiter } from "@/lib/candidate-action-queue";
+import { confidenceForQueueRow } from "@/lib/p199-candidate-queue-ux";
 import type { RecruiterRosters } from "@/lib/candidate-workflow-types";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 function candidateDisplayName(candidate: CandidateDrawerRow): string {
   return formatCandidateDisplayName({
@@ -39,6 +44,26 @@ function candidateDisplayName(candidate: CandidateDrawerRow): string {
     lastName: candidate.lastName,
     email: candidate.email,
   });
+}
+
+function formatAppliedDate(raw: string): string {
+  if (!raw.trim()) return "—";
+  try {
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(raw));
+  } catch {
+    return raw;
+  }
+}
+
+function buildBreezyCandidateUrl(input: {
+  companyId: string | null;
+  positionId: string | null;
+  candidateId: string;
+}): string | null {
+  const companyId = input.companyId?.trim();
+  const positionId = input.positionId?.trim();
+  if (!companyId || !positionId) return null;
+  return `https://app.breezy.hr/app/company/${encodeURIComponent(companyId)}/position/${encodeURIComponent(positionId)}/candidates/${encodeURIComponent(input.candidateId)}`;
 }
 
 export type CandidateWorkspaceProps = {
@@ -51,6 +76,10 @@ export type CandidateWorkspaceProps = {
   sendBlockReason: SendPaperworkBlockReason | null;
   paperworkSending?: boolean;
   workspaceBusy?: boolean;
+  breezyCompanyId?: string | null;
+  breezyPositionId?: string | null;
+  nearbyJobCount?: number;
+  nearestDistanceMiles?: number | null;
   onAddNote: (note: string) => void;
   onSendPaperwork: (templateKey: OnboardingTemplateKey) => void;
   onRefreshPaperworkStatus: () => void;
@@ -74,6 +103,10 @@ export function CandidateWorkspace({
   sendBlockReason,
   paperworkSending = false,
   workspaceBusy = false,
+  breezyCompanyId = null,
+  breezyPositionId = null,
+  nearbyJobCount = 0,
+  nearestDistanceMiles = null,
   onAddNote,
   onSendPaperwork,
   onRefreshPaperworkStatus,
@@ -81,6 +114,9 @@ export function CandidateWorkspace({
   onAssignRecruiter,
   onAdvanceWorkflow,
 }: CandidateWorkspaceProps) {
+  const resumeRef = useRef<HTMLDivElement | null>(null);
+  const questionnaireRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
@@ -89,6 +125,21 @@ export function CandidateWorkspace({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
+
+  const p193ViewModel = useMemo(() => {
+    if (!candidate) return null;
+    return projectLegacyRowToStatusViewModel({
+      candidateId: candidate.candidateId,
+      workflowStatus: candidate.workflowStatus,
+      recommendedStage: candidate.recommendedStage,
+      paperworkStatus: candidate.paperworkStatus,
+      signatureRequestId: candidate.signatureRequestId,
+      notes: candidate.notes,
+      paperworkViewedAt: null,
+      paperworkSignedAt: candidate.paperworkSignedAt,
+      paperworkSentAt: candidate.paperworkSentAt,
+    });
+  }, [candidate]);
 
   if (!open || !candidate) return null;
 
@@ -113,6 +164,31 @@ export function CandidateWorkspace({
   });
   const needsRecruiterAssignment = isUnassignedRecruiter(activeCandidate.assignedRecruiter);
   const assignmentBusy = workspaceBusy || paperworkSending;
+  const location = [activeCandidate.city, activeCandidate.state].filter(Boolean).join(", ") || "—";
+  const breezyUrl = buildBreezyCandidateUrl({
+    companyId: breezyCompanyId,
+    positionId: breezyPositionId,
+    candidateId: activeCandidate.candidateId,
+  });
+  const confidence = confidenceForQueueRow({
+    actionConfidence: activeCandidate.actionConfidence,
+    recruiterAssignmentConfidence: activeCandidate.recruiterAssignmentConfidence,
+    progressionConfidence: activeCandidate.progressionConfidence,
+    aiNumericScore: activeCandidate.aiNumericScore,
+  });
+  const paperworkViewed =
+    activeCandidate.paperworkStatus === "viewed" || activeCandidate.paperworkStatus === "signed";
+  const paperworkSigned =
+    activeCandidate.paperworkStatus === "signed" || Boolean(activeCandidate.paperworkSignedAt);
+  const resolvedNearby =
+    nearbyJobCount > 0
+      ? nearbyJobCount
+      : p193ViewModel && !p193ViewModel.missing
+        ? p193ViewModel.nearbyJobCount
+        : activeCandidate.matchedOpportunities.length;
+  const resolvedDistance =
+    nearestDistanceMiles ??
+    (p193ViewModel && !p193ViewModel.missing ? p193ViewModel.nearestDistanceMiles : null);
 
   function runPrimaryAction() {
     switch (workspaceAction.kind) {
@@ -168,29 +244,88 @@ export function CandidateWorkspace({
       >
         <header className="border-b border-zinc-800 px-4 py-3">
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-teal-300/90">
                 Candidate workspace
               </p>
-              <h2 id="candidate-workspace-title" className="mt-0.5 text-lg font-semibold text-zinc-50">
+              <h2 id="candidate-workspace-title" className="mt-0.5 truncate text-lg font-semibold text-zinc-50">
                 {candidateDisplayName(activeCandidate)}
               </h2>
-              <p className="mt-1 text-xs text-zinc-500">
-                {activeCandidate.email || "No email"} · {activeCandidate.phone || "No phone"}
-              </p>
+              <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-zinc-400 sm:grid-cols-3">
+                <div>
+                  <dt className="text-zinc-600">City, State</dt>
+                  <dd className="text-zinc-200">{location}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-600">Phone</dt>
+                  <dd className="text-zinc-200">{activeCandidate.phone || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-600">Email</dt>
+                  <dd className="truncate text-zinc-200">{activeCandidate.email || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-600">Applied</dt>
+                  <dd className="text-zinc-200">{formatAppliedDate(activeCandidate.appliedDate)}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-600">Stage</dt>
+                  <dd className="text-zinc-200">{activeCandidate.workflowStatus}</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-600">Owner</dt>
+                  <dd className="text-zinc-200">{activeCandidate.assignedRecruiter || "Unassigned"}</dd>
+                </div>
+              </dl>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+              className="shrink-0 rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
             >
               Close
             </button>
           </div>
         </header>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-          <CandidateSummary candidate={activeCandidate} matchScore={matchScore} />
+        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          <CandidateWorkspacePrimaryActions
+            paperworkStatus={activeCandidate.paperworkStatus}
+            paperworkViewed={paperworkViewed}
+            paperworkSigned={paperworkSigned}
+            sending={paperworkSending}
+            canSend={sendBlockReason === null && Boolean(activeCandidate.email?.trim())}
+            breezyUrl={breezyUrl}
+            hasResume={activeCandidate.resumeIntelligence.available}
+            hasQuestionnaire={activeCandidate.questionnaireIntelligence.available}
+            onOpenBreezy={() => {
+              if (breezyUrl) window.open(breezyUrl, "_blank", "noopener,noreferrer");
+            }}
+            onScrollToResume={() =>
+              resumeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            onScrollToQuestionnaire={() =>
+              questionnaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            onSendPaperwork={() => onSendPaperwork("onboarding_packet")}
+            onRefreshStatus={onRefreshPaperworkStatus}
+          />
+
+          <CandidateWorkspaceQuickSummary
+            candidate={activeCandidate}
+            nearbyJobCount={resolvedNearby}
+            nearestDistanceMiles={resolvedDistance}
+            confidence={confidence ?? matchScore}
+          />
+
+          <CandidateWorkspaceMilestoneTimeline candidate={activeCandidate} />
+
+          <CandidateNextActionCard
+            action={workspaceAction}
+            busy={assignmentBusy}
+            onPrimary={runPrimaryAction}
+            onComplete={runCompleteAction}
+          />
 
           <CandidateAssignmentPanel
             assignedRecruiter={activeCandidate.assignedRecruiter}
@@ -201,62 +336,76 @@ export function CandidateWorkspace({
             onAssignRecruiter={onAssignRecruiter}
           />
 
-          <CandidateRecruiterActionPanel
-            requiredAction={activeCandidate.requiredAction}
-            actionPriority={activeCandidate.actionPriority}
-            actionReason={activeCandidate.actionReason}
-            actionDueDate={activeCandidate.actionDueDate}
-            actionConfidence={activeCandidate.actionConfidence}
-          />
+          <div ref={resumeRef}>
+            <CandidateResumeIntelligencePanel intelligence={activeCandidate.resumeIntelligence} />
+          </div>
+          <div ref={questionnaireRef}>
+            <CandidateQuestionnaireIntelligencePanel
+              intelligence={activeCandidate.questionnaireIntelligence}
+            />
+          </div>
 
-          <CandidateProgressionPanel
-            recommendedStage={activeCandidate.recommendedStage}
-            progressionPriority={activeCandidate.progressionPriority}
-            progressionReason={activeCandidate.progressionReason}
-            progressionConfidence={activeCandidate.progressionConfidence}
-            progressionGeneratedAt={activeCandidate.progressionGeneratedAt}
-          />
+          <details className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3">
+            <summary className="cursor-pointer text-sm font-semibold text-zinc-200">
+              Automation status
+            </summary>
+            <div className="mt-3 space-y-3">
+              <CandidateAutomationStatusPanel
+                automation={activeCandidate.funnelAutomation}
+                assignmentSource={activeCandidate.recruiterAssignmentSource}
+              />
+              <CandidateRecruiterActionPanel
+                requiredAction={activeCandidate.requiredAction}
+                actionPriority={activeCandidate.actionPriority}
+                actionReason={activeCandidate.actionReason}
+                actionDueDate={activeCandidate.actionDueDate}
+                actionConfidence={activeCandidate.actionConfidence}
+              />
+              <CandidateProgressionPanel
+                recommendedStage={activeCandidate.recommendedStage}
+                progressionPriority={activeCandidate.progressionPriority}
+                progressionReason={activeCandidate.progressionReason}
+                progressionConfidence={activeCandidate.progressionConfidence}
+                progressionGeneratedAt={activeCandidate.progressionGeneratedAt}
+              />
+              <CandidateGradePanel grade={activeCandidate.candidateGrade} />
+              <CandidateCopilotPanel
+                copilot={activeCandidate.funnelAutomation.copilot}
+                showAssignmentActions={needsRecruiterAssignment}
+                actingRecruiter={actingRecruiter}
+                rosters={rosters}
+                busy={assignmentBusy}
+                onAssignToMe={onAssignActingRecruiter}
+                onAssignRecruiter={onAssignRecruiter}
+              />
+              <P193CandidateDetailPanel viewModel={p193ViewModel} />
+            </div>
+          </details>
 
-          <CandidateGradePanel grade={activeCandidate.candidateGrade} />
-          <CandidateCopilotPanel
-            copilot={activeCandidate.funnelAutomation.copilot}
-            showAssignmentActions={needsRecruiterAssignment}
-            actingRecruiter={actingRecruiter}
-            rosters={rosters}
-            busy={assignmentBusy}
-            onAssignToMe={onAssignActingRecruiter}
-            onAssignRecruiter={onAssignRecruiter}
-          />
-          <CandidateAutomationStatusPanel
-            automation={activeCandidate.funnelAutomation}
-            assignmentSource={activeCandidate.recruiterAssignmentSource}
-          />
-          <CandidateResumeIntelligencePanel intelligence={activeCandidate.resumeIntelligence} />
-          <CandidateQuestionnaireIntelligencePanel intelligence={activeCandidate.questionnaireIntelligence} />
-
-          <CandidateNextActionCard
-            action={workspaceAction}
-            busy={assignmentBusy}
-            onPrimary={runPrimaryAction}
-            onComplete={runCompleteAction}
-          />
-
-          <CandidateTimeline entries={timeline} />
           <CandidateNotesPanel notes={activeCandidate.notes} onAddNote={onAddNote} />
-          <CandidatePaperworkPanel
-            paperworkStatus={activeCandidate.paperworkStatus}
-            sentAt={activeCandidate.paperworkSentAt}
-            signedAt={activeCandidate.paperworkSignedAt}
-            sending={paperworkSending}
-            canSend={sendBlockReason === null && Boolean(activeCandidate.email?.trim())}
-            onSend={() => onSendPaperwork("onboarding_packet")}
-            onRefresh={onRefreshPaperworkStatus}
-          />
-          <CandidateMelReadinessPanel items={melReadiness} />
-          <CandidateOnboardingPreviewPanel candidate={activeCandidate} />
-          <CandidateOnboardingPipelinePanel candidate={activeCandidate} />
-          <CandidateWorkforcePlacementPreviewPanel candidate={activeCandidate} />
-          <CandidateCommunicationLog entries={communicationLog} />
+
+          <details className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-3">
+            <summary className="cursor-pointer text-sm font-medium text-zinc-300">
+              More details
+            </summary>
+            <div className="mt-3 space-y-3">
+              <CandidatePaperworkPanel
+                paperworkStatus={activeCandidate.paperworkStatus}
+                sentAt={activeCandidate.paperworkSentAt}
+                signedAt={activeCandidate.paperworkSignedAt}
+                sending={paperworkSending}
+                canSend={sendBlockReason === null && Boolean(activeCandidate.email?.trim())}
+                onSend={() => onSendPaperwork("onboarding_packet")}
+                onRefresh={onRefreshPaperworkStatus}
+              />
+              <CandidateTimeline entries={timeline} />
+              <CandidateMelReadinessPanel items={melReadiness} />
+              <CandidateOnboardingPreviewPanel candidate={activeCandidate} />
+              <CandidateOnboardingPipelinePanel candidate={activeCandidate} />
+              <CandidateWorkforcePlacementPreviewPanel candidate={activeCandidate} />
+              <CandidateCommunicationLog entries={communicationLog} />
+            </div>
+          </details>
         </div>
       </aside>
     </>

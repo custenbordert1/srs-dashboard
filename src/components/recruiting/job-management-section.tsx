@@ -1,10 +1,10 @@
 "use client";
 
+import { JobCommandCenterPanel } from "@/components/recruiting/job-command-center-panel";
 import {
   JobDraftEditModal,
   JobPushConfirmModal,
   JobPushResultModal,
-  JobViewModal,
 } from "@/components/recruiting/job-management-modals";
 import { JobManagementStatusBadge } from "@/components/recruiting/job-management-status-badge";
 import type { BreezyJobCatalogRow } from "@/lib/job-management/job-draft-types";
@@ -34,6 +34,7 @@ type CatalogMeta = {
   warnings?: string[];
   source: string;
   sourcePath: string;
+  companyId?: string;
   companyName?: string;
   publishedCount?: number;
   draftCount?: number;
@@ -203,6 +204,7 @@ export function JobManagementSection() {
           warnings: parsed.warnings,
           source: parsed.source,
           sourcePath: parsed.sourcePath,
+          companyId: parsed.companyId,
           companyName: parsed.companyName,
           publishedCount: parsed.publishedCount,
           draftCount: parsed.draftCount,
@@ -427,8 +429,8 @@ export function JobManagementSection() {
         <div>
           <h2 className="text-lg font-semibold text-zinc-50">Job management</h2>
           <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-            Table-first workflow: sync Breezy jobs, clone to draft, edit in a modal, and push with
-            confirmation. City and state stay in separate fields.
+            Table-first workflow: sync Breezy jobs, open the Job Command Center (View), clone to
+            draft, edit in a modal, and push with confirmation. City and state stay in separate fields.
           </p>
           <p className="mt-2 text-xs text-zinc-600">
             Source:{" "}
@@ -607,7 +609,13 @@ export function JobManagementSection() {
         </div>
       </section>
 
-      {viewRow ? <JobViewModal row={viewRow} onClose={() => setViewRow(null)} /> : null}
+      {viewRow ? (
+        <JobCommandCenterPanel
+          row={viewRow}
+          breezyCompanyId={catalogMeta?.companyId ?? null}
+          onClose={() => setViewRow(null)}
+        />
+      ) : null}
       {editDraft ? (
         <JobDraftEditModal
           draft={editDraft}

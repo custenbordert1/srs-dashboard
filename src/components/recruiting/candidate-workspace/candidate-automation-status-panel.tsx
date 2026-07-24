@@ -15,7 +15,10 @@ type CandidateAutomationStatusPanelProps = {
 };
 
 function assignmentSourceLabel(source: RecruiterAssignmentSource): string {
-  return source === "auto" ? "Auto assigned" : "Manual assigned";
+  if (source === "auto" || source === "territory_default") return "Auto assigned";
+  if (source === "operator_restore") return "Operator restore";
+  if (source === "breezy_import") return "Breezy import signal";
+  return "Manual assigned";
 }
 
 export function CandidateAutomationStatusPanel({

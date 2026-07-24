@@ -1,0 +1,1615 @@
+{
+  "phase": "P241",
+  "generatedAt": "2026-07-21T14:33:17.170Z",
+  "count": 8,
+  "traces": [
+    {
+      "redactedCandidateId": "61244a24ba7e",
+      "displayName": "TOMMY EDWARD HARPER JR",
+      "workflowStage": "Paperwork Sent",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "await-signature",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Sent",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Sent)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Sent (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Sent, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=await-signature, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "09d804b86cb5",
+      "displayName": "Dylan Albright",
+      "workflowStage": "Paperwork Sent",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "await-signature",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Sent",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Sent)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Sent (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Sent, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=await-signature, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "9d2a0cd6d508",
+      "displayName": "Faith Bandy",
+      "workflowStage": "Paperwork Sent",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "await-signature",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Sent",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Sent)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Sent (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Sent, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=await-signature, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "c15e4466e945",
+      "displayName": "Derrick Fowler",
+      "workflowStage": "Paperwork Sent",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "await-signature",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Sent",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Sent)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Sent (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Sent, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=await-signature, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "7ffaf043808e",
+      "displayName": "Brian Alspaugh",
+      "workflowStage": "Paperwork Sent",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "await-signature",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Sent",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Sent)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Sent (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=await-signature",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Sent, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=await-signature, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "4c8aa3fd8f88",
+      "displayName": "Tyera Anderson-Rainey",
+      "workflowStage": "Paperwork Needed",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "send-paperwork",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Needed",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Needed)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Needed (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=send-paperwork",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=send-paperwork",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Needed, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=send-paperwork, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "cbe24e733f0a",
+      "displayName": "Samantha Bland",
+      "workflowStage": "Paperwork Needed",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "send-paperwork",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Needed",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Needed)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Needed (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=send-paperwork",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=send-paperwork",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Needed, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=send-paperwork, which still fails canPromoteToPaperworkFunnel."
+    },
+    {
+      "redactedCandidateId": "f1c539dc4ed7",
+      "displayName": "Yolanda Tolson",
+      "workflowStage": "Paperwork Needed",
+      "breezyStage": "Applied",
+      "paperworkStatus": "sent",
+      "actionType": "send-paperwork",
+      "aiGrade": "D",
+      "qualificationStatus": "already_past_qualification_packet_active (grade=D)",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "currentState": {
+        "context": "current_state",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Paperwork Needed",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": false,
+            "detail": "active packet (sig=true paperwork=sent stage=Paperwork Needed)",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": false,
+            "detail": "workflowStatus=Paperwork Needed (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=send-paperwork",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "active_packet",
+        "firstFailedRuleCategory": "duplicate_protection"
+      },
+      "p240Replay": {
+        "context": "p240_replay",
+        "canPromote": false,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": false,
+            "detail": "actionType=send-paperwork",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": "action_type_blocks_promotion",
+        "firstFailedRuleCategory": "business_rule"
+      },
+      "fixedReplay": {
+        "context": "fixed_replay",
+        "canPromote": true,
+        "checks": [
+          {
+            "checkId": "funnel_promotion_disabled",
+            "passed": true,
+            "detail": "funnelPromotion.enabled=true",
+            "ruleCategory": "configuration"
+          },
+          {
+            "checkId": "unassigned_recruiter",
+            "passed": true,
+            "detail": "assignedRecruiter=Taylor",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "missing_email",
+            "passed": true,
+            "detail": "email present",
+            "ruleCategory": "missing_required_field"
+          },
+          {
+            "checkId": "terminal_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "active_packet",
+            "passed": true,
+            "detail": "no active packet",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "already_signed",
+            "passed": true,
+            "detail": "paperworkStatus=not_sent",
+            "ruleCategory": "duplicate_protection"
+          },
+          {
+            "checkId": "grade_not_allowed",
+            "passed": true,
+            "detail": "aiGrade=D allowed=true",
+            "ruleCategory": "score_below_threshold"
+          },
+          {
+            "checkId": "not_intake_status",
+            "passed": true,
+            "detail": "workflowStatus=Applied (intake requires Applied|Needs Review)",
+            "ruleCategory": "business_rule"
+          },
+          {
+            "checkId": "action_type_blocks_promotion",
+            "passed": true,
+            "detail": "actionType=screen-candidate",
+            "ruleCategory": "business_rule"
+          }
+        ],
+        "firstFailedCheckId": null,
+        "firstFailedRuleCategory": null
+      },
+      "classification": "logic_bug",
+      "recoverability": "automatic",
+      "rootCause": "Candidate already advanced (workflow=Paperwork Needed, paperwork=sent). Live P65.6 correctly blocks re-promotion (active_packet). P240 proxy replay incorrectly reported qualification_gate_failed because replayAsFreshNew cleared stage/packet fields but left actionType=send-paperwork, which still fails canPromoteToPaperworkFunnel."
+    }
+  ]
+}

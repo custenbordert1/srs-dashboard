@@ -1,0 +1,14 @@
+{
+  "phase": "P245-onboarding-paperwork-reminders",
+  "generatedAt": "2026-07-21T20:22:55.046Z",
+  "mode": "preview",
+  "count": 0,
+  "mailBlocker": "DIRECT_DEPOSIT_EMAIL_MODE is not 'resend' (currently log/outbox only); RESEND_API_KEY is not configured",
+  "liveDeliveryReady": false,
+  "requiredForLiveDelivery": [
+    "Set RESEND_API_KEY in .env.local",
+    "Set DIRECT_DEPOSIT_EMAIL_MODE=resend",
+    "Re-run: npx tsx scripts/p245-run-paperwork-reminders.ts --live --confirm-live"
+  ],
+  "failures": []
+}

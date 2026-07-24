@@ -1,6 +1,5 @@
 import type { BreezyJob } from "@/lib/breezy-api";
 import type { BreezyPositionFetchResult } from "@/lib/breezy-api";
-import { parseLocationFromJobName } from "@/lib/breezy-job-location";
 import {
   buildDuplicateJobIndex,
   findActivePublishedDuplicate,
@@ -58,12 +57,14 @@ function inferJobFromCandidates(
 ): Pick<BreezyJob, "jobId" | "name" | "city" | "state" | "status" | "updatedDate"> {
   const plan = plans.find((p) => p.positionId === positionId);
   const name = plan?.positionName ?? "Unknown position";
-  const parsed = parseLocationFromJobName(name);
+  // P216 — never invent city/state from the position title. Prefer territory
+  // state from the plan when available; otherwise leave empty until live
+  // Position.Location is resolved.
   return {
     jobId: positionId,
     name,
-    city: parsed.city,
-    state: (parsed.state || plan?.dmTerritory) ?? "",
+    city: "",
+    state: plan?.dmTerritory ?? "",
     status: "unknown",
     updatedDate: "",
   };

@@ -1,0 +1,41 @@
+{
+  "phase": "P240",
+  "generatedAt": "2026-07-21T13:43:33.417Z",
+  "lookbackDays": 14,
+  "simulationHorizonHours": 24,
+  "arrivalsLast14Days": 244,
+  "estimatedDailyArrivalRate": 17.4,
+  "projectedArrivalsNext24h": 17,
+  "proxyCohortSize": 17,
+  "wouldReachPnCount": 5,
+  "wouldSendCount": 5,
+  "blockedCount": 12,
+  "protectedSkipCount": 0,
+  "autoClearRatePct": 29.4,
+  "estimatedDailyThroughputToPn": 5.1,
+  "estimatedDailyThroughputToSent": 5.1,
+  "averageMinutesAppliedToPaperwork": 50,
+  "averageHoursAppliedToPaperwork": 0.83,
+  "bottleneckBreakdown": [
+    {
+      "blocker": "qualification_gate_failed",
+      "count": 8,
+      "pct": 66.7
+    },
+    {
+      "blocker": "manual_review_40_60",
+      "count": 2,
+      "pct": 16.7
+    },
+    {
+      "blocker": "duplicate_identity",
+      "count": 1,
+      "pct": 8.3
+    },
+    {
+      "blocker": "missing_phone",
+      "count": 1,
+      "pct": 8.3
+    }
+  ]
+}

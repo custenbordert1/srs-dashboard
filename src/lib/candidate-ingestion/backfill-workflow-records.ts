@@ -102,7 +102,7 @@ export async function backfillWorkflowRecordsForCandidates(input: {
     const record = await upsertCandidateWorkflow({
       candidateId,
       workflowStatus: initialWorkflowStatus(candidate),
-      assignedRecruiter: "Unassigned",
+      // P188.4: do not pass Unassigned — omit so named owners cannot be clobbered on race/create.
       audit: {
         action: "ingestion_import",
         byUserId: input.byUserId,
@@ -110,6 +110,7 @@ export async function backfillWorkflowRecordsForCandidates(input: {
           positionId: candidate.positionId,
           positionName: candidate.positionName,
           appliedDate: candidate.appliedDate,
+          ownershipSignalPresent: Boolean(candidate.ownershipSignals?.preferredName),
         },
       },
     });

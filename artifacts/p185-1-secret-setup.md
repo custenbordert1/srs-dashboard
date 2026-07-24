@@ -12,6 +12,22 @@ Required for scheduled production (after operator approval):
 | P185_DURABLE_DATA_DIR | Absolute durable volume on serverless (not /tmp) |
 | DROPBOX_SIGN_API_KEY | Dropbox Sign API |
 | DROPBOX_SIGN_TEMPLATE_* | Required template IDs |
+| P185_DATABASE_URL / DATABASE_URL / POSTGRES_URL | Neon or Vercel Postgres connection string for P185.5 durable state |
+| P185_PGLITE_DATA_DIR | Optional local durable PGlite directory for migration validation |
+| P185_PRODUCTION_STORAGE_CONFIRMED=1 | Set **only after** P185.5 migration + durability validation report `ready_to_confirm` (never fabricate) |
+
+## P185.5 durable storage
+
+Preferred provider: **Neon Postgres** (or Vercel Marketplace Postgres). Adapter type: `postgres`.
+
+Local validation without Neon:
+
+```
+P185_PGLITE_DATA_DIR=.p1855-pglite
+npm run p185-5:migrate
+```
+
+Do **not** set `P185_PRODUCTION_STORAGE_CONFIRMED` until the migration artifact shows `storageConfirmationStatus: ready_to_confirm`.
 
 ## Vercel Cron note (Hobby vs Pro)
 

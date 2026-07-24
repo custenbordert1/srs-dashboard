@@ -1,0 +1,549 @@
+{
+  "generatedAt": "2026-07-13T14:22:50.218Z",
+  "readOnly": true,
+  "schedulerEnabled": false,
+  "schedulers": [
+    {
+      "schedulerId": "p185-cron-api",
+      "type": "cron-route",
+      "cadence": "*/10 * * * *",
+      "trigger": "external cron → API",
+      "entryPoint": "src/app/api/cron/p185-paperwork-automation/route.ts",
+      "candidateScope": "P185 rollout cohort / queue",
+      "lockOrLease": "partial",
+      "storageBackend": "P185 durable (Neon/PGlite)",
+      "timeoutBehavior": "maxDuration 60s",
+      "overlapRisk": "high",
+      "duplicateProcessingRisk": "medium",
+      "featureFlag": "P185_PRODUCTION_AUTOMATION_ENABLED",
+      "relatedWriterIds": [
+        "p185-production-paperwork-runner",
+        "p184-autonomous-paperwork-send-engine"
+      ]
+    },
+    {
+      "schedulerId": "p125-production-runner-interval",
+      "type": "in-process-interval",
+      "cadence": "5m",
+      "trigger": "setInterval in-process",
+      "entryPoint": "src/lib/p125-autonomous-paperwork-production-runner/run-production-runner.ts",
+      "candidateScope": "paperwork-needed candidates",
+      "lockOrLease": "none",
+      "storageBackend": "local runner state",
+      "timeoutBehavior": "cycle timeout varies",
+      "overlapRisk": "critical",
+      "duplicateProcessingRisk": "high",
+      "featureFlag": "P125_RUNNER_CONTINUOUS_ENABLED",
+      "relatedWriterIds": [
+        "p125-production-runner"
+      ]
+    },
+    {
+      "schedulerId": "p136-paperwork-scheduler-interval",
+      "type": "in-process-interval",
+      "cadence": "5m",
+      "trigger": "setInterval via API start",
+      "entryPoint": "src/app/api/autonomous-paperwork-scheduler/start/route.ts",
+      "candidateScope": "paperwork-needed candidates",
+      "lockOrLease": "none",
+      "storageBackend": "scheduler state file",
+      "timeoutBehavior": "cycle timeout varies",
+      "overlapRisk": "critical",
+      "duplicateProcessingRisk": "high",
+      "featureFlag": null,
+      "relatedWriterIds": [
+        "p136-paperwork-scheduler"
+      ]
+    },
+    {
+      "schedulerId": "p1061-runner-interval",
+      "type": "in-process-interval",
+      "cadence": "5m",
+      "trigger": "setInterval via API start",
+      "entryPoint": "src/app/api/autonomous-paperwork-runner/start/route.ts",
+      "candidateScope": "autonomous paperwork queue",
+      "lockOrLease": "none",
+      "storageBackend": "runner state",
+      "timeoutBehavior": "full reconcile 24h",
+      "overlapRisk": "critical",
+      "duplicateProcessingRisk": "high",
+      "featureFlag": "AUTONOMOUS_PAPERWORK_RUNNER_SCHEDULE_ENABLED",
+      "relatedWriterIds": [
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine"
+      ]
+    },
+    {
+      "schedulerId": "p107-paperwork-monitor-interval",
+      "type": "in-process-interval",
+      "cadence": "5m",
+      "trigger": "setInterval",
+      "entryPoint": "src/lib/paperwork-monitor/run-paperwork-monitor-cycle.ts",
+      "candidateScope": "sent/unsigned paperwork",
+      "lockOrLease": "none",
+      "storageBackend": "workflow store",
+      "timeoutBehavior": "cycle timeout varies",
+      "overlapRisk": "medium",
+      "duplicateProcessingRisk": "medium",
+      "featureFlag": null,
+      "relatedWriterIds": [
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook"
+      ]
+    },
+    {
+      "schedulerId": "p148-orchestrator-interval",
+      "type": "host-interval",
+      "cadence": "5m",
+      "trigger": "host script interval",
+      "entryPoint": "scripts/p148-autonomous-recruiting-orchestrator.ts",
+      "candidateScope": "recruiting automation cohort",
+      "lockOrLease": "none",
+      "storageBackend": "orchestrator store",
+      "timeoutBehavior": "unknown",
+      "overlapRisk": "high",
+      "duplicateProcessingRisk": "high",
+      "featureFlag": "AUTONOMOUS_RECRUITING_ENABLED",
+      "relatedWriterIds": [
+        "p148-autonomous-recruiting-orchestrator"
+      ]
+    },
+    {
+      "schedulerId": "p1547-continuous-daemon",
+      "type": "host-daemon",
+      "cadence": "10m",
+      "trigger": "daemon script",
+      "entryPoint": "scripts/p154.7-continuous-runner.ts",
+      "candidateScope": "full recruiting pipeline",
+      "lockOrLease": "partial",
+      "storageBackend": "runner + workflow store",
+      "timeoutBehavior": "P154_STOP_ON_ERROR",
+      "overlapRisk": "critical",
+      "duplicateProcessingRisk": "high",
+      "featureFlag": "P154_CONTINUOUS_ENABLED",
+      "relatedWriterIds": [
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot"
+      ]
+    },
+    {
+      "schedulerId": "p169-orchestrator-host",
+      "type": "host-interval",
+      "cadence": "7m",
+      "trigger": "host script interval",
+      "entryPoint": "scripts/p169-orchestrator-host.ts",
+      "candidateScope": "orchestrator evaluation set",
+      "lockOrLease": "partial",
+      "storageBackend": "P169 evaluation store",
+      "timeoutBehavior": "cycle timeout varies",
+      "overlapRisk": "critical",
+      "duplicateProcessingRisk": "high",
+      "featureFlag": "P169_ORCHESTRATOR_ENABLED",
+      "relatedWriterIds": [
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ]
+    },
+    {
+      "schedulerId": "p171-lifecycle-host",
+      "type": "host-interval",
+      "cadence": "15m",
+      "trigger": "host/API control",
+      "entryPoint": "src/app/api/recruiting/lifecycle-manager/control/route.ts",
+      "candidateScope": "P171 lifecycle cohort",
+      "lockOrLease": "partial",
+      "storageBackend": "P171 lifecycle store",
+      "timeoutBehavior": "cycle timeout varies",
+      "overlapRisk": "high",
+      "duplicateProcessingRisk": "medium",
+      "featureFlag": "P171_LIFECYCLE_ENABLED",
+      "relatedWriterIds": [
+        "p171-lifecycle-manager"
+      ]
+    },
+    {
+      "schedulerId": "dropbox-webhook-retries",
+      "type": "webhook-retry",
+      "cadence": "provider retry policy",
+      "trigger": "Dropbox Sign webhook",
+      "entryPoint": "src/app/api/dropbox-sign/webhook/route.ts",
+      "candidateScope": "envelope events",
+      "lockOrLease": "partial",
+      "storageBackend": "workflow store",
+      "timeoutBehavior": "HTTP retry",
+      "overlapRisk": "medium",
+      "duplicateProcessingRisk": "medium",
+      "featureFlag": null,
+      "relatedWriterIds": [
+        "dropbox-sign-webhook"
+      ]
+    }
+  ],
+  "overlaps": [
+    {
+      "id": "sched-p125-production-runner-interval__p136-paperwork-scheduler-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p125-production-runner",
+        "p136-paperwork-scheduler"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p125-production-runner-interval and p136-paperwork-scheduler-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p125-production-runner-interval (5m) overlaps p136-paperwork-scheduler-interval (5m)"
+    },
+    {
+      "id": "sched-p125-production-runner-interval__p1061-runner-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p125-production-runner",
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p125-production-runner-interval and p1061-runner-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p125-production-runner-interval (5m) overlaps p1061-runner-interval (5m)"
+    },
+    {
+      "id": "sched-p125-production-runner-interval__p107-paperwork-monitor-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p125-production-runner",
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p125-production-runner-interval and p107-paperwork-monitor-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p125-production-runner-interval (5m) overlaps p107-paperwork-monitor-interval (5m)"
+    },
+    {
+      "id": "sched-p125-production-runner-interval__p148-orchestrator-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p125-production-runner",
+        "p148-autonomous-recruiting-orchestrator"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p125-production-runner-interval and p148-orchestrator-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p125-production-runner-interval (5m) overlaps p148-orchestrator-interval (5m)"
+    },
+    {
+      "id": "sched-p125-production-runner-interval__p1547-continuous-daemon",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p125-production-runner",
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p125-production-runner-interval and p1547-continuous-daemon concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p125-production-runner-interval (5m) overlaps p1547-continuous-daemon (10m)"
+    },
+    {
+      "id": "sched-p125-production-runner-interval__p169-orchestrator-host",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p125-production-runner",
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p125-production-runner-interval and p169-orchestrator-host concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p125-production-runner-interval (5m) overlaps p169-orchestrator-host (7m)"
+    },
+    {
+      "id": "sched-p136-paperwork-scheduler-interval__p1061-runner-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p136-paperwork-scheduler",
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p136-paperwork-scheduler-interval and p1061-runner-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p136-paperwork-scheduler-interval (5m) overlaps p1061-runner-interval (5m)"
+    },
+    {
+      "id": "sched-p136-paperwork-scheduler-interval__p107-paperwork-monitor-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p136-paperwork-scheduler",
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p136-paperwork-scheduler-interval and p107-paperwork-monitor-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p136-paperwork-scheduler-interval (5m) overlaps p107-paperwork-monitor-interval (5m)"
+    },
+    {
+      "id": "sched-p136-paperwork-scheduler-interval__p148-orchestrator-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p136-paperwork-scheduler",
+        "p148-autonomous-recruiting-orchestrator"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p136-paperwork-scheduler-interval and p148-orchestrator-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p136-paperwork-scheduler-interval (5m) overlaps p148-orchestrator-interval (5m)"
+    },
+    {
+      "id": "sched-p136-paperwork-scheduler-interval__p1547-continuous-daemon",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p136-paperwork-scheduler",
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p136-paperwork-scheduler-interval and p1547-continuous-daemon concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p136-paperwork-scheduler-interval (5m) overlaps p1547-continuous-daemon (10m)"
+    },
+    {
+      "id": "sched-p136-paperwork-scheduler-interval__p169-orchestrator-host",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p136-paperwork-scheduler",
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p136-paperwork-scheduler-interval and p169-orchestrator-host concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p136-paperwork-scheduler-interval (5m) overlaps p169-orchestrator-host (7m)"
+    },
+    {
+      "id": "sched-p1061-runner-interval__p107-paperwork-monitor-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine",
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p1061-runner-interval and p107-paperwork-monitor-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p1061-runner-interval (5m) overlaps p107-paperwork-monitor-interval (5m)"
+    },
+    {
+      "id": "sched-p1061-runner-interval__p148-orchestrator-interval",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine",
+        "p148-autonomous-recruiting-orchestrator"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p1061-runner-interval and p148-orchestrator-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p1061-runner-interval (5m) overlaps p148-orchestrator-interval (5m)"
+    },
+    {
+      "id": "sched-p1061-runner-interval__p1547-continuous-daemon",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine",
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p1061-runner-interval and p1547-continuous-daemon concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p1061-runner-interval (5m) overlaps p1547-continuous-daemon (10m)"
+    },
+    {
+      "id": "sched-p1061-runner-interval__p169-orchestrator-host",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p1061-autonomous-paperwork-runner",
+        "p106-autonomous-paperwork-engine",
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p1061-runner-interval and p169-orchestrator-host concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p1061-runner-interval (5m) overlaps p169-orchestrator-host (7m)"
+    },
+    {
+      "id": "sched-p107-paperwork-monitor-interval__p148-orchestrator-interval",
+      "kind": "scheduler_overlap",
+      "severity": "high",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook",
+        "p148-autonomous-recruiting-orchestrator"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p107-paperwork-monitor-interval and p148-orchestrator-interval concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p107-paperwork-monitor-interval (5m) overlaps p148-orchestrator-interval (5m)"
+    },
+    {
+      "id": "sched-p107-paperwork-monitor-interval__p1547-continuous-daemon",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook",
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p107-paperwork-monitor-interval and p1547-continuous-daemon concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p107-paperwork-monitor-interval (5m) overlaps p1547-continuous-daemon (10m)"
+    },
+    {
+      "id": "sched-p107-paperwork-monitor-interval__p169-orchestrator-host",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p107-paperwork-monitor",
+        "dropbox-sign-webhook",
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p107-paperwork-monitor-interval and p169-orchestrator-host concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p107-paperwork-monitor-interval (5m) overlaps p169-orchestrator-host (7m)"
+    },
+    {
+      "id": "sched-p148-orchestrator-interval__p1547-continuous-daemon",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p148-autonomous-recruiting-orchestrator",
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p148-orchestrator-interval and p1547-continuous-daemon concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p148-orchestrator-interval (5m) overlaps p1547-continuous-daemon (10m)"
+    },
+    {
+      "id": "sched-p148-orchestrator-interval__p169-orchestrator-host",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p148-autonomous-recruiting-orchestrator",
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p148-orchestrator-interval and p169-orchestrator-host concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p148-orchestrator-interval (5m) overlaps p169-orchestrator-host (7m)"
+    },
+    {
+      "id": "sched-p1547-continuous-daemon__p169-orchestrator-host",
+      "kind": "scheduler_overlap",
+      "severity": "critical",
+      "transition": "scheduler_collision",
+      "affectedCandidates": [],
+      "activeWriters": [
+        "p1547-continuous-recruiting-runner",
+        "p154-controlled-autopilot",
+        "p169-recruiting-orchestrator",
+        "p159-operations-control-center"
+      ],
+      "recommendedOwner": "p185-production-paperwork-runner",
+      "recommendedRetirementAction": "Do not run p1547-continuous-daemon and p169-orchestrator-host concurrently; prefer single P185 cadence",
+      "status": "open",
+      "assignedInvestigationOwner": null,
+      "detail": "p1547-continuous-daemon (10m) overlaps p169-orchestrator-host (7m)"
+    }
+  ],
+  "recommendedCadence": {
+    "cadence": "every 15 minutes (read-only reconcile) + event-driven observe on writes",
+    "rationale": "Aligns with P171 interval without enabling it; stays slower than P185 send cron; event-driven observe covers near-real-time drift.",
+    "enabledNow": false
+  }
+}

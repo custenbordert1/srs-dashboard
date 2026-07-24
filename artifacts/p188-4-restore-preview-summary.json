@@ -1,0 +1,56 @@
+{
+  "sourcePhase": "P188.4",
+  "scannedAt": "2026-07-13T20:18:05.243Z",
+  "recordsScanned": 684,
+  "totals": {
+    "operatorConfirmable": 364,
+    "conflicting": 13,
+    "insufficientEvidence": 307
+  },
+  "namedHistoricalAssignmentsFound": 377,
+  "canaryPackage": [
+    {
+      "candidateId": "1b3a…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "5da2…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "2726…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "f700…",
+      "proposedRecruiter": "Logan"
+    },
+    {
+      "candidateId": "570d…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "1b90…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "520a…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "de92…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "9684…",
+      "proposedRecruiter": "Taylor"
+    },
+    {
+      "candidateId": "9111…",
+      "proposedRecruiter": "Taylor"
+    }
+  ],
+  "restoreExecutionDefault": "refused",
+  "refusedDetail": "P188_OWNERSHIP_RESTORE_EXECUTION flag is off — preview only",
+  "productionRecruiterWrites": 0
+}

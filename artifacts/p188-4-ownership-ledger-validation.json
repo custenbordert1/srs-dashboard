@@ -1,0 +1,10 @@
+{
+  "sourcePhase": "P188.4",
+  "ok": true,
+  "backend": "memory_jsonl",
+  "memoryCount": 1,
+  "sqlConfigured": false,
+  "detail": "Append-only ledger healthy (memory/jsonl); enable P188_OWNERSHIP_LEDGER_SQL=1 for Neon/PGlite",
+  "appendOnly": true,
+  "deletesUnsupported": true
+}

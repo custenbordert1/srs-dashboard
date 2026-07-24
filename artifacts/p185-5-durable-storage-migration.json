@@ -1,0 +1,115 @@
+{
+  "phase": "P185.5",
+  "generatedAt": "2026-07-10T19:08:04.143Z",
+  "provider": "neon_postgres",
+  "adapter": "postgres",
+  "schemaVersion": 1,
+  "migration": {
+    "phase": "P185.5",
+    "generatedAt": "2026-07-10T19:07:46.460Z",
+    "provider": "neon_postgres",
+    "schemaVersion": 1,
+    "rolloutId": "p1853-20260710-b419512d",
+    "before": {
+      "queueDepth": 25,
+      "frozenCohort": 25
+    },
+    "after": {
+      "queueDepth": 25,
+      "frozenCohort": 25
+    },
+    "recordsMigrated": {
+      "queueItems": 25,
+      "completedIdempotencyKeys": 0,
+      "sendTimestamps": 0,
+      "operations": 0,
+      "envelopes": 0,
+      "cohortMembers": 25,
+      "rollouts": 1,
+      "auditEvents": 50
+    },
+    "checksums": [
+      {
+        "entity": "p184_queue_candidate_ids",
+        "sourceCount": 25,
+        "destinationCount": 25,
+        "sourceHash": "be4116b2f2e861f5b854afe2",
+        "destinationHash": "be4116b2f2e861f5b854afe2",
+        "ok": true
+      },
+      {
+        "entity": "cohort_member_ids",
+        "sourceCount": 25,
+        "destinationCount": 25,
+        "sourceHash": "be4116b2f2e861f5b854afe2",
+        "destinationHash": "be4116b2f2e861f5b854afe2",
+        "ok": true
+      }
+    ],
+    "duplicateCandidateIds": [],
+    "missingQueueItems": [],
+    "ok": true,
+    "errors": []
+  },
+  "validation": {
+    "restartTest": true,
+    "concurrencyTest": true,
+    "staleLeaseTakeover": true,
+    "idempotencySurvivesRestart": true,
+    "sentUnverifiedNoResend": true,
+    "queueOrderingPreserved": true,
+    "rateLimitCountersPersist": true,
+    "details": [
+      "Restart persistence OK.",
+      "Two-instance claim exclusivity OK.",
+      "Lease contention + stale takeover OK.",
+      "Idempotency survives restart OK.",
+      "sent_unverified blocks resend OK.",
+      "Queue ordering OK.",
+      "Rate-limit counter persistence OK."
+    ]
+  },
+  "health": {
+    "phase": "P185.5",
+    "generatedAt": "2026-07-10T19:07:53.044Z",
+    "adapterType": "postgres",
+    "providerNameRedacted": "neon_postgres",
+    "databaseConnectivity": true,
+    "schemaVersion": 1,
+    "migrationStatus": "applied",
+    "queueCount": 25,
+    "frozenCohortCount": 25,
+    "leaseHealth": "free",
+    "transactionCapability": true,
+    "idempotencyHealth": true,
+    "storageConfirmationStatus": "ready_to_confirm",
+    "durable": true,
+    "blockers": []
+  },
+  "dryRun": {
+    "frozenSize": 25,
+    "stillEligible": 25,
+    "newlyBlocked": 0,
+    "queueDepth": 25,
+    "duplicateProtections": 0,
+    "activeEnvelopes": 0,
+    "completedEnvelopes": 0
+  },
+  "p184": {
+    "enabled": true,
+    "mode": "dry_run"
+  },
+  "storageConfirmationReadiness": "ready_to_confirm",
+  "schedulerRecommendation": [
+    "Do not restore */10 in vercel.json on Hobby (once-daily limit only).",
+    "Preferred: external/company scheduler every 10 minutes calling POST /api/cron/p185-paperwork-automation with Authorization: Bearer $CRON_SECRET.",
+    "Alternative: upgrade to Vercel Pro for native sub-daily cron."
+  ],
+  "remainingCanaryBlockers": [
+    "P185_PRODUCTION_STORAGE_CONFIRMED is not set — set only after P185.5 migration + durability validation pass.",
+    "P184 mode is dry_run (leave until canary authorization — do not enable now).",
+    "Canary not authorized (do not authorize in P185.5).",
+    "Vercel Hobby cannot run */10 native cron — use external scheduler or Pro."
+  ],
+  "note": "P185_PRODUCTION_STORAGE_CONFIRMED was NOT set automatically."
+}

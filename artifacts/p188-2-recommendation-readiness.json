@@ -1,0 +1,25 @@
+{
+  "sourcePhase": "P188.2",
+  "scannedAt": "2026-07-13T19:39:30.796Z",
+  "recruiterResolvedCount": 0,
+  "recruiterUnresolvedCount": 684,
+  "jobResolvedCount": 573,
+  "jobUnresolvedCount": 111,
+  "bothResolvedCount": 0,
+  "readyForRecruiterReview": 0,
+  "readyForRecommendHire": 0,
+  "stillBlocked": 653,
+  "predictedP187EligibleAfterValidRecommendations": 0,
+  "bypassFindingsPreserved": 139,
+  "bypassExcludedFromP187": true,
+  "pilotCandidates": [],
+  "sideEffects": {
+    "productionWrites": 0,
+    "approvals": 0,
+    "paperworkSends": 0,
+    "melWrites": 0,
+    "recommendationsExecuted": 0,
+    "p187Executed": 0
+  },
+  "finalRecommendation": "insufficient_authoritative_data"
+}

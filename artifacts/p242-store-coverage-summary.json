@@ -1,0 +1,250 @@
+[
+  {
+    "storeLabel": "CAYCE, SC",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 5,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "COLUMBIA, SC",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 5,
+    "eligible": 3,
+    "confirmedSends": 3,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "BABCOCK RANCH, FL",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 4,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "CONWAY, SC",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 4,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "LAREDO, TX",
+    "districtManager": "Amy Harp",
+    "applicantsFound": 4,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "Dickinson, TX",
+    "districtManager": "Amy Harp",
+    "applicantsFound": 3,
+    "eligible": 2,
+    "confirmedSends": 2,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "Goldsboro, NC",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 3,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "HILLSBORO, OH",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 3,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "LAWTON, OK",
+    "districtManager": "Amy Harp",
+    "applicantsFound": 3,
+    "eligible": 2,
+    "confirmedSends": 2,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "Oak Grove, KY",
+    "districtManager": "Lori District Manager",
+    "applicantsFound": 3,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "PEMBROKE PINES, FL",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 3,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "PHILADELPHIA, PA",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 3,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "SUMTER, SC",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 3,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "CAMPBELLSVILLE, KY",
+    "districtManager": "Lori District Manager",
+    "applicantsFound": 2,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "MIDLAND, MI",
+    "districtManager": "Trista Thomas",
+    "applicantsFound": 2,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "PLYMOUTH, PA",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 2,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "SPRINGFIELD, PA",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 2,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "AMES, IA",
+    "districtManager": "Lori District Manager",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "ASHTABULA, OH",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "BLUEFIELD, WV",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "BRANDON, FL",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "CAMDEN, SC",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "JACKSONVILLE, IL",
+    "districtManager": "Trista Thomas",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "LORTON, VA",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "MANSFIELD, OH",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "MATTOON, IL",
+    "districtManager": "Trista Thomas",
+    "applicantsFound": 1,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "SHEBOYGAN FALL, WI",
+    "districtManager": "Lori District Manager",
+    "applicantsFound": 1,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "STEPHENVILLE, TX",
+    "districtManager": "Amy Harp",
+    "applicantsFound": 1,
+    "eligible": 1,
+    "confirmedSends": 1,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "TEQUESTA, FL",
+    "districtManager": "Erin Boatright",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "WHITESTOWN, IN",
+    "districtManager": "Lori District Manager",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  },
+  {
+    "storeLabel": "WOODLYN, PA",
+    "districtManager": "Mindie Rodriguez",
+    "applicantsFound": 1,
+    "eligible": 0,
+    "confirmedSends": 0,
+    "usableApplicantRemaining": false
+  }
+]

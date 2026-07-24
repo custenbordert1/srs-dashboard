@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-07-13T15:09:45.220Z",
+  "candidateHealthDistribution": {
+    "fair": 11,
+    "poor": 2,
+    "good": 1
+  },
+  "sample": [
+    {
+      "candidateId": "1",
+      "score": 67,
+      "band": "fair",
+      "positives": 1,
+      "negatives": 1
+    },
+    {
+      "candidateId": "2",
+      "score": 47,
+      "band": "poor",
+      "positives": 1,
+      "negatives": 1
+    },
+    {
+      "candidateId": "2b",
+      "score": 67,
+      "band": "fair",
+      "positives": 1,
+      "negatives": 1
+    },
+    {
+      "candidateId": "3",
+      "score": 67,
+      "band": "fair",
+      "positives": 1,
+      "negatives": 1
+    },
+    {
+      "candidateId": "4",
+      "score": 57,
+      "band": "fair",
+      "positives": 1,
+      "negatives": 1
+    }
+  ]
+}

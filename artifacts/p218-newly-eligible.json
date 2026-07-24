@@ -1,0 +1,67 @@
+{
+  "phase": "P218",
+  "generatedAt": "2026-07-17T18:46:16.325Z",
+  "simulationOnly": true,
+  "evidenceSource": "artifacts/p216-candidate-comparison.json",
+  "rule": "Remove blocked_dm_unassigned only when P218 would assign a unique DM; retain every other coverage and paperwork blocker.",
+  "newlyEligibleCount": 2,
+  "stillBlockedCount": 0,
+  "candidates": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "nearestWork": "Columbus, OH",
+      "distanceMiles": 0,
+      "coverageTier": "tier1_0_20",
+      "expectedAssignedDm": "Mindie Rodriguez",
+      "blockersBefore": [
+        "blocked_dm_unassigned"
+      ],
+      "blockersAfterSimulatedAssignment": [],
+      "coverageGatePasses": true,
+      "paperworkEligibilityAfterAssignment": "ELIGIBLE",
+      "newlyEligible": true
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "nearestWork": "MERRIAM, KS",
+      "distanceMiles": 8.3,
+      "coverageTier": "tier1_0_20",
+      "expectedAssignedDm": "Amy Harp",
+      "blockersBefore": [
+        "blocked_dm_unassigned"
+      ],
+      "blockersAfterSimulatedAssignment": [],
+      "coverageGatePasses": true,
+      "paperworkEligibilityAfterAssignment": "ELIGIBLE",
+      "newlyEligible": true
+    }
+  ],
+  "safety": {
+    "mode": "preview",
+    "previewOnly": true,
+    "liveOperatorApprovalProvided": false,
+    "approvedBy": null,
+    "workflowWrites": 0,
+    "workflowStageChanges": 0,
+    "paperworkSent": 0,
+    "dropboxWrites": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "evaluatedWorkflowFieldsUnchanged": true,
+    "workflowsFileUnchanged": true,
+    "concurrentExternalWorkflowStoreActivityObserved": false,
+    "ingestionFileUnchanged": true
+  }
+}

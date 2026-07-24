@@ -1,0 +1,51 @@
+3d272f69061a: Columbus, OH → DM Mindie Rodriguez (correct=true) | BLOCKED blocked_dm_unassigned
+c0d00937ae31: Kansas City, MO → DM Amy Harp (correct=true) | BLOCKED blocked_dm_unassigned
+
+=== Running P214 eligibility pipeline (--no-freeze) ===
+prior-send ledgers: ids=194 emails=163
+MEL rows=27037 activeAvailable=2864
+opportunity locations: unique=1967 trustedCached=1646
+P214 preview --no-freeze: selected=0 eligible; cohort NOT frozen (P216 revalidation).
+[artifact] artifacts/p214-unsent-test-preview.json
+[artifact] artifacts/p214-blocked-candidates-summary.json
+[local] .data/p214-preview-nofreeze-eligibility-local.json
+{
+  "reviewed": 859,
+  "previouslySent": 370,
+  "signed": 18,
+  "viewed": 26,
+  "pending": 1,
+  "duplicates": 1,
+  "blockedCoverage": 0,
+  "blockedDm": 2,
+  "blockedNonGeo": 0,
+  "eligibleUnsent": 0,
+  "cohortSize": 0
+}
+
+[artifact] artifacts/p216-location-resolution.json
+[artifact] artifacts/p216-candidate-comparison.json
+[artifact] artifacts/p216-preview-results.json
+[artifact] artifacts/p216-position-authority-report.md
+{
+  "candidatesReEvaluated": 2,
+  "correctlyResolved": 2,
+  "stillBlocked": 2,
+  "nowEligible": 0,
+  "bothEligible": false,
+  "futureBatchWouldContainCandidates": false,
+  "positionLocationSuccessRate": 100,
+  "remainingTitleParses": 0,
+  "safety": {
+    "previewOnly": true,
+    "paperworkSent": 0,
+    "dropboxWrites": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "workflowStageChanges": 0,
+    "cohortFrozen": false,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true,
+    "frozenCohortFileUnchanged": true
+  }
+}

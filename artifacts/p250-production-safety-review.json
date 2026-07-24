@@ -1,0 +1,110 @@
+{
+  "phase": "P250-go-live-preparation",
+  "generatedAt": "2026-07-23T14:15:12.206Z",
+  "opsDate": "2026-07-23",
+  "mode": "read_only_code_and_ops_review",
+  "controls": [
+    {
+      "id": "duplicate_prevention_initial",
+      "control": "Initial paperwork already-sent / signed exclusion",
+      "status": "present",
+      "evidence": "P242/P243 classify sets alreadySentExclusion and signedExclusion; dry-run excluded 68 already_sent",
+      "residualRisk": null
+    },
+    {
+      "id": "idempotency_reminders",
+      "control": "Reminder idempotency keys",
+      "status": "present",
+      "evidence": "P246 buildP246IdempotencyKey + hasIdempotencyKey / usedIdempotencyKeys in reminder store before send",
+      "residualRisk": "Reminder store file was absent in P249 — first live run creates it; ensure durable path is writable"
+    },
+    {
+      "id": "dropbox_refresh_before_send",
+      "control": "Dropbox live status refresh before reminder send",
+      "status": "present",
+      "evidence": "send.ts calls probeDropboxLiveStatus(..., { forceRefresh: true }) and skips signed/complete/ineligible",
+      "residualRisk": null
+    },
+    {
+      "id": "reminder_cooldown",
+      "control": "Reminder cadence / cooldown",
+      "status": "present",
+      "evidence": "isCadenceSatisfied + max 4 reminders; P249 cooldown_not_met=52",
+      "residualRisk": null
+    },
+    {
+      "id": "signed_exclusion",
+      "control": "Signed / completed exclusion",
+      "status": "present",
+      "evidence": "Eligibility + pre-send probe skip signed_before_send; P249 signed_or_completed=78",
+      "residualRisk": null
+    },
+    {
+      "id": "retry_protection",
+      "control": "Transient retry + campaign stop on provider failures",
+      "status": "present",
+      "evidence": "One retry after 750ms for transient errors; stopCampaign on auth/domain/429/persistence failures",
+      "residualRisk": "Operator must not re-run --continue-full without reviewing stopReason"
+    },
+    {
+      "id": "rate_limiting",
+      "control": "Batch rate limiting",
+      "status": "present",
+      "evidence": "P246_BATCH_SIZE=25, P246_BATCH_PAUSE_MS=1500",
+      "residualRisk": "Resend account limits still apply; campaign stops on 429"
+    },
+    {
+      "id": "audit_logging",
+      "control": "Send / skip audit records",
+      "status": "present",
+      "evidence": "P246 records sent/skips/failures with idempotencyKey, messageId, failureClass; P248 writes campaign artifacts",
+      "residualRisk": null
+    },
+    {
+      "id": "transactional_safety",
+      "control": "Live flags + dry-run default",
+      "status": "present",
+      "evidence": "Scripts refuse --live without --confirm-live; P243 requires dryRun=false + confirmLive + execute; P250/P249 refuse live flags",
+      "residualRisk": null
+    },
+    {
+      "id": "mail_transport_gate",
+      "control": "Resend live delivery gate",
+      "status": "missing",
+      "evidence": "readyForLive=false — RESEND / mode / From / domain blockers remain",
+      "residualRisk": "Any accidental --live will stop before delivery while mailer is log/outbox"
+    },
+    {
+      "id": "dropbox_test_mode",
+      "control": "Dropbox testMode guard for initial packets",
+      "status": "operator_dependent",
+      "evidence": "DROPBOX_SIGN_TEST_MODE / config testMode=true; P243 refuses live when testMode is not true",
+      "residualRisk": "Production quota=0 — production-mode packet sends blocked; testMode packets are test envelopes"
+    },
+    {
+      "id": "mel_write_isolation",
+      "control": "No automatic MEL writes in reminder/initial paths",
+      "status": "present",
+      "evidence": "P246/P248 do not write MEL; Ready-for-MEL advancement is manual/authorized after signature verify",
+      "residualRisk": null
+    }
+  ],
+  "remainingProductionRisks": [
+    "Live email blocked until Resend configuration FAILs are remediated",
+    "Dropbox Sign production quota=0 — initial packet production sends blocked; use intentional testMode only",
+    "Dropbox testMode=true — initial packets are test envelopes until production mode is authorized and quota restored",
+    "101 invalid emails excluded from reminders — clean in Breezy before forcing",
+    "103 outstanding packets missing signatureRequestId — reconcile before chasing",
+    "Do not enable P246 --apply-safe-corrections until reconciliation conflicts are operator-reviewed",
+    "Reminder store was not present at P249 — first successful live reminder persists idempotency history; protect .data/",
+    "Never pass --live without --confirm-live"
+  ],
+  "liveWriteGuards": [
+    "P250 script rejects --live / --confirm-live",
+    "P249 script rejects --live / --confirm-live",
+    "P248 requires --live AND --confirm-live; defaults to config+freeze only",
+    "P243 execute requires dryRun=false + confirmLive=true + execute=true",
+    "P246 send path skips when mail.canLiveDeliver is false when requireLiveDelivery=true",
+    "P250 performs zero emails, Dropbox writes, Breezy writes, MEL writes, or DB mutations"
+  ]
+}

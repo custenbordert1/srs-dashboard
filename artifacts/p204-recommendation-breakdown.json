@@ -1,0 +1,2052 @@
+{
+  "generatedAt": "2026-07-15T19:48:52.713Z",
+  "sourcePhase": "P204",
+  "appliedAnalyzed": 568,
+  "recommendations": {
+    "advance": 43,
+    "review": 518,
+    "reject": 7,
+    "advancePct": 7.6,
+    "reviewPct": 91.2,
+    "rejectPct": 1.2
+  },
+  "byRecommendation": {
+    "advance_paperwork_needed": 43,
+    "needs_recruiter_review": 518,
+    "reject": 7
+  },
+  "sampleAdvance": [
+    {
+      "candidateId": "010e728f3d37",
+      "redactedCandidateId": "010e728f3d37",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 76,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=76"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 43,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 86,
+        "readinessScore": 74,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 32,
+        "experienceYears": 8,
+        "nearestJobMiles": 146.3,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "702b11e4cf12",
+      "redactedCandidateId": "702b11e4cf12",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 38,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 67,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 52,
+        "experienceYears": 12,
+        "nearestJobMiles": 94.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "b0bfbc746e1d",
+      "redactedCandidateId": "b0bfbc746e1d",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 12,
+        "nearestJobMiles": 215.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "50d84b0ff17c",
+      "redactedCandidateId": "50d84b0ff17c",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 74,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 12,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "950f2dc9a040",
+      "redactedCandidateId": "950f2dc9a040",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 71,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 32,
+        "experienceYears": 12,
+        "nearestJobMiles": 189.2,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "fcb34d3e2985",
+      "redactedCandidateId": "fcb34d3e2985",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 32,
+        "experienceYears": 12,
+        "nearestJobMiles": 180,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "86ee9e936ef5",
+      "redactedCandidateId": "86ee9e936ef5",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 12,
+        "nearestJobMiles": 272.5,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "60df123b79f4",
+      "redactedCandidateId": "60df123b79f4",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 77,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=77"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 89,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 26,
+        "questionnaireScore": 100,
+        "locationScore": 32,
+        "experienceYears": 12,
+        "nearestJobMiles": 155.2,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "326d0f957ef1",
+      "redactedCandidateId": "326d0f957ef1",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 32,
+        "experienceYears": 12,
+        "nearestJobMiles": 192.9,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "6edd0001ce9d",
+      "redactedCandidateId": "6edd0001ce9d",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 12,
+        "nearestJobMiles": 248.1,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "f52453876804",
+      "redactedCandidateId": "f52453876804",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 76,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=96",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=76"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 88,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 100,
+        "experienceYears": 8,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "ee4c5b54711e",
+      "redactedCandidateId": "ee4c5b54711e",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 76,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=96",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=76"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 88,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 18,
+        "experienceYears": 8,
+        "nearestJobMiles": 248.5,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "010f5a07ca0f",
+      "redactedCandidateId": "010f5a07ca0f",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 75,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=91",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=75"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 86,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 91,
+        "locationScore": 18,
+        "experienceYears": 8,
+        "nearestJobMiles": 238,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "89ad4f09e9fd",
+      "redactedCandidateId": "89ad4f09e9fd",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 12,
+        "nearestJobMiles": 365.9,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "90f90239be68",
+      "redactedCandidateId": "90f90239be68",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 77,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=77"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 89,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 8,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "afaa2696c4d0",
+      "redactedCandidateId": "afaa2696c4d0",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 77,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "territory_fit",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Travel/territory score=72",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=77"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 89,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 72,
+        "experienceYears": 8,
+        "nearestJobMiles": 70.6,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "8cd125086e3e",
+      "redactedCandidateId": "8cd125086e3e",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 12,
+        "nearestJobMiles": 244.8,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "04621a5593b4",
+      "redactedCandidateId": "04621a5593b4",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 77,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=77"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 89,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 8,
+        "nearestJobMiles": 212.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "f7d0e92a097f",
+      "redactedCandidateId": "f7d0e92a097f",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 77,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=77"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 89,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 8,
+        "nearestJobMiles": 212.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "bc29dcb32038",
+      "redactedCandidateId": "bc29dcb32038",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 12,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "92ce80c1115b",
+      "redactedCandidateId": "92ce80c1115b",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 78,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=78"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 36,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 73,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 12,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "c234f4adb4ec",
+      "redactedCandidateId": "c234f4adb4ec",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 78,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=78"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 37,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 12,
+        "nearestJobMiles": 267,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "d6713c5e6680",
+      "redactedCandidateId": "d6713c5e6680",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 79,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 decision=Qualified conf=93",
+        "Advance blend confidence=79"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Qualified",
+        "p1934Confidence": 93,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 12,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "3b5f23f72bcd",
+      "redactedCandidateId": "3b5f23f72bcd",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 77,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=77"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 89,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 8,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "054e37fa007f",
+      "redactedCandidateId": "054e37fa007f",
+      "workflowStatus": "Applied",
+      "recommendation": "advance_paperwork_needed",
+      "confidence": 75,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "high_qualification_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "Advance blend confidence=75"
+      ],
+      "recommendedNextAction": "Queue for supervised Paperwork Needed promotion (no auto-write in P204)",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 85,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 25,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 8,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    }
+  ],
+  "sampleReview": [
+    {
+      "candidateId": "74ad83073c23",
+      "redactedCandidateId": "74ad83073c23",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 43,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 73,
+        "readinessScore": 75,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 298.4,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "0ab710701ffc",
+      "redactedCandidateId": "0ab710701ffc",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 72,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=96",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 80,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 18,
+        "experienceYears": 4,
+        "nearestJobMiles": 243.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "d660a609d89a",
+      "redactedCandidateId": "d660a609d89a",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 67,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 70,
+        "readinessScore": 70,
+        "readinessConfidence": 90,
+        "resumeScore": 27,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 0.5,
+        "nearestJobMiles": 203.9,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "28bd1f12c67a",
+      "redactedCandidateId": "28bd1f12c67a",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 39,
+      "reasonCodes": [
+        "historical_applicant",
+        "missing_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "low_confidence",
+        "hard_gate_fail_closed_to_review"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire answers missing",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 34,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 44,
+        "readinessScore": 68,
+        "readinessConfidence": 40,
+        "resumeScore": 27,
+        "questionnaireScore": 20,
+        "locationScore": 100,
+        "experienceYears": 5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "67584602d857",
+      "redactedCandidateId": "67584602d857",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 67,
+      "reasonCodes": [
+        "missing_resume",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "No resume text available",
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 34,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 81,
+        "readinessScore": 55,
+        "readinessConfidence": 70,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 4,
+        "nearestJobMiles": 261.5,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 15
+      }
+    },
+    {
+      "candidateId": "7534175120b6",
+      "redactedCandidateId": "7534175120b6",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 73,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 81,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 4,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "8f6aa71e5fc7",
+      "redactedCandidateId": "8f6aa71e5fc7",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 73,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 81,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 32,
+        "experienceYears": 4,
+        "nearestJobMiles": 165,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "ee336001b53a",
+      "redactedCandidateId": "ee336001b53a",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 38,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 76,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 23,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 4,
+        "nearestJobMiles": 306,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "0b005cfd8846",
+      "redactedCandidateId": "0b005cfd8846",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 70,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 76,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 215.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "20c96a082790",
+      "redactedCandidateId": "20c96a082790",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 73,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 81,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 4,
+        "nearestJobMiles": 215.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "222add89ccc9",
+      "redactedCandidateId": "222add89ccc9",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 74,
+        "readinessScore": 71,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 0.5,
+        "nearestJobMiles": 215.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "48913c1a43f8",
+      "redactedCandidateId": "48913c1a43f8",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=96",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 75,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 18,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 215.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "631f1c41df3f",
+      "redactedCandidateId": "631f1c41df3f",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 74,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 27,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 4,
+        "nearestJobMiles": 215.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "769f77ba0cb5",
+      "redactedCandidateId": "769f77ba0cb5",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 46,
+      "reasonCodes": [
+        "duplicate_suspect",
+        "historical_applicant",
+        "missing_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "low_confidence",
+        "hard_gate_fail_closed_to_review"
+      ],
+      "evidence": [
+        "Same-email count=2",
+        "Applied date outside current MTD window",
+        "Questionnaire answers missing",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 36,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 44,
+        "readinessScore": 68,
+        "readinessConfidence": 70,
+        "resumeScore": 30,
+        "questionnaireScore": 20,
+        "locationScore": 100,
+        "experienceYears": 5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": true,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "3ba65ee631d7",
+      "redactedCandidateId": "3ba65ee631d7",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 43,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 73,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 35,
+        "questionnaireScore": 100,
+        "locationScore": 18,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 293.9,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "53def2aa4997",
+      "redactedCandidateId": "53def2aa4997",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 38,
+      "reasonCodes": [
+        "duplicate_suspect",
+        "historical_applicant",
+        "missing_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "low_confidence",
+        "hard_gate_fail_closed_to_review"
+      ],
+      "evidence": [
+        "Same-email count=2",
+        "Applied date outside current MTD window",
+        "Questionnaire answers missing",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 33,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 43,
+        "readinessScore": 66,
+        "readinessConfidence": 40,
+        "resumeScore": 25,
+        "questionnaireScore": 20,
+        "locationScore": 100,
+        "experienceYears": 5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": true,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "17df15335b1c",
+      "redactedCandidateId": "17df15335b1c",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 70,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=96",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 77,
+        "readinessScore": 74,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 18,
+        "experienceYears": 4,
+        "nearestJobMiles": 317.6,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "4a95eb78f6d0",
+      "redactedCandidateId": "4a95eb78f6d0",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 68,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=96",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 73,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 18,
+        "experienceYears": 0.5,
+        "nearestJobMiles": 272.4,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "8ecba75ce51d",
+      "redactedCandidateId": "8ecba75ce51d",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 69,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 38,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 76,
+        "readinessScore": 69,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "05f0ead7b4bd",
+      "redactedCandidateId": "05f0ead7b4bd",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 68,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 73,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 52,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 109.1,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "abeee46f2907",
+      "redactedCandidateId": "abeee46f2907",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 59,
+      "reasonCodes": [
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "calibrated_request_more_info",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 request more info conf=57"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Request More Information",
+        "p1934Confidence": 57,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 25,
+        "questionnaireScore": 50,
+        "locationScore": 100,
+        "experienceYears": 4,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "6cd324fff9ee",
+      "redactedCandidateId": "6cd324fff9ee",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 72,
+      "reasonCodes": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire score=100",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 81,
+        "readinessScore": 70,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 100,
+        "locationScore": 100,
+        "experienceYears": 4,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "4019b5797c59",
+      "redactedCandidateId": "4019b5797c59",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 70,
+      "reasonCodes": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Questionnaire score=96",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 42,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 75,
+        "readinessScore": 70,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 96,
+        "locationScore": 18,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 235.7,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "eb575ce86288",
+      "redactedCandidateId": "eb575ce86288",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 40,
+      "reasonCodes": [
+        "historical_applicant",
+        "missing_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "low_confidence",
+        "hard_gate_fail_closed_to_review"
+      ],
+      "evidence": [
+        "Applied date outside current MTD window",
+        "Questionnaire answers missing",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 36,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 44,
+        "readinessScore": 68,
+        "readinessConfidence": 40,
+        "resumeScore": 30,
+        "questionnaireScore": 20,
+        "locationScore": 100,
+        "experienceYears": 5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "fbcbf03b7f12",
+      "redactedCandidateId": "fbcbf03b7f12",
+      "workflowStatus": "Applied",
+      "recommendation": "needs_recruiter_review",
+      "confidence": 60,
+      "reasonCodes": [
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "calibrated_request_more_info",
+        "borderline_confidence"
+      ],
+      "evidence": [
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire",
+        "P193.4 request more info conf=58"
+      ],
+      "recommendedNextAction": "Route to recruiter review queue with evidence packet",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Request More Information",
+        "p1934Confidence": 58,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 27,
+        "questionnaireScore": 50,
+        "locationScore": 100,
+        "experienceYears": 5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    }
+  ],
+  "sampleReject": [
+    {
+      "candidateId": "6b5511892bb2",
+      "redactedCandidateId": "6b5511892bb2",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 66,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "strong_questionnaire",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_transport_age",
+        "Questionnaire score=82",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 69,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 82,
+        "locationScore": 32,
+        "experienceYears": 4,
+        "nearestJobMiles": 165,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "7bac85e81822",
+      "redactedCandidateId": "7bac85e81822",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 61,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_no_smartphone",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 60,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 27,
+        "questionnaireScore": 78,
+        "locationScore": 52,
+        "experienceYears": 1.5,
+        "nearestJobMiles": 86.1,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "d5dbd0abbf26",
+      "redactedCandidateId": "d5dbd0abbf26",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 56,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "duplicate_suspect",
+        "historical_applicant",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_gig, explicit_disqualify_transport_age",
+        "Same-email count=2",
+        "Applied date outside current MTD window",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 51,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 25,
+        "questionnaireScore": 55,
+        "locationScore": 100,
+        "experienceYears": 4,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": true,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "a331c4727dc5",
+      "redactedCandidateId": "a331c4727dc5",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 50,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "invalid_contact",
+        "historical_applicant",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_transport_age, explicit_disqualify_no_smartphone",
+        "Contact gates: invalid_contact_phone",
+        "Applied date outside current MTD window",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 35,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 43,
+        "readinessScore": 65,
+        "readinessConfidence": 90,
+        "resumeScore": 26,
+        "questionnaireScore": 60,
+        "locationScore": 100,
+        "experienceYears": 0.5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 10
+      }
+    },
+    {
+      "candidateId": "f1abf23a4842",
+      "redactedCandidateId": "f1abf23a4842",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 52,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "missing_resume",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_gig",
+        "No resume text available",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 33,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 54,
+        "readinessScore": 55,
+        "readinessConfidence": 70,
+        "resumeScore": 23,
+        "questionnaireScore": 70,
+        "locationScore": 100,
+        "experienceYears": 0.5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 15
+      }
+    },
+    {
+      "candidateId": "25014390b5cf",
+      "redactedCandidateId": "25014390b5cf",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 60,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_gig",
+        "Nearest job ~0 mi",
+        "Travel/territory score=100",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 40,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 58,
+        "readinessScore": 68,
+        "readinessConfidence": 90,
+        "resumeScore": 27,
+        "questionnaireScore": 50,
+        "locationScore": 100,
+        "experienceYears": 5,
+        "nearestJobMiles": 0,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    },
+    {
+      "candidateId": "9e9014fdbf65",
+      "redactedCandidateId": "9e9014fdbf65",
+      "workflowStatus": "Applied",
+      "recommendation": "reject",
+      "confidence": 63,
+      "reasonCodes": [
+        "explicit_disqualify",
+        "strong_questionnaire",
+        "available_and_transport_ready"
+      ],
+      "evidence": [
+        "Explicit disqualify gates: explicit_disqualify_transport_age",
+        "Questionnaire score=87",
+        "Availability/transport signals present on questionnaire"
+      ],
+      "recommendedNextAction": "Present reject recommendation to recruiter for confirmation",
+      "components": {
+        "p193Decision": "Needs Human Review",
+        "p193Confidence": 39,
+        "p1934Decision": "Needs Human Review",
+        "p1934Confidence": 64,
+        "readinessScore": 66,
+        "readinessConfidence": 90,
+        "resumeScore": 55,
+        "questionnaireScore": 87,
+        "locationScore": 18,
+        "experienceYears": 0.5,
+        "nearestJobMiles": 261.5,
+        "duplicateSuspect": false,
+        "fraudSpamScore": 0
+      }
+    }
+  ]
+}

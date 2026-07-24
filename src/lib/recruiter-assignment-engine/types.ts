@@ -1,7 +1,11 @@
 import type { BreezyCandidate, BreezyJob } from "@/lib/breezy-api";
-import type { CandidateWorkflowState, RecruiterRosters } from "@/lib/candidate-workflow-types";
+import type {
+  CandidateWorkflowState,
+  RecruiterAssignmentSource,
+  RecruiterRosters,
+} from "@/lib/candidate-workflow-types";
 
-export type RecruiterAssignmentSource = "auto" | "manual";
+export type { RecruiterAssignmentSource };
 
 /** Minimum confidence (0–100) required before persisting an automatic assignment. */
 export const RECRUITER_ASSIGNMENT_CONFIDENCE_THRESHOLD = 65;

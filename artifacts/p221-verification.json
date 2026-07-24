@@ -1,0 +1,98 @@
+{
+  "phase": "P221",
+  "generatedAt": "2026-07-20T14:29:22.053Z",
+  "approvedBy": "Taylor Custenborder",
+  "mode": "live",
+  "testMode": true,
+  "selection": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "expectedCity": "Columbus",
+      "expectedState": "OH",
+      "expectedDm": "Mindie Rodriguez"
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "expectedCity": "Kansas City",
+      "expectedState": "MO",
+      "expectedDm": "Amy Harp"
+    }
+  ],
+  "sends": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "ok": true,
+      "signatureRequestId": "32a3cf53f36b78c86a91e6d48c4ba0bfe956ea11",
+      "paperworkStatus": "sent",
+      "error": null
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "ok": true,
+      "signatureRequestId": "94f692a2f2cd4e9296cf6adff3cacac6b22a4519",
+      "paperworkStatus": "sent",
+      "error": null
+    }
+  ],
+  "readBack": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "previousStage": "Paperwork Needed",
+      "newStage": "Paperwork Sent",
+      "previousPaperworkStatus": "not_sent",
+      "newPaperworkStatus": "sent",
+      "signatureRequestId": "32a3cf53f36b78c86a91e6d48c4ba0bfe956ea11",
+      "assignedDm": "Mindie Rodriguez",
+      "assignedRecruiter": "Unassigned",
+      "changedFields": [
+        "workflowStatus",
+        "lastActionAt",
+        "history",
+        "signatureRequestId",
+        "paperworkTemplateKey",
+        "paperworkSentAt",
+        "paperworkStatus",
+        "onboardingContactEmail",
+        "updatedAt"
+      ],
+      "ok": true
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "previousStage": "Paperwork Needed",
+      "newStage": "Paperwork Sent",
+      "previousPaperworkStatus": "not_sent",
+      "newPaperworkStatus": "sent",
+      "signatureRequestId": "94f692a2f2cd4e9296cf6adff3cacac6b22a4519",
+      "assignedDm": "Amy Harp",
+      "assignedRecruiter": "Unassigned",
+      "changedFields": [
+        "workflowStatus",
+        "lastActionAt",
+        "history",
+        "signatureRequestId",
+        "paperworkTemplateKey",
+        "paperworkSentAt",
+        "paperworkStatus",
+        "onboardingContactEmail",
+        "updatedAt"
+      ],
+      "ok": true
+    }
+  ],
+  "safety": {
+    "candidatesWritten": 2,
+    "otherCandidatesWritten": 0,
+    "workflowChangesOutsideTarget": 0,
+    "dropboxSignRequestsCreated": 2,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "recruiterChanges": 0,
+    "assignedDmChanges": 0,
+    "notesChanges": 0,
+    "reminderEmails": 0,
+    "reminderJobs": 0,
+    "advancedBeyondPaperworkSent": 0,
+    "testMode": true
+  }
+}

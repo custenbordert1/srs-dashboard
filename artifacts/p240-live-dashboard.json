@@ -1,0 +1,21 @@
+{
+  "phase": "P240",
+  "generatedAt": "2026-07-21T13:43:33.417Z",
+  "mode": "dry_run_only",
+  "cutoffIso": "2026-07-20T21:06:46.975Z",
+  "cutoffSource": "P239 final remaining auto-eligible send completion (artifacts/p239-sent.json generatedAt); file=artifacts/p239-sent.json",
+  "newApplicantsWaiting": 0,
+  "awaitingRecruiter": 0,
+  "awaitingQualification": 8,
+  "awaitingDm": 0,
+  "paperworkNeeded": 0,
+  "sending": 0,
+  "sentToday": 5,
+  "failedToday": 0,
+  "blockedCandidates": 4,
+  "protectedAlreadySent": 0,
+  "wouldReachPaperworkNeeded": 5,
+  "wouldSend": 5,
+  "realNewPostCutoff": 0,
+  "simulationProxyCount": 17
+}

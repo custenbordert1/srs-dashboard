@@ -1,0 +1,52 @@
+{
+  "phase": "P214",
+  "generatedAt": "2026-07-17T18:15:59.124Z",
+  "cohortId": "p214-preview-nofreeze-19f714adb83",
+  "fingerprint": "e92031b26a984deeebe11602",
+  "totalApplicantsReviewed": 859,
+  "confirmedPreviouslySent": 370,
+  "confirmedSigned": 18,
+  "viewed": 26,
+  "pendingEnvelopes": 1,
+  "duplicates": 1,
+  "alreadyPlaced": 0,
+  "stageNotAuthorized": 24,
+  "missingRequiredInformation": 417,
+  "blockedByCoverage": 0,
+  "blockedByDmAssignment": 2,
+  "blockedByNonGeographicPosting": 0,
+  "eligibleAndUnsent": 0,
+  "proposedTestCohortSize": 0,
+  "maxCohortSize": 20,
+  "classificationCounts": {
+    "previously_sent_workflow": 367,
+    "missing_contact_info": 417,
+    "stage_not_authorized": 24,
+    "viewed": 26,
+    "prior_cohort_member": 3,
+    "signed": 18,
+    "pending_envelope": 1,
+    "blocked_dm_unassigned": 2,
+    "unsent_but_blocked": 2,
+    "duplicate_identity": 1
+  },
+  "priorSendLedgerSources": {
+    "p208_frozen_cohort": 162,
+    "p208_operator_ledger": 162,
+    "p208_send_audit": 313,
+    "p185_7_rollout": 25,
+    "p185_3_cohort": 25,
+    "p100_live_send": 7,
+    "p104_live_send": 1
+  },
+  "dropboxLiveLookupsPerformed": 5,
+  "cohortMembers": [],
+  "safety": {
+    "sendMode": "test_mode",
+    "dropboxRequestsCreated": 0,
+    "melWrites": 0,
+    "workflowTransitions": 0,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true
+  }
+}

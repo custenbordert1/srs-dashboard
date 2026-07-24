@@ -1,0 +1,173 @@
+{
+  "phase": "P262",
+  "title": "Ownership Durability & Deployment Readiness",
+  "generatedAt": "2026-07-23T19:52:00.000Z",
+  "verdicts": {
+    "ownershipDurabilityEqualPriorityFix": "GO",
+    "authoritativePrecedenceModel": "GO",
+    "p259P261RegressionAndFailClosed": "GO",
+    "actualLiveSendWhileQuotaZero": "NO-GO",
+    "vercelDeploymentReadiness": "CONDITIONAL_GO"
+  },
+  "rootCause": {
+    "summary": "writeStoreFile mergeOwnershipSticky preserved equal-priority disk owners without freshness, reverting newer confirmed operator Assign Recruiter/DM writes after upsert force-applied them in memory.",
+    "files": [
+      "src/lib/p188-4-recruiter-ownership-durability/precedence.ts",
+      "src/lib/p188-4-recruiter-ownership-durability/ownershipMerge.ts",
+      "src/lib/candidate-workflow-store.ts"
+    ],
+    "p261Evidence": "Equal-priority ownership merge blocked API restore of same-priority manual recruiter; durable-file restore used"
+  },
+  "precedence": {
+    "1_confirmedOperator": ["manual", "operator_restore", "operator_confirmed_historical_restore"],
+    "2_approvedAutomated": ["production_assignment", "internal_assignment"],
+    "3_breezySourced": ["breezy_import"],
+    "4_workflowRestored": "durable merge prefers fresher disk/incoming ownership",
+    "5_inferredDefault": ["auto", "territory_default"],
+    "6_unassignedFallback": ["unassigned"],
+    "equalPriorityRule": "higher ownershipVersion else newer assignedAt; tied fail-closed preserve current"
+  },
+  "fix": {
+    "equalPriorityNewerWins": true,
+    "staleEqualPriorityBlocked": true,
+    "dmStickyMerge": true,
+    "durableMetadata": [
+      "source",
+      "updatedAt/assignedAt",
+      "operator (assignedBy)",
+      "revision/version",
+      "confirmationStatus"
+    ],
+    "conflictActivity": true,
+    "upsertReturnsPostMergeRecord": true,
+    "quotaOrPacketBehaviorChanged": false,
+    "hardCodedTestCandidate": false
+  },
+  "ui": {
+    "operatorSourceTimeIdentity": true,
+    "surfaces": [
+      "candidate-assignment-badge",
+      "candidate-operations-applicant-drawer",
+      "hiring-workspace-applicant-drawer",
+      "candidate-queue-row",
+      "candidates-section"
+    ]
+  },
+  "reproduce": {
+    "method": "in_memory_merge_race",
+    "artifact": "artifacts/p262-reproduce-trace.json",
+    "operatorWriteStuck": true,
+    "staleRacePreservedConfirmed": true,
+    "breezySyncBlocked": true,
+    "dropboxPackets": 0,
+    "signedInBrowserRerun": false,
+    "signedInBrowserBlocker": "localhost:3000 down"
+  },
+  "envPresence": {
+    "local": {
+      "SESSION_SECRET": "PRESENT",
+      "BREEZY_API_KEY": "PRESENT",
+      "DATABASE_URL": "PRESENT",
+      "DROPBOX_SIGN_API_KEY": "PRESENT",
+      "DROPBOX_SIGN_TEST_MODE": "MISSING",
+      "P185_DATABASE_URL": "MISSING",
+      "CRON_SECRET": "MISSING",
+      "RESEND_API_KEY": "MISSING"
+    },
+    "vercelPreview": {
+      "SESSION_SECRET": "PRESENT",
+      "BREEZY_API_KEY": "PRESENT",
+      "DATABASE_URL": "PRESENT",
+      "CRON_SECRET": "PRESENT",
+      "source": "artifacts/p261-auth-recovery.json"
+    },
+    "vercelProduction": {
+      "SESSION_SECRET": "PRESENT",
+      "BREEZY_API_KEY": "PRESENT",
+      "DATABASE_URL": "PRESENT",
+      "CRON_SECRET": "PRESENT",
+      "source": "artifacts/p261-auth-recovery.json"
+    },
+    "redeployed": false,
+    "deployAuthorized": false,
+    "commitAuthorized": false,
+    "pushAuthorized": false
+  },
+  "deploymentGraph": {
+    "loginPage": true,
+    "proxy": true,
+    "middlewareTs": false,
+    "workflowsApi": true,
+    "jccSendPaperworkApi": true,
+    "p185DurableStorageModule": true,
+    "clientNodeFsPromisesInRecruitingUi": false,
+    "p260RefreshUsesNodeFsServerOnly": true
+  },
+  "quota": {
+    "accountQuotaRemaining": 0,
+    "liveSend": "NO-GO",
+    "testModeSubstitute": false,
+    "source": "artifacts/p260-live-paperwork-workspace.json + p261"
+  },
+  "tests": {
+    "passed": 71,
+    "failed": 0,
+    "suites": [
+      "p188-4-recruiter-ownership-durability",
+      "p262-ownership-durability",
+      "p258-hiring-workspace",
+      "p259-candidate-operations",
+      "p260-live-paperwork-workspace",
+      "p261-auth-recovery"
+    ]
+  },
+  "writesPerformed": {
+    "dropboxPacketsCreated": 0,
+    "paperworkSentWrites": 0,
+    "liveProductionOwnershipWrites": 0,
+    "inMemoryReproduceOnly": true
+  },
+  "filesChanged": [
+    "src/lib/p188-4-recruiter-ownership-durability/precedence.ts",
+    "src/lib/p188-4-recruiter-ownership-durability/ownershipMerge.ts",
+    "src/lib/p188-4-recruiter-ownership-durability/index.ts",
+    "src/lib/p188-4-recruiter-ownership-durability/simulate.ts",
+    "src/lib/p188-4-recruiter-ownership-durability/__tests__/p188-4-recruiter-ownership-durability.test.ts",
+    "src/lib/p188-4-recruiter-ownership-durability/__tests__/p262-ownership-durability.test.ts",
+    "src/lib/candidate-workflow-types.ts",
+    "src/lib/candidate-workflow-store.ts",
+    "src/app/api/candidates/workflows/route.ts",
+    "src/lib/build-candidate-workflow-row.ts",
+    "src/lib/p258-hiring-workspace/types.ts",
+    "src/lib/p258-hiring-workspace/applicants.ts",
+    "src/lib/p259-candidate-operations/p259-candidate-operations.test.ts",
+    "src/components/recruiting/candidate-assignment-badge.tsx",
+    "src/components/recruiting/candidate-operations-applicant-drawer.tsx",
+    "src/components/recruiting/hiring-workspace-applicant-drawer.tsx",
+    "src/components/recruiting/candidate-queue-row.tsx",
+    "src/components/recruiting/candidates-section.tsx",
+    "artifacts/p262-ownership-durability-report.md",
+    "artifacts/p262-ownership-durability.json",
+    "artifacts/p262-reproduce-trace.json"
+  ],
+  "outstandingBlockers": [
+    "Dropbox production quota = 0 blocks live send",
+    "No authorize to commit/push/redeploy Preview or Production",
+    "Signed-in browser re-validation pending after local/preview server available"
+  ],
+  "checklists": {
+    "redeploy": [
+      "Merge ownership + P261 client-safe import split",
+      "Confirm nonsecret Vercel env names present",
+      "Preview smoke: login, JCC/Operations, assign, refresh, P260 preview fail-closed",
+      "Production only after Preview smoke",
+      "Keep live send blocked while quota 0"
+    ],
+    "rollback": [
+      "Revert to previous Vercel deployment",
+      "Verify workflow store integrity",
+      "Smoke /login and JCC",
+      "Do not attempt live send during rollback while quota 0"
+    ]
+  }
+}

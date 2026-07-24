@@ -1,0 +1,48 @@
+{
+  "sourcePhase": "P188.4",
+  "assignmentsPreserved": 4,
+  "clobbersPrevented": 4,
+  "conflictsSurfaced": 1,
+  "scenarios": [
+    {
+      "name": "Unassigned import after named assignment",
+      "ok": true,
+      "detail": "Unassigned/empty incoming cannot overwrite named recruiter"
+    },
+    {
+      "name": "null cannot overwrite named",
+      "ok": true,
+      "detail": "Unassigned/empty incoming cannot overwrite named recruiter"
+    },
+    {
+      "name": "auto cannot overwrite manual",
+      "ok": true,
+      "detail": "Lower-priority auto cannot overwrite manual"
+    },
+    {
+      "name": "explicit reassignment works",
+      "ok": true,
+      "detail": "Forced explicit reassignment"
+    },
+    {
+      "name": "concurrent ingestion/assignment race merge",
+      "ok": true,
+      "detail": "merged=Morgan"
+    },
+    {
+      "name": "conflicting historical assignments",
+      "ok": true,
+      "detail": "Equal-priority conflict (auto): preserving current"
+    },
+    {
+      "name": "operator-confirmed restore sticky",
+      "ok": true,
+      "detail": "Unassigned/empty incoming cannot overwrite named recruiter"
+    },
+    {
+      "name": "manual assignment sticky",
+      "ok": true,
+      "detail": "Lower-priority breezy_import cannot overwrite manual"
+    }
+  ]
+}

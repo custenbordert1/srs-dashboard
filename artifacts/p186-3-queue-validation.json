@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-07-13T14:05:49.626Z",
+  "sourcePhase": "P186.3",
+  "readOnly": true,
+  "productionWritesAttempted": 0,
+  "productionWritesCompleted": 0,
+  "flagsDefaultOff": {
+    "operatorDashboard": false,
+    "approvalActions": false,
+    "bulkActions": false,
+    "missingShadowReviewQueue": false,
+    "redactedExports": false
+  },
+  "queueTotals": {
+    "waiting_recruiter_review": 1,
+    "hiring_recommendation_needed": 0,
+    "waiting_operator_approval": 2,
+    "approved_waiting_paperwork": 0,
+    "paperwork_sent": 0,
+    "paperwork_viewed": 0,
+    "paperwork_signed": 0,
+    "onboarding_incomplete": 0,
+    "ready_for_mel": 0,
+    "export_blocked": 0,
+    "lifecycle_conflicts": 1,
+    "missing_shadow": 1
+  },
+  "approvalReadyCount": 2,
+  "blockedCount": 1,
+  "mismatchCount": 1,
+  "missingShadowCount": 1,
+  "dashboardItemCount": 5,
+  "bulkPreviewValidation": {
+    "action": "approve_hiring_recommendation",
+    "eligible": 1,
+    "blocked": 1,
+    "batchLimit": 25
+  },
+  "isolation": {
+    "p184P185Untouched": true,
+    "paperworkSendDisabled": true,
+    "continuousAutomationDisabled": true,
+    "p186NonAuthoritative": true
+  }
+}

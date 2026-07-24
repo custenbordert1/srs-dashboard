@@ -1,0 +1,111 @@
+{
+  "phase": "P241",
+  "generatedAt": "2026-07-21T14:33:17.170Z",
+  "count": 8,
+  "opportunities": [
+    {
+      "redactedCandidateId": "61244a24ba7e",
+      "displayName": "TOMMY EDWARD HARPER JR",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 0,
+      "projectedCoverageTier": "tier1_0_20"
+    },
+    {
+      "redactedCandidateId": "09d804b86cb5",
+      "displayName": "Dylan Albright",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 26.2,
+      "projectedCoverageTier": "tier2_21_39"
+    },
+    {
+      "redactedCandidateId": "9d2a0cd6d508",
+      "displayName": "Faith Bandy",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 5.8,
+      "projectedCoverageTier": "tier1_0_20"
+    },
+    {
+      "redactedCandidateId": "c15e4466e945",
+      "displayName": "Derrick Fowler",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 22.2,
+      "projectedCoverageTier": "tier2_21_39"
+    },
+    {
+      "redactedCandidateId": "7ffaf043808e",
+      "displayName": "Brian Alspaugh",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 11.5,
+      "projectedCoverageTier": "tier1_0_20"
+    },
+    {
+      "redactedCandidateId": "4c8aa3fd8f88",
+      "displayName": "Tyera Anderson-Rainey",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 0,
+      "projectedCoverageTier": "tier1_0_20"
+    },
+    {
+      "redactedCandidateId": "cbe24e733f0a",
+      "displayName": "Samantha Bland",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 0,
+      "projectedCoverageTier": "tier1_0_20"
+    },
+    {
+      "redactedCandidateId": "f1c539dc4ed7",
+      "displayName": "Yolanda Tolson",
+      "recoverability": "automatic",
+      "classification": "logic_bug",
+      "failedCheckId": "action_type_blocks_promotion",
+      "failedRule": "business_rule",
+      "correction": "In P240 simulateP240CandidatePath replayAsFreshNew, also clear actionType/requiredAction/actionReason/actionDueDate/actionGeneratedAt (and optionally requiredAction-derived fields). Do not bypass P65.6 live business rules for already-sent packets.",
+      "unlocksWouldSend": true,
+      "projectedOutcome": "would_send",
+      "projectedNearestMiles": 0,
+      "projectedCoverageTier": "tier1_0_20"
+    }
+  ]
+}

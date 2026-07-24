@@ -1,0 +1,605 @@
+{
+  "generatedAt": "2026-07-13T18:50:30.325Z",
+  "productionCommit": "81039fba0bc58d1545dc8cd1c76073392785e2fe",
+  "candidatesScanned": 684,
+  "rawStatusLikeDistribution": {
+    "Applied": 504,
+    "Recruiter Review": 10,
+    "Hiring Recommendation": 0,
+    "Operator Approved": 0,
+    "Paperwork Needed": 0,
+    "Paperwork Sent": 122,
+    "Viewed": 25,
+    "Signed": 17,
+    "Ready for MEL": 0,
+    "Exported": 0,
+    "Other": 6
+  },
+  "furthestLegitimateStageCounts": {
+    "Applied": 504,
+    "Recruiter Review": 10,
+    "Hiring Recommendation": 0,
+    "Operator Approved": 0,
+    "Paperwork Needed": 0,
+    "Paperwork Sent": 122,
+    "Viewed": 25,
+    "Signed": 17,
+    "Ready for MEL": 0,
+    "Exported": 0,
+    "Other": 6
+  },
+  "recommendedStagePersistedCount": 0,
+  "unassignedRecruiterCount": 684,
+  "hiringRecommendationCount": 0,
+  "sampleClassifications": [
+    {
+      "redactedCandidateId": "1b3a2f…b63c",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "5da2f2…1b96",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "272690…a5b9",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "f700c2…0f03",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "c5b232…837a",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "afa412…d361",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "570d0e…132e",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "1b909b…99ec",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "cbc938…11b2",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "faec52…e4c9",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "305e36…07a8",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "520ae0…6673",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "de921c…199b",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "968499…4533",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "911157…89ae",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "8d0a9d…2b68",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "fd299c…7d14",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "d3c7ba…8523",
+      "productionWorkflowStatus": "Not Qualified",
+      "furthestLegitimateStage": "Other",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "8249cd…d538",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "ba880e…ff1e",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "554fe2…1478",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "64ac20…117e",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "a23e30…3307",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "854fd7…f321",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "8c0354…cf91",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "f1b232…74c4",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "840c0b…8148",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "621ef8…480c",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "b06d22…b36a",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "6acc09…d96a",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Viewed",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "viewed",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "e2399d…283c",
+      "productionWorkflowStatus": "Needs Review",
+      "furthestLegitimateStage": "Recruiter Review",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "21dc66…4d31",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "fc9fe7…5e36",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "fe26ac…d3f7",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "2969a7…3a25",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "c3b611…6cfd",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "5e6421…aaf9",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "445225…71f7",
+      "productionWorkflowStatus": "Paperwork Sent",
+      "furthestLegitimateStage": "Paperwork Sent",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "6a8910…f999",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    },
+    {
+      "redactedCandidateId": "bb5d94…8f10",
+      "productionWorkflowStatus": "Applied",
+      "furthestLegitimateStage": "Applied",
+      "ageDays": 3.9,
+      "assignedRecruiter": "Unassigned",
+      "recommendedStage": null,
+      "paperworkStatus": "not_sent",
+      "blockReasons": [
+        "missing_recommendation_evidence",
+        "unresolved_owner",
+        "unresolved_job"
+      ]
+    }
+  ],
+  "safety": {
+    "productionWrites": 0,
+    "candidateStateChanges": 0,
+    "paperworkSends": 0,
+    "approvals": 0,
+    "melWrites": 0,
+    "automationEnabled": false,
+    "featureFlagsChanged": false
+  }
+}

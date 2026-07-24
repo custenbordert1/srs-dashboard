@@ -1,7 +1,11 @@
-import { appendFile, mkdir } from "node:fs/promises";
+import { appendFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import {recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
+import { recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
+import {
+  assertLiveMailReadyForSend,
+  getDeploymentTier,
+} from "@/lib/production-mail-config";
 
 export type TransactionalEmailPayload = {
   from: string;
@@ -20,6 +24,14 @@ export type TransactionalEmailResult = {
   mode: "log" | "resend" | "skipped";
   messageId?: string;
   error?: string;
+};
+
+export type SendTransactionalEmailOptions = {
+  /**
+   * When true, refuse log/outbox "success" — live Resend delivery is required.
+   * Production live reminder / paperwork paths must set this (or call assertLiveMailReadyForSend).
+   */
+  requireLiveDelivery?: boolean;
 };
 
 function emailDataDir(): string {
@@ -83,23 +95,58 @@ async function sendViaResend(payload: TransactionalEmailPayload): Promise<Transa
   return { ok: true, mode: "resend", messageId: body.id };
 }
 
-/** Sends transactional email (log outbox always; optional Resend when configured). */
+/**
+ * Sends transactional email (log outbox always; optional Resend when configured).
+ * When requireLiveDelivery is true, never treats log/outbox as success.
+ */
 export async function sendTransactionalEmail(
   payload: TransactionalEmailPayload,
   meta: Record<string, unknown> = {},
+  options: SendTransactionalEmailOptions = {},
 ): Promise<TransactionalEmailResult> {
   const mode = getTransactionalEmailMode();
+  const tier = getDeploymentTier();
+  const requireLive = Boolean(options.requireLiveDelivery);
+
+  if (requireLive) {
+    const gate = assertLiveMailReadyForSend();
+    if (!gate.ok) {
+      await appendTransactionalEmailOutbox(payload, {
+        ...meta,
+        deliveryMode: mode,
+        blockedLiveDelivery: true,
+        deploymentTier: tier,
+      });
+      return {
+        ok: false,
+        mode: "skipped",
+        error: gate.error ?? "Live mail not ready",
+      };
+    }
+  }
+
   await appendTransactionalEmailOutbox(payload, {
     ...meta,
     deliveryMode: mode,
+    deploymentTier: tier,
+    requireLiveDelivery: requireLive,
   });
 
   if (mode === "log") {
+    if (requireLive) {
+      return {
+        ok: false,
+        mode: "skipped",
+        error:
+          "DIRECT_DEPOSIT_EMAIL_MODE is log — live delivery required; refusing silent outbox success",
+      };
+    }
     console.info("[transactional-email] logged", {
       to: payload.to,
       bcc: payload.bcc ?? null,
       subject: payload.subject,
       tags: payload.tags,
+      deploymentTier: tier,
       ...meta,
     });
     return { ok: true, mode: "log", messageId: "logged" };

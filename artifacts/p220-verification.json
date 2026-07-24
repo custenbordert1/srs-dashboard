@@ -1,0 +1,81 @@
+{
+  "phase": "P220",
+  "generatedAt": "2026-07-20T14:02:36.440Z",
+  "approvedBy": "Taylor Custenborder",
+  "mode": "live",
+  "targetStage": "Paperwork Needed",
+  "selection": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "expectedCity": "Columbus",
+      "expectedState": "OH",
+      "expectedDm": "Mindie Rodriguez"
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "expectedCity": "Kansas City",
+      "expectedState": "MO",
+      "expectedDm": "Amy Harp"
+    }
+  ],
+  "writes": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "transitioned": true,
+      "reason": "already_at_target_affirmed",
+      "previousStage": "Paperwork Needed",
+      "newStage": "Paperwork Needed"
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "transitioned": true,
+      "reason": "already_at_target_affirmed",
+      "previousStage": "Paperwork Needed",
+      "newStage": "Paperwork Needed"
+    }
+  ],
+  "readBack": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "previousStage": "Paperwork Needed",
+      "newStage": "Paperwork Needed",
+      "assignedDm": "Mindie Rodriguez",
+      "assignedRecruiter": "Unassigned",
+      "paperworkStatus": "not_sent",
+      "signatureRequestId": null,
+      "changedFields": [
+        "lastActionAt",
+        "updatedAt"
+      ],
+      "ok": true
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "previousStage": "Paperwork Needed",
+      "newStage": "Paperwork Needed",
+      "assignedDm": "Amy Harp",
+      "assignedRecruiter": "Unassigned",
+      "paperworkStatus": "not_sent",
+      "signatureRequestId": null,
+      "changedFields": [
+        "lastActionAt",
+        "updatedAt"
+      ],
+      "ok": true
+    }
+  ],
+  "safety": {
+    "candidatesWritten": 2,
+    "otherCandidatesWritten": 0,
+    "workflowChangesOutsideTarget": 0,
+    "dropboxRequests": 0,
+    "signatureRequestsCreated": 0,
+    "paperworkSent": 0,
+    "emailsSent": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "recruiterChanges": 0,
+    "notesChanges": 0,
+    "advancedBeyondPaperworkNeeded": 0
+  }
+}

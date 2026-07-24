@@ -1,0 +1,20 @@
+{
+  "phase": "P249-daily-ops-mission",
+  "generatedAt": "2026-07-23T13:56:21.245Z",
+  "opsDate": "2026-07-23",
+  "newApplicants": 399,
+  "paperworkNeeded": 8,
+  "eligibleToSend": 1,
+  "paperworkSent": 496,
+  "outstandingSignatures": 310,
+  "reminder1": 180,
+  "reminder2": 0,
+  "reminder3": 0,
+  "reminder4": 0,
+  "viewed": 139,
+  "signedToday": 0,
+  "readyForMel": 18,
+  "blocked": 204,
+  "pipelineHealthPct": 38,
+  "estimatedRecruiterHoursSaved": 9.1
+}

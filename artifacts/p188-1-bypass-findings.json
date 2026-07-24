@@ -1,0 +1,406 @@
+{
+  "generatedAt": "2026-07-13T19:21:47.237Z",
+  "findingsCount": 139,
+  "findings": [
+    {
+      "candidateId": "c5b232…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "afa412…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "854fd7…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "8c0354…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "f1b232…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "840c0b…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "621ef8…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "b06d22…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "6acc09…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "21dc66…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "c3b611…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "5e6421…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "445225…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "84d510…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "c70e4a…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "09c38d…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "92181f…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "705cdc…",
+      "reconciledTo": "Signed",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": false,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "91faef…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "189e89…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "652bc9…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "aaa557…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "c87b5e…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "94f3eb…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "4eb52a…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "e5124f…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "6b40ff…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "a498d7…",
+      "reconciledTo": "Signed",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": false,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "de52f7…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "db05da…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "94b379…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "598e1b…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "c0c920…",
+      "reconciledTo": "Signed",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": false,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "773445…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "cfcd1b…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "f71f2c…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "449637…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "edc9df…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "9c8555…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "cfd032…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "9990aa…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "465518…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "f8bc83…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "86a8d6…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "b32054…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "e72d6a…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "98400c…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "1bd395…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "6a850d…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    },
+    {
+      "candidateId": "6d548b…",
+      "reconciledTo": "Paperwork Sent",
+      "detail": "Onboarding reconcile advanced past mid-funnel without durable Hiring Recommendation / Operator Approved",
+      "paperworkSent": true,
+      "createdHiringRecommendation": false,
+      "createdOperatorApproved": false
+    }
+  ]
+}

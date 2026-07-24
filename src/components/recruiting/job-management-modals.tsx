@@ -9,58 +9,9 @@ import {
 } from "@/lib/job-management/breezy-position-payload";
 import { normalizeJobLocationFields } from "@/lib/job-management/normalize-job-location-fields";
 import { BREEZY_COUNTRY_CODE } from "@/lib/job-management/us-location-rules";
-import type { JobManagementRow } from "@/lib/job-management/job-management-rows";
-
 const inputClass =
   "mt-1 w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-teal-500/50";
 const labelClass = "block text-xs font-medium text-zinc-500";
-
-export function JobViewModal({
-  row,
-  onClose,
-}: {
-  row: JobManagementRow;
-  onClose: () => void;
-}) {
-  return (
-    <ModalShell title="View job" onClose={onClose}>
-      <dl className="grid gap-3 text-sm sm:grid-cols-2">
-        <Field label="Title" value={row.title} />
-        <Field label="Status" value={row.statusLabel} />
-        <Field label="City" value={row.city || "—"} />
-        <Field label="State" value={row.state || "—"} />
-        <Field label="Display location" value={row.displayLocation || "—"} />
-        <Field label="Source" value={row.source} />
-        <Field label="Applicants" value={row.applicants?.toLocaleString() ?? "—"} />
-        <Field
-          label="Posted"
-          value={row.postedDate ? new Date(row.postedDate).toLocaleString() : "—"}
-        />
-        <Field
-          label="Last synced"
-          value={row.lastSynced ? new Date(row.lastSynced).toLocaleString() : "—"}
-        />
-        {row.breezyJobId ? <Field label="Breezy job ID" value={row.breezyJobId} /> : null}
-        {row.draftId ? <Field label="Draft ID" value={row.draftId} /> : null}
-      </dl>
-      {row.draft?.description ? (
-        <div className="mt-4">
-          <p className={labelClass}>Description</p>
-          <p className="mt-1 max-h-40 overflow-auto rounded-md border border-zinc-800 bg-zinc-950/80 p-2 text-xs text-zinc-300 whitespace-pre-wrap">
-            {row.draft.description}
-          </p>
-        </div>
-      ) : row.breezyJob?.description ? (
-        <div className="mt-4">
-          <p className={labelClass}>Description</p>
-          <p className="mt-1 max-h-40 overflow-auto rounded-md border border-zinc-800 bg-zinc-950/80 p-2 text-xs text-zinc-300 whitespace-pre-wrap">
-            {row.breezyJob.description}
-          </p>
-        </div>
-      ) : null}
-    </ModalShell>
-  );
-}
 
 export function JobDraftEditModal({
   draft,

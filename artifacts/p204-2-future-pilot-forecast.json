@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-07-15T20:03:43.477Z",
+  "forecastOnly": true,
+  "approvedAdvance": 9,
+  "approvedNeedsReview": 5,
+  "approvedReject": 5,
+  "deferred": 0,
+  "stale": 0,
+  "blockedByEvidence": 1,
+  "eligibleForFutureControlledActionPilot": 19,
+  "notes": [
+    "Forecast only — no lifecycle / PN / reject / Dropbox / MEL actions performed.",
+    "Safety-flagged candidates are blocked from future lifecycle pilot eligibility until resolved."
+  ]
+}

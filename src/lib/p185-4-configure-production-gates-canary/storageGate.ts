@@ -9,6 +9,7 @@ export type ProductionStoragePathClassification =
   | "local_filesystem"
   | "ephemeral_tmp"
   | "in_memory"
+  | "postgres"
   | "unsafe";
 
 function isVercelRuntime(): boolean {
@@ -20,9 +21,10 @@ function productionStorageConfirmed(): boolean {
 }
 
 /**
- * Local filesystem is acceptable for a laptop canary only when the operator
- * explicitly confirms storage for this environment. Vercel always requires a
- * durable volume (or confirmed non-/tmp absolute durable dir) — never /tmp.
+ * Production live-send gate (Option A):
+ * - Preferred: Neon / Vercel Postgres (`adapter === "postgres"`) via P185.5.
+ * - Local filesystem alone is not enough on Vercel.
+ * - `P185_PRODUCTION_STORAGE_CONFIRMED` is never auto-set — operator only.
  */
 export function evaluateProductionStorageGate(input?: {
   storage?: ReturnType<typeof getP185StorageHealth>;
@@ -33,23 +35,45 @@ export function evaluateProductionStorageGate(input?: {
   setup: string[];
 } {
   const storage = input?.storage ?? getP185StorageHealth();
-  const dataDir = path.resolve(storage.dataDir || p185DataDir());
+  const dataDir = path.resolve(
+    storage.adapter === "postgres" ? "/postgres" : storage.dataDir || p185DataDir(),
+  );
   const vercel = isVercelRuntime();
   const confirmed = productionStorageConfirmed();
   const blockers: string[] = [];
   const setup: string[] = [];
 
   let pathClassification: ProductionStoragePathClassification =
-    storage.adapter === "durable_volume"
-      ? "durable_volume"
-      : storage.adapter === "ephemeral_tmp"
-        ? "ephemeral_tmp"
-        : storage.adapter === "in_memory"
-          ? "in_memory"
-          : "local_filesystem";
+    storage.adapter === "postgres"
+      ? "postgres"
+      : storage.adapter === "durable_volume"
+        ? "durable_volume"
+        : storage.adapter === "ephemeral_tmp"
+          ? "ephemeral_tmp"
+          : storage.adapter === "in_memory"
+            ? "in_memory"
+            : "local_filesystem";
 
-  if (dataDir.startsWith("/tmp/") || dataDir === "/tmp") {
+  if (storage.adapter !== "postgres" && (dataDir.startsWith("/tmp/") || dataDir === "/tmp")) {
     pathClassification = "ephemeral_tmp";
+  }
+
+  if (storage.adapter === "postgres") {
+    if (!storage.healthy || !storage.durable) {
+      blockers.push("Postgres durable adapter is unhealthy.");
+      setup.push("Check P185_DATABASE_URL / DATABASE_URL connectivity and schema migrations.");
+      return { approvedForLiveSend: false, pathClassification, blockers, setup };
+    }
+    if (!confirmed) {
+      blockers.push(
+        "P185_PRODUCTION_STORAGE_CONFIRMED is not set — set only after P185.5 migration + durability validation pass.",
+      );
+      setup.push(
+        "After P185.5 migration/validation reports ready_to_confirm, set P185_PRODUCTION_STORAGE_CONFIRMED=1 in Vercel Production env (do not fabricate).",
+      );
+      return { approvedForLiveSend: false, pathClassification, blockers, setup };
+    }
+    return { approvedForLiveSend: true, pathClassification, blockers, setup };
   }
 
   if (
@@ -60,7 +84,7 @@ export function evaluateProductionStorageGate(input?: {
   ) {
     blockers.push("Durable production storage is not confirmed healthy.");
     setup.push(
-      "Set P185_DURABLE_DATA_DIR to a durable absolute path (never /tmp). On Vercel, attach a persistent volume or external durable store — local .data is not durable across serverless deploys.",
+      "Prefer Neon/Vercel Postgres via P185_DATABASE_URL. Do not use .data, /tmp, or function-local filesystem on Vercel.",
     );
     return { approvedForLiveSend: false, pathClassification, blockers, setup };
   }
@@ -71,14 +95,14 @@ export function evaluateProductionStorageGate(input?: {
         "Vercel runtime detected with local_filesystem storage — not durable across deployments.",
       );
       setup.push(
-        "On Vercel: provision durable storage, set P185_DURABLE_DATA_DIR to that absolute path, and set P185_PRODUCTION_STORAGE_CONFIRMED=1 only after verifying persistence across deploys.",
+        "On Vercel: set P185_DATABASE_URL to Neon/Vercel Postgres, run P185.5 migration, then set P185_PRODUCTION_STORAGE_CONFIRMED=1 after validation.",
       );
       return { approvedForLiveSend: false, pathClassification, blockers, setup };
     }
     if (!confirmed) {
       blockers.push("P185_PRODUCTION_STORAGE_CONFIRMED is not set to 1 for this Vercel environment.");
       setup.push(
-        "After verifying the durable volume survives redeploys, set P185_PRODUCTION_STORAGE_CONFIRMED=1 in Vercel project env (Production).",
+        "After verifying durable Postgres survives redeploys, set P185_PRODUCTION_STORAGE_CONFIRMED=1 in Vercel project env (Production).",
       );
       return { approvedForLiveSend: false, pathClassification, blockers, setup };
     }
@@ -87,7 +111,7 @@ export function evaluateProductionStorageGate(input?: {
       "P185_PRODUCTION_STORAGE_CONFIRMED is not set — local filesystem health alone does not authorize live sends.",
     );
     setup.push(
-      "For an intentional local canary only: set P185_PRODUCTION_STORAGE_CONFIRMED=1 in .env.local after confirming this machine's .data path is the intended durable store for the canary. Do not set this on Vercel without a durable volume.",
+      "Use P185_DATABASE_URL (or P185_PGLITE_DATA_DIR for local durable validation), run P185.5 migration/validation, then set P185_PRODUCTION_STORAGE_CONFIRMED=1.",
     );
     return { approvedForLiveSend: false, pathClassification, blockers, setup };
   }

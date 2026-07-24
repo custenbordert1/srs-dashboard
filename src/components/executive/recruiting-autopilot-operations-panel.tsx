@@ -48,8 +48,16 @@ export function RecruitingAutopilotOperationsPanel() {
     actionBusy,
     actionMessage,
     actionError,
+    evaluationPreview,
+    evaluationPreviewBusy,
+    evaluationPreviewError,
+    cycleReport,
+    cycleBusy,
+    cycleError,
     refresh,
     postControl,
+    runEvaluationPreview,
+    runFullAutonomousCycle,
   } = useRecruitingAutopilotOperations();
 
   if (loading) {
@@ -212,6 +220,232 @@ export function RecruitingAutopilotOperationsPanel() {
             ))}
           </ul>
         )}
+      </ExecutiveCard>
+
+      <ExecutiveCard id="p243-full-autonomous-cycle" variant="premium">
+        <SectionHeader
+          title="Full Autonomous Cycle"
+          subtitle="P243 end-to-end: pull → P204/CEO score → decide → plan paperwork (dry-run default; live = canary)"
+          badge="P243"
+        />
+        <div className="mb-3 flex flex-wrap gap-2">
+          <StatusBadge tone={cycleReport && !cycleReport.dryRun ? "warning" : "success"}>
+            {cycleReport
+              ? cycleReport.dryRun
+                ? "DRY-RUN"
+                : cycleReport.executionMode === "full_live"
+                  ? "FULL-LIVE"
+                  : "CANARY-LIVE"
+              : "dry-run first"}
+          </StatusBadge>
+          {cycleReport?.ceoTraceId ? (
+            <StatusBadge tone="neutral">
+              {`CEO ${cycleReport.ceoTraceId.slice(0, 8)}…`}
+            </StatusBadge>
+          ) : null}
+          {cycleReport ? (
+            <StatusBadge tone={cycleReport.failures > 0 ? "warning" : "success"}>
+              {`failures ${cycleReport.failures}`}
+            </StatusBadge>
+          ) : null}
+          {cycleReport?.ingestion?.source ? (
+            <StatusBadge tone="neutral">{`ingest ${cycleReport.ingestion.source}`}</StatusBadge>
+          ) : null}
+        </div>
+        <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <MetricCard label="Pulled" value={cycleReport ? String(cycleReport.pulled) : "—"} />
+          <MetricCard label="Scored" value={cycleReport ? String(cycleReport.scored) : "—"} />
+          <MetricCard
+            label="Auto-advance"
+            value={cycleReport ? String(cycleReport.autoAdvance) : "—"}
+          />
+          <MetricCard
+            label="Paperwork planned"
+            value={cycleReport ? String(cycleReport.paperworkPlanned) : "—"}
+          />
+          <MetricCard
+            label="Paperwork sent"
+            value={cycleReport ? String(cycleReport.paperworkSent) : "—"}
+          />
+          <MetricCard
+            label="Success rate"
+            value={
+              cycleReport?.successRatePct != null ? `${cycleReport.successRatePct}%` : "—"
+            }
+          />
+          <MetricCard
+            label="Advance rate"
+            value={
+              cycleReport?.advanceRatePct != null ? `${cycleReport.advanceRatePct}%` : "—"
+            }
+          />
+          <MetricCard
+            label="Human review"
+            value={cycleReport ? String(cycleReport.humanReview) : "—"}
+          />
+          <MetricCard
+            label="Fresh Reset Applied"
+            value={
+              cycleReport?.freshResetApplied != null
+                ? String(cycleReport.freshResetApplied)
+                : "—"
+            }
+          />
+        </div>
+        {cycleReport?.warnings && cycleReport.warnings.length > 0 ? (
+          <ul className="mb-3 space-y-1 text-sm text-amber-200/90">
+            {cycleReport.warnings.slice(0, 5).map((w) => (
+              <li key={w}>⚠ {w}</li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded-md border border-emerald-700/60 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-100"
+            disabled={cycleBusy || actionBusy}
+            onClick={() =>
+              void runFullAutonomousCycle({ limit: 25, dryRun: true, forceFreshReset: true })
+            }
+          >
+            {cycleBusy ? "Running…" : "Run Full Autonomous Cycle (dry-run + fresh reset)"}
+          </button>
+          <button
+            type="button"
+            className="rounded-md border border-emerald-700/60 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-100"
+            disabled={cycleBusy || actionBusy}
+            onClick={() => void runFullAutonomousCycle({ limit: 25, dryRun: true })}
+          >
+            {cycleBusy ? "Running…" : "Run Full Autonomous Cycle (dry-run)"}
+          </button>
+          <button
+            type="button"
+            className="rounded-md border border-amber-700/60 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-100"
+            disabled={cycleBusy || actionBusy}
+            onClick={() => {
+              const ok = window.confirm(
+                "Run P243 CANARY LIVE (max 3 paperwork sends)? Requires Dropbox testMode=true and confirmLive.",
+              );
+              if (!ok) return;
+              void runFullAutonomousCycle({
+                limit: 25,
+                dryRun: false,
+                confirmLive: true,
+                canaryLimit: 3,
+              });
+            }}
+          >
+            Canary live (limit 3)
+          </button>
+        </div>
+        {cycleError ? <p className="mt-3 text-sm text-red-400">{cycleError}</p> : null}
+      </ExecutiveCard>
+
+      <ExecutiveCard id="are-evaluation-preview">
+        <SectionHeader
+          title="Evaluation Engine Preview"
+          subtitle="Thin P204 composer (CEO) — dry-run audit/timeline, LLM off by default"
+          badge="CEO"
+        />
+        <div className="mb-3 flex flex-wrap gap-2">
+          {evaluationPreview?.traceId ? (
+            <StatusBadge tone="neutral">
+              {`trace ${evaluationPreview.traceId.slice(0, 8)}…`}
+            </StatusBadge>
+          ) : (
+            <StatusBadge tone="neutral">no trace yet</StatusBadge>
+          )}
+          <StatusBadge tone="success">dry-run</StatusBadge>
+          <StatusBadge tone="neutral">
+            {`audits ${evaluationPreview?.auditCount ?? 0}`}
+          </StatusBadge>
+          <StatusBadge tone="neutral">
+            {`timeline ${evaluationPreview?.timelineLength ?? 0}`}
+          </StatusBadge>
+          <StatusBadge
+            tone={(evaluationPreview?.llmEnhancementsApplied ?? 0) > 0 ? "warning" : "neutral"}
+          >
+            {`LLM ${(evaluationPreview?.llmEnhancementsApplied ?? 0) > 0 ? "stubbed" : "off"}`}
+          </StatusBadge>
+        </div>
+        <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+          <MetricCard
+            label="Last preview evaluated"
+            value={evaluationPreview ? String(evaluationPreview.evaluated) : "—"}
+          />
+          <MetricCard
+            label="Auto-advance"
+            value={evaluationPreview ? String(evaluationPreview.autoAdvance) : "—"}
+          />
+          <MetricCard
+            label="Human review"
+            value={evaluationPreview ? String(evaluationPreview.humanReview) : "—"}
+          />
+          <MetricCard
+            label="Auto-reject"
+            value={evaluationPreview ? String(evaluationPreview.autoReject) : "—"}
+          />
+          <MetricCard
+            label="Paperwork tasks planned"
+            value={evaluationPreview ? String(evaluationPreview.paperworkTasksPlanned) : "—"}
+          />
+          <MetricCard
+            label="Avg latency"
+            value={
+              evaluationPreview ? `${evaluationPreview.averageLatencyMs} ms` : "—"
+            }
+          />
+        </div>
+        <button
+          type="button"
+          className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200"
+          disabled={evaluationPreviewBusy}
+          onClick={() =>
+            void runEvaluationPreview([
+              {
+                candidateId: "preview-demo-strong",
+                candidateName: "Preview Strong",
+                email: "strong@example.com",
+                workflowStatus: "Applied",
+                paperworkStatus: "not_sent",
+                nearestJobMiles: 8,
+                reasonCodes: ["strong_questionnaire", "nearby_work_available"],
+                components: {
+                  resumeScore: 82,
+                  questionnaireScore: 80,
+                  locationScore: 88,
+                  readinessScore: 84,
+                  fraudSpamScore: 0,
+                  experienceYears: 3,
+                  duplicateSuspect: false,
+                },
+              },
+              {
+                candidateId: "preview-demo-review",
+                candidateName: "Preview Review",
+                email: "review@example.com",
+                workflowStatus: "Applied",
+                paperworkStatus: "not_sent",
+                nearestJobMiles: 45,
+                reasonCodes: ["missing_questionnaire", "manual_review_40_60"],
+                components: {
+                  resumeScore: 60,
+                  questionnaireScore: 30,
+                  locationScore: 40,
+                  readinessScore: 55,
+                  fraudSpamScore: 0,
+                  experienceYears: 1,
+                  duplicateSuspect: false,
+                },
+              },
+            ])
+          }
+        >
+          {evaluationPreviewBusy ? "Running preview…" : "Run sample evaluation preview"}
+        </button>
+        {evaluationPreviewError ? (
+          <p className="mt-3 text-sm text-red-400">{evaluationPreviewError}</p>
+        ) : null}
       </ExecutiveCard>
 
       <ExecutiveCard id="p155-controls">

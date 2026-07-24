@@ -1,0 +1,518 @@
+{
+  "generatedAt": "2026-07-15T19:54:10.904Z",
+  "cohortId": "p204-1-807bd648",
+  "fingerprint": "c18a84f889e6bb453c30b0d0",
+  "entries": [
+    {
+      "candidateId": "b932323148d8",
+      "redactedCandidateId": "b932323148d8",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 80,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~232mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "702b11e4cf12",
+      "redactedCandidateId": "702b11e4cf12",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~95mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "50d84b0ff17c",
+      "redactedCandidateId": "50d84b0ff17c",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~0mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "950f2dc9a040",
+      "redactedCandidateId": "950f2dc9a040",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~189mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "fcb34d3e2985",
+      "redactedCandidateId": "fcb34d3e2985",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~180mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "326d0f957ef1",
+      "redactedCandidateId": "326d0f957ef1",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~193mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "6edd0001ce9d",
+      "redactedCandidateId": "6edd0001ce9d",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~248mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "89ad4f09e9fd",
+      "redactedCandidateId": "89ad4f09e9fd",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~366mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "8cd125086e3e",
+      "redactedCandidateId": "8cd125086e3e",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~245mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "d044e7490882",
+      "redactedCandidateId": "d044e7490882",
+      "candidateDisplayName": null,
+      "recommendation": "Advance",
+      "confidence": 79,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified",
+        "high_qualification_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~226mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "d78a5dc279ae",
+      "redactedCandidateId": "d78a5dc279ae",
+      "candidateDisplayName": null,
+      "recommendation": "Needs Recruiter Review",
+      "confidence": 74,
+      "topReasons": [
+        "historical_applicant",
+        "missing_resume",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "calibrated_qualified"
+      ],
+      "evidenceWarnings": [
+        "missing_resume"
+      ],
+      "nearbyJobs": "nearest~130mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "1e8c90ecfa29",
+      "redactedCandidateId": "1e8c90ecfa29",
+      "candidateDisplayName": null,
+      "recommendation": "Needs Recruiter Review",
+      "confidence": 74,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~96mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "fa337c0e5489",
+      "redactedCandidateId": "fa337c0e5489",
+      "candidateDisplayName": null,
+      "recommendation": "Needs Recruiter Review",
+      "confidence": 74,
+      "topReasons": [
+        "historical_applicant",
+        "missing_resume",
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit"
+      ],
+      "evidenceWarnings": [
+        "missing_resume"
+      ],
+      "nearbyJobs": "nearest~0mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "9b4a0c15712b",
+      "redactedCandidateId": "9b4a0c15712b",
+      "candidateDisplayName": null,
+      "recommendation": "Needs Recruiter Review",
+      "confidence": 74,
+      "topReasons": [
+        "historical_applicant",
+        "strong_questionnaire",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~139mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "7534175120b6",
+      "redactedCandidateId": "7534175120b6",
+      "candidateDisplayName": null,
+      "recommendation": "Needs Recruiter Review",
+      "confidence": 73,
+      "topReasons": [
+        "strong_questionnaire",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready",
+        "borderline_confidence"
+      ],
+      "evidenceWarnings": [],
+      "nearbyJobs": "nearest~0mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "6b5511892bb2",
+      "redactedCandidateId": "6b5511892bb2",
+      "candidateDisplayName": null,
+      "recommendation": "Reject",
+      "confidence": 66,
+      "topReasons": [
+        "explicit_disqualify",
+        "strong_questionnaire",
+        "available_and_transport_ready"
+      ],
+      "evidenceWarnings": [
+        "explicit_disqualify"
+      ],
+      "nearbyJobs": "nearest~165mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "9e9014fdbf65",
+      "redactedCandidateId": "9e9014fdbf65",
+      "candidateDisplayName": null,
+      "recommendation": "Reject",
+      "confidence": 63,
+      "topReasons": [
+        "explicit_disqualify",
+        "strong_questionnaire",
+        "available_and_transport_ready"
+      ],
+      "evidenceWarnings": [
+        "explicit_disqualify"
+      ],
+      "nearbyJobs": "nearest~262mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "7bac85e81822",
+      "redactedCandidateId": "7bac85e81822",
+      "candidateDisplayName": null,
+      "recommendation": "Reject",
+      "confidence": 61,
+      "topReasons": [
+        "explicit_disqualify",
+        "available_and_transport_ready"
+      ],
+      "evidenceWarnings": [
+        "explicit_disqualify"
+      ],
+      "nearbyJobs": "nearest~86mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "25014390b5cf",
+      "redactedCandidateId": "25014390b5cf",
+      "candidateDisplayName": null,
+      "recommendation": "Reject",
+      "confidence": 60,
+      "topReasons": [
+        "explicit_disqualify",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidenceWarnings": [
+        "explicit_disqualify"
+      ],
+      "nearbyJobs": "nearest~0mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    },
+    {
+      "candidateId": "f1abf23a4842",
+      "redactedCandidateId": "f1abf23a4842",
+      "candidateDisplayName": null,
+      "recommendation": "Reject",
+      "confidence": 52,
+      "topReasons": [
+        "explicit_disqualify",
+        "missing_resume",
+        "nearby_work_available",
+        "territory_fit",
+        "available_and_transport_ready"
+      ],
+      "evidenceWarnings": [
+        "explicit_disqualify",
+        "missing_resume"
+      ],
+      "nearbyJobs": "nearest~0mi",
+      "currentStage": "Applied",
+      "allowedDecisions": [
+        "approve_recommendation",
+        "override_to_review",
+        "override_to_advance",
+        "override_to_reject",
+        "defer"
+      ],
+      "operatorDecision": null
+    }
+  ],
+  "allowedDecisions": [
+    "approve_recommendation",
+    "override_to_review",
+    "override_to_advance",
+    "override_to_reject",
+    "defer"
+  ],
+  "note": "Operator decisions are review outcomes only in P204.1 — no lifecycle execution."
+}

@@ -1,0 +1,96 @@
+{
+  "phase": "P216",
+  "generatedAt": "2026-07-17T18:15:59.893Z",
+  "previouslyBlockedByNonGeographicPosting": 2,
+  "correctlyResolvedPositionAndDm": 2,
+  "stillBlocked": 2,
+  "nowEligible": 0,
+  "candidates": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "emailHash": "169944358020b517",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionId": "73048dbe5519",
+      "positionStatus": "closed",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "positionLocationAuthoritative": true,
+      "hasAuthoritativeGeoPosting": true,
+      "nearestWork": "Columbus, OH",
+      "distanceMiles": 0,
+      "coverageTier": "tier1_0_20",
+      "market": "OH",
+      "territory": "OH",
+      "assignedDm": "Unassigned",
+      "expectedDm": "Mindie Rodriguez",
+      "dmResolvedCorrectly": true,
+      "eligibility": "BLOCKED",
+      "blockers": [
+        "blocked_dm_unassigned"
+      ],
+      "remainingGate": "blocked_dm_unassigned",
+      "reason": "Still blocked: blocked_dm_unassigned",
+      "p214Before": {
+        "blockers": [
+          "blocked_dm_unassigned",
+          "blocked_non_geographic_posting"
+        ],
+        "geoPosting": false,
+        "expectedDm": "Mindie Rodriguez",
+        "nearestActiveWorkMiles": 0
+      }
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "emailHash": "1d56f3d610829cb0",
+      "position": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionId": "f2ca3cdaeee8",
+      "positionStatus": "closed",
+      "positionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "positionLocationAuthoritative": true,
+      "hasAuthoritativeGeoPosting": true,
+      "nearestWork": "MERRIAM, KS",
+      "distanceMiles": 8.3,
+      "coverageTier": "tier1_0_20",
+      "market": "MO",
+      "territory": "MO",
+      "assignedDm": "Unassigned",
+      "expectedDm": "Amy Harp",
+      "dmResolvedCorrectly": true,
+      "eligibility": "BLOCKED",
+      "blockers": [
+        "blocked_dm_unassigned"
+      ],
+      "remainingGate": "blocked_dm_unassigned",
+      "reason": "Still blocked: blocked_dm_unassigned",
+      "p214Before": {
+        "blockers": [
+          "blocked_dm_unassigned",
+          "blocked_non_geographic_posting"
+        ],
+        "geoPosting": false,
+        "expectedDm": "Amy Harp",
+        "nearestActiveWorkMiles": 0
+      }
+    }
+  ],
+  "safety": {
+    "previewOnly": true,
+    "paperworkSent": 0,
+    "dropboxWrites": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "workflowStageChanges": 0,
+    "cohortFrozen": false,
+    "workflowsFileUnchanged": true,
+    "ingestionFileUnchanged": true,
+    "frozenCohortFileUnchanged": true
+  }
+}

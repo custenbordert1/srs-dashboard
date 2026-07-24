@@ -344,12 +344,18 @@ export async function executeAutoSendPaperworkReminders(input: {
             recommendedAction: item.recommendedAction,
             templateId: emailContent.templateId,
           },
+          { requireLiveDelivery: true },
         );
-        if (result.ok) {
+        if (result.ok && result.mode === "resend") {
           sendResult = "sent";
           summary.sentCount += 1;
           summary.paperworkSent = true;
           reason = `Reminder sent via ${result.mode}.`;
+        } else if (result.ok && result.mode === "log") {
+          sendResult = "failed";
+          summary.failedCount += 1;
+          reason =
+            "Mailer logged to outbox only; live Resend required for P146 auto-send (set DIRECT_DEPOSIT_EMAIL_MODE=resend and RESEND_API_KEY).";
         } else {
           sendResult = "failed";
           summary.failedCount += 1;

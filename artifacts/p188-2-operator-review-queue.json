@@ -1,0 +1,835 @@
+{
+  "sourcePhase": "P188.2",
+  "scannedAt": "2026-07-13T19:39:30.796Z",
+  "queueSizes": {
+    "recruiter_confidently_resolved": 0,
+    "recruiter_ambiguous": 0,
+    "recruiter_unresolved": 684,
+    "job_confidently_resolved": 573,
+    "job_ambiguous": 10,
+    "job_unresolved": 101,
+    "both_resolved": 0,
+    "one_resolved": 573,
+    "conflicting_evidence": 6,
+    "stale_evidence": 0
+  },
+  "queues": {
+    "recruiter_ambiguous": [],
+    "job_ambiguous": [
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "2c540d056e8a",
+        "redactedCandidateId": "2c54…6e8a",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "17ebbae5fee1",
+          "95d0dff2e9fb"
+        ],
+        "evidence": "tcs_ambiguous:17ebbae5fee1|tcs_ambiguous:95d0dff2e9fb",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Select job from ambiguous matches"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "8b75e9561e3d",
+        "redactedCandidateId": "8b75…1e3d",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "17ebbae5fee1",
+          "95d0dff2e9fb"
+        ],
+        "evidence": "tcs_ambiguous:17ebbae5fee1|tcs_ambiguous:95d0dff2e9fb",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Select job from ambiguous matches"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "92fa58cc5870",
+        "redactedCandidateId": "92fa…5870",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "7959fdf7c9f1",
+          "93ebc05539b8"
+        ],
+        "evidence": "breezy_candidate:92fa58cc5870:positionId=7959fdf7c9f1|approved_mapping:92fa58cc5870:93ebc05539b8",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting job evidence"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "16d6b86e06e7",
+        "redactedCandidateId": "16d6…06e7",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "17ebbae5fee1",
+          "95d0dff2e9fb"
+        ],
+        "evidence": "tcs_ambiguous:17ebbae5fee1|tcs_ambiguous:95d0dff2e9fb",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Select job from ambiguous matches"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "ca747f355c14",
+        "redactedCandidateId": "ca74…5c14",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "17ebbae5fee1",
+          "95d0dff2e9fb"
+        ],
+        "evidence": "tcs_ambiguous:17ebbae5fee1|tcs_ambiguous:95d0dff2e9fb",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Select job from ambiguous matches"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "bfd12572f3e5",
+        "redactedCandidateId": "bfd1…f3e5",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "1e5461419b41",
+          "07c1de432ea6"
+        ],
+        "evidence": "breezy_candidate:bfd12572f3e5:positionId=1e5461419b41|approved_mapping:bfd12572f3e5:07c1de432ea6",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting job evidence"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "cde8b040e7a4",
+        "redactedCandidateId": "cde8…e7a4",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "1e5461419b41",
+          "07c1de432ea6"
+        ],
+        "evidence": "breezy_candidate:cde8b040e7a4:positionId=1e5461419b41|approved_mapping:cde8b040e7a4:07c1de432ea6",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting job evidence"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "7c37beb6ac48",
+        "redactedCandidateId": "7c37…ac48",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "0322103a6bdd",
+          "a707da4f2564"
+        ],
+        "evidence": "breezy_candidate:7c37beb6ac48:positionId=0322103a6bdd|approved_mapping:7c37beb6ac48:a707da4f2564",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting job evidence"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "8fba13c8cf25",
+        "redactedCandidateId": "8fba…cf25",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "d185be0d77ee",
+          "a707da4f2564"
+        ],
+        "evidence": "breezy_candidate:8fba13c8cf25:positionId=d185be0d77ee|approved_mapping:8fba13c8cf25:a707da4f2564",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting job evidence"
+      },
+      {
+        "queueId": "job_ambiguous",
+        "candidateId": "a364ab16b68e",
+        "redactedCandidateId": "a364…b68e",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "d185be0d77ee",
+          "a707da4f2564"
+        ],
+        "evidence": "breezy_candidate:a364ab16b68e:positionId=d185be0d77ee|approved_mapping:a364ab16b68e:a707da4f2564",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting job evidence"
+      }
+    ],
+    "conflicting_evidence": [
+      {
+        "queueId": "conflicting_evidence",
+        "candidateId": "92fa58cc5870",
+        "redactedCandidateId": "92fa…5870",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "7959fdf7c9f1",
+          "93ebc05539b8"
+        ],
+        "evidence": "|breezy_candidate:92fa58cc5870:positionId=7959fdf7c9f1|approved_mapping:92fa58cc5870:93ebc05539b8",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting evidence manually"
+      },
+      {
+        "queueId": "conflicting_evidence",
+        "candidateId": "bfd12572f3e5",
+        "redactedCandidateId": "bfd1…f3e5",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "1e5461419b41",
+          "07c1de432ea6"
+        ],
+        "evidence": "|breezy_candidate:bfd12572f3e5:positionId=1e5461419b41|approved_mapping:bfd12572f3e5:07c1de432ea6",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting evidence manually"
+      },
+      {
+        "queueId": "conflicting_evidence",
+        "candidateId": "cde8b040e7a4",
+        "redactedCandidateId": "cde8…e7a4",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "1e5461419b41",
+          "07c1de432ea6"
+        ],
+        "evidence": "|breezy_candidate:cde8b040e7a4:positionId=1e5461419b41|approved_mapping:cde8b040e7a4:07c1de432ea6",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting evidence manually"
+      },
+      {
+        "queueId": "conflicting_evidence",
+        "candidateId": "7c37beb6ac48",
+        "redactedCandidateId": "7c37…ac48",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "0322103a6bdd",
+          "a707da4f2564"
+        ],
+        "evidence": "|breezy_candidate:7c37beb6ac48:positionId=0322103a6bdd|approved_mapping:7c37beb6ac48:a707da4f2564",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting evidence manually"
+      },
+      {
+        "queueId": "conflicting_evidence",
+        "candidateId": "8fba13c8cf25",
+        "redactedCandidateId": "8fba…cf25",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "d185be0d77ee",
+          "a707da4f2564"
+        ],
+        "evidence": "|breezy_candidate:8fba13c8cf25:positionId=d185be0d77ee|approved_mapping:8fba13c8cf25:a707da4f2564",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting evidence manually"
+      },
+      {
+        "queueId": "conflicting_evidence",
+        "candidateId": "a364ab16b68e",
+        "redactedCandidateId": "a364…b68e",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "d185be0d77ee",
+          "a707da4f2564"
+        ],
+        "evidence": "|breezy_candidate:a364ab16b68e:positionId=d185be0d77ee|approved_mapping:a364ab16b68e:a707da4f2564",
+        "confidence": "none",
+        "recommendedOperatorSelection": "Resolve conflicting evidence manually"
+      }
+    ],
+    "stale_evidence": [],
+    "both_resolved": [],
+    "one_resolved": [
+      {
+        "queueId": "one_resolved",
+        "candidateId": "1b3a2f14b63c",
+        "redactedCandidateId": "1b3a…b63c",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:c109e3042321"
+        ],
+        "evidence": "breezy_candidate:1b3a2f14b63c:positionId=c109e3042321",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "5da2f2141b96",
+        "redactedCandidateId": "5da2…1b96",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:c109e3042321"
+        ],
+        "evidence": "breezy_candidate:5da2f2141b96:positionId=c109e3042321",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "27269078a5b9",
+        "redactedCandidateId": "2726…a5b9",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:c109e3042321"
+        ],
+        "evidence": "breezy_candidate:27269078a5b9:positionId=c109e3042321",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "f700c2780f03",
+        "redactedCandidateId": "f700…0f03",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:ecebdcf8f780"
+        ],
+        "evidence": "breezy_candidate:f700c2780f03:positionId=ecebdcf8f780",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "c5b23216837a",
+        "redactedCandidateId": "c5b2…837a",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:ecebdcf8f780"
+        ],
+        "evidence": "breezy_candidate:c5b23216837a:positionId=ecebdcf8f780",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "afa4123cd361",
+        "redactedCandidateId": "afa4…d361",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:ecebdcf8f780"
+        ],
+        "evidence": "breezy_candidate:afa4123cd361:positionId=ecebdcf8f780",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "570d0e5c132e",
+        "redactedCandidateId": "570d…132e",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:34af23ca0615"
+        ],
+        "evidence": "breezy_candidate:570d0e5c132e:positionId=34af23ca0615",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "1b909bd699ec",
+        "redactedCandidateId": "1b90…99ec",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:34af23ca0615"
+        ],
+        "evidence": "breezy_candidate:1b909bd699ec:positionId=34af23ca0615",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "cbc9380411b2",
+        "redactedCandidateId": "cbc9…11b2",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:34af23ca0615"
+        ],
+        "evidence": "breezy_candidate:cbc9380411b2:positionId=34af23ca0615",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "faec52c5e4c9",
+        "redactedCandidateId": "faec…e4c9",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:34af23ca0615"
+        ],
+        "evidence": "breezy_candidate:faec52c5e4c9:positionId=34af23ca0615",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "305e367a07a8",
+        "redactedCandidateId": "305e…07a8",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:34af23ca0615"
+        ],
+        "evidence": "breezy_candidate:305e367a07a8:positionId=34af23ca0615",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "520ae00e6673",
+        "redactedCandidateId": "520a…6673",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:4484897c0852"
+        ],
+        "evidence": "breezy_candidate:520ae00e6673:positionId=4484897c0852",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "de921c6e199b",
+        "redactedCandidateId": "de92…199b",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:4484897c0852"
+        ],
+        "evidence": "breezy_candidate:de921c6e199b:positionId=4484897c0852",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "968499ef4533",
+        "redactedCandidateId": "9684…4533",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:4484897c0852"
+        ],
+        "evidence": "breezy_candidate:968499ef4533:positionId=4484897c0852",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "911157c289ae",
+        "redactedCandidateId": "9111…89ae",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:4484897c0852"
+        ],
+        "evidence": "breezy_candidate:911157c289ae:positionId=4484897c0852",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "8d0a9d872b68",
+        "redactedCandidateId": "8d0a…2b68",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:4484897c0852"
+        ],
+        "evidence": "breezy_candidate:8d0a9d872b68:positionId=4484897c0852",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "fd299c767d14",
+        "redactedCandidateId": "fd29…7d14",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:4484897c0852"
+        ],
+        "evidence": "breezy_candidate:fd299c767d14:positionId=4484897c0852",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "d3c7baa38523",
+        "redactedCandidateId": "d3c7…8523",
+        "currentWorkflowState": "Not Qualified",
+        "proposedMatches": [
+          "job:75f4049fb689"
+        ],
+        "evidence": "breezy_candidate:d3c7baa38523:positionId=75f4049fb689",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "8249cd92d538",
+        "redactedCandidateId": "8249…d538",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:75f4049fb689"
+        ],
+        "evidence": "breezy_candidate:8249cd92d538:positionId=75f4049fb689",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "ba880e29ff1e",
+        "redactedCandidateId": "ba88…ff1e",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:a2c4d4b0999a"
+        ],
+        "evidence": "breezy_candidate:ba880e29ff1e:positionId=a2c4d4b0999a",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "554fe2251478",
+        "redactedCandidateId": "554f…1478",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:a2c4d4b0999a"
+        ],
+        "evidence": "breezy_candidate:554fe2251478:positionId=a2c4d4b0999a",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "64ac200f117e",
+        "redactedCandidateId": "64ac…117e",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:35dcda01b97d"
+        ],
+        "evidence": "breezy_candidate:64ac200f117e:positionId=35dcda01b97d",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "a23e30953307",
+        "redactedCandidateId": "a23e…3307",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:35dcda01b97d"
+        ],
+        "evidence": "breezy_candidate:a23e30953307:positionId=35dcda01b97d",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "e2399d01283c",
+        "redactedCandidateId": "e239…283c",
+        "currentWorkflowState": "Needs Review",
+        "proposedMatches": [
+          "job:a996c1f0d9bb"
+        ],
+        "evidence": "breezy_candidate:e2399d01283c:positionId=a996c1f0d9bb",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "21dc66d94d31",
+        "redactedCandidateId": "21dc…4d31",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:c87acc7a5c1a"
+        ],
+        "evidence": "breezy_candidate:21dc66d94d31:positionId=c87acc7a5c1a",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "fc9fe75e5e36",
+        "redactedCandidateId": "fc9f…5e36",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:9e9151889788"
+        ],
+        "evidence": "breezy_candidate:fc9fe75e5e36:positionId=9e9151889788",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "fe26ac4bd3f7",
+        "redactedCandidateId": "fe26…d3f7",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:bb0368403ab9"
+        ],
+        "evidence": "breezy_candidate:fe26ac4bd3f7:positionId=bb0368403ab9",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "2969a7a83a25",
+        "redactedCandidateId": "2969…3a25",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:1d6c7df02192"
+        ],
+        "evidence": "breezy_candidate:2969a7a83a25:positionId=1d6c7df02192",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "c3b611496cfd",
+        "redactedCandidateId": "c3b6…6cfd",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:604de23a02a7"
+        ],
+        "evidence": "breezy_candidate:c3b611496cfd:positionId=604de23a02a7",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "5e64219daaf9",
+        "redactedCandidateId": "5e64…aaf9",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:c29463ebed27"
+        ],
+        "evidence": "breezy_candidate:5e64219daaf9:positionId=c29463ebed27",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "445225a971f7",
+        "redactedCandidateId": "4452…71f7",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:fdb39f9158fa"
+        ],
+        "evidence": "breezy_candidate:445225a971f7:positionId=fdb39f9158fa",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "6a891047f999",
+        "redactedCandidateId": "6a89…f999",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:d3b2353e509a"
+        ],
+        "evidence": "breezy_candidate:6a891047f999:positionId=d3b2353e509a",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "bb5d94088f10",
+        "redactedCandidateId": "bb5d…8f10",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:aee6bedad16b"
+        ],
+        "evidence": "breezy_candidate:bb5d94088f10:positionId=aee6bedad16b",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "84d51041e750",
+        "redactedCandidateId": "84d5…e750",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:aee6bedad16b"
+        ],
+        "evidence": "breezy_candidate:84d51041e750:positionId=aee6bedad16b",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "c70e4a31b050",
+        "redactedCandidateId": "c70e…b050",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:e0065232eeff"
+        ],
+        "evidence": "breezy_candidate:c70e4a31b050:positionId=e0065232eeff",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "09c38dd6b79b",
+        "redactedCandidateId": "09c3…b79b",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:e0065232eeff"
+        ],
+        "evidence": "breezy_candidate:09c38dd6b79b:positionId=e0065232eeff",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "92181f9de45c",
+        "redactedCandidateId": "9218…e45c",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:f7c834a75e50"
+        ],
+        "evidence": "breezy_candidate:92181f9de45c:positionId=f7c834a75e50",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "705cdc0e7f30",
+        "redactedCandidateId": "705c…7f30",
+        "currentWorkflowState": "Signed",
+        "proposedMatches": [
+          "job:f8f9afaa12b8"
+        ],
+        "evidence": "breezy_candidate:705cdc0e7f30:positionId=f8f9afaa12b8",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "91faef15d8fd",
+        "redactedCandidateId": "91fa…d8fd",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:f292959788ed"
+        ],
+        "evidence": "breezy_candidate:91faef15d8fd:positionId=f292959788ed",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "189e89cd8493",
+        "redactedCandidateId": "189e…8493",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:f292959788ed"
+        ],
+        "evidence": "breezy_candidate:189e89cd8493:positionId=f292959788ed",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "652bc90340b9",
+        "redactedCandidateId": "652b…40b9",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:4ced078b1d24"
+        ],
+        "evidence": "breezy_candidate:652bc90340b9:positionId=4ced078b1d24",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "40764d83ef6d",
+        "redactedCandidateId": "4076…ef6d",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:89f2de1d0ad1"
+        ],
+        "evidence": "breezy_candidate:40764d83ef6d:positionId=89f2de1d0ad1",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "b484a5e72135",
+        "redactedCandidateId": "b484…2135",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:d4495f39d126"
+        ],
+        "evidence": "breezy_candidate:b484a5e72135:positionId=d4495f39d126",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "aaa55717777d",
+        "redactedCandidateId": "aaa5…777d",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:d4495f39d126"
+        ],
+        "evidence": "breezy_candidate:aaa55717777d:positionId=d4495f39d126",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "0bc4a331bb26",
+        "redactedCandidateId": "0bc4…bb26",
+        "currentWorkflowState": "Applied",
+        "proposedMatches": [
+          "job:1b69b246215f"
+        ],
+        "evidence": "breezy_candidate:0bc4a331bb26:positionId=1b69b246215f",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "c87b5e655cc6",
+        "redactedCandidateId": "c87b…5cc6",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:1b69b246215f"
+        ],
+        "evidence": "breezy_candidate:c87b5e655cc6:positionId=1b69b246215f",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "94f3eb998444",
+        "redactedCandidateId": "94f3…8444",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:a6f6cb5c9b81"
+        ],
+        "evidence": "breezy_candidate:94f3eb998444:positionId=a6f6cb5c9b81",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "4eb52a6c7495",
+        "redactedCandidateId": "4eb5…7495",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:a6f6cb5c9b81"
+        ],
+        "evidence": "breezy_candidate:4eb52a6c7495:positionId=a6f6cb5c9b81",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "e5124f6a674e",
+        "redactedCandidateId": "e512…674e",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:a6f6cb5c9b81"
+        ],
+        "evidence": "breezy_candidate:e5124f6a674e:positionId=a6f6cb5c9b81",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      },
+      {
+        "queueId": "one_resolved",
+        "candidateId": "6b40ff3b280a",
+        "redactedCandidateId": "6b40…280a",
+        "currentWorkflowState": "Paperwork Sent",
+        "proposedMatches": [
+          "job:ffb6ded24970"
+        ],
+        "evidence": "breezy_candidate:6b40ff3b280a:positionId=ffb6ded24970",
+        "confidence": "medium",
+        "recommendedOperatorSelection": "Resolve remaining side before write"
+      }
+    ]
+  }
+}

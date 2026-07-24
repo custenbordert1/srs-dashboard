@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "sourcePhase": "P191",
+  "checkedAt": "2026-07-14T12:36:59.191Z",
+  "gates": [
+    {
+      "id": "source_cohort_id",
+      "ok": true,
+      "detail": "source=p190-pilot-2a6b078b89 required=p190-pilot-2a6b078b89"
+    },
+    {
+      "id": "source_fingerprint",
+      "ok": true,
+      "detail": "source=11a81d2a561882378aefa019 required=11a81d2a561882378aefa019"
+    },
+    {
+      "id": "source_member_count",
+      "ok": true,
+      "detail": "members=25"
+    },
+    {
+      "id": "neon_or_local_durable",
+      "ok": true,
+      "detail": "Neon/Postgres URL configured"
+    },
+    {
+      "id": "candidate_workflow_store_healthy",
+      "ok": true,
+      "detail": "candidate-workflows.json present with 684 records"
+    },
+    {
+      "id": "ownership_ledger_healthy",
+      "ok": true,
+      "detail": "Append-only ledger healthy (memory/jsonl); enable P188_OWNERSHIP_LEDGER_SQL=1 for Neon/PGlite"
+    },
+    {
+      "id": "p184_starts_dry_run",
+      "ok": true,
+      "detail": "P184 config.mode=dry_run enabled=true"
+    },
+    {
+      "id": "dropbox_sign_configured",
+      "ok": true,
+      "detail": "Dropbox Sign configured for live sends"
+    },
+    {
+      "id": "p187_flags_off",
+      "ok": true,
+      "detail": "P187 authority/execution off"
+    },
+    {
+      "id": "automation_off",
+      "ok": true,
+      "detail": "Continuous automation/scheduler disabled"
+    }
+  ],
+  "abortReasons": [],
+  "automationStatus": "off",
+  "p184Mode": "dry_run"
+}

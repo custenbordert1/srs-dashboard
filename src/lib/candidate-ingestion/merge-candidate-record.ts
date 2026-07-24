@@ -1,4 +1,5 @@
 import type { BreezyCandidate } from "@/lib/breezy-api";
+import { scrubDemoOwnershipSignals } from "@/lib/p203-2-demo-recruiter-ownership-cleanup/prevent";
 
 export function mergeIngestionSource(
   existing?: BreezyCandidate["ingestionSource"],
@@ -26,14 +27,25 @@ export function mergeCandidateRecord(
   const incomingResumeLength = incoming.resumeText?.trim().length ?? 0;
   const existingResumeLength = existing.resumeText?.trim().length ?? 0;
 
+  const incomingZip = (incoming.zipCode ?? "").trim();
+  const existingZip = (existing.zipCode ?? "").trim();
+
   return {
     ...existing,
     ...incoming,
+    // P200.2 — never wipe a known ZIP with empty CSV/export/list placeholders.
+    zipCode: incomingZip || existingZip || "",
     ingestionSource: mergeIngestionSource(existing.ingestionSource, incoming.ingestionSource),
     breezyCandidateIdUnavailable:
       existing.breezyCandidateIdUnavailable === false
         ? false
         : incoming.breezyCandidateIdUnavailable ?? existing.breezyCandidateIdUnavailable,
+    ownershipSignals:
+      scrubDemoOwnershipSignals(
+        incoming.ownershipSignals?.preferredName
+          ? incoming.ownershipSignals
+          : existing.ownershipSignals ?? incoming.ownershipSignals,
+      ) ?? undefined,
     questionnaireAnswers,
     hasQuestionnaire: Boolean(questionnaireAnswers?.length) || existing.hasQuestionnaire || incoming.hasQuestionnaire,
     questionnaireEnrichmentAttemptedAt:

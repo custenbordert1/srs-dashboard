@@ -1,0 +1,12 @@
+{
+  "sourcePhase": "P188.3",
+  "scannedAt": "2026-07-13T19:52:34.604Z",
+  "recommendationReady": 182,
+  "p187Eligible": 182,
+  "operatorReviewRequired": 377,
+  "bothResolvedUnderSimulation": 339,
+  "bypassExcluded": 139,
+  "simulationOnly": true,
+  "p187AuthorityEnabled": false,
+  "note": "Forecast applies simulated ownership + existing job resolution virtually."
+}

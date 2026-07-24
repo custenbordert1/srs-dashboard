@@ -1,0 +1,89 @@
+{
+  "snapshot": {
+    "candidateId": "22072d81bbfd",
+    "assignedRecruiter": "Recruiting Team",
+    "assignedDM": "Melissa O'Connor",
+    "workflowStatus": "Applied"
+  },
+  "writes": [
+    {
+      "action": "assign_recruiter",
+      "status": 200,
+      "ok": true,
+      "assignedRecruiter": "P261 Test Recruiter"
+    },
+    {
+      "action": "assign_dm",
+      "status": 200,
+      "ok": true,
+      "assignedDM": "P261 Test DM"
+    },
+    {
+      "action": "p260_preview",
+      "status": 200,
+      "ok": true,
+      "mode": "preview",
+      "canSend": false,
+      "quota": 0,
+      "blockers": [
+        "Dropbox Sign test_mode=true — production requires test_mode=false",
+        "Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+      ],
+      "topKeys": [
+        "ok",
+        "result",
+        "requiredPhrase"
+      ]
+    },
+    {
+      "action": "p260_send_blocked",
+      "status": 409,
+      "ok": false,
+      "mode": "send",
+      "signatureRequestId": null,
+      "blockers": [
+        "Dropbox Sign test_mode=true — production requires test_mode=false",
+        "Production Dropbox Sign quota is 0 (api_signature_requests_left). Live production packet creation is blocked — do not fall back to testMode."
+      ],
+      "aborted": true,
+      "packetsCreated": 0
+    },
+    {
+      "action": "move_stage",
+      "status": 200,
+      "ok": true,
+      "workflowStatus": "Needs Review",
+      "target": "Needs Review"
+    },
+    {
+      "action": "restore",
+      "status": 200,
+      "ok": true,
+      "assignedRecruiter": "Recruiting Team",
+      "assignedDM": "Melissa O'Connor",
+      "workflowStatus": "Applied"
+    },
+    {
+      "action": "store_restore",
+      "ok": true,
+      "restored": false,
+      "assignedRecruiter": "P261 Test Recruiter",
+      "assignedDM": "Melissa O'Connor",
+      "workflowStatus": "Applied"
+    },
+    {
+      "action": "disk_restore",
+      "ok": true,
+      "restored": true,
+      "note": "Direct durable-file restore because equal-priority ownership merge blocks API restore of same-priority manual recruiter"
+    }
+  ],
+  "restored": true,
+  "final": {
+    "assignedRecruiter": "Recruiting Team",
+    "assignedDM": "Melissa O'Connor",
+    "workflowStatus": "Applied",
+    "paperworkStatus": "not_sent",
+    "signatureRequestId": null
+  }
+}

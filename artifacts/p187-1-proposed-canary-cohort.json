@@ -1,0 +1,262 @@
+{
+  "freezeAbort": "No eligible production candidates for Hiring Recommendation→Operator Approved (standards not lowered)",
+  "cohort": null,
+  "eligibleCount": 0,
+  "ineligibleCount": 684,
+  "truncated": false,
+  "sampleBlocked": [
+    {
+      "redacted": "1b3a2f…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "5da2f2…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "272690…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "f700c2…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "c5b232…",
+      "lifecycleState": "PAPERWORK_SENT",
+      "reasons": [
+        "lifecycleState=PAPERWORK_SENT (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "afa412…",
+      "lifecycleState": "PAPERWORK_SENT",
+      "reasons": [
+        "lifecycleState=PAPERWORK_SENT (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "570d0e…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "1b909b…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "cbc938…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "faec52…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "305e36…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "520ae0…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "de921c…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "968499…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "911157…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "8d0a9d…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "fd299c…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "d3c7ba…",
+      "lifecycleState": "NOT_QUALIFIED",
+      "reasons": [
+        "lifecycleState=NOT_QUALIFIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "8249cd…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "ba880e…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "554fe2…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "64ac20…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "a23e30…",
+      "lifecycleState": "APPLIED",
+      "reasons": [
+        "lifecycleState=APPLIED (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "854fd7…",
+      "lifecycleState": "PAPERWORK_SENT",
+      "reasons": [
+        "lifecycleState=PAPERWORK_SENT (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    },
+    {
+      "redacted": "8c0354…",
+      "lifecycleState": "PAPERWORK_SENT",
+      "reasons": [
+        "lifecycleState=PAPERWORK_SENT (need HIRING_RECOMMENDATION)",
+        "recommendation evidence missing",
+        "job assignment unresolved",
+        "operator owner unresolved"
+      ]
+    }
+  ],
+  "authorityWritten": false,
+  "approvalsWritten": false,
+  "productionCanaryExecuted": false
+}

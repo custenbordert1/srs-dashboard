@@ -1,0 +1,110 @@
+{
+  "phase": "P217",
+  "generatedAt": "2026-07-17T18:34:22.224Z",
+  "candidatesAudited": 2,
+  "rootCauseDistribution": {
+    "Assignment Engine Failure": 2
+  },
+  "globalRootCauseDistribution": {
+    "Assignment Engine Failure": 373,
+    "Territory Missing": 228
+  },
+  "failurePoint": {
+    "exactLocation": "P205 transitions historical P204-approved candidates to Paperwork Needed without assignedDM; candidate-workflow-store preserves the existing 'Unassigned' value.",
+    "whyPostImportDidNotRepair": "runPostImportPipeline applies assignments only to filterMtdCandidates(...). These April historical applicants were outside the current-month import assignment cohort.",
+    "whyRecruiterAssignmentDidNotRepair": "DM persistence in applyRecruiterAssignments is coupled to decision.shouldAssign (recruiter assignment). No standalone territory-DM repair ran for P204/P205.",
+    "classification": "Assignment Engine Failure"
+  },
+  "assignmentPipeline": [
+    {
+      "step": "Candidate Import / Breezy Sync",
+      "file": "src/lib/candidate-ingestion/run-post-import-pipeline.ts",
+      "function": "runPostImportPipeline",
+      "behavior": "Builds assignment decisions only for filterMtdCandidates(...). Historical candidates outside the current-month import cohort are not passed to assignment."
+    },
+    {
+      "step": "Territory Mapping",
+      "file": "src/lib/dm-territory-map.ts",
+      "function": "getDmForState",
+      "behavior": "Deterministic state → DM map. OH resolves to Mindie Rodriguez; MO resolves to Amy Harp."
+    },
+    {
+      "step": "Candidate / Job State Selection",
+      "file": "src/lib/candidate-dm-suggest.ts",
+      "function": "resolveCandidateState / suggestDmForCandidate",
+      "behavior": "Selects job state before candidate home state and maps it to a suggested DM. It is pure logic and does not persist an assignment."
+    },
+    {
+      "step": "Assignment Decision",
+      "file": "src/lib/recruiter-assignment-engine/build-assignment-decision.ts",
+      "function": "buildRecruiterAssignmentDecision",
+      "behavior": "Resolves territoryState and dmName, but returns shouldAssign=false when recruiter ownership does not need auto-assignment."
+    },
+    {
+      "step": "Assignment Persistence",
+      "file": "src/lib/recruiter-assignment-engine/apply-recruiter-assignments.ts",
+      "function": "applyRecruiterAssignments",
+      "behavior": "Persists assignedDM only for decisions with shouldAssign=true. DM assignment is coupled to recruiter assignment."
+    },
+    {
+      "step": "Standalone Territory Assignment",
+      "file": "src/lib/p151-workflow-bottleneck-resolution/apply-territory-dm-assignments.ts",
+      "function": "applyTerritoryDmAssignments",
+      "behavior": "Can repair Unassigned DM from candidate/job state, but it is invoked by specific P151 pipelines—not by P204/P205."
+    },
+    {
+      "step": "Operator Assignment",
+      "file": "src/app/api/candidates/workflows/route.ts",
+      "function": "POST workflow assignment path",
+      "behavior": "Accepts assignedDM from an authenticated operator and persists it through upsertCandidateWorkflow. No operator assignment exists for the two targets."
+    },
+    {
+      "step": "MEL Sync",
+      "file": "src/lib/mel-projects-sheet.ts",
+      "function": "fetchMelProjectsSheet",
+      "behavior": "Supplies operational project/coverage data only. It has no assignedDM write path and cannot repair candidate workflow ownership."
+    },
+    {
+      "step": "Workflow Store Default",
+      "file": "src/lib/candidate-workflow-store.ts",
+      "function": "upsertCandidateWorkflowUnlocked",
+      "behavior": "assignedDM = input.assignedDM?.trim() || existing?.assignedDM || 'Unassigned'. A transition that omits assignedDM preserves the existing Unassigned value."
+    },
+    {
+      "step": "Qualification Recommendation",
+      "file": "src/lib/p204-1-supervised-qualification-pilot/execute.ts",
+      "function": "executeP2041RecommendationPilot",
+      "behavior": "Writes recommendation notes only; intentionally makes no ownership change."
+    },
+    {
+      "step": "Paperwork Needed Transition",
+      "file": "src/lib/p205-controlled-lifecycle-action-pilot/execute.ts",
+      "function": "executeP205ControlledLifecyclePilot",
+      "behavior": "Moves approved historical candidates to Paperwork Needed without assignedDM; workflow store therefore preserves Unassigned."
+    },
+    {
+      "step": "Paperwork Eligibility",
+      "file": "src/lib/p214-unsent-test-batch/eligibility.ts",
+      "function": "evaluateP214Gates",
+      "behavior": "Read-only consumer: compares persisted assignedDM with expectedDM and blocks Unassigned; it does not assign."
+    }
+  ],
+  "expectedDmAccuracy": {
+    "verified": 2,
+    "correct": 2,
+    "accuracyPct": 100
+  },
+  "safety": {
+    "readOnly": true,
+    "p217WorkflowWrites": 0,
+    "workflowChanges": 0,
+    "stageMovements": 0,
+    "melWrites": 0,
+    "breezyWrites": 0,
+    "dropboxWrites": 0,
+    "targetWorkflowFieldsUnchanged": true,
+    "workflowsFileUnchanged": false,
+    "concurrentExternalWorkflowStoreActivityObserved": true,
+    "ingestionFileUnchanged": true
+  }
+}

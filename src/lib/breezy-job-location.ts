@@ -308,13 +308,16 @@ export function normalizeBreezyJobLocation(record: Record<string, unknown>): Nor
 
   const jobName = stringField(record, ["name", "title"]);
   if ((!city || !state) && jobName) {
+    // P216 — title parsing is diagnostic only (locationSource="job_name").
+    // Never promote title-derived city/state into the authoritative fields used
+    // for coverage, DM assignment, distance, or paperwork eligibility.
     const fromName = parseLocationFromJobName(jobName);
-    if (!city && fromName.city) city = fromName.city;
-    if (!state && fromName.state) state = fromName.state;
-    if (fromName.city || fromName.state) locationSource = "job_name";
+    if (fromName.city || fromName.state) {
+      if (!city && !state) locationSource = "job_name";
+    }
   }
 
-  if (!city && !state) locationSource = "missing";
+  if (!city && !state && locationSource !== "job_name") locationSource = "missing";
 
   return {
     city,

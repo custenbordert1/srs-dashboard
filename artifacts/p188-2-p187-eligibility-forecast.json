@@ -1,0 +1,10 @@
+{
+  "sourcePhase": "P188.2",
+  "scannedAt": "2026-07-13T19:39:30.796Z",
+  "predictedEligibleCount": 0,
+  "note": "Forecast only after simulated successful Recommend Hire; P187 flags remain off; bypass cohort excluded.",
+  "p187AuthorityEnabled": false,
+  "operatorApprovalOccurred": false,
+  "canaryExecuted": false,
+  "bypassExcludedCount": 139
+}

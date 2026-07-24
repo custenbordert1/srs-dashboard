@@ -1,0 +1,132 @@
+{
+  "sourcePhase": "P188.5",
+  "authorization": {
+    "actor": "operator:p188.5-prompt",
+    "authorizedAt": "2026-07-13T20:28:37.083Z",
+    "cohortId": "p188.5-canary-c5c917a526",
+    "fingerprint": "acbfbd53412fe35160ea41d5",
+    "maxRecruiterWrites": 10,
+    "maxLedgerEvents": 10,
+    "expiresAt": "2026-07-14T00:28:35.737Z",
+    "scope": "ten_candidate_recruiter_ownership_restore_only"
+  },
+  "execution": {
+    "cohortId": "p188.5-canary-c5c917a526",
+    "fingerprint": "acbfbd53412fe35160ea41d5",
+    "attempted": 10,
+    "restored": 10,
+    "failed": 0,
+    "staleConflicts": 0,
+    "ledgerEventsWritten": 10,
+    "stoppedEarly": false,
+    "stopReason": null,
+    "attempts": [
+      {
+        "candidateId": "1b3a…b63c",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-b0438b88-b1ee-4d52-8e13-a903df005aeb",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "5da2…1b96",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-66fcb6a7-e564-42b8-b16c-3755eb10c4eb",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "2726…a5b9",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-a1e4cd47-9cc5-4742-8b72-6f08d3f6fb9c",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "f700…0f03",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Logan",
+        "ledgerEventId": "own-ed38f4cd-c717-45f4-aab8-f10396cf7e69",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "570d…132e",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-fc77f4d0-0684-4215-b111-29a258a97e34",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "1b90…99ec",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-f71eb001-1ca1-4352-8c3a-1a0eb144c358",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "520a…6673",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-db86ff3e-f4f7-4d15-949b-3b9b2c753005",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "de92…199b",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-48f4ef92-9c0f-430a-a66f-fcfea0e9819e",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "9684…4533",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-267de172-e503-4b03-9858-29b66b464a50",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      },
+      {
+        "candidateId": "9111…89ae",
+        "ok": true,
+        "detail": "Restored and durable-confirmed",
+        "previousRecruiter": "Unassigned",
+        "newRecruiter": "Taylor",
+        "ledgerEventId": "own-74e9eb54-4c12-4ed2-a73c-08321b9dc64f",
+        "ownershipVersionAfter": 1,
+        "lifecycleFieldsChanged": []
+      }
+    ],
+    "lifecycleWrites": 0,
+    "recommendations": 0,
+    "approvals": 0,
+    "paperworkSends": 0,
+    "melWrites": 0,
+    "recruiterWrites": 10
+  }
+}

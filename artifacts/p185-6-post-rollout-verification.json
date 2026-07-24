@@ -1,0 +1,858 @@
+{
+  "phase": "P185.6-post-verification",
+  "generatedAt": "2026-07-10T19:58:21.396Z",
+  "elapsedMs": 9810,
+  "rolloutId": "p1853-20260710-b419512d",
+  "verification": {
+    "rolloutId": "p1853-20260710-b419512d",
+    "phase": "backlog_complete",
+    "totalSent": 25,
+    "engineSent": 25,
+    "confirmed_sent": 25,
+    "opsConfirmed": 25,
+    "queueDepth": 0,
+    "unresolvedOperations": 0,
+    "p184Mode": "dry_run",
+    "p184Enabled": true,
+    "continuousAutomationEnv": null,
+    "byStatus": {
+      "sent": 25
+    },
+    "envelopeStateCounts": {
+      "confirmed_sent": 25
+    },
+    "storage": {
+      "adapter": "postgres",
+      "durable": true,
+      "healthy": true,
+      "detail": "External Postgres durable adapter (Neon / Vercel Postgres / PGlite).",
+      "dataDir": "postgres://redacted",
+      "provider": "neon_postgres"
+    },
+    "gates": {
+      "rolloutIdOk": true,
+      "totalSentOk": true,
+      "confirmedSentOk": true,
+      "queueDepthOk": true,
+      "unresolvedOk": true,
+      "dryRunOk": true,
+      "automationDisabledOk": true,
+      "frozenCohortSizeOk": true
+    },
+    "allGatesPassed": true
+  },
+  "frozenCohortOnly": {
+    "frozenSize": 25,
+    "sentCount": 25,
+    "outsideFrozenIds": [],
+    "noOutsideFrozen": true,
+    "missingEnvelopeIds": []
+  },
+  "workflow": {
+    "summary": {
+      "checked": 25,
+      "ok": 25,
+      "missingWorkflow": 0,
+      "statusMismatch": 0,
+      "envelopeMismatch": 0,
+      "missingSentAt": 0
+    },
+    "rows": [
+      {
+        "candidateId": "9f9d978c7e71",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "aa350a0bd88fe37e",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:48:09.300Z",
+        "signatureRequestIdHash": "aa350a0bd88fe37e",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "1158b78ee219",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "83c4f9db66f18813",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:42:18.535Z",
+        "signatureRequestIdHash": "83c4f9db66f18813",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "334a0e2bcb6c",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "aa534a7dedadb9f4",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:47:21.789Z",
+        "signatureRequestIdHash": "aa534a7dedadb9f4",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "d021d8262ef6",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "b6d8026fe4a1c52f",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:43:51.512Z",
+        "signatureRequestIdHash": "b6d8026fe4a1c52f",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "9ef7bf235ee9",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "20f3b9c1429b1680",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:33:58.792Z",
+        "signatureRequestIdHash": "20f3b9c1429b1680",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "86ea44c3d95a",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "b8bc5cf209381495",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:44:12.815Z",
+        "signatureRequestIdHash": "b8bc5cf209381495",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "6931fb8de72c",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "1d77a2476a906adc",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:47:00.264Z",
+        "signatureRequestIdHash": "1d77a2476a906adc",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "91f84eae7546",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "f05e3fcb5fc4c024",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:42:40.344Z",
+        "signatureRequestIdHash": "f05e3fcb5fc4c024",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "68015bc9a375",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "2767514855ff2d15",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:45:21.874Z",
+        "signatureRequestIdHash": "2767514855ff2d15",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "9cdc414f3b49",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "cfc558c2b96c6e8b",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:48:30.769Z",
+        "signatureRequestIdHash": "cfc558c2b96c6e8b",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "86da01f7739b",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "b49ada68071f0b66",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:47:43.448Z",
+        "signatureRequestIdHash": "b49ada68071f0b66",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "9921cca9ccbd",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "6278a334b4a2021d",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:49:21.757Z",
+        "signatureRequestIdHash": "6278a334b4a2021d",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "0ed8fd3b95f3",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "6305784142358322",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:45:48.277Z",
+        "signatureRequestIdHash": "6305784142358322",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "1ec650f8e1d9",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "09cf07f42778e6bf",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:43:01.917Z",
+        "signatureRequestIdHash": "09cf07f42778e6bf",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "3fb0c007171d",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "233ade311858bcce",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:45:00.520Z",
+        "signatureRequestIdHash": "233ade311858bcce",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "ca747f355c14",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "e9f26a1da8f1acb2",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:48:53.282Z",
+        "signatureRequestIdHash": "e9f26a1da8f1acb2",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "39ddf56edc32",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "1b52a9c688014d5c",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:44:39.328Z",
+        "signatureRequestIdHash": "1b52a9c688014d5c",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "d39f8bc6193e",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "b7f8b732e8298a69",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:46:10.533Z",
+        "signatureRequestIdHash": "b7f8b732e8298a69",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "fb06444d1348",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "bda848bb4d9b79bd",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:46:32.029Z",
+        "signatureRequestIdHash": "bda848bb4d9b79bd",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "5e290d45974f",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "48611e53170fe99e",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:43:29.825Z",
+        "signatureRequestIdHash": "48611e53170fe99e",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "40764d83ef6d",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "999b1d5749ecc590",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:19:10.414Z",
+        "signatureRequestIdHash": "999b1d5749ecc590",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "b484a5e72135",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "d4c8108df99a622f",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:19:22.599Z",
+        "signatureRequestIdHash": "d4c8108df99a622f",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "650590ddbe20",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "d07cc9baa237f59f",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:19:35.748Z",
+        "signatureRequestIdHash": "d07cc9baa237f59f",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "8ec5f7b7371f",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "a1babc09f7f3893f",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:19:48.930Z",
+        "signatureRequestIdHash": "a1babc09f7f3893f",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      },
+      {
+        "candidateId": "36f4e45c3d3d",
+        "envelopeIdPresent": true,
+        "envelopeIdHash": "986f5a17d23de824",
+        "workflowFound": true,
+        "paperworkStatus": "sent",
+        "workflowStatus": "Paperwork Sent",
+        "paperworkSentAt": "2026-07-10T19:20:02.032Z",
+        "signatureRequestIdHash": "986f5a17d23de824",
+        "envelopeMatchesWorkflow": true,
+        "statusOk": true,
+        "hasSentAt": true,
+        "ok": true
+      }
+    ]
+  },
+  "reconciliation": {
+    "totals": {
+      "pending_signature": 22,
+      "viewed": 3,
+      "signed": 0,
+      "declined": 0,
+      "canceled": 0,
+      "failed": 0,
+      "unknown": 0
+    },
+    "rows": [
+      {
+        "candidateId": "9f9d978c7e71",
+        "envelopeIdHash": "aa350a0bd88fe37e",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "1158b78ee219",
+        "envelopeIdHash": "83c4f9db66f18813",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "334a0e2bcb6c",
+        "envelopeIdHash": "aa534a7dedadb9f4",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "d021d8262ef6",
+        "envelopeIdHash": "b6d8026fe4a1c52f",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "9ef7bf235ee9",
+        "envelopeIdHash": "20f3b9c1429b1680",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "86ea44c3d95a",
+        "envelopeIdHash": "b8bc5cf209381495",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "6931fb8de72c",
+        "envelopeIdHash": "1d77a2476a906adc",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "91f84eae7546",
+        "envelopeIdHash": "f05e3fcb5fc4c024",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "68015bc9a375",
+        "envelopeIdHash": "2767514855ff2d15",
+        "lifecycle": "viewed",
+        "rawLifecycle": "viewed",
+        "rawStatus": "viewed",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": "2026-07-10T19:46:13.000Z",
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "9cdc414f3b49",
+        "envelopeIdHash": "cfc558c2b96c6e8b",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "86da01f7739b",
+        "envelopeIdHash": "b49ada68071f0b66",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "9921cca9ccbd",
+        "envelopeIdHash": "6278a334b4a2021d",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "0ed8fd3b95f3",
+        "envelopeIdHash": "6305784142358322",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "1ec650f8e1d9",
+        "envelopeIdHash": "09cf07f42778e6bf",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "3fb0c007171d",
+        "envelopeIdHash": "233ade311858bcce",
+        "lifecycle": "viewed",
+        "rawLifecycle": "viewed",
+        "rawStatus": "viewed",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": "2026-07-10T19:51:29.000Z",
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "ca747f355c14",
+        "envelopeIdHash": "e9f26a1da8f1acb2",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "39ddf56edc32",
+        "envelopeIdHash": "1b52a9c688014d5c",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "d39f8bc6193e",
+        "envelopeIdHash": "b7f8b732e8298a69",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "fb06444d1348",
+        "envelopeIdHash": "bda848bb4d9b79bd",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "5e290d45974f",
+        "envelopeIdHash": "48611e53170fe99e",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "40764d83ef6d",
+        "envelopeIdHash": "999b1d5749ecc590",
+        "lifecycle": "viewed",
+        "rawLifecycle": "viewed",
+        "rawStatus": "viewed",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": "2026-07-10T19:20:09.000Z",
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "b484a5e72135",
+        "envelopeIdHash": "d4c8108df99a622f",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "650590ddbe20",
+        "envelopeIdHash": "d07cc9baa237f59f",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "8ec5f7b7371f",
+        "envelopeIdHash": "a1babc09f7f3893f",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      },
+      {
+        "candidateId": "36f4e45c3d3d",
+        "envelopeIdHash": "986f5a17d23de824",
+        "lifecycle": "pending_signature",
+        "rawLifecycle": "confirmed_sent",
+        "rawStatus": "pending",
+        "isComplete": false,
+        "isDeclined": false,
+        "signatures": [
+          {
+            "statusCode": "awaiting_signature",
+            "lastViewedAt": null,
+            "signedAt": null
+          }
+        ],
+        "error": null
+      }
+    ],
+    "note": "Read-only Dropbox Sign GET reconciliation. No sends performed."
+  },
+  "safety": {
+    "paperworkSent": false,
+    "liveModeEnabled": false,
+    "continuousAutomationEnabled": false,
+    "autonomousSchedulingEnabled": false
+  }
+}

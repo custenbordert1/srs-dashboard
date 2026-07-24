@@ -1,0 +1,74 @@
+{
+  "phase": "P214",
+  "generatedAt": "2026-07-17T18:15:59.125Z",
+  "cohortId": "p214-preview-nofreeze-19f714adb83",
+  "totalBlockedAfterUnsentConfirmation": 2,
+  "blockedByReason": {
+    "coverage_no_active_work": 0,
+    "coverage_over_60_miles": 0,
+    "coverage_manual_review_40_60": 0,
+    "coverage_unknown": 0,
+    "dm_unassigned": 2,
+    "dm_wrong": 0,
+    "non_geographic_posting": 0
+  },
+  "excludedEarlier": {
+    "previouslySentWorkflow": 367,
+    "priorCohortMember": 3,
+    "signed": 18,
+    "viewed": 26,
+    "pendingEnvelope": 1,
+    "duplicateIdentity": 1,
+    "alreadyPlaced": 0,
+    "missingContactInfo": 417,
+    "stageNotAuthorized": 24
+  },
+  "blockedCandidates": [
+    {
+      "redactedCandidateId": "3d272f69061a",
+      "workflowStatus": "Paperwork Needed",
+      "homeState": "OH",
+      "homeCity": "Columbus",
+      "coverageTier": "tier1_0_20",
+      "nearestActiveWorkMiles": 0,
+      "nearestOpportunity": "COLUMBUS, OH",
+      "assignedDm": "Unassigned",
+      "expectedDm": "Mindie Rodriguez",
+      "appliedPositionId": "73048dbe5519",
+      "appliedPositionName": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Columbus",
+        "state": "OH",
+        "source": "location.city+location.state"
+      },
+      "geoPosting": true,
+      "locationSource": "location.city+location.state",
+      "blockers": [
+        "blocked_dm_unassigned"
+      ]
+    },
+    {
+      "redactedCandidateId": "c0d00937ae31",
+      "workflowStatus": "Paperwork Needed",
+      "homeState": "MO",
+      "homeCity": "Kansas City",
+      "coverageTier": "tier1_0_20",
+      "nearestActiveWorkMiles": 0,
+      "nearestOpportunity": "Kansas City, MO",
+      "assignedDm": "Unassigned",
+      "expectedDm": "Amy Harp",
+      "appliedPositionId": "f2ca3cdaeee8",
+      "appliedPositionName": "Retail Merchandiser (Flexible, Project-Based Work)",
+      "positionLocation": {
+        "city": "Kansas City",
+        "state": "MO",
+        "source": "location.city+location.state"
+      },
+      "geoPosting": true,
+      "locationSource": "location.city+location.state",
+      "blockers": [
+        "blocked_dm_unassigned"
+      ]
+    }
+  ]
+}

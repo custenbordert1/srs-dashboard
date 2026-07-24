@@ -1,0 +1,36 @@
+{
+  "phase": "P186.2",
+  "generatedAt": "2026-07-13T13:52:49.175Z",
+  "runAt": "2026-07-13T13:52:49.165Z",
+  "evaluated": 3,
+  "findings": [
+    {
+      "candidateId": "syn-j",
+      "kind": "aligned",
+      "workflowState": "Ready for MEL",
+      "paperworkState": "signed",
+      "shadowState": "READY_FOR_MEL",
+      "detail": "Shadow aligns with production-derived state."
+    },
+    {
+      "candidateId": "syn-a",
+      "kind": "aligned",
+      "workflowState": "Applied",
+      "paperworkState": null,
+      "shadowState": "APPLIED",
+      "detail": "Shadow aligns with production-derived state."
+    },
+    {
+      "candidateId": "missing-shadow-x",
+      "kind": "missing_shadow",
+      "workflowState": "Needs Review",
+      "paperworkState": null,
+      "shadowState": null,
+      "detail": "No shadow record; production-derived=RECRUITER_REVIEW"
+    }
+  ],
+  "byKind": {
+    "aligned": 2,
+    "missing_shadow": 1
+  }
+}

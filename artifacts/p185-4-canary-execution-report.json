@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-07-10T19:21:09.077Z",
+  "phase": "P185.4 five-candidate canary — final report",
+  "rolloutId": "p1853-20260710-b419512d",
+  "execution": {
+    "authorized": true,
+    "actor": "operator-canary-20260710",
+    "authorizationSource": "cli:p185-4-configure-and-canary.ts --authorize-canary",
+    "maxSends": 5,
+    "concurrency": 1,
+    "stoppedBeforeSend": false,
+    "backlogReleased": false
+  },
+  "canary": {
+    "attempted": 5,
+    "confirmed": 5,
+    "sentUnverified": 0,
+    "failed": 0,
+    "passed": true,
+    "paused": false,
+    "attempts": [
+      {
+        "candidateId": "40764d83ef6d",
+        "cycle": "canary",
+        "attemptedAt": "2026-07-10T19:19:10.447Z",
+        "ok": true,
+        "state": "confirmed_sent",
+        "permanent": false,
+        "transient": false,
+        "error": null,
+        "envelopeIdHash": "999b1d5749ec"
+      },
+      {
+        "candidateId": "b484a5e72135",
+        "cycle": "canary",
+        "attemptedAt": "2026-07-10T19:19:22.619Z",
+        "ok": true,
+        "state": "confirmed_sent",
+        "permanent": false,
+        "transient": false,
+        "error": null,
+        "envelopeIdHash": "d4c8108df99a"
+      },
+      {
+        "candidateId": "650590ddbe20",
+        "cycle": "canary",
+        "attemptedAt": "2026-07-10T19:19:35.775Z",
+        "ok": true,
+        "state": "confirmed_sent",
+        "permanent": false,
+        "transient": false,
+        "error": null,
+        "envelopeIdHash": "d07cc9baa237"
+      },
+      {
+        "candidateId": "8ec5f7b7371f",
+        "cycle": "canary",
+        "attemptedAt": "2026-07-10T19:19:48.949Z",
+        "ok": true,
+        "state": "confirmed_sent",
+        "permanent": false,
+        "transient": false,
+        "error": null,
+        "envelopeIdHash": "a1babc09f7f3"
+      },
+      {
+        "candidateId": "36f4e45c3d3d",
+        "cycle": "canary",
+        "attemptedAt": "2026-07-10T19:20:02.052Z",
+        "ok": true,
+        "state": "confirmed_sent",
+        "permanent": false,
+        "transient": false,
+        "error": null,
+        "envelopeIdHash": "986f5a17d23d"
+      }
+    ]
+  },
+  "totals": {
+    "failed": 0,
+    "packetsSent": 5,
+    "newlyBlocked": 5,
+    "sentUnverified": 0,
+    "packetsConfirmed": 5,
+    "duplicatesPrevented": 5
+  },
+  "phaseState": "canary_passed_awaiting_backlog",
+  "nextScheduledAction": "Canary Passed — Awaiting Backlog Authorization. Do not release remaining 20 without separate operator decision. P184 reverted to dry_run.",
+  "p184": {
+    "beforeCanary": {
+      "enabled": true,
+      "mode": "dry_run"
+    },
+    "duringCanary": {
+      "enabled": true,
+      "mode": "live"
+    },
+    "afterSafetyRevert": {
+      "enabled": true,
+      "mode": "dry_run"
+    },
+    "note": "Reverted to dry_run after canary to prevent any sends beyond the five-candidate canary without explicit approval."
+  },
+  "queue": {
+    "queuedOrRetry": 20,
+    "sentStatus": 5,
+    "remainingBacklogHeld": 20
+  },
+  "envelopesByState": {},
+  "unresolvedOperations": 0,
+  "killSwitch": false,
+  "circuitOpen": false,
+  "safety": {
+    "continuedBeyondCanary": false,
+    "backlogAuthorization": "NOT granted — awaiting operator approval"
+  },
+  "updatedAt": "2026-07-10T19:21:39.317Z"
+}

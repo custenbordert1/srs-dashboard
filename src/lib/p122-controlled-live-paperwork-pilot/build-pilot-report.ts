@@ -74,11 +74,10 @@ function pickTargetCandidate(
   evaluations: PilotCandidateEvaluation[],
   candidateId?: string,
 ): PilotCandidateEvaluation | null {
-  const allowlisted = evaluations.filter((entry) => entry.allowlisted);
   if (candidateId) {
-    return allowlisted.find((entry) => entry.candidateId === candidateId) ?? null;
+    return evaluations.find((entry) => entry.candidateId === candidateId) ?? null;
   }
-  return allowlisted.find((entry) => entry.status === "ready_to_send") ?? null;
+  return evaluations.find((entry) => entry.allowlisted && entry.status === "ready_to_send") ?? null;
 }
 
 export async function buildControlledLivePaperworkPilotReport(input?: {
@@ -91,10 +90,12 @@ export async function buildControlledLivePaperworkPilotReport(input?: {
   const config = input?.config ?? loadPilotConfig();
   const context = await loadCandidateContext();
 
-  const candidateIds =
-    config.allowlist.length > 0
-      ? config.allowlist
-      : [...context.rowsByCandidateId.keys()].slice(0, 0);
+  const candidateIds = Array.from(
+    new Set([
+      ...(config.allowlist.length > 0 ? config.allowlist : []),
+      ...(input?.candidateId ? [input.candidateId] : []),
+    ]),
+  );
 
   const evaluatedCandidates = candidateIds.map((candidateId) => {
     const row = context.rowsByCandidateId.get(candidateId) ?? null;

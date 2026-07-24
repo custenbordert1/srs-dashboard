@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-07-15T20:03:43.477Z",
+  "thresholdsUnchanged": true,
+  "advanceOverriddenToReviewOrReject": 1,
+  "rejectOverriddenToReviewOrAdvance": 0,
+  "reviewOverriddenToAdvanceOrReject": 0,
+  "disagreementConfidenceLevels": [
+    79
+  ],
+  "missingEvidenceAssociatedWithDisagreement": 0,
+  "territoryScoreInfluenceCases": 1,
+  "historicalApplicantInfluenceCases": 1,
+  "recommendation": "keep_thresholds",
+  "notes": [
+    "Override volume does not justify changing thresholds in this phase.",
+    "Thresholds remain unchanged in P204.2."
+  ]
+}

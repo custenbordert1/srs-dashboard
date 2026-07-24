@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-07-16T15:00:00.000Z",
+  "phase": "P207.2",
+  "suggestedPrTitle": "P207 Autonomous Readiness Dashboard and Operational Alerts",
+  "include": [
+    "src/lib/p207-autonomous-readiness-dashboard/**",
+    "src/app/api/recruiting/p207-autonomous-readiness/route.ts",
+    "src/components/executive/p207-autonomous-readiness-panel.tsx",
+    "src/components/executive/executive-home-panel.tsx (P207 panel wire-in only)",
+    "scripts/p207-generate-artifacts.ts",
+    "scripts/p207-1-generate-artifacts.ts",
+    "package.json (p207 / p207-1 scripts + test glob)",
+    "src/lib/candidate-ingestion/merge-candidate-record.ts (null→undefined typing only)",
+    "artifacts/p207-*.json",
+    "artifacts/p207-*.md",
+    "artifacts/p207-1-*.json",
+    "artifacts/p207-1-*.md",
+    "artifacts/p207-2-*.json",
+    "artifacts/p207-2-*.md"
+  ],
+  "exclude": [
+    "unrelated P185–P206 WIP scripts/modules not required for P207",
+    ".data/",
+    ".env*",
+    "Dropbox response payloads",
+    "candidate PII",
+    "*.tsbuildinfo",
+    "*.log",
+    "temporary canary/execution logs under artifacts/p185* p193* etc. unless already scoped out"
+  ],
+  "gitHygiene": {
+    "dataDirGitignored": true,
+    "secretsStaged": false,
+    "candidateEmailsInPublicArtifacts": false,
+    "signingUrls": false,
+    "apiKeys": false,
+    "rawDropboxPayloads": false,
+    "localCacheFiles": false
+  },
+  "knownRemainingBuildBlocker": {
+    "file": "src/lib/p201-3-controlled-paperwork-needed-pilot/gates.ts",
+    "line": 188,
+    "inScopeForP207_2": false
+  }
+}

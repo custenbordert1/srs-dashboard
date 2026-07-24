@@ -1,4 +1,5 @@
-import { readFile, writeFile, appendFile } from "node:fs/promises";
+import { access, readFile, writeFile, appendFile, rename } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
 import {
   applyRecruitingActionToggle,
   completeFollowUpActions,
@@ -30,13 +31,46 @@ import {
 } from "@/lib/candidate-workflow-types";
 import type { OnboardingTemplateKey } from "@/lib/onboarding-template-registry";
 import {
-  resolveAssignedRecruiter,
   resolvePaperworkStatus,
   resolveWorkflowStatus,
 } from "@/lib/workflow-onboarding-reconciliation/workflow-durability";
+import { decideOwnershipWrite, formatOwnershipConflictActivity } from "@/lib/p188-4-recruiter-ownership-durability/precedence";
+import {
+  assertOwnershipCas,
+  mergeWorkflowMapsForDurableWrite,
+} from "@/lib/p188-4-recruiter-ownership-durability/ownershipMerge";
+import { appendOwnershipLedgerEvent } from "@/lib/p188-4-recruiter-ownership-durability/ledgerStore";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { recruitingDataDir, safeRecruitingMkdir } from "@/lib/recruiting-data-dir";
+import {
+  buildProductionRecruiterSelectorOptions,
+  isDemoRecruiterName,
+  readInactiveRecruitersFromEnv,
+  readProductionRecruiterDirectoryFromEnv,
+} from "@/lib/production-recruiter-directory";
+import { isDmUnassigned } from "@/lib/candidate-dm-suggest";
+
+function normalizeRecruiterRoster(recruiters: readonly string[] | undefined): string[] {
+  return buildProductionRecruiterSelectorOptions({
+    directory: readProductionRecruiterDirectoryFromEnv(),
+    roster: recruiters?.length ? recruiters : defaultRecruiterRosters().recruiters,
+    inactive: readInactiveRecruitersFromEnv(),
+    includeRecruitingTeam: true,
+  });
+}
+
+/** Serialize workflow store mutations to prevent lost updates (P188.4). */
+let workflowStoreWriteChain: Promise<void> = Promise.resolve();
+
+function withWorkflowStoreLock<T>(fn: () => Promise<T>): Promise<T> {
+  const run = workflowStoreWriteChain.then(fn, fn);
+  workflowStoreWriteChain = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
 
 function workflowDataDir(): string {
   const override = process.env.SRS_CANDIDATE_WORKFLOW_DATA_DIR?.trim();
@@ -61,6 +95,14 @@ export type CandidateWorkflowAuditEntry = {
   byUserId?: string;
   metadata?: Record<string, string | boolean | number>;
 };
+
+export class OwnershipConcurrencyError extends Error {
+  readonly code = "OWNERSHIP_CONCURRENCY_CONFLICT";
+  constructor(message: string) {
+    super(message);
+    this.name = "OwnershipConcurrencyError";
+  }
+}
 
 function sortedRoster(values: string[], anchor = "Unassigned"): string[] {
   const trimmed = values.map((v) => v.trim()).filter(Boolean);
@@ -95,9 +137,7 @@ function normalizeStoreFile(parsed: unknown): CandidateWorkflowStoreFile {
       version: 2,
       workflows: normalizeWorkflowsMap(file.workflows ?? {}),
       rosters: {
-        recruiters: sortedRoster(
-          file.rosters?.recruiters?.length ? file.rosters.recruiters : defaultRecruiterRosters().recruiters,
-        ),
+        recruiters: normalizeRecruiterRoster(file.rosters?.recruiters),
         dms: sortedRoster(
           file.rosters?.dms?.length ? file.rosters.dms : defaultRecruiterRosters().dms,
           "Unassigned",
@@ -126,10 +166,13 @@ function normalizeStoreFile(parsed: unknown): CandidateWorkflowStoreFile {
 
 async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
   const { storePath } = storePaths();
+  let missing = false;
   try {
-    const raw = await readFile(storePath, "utf8");
-    return normalizeStoreFile(JSON.parse(raw) as unknown);
+    await access(storePath, fsConstants.F_OK);
   } catch {
+    missing = true;
+  }
+  if (missing) {
     return {
       version: 2,
       workflows: {},
@@ -137,12 +180,45 @@ async function readStoreFile(): Promise<CandidateWorkflowStoreFile> {
       updatedAt: new Date().toISOString(),
     };
   }
+
+  // Retry parse under concurrent writers. Never treat a mid-write/truncated
+  // JSON as an empty store — that previously wiped hundreds of records.
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    try {
+      const raw = await readFile(storePath, "utf8");
+      return normalizeStoreFile(JSON.parse(raw) as unknown);
+    } catch (err) {
+      lastErr = err;
+      await new Promise((r) => setTimeout(r, 20 * (attempt + 1)));
+    }
+  }
+  throw new Error(
+    `Failed to read candidate-workflows store after retries: ${
+      lastErr instanceof Error ? lastErr.message : String(lastErr)
+    }`,
+  );
 }
 
 async function writeStoreFile(file: CandidateWorkflowStoreFile): Promise<void> {
   const { storeDir, storePath } = storePaths();
   await safeRecruitingMkdir(storeDir);
-  await writeFile(storePath, JSON.stringify(file, null, 2), "utf8");
+  const disk = await readStoreFile();
+  const merged: CandidateWorkflowStoreFile = {
+    version: 2,
+    rosters: {
+      recruiters: normalizeRecruiterRoster(
+        file.rosters?.recruiters?.length ? file.rosters.recruiters : disk.rosters.recruiters,
+      ),
+      dms: sortedRoster(file.rosters?.dms?.length ? file.rosters.dms : disk.rosters.dms),
+    },
+    workflows: mergeWorkflowMapsForDurableWrite(disk.workflows, file.workflows),
+    updatedAt: file.updatedAt ?? new Date().toISOString(),
+  };
+  // Atomic replace so concurrent readers never observe truncated JSON.
+  const tmpPath = `${storePath}.${process.pid}.${Date.now()}.tmp`;
+  await writeFile(tmpPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
+  await rename(tmpPath, storePath);
 }
 
 export async function appendCandidateWorkflowAudit(entry: CandidateWorkflowAuditEntry): Promise<void> {
@@ -173,7 +249,7 @@ export async function saveRecruiterRosters(rosters: RecruiterRosters): Promise<R
   const file = await readStoreFile();
   const now = new Date().toISOString();
   file.rosters = {
-    recruiters: sortedRoster(rosters.recruiters),
+    recruiters: normalizeRecruiterRoster(rosters.recruiters),
     dms: sortedRoster(rosters.dms),
   };
   file.updatedAt = now;
@@ -183,9 +259,9 @@ export async function saveRecruiterRosters(rosters: RecruiterRosters): Promise<R
 
 export async function addRecruiterToServerRoster(name: string): Promise<RecruiterRosters> {
   const trimmed = name.trim();
-  if (!trimmed) return getRecruiterRosters();
+  if (!trimmed || isDemoRecruiterName(trimmed)) return getRecruiterRosters();
   const file = await readStoreFile();
-  file.rosters.recruiters = sortedRoster([...file.rosters.recruiters, trimmed]);
+  file.rosters.recruiters = normalizeRecruiterRoster([...file.rosters.recruiters, trimmed]);
   file.updatedAt = new Date().toISOString();
   await writeStoreFile(file);
   return file.rosters;
@@ -231,6 +307,10 @@ export async function upsertCandidateWorkflow(input: {
   recruiterAssignmentSource?: RecruiterAssignmentSource | null;
   recruiterAssignmentReason?: string | null;
   recruiterAssignmentConfidence?: number | null;
+  recruiterAssignedBy?: string | null;
+  recruiterConfirmationStatus?: import("@/lib/candidate-workflow-types").OwnershipConfirmationStatus | null;
+  dmAssignmentSource?: import("@/lib/candidate-workflow-types").DmAssignmentSource | null;
+  dmAssignedBy?: string | null;
   requiredAction?: string | null;
   actionType?: RecruiterActionType | null;
   actionPriority?: RecruiterActionPriority | null;
@@ -247,18 +327,249 @@ export async function upsertCandidateWorkflow(input: {
   forceWorkflowStatus?: boolean;
   /** When true, allow paperworkStatus to regress from sent/viewed/signed. */
   forcePaperworkStatus?: boolean;
+  /** P188.4 optimistic concurrency — fail closed on mismatch. */
+  expectedOwnershipVersion?: number | null;
+  expectedRecruiter?: string | null;
+  /** Allow explicit overwrite of sticky higher-priority owners (manual/operator). */
+  allowForceOverwrite?: boolean;
+  /** Skip ownership ledger append (tests / pure metadata updates). */
+  skipOwnershipLedger?: boolean;
   audit?: { action: string; byUserId?: string; metadata?: CandidateWorkflowAuditEntry["metadata"] };
 }): Promise<CandidateWorkflowRecord> {
+  return withWorkflowStoreLock(() => upsertCandidateWorkflowUnlocked(input));
+}
+
+export type AssignCandidateDmIfUnassignedResult =
+  | {
+      assigned: true;
+      reason: "assigned";
+      record: CandidateWorkflowRecord;
+    }
+  | {
+      assigned: false;
+      reason: "workflow_missing" | "already_assigned" | "invalid_expected_dm";
+      record: CandidateWorkflowRecord | null;
+    };
+
+/**
+ * P218 live-mode persistence primitive.
+ *
+ * The read/check/write occurs inside the workflow-store mutation chain and
+ * fails closed if a named DM is already present. It never changes stage,
+ * paperwork, recruiter, or lifecycle fields.
+ */
+export async function assignCandidateDmIfUnassigned(input: {
+  candidateId: string;
+  expectedDm: string;
+  approvedBy: string;
+  positionId: string;
+  territory: string;
+}): Promise<AssignCandidateDmIfUnassignedResult> {
+  return withWorkflowStoreLock(async () => {
+    const expectedDm = input.expectedDm.trim();
+    if (isDmUnassigned(expectedDm)) {
+      return { assigned: false, reason: "invalid_expected_dm", record: null };
+    }
+
+    const file = await readStoreFile();
+    const existing = file.workflows[input.candidateId];
+    if (!existing) {
+      return { assigned: false, reason: "workflow_missing", record: null };
+    }
+    if (!isDmUnassigned(existing.assignedDM)) {
+      return { assigned: false, reason: "already_assigned", record: existing };
+    }
+
+    const record = await upsertCandidateWorkflowUnlocked({
+      candidateId: input.candidateId,
+      assignedDM: expectedDm,
+      dmAssignmentSource: "auto",
+      dmAssignedBy: input.approvedBy,
+      audit: {
+        action: "p218_auto_assign_dm",
+        byUserId: input.approvedBy,
+        metadata: {
+          previousAssignedDM: existing.assignedDM,
+          assignedDM: expectedDm,
+          positionId: input.positionId,
+          territory: input.territory,
+          mode: "live",
+        },
+      },
+    });
+    return { assigned: true, reason: "assigned", record };
+  });
+}
+
+export type TransitionCandidateToPaperworkNeededResult =
+  | {
+      transitioned: true;
+      reason: "transitioned" | "already_at_target_affirmed";
+      previousStage: string;
+      newStage: "Paperwork Needed";
+      record: CandidateWorkflowRecord;
+    }
+  | {
+      transitioned: false;
+      reason:
+        | "workflow_missing"
+        | "dm_mismatch"
+        | "beyond_paperwork_needed"
+        | "send_path_active";
+      previousStage: string | null;
+      newStage: null;
+      record: CandidateWorkflowRecord | null;
+    };
+
+/**
+ * P220 live-mode persistence primitive.
+ *
+ * Stage-only write to "Paperwork Needed". Never sends Dropbox Sign, never
+ * creates signature requests, never touches assignedDM, recruiter, notes,
+ * paperworkStatus, or any external integration.
+ */
+export async function transitionCandidateToPaperworkNeeded(input: {
+  candidateId: string;
+  expectedDm: string;
+  approvedBy: string;
+}): Promise<TransitionCandidateToPaperworkNeededResult> {
+  return withWorkflowStoreLock(async () => {
+    const file = await readStoreFile();
+    const existing = file.workflows[input.candidateId];
+    if (!existing) {
+      return {
+        transitioned: false,
+        reason: "workflow_missing",
+        previousStage: null,
+        newStage: null,
+        record: null,
+      };
+    }
+
+    const previousStage = existing.workflowStatus;
+    if (String(existing.assignedDM ?? "").trim() !== input.expectedDm.trim()) {
+      return {
+        transitioned: false,
+        reason: "dm_mismatch",
+        previousStage,
+        newStage: null,
+        record: existing,
+      };
+    }
+
+    const beyond = new Set([
+      "Paperwork Sent",
+      "Signed",
+      "Awaiting DD Verification",
+      "Ready for MEL",
+      "Loaded in MEL",
+      "Training Needed",
+      "Active Rep",
+    ]);
+    if (beyond.has(previousStage)) {
+      return {
+        transitioned: false,
+        reason: "beyond_paperwork_needed",
+        previousStage,
+        newStage: null,
+        record: existing,
+      };
+    }
+
+    if (
+      existing.paperworkStatus !== "not_sent" ||
+      Boolean(existing.signatureRequestId?.trim())
+    ) {
+      return {
+        transitioned: false,
+        reason: "send_path_active",
+        previousStage,
+        newStage: null,
+        record: existing,
+      };
+    }
+
+    const alreadyAtTarget = previousStage === "Paperwork Needed";
+    const record = await upsertCandidateWorkflowUnlocked({
+      candidateId: input.candidateId,
+      workflowStatus: "Paperwork Needed",
+      forceWorkflowStatus: true,
+      audit: {
+        action: "p220_paperwork_needed_transition",
+        byUserId: input.approvedBy,
+        metadata: {
+          previousStage,
+          newStage: "Paperwork Needed",
+          assignedDM: existing.assignedDM,
+          mode: "live",
+          affirmed: alreadyAtTarget,
+        },
+      },
+    });
+
+    return {
+      transitioned: true,
+      reason: alreadyAtTarget ? "already_at_target_affirmed" : "transitioned",
+      previousStage,
+      newStage: "Paperwork Needed",
+      record,
+    };
+  });
+}
+
+async function upsertCandidateWorkflowUnlocked(input: Parameters<typeof upsertCandidateWorkflow>[0]): Promise<CandidateWorkflowRecord> {
   const now = new Date().toISOString();
   const file = await readStoreFile();
   const existing = file.workflows[input.candidateId];
+
+  const cas = assertOwnershipCas({
+    existing,
+    expectedOwnershipVersion: input.expectedOwnershipVersion,
+    expectedRecruiter: input.expectedRecruiter,
+  });
+  if (!cas.ok) {
+    throw new OwnershipConcurrencyError(cas.detail);
+  }
+
   const workflowStatus = resolveWorkflowStatus(
     input.workflowStatus,
     existing,
     input.forceWorkflowStatus ?? false,
   );
-  const assignedRecruiter = resolveAssignedRecruiter(input.assignedRecruiter, existing);
-  const assignedDM = input.assignedDM?.trim() || existing?.assignedDM || "Unassigned";
+  const ownershipDecision = decideOwnershipWrite({
+    incomingRecruiter: input.assignedRecruiter,
+    incomingSource: input.recruiterAssignmentSource,
+    existingRecruiter: existing?.assignedRecruiter,
+    existingSource: existing?.recruiterAssignmentSource,
+    incomingAssignedAt: now,
+    existingAssignedAt: existing?.recruiterAssignedAt,
+    incomingOwnershipVersion:
+      input.assignedRecruiter !== undefined
+        ? (existing?.recruiterOwnershipVersion ?? 0) + 1
+        : existing?.recruiterOwnershipVersion,
+    existingOwnershipVersion: existing?.recruiterOwnershipVersion,
+    allowForceOverwrite:
+      input.allowForceOverwrite === true ||
+      input.recruiterAssignmentSource === "manual" ||
+      input.recruiterAssignmentSource === "operator_restore" ||
+      input.recruiterAssignmentSource === "operator_confirmed_historical_restore",
+  });
+  const assignedRecruiter = ownershipDecision.recruiter;
+  const dmIncoming = input.assignedDM?.trim();
+  const dmChanging =
+    Boolean(dmIncoming) && dmIncoming !== (existing?.assignedDM?.trim() || "Unassigned");
+  const assignedDM = dmIncoming || existing?.assignedDM || "Unassigned";
+  const dmAssignmentSource = dmChanging
+    ? (input.dmAssignmentSource ??
+      (input.audit?.byUserId ? ("manual" as const) : existing?.dmAssignmentSource ?? null))
+    : (existing?.dmAssignmentSource ?? null);
+  const dmAssignedAt = dmChanging ? now : (existing?.dmAssignedAt ?? null);
+  const dmAssignedBy = dmChanging
+    ? (input.dmAssignedBy ?? input.audit?.byUserId ?? existing?.dmAssignedBy ?? null)
+    : (existing?.dmAssignedBy ?? null);
+  const dmOwnershipVersion = dmChanging
+    ? (existing?.dmOwnershipVersion ?? 0) + 1
+    : (existing?.dmOwnershipVersion ?? 0);
   const notes = input.note?.trim()
     ? [input.note.trim(), ...(existing?.notes ?? [])].slice(0, 25)
     : (existing?.notes ?? []);
@@ -336,26 +647,57 @@ export async function upsertCandidateWorkflow(input: {
     input.directDepositLastHrBccAddress !== undefined
       ? input.directDepositLastHrBccAddress
       : (existing?.directDepositLastHrBccAddress ?? null);
-  const recruiterAssignmentSource =
-    input.recruiterAssignmentSource !== undefined
-      ? input.recruiterAssignmentSource
-      : (existing?.recruiterAssignmentSource ?? null);
+  const recruiterAssignmentSource = ownershipDecision.applied
+    ? ((ownershipDecision.source as RecruiterAssignmentSource | null) ??
+      input.recruiterAssignmentSource ??
+      existing?.recruiterAssignmentSource ??
+      null)
+    : (existing?.recruiterAssignmentSource ??
+      (ownershipDecision.source as RecruiterAssignmentSource | null) ??
+      null);
   const recruiterAssignmentReason =
-    input.recruiterAssignmentReason !== undefined
+    ownershipDecision.applied && input.recruiterAssignmentReason !== undefined
       ? input.recruiterAssignmentReason
-      : (existing?.recruiterAssignmentReason ?? null);
+      : ownershipDecision.applied
+        ? (input.recruiterAssignmentReason ?? existing?.recruiterAssignmentReason ?? null)
+        : (existing?.recruiterAssignmentReason ?? null);
   const recruiterAssignmentConfidence =
-    input.recruiterAssignmentConfidence !== undefined
+    ownershipDecision.applied && input.recruiterAssignmentConfidence !== undefined
       ? input.recruiterAssignmentConfidence
-      : (existing?.recruiterAssignmentConfidence ?? null);
-  const recruiterAssignedAt =
-    input.assignedRecruiter?.trim() &&
-    existing?.assignedRecruiter !== assignedRecruiter &&
-    (input.recruiterAssignmentSource === "auto" || input.recruiterAssignmentSource === "manual")
-      ? now
-      : input.recruiterAssignmentSource !== undefined && input.recruiterAssignmentSource !== existing?.recruiterAssignmentSource
-        ? now
-        : (existing?.recruiterAssignedAt ?? null);
+      : ownershipDecision.applied
+        ? (input.recruiterAssignmentConfidence ?? existing?.recruiterAssignmentConfidence ?? null)
+        : (existing?.recruiterAssignmentConfidence ?? null);
+  const ownershipChanged =
+    Boolean(existing?.assignedRecruiter) && existing!.assignedRecruiter !== assignedRecruiter
+      ? true
+      : !existing && assignedRecruiter !== "Unassigned"
+        ? true
+        : (existing?.assignedRecruiter ?? "Unassigned") !== assignedRecruiter;
+  const recruiterAssignedAt = ownershipChanged
+    ? now
+    : (existing?.recruiterAssignedAt ?? null);
+  const recruiterOwnershipVersion = ownershipChanged
+    ? (existing?.recruiterOwnershipVersion ?? 0) + 1
+    : (existing?.recruiterOwnershipVersion ?? 0);
+  const recruiterAssignedBy = ownershipChanged
+    ? (input.recruiterAssignedBy ??
+      input.audit?.byUserId ??
+      existing?.recruiterAssignedBy ??
+      null)
+    : (existing?.recruiterAssignedBy ?? null);
+  const recruiterConfirmationStatus = ownershipChanged
+    ? (input.recruiterConfirmationStatus ??
+      (recruiterAssignmentSource === "manual" ||
+      recruiterAssignmentSource === "operator_restore" ||
+      recruiterAssignmentSource === "operator_confirmed_historical_restore"
+        ? ("confirmed" as const)
+        : recruiterAssignmentSource === "production_assignment" ||
+            recruiterAssignmentSource === "internal_assignment"
+          ? ("approved_auto" as const)
+          : recruiterAssignmentSource
+            ? ("inferred" as const)
+            : ("unassigned" as const)))
+    : (existing?.recruiterConfirmationStatus ?? null);
 
   const requiredAction =
     input.requiredAction !== undefined ? input.requiredAction : (existing?.requiredAction ?? null);
@@ -394,11 +736,8 @@ export async function upsertCandidateWorkflow(input: {
   if (input.note?.trim()) {
     history.unshift(event("note", `Note added: ${input.note.trim()}`, now));
   }
-  if (input.assignedDM?.trim() && existing?.assignedDM !== assignedDM) {
-    history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
-  }
   if (input.assignedRecruiter?.trim() && existing?.assignedRecruiter !== assignedRecruiter) {
-    if (input.recruiterAssignmentSource === "auto") {
+    if (ownershipDecision.applied && recruiterAssignmentSource === "auto") {
       history.unshift(
         event(
           "assignment",
@@ -406,9 +745,40 @@ export async function upsertCandidateWorkflow(input: {
           now,
         ),
       );
+    } else if (ownershipDecision.applied) {
+      const by = recruiterAssignedBy ? ` by ${recruiterAssignedBy}` : "";
+      history.unshift(
+        event(
+          "assignment",
+          `Assigned recruiter changed to ${assignedRecruiter} (Operator${by}).`,
+          now,
+        ),
+      );
     } else {
-      history.unshift(event("assignment", `Assigned recruiter changed to ${assignedRecruiter}.`, now));
+      history.unshift(
+        event(
+          "assignment",
+          formatOwnershipConflictActivity({
+            attemptedRecruiter: input.assignedRecruiter.trim(),
+            attemptedSource: input.recruiterAssignmentSource,
+            existingRecruiter: assignedRecruiter,
+            existingSource: existing?.recruiterAssignmentSource,
+            attemptedAt: now,
+            existingAt: existing?.recruiterAssignedAt,
+            reason: ownershipDecision.reason,
+          }),
+          now,
+        ),
+      );
     }
+  }
+  if (dmChanging) {
+    const by = dmAssignedBy ? ` by ${dmAssignedBy}` : "";
+    history.unshift(
+      event("assignment", `Assigned DM changed to ${assignedDM} (Operator${by}).`, now),
+    );
+  } else if (input.assignedDM?.trim() && existing?.assignedDM !== assignedDM) {
+    history.unshift(event("assignment", `Assigned DM changed to ${assignedDM}.`, now));
   }
   if (
     input.recruitingActions &&
@@ -493,6 +863,13 @@ export async function upsertCandidateWorkflow(input: {
     recruiterAssignmentReason,
     recruiterAssignmentConfidence,
     recruiterAssignedAt,
+    recruiterAssignedBy,
+    recruiterConfirmationStatus,
+    recruiterOwnershipVersion,
+    dmAssignmentSource,
+    dmAssignedAt,
+    dmAssignedBy,
+    dmOwnershipVersion,
     requiredAction,
     actionType,
     actionPriority,
@@ -512,6 +889,38 @@ export async function upsertCandidateWorkflow(input: {
   file.updatedAt = now;
   await writeStoreFile(file);
 
+  if (
+    ownershipChanged &&
+    ownershipDecision.applied &&
+    !input.skipOwnershipLedger &&
+    assignedRecruiter !== (existing?.assignedRecruiter ?? "Unassigned")
+  ) {
+    const correlationId = randomUUID();
+    const idempotencyKey = `own:${input.candidateId}:${recruiterOwnershipVersion}:${assignedRecruiter}`;
+    await appendOwnershipLedgerEvent({
+      candidateId: input.candidateId,
+      previousRecruiter: existing?.assignedRecruiter ?? null,
+      newRecruiter: assignedRecruiter,
+      source: ownershipDecision.source ?? "unassigned",
+      actor: input.audit?.byUserId ?? "system",
+      actorRole:
+        ownershipDecision.source === "manual" ||
+        ownershipDecision.source === "operator_restore" ||
+        ownershipDecision.source === "operator_confirmed_historical_restore"
+          ? "operator"
+          : "system",
+      reason: input.recruiterAssignmentReason ?? ownershipDecision.reason,
+      correlationId,
+      idempotencyKey,
+      workflowVersion: recruiterOwnershipVersion,
+      confidence: recruiterAssignmentConfidence,
+      evidenceReference: input.audit?.action ?? null,
+      rollbackReference: existing
+        ? `rollback:${input.candidateId}:v${existing.recruiterOwnershipVersion ?? 0}`
+        : null,
+    });
+  }
+
   if (input.audit) {
     await appendCandidateWorkflowAudit({
       id: randomUUID(),
@@ -524,7 +933,21 @@ export async function upsertCandidateWorkflow(input: {
     });
   }
 
-  return record;
+  // P186.2 shadow dual-write observe — production store remains authoritative.
+  // Failures are swallowed; never blocks workflow upsert.
+  void import("@/lib/p186-2-event-adapters")
+    .then(({ observeWorkflowUpsertSafe }) =>
+      observeWorkflowUpsertSafe({
+        candidateId: input.candidateId,
+        workflowStatus: record.workflowStatus,
+        paperworkStatus: record.paperworkStatus,
+      }),
+    )
+    .catch(() => undefined);
+
+  // Return post-merge durable record so API/UI never diverge from disk (P262).
+  const persisted = await readStoreFile();
+  return persisted.workflows[input.candidateId] ?? record;
 }
 
 export async function toggleCandidateRecruitingAction(input: {

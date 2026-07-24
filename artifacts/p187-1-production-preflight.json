@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-07-13T17:56:11.227Z",
+  "productionCommit": "81039fba0bc58d1545dc8cd1c76073392785e2fe",
+  "aborted": false,
+  "abortReasons": [],
+  "gates": [
+    {
+      "gateId": "production_commit",
+      "ok": true,
+      "detail": "commit=81039fba0bc58d1545dc8cd1c76073392785e2fe",
+      "critical": true
+    },
+    {
+      "gateId": "neon_postgres_healthy",
+      "ok": true,
+      "detail": "neonOrPglite=true",
+      "critical": true
+    },
+    {
+      "gateId": "candidate_workflow_store_healthy",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "p186_shadow_healthy",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "p187_framework_healthy",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "audit_persistence_healthy",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "reconciliation_healthy",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "unresolved_lifecycle_operations",
+      "ok": true,
+      "detail": "unresolved=0",
+      "critical": true
+    },
+    {
+      "gateId": "critical_mismatches",
+      "ok": true,
+      "detail": "critical=0",
+      "critical": true
+    },
+    {
+      "gateId": "p184_p185_isolated",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "p184_dry_run",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "continuous_automation_disabled",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "automatic_mel_export_disabled",
+      "ok": true,
+      "detail": "true",
+      "critical": true
+    },
+    {
+      "gateId": "p187_authority_execution_flags_off",
+      "ok": true,
+      "detail": "{\"P187_CANARY_FRAMEWORK\":true,\"P187_TRANSITION_AUTHORITY_HR_TO_OA\":true,\"P187_RECONCILIATION\":true,\"P187_ROLLBACK\":true,\"P187_EXECUTE_PRODUCTION_CANARY\":true,\"no_global_authority\":true}",
+      "critical": true
+    }
+  ],
+  "allCriticalPassed": true,
+  "flagsCurrentlyOff": {
+    "P187_CANARY_FRAMEWORK": true,
+    "P187_TRANSITION_AUTHORITY_HR_TO_OA": true,
+    "P187_RECONCILIATION": true,
+    "P187_ROLLBACK": true,
+    "P187_EXECUTE_PRODUCTION_CANARY": true,
+    "no_global_authority": true
+  },
+  "workflowStore": {
+    "healthy": true,
+    "count": 684,
+    "note": "Read-only load of 684 workflow records"
+  },
+  "scannedCandidates": 684,
+  "eligibleCount": 0
+}

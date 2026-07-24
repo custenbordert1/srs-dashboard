@@ -9,6 +9,7 @@ export type * from "@/lib/p185-production-paperwork-automation-runner/types";
 
 export {
   getP185StorageHealth,
+  probeP185StorageConnectivity,
   loadP185RunnerState,
   saveP185RunnerState,
   updateP185RunnerState,
@@ -17,6 +18,7 @@ export {
   setP185StorageTestFlags,
   p185DataDir,
 } from "@/lib/p185-production-paperwork-automation-runner/durableStorage";
+export type { P185StorageConnectivityProbe } from "@/lib/p185-production-paperwork-automation-runner/durableStorage";
 
 export {
   acquireP185Lease,

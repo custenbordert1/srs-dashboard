@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-07-16T15:00:00.000Z",
+  "phase": "P207.2",
+  "mergeCandidateRecordFix": {
+    "file": "src/lib/candidate-ingestion/merge-candidate-record.ts",
+    "cleared": true,
+    "approach": "normalize scrubDemoOwnershipSignals null to undefined via ?? undefined"
+  },
+  "ownershipRegression": {
+    "p188_4": { "passed": true, "tests": 13 },
+    "p203_2": { "passed": true, "tests": 13 },
+    "p203_1_unitTests": "none in __tests__ (script-only validate)",
+    "p203_3_unitTests": "none in __tests__ (script-only cleanup)",
+    "candidateIngestion": { "passed": true },
+    "behaviorChanges": false,
+    "notes": [
+      "named recruiter cannot be overwritten by blank/unassigned — preserved (P188.4)",
+      "demo recruiters remain blocked — preserved (P203.2)",
+      "null ownership signals do not create fake recruiter assignments — null/undefined stay absent"
+    ]
+  },
+  "p204_to_p207": {
+    "passed": true,
+    "tests": 48,
+    "suites": 7
+  },
+  "p207_typescript": "clean",
+  "fullBuild": {
+    "compile": "success",
+    "typecheck": "failed",
+    "blockingFile": "src/lib/p201-3-controlled-paperwork-needed-pilot/gates.ts",
+    "blockingLine": 188,
+    "relatedToP207": false,
+    "relatedToMergeCandidateRecord": false
+  },
+  "recommendation": "ready after minor cleanup"
+}

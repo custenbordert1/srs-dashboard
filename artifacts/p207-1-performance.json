@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-07-16T14:39:20.734Z",
+  "samplesMs": [
+    53,
+    22,
+    29,
+    22,
+    18,
+    20,
+    17
+  ],
+  "apiProxyP50Ms": 22,
+  "apiProxyP95Ms": 53,
+  "snapshotBuildMs": 1,
+  "alertGenerationMs": 0,
+  "targets": {
+    "apiP95UnderMs": 500,
+    "alertGenerationUnderMs": 100
+  },
+  "targetsMet": {
+    "apiP95": true,
+    "alertGeneration": true
+  },
+  "largeCandidateSet": 847,
+  "duplicatePolling": false,
+  "notes": "Measured local snapshot+probe loop as API proxy; force-dynamic + Cache-Control no-store."
+}

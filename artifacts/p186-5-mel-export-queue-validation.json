@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-07-13T15:02:26.349Z",
+  "sourcePhase": "P186.5",
+  "queueCreated": true,
+  "duplicateQueueCandidatesPrevented": 1,
+  "alreadyExportedExcluded": 1,
+  "melQueuePreviewCount": 1,
+  "melWritesAttempted": 0,
+  "creatableStatusesOnly": [
+    "pending_review",
+    "approved_for_export"
+  ]
+}

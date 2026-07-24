@@ -1,0 +1,19 @@
+{
+  "sourcePhase": "P188.7",
+  "totalRestoredRecruiterAssignments": 110,
+  "bothResolvedCount": 110,
+  "recommendationReady": 103,
+  "predictedP187Eligible": 103,
+  "remainingOperatorConfirmableUnassigned": 254,
+  "remainingConflicts": 13,
+  "remainingImpossibleUnrecoverable": 307,
+  "recommendedNextBatchSize": 50,
+  "stopAfterThisBatch": true,
+  "sideEffects": {
+    "lifecycleWrites": 0,
+    "recommendations": 0,
+    "approvals": 0,
+    "paperworkSends": 0,
+    "melWrites": 0
+  }
+}

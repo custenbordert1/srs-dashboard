@@ -168,6 +168,25 @@ export type BreezyCandidate = {
   ingestionSource?: "breezy_api" | "breezy_export" | "merged";
   /** True when Breezy candidate _id was not available from export import. */
   breezyCandidateIdUnavailable?: boolean;
+  /**
+   * P188.4 — ownership signals retained from Breezy (not automatically authoritative).
+   * Workflow store remains source of truth for assignedRecruiter.
+   */
+  ownershipSignals?: BreezyOwnershipSignals;
+  /**
+   * P223+ — how the candidate entered the dashboard list.
+   * `workflow_restored` marks operationally active rows unioned from workflow store.
+   */
+  listMembershipSource?: "ingestion" | "workflow_restored";
+};
+
+export type BreezyOwnershipSignals = {
+  ownerName: string | null;
+  assigneeName: string | null;
+  recruiterName: string | null;
+  /** Best single signal for downstream import (owner → assignee → recruiter). */
+  preferredName: string | null;
+  sourcedAt: string;
 };
 
 export type BreezyJobsSuccess = {
@@ -591,6 +610,48 @@ function extractBreezyAddedDate(record: Record<string, unknown>): {
   return { addedDate: "", createdDate: "", updatedDate, addedDateSource: "" };
 }
 
+function extractOwnershipSignals(record: Record<string, unknown>): BreezyOwnershipSignals {
+  const ownerName =
+    nestedString(record, [
+      ["owner", "name"],
+      ["owner", "full_name"],
+      ["meta", "owner", "name"],
+    ]) ||
+    stringField(record, ["owner_name", "ownerName"]) ||
+    null;
+  const assigneeName =
+    nestedString(record, [
+      ["assigned_to", "name"],
+      ["assignee", "name"],
+      ["user", "name"],
+      ["meta", "assigned_to", "name"],
+    ]) ||
+    stringField(record, ["assigned_to_name", "assignee_name", "assigneeName"]) ||
+    null;
+  const recruiterName =
+    nestedString(record, [
+      ["recruiter", "name"],
+      ["meta", "recruiter", "name"],
+    ]) ||
+    stringField(record, ["recruiter", "recruiter_name", "recruiterName", "sourced_by_name"]) ||
+    null;
+  const preferredName = ownerName || assigneeName || recruiterName || null;
+  return {
+    ownerName: ownerName || null,
+    assigneeName: assigneeName || null,
+    recruiterName: recruiterName || null,
+    preferredName,
+    sourcedAt: new Date().toISOString(),
+  };
+}
+
+/** Exported for P188.4 tests — retains Breezy ownership signals without making them authoritative. */
+export function extractBreezyOwnershipSignalsFromRaw(
+  raw: Record<string, unknown>,
+): BreezyOwnershipSignals {
+  return extractOwnershipSignals(raw);
+}
+
 function sanitizeCandidate(
   raw: RawBreezyCandidate,
   position: Pick<BreezyJob, "jobId" | "name" | "city" | "state" | "status"> | undefined,
@@ -607,6 +668,7 @@ function sanitizeCandidate(
   const inlineResumeAssets = extractResumeAssetsFromRaw(record);
   const questionnaireAnswers = extractQuestionnaireAnswersFromRaw(record);
   const zipCode = extractZipFromRaw(record);
+  const ownershipSignals = extractOwnershipSignals(record);
   const resumeParts = [
     resumeFields?.headline,
     resumeFields?.summary,
@@ -671,6 +733,7 @@ function sanitizeCandidate(
     hasQuestionnaire: questionnaireAnswers.length > 0,
     score: numberField(record, ["score", "rating"]),
     positionPipelineStatus: position?.status || "",
+    ownershipSignals,
   };
 }
 
@@ -1211,8 +1274,8 @@ export async function fetchBreezyPositionsByIds(positionIds: string[]): Promise<
   };
 }
 
-function parseCandidateAppliedDate(raw: string): Date | null {
-  const trimmed = raw.trim();
+function parseCandidateAppliedDate(raw: string | null | undefined): Date | null {
+  const trimmed = String(raw ?? "").trim();
   if (!trimmed) return null;
   if (/^\d{10,13}$/.test(trimmed)) {
     const numeric = Number(trimmed);

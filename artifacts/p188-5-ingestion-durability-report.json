@@ -1,0 +1,82 @@
+{
+  "sourcePhase": "P188.5",
+  "challengedAt": "2026-07-13T20:28:37.254Z",
+  "cohortSize": 10,
+  "challenged": 10,
+  "preserved": 10,
+  "clobbered": 0,
+  "lostUpdates": 0,
+  "unrelatedFieldChanges": 0,
+  "details": [
+    {
+      "candidateId": "1b3a…b63c",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "5da2…1b96",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "2726…a5b9",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "f700…0f03",
+      "before": "Logan",
+      "afterChallenge": "Logan",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "570d…132e",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "1b90…99ec",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "520a…6673",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "de92…199b",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9684…4533",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    },
+    {
+      "candidateId": "9111…89ae",
+      "before": "Taylor",
+      "afterChallenge": "Taylor",
+      "preserved": true,
+      "unrelatedChanges": []
+    }
+  ]
+}
